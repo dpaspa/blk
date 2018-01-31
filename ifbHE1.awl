@@ -1,0 +1,99 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       ifbHE1                                                        //
+// Description: Instances of HE1                                              //
+//                                                                            //
+// Vessel vent filter electric heating element.                               //
+// Cutout ON when key switch is OFF and Command is ON or OFF.When Key switch  //
+// is ON cutout can be ON or OFF by using user ON/OFF command.                //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 0.6 David Paspa      05-Jan-2018 NA        Reboot from Pharmaniaga.        //
+// 0.5 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.4 Khairul Basar    17-Sep-2009 CC-09/016 ifcHE1 interface function       //
+//                                            created.                        //
+// 0.3 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Input Parameters      //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters.          //
+// 0.2 Khairul Basar    28-Aug-2009 CC-09/016 Cutout can be ON/OFF when key   //
+//                                            switch is ON.                   //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbHE1"
+TITLE = Instances of Manufacturing Filtration Line Heat Exchanger
+{ S7_Optimized_Access := 'FALSE' }
+NAME : ifbHE1
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 0.6
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+   VAR
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@ : "fbHE1";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@_MODE : Struct
+         PosEdge1 : Bool;
+         PosEdge2 : Bool;
+         REQ : Int;   // Request for Required Mode
+      END_STRUCT;
+@@TEMPLATE_END@@
+   END_VAR
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL "ifcHE1"
+      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
+         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
+         IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|HE@@_CMD ,
+         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
+         IO_MODE                     := #@@MODULE@@.MODE ,
+         OUT_CMD                     := "idbHE1".@@MODULE@@.CMD ,
+         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+      );
+      NOP 0;
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      A(;
+@@ATTR_BEGIN|CR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+@@ATTR_END|CR_IL@@
+      );
+      = %L0.0;
+      BLD 103;
+      A(;
+@@ATTR_BEGIN|NCR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+@@ATTR_END|NCR_IL@@
+      );
+      = %L0.1;
+      BLD 103;
+      CALL #HE_1010
+      (  CMD                         := #@@MODULE@@.CMD ,
+         CR_IL                       := %L0.0 ,
+         NCR_IL                      := %L0.1 ,
+         DO_OUTPUT                   := "@@INSTANCE@@" ,
+         CUTOUT                      := #@@MODULE@@.CUTOUT ,
+         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
+         MODE                        := #@@MODULE@@.MODE
+      );
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

@@ -1,0 +1,131 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       ifbTC1                                                        //
+// Description: Instances of TC1                                              //
+//                                                                            //
+// Manufacutring Transfer line cooling only temperature controller.           //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 0.9 David Paspa      05-Jan-2018 NA        Reboot from Pharmaniaga.        //
+// 0.8 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.7 Khairul Basar    04-Oct-2009 CC-09/016 TC1 SETPOINT variables DB ref.  //
+//                                            not internal variables.         //
+// 0.6 Gus Abdallah     01-Oct-2009 CC-09/016 Interlock are CM processed      //
+// 0.5 Khairul Basar    18-Sep-2009 CC-09/016 T_CTRL-BOOL->INT, CMD deleted.  //
+// 0.4 Khairul Basar    14-Sep-2009 CC-09/016 NCR_IL TI_1x10.INTERLOCK linked.//
+// 0.3 Khairul Basar    11-Sep-2009 CC-09/016 Manual setpoint, Non PID        //
+//                                            selection parameters added &    //
+//                                            programmed.                     //
+// 0.2 Khairul Basar    03-Sep-2009 CC-09/016 T_CTRL parameters linked to TI1 //
+//                                            INTERLOCK is changed from       //
+//                                            IN_OUT to OUT.New parameters    //
+//                                            CMD_MAN, CMD_AUTO, DEV_STATE    //
+//                                            added.                          //
+//                                            LMN & MEASURE parameters are    //
+//                                            linked to MOD1 & TI1            //
+//                                            respectively.                   //
+// 0.1 Khairul Basar    31-Aug-2009           Initial design                  //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbTC1"
+TITLE = TC1 : Manufacturing Transfer Line cooling only temperature controller
+{ S7_Optimized_Access := 'FALSE' }
+NAME : ifbTC1
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 0.9
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+   VAR
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@ : "fbTC1";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@_MODE : Struct
+         PosEdge1 : Bool;
+         PosEdge2 : Bool;
+         REQ : Int;   // Request for Required Mode
+      END_STRUCT;
+@@TEMPLATE_END@@
+   END_VAR
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL "ifcTC1"
+      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
+         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
+         IN_T_CTRL                   := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|TC@@_CTRL ,
+         IN_SETPOINT                 := "idb@@PARENTCLASS@@".@@PARENT@@.OUT_SETPOINT ,
+         IN_GAIN                     := "idb@@PARENTCLASS@@".@@PARENT@@.GAIN ,
+         IN_TI                       := "idb@@PARENTCLASS@@".@@PARENT@@.TI ,
+         IN_TD                       := "idb@@PARENTCLASS@@".@@PARENT@@.TD ,
+         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
+         IO_MODE                     := "idbTC1".@@MODULE@@.MODE ,
+         IO_T_CTRL                   := "idbTC1".@@MODULE@@.T_CTRL ,
+         IO_SETPOINT                 := "idbTC1".@@MODULE@@.SETPOINT ,
+         IO_GAIN                     := "idbTC1".@@MODULE@@.GAIN ,
+         IO_TI                       := "idbTC1".@@MODULE@@.TI ,
+         IO_TD                       := "idbTC1".@@MODULE@@.TD ,
+         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+      );
+      NOP 0;
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      A(;
+@@ATTR_BEGIN|CR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+@@ATTR_END|CR_IL@@
+      );
+      = %L0.0;
+      BLD 103;
+      A(;
+@@ATTR_BEGIN|NCR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+      A "idbTI1".TI_@@NUMINSTANCE@@.INTERLOCK;
+@@ATTR_END|NCR_IL@@
+      );
+      = %L0.1;
+      BLD 103;
+      CALL #@@MODULE@@
+      (  T_CTRL                      := "idbTC1".@@MODULE@@.T_CTRL ,
+         MEASURE                     := "idbTI1".TI_@@NUMINSTANCE@@.MEASURE ,
+         SETPOINT                    := "idbTC1".@@MODULE@@.SETPOINT ,
+         GAIN                        := "idbTC1".@@MODULE@@.GAIN ,
+         TI                          := "idbTC1".@@MODULE@@.TI ,
+         TD                          := "idbTC1".@@MODULE@@.TD ,
+         MAN                         := #@@MODULE@@.MAN ,
+         CR_IL                       := %L0.0 ,
+         NCR_IL                      := %L0.1 ,
+         MAN_OVERRIDE                := #@@MODULE@@.MAN_OVERRIDE ,
+         NON_PID                     := #@@MODULE@@.NON_PID ,
+         CYCLE                       := #@@MODULE@@.CYCLE ,
+         P_SEL                       := #@@MODULE@@.P_SEL ,
+         I_SEL                       := #@@MODULE@@.I_SEL ,
+         D_SEL                       := #@@MODULE@@.D_SEL ,
+         LMN_HLM                     := #@@MODULE@@.LMN_HLM ,
+         LMN_LLM                     := #@@MODULE@@.LMN_LLM ,
+         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
+         LMN                         := #@@MODULE@@.LMN ,
+         OUT_CMD                     := #@@MODULE@@.OUT_CMD ,
+         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
+         MAN_NON_PID                 := #@@MODULE@@.MAN_NON_PID ,
+         MODE                        := #@@MODULE@@.MODE
+      );
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

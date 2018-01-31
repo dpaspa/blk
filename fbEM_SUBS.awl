@@ -1,0 +1,587 @@
+FUNCTION_BLOCK "fbEMC2_SUBS"
+TITLE = EMC2 EQUIPMENT MODULE
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : Synertec
+VERSION : 0.5
+////------------------------------------------------------------------------------
+////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
+////------------------------------------------------------------------------------
+//// Title:EMC2
+//// 
+//// Description:
+//// WFI, SC Supply and PW, CS supply to Mx vessel
+////------------------------------------------------------------------------------
+//// Revision History:
+//// Rev   By                  Date             Note
+//// 0.5 Khairul Basar    04-Oct-2009 CC-09/023  CALL_PH.. assigned correctly
+////                                             STATE_VAR for Charge& flush 
+////                                             for SW_REQ flag set/reset use
+////                                             PATH_OK valid only when running
+//// 0.4 Khoon            01-Oct-2009 CC-09/016  Added STOP to reset CALL_PH...
+////                                             Change STOP to NOT RUNNING if any
+//// 0.3 Khairul Basar    21-Sep-2009 CC-09/023  Ref1.
+//// 0.2 Khairul Basar    27-Aug-2009 CC-09/023  ARM_FLAG added
+//// 0.1 Khairul Basar    03-Aug-2009            Initial design
+////------------------------------------------------------------------------------
+//Ref1:
+//PULSE timer 
+//is created as multiple instance of a standard FB, no more hard coded S5 
+//timer.ERR_FLT is changed to TIMEOUT_VER, PATH_IL to FLOWPATH.
+   VAR_INPUT 
+      INITIATE : Bool;
+      STOP : Bool;
+      RUNNING : Bool;
+      MODE : Int := 1;
+      SEL_SUBS : Int := 1;
+      MEDIUM : Int;
+      PULSE : Bool;
+      TIME_P_ON : Time;
+      TIME_P_OFF : Time;
+      WFI_VALV_STATE : Int;
+      PW_VALV_STATE : Int;
+      CS_WFI_VALV_STATE : Int;
+      CS_PW_VALV_STATE : Int;
+      WFI_CS_SW_STATE : Int;
+      PW_CS_SW_STATE : Int;
+      PH_SETUP_FINISHED : Bool;
+      PH_ISOLATE_FINISHED : Bool;
+      PH_CHARGE_FINISHED : Bool;
+      PH_FLUSH_FINISHED : Bool;
+      FLOWPATH_PW : Bool;
+      FLOWPATH_WFI : Bool;
+      FLOWPATH_ISOLATED : Bool;
+   END_VAR
+
+   VAR_OUTPUT 
+      DEV_STATE : Int;
+      STATE_VER : Bool;
+      EM_PROCESSED : Bool;
+      PATH_OK : Bool;
+      WFI_CS_REQ_T : Bool;
+      PW_CS_REQ_T : Bool;
+      WFI_VALV_CMD : Int;   // 1=ENABLE,2=DISABLE
+      PW_VALV_CMD : Int;
+      CS_WFI_VALV_CMD : Int;
+      CS_PW_VALV_CMD : Int;
+      WFI_CS_REQ : Bool;
+      PW_CS_REQ : Bool;
+      CALL_PH_SETUP : Bool;
+      CALL_PH_ISOLATE : Bool;
+      CALL_PH_CHARGE : Bool;
+      CALL_PH_FLUSH : Bool;
+      BAD_PARAM : Bool;
+      ACT_PH : Int;
+   END_VAR
+
+   VAR_IN_OUT 
+      ErrFlag : Int;
+   END_VAR
+
+   VAR 
+      STATUS {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+      TMR_PULSE : "fbTMR_PULSE";
+      TEQ {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+   END_VAR
+
+   VAR_TEMP 
+      State_Eq_Command : Bool;
+      do_nothing : Bool;
+      Subs_Setup : Bool;
+      Subs_Isolate : Bool;
+      Subs_Charge : Bool;
+      Subs_Flush : Bool;
+      SafeSate : Bool;
+      Medium_WFI : Bool;
+      Medium_PW : Bool;
+      Medium_CS_PW : Bool;
+      Medium_CS_WFI : Bool;
+      ControlBit : Array[1..8] of Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Assign selected Substate number  into Temporary Variables
+      O #RUNNING;
+      O #INITIATE;
+      = %L4.0;
+      A %L4.0;
+      A(;
+      L #SEL_SUBS;
+      L "dbCONST_VAL".EM.EMC2.SUBS.SETUP;
+      ==I;
+      );
+      = #Subs_Setup;
+      A %L4.0;
+      A(;
+      L #SEL_SUBS;
+      L "dbCONST_VAL".EM.EMC2.SUBS.ISOLATE;
+      ==I;
+      );
+      = #Subs_Isolate;
+      A %L4.0;
+      A(;
+      L #SEL_SUBS;
+      L "dbCONST_VAL".EM.EMC2.SUBS.CHARGE;
+      ==I;
+      );
+      = #Subs_Charge;
+      A %L4.0;
+      A(;
+      L #SEL_SUBS;
+      L "dbCONST_VAL".EM.EMC2.SUBS.FLUSH;
+      ==I;
+      );
+      = #Subs_Flush;
+NETWORK
+TITLE = Medium Selection
+//Medium Selection:
+//
+      O #RUNNING;
+      O #INITIATE;
+      = %L4.0;
+      A %L4.0;
+      A(;
+      L #MEDIUM;
+      L "dbCONST_VAL".EM.EMC3.MEDIUM.PW;
+      ==I;
+      );
+      = #Medium_PW;
+      A %L4.0;
+      A(;
+      L #MEDIUM;
+      L "dbCONST_VAL".EM.EMC3.MEDIUM.WFI;
+      ==I;
+      );
+      = #Medium_WFI;
+      A %L4.0;
+      A(;
+      L #MEDIUM;
+      L "dbCONST_VAL".EM.EMC3.MEDIUM.CS_PW;
+      ==I;
+      );
+      = #Medium_CS_PW;
+      A %L4.0;
+      A(;
+      L #MEDIUM;
+      L "dbCONST_VAL".EM.EMC3.MEDIUM.CS_WFI;
+      ==I;
+      );
+      = #Medium_CS_WFI;
+NETWORK
+TITLE = If EM is STOPPED/IL then Set a Bit for Safe state
+      AN #RUNNING;
+      = #SafeSate;
+NETWORK
+TITLE = Arm flag
+      A(;
+      O #Subs_Flush;
+      O #Subs_Charge;
+      );
+      A(;
+      A(;
+      O #Medium_WFI;
+      O #Medium_CS_WFI;
+      );
+      AN #WFI_CS_REQ;
+      O;
+      A(;
+      O #Medium_PW;
+      O #Medium_CS_PW;
+      );
+      AN #PW_CS_REQ;
+      );
+      = #BAD_PARAM;
+NETWORK
+TITLE = Item1 to 4:Supply Valves
+//[Command=Closed] will be effective for following substate:
+//0.Stop
+//1.Setup
+//2.Isolate
+//3.Charge
+//4.Flush
+//
+//****************************************************************************
+//State Needed:Closed
+//****************************************************************************
+//
+      A #INITIATE;
+      A(;
+      A #Subs_Setup;
+      AN #CALL_PH_SETUP;
+      O;
+      A #Subs_Isolate;
+      AN #CALL_PH_ISOLATE;
+      O;
+      A #Subs_Charge;
+      AN #BAD_PARAM;
+      AN #CALL_PH_CHARGE;
+      O;
+      A #Subs_Flush;
+      AN #BAD_PARAM;
+      AN #CALL_PH_FLUSH;
+      );
+      O #SafeSate;
+      = %L4.0;
+      A(;
+      A %L4.0;
+      JNB Label_0;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #WFI_VALV_CMD;
+      SET;
+      SAVE;
+      CLR;
+Label_0:      A BR;
+      );
+      JNB Label_1;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #PW_VALV_CMD;
+Label_1:      NOP 0;
+      A(;
+      A %L4.0;
+      JNB Label_2;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #CS_WFI_VALV_CMD;
+      SET;
+      SAVE;
+      CLR;
+Label_2:      A BR;
+      );
+      JNB Label_3;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #CS_PW_VALV_CMD;
+Label_3:      NOP 0;
+NETWORK
+TITLE = 5 and 6: CS/PW and CS/WFI supply switch
+//=================================Item5 and 6==============================
+//[StateRequest=Out(Low)] will be effective for following substate:
+//2.ISOLATE
+//****************************************************************************
+//State Needed:Out(2)
+//****************************************************************************
+//[StateRequest=In(High)] will be effective for following substate:
+//1.SETUP
+//3.FLUSH
+//4.Charge
+      A #FLOWPATH_WFI;
+      R #PW_CS_REQ;
+      S #WFI_CS_REQ;
+NETWORK
+TITLE = 5 and 6: CS/PW and CS/WFI supply switch
+//=================================Item5 and 6==============================
+//[StateRequest=Out(Low)] will be effective for following substate:
+//2.ISOLATE
+//****************************************************************************
+//State Needed:Out(2)
+//****************************************************************************
+//[StateRequest=In(High)] will be effective for following substate:
+//1.SETUP
+//3.FLUSH
+//4.Charge
+      A #FLOWPATH_PW;
+      S #PW_CS_REQ;
+      R #WFI_CS_REQ;
+NETWORK
+TITLE = Isolate Switch Req
+      A #FLOWPATH_ISOLATED;
+      R #WFI_CS_REQ;
+      R #PW_CS_REQ;
+NETWORK
+TITLE = Check Switch state
+      A(;
+      L #WFI_CS_SW_STATE;
+      L "dbCONST_VAL".CM.ZSC2_DEV_STATE.MISMATCH;
+      <>I;
+      );
+      A(;
+      L #PW_CS_SW_STATE;
+      L "dbCONST_VAL".CM.ZSC2_DEV_STATE.MISMATCH;
+      <>I;
+      );
+      = #PATH_OK;
+NETWORK
+TITLE = 
+      L 0;
+      T #ErrFlag;
+      NOP 0;
+NETWORK
+TITLE = Check valve status
+      L #WFI_VALV_STATE;
+      L #WFI_VALV_CMD;
+      ==I;
+      = %L4.0;
+      A %L4.0;
+      BLD 102;
+      = #ControlBit[1];
+      A %L4.0;
+      NOT;
+      JNB Label_4;
+      L 1;
+      T #ErrFlag;
+Label_4:      NOP 0;
+NETWORK
+TITLE = Check valve status
+      L #PW_VALV_STATE;
+      L #PW_VALV_CMD;
+      ==I;
+      = %L4.0;
+      A %L4.0;
+      BLD 102;
+      = #ControlBit[2];
+      A %L4.0;
+      NOT;
+      JNB Label_5;
+      L 2;
+      T #ErrFlag;
+Label_5:      NOP 0;
+NETWORK
+TITLE = Check valve status
+      L #CS_WFI_VALV_STATE;
+      L #CS_WFI_VALV_CMD;
+      ==I;
+      = %L4.0;
+      A %L4.0;
+      BLD 102;
+      = #ControlBit[3];
+      A %L4.0;
+      NOT;
+      JNB Label_6;
+      L 3;
+      T #ErrFlag;
+Label_6:      NOP 0;
+NETWORK
+TITLE = Check valve status
+      L #CS_PW_VALV_STATE;
+      L #CS_PW_VALV_CMD;
+      ==I;
+      = %L4.0;
+      A %L4.0;
+      BLD 102;
+      = #ControlBit[4];
+      A %L4.0;
+      NOT;
+      JNB Label_7;
+      L 4;
+      T #ErrFlag;
+Label_7:      NOP 0;
+NETWORK
+TITLE = States eq cmd
+      A #ControlBit[1];
+      A #ControlBit[2];
+      A #ControlBit[3];
+      A #ControlBit[4];
+      = #State_Eq_Command;
+NETWORK
+TITLE = START DEVICE STATUS MONITORING TIME OF THE EM_COMMAND
+      A #RUNNING;
+      AN #State_Eq_Command;
+      = %L4.0;
+      BLD 103;
+      CALL #STATUS
+      {time_type := 'Time'}
+      (  IN                          := %L4.0 , 
+         PT                          := T#10S , 
+         Q                           := #STATUS.Q , 
+         ET                          := #STATUS.ET
+      );
+      NOP 0;
+NETWORK
+TITLE = CHARGE LOGIC for Open/Close
+      A #PULSE;
+      = %L4.0;
+      BLD 103;
+      CALL #TMR_PULSE
+      (  START                       := %L4.0 , 
+         TON                         := #TIME_P_ON , 
+         TOFF                        := #TIME_P_OFF , 
+         Q_PULSE                     := #TMR_PULSE.Q_PULSE
+      );
+      NOP 0;
+NETWORK
+TITLE = Charge logic in Pulse mode
+      A #PULSE;
+      A "CALL_EMC2_PH_CHARGE";
+      = %L4.0;
+      A %L4.0;
+      A #Medium_WFI;
+      = %L4.1;
+      A %L4.1;
+      A #TMR_PULSE.Q_PULSE;
+      JNB Label_8;
+      L "dbCONST_VAL".CM.CMD_VALVE.OPEN;
+      T #WFI_VALV_CMD;
+Label_8:      NOP 0;
+      A %L4.1;
+      AN #TMR_PULSE.Q_PULSE;
+      JNB Label_9;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #WFI_VALV_CMD;
+Label_9:      NOP 0;
+      A %L4.0;
+      A #Medium_PW;
+      = %L4.2;
+      A %L4.2;
+      A #TMR_PULSE.Q_PULSE;
+      JNB Label_10;
+      L "dbCONST_VAL".CM.CMD_VALVE.OPEN;
+      T #PW_VALV_CMD;
+Label_10:      NOP 0;
+      A %L4.2;
+      AN #TMR_PULSE.Q_PULSE;
+      JNB Label_11;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #PW_VALV_CMD;
+Label_11:      NOP 0;
+NETWORK
+TITLE = Error if Device states are not Equivallent to commands
+//Sequencer run condition/EM finish condition
+      A #STATUS.Q;
+      = #STATE_VER;
+NETWORK
+TITLE = Start Sequencer if Device states are in the commanded states
+      A #RUNNING;
+      A #State_Eq_Command;
+      JNB Label_12;
+      L #SEL_SUBS;
+      T #ACT_PH;
+      SET;
+      SAVE;
+      CLR;
+Label_12:      A BR;
+      = %L4.0;
+      A %L4.0;
+      A #Subs_Setup;
+      AN #CALL_PH_SETUP;
+      S #CALL_PH_SETUP;
+      A %L4.0;
+      A #Subs_Isolate;
+      AN #CALL_PH_ISOLATE;
+      S #CALL_PH_ISOLATE;
+      A %L4.0;
+      A #Subs_Flush;
+      AN #CALL_PH_FLUSH;
+      A #PATH_OK;
+      AN #BAD_PARAM;
+      S #CALL_PH_FLUSH;
+      A %L4.0;
+      A #Subs_Charge;
+      AN #CALL_PH_CHARGE;
+      A #PATH_OK;
+      AN #BAD_PARAM;
+      S #CALL_PH_CHARGE;
+NETWORK
+TITLE = 
+      A(;
+      L #SEL_SUBS;
+      L #ACT_PH;
+      <>I;
+      );
+      JNB Label_13;
+      L 0;
+      T #ACT_PH;
+Label_13:      NOP 0;
+NETWORK
+TITLE = Stop selected sequencer if EM is not running
+      ON #RUNNING;
+      O #RUNNING;
+      = %L4.0;
+      A %L4.0;
+      AN #Subs_Setup;
+      R #CALL_PH_SETUP;
+      A %L4.0;
+      AN #Subs_Isolate;
+      R #CALL_PH_ISOLATE;
+      A %L4.0;
+      AN #Subs_Flush;
+      R #CALL_PH_FLUSH;
+      A %L4.0;
+      AN #Subs_Charge;
+      R #CALL_PH_CHARGE;
+NETWORK
+TITLE = Device state of all the CM should be equal to the Commands
+      A #PH_SETUP_FINISHED;
+      A #Subs_Setup;
+      O;
+      A #PH_ISOLATE_FINISHED;
+      A #Subs_Isolate;
+      O;
+      A #PH_FLUSH_FINISHED;
+      A #Subs_Flush;
+      O;
+      A #PH_CHARGE_FINISHED;
+      A #Subs_Charge;
+      = #EM_PROCESSED;
+NETWORK
+TITLE = SET DEVICE STATE =NOT RUNNING/STOPPED
+      A(;
+      ON #RUNNING;
+      O;
+      A #RUNNING;
+      A #STATE_VER;
+      );
+      JNB Label_14;
+      L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+      T #DEV_STATE;
+Label_14:      NOP 0;
+NETWORK
+TITLE = SET DEVICE STATE =RUNNING SUBSTATE
+      A #TEQ.Q;
+      JNB Label_15;
+      L #SEL_SUBS;
+      T #DEV_STATE;
+Label_15:      NOP 0;
+NETWORK
+TITLE = 
+      A #RUNNING;
+      A #State_Eq_Command;
+      AN #TEQ.Q;
+      = %L4.0;
+      BLD 103;
+      CALL #TEQ
+      {time_type := 'Time'}
+      (  IN                          := %L4.0 , 
+         PT                          := T#2S
+      );
+      NOP 0;
+NETWORK
+TITLE = EM complete
+      A(;
+      O #PH_SETUP_FINISHED;
+      O #PH_ISOLATE_FINISHED;
+      O #PH_FLUSH_FINISHED;
+      O #PH_CHARGE_FINISHED;
+      );
+      JNB Label_16;
+      L "dbCONST_VAL".EM.DEV_STATE.COMPLETE;
+      T #DEV_STATE;
+Label_16:      NOP 0;
+NETWORK
+TITLE = 
+      A(;
+      A #WFI_CS_REQ;
+      AN #Subs_Setup;
+      O;
+      A #Subs_Setup;
+      A(;
+      O #Medium_WFI;
+      O #Medium_CS_WFI;
+      );
+      );
+      AN #Subs_Isolate;
+      = #WFI_CS_REQ_T;
+NETWORK
+TITLE = 
+      A(;
+      A #PW_CS_REQ;
+      AN #Subs_Setup;
+      O;
+      A #Subs_Setup;
+      A(;
+      O #Medium_PW;
+      O #Medium_CS_PW;
+      );
+      );
+      AN #Subs_Isolate;
+      = #PW_CS_REQ_T;
+END_FUNCTION_BLOCK
+

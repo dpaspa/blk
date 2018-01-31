@@ -1,0 +1,42 @@
+FUNCTION "ifcDI1" : Void
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_INPUT 
+      IN_REQ_MODE : Bool;
+      IN_MODE : Int;
+   END_VAR
+
+   VAR_OUTPUT 
+      OUT_MODE : Int;
+   END_VAR
+
+   VAR_IN_OUT 
+      IO_MODE : Int;
+      POS_EDGE1 : Bool;
+      POS_EDGE2 : Bool;
+   END_VAR
+
+   VAR_TEMP 
+      RetVal : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Mode change
+      A #IN_REQ_MODE;
+      = %L1.0;
+      BLD 103;
+      CALL "MODE_REQ"
+      (  IN_REQ_MODE                 := %L1.0 , 
+         IN_MODE                     := #IN_MODE , 
+         MODULE                      := 'C' , 
+         Ret_Val                     := #RetVal , 
+         OUT_MODE                    := #OUT_MODE , 
+         IO_MODE                     := #IO_MODE , 
+         POS_EDGE1                   := #POS_EDGE1 , 
+         POS_EDGE2                   := #POS_EDGE2
+      );
+      NOP 0;
+END_FUNCTION
+

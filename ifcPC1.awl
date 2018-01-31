@@ -1,0 +1,74 @@
+FUNCTION "ifcPC1" : Void
+TITLE = ifcPC1-
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_INPUT 
+      IN_REQ_MODE : Bool;
+      IN_MODE : Int;   // Mode of EM
+      SETPOINT : Real;
+      P_CTRL : Int;
+      GAS_SELECT : Int;
+   END_VAR
+
+   VAR_OUTPUT 
+      OUT_MODE : Int;
+   END_VAR
+
+   VAR_IN_OUT 
+      IO_MODE : Int;   // Mode of CM
+      IO_SETPOINT : Real;
+      IO_P_CTRL : Int;
+      IO_GAS_SELECT : Int;
+      POS_EDGE1 : Bool;   // Positive edge of EM mode change
+      POS_EDGE2 : Bool;   // Positive edge of EM mode change
+   END_VAR
+
+   VAR_TEMP 
+      RetVal : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Mode change
+      A #IN_REQ_MODE;
+      = %L1.0;
+      BLD 103;
+      CALL "MODE_REQ"
+      (  IN_REQ_MODE                 := %L1.0 , 
+         IN_MODE                     := #IN_MODE , 
+         MODULE                      := 'C' , 
+         Ret_Val                     := #RetVal , 
+         OUT_MODE                    := #OUT_MODE , 
+         IO_MODE                     := #IO_MODE , 
+         POS_EDGE1                   := #POS_EDGE1 , 
+         POS_EDGE2                   := #POS_EDGE2
+      );
+      NOP 0;
+NETWORK
+TITLE = Transfer Input Parameters to Output
+      L #IO_MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      = %L1.0;
+      A(;
+      A %L1.0;
+      JNB Label_0;
+      L #SETPOINT;
+      T #IO_SETPOINT;
+      SET;
+      SAVE;
+      CLR;
+Label_0:      A BR;
+      );
+      JNB Label_1;
+      L #P_CTRL;
+      T #IO_P_CTRL;
+Label_1:      NOP 0;
+      A %L1.0;
+      JNB Label_2;
+      L #GAS_SELECT;
+      T #IO_GAS_SELECT;
+Label_2:      NOP 0;
+END_FUNCTION
+

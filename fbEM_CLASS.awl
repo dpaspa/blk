@@ -1,0 +1,810 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Title:       @@CLASS@@                                                     //
+// Description: @@DESCRIPTION@@                                               //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.1 David Paspa      30-Jan-2018 NA        Reboot from Pharmaniaga to make //
+//                                            generic EM template.            //
+// 1.0 Gerald Kontriner 10-Oct-2009 CC-09/023 Added Alarm flag MON_MISMATCH.  //
+// 0.9 Khairul Basar    04-Oct-2009 CC-09/023 SHARED_BY  changed to OWNER int.//
+// 0.8 Khairul Basar    02-Oct-2009 CC-09/023 SQ_STATE, ERR flag reset if SQ  //
+//                                            off.                            //
+// 0.7 Khoon            01-Oct-2009 CC-09/016 Mode=2 init,'Substate change'   //
+//                                            added to STOP input of Subs.    //
+// 0.6 Khairul Basar    30-Sep-2009 CC-09/023 EM Mode var changed to IN_OUT.  //
+// 0.5 Khairul Basar    25-Sep-2009 CC-09/016 Ref2.                           //
+// 0.4 Khairul Basar    21-Sep-2009 CC-09/016 Ref1.                           //
+// 0.3 Khairul Basar    17-Sep-2009 CC-09/016 Duplicate command/SP parameters //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters.          //
+// 0.2 Khairul Basar    27-Aug-2009 CC-09/023 Path_IL added, Phase updated.   //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+// Ref2:                                                                      //
+// SQ_ACK,SQ_RESUME,SQ_ERROR,CURSTEP,SQ_STATE variables are added as to       //
+// control from HMI faceplate.                                                //
+// Ref1:                                                                      //
+// Phases are updated.Flush & Charge Syncronised for valve commands.SQ_stop   //
+// command is passed when CALL flag is OFF(previously there was error).PULSE  //
+// timer is created as multiple instance of a standard FB, no more hard coded //
+// S5 timer. ERR_FLT is changed to TIMEOUT_VER, PATH_IL to FLOWPATH.Shared    //
+// Equipment availability flag programmed,BatchCycle variable added.          //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbEMC2_CLASS"
+TITLE = EMC2:WFI, SC Supply and PW, CS supply to Mx vessel
+{ S7_Optimized_Access := 'FALSE' }
+NAME : fb@@CLASS@@_CLASS
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 1.1
+
+//----------------------------------------------------------------------------//
+// Dclare variables:                                                          //
+//----------------------------------------------------------------------------//
+@@TEMPLATE_BEGIN@@
+   VAR_INPUT
+      COMMAND : Int := 1;         // Start/Stop command from HMI
+      SEL_SUBS : Int := 1;        // Select running sibstate
+      CR_IL : Bool;               // critical Interlock that can not be bypased.
+      NCR_IL : Bool;              // Interlock that can be bypased/Override.
+      MAN_OVERRIDE : Bool;        // Manual override to bypass NCR_IL
+@@ATTR_BEGIN|CHILD_STATE@@
+      @@CHILDALIASTAG@@_STATE : Int;           // @@CHILDALIASDESCRIPTION@@
+@@ATTR_END|CHILD_STATE@@
+@@ATTR_BEGIN|PARAMETER_IN@@
+         @@PARAMETER@@               := #@@MODULE@@.@@PARAMETER@@ ,
+@@ATTR_END|PARAMETER_IN@@
+      CurrentMass : Real;
+      OWNER : Int := 1;           // value to be set or reset by Parent level
+      "NULL" : Int;               // no use to HMI Structure match
+   END_VAR
+
+   VAR_OUTPUT
+      DEV_STATE : Int;
+      RUNNING : Bool;
+      AVAILABLE : Bool;
+      TIME_EXPIRED : Bool;
+      ALARM_TIMEOUT : Bool;
+      INTERLOCK : Bool;
+      STATE_VER : Bool;
+      EM_PROCESSED : Bool;
+      SQ_ERROR : Bool;
+      CURSTEP : Int;
+      SQ_STATE : Int;
+      REMNG_HOUR : Int;
+      REMNG_MIN : Int;
+      REMNG_SEC : Int;
+      RUNNING_SUBS : Int;
+@@ATTR_BEGIN|CHILD_CMD@@
+         @@CHILDALIASTAG@@_@@COMMANDALIASTYPE@@ : @@COMMANDALIASDATATYPE@@;     // @@CHILDALIASDESCRIPTION@@
+@@ATTR_END|CHILD_CMD@@
+      FLOWPATH : Bool;
+      ARM_FLAG : Bool;
+      MON_MISMATCH : Bool;
+      BAD_PARAM : Bool;
+   END_VAR
+
+   VAR_IN_OUT
+      MODE : Int := 2;   // Select mode manual or auto
+      SQ_ACK : Bool;
+      SQ_RESUME : Bool;
+@@ATTR_BEGIN|PARAMETER_SQ@@
+      @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
+      MEDIUM : Int := 1;   // Selected medium to be added
+      PULSE : Bool;   // True if pulse mode selected, otherwise valve left fully opened
+      EMM1_CMD : Int := 1;
+      EMM1_SUBSTATE : Int;
+      FlushToTime : Bool;
+      EMM_substate : Int;
+      MassReady : Bool;
+      MassCharge : Real;
+      MassInitial : Real;
+      MassFinal : Real;
+      MassActual : Real;
+      MassFull : Real;
+      MassCurrent : Real;
+      MassPulse : Real;
+@@ATTR_END|PARAMETER_SQ@@
+   END_VAR
+
+   VAR
+      BATCHCYCLE : "udtID";
+      CMD_FUNC : "Mode_Cmd_Hist";
+      RUNTMR : "fbRunTimer";
+      SUBS : "fb@@CLASS@@_SUBS";
+@@ATTR_BEGIN|SFC@@
+      @@SFC@@ : "fb@@CLASS@@_@@SFC@@"
+@@ATTR_END|SFC@@
+@@ATTR_BEGIN|SFC@@
+      FP_i@@STATE@@ : Bool;
+      FP_e@@STATE@@ : Bool;
+@@ATTR_END|SFC@@
+   END_VAR
+
+   VAR_TEMP
+      tmpRunning : Bool;
+      tTime : Time;
+      dTime : DInt;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Shared Equipment module availability
+      L #OWNER;
+      L "dbCONST_VAL".BLK.OWNER.NONE;
+      ==I;
+      = #AVAILABLE;
+NETWORK
+TITLE = Call Mode & Command handling block
+      A(;
+      O #CR_IL;
+      O #BAD_PARAM;
+      );
+      = %L10.0;
+      BLD 103;
+      A #NCR_IL;
+      = %L10.1;
+      BLD 103;
+      CALL "COMMAND_FUNCTION"
+      (  COMMAND                     := #COMMAND ,
+         MODE                        := #MODE ,
+         SUBS                        := #SEL_SUBS ,
+         START_CMD                   := "dbCONST_VAL".BLK.CMD.START ,
+         STOP_CMD                    := "dbCONST_VAL".BLK.CMD.STOP ,
+         MODE_MAN                    := "dbCONST_VAL".BLK.MODE.MANUAL ,
+         MODE_AUTO                   := "dbCONST_VAL".BLK.MODE.AUTO ,
+         MODE_OOS                    := "dbCONST_VAL".BLK.MODE.OUT_OF_SERVICE ,
+         CR_IL                       := %L10.0 ,
+         NCR_IL                      := %L10.1 ,
+         MAN_OVERRIDE                := #MAN_OVERRIDE ,
+         RUNNING                     := #tmpRunning ,
+         INITIATE                    := "CMD_INITIATE" ,
+         STOP                        := "CMD_STOP" ,
+         MAN                         := "MODE_MANUAL" ,
+         AUTO                        := "MODE_AUTO" ,
+         OOS                         := "MODE_OUT_OF_SERVICE" ,
+         MODE_CHNG                   := "MODE_CHANGED" ,
+         SUBS_CHNG                   := "SUBS_CHANGED" ,
+         INTERLOCK                   := #INTERLOCK ,
+         CMD_M_H                     := #CMD_FUNC.Cmd_Man_hist ,
+         CMD_A_H                     := #CMD_FUNC.Cmd_Auto_hist ,
+         MODE_H                      := #CMD_FUNC.Mode_hist ,
+         SUBS_H                      := #CMD_FUNC.Subs_hist
+      );
+      NOP 0;
+NETWORK
+TITLE = if Started/Initiated, Set running flag
+      A "CMD_INITIATE";
+      S #RUNNING;
+      S #CMD_FUNC.Running;
+      = #CMD_FUNC.Initiate_Bit;
+NETWORK
+TITLE = if stopped, Reset Running flags
+      A "CMD_STOP";
+      = #CMD_FUNC.Stop_Bit;
+      R #CMD_FUNC.Running;
+      R #RUNNING;
+NETWORK
+TITLE = Call Substate Handling Block
+      A #CMD_FUNC.Initiate_Bit;
+      = %L10.0;
+      BLD 103;
+      A #CMD_FUNC.Stop_Bit;
+      = %L10.1;
+      BLD 103;
+      A #CMD_FUNC.Running;
+      = %L10.2;
+      BLD 103;
+      A #PH_CHARGE._pulse_mode;
+      = %L10.3;
+      BLD 103;
+@@ATTR_BEGIN|SFC@@
+      A #SUBS.@@SFC@@_FINISHED;
+      = %L11.@@COUNTER|0@@;
+      BLD 103;
+@@ATTR_END|SFC@@
+@@ATTR_BEGIN|PARAMETER_FP@@
+      A #@@SFC@@._flowpath_@@FP@@;
+      = %L12.@@COUNTER|0@@;
+      BLD 103;
+@@ATTR_END|PARAMETER_FP@@
+      CALL #SUBS
+      (  INITIATE                    := %L10.0 ,
+         STOP                        := %L10.1 ,
+         RUNNING                     := %L10.2 ,
+         MODE                        := #MODE ,
+         SEL_SUBS                    := #SEL_SUBS ,
+         MEDIUM                      := #MEDIUM ,
+         PULSE                       := %L10.3 ,
+         TIME_P_ON                   := #TIME_P_ON ,
+         TIME_P_OFF                  := #TIME_P_OFF ,
+@@ATTR_BEGIN|CHILD_STATE@@
+         @@CHILDALIAS@@_STATE        := #@@CHILDALIASTAG@@_STATE ,
+@@ATTR_END|CHILD_STATE@@
+@@ATTR_BEGIN|SFC@@
+         @@SFC@@_FINISHED            := %L11.@@COUNTER|0@@ ,
+@@ATTR_END|SFC@@
+@@ATTR_BEGIN|PARAMETER_FP@@
+         FLOWPATH_@@FP@@               := %L12.@@COUNTER|0@@ ,
+@@ATTR_END|PARAMETER_FP@@
+         DEV_STATE                   := #DEV_STATE ,
+         STATE_VER                   := #STATE_VER ,
+         BLK_PROCESSED               := #BLK_PROCESSED ,
+         PATH_OK                     := #SUBS.PATH_OK ,
+@@ATTR_BEGIN|CHILD_CMD@@
+         @@CHILDALIAS@@_@@COMMANDALIASTYPE@@ := #@@CHILDALIASTAG@@_@@COMMANDALIASTYPE@@ ,
+@@ATTR_END|CHILD_CMD@@
+@@ATTR_BEGIN|SFC@@
+         CALL_@@SFC@@                := #SUBS.CALL_@@SFC@@ ,
+@@ATTR_END|SFC@@
+         BAD_PARAM                   := #BAD_PARAM
+      );
+      NOP 0;
+NETWORK
+TITLE = Interlock State
+      A #INTERLOCK;
+      A(;
+      L #SEL_SUBS;
+      L "dbCONST_VAL".BLK.SUBSTATE.ZERO;
+      <>I;
+      );
+      JNB Label_0;
+      L "dbCONST_VAL".BLK.DEV_STATE.INTERLOCKED;
+      T #DEV_STATE;
+      SET;
+      SAVE;
+      CLR;
+Label_0:      A BR;
+      = #MON_MISMATCH;
+NETWORK
+TITLE = Initiate Command variable of Phase Instance
+//Command to valves
+@@ATTR_BEGIN|SFC@@
+      AN #SUBS.CALL_@@SFC@@;
+@@ATTR_END|SFC@@
+      JCN nini;
+
+      L #SUBS.WFI_VALV_CMD;
+      T #PH_CHARGE._WFI_valve_cmd;
+      T #PH_FLUSH._WFI_valve_cmd;
+
+      L #SUBS.PW_VALV_CMD;
+      T #PH_CHARGE._PW_valve_cmd;
+      T #PH_FLUSH._PW_valve_cmd;
+
+      L #SUBS.CS_WFI_VALV_CMD;
+      T #PH_CHARGE._CS_WFI_valve_cmd;
+      T #PH_FLUSH._WFICS_valve_cmd;
+
+      L #SUBS.CS_PW_VALV_CMD;
+      T #PH_CHARGE._CS_PW_valve_cmd;
+      T #PH_FLUSH._PWCS_valve_cmd;
+
+nini:      NOP 0;
+NETWORK
+TITLE = Start/Stop Sequencer commands
+@@ATTR_BEGIN|SFC@@
+         CALL_@@SFC@@                := #SUBS.CALL_@@SFC@@ ,
+// @@StateDescription@@
+      NOP 0;
+      A #SUBS.CALL_@@SFC@@;
+@@ATTR_BEGIN|PARAMETER_FP@@
+      FP #FP_i@@FP@@;
+@@ATTR_END|PARAMETER_FP@@
+      JNB _i@@COUNTER|1@@; // Initiate Sequence
+      L "dbCONST_VAL".SQ_CMD.START;
+      T #@@SFC@@.SQ_CMD;
+_i@@COUNTER@@:      NOP 0;
+
+      AN #SUBS.CALL_@@SFC@@;
+      JNB _e@@COUNTER|1@@;//end Sequence
+      L "dbCONST_VAL".SQ_CMD.STOP;
+      T #@@SFC@@.SQ_CMD;
+_e@@COUNTER@@:      NOP 0;
+@@ATTR_END|SFC@@
+
+NETWORK
+TITLE = Pause SQ, If STATE_VER when PHASE running
+      JU psc1;
+@@ATTR_BEGIN|SFC@@
+      A #STATE_VER;
+      A #SUBS.CALL_@@SFC@@;
+      JNB pse@@COUNTER|1@@;
+      L "dbCONST_VAL".SQ_CMD.PAUSE;
+      T #@@SFC@@.SQ_CMD;
+pse@@COUNTER@@:      NOP 0;
+@@ATTR_END|SFC@@
+psc1:      NOP 0;
+
+@@ATTR_BEGIN|SFC@@
+      AN #FLOWPATH;
+      A #SUBS.CALL_@@SFC@@;
+      JNB fp@@COUNTER|1@@;
+      L "dbCONST_VAL".SQ_CMD.PAUSE;
+      T #@@SFC@@.SQ_CMD;
+fp@@COUNTER@@:      NOP 0;
+@@ATTR_END|SFC@@
+
+NETWORK
+TITLE = SQ Acknowlede Error Fault &  Resume
+@@ATTR_BEGIN|SFC@@
+      A #SQ_ACK;
+      A #SQ_ERROR;
+      A #SUBS.CALL_@@SFC@@;
+      JNB Ack@@COUNTER|1@@;
+      L "dbCONST_VAL".SQ_CMD.ACKNOWLEDGE_ERR;
+      T #@@SFC@@.SQ_CMD;
+      R #SQ_ACK;
+
+Ack@@COUNTER@@:      NOP 0;
+
+      A #SQ_RESUME;
+      A #SUBS.CALL_@@SFC@@;
+      A(;
+      O(;
+      L #SQ_STATE;
+      L "dbCONST_VAL".SQ_CMD.PAUSE;
+      ==I;
+      );
+      O(;
+      L #SQ_STATE;
+      L "dbCONST_VAL".SQ_CMD.ACKNOWLEDGE_ERR;
+      ==I;
+      );
+      );
+      JNB Res@@COUNTER|1@@;
+      L "dbCONST_VAL".SQ_CMD.RESUME;
+      T #@@SFC@@.SQ_CMD;
+      R #SQ_RESUME;
+
+Res@@COUNTER@@:      NOP 0;
+@@ATTR_END|SFC@@
+
+NETWORK
+TITLE = All SQ are in Auto mode when EM in Auto
+      A "MODE_CHANGED";
+      A "MODE_AUTO";
+      JNB _009;
+      L #MODE;
+@@ATTR_BEGIN|SFC@@
+      T #@@SFC@@.MODE;
+@@ATTR_END|SFC@@
+
+_009:      NOP 0;
+NETWORK
+TITLE = Setup
+      CALL #PH_SETUP
+      (  MODE                        := #PH_SETUP.MODE ,
+         SQ_CMD                      := #PH_SETUP.SQ_CMD ,
+         _WFI_switch_state           := #ZSC_x034_STATE ,
+         _PW_switch_state            := #ZSC_x033_STATE ,
+         _medium                     := #MEDIUM ,
+         SQ_STATE                    := #PH_SETUP.SQ_STATE ,
+         CURSTEP                     := #PH_SETUP.CURSTEP ,
+         NXT_STEP                    := #PH_SETUP.NXT_STEP ,
+         S_ACTIVE                    := #PH_SETUP.S_ACTIVE ,
+         ERR_FAULT                   := #PH_SETUP.ERR_FAULT ,
+         PAUSED                      := #PH_SETUP.PAUSED ,
+         OFF_IDLE                    := #PH_SETUP.OFF_IDLE ,
+         SQ_FINISHED                 := #PH_SETUP.SQ_FINISHED ,
+         STEPNO_JUMP                 := #PH_SETUP.STEPNO_JUMP ,
+         MAN_JUMP                    := #PH_SETUP.MAN_JUMP ,
+         NO_VERIFIC                  := #PH_SETUP.NO_VERIFIC ,
+         TRN_AND_JUMP                := #PH_SETUP.TRN_AND_JUMP ,
+         _flowpath_PW                := #PH_SETUP._flowpath_PW ,
+         _flowpath_WFI               := #PH_SETUP._flowpath_WFI
+      );
+      NOP 0;
+NETWORK
+TITLE = Setup synchronize commands and settings
+//Command and settings to EM
+      A(;
+      L #SUBS.ACT_PH;
+      L "dbCONST_VAL".EM.EMC2.SUBS.SETUP;
+      ==I;
+      );
+      JCN setu;
+
+//No command is processed by this Phase.
+
+setu:      NOP 0;
+
+
+NETWORK
+TITLE = Arm flowpath: if setup reset flowpath_isolated flag
+      A #PH_SETUP._flowpath_PW;
+      R #PH_SETUP._flowpath_WFI;
+      R #PH_ISOLATE._flowpath_isolated;
+NETWORK
+TITLE = Arm flowpath: if setup reset flowpath_isolated flag
+      A #PH_SETUP._flowpath_WFI;
+      R #PH_SETUP._flowpath_PW;
+      R #PH_ISOLATE._flowpath_isolated;
+NETWORK
+TITLE = Arm flowpath: if setup reset flowpath_isolated flag
+      A #PH_ISOLATE._flowpath_isolated;
+      R #PH_SETUP._flowpath_WFI;
+      R #PH_SETUP._flowpath_PW;
+NETWORK
+TITLE = Setup finished
+      A #PH_SETUP.SQ_FINISHED;
+      = #SUBS.PH_SETUP_FINISHED;
+NETWORK
+TITLE = Isolate
+      CALL #PH_ISOLATE
+      (  MODE                        := #PH_ISOLATE.MODE ,
+         SQ_CMD                      := #PH_ISOLATE.SQ_CMD ,
+         _WFI_switch_state           := #ZSC_x034_STATE ,
+         _PW_switch_state            := #ZSC_x033_STATE ,
+         SQ_STATE                    := #PH_ISOLATE.SQ_STATE ,
+         CURSTEP                     := #PH_ISOLATE.CURSTEP ,
+         NXT_STEP                    := #PH_ISOLATE.NXT_STEP ,
+         S_ACTIVE                    := #PH_ISOLATE.S_ACTIVE ,
+         ERR_FAULT                   := #PH_ISOLATE.ERR_FAULT ,
+         PAUSED                      := #PH_ISOLATE.PAUSED ,
+         OFF_IDLE                    := #PH_ISOLATE.OFF_IDLE ,
+         SQ_FINISHED                 := #PH_ISOLATE.SQ_FINISHED ,
+         STEPNO_JUMP                 := #PH_ISOLATE.STEPNO_JUMP ,
+         MAN_JUMP                    := #PH_ISOLATE.MAN_JUMP ,
+         NO_VERIFIC                  := #PH_ISOLATE.MAN_JUMP ,
+         TRN_AND_JUMP                := #PH_ISOLATE.TRN_AND_JUMP ,
+         _flowpath_isolated          := #PH_ISOLATE._flowpath_isolated
+      );
+      NOP 0;
+NETWORK
+TITLE = Isolate synchronize commands and settings
+//Command and settings to EM
+      A(;
+      L #SUBS.ACT_PH;
+      L "dbCONST_VAL".EM.EMC2.SUBS.ISOLATE;
+      ==I;
+      );
+      JCN isol;
+
+//No command is processed by this Phase.
+
+isol:      NOP 0;
+
+
+NETWORK
+TITLE = If Isolated, flowpath no more setup
+      A #PH_ISOLATE._flowpath_isolated;
+      R #PH_SETUP._flowpath_WFI;
+      R #PH_SETUP._flowpath_PW;
+NETWORK
+TITLE = Isolate finished
+      A #PH_ISOLATE.SQ_FINISHED;
+      = #SUBS.PH_ISOLATE_FINISHED;
+NETWORK
+TITLE = Charge
+      CALL #@@SFC@@
+      (  MODE                        := #@@SFC@@.MODE ,
+         SQ_CMD                      := #@@SFC@@.SQ_CMD ,
+@@ATTR_BEGIN|CHILD_CMD@@
+         @@CHILDALIAS@@_state        := #@@CHILDALIASTAG@@_STATE ,
+@@ATTR_END|CHILD_CMD@@
+         SQ_STATE                    := #@@SFC@@.SQ_STATE ,
+         CURSTEP                     := #@@SFC@@.CURSTEP ,
+         NXT_STEP                    := #@@SFC@@.NXT_STEP ,
+         S_ACTIVE                    := #@@SFC@@.S_ACTIVE ,
+         ERR_FAULT                   := #@@SFC@@.ERR_FAULT ,
+         PAUSED                      := #@@SFC@@.PAUSED ,
+         OFF_IDLE                    := #@@SFC@@.OFF_IDLE ,
+         SQ_FINISHED                 := #@@SFC@@.SQ_FINISHED ,
+@@ATTR_BEGIN|CHILD_CMD@@
+         @@CHILDALIAS@@_@@COMMANDALIASTYPE@@ := @@COMMANDALIASTAG@@_@@COMMANDALIASTYPE@@ ,
+@@ATTR_END|CHILD_CMD@@
+         _timeout_alarm              := #@@SFC@@._timeout_alarm ,
+         STEPNO_JUMP                 := #@@SFC@@.STEPNO_JUMP ,
+         MAN_JUMP                    := #@@SFC@@.MAN_JUMP ,
+         NO_VERIFIC                  := #@@SFC@@.NO_VERIFIC ,
+         TRN_AND_JUMP                := #@@SFC@@.TRN_AND_JUMP ,
+         _@@CLASS@@_substate              := #@@CLASS@@_SUBSTATE ,
+         _@@CLASS@@_cmd                   := #@@CLASS@@_CMD ,
+@@ATTR_BEGIN|PARAMETER_SQ@@
+         _@@PARAMETER@@                 := #@@PARAMETER@@ ,
+@@ATTR_END|PARAMETER_SQ@@
+@@ATTR_BEGIN|PARAMETER_FP@@
+         _flowpath_@@FP@@                := #@@SFC@@._flowpath_@@FP@@ ,
+@@ATTR_END|PARAMETER_FP@@
+      );
+      NOP 0;
+NETWORK
+TITLE = @@STATEDESCRIPTION@@ finished
+      A #@@SFC@@.SQ_FINISHED;
+      = #SUBS.@@SFC@@_FINISHED;
+NETWORK
+TITLE = Syncronize the valve commands of Charge & Flush
+//Command to valves
+      A(;
+      L #SUBS.ACT_PH;
+      L "dbCONST_VAL".EM.@@CLASS@@.SUBS.@@STATE@@;
+      ==I;
+      );
+      JCN chrg;
+      L #PH_CHARGE._WFI_valve_cmd;
+      T #PH_FLUSH._WFI_valve_cmd;
+      T #SUBS.WFI_VALV_CMD;
+
+      L #PH_CHARGE._PW_valve_cmd;
+      T #PH_FLUSH._PW_valve_cmd;
+      T #SUBS.PW_VALV_CMD;
+
+      L #PH_CHARGE._CS_WFI_valve_cmd;
+      T #PH_FLUSH._WFICS_valve_cmd;
+      T #SUBS.CS_WFI_VALV_CMD;
+
+      L #PH_CHARGE._CS_PW_valve_cmd;
+      T #PH_FLUSH._PWCS_valve_cmd;
+      T #SUBS.CS_PW_VALV_CMD;
+chrg:      NOP 0;
+NETWORK
+TITLE = Flush
+      A #RUN_TO_TIME;
+      = %L10.0;
+      BLD 103;
+      AN #PH_ISOLATE._flowpath_isolated;
+      JNB Label_1;
+      CALL #PH_FLUSH
+      (  MODE                        := #PH_FLUSH.MODE ,
+         SQ_CMD                      := #PH_FLUSH.SQ_CMD ,
+         _Flush_timeS                := #TIME_RUN_S ,
+         _Flush_timeM                := #TIME_RUN_M ,
+         _Flush_timeH                := #TIME_RUN_H ,
+         _WFI_switch_state           := #ZSC_x034_STATE ,
+         _PW_switch_state            := #ZSC_x033_STATE ,
+         _flush_to_time              := %L10.0 ,
+         _PW_valve_state             := #DV_x060_STATE ,
+         _WFI_valve_state            := #DV_x050_STATE ,
+         _PWCS_valve_state           := #DV_x041_STATE ,
+         _WFICS_valve_state          := #PV_x040_STATE ,
+         _medium                     := #MEDIUM ,
+         SQ_STATE                    := #PH_FLUSH.SQ_STATE ,
+         CURSTEP                     := #PH_FLUSH.CURSTEP ,
+         NXT_STEP                    := #PH_FLUSH.NXT_STEP ,
+         S_ACTIVE                    := #PH_FLUSH.S_ACTIVE ,
+         ERR_FAULT                   := #PH_FLUSH.ERR_FAULT ,
+         PAUSED                      := #PH_FLUSH.PAUSED ,
+         OFF_IDLE                    := #PH_FLUSH.OFF_IDLE ,
+         SQ_FINISHED                 := #PH_FLUSH.SQ_FINISHED ,
+         _EM_stop_cmd                := #PH_FLUSH._EM_stop_cmd ,
+         _WFICS_valve_cmd            := #DV_x040_CMD ,
+         _PWCS_valve_cmd             := #DV_x041_CMD ,
+         _PW_valve_cmd               := #DV_x060_CMD ,
+         _WFI_valve_cmd              := #DV_x050_CMD ,
+         STEPNO_JUMP                 := #PH_FLUSH.STEPNO_JUMP ,
+         MAN_JUMP                    := #PH_FLUSH.MAN_JUMP ,
+         NO_VERIFIC                  := #PH_FLUSH.NO_VERIFIC ,
+         TRN_AND_JUMP                := #PH_FLUSH.TRN_AND_JUMP
+      );
+Label_1:      NOP 0;
+NETWORK
+TITLE = Command from Flush: to make comparision & evaluate STATE_VER
+//Command and settings to EM
+      A(;
+      L #SUBS.ACT_PH;
+      L "dbCONST_VAL".EM.EMC2.SUBS.FLUSH;
+      ==I;
+      );
+      JCN flus;
+
+      L #PH_FLUSH._PW_valve_cmd;
+      T #SUBS.PW_VALV_CMD;
+
+      L #PH_FLUSH._WFI_valve_cmd;
+      T #SUBS.WFI_VALV_CMD;
+
+      L #PH_FLUSH._PWCS_valve_cmd;
+      T #SUBS.CS_PW_VALV_CMD;
+
+      L #PH_FLUSH._WFICS_valve_cmd;
+      T #SUBS.CS_WFI_VALV_CMD;
+
+flus:      NOP 0;
+
+
+NETWORK
+TITLE = Flush Finished
+      A #PH_FLUSH.SQ_FINISHED;
+      = #SUBS.PH_FLUSH_FINISHED;
+NETWORK
+TITLE = Flowpath
+      A(;
+      A #SUBS.CALL_PH_SETUP;
+      AN #PH_SETUP._flowpath_PW;
+      AN #PH_SETUP._flowpath_WFI;
+      O;
+      A #SUBS.CALL_PH_ISOLATE;
+      AN #PH_ISOLATE._flowpath_isolated;
+      );
+      NOT;
+      = #ARM_FLAG;
+NETWORK
+TITLE =
+      O #SUBS.PATH_OK;
+      ON #ARM_FLAG;
+      O "MODE_OUT_OF_SERVICE";
+      = #FLOWPATH;
+NETWORK
+TITLE = Move Phase Current Step to Output
+      NOP 0;
+      A(;
+      L #SUBS.ACT_PH;
+      L "dbCONST_VAL".EM.EMC2.SUBS.SETUP;
+      ==I;
+      );
+      JNB mov1;
+      L #PH_SETUP.CURSTEP;
+      T #CURSTEP;
+      L #PH_SETUP.SQ_STATE;
+      T #SQ_STATE;
+      A #PH_SETUP.ERR_FAULT;
+      = #SQ_ERROR;
+
+mov1:      NOP 0;
+
+      NOP 0;
+      A(;
+      L #SUBS.ACT_PH;
+      L "dbCONST_VAL".EM.EMC2.SUBS.ISOLATE;
+      ==I;
+      );
+      JNB mov2;
+      L #PH_ISOLATE.CURSTEP;
+      T #CURSTEP;
+      L #PH_ISOLATE.SQ_STATE;
+      T #SQ_STATE;
+      A #PH_ISOLATE.ERR_FAULT;
+      = #SQ_ERROR;
+
+
+
+
+
+mov2:      NOP 0;
+
+      A(;
+      L #SUBS.ACT_PH;
+      L "dbCONST_VAL".EM.EMC2.SUBS.FLUSH;
+      ==I;
+      );
+      JNB mov3;
+      L #PH_FLUSH.CURSTEP;
+      T #CURSTEP;
+      L #PH_FLUSH.SQ_STATE;
+      T #SQ_STATE;
+      A #PH_FLUSH.ERR_FAULT;
+      = #SQ_ERROR;
+
+mov3:      NOP 0;
+
+
+      A(;
+      L #SUBS.ACT_PH;
+      L "dbCONST_VAL".EM.EMC2.SUBS.CHARGE;
+      ==I;
+      );
+      JNB mov4;
+      L #PH_CHARGE.CURSTEP;
+      T #CURSTEP;
+      L #PH_CHARGE.SQ_STATE;
+      T #SQ_STATE;
+      A #PH_CHARGE.ERR_FAULT;
+      = #SQ_ERROR;
+
+
+
+mov4:      NOP 0;
+
+
+
+NETWORK
+TITLE = Charge/Flush :If Phase Paused/Error
+      A #SUBS.CALL_PH_CHARGE;
+      A #PH_CHARGE.PAUSED;
+      O;
+      A #SUBS.CALL_PH_FLUSH;
+      A #PH_FLUSH.PAUSED;
+      JNB pau1;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #DV_x040_CMD;
+      T #DV_x041_CMD;
+      T #DV_x050_CMD;
+      T #DV_x060_CMD;
+
+      T #SUBS.CS_PW_VALV_CMD;
+      T #SUBS.CS_WFI_VALV_CMD;
+      T #SUBS.PW_VALV_CMD;
+      T #SUBS.WFI_VALV_CMD;
+      L 0;
+      T #DEV_STATE;
+pau1:      NOP 0;
+
+      A #SUBS.CALL_PH_FLUSH;
+      AN #PH_FLUSH.PAUSED;
+      JNB pau2;
+// Last/stored commands are valid
+      L #PH_FLUSH._PW_valve_cmd;
+      T #DV_x060_CMD;
+      T #SUBS.PW_VALV_CMD;
+
+      L #PH_FLUSH._WFI_valve_cmd;
+      T #DV_x050_CMD;
+      T #SUBS.WFI_VALV_CMD;
+
+      L #PH_FLUSH._WFICS_valve_cmd;
+      T #DV_x040_CMD;
+      T #SUBS.CS_WFI_VALV_CMD;
+
+
+      L #PH_FLUSH._PWCS_valve_cmd;
+      T #DV_x041_CMD;
+      T #SUBS.CS_PW_VALV_CMD;
+
+
+pau2:      NOP 0;
+
+
+      A #SUBS.CALL_PH_CHARGE;
+      AN #PH_CHARGE.PAUSED;
+      JNB pau3;
+
+// Last/stored commands are valid
+      L #PH_CHARGE._PW_valve_cmd;
+      T #DV_x060_CMD;
+
+      L #PH_CHARGE._WFI_valve_cmd;
+      T #DV_x050_CMD;
+
+      L #PH_CHARGE._CS_WFI_valve_cmd;
+      T #DV_x040_CMD;
+
+      L #PH_CHARGE._CS_PW_valve_cmd;
+      T #DV_x041_CMD;
+
+pau3:      NOP 0;
+
+///Reset ACT_PH=0
+      A(;
+      L #SEL_SUBS;
+      L "dbCONST_VAL".BLK.SUBSTATE.ZERO;
+      ==I;
+      );
+      A(;
+      O(;
+      L #SQ_STATE;
+      L "dbCONST_VAL".SQ_STATE.ABORTED;
+      ==I;
+      );
+      O(;
+      L #SQ_STATE;
+      L "dbCONST_VAL".SQ_STATE.COMPLETE;
+      ==I;
+      );
+      );
+      JCN SQCO;
+
+      L "dbCONST_VAL".BLK.SUBSTATE.ZERO;
+      T #SQ_STATE;
+
+      L 0;
+      T #CURSTEP;
+@@ATTR_BEGIN|SFC@@
+      T #@@SFC@@.CURSTEP;
+@@ATTR_END|SFC@@
+@@ATTR_BEGIN|SFC@@
+      T #@@SFC@@.SQ_STATE;
+@@ATTR_END|SFC@@
+
+      R #SQ_ERROR;
+@@ATTR_BEGIN|SFC@@
+      R #@@SFC@@.ERR_FAULT;
+      R #@@SFC@@.PAUSED;
+@@ATTR_END|SFC@@
+
+SQCO:      NOP 0;
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

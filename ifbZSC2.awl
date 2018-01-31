@@ -1,0 +1,73 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       ifbZSC2                                                       //
+// Description: Instances of ZSC2                                             //
+//                                                                            //
+// Flowplate position indicator proximity switch for setting flowpaths.       //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 0.5 David Paspa      05-Jan-2018 NA        Reboot from Pharmaniaga.        //
+// 0.4 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.3 Khairul Basar    28-Sep-2009 CC-09/016 Interface function configurred. //
+// 0.2 Khairul Basar    04-Sep-2009 CC-09/016 Mode=1 initialized, Instance    //
+//                                            comment added.                  //
+// 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbZSC2"
+TITLE = ZSC2 : Instances of Flow path proximity switch connection indication
+{ S7_Optimized_Access := 'FALSE' }
+NAME : ifbZSC2
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 0.5
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+VAR
+@@TEMPLATE_BEGIN@@
+   @@MODULE@@ : "fbZSC2";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN@@
+   @@MODULE@@_MODE : Struct
+      PosEdge1 : Bool;
+      PosEdge2 : Bool;
+      REQ : Int;   // Request for Required Mode
+   END_STRUCT;
+@@TEMPLATE_END@@
+END_VAR
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL "ifcZSC2"
+      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
+         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
+         IN_REQ                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@MODULE@@_REQ ,
+         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
+         IO_MODE                     := "idbZSC2".@@MODULE@@.MODE ,
+         IO_REQ                      := "idbZSC2".@@MODULE@@.REQ_STATE ,
+         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+      );
+      NOP 0;
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL #@@MODULE@@
+      (  MODE                        := #@@MODULE@@.MODE ,
+         DI_INPUT                    := "ZSC-@@NUMINSTANCE@@" ,
+         DI_USER                     := #@@MODULE@@.DI_USER ,
+         REQ_STATE                   := #@@MODULE@@.REQ_STATE ,
+         ARM_FLAG                    := "idb@@PARENTCLASS@@".@@PARENT@@.ARM_FLAG ,
+         DI_PV                       := #@@MODULE@@.DI_PV ,
+         DEV_STATE                   := #@@MODULE@@.DEV_STATE
+      );
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

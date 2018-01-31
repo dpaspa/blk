@@ -1,0 +1,187 @@
+FUNCTION_BLOCK "fbMI1"
+TITLE = MI1 - Load Cell mass indicator
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : Synertec
+NAME : fbMI1
+VERSION : 0.3
+////------------------------------------------------------------------------------
+////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
+////------------------------------------------------------------------------------
+//// Title: MI1
+//// 
+//// Description:
+//// Load Cell mass indicator
+////------------------------------------------------------------------------------
+//// Revision History:
+//// Rev   By                  Date             Note
+//// 0.3 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.
+//// 0.2 Khairul Basar    31-Aug-2009 CC-09/016  Upper/Lower range hardcoded.
+////                                             USER_INPUT added for manual mode 
+////                                             simulation
+//// 0.1 Khairul Basar    03-Aug-2009            Initial design
+////------------------------------------------------------------------------------
+//
+   VAR_INPUT 
+      MODE : Int := 2;
+      RAW_INPUT : Word;   // Raw input signal from Field (4mA = 0, 20mA = 27648)
+      USER_INPUT : Int;   // Manual mode , equivallent of Analog input, to be entered by Operator
+      UPPER_RANGE : Real;   // Upper Range Limit in engineering units
+      LOWER_RANGE : Real := -100.0;   // Lower Range Limit in engineering units
+      POLARITY : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+      LIMIT_HH : Real;   // High High Alarm Limit
+      LIMIT_H : Real;   // High Alarm Limit
+   END_VAR
+
+   VAR_OUTPUT 
+      MEASURE : Real;   // Measured Value (after scaling)
+      DATA_QUALITY : Bool;   // MV data quality (0=Bad; 1=Good)
+      ALARM_HH : Bool;   // HighHigh Alarm
+      ALARM_H : Bool;   // High Alarm
+      INTERLOCK : Bool;   // Interlock Flag
+   END_VAR
+
+   VAR_IN_OUT 
+      RANGE_ERROR : Bool;   // Range Error (<4mA or >20mA)
+      BROKEN_WIRE : Bool;   // Broken Wire detection
+   END_VAR
+
+   VAR_TEMP 
+      RET_VAL1 : Word;   // Returns a value of W#16#0000 if the instruction executes without error.
+      PV_R_1 : Real;   // Temporary measured value
+      HH_ALM_B_1 : Bool;   // Temporary HighHigh alarm
+      iRAW_INPUT : Int;
+      OUTOFSERV : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = SCALING: MASS
+//Scale of Manufacturing vessel:
+      A #POLARITY;
+      = %L11.0;
+      BLD 103;
+      A(;
+      O(;
+      A(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      );
+      JNB Label_0;
+      L #RAW_INPUT;
+      T #iRAW_INPUT;
+      SET;
+      SAVE;
+      CLR;
+Label_0:      A BR;
+      );
+      O(;
+      A(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      JNB Label_1;
+      L #USER_INPUT;
+      T #iRAW_INPUT;
+      SET;
+      SAVE;
+      CLR;
+Label_1:      A BR;
+      );
+      );
+      JNB Label_2;
+      CALL SCALE
+      (  IN                          := #iRAW_INPUT , 
+         HI_LIM                      := #UPPER_RANGE , 
+         LO_LIM                      := #LOWER_RANGE , 
+         BIPOLAR                     := %L11.0 , 
+         RET_VAL                     := #RET_VAL1 , 
+         OUT                         := #PV_R_1
+      );
+Label_2:      NOP 0;
+NETWORK
+TITLE = Mode Out Of Service
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      ==I;
+      = #OUTOFSERV;
+NETWORK
+TITLE = MASS  OUTPUT AS REAL
+//In Manual mode operator can change USER_INPUT variable to simulate Measure 
+//output.
+      L #PV_R_1;
+      T #MEASURE;
+      NOP 0;
+NETWORK
+TITLE = CHECK RANGE ERROR
+      A(;
+      O(;
+      L #iRAW_INPUT;
+      L 27648;
+      >I;
+      );
+      O(;
+      L #iRAW_INPUT;
+      L 0;
+      <I;
+      );
+      );
+      AN #OUTOFSERV;
+      = #RANGE_ERROR;
+NETWORK
+TITLE = CHECK BROKEN WIRE
+//
+//
+      A(;
+      O(;
+      L #iRAW_INPUT;
+      L 32767;
+      ==I;
+      );
+      O(;
+      L #iRAW_INPUT;
+      L -32768;
+      ==I;
+      );
+      );
+      AN #OUTOFSERV;
+      = #BROKEN_WIRE;
+NETWORK
+TITLE = Setting Data Quality
+//If no error set Data Quality DQ=1 (GOOD), else DQ=0 (BAD).
+      AN #RANGE_ERROR;
+      AN #BROKEN_WIRE;
+      O "AlwaysHighBit";
+      = #DATA_QUALITY;
+NETWORK
+TITLE = HighHigh ALARM
+//If HighHigh limit reached
+      AN #OUTOFSERV;
+      A(;
+      L #PV_R_1;
+      L #LIMIT_HH;
+      >=R;
+      );
+      = #HH_ALM_B_1;
+      A #HH_ALM_B_1;
+      = #ALARM_HH;
+NETWORK
+TITLE = High ALARM
+      AN #OUTOFSERV;
+      A(;
+      L #PV_R_1;
+      L #LIMIT_H;
+      >=R;
+      );
+      = #ALARM_H;
+NETWORK
+TITLE = INTERLOCK
+//Set interlock flag if data quality is bad (Range error OR Broken Wire) or High 
+//High mass limit is reached.
+      O #HH_ALM_B_1;
+      ON #DATA_QUALITY;
+      = #INTERLOCK;
+END_FUNCTION_BLOCK
+

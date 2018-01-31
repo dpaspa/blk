@@ -1,0 +1,76 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       ifbDI1                                                        //
+// Description: Instances of DI1                                              //
+//                                                                            //
+// General alarm single digital input.                                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 0.7 David Paspa      05-Jan-2018 NA        Reboot from Pharmaniaga.        //
+// 0.6 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.5 Khairul Basar    03-Oct-2009 CC-09/016 PSH_parameters corrected.       //
+// 0.4 Khairul Basar    15-Sep-2009 CC-09/016 PSA_1010 DI_USER assigned       //
+//                                            correctly.                      //
+// 0.3 Khairul Basar    09-Sep-2009 CC-09/016 I/O assignment associated with  //
+//                                            corresponding Instance is       //
+//                                            corrected.                      //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Mode=1 initialized.             //
+//                                            Instance comment added.         //
+// 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbDI1"
+TITLE = Instances of DI1 General alarm single digital input
+{ S7_Optimized_Access := 'FALSE' }
+NAME : ifbDI1
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 0.7
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+   VAR
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@ : "fbDI1";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@_MODE : Struct
+         PosEdge1 : Bool;
+         PosEdge2 : Bool;
+         REQ : Int;   // Request for Required Mode
+      END_STRUCT;
+@@TEMPLATE_END@@
+   END_VAR
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL "ifcDI1"
+      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
+         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
+         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
+         IO_MODE                     := "idbDI1".@@MODULE@@.MODE ,
+         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+      );
+      NOP 0;
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL #@@MODULE@@
+      (  MODE                        := #@@MODULE@@.MODE ,
+         DI_INPUT                    := "@@MODULE@@" ,
+         DI_USER                     := #@@MODULE@@.DI_USER ,
+         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
+         ALARM                       := #@@MODULE@@.ALARM ,
+         DI_PV                       := #@@MODULE@@.DI_PV ,
+         DEV_STATE                   := #@@MODULE@@.DEV_STATE
+      );
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

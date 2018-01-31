@@ -1,0 +1,211 @@
+FUNCTION_BLOCK "fbTC1"
+TITLE = TC1 -Vesel cooling only temperature controller
+{ S7_Optimized_Access := 'FALSE' }
+NAME : fbTC1
+VERSION : 0.5
+////------------------------------------------------------------------------------
+////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
+////------------------------------------------------------------------------------
+//// Title: TC1
+////Vesel cooling only temperature controller
+////------------------------------------------------------------------------------
+//// Revision History:
+//// Rev   By                  Date             Note
+//// 0.7 Gerald Kontriner 09-Oct-2009 CC-09/016  MON_MISMATCH Logic
+//// 0.6 Khairul Basar    06-Oct-2009 CC-09/016  PID HLM,LLM reversed for cool
+//// 0.5 Khairul Basar    17-Sep-2009 CC-09/016  OUT_CMD as Command to MOD1 added.
+//// 0.4 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters 
+////                                            deleted auto/manual both now 
+////                                            using same parameters.  
+//// 0.3 Khairul Basar    11-Sep-2009 CC-09/016  Manual setpoint, Non PID 
+////                                             selection parameters added & 
+////                                             programmed.
+//// 0.2 Khairul Basar    03-Sep-2009 CC-09/016  State enable/disable code added
+////                                             INTERLOCK is changed from       
+////                                             IN_OUT to OUT & program safe 
+////                                             state for Interlock.
+////                                             CMD_AUTO/MAN & DEV_STATE 
+////                                             paramters are added & programed.
+//// 0.1 Khairul Basar    03-Aug-2009            Initial design
+////------------------------------------------------------------------------------
+//
+   VAR_INPUT 
+      T_CTRL : Int := 1;
+      MEASURE : Real;   // Measured Value received from control module
+      SETPOINT : Real;   // Setpoint
+      GAIN : Real := 1.0;   // Proportional Gain
+      TI : Time := T#20S;   // Integral Time
+      TD : Time := T#10S;   // Derivative Time
+      MAN : Real;   // PID controller output signal if disabled (=0%)
+      CR_IL : Bool;   // Critical Interlock
+      NCR_IL : Bool;   // Non-Critical Interlock
+      MAN_OVERRIDE : Bool;   // Bypass of Non-Critical Interlock
+      NON_PID : Bool;   // Manual non pid selection
+      CYCLE : Time := T#100MS;   // PID Block Sampling Time
+      P_SEL : Bool := TRUE;   // Proportional Action ON/OFF
+      I_SEL : Bool := TRUE;   // Integral Action ON/OFF
+      D_SEL : Bool := TRUE;   // Derivative Action ON/OFF
+      LMN_HLM : Real := 100.0;   // Manipulated Value High Limit 100%
+      LMN_LLM : Real;   // Manipulated Value Low Limit 0%
+   END_VAR
+
+   VAR_OUTPUT 
+      DEV_STATE : Int;
+      LMN : Real;   // PID controller output (0-100%)
+      OUT_CMD : Bool;   // Open/Close command to MOD1
+      INTERLOCK : Bool;
+      MAN_NON_PID : Bool;
+      MON_MISMATCH : Bool;
+   END_VAR
+
+   VAR_IN_OUT 
+      MODE : Int := 2;
+   END_VAR
+
+   VAR 
+      PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
+   END_VAR
+
+   VAR_TEMP 
+      tSetpoint : Real;
+      tmpman_non_pid : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = INTERLOCK Logic
+      O #CR_IL;
+      O;
+      A #NCR_IL;
+      AN #MAN_OVERRIDE;
+      = #INTERLOCK;
+NETWORK
+TITLE = Disable Temperature Control
+      A(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      A #NON_PID;
+      = #MAN_NON_PID;
+      = #tmpman_non_pid;
+NETWORK
+TITLE = Enable or Disable 
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      );
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      = %L6.0;
+      A %L6.0;
+      A(;
+      L #T_CTRL;
+      L "dbCONST_VAL".CM.EN_DISABLE.ENABLE;
+      ==I;
+      );
+      = %L6.1;
+      A %L6.1;
+      JNB _001;
+      L #SETPOINT;
+      T #tSetpoint;
+      SET;
+      SAVE;
+      CLR;
+_001:      A BR;
+      S #OUT_CMD;
+      A %L6.1;
+      JNB _002;
+      L "dbCONST_VAL".CM.TC1_DEV_STATE.ENABLED;
+      T #DEV_STATE;
+_002:      NOP 0;
+      A %L6.0;
+      A(;
+      O(;
+      L #T_CTRL;
+      L "dbCONST_VAL".CM.EN_DISABLE.DISABLE;
+      ==I;
+      );
+      O #INTERLOCK;
+      );
+      = %L6.1;
+      A %L6.1;
+      JNB _003;
+      L 0;
+      T #tSetpoint;
+      SET;
+      SAVE;
+      CLR;
+_003:      A BR;
+      R #OUT_CMD;
+      A %L6.1;
+      JNB _004;
+      L "dbCONST_VAL".CM.TC1_DEV_STATE.DISABLED;
+      T #DEV_STATE;
+_004:      NOP 0;
+NETWORK
+TITLE = PID Controller
+      A(;
+      A "FirstScanRestartflag";
+      = %L7.0;
+      BLD 103;
+      A #tmpman_non_pid;
+      = %L7.1;
+      BLD 103;
+      A #P_SEL;
+      = %L7.2;
+      BLD 103;
+      A #I_SEL;
+      = %L7.3;
+      BLD 103;
+      A #D_SEL;
+      = %L7.4;
+      BLD 103;
+      CALL #PID1
+      (  COM_RST                     := %L7.0 , 
+         MAN_ON                      := %L7.1 , 
+         P_SEL                       := %L7.2 , 
+         I_SEL                       := %L7.3 , 
+         D_SEL                       := %L7.4 , 
+         CYCLE                       := #CYCLE , 
+         SP_INT                      := #tSetpoint , 
+         PV_IN                       := #MEASURE , 
+         MAN                         := #tSetpoint , 
+         GAIN                        := #GAIN , 
+         TI                          := #TI , 
+         TD                          := #TD , 
+         LMN_HLM                     := #LMN_HLM , 
+         LMN_LLM                     := #LMN_LLM , 
+         LMN                         := #LMN
+      );
+      A BR;
+      );
+      JNB Label_0;
+      L 100.0;
+      L #LMN;
+      -R;
+      T #LMN;
+Label_0:      NOP 0;
+NETWORK
+TITLE = If interlocked, 0% valve openning
+      A #INTERLOCK;
+      JNB Label_1;
+      L 0.0;
+      T #LMN;
+Label_1:      NOP 0;
+NETWORK
+TITLE = 
+      A(;
+      L #T_CTRL;
+      L "dbCONST_VAL".CM.EN_DISABLE.ENABLE;
+      ==I;
+      );
+      A #INTERLOCK;
+      = #MON_MISMATCH;
+END_FUNCTION_BLOCK
+

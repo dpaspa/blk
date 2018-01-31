@@ -1,0 +1,229 @@
+FUNCTION_BLOCK "fbPI1"
+TITLE = PI1 - Vessel pressure indicator with alarms and interlocks
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : Synertec
+NAME : fbPI1
+VERSION : 0.5
+////------------------------------------------------------------------------------
+////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
+////------------------------------------------------------------------------------
+//// Title: PI1
+//// 
+//// Description:
+//// Vessel pressure indicator with alarms and interlocks
+////------------------------------------------------------------------------------
+//// Revision History:
+//// Rev   By                  Date     CC       Note
+//// 0.5 Mr. Khoon        01-Oct-2009 CC-09/016  Mode=2 Initialized,OOS coded.
+//// 0.4 Khairul Basar    14-Sep-2009 CC-09/016  UserInput for Manual mode added
+//// 0.3 Khairul Basar    14-Sep-2009 CC-09/016  CR_IL,NCR_IL,
+////                                             Man_Override-deleted.            
+//// 0.2 Khairul Basar    01-Sep-2009 CC-09/016  Initial value assigned for 
+////                                             followings:LIMIT_HH.2, 
+////                                             LIMIT_H=2.0, LIMIT_L=0.2, 
+////                                             LIMIT_LL=0.1,ENABLE_L=1, 
+////                                             ENABLE_LL=1,DATA_QUALITY=1
+////                                             PI-1210(PIW264) configured.
+//// 0.1 Khairul Basar    03-Aug-2009            Initial design
+////------------------------------------------------------------------------------
+//
+   VAR_INPUT 
+      MODE : Int := 2;
+      RAW_INPUT : Int;   // Raw input signal from Field (4mA = 0, 20mA = 27648)
+      USER_INPUT : Int;   // Operator input value equivalent to Analog input
+      UPPER_RANGE : Real := 5.0;   // Upper Range Limit in engineering units
+      LOWER_RANGE : Real := -1.0;   // Lower Range Limit in engineering units
+      POLARITY : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+      PSH : Bool;   // PSH input
+      LIMIT_HH : Real := 2.2;   // High High Alarm Limit
+      LIMIT_H : Real := 2.0;   // High Alarm Limit
+      LIMIT_L : Real := -0.9;   // Low Alarm Limit
+      LIMIT_LL : Real := -1.0;   // LowLow Alarm Limit
+      ENABLE_L : Bool := TRUE;
+      ENABLE_LL : Bool := TRUE;
+   END_VAR
+
+   VAR_OUTPUT 
+      MEASURE : Real;   // Measured Value (after scaling)
+      DATA_QUALITY : Bool := TRUE;   // MV data quality (0=Bad; 1=Good)
+      ALARM_HH : Bool;   // HighHigh Alarm
+      ALARM_H : Bool;   // High Alarm
+      ALARM_L : Bool;   // Low Alarm
+      ALARM_LL : Bool;   // LowLow Alarm
+      INTERLOCK : Bool;   // Interlock Flag
+   END_VAR
+
+   VAR_IN_OUT 
+      RANGE_ERROR : Bool;   // Range Error (<4mA or >20mA)
+      BROKEN_WIRE : Bool;   // Broken Wire detection
+   END_VAR
+
+   VAR_TEMP 
+      RET_VAL1 : Word;   // Returns a value of W#16#0000 if the instruction executes without error.
+      PV_R_1 : Real;   // Temporary measured value
+      HH_ALM_B_1 : Bool;   // Temporary HighHigh alarm
+      AnalogInput : Int;
+      OUTOFSERV : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = SCALING: PRESSURE
+//Scale of Manufacturing vessel:
+      A #POLARITY;
+      = %L11.0;
+      BLD 103;
+      A(;
+      O(;
+      A(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      JNB Label_0;
+      L #USER_INPUT;
+      T #AnalogInput;
+      SET;
+      SAVE;
+      CLR;
+Label_0:      A BR;
+      );
+      O(;
+      A(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      );
+      JNB Label_1;
+      L #RAW_INPUT;
+      T #AnalogInput;
+      SET;
+      SAVE;
+      CLR;
+Label_1:      A BR;
+      );
+      );
+      JNB Label_2;
+      CALL SCALE
+      (  IN                          := #AnalogInput , 
+         HI_LIM                      := #UPPER_RANGE , 
+         LO_LIM                      := #LOWER_RANGE , 
+         BIPOLAR                     := %L11.0 , 
+         RET_VAL                     := #RET_VAL1 , 
+         OUT                         := #PV_R_1
+      );
+Label_2:      NOP 0;
+NETWORK
+TITLE = Mode Out Of Service
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      ==I;
+      = #OUTOFSERV;
+NETWORK
+TITLE = PRESSURE OUTPUT AS REAL
+//In Manual Mode Process field value will not be updated in HMI in MEASURE 
+//variable.Instead the Operator will be able to change this #MEASURE value 
+//directly from HMI.That is when mode is in Manual Measure value will be as Input 
+//and Output.
+      L #PV_R_1;
+      T #MEASURE;
+      NOP 0;
+NETWORK
+TITLE = CHECK RANGE ERROR
+      A(;
+      O(;
+      L #AnalogInput;
+      L 27648;
+      >I;
+      );
+      O(;
+      L #AnalogInput;
+      L 0;
+      <I;
+      );
+      );
+      AN #OUTOFSERV;
+      = #RANGE_ERROR;
+NETWORK
+TITLE = CHECK BROKEN WIRE
+//
+//
+      A(;
+      O(;
+      L #AnalogInput;
+      L 32767;
+      ==I;
+      );
+      O(;
+      L #AnalogInput;
+      L -32768;
+      ==I;
+      );
+      );
+      AN #OUTOFSERV;
+      = #BROKEN_WIRE;
+NETWORK
+TITLE = Setting Data Quality
+//If no error set Data Quality DQ=1 (GOOD), else DQ=0 (BAD).
+      AN #RANGE_ERROR;
+      AN #BROKEN_WIRE;
+      AN #OUTOFSERV;
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      = #DATA_QUALITY;
+NETWORK
+TITLE = HighHigh ALARM
+//If HighHigh limit reached
+      AN #OUTOFSERV;
+      A(;
+      L #PV_R_1;
+      L #LIMIT_HH;
+      >=R;
+      );
+      = #HH_ALM_B_1;
+      A #HH_ALM_B_1;
+      = #ALARM_HH;
+NETWORK
+TITLE = High ALARM
+      AN #OUTOFSERV;
+      A(;
+      L #PV_R_1;
+      L #LIMIT_H;
+      >=R;
+      );
+      = #ALARM_H;
+NETWORK
+TITLE = Low ALARM
+      A #ENABLE_L;
+      AN #OUTOFSERV;
+      A(;
+      L #PV_R_1;
+      L #LIMIT_L;
+      <=R;
+      );
+      = #ALARM_L;
+NETWORK
+TITLE = LowLow ALARM
+      A #ENABLE_LL;
+      AN #OUTOFSERV;
+      A(;
+      L #PV_R_1;
+      L #LIMIT_LL;
+      <=R;
+      );
+      = #ALARM_LL;
+NETWORK
+TITLE = INTERLOCK
+//Set interlock flag if data quality is bad (Range error OR Broken Wire) or High 
+//High mass limit is reached.
+      O #HH_ALM_B_1;
+      O #RANGE_ERROR;
+      O #BROKEN_WIRE;
+      ON #PSH;
+      = #INTERLOCK;
+END_FUNCTION_BLOCK
+

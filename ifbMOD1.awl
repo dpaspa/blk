@@ -1,0 +1,104 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       ifbMOD1                                                       //
+// Description: Instances of MOD1                                             //
+//                                                                            //
+// Modulating control valve.                                                  //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 0.6 David Paspa      05-Jan-2018 NA        Reboot from Pharmaniaga.        //
+// 0.4 Khairul Basar    17-Sep-2009 CC-09/016 ifcMOD1 created for Interface.  //
+// 0.3 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Input Parameters      //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters,Interface //
+//                                            FC used for Bumpless changeover.//
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 MODE initialize to Manual=1     //
+//                                            Reset POSN to zero if OUT_Q=0.  //
+// 0.1 Khairul Basar    03-Aug-2009 CC-09/016 Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbMOD1"
+TITLE = MOD1 Instances
+{ S7_Optimized_Access := 'FALSE' }
+NAME : ifbMOD1
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 0.4
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+   VAR
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@ : "fbMOD1";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@_MODE : Struct
+         PosEdge1 : Bool;
+         PosEdge2 : Bool;
+         REQ : Int;   // Request for Required Mode
+      END_STRUCT;
+@@TEMPLATE_END@@
+   END_VAR
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL "ifcMOD1"
+      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
+         IN_MODE                     := "idbTC1".@@lnk1Tag@@_MODE.REQ ,
+         IN_CMND                     := "idbTC1".@@lnk1Tag@@.OUT_CMD ,
+         INTERLOCK                   := "idbTC1".@@lnk1Tag@@.INTERLOCK ,
+         IN_POSN                     := "idbTC1".@@lnk1Tag@@.LMN ,
+         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
+         IO_MODE                     := "idbMOD1".@@MODULE@@.MODE ,
+         IO_CMND                     := "idbMOD1".@@MODULE@@.CMND ,
+         IO_POSN                     := "idbMOD1".@@MODULE@@.POSN ,
+         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+      );
+      NOP 0;
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      A(;
+@@ATTR_BEGIN|CR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+      O "idbPOS1".@@lnk1Tag@@.VLC_NO;
+@@ATTR_END|CR_IL@@
+      );
+      = %L0.0;
+      BLD 103;
+      A(;
+@@ATTR_BEGIN|NCR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+@@ATTR_END|NCR_IL@@
+      );
+      = %L0.1;
+      BLD 103;
+      CALL #@@MODULE@@
+      (  CMND                        := #@@MODULE@@.CMND ,
+         UPPER_RANGE                 := #@@MODULE@@.UPPER_RANGE ,
+         LOWER_RANGE                 := #@@MODULE@@.LOWER_RANGE ,
+         POLARITY                    := #@@MODULE@@.POLARITY ,
+         CR_IL                       := %L0.0 ,
+         NCR_IL                       := %L0.1 ,
+         RAW_OUTPUT                  := "P_MOD-@@NUMINSTANCE@@":P ,
+         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
+         OUT_Q                       := "@@INSTANCE@@" ,
+         INTERLOCK                   := "idbTC1".@@lnk1Tag@@.INTERLOCK ,
+         MODE                        := #@@MODULE@@.MODE ,
+         POSN                        := #@@MODULE@@.POSN
+      );
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

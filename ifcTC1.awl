@@ -1,0 +1,84 @@
+FUNCTION "ifcTC1" : Void
+TITLE = ifcTC1
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_INPUT 
+      IN_REQ_MODE : Bool;
+      IN_MODE : Int;
+      IN_T_CTRL : Int;
+      IN_SETPOINT : Real;
+      IN_GAIN : Real;
+      IN_TI : Time;
+      IN_TD : Time;
+   END_VAR
+
+   VAR_OUTPUT 
+      OUT_MODE : Int;
+   END_VAR
+
+   VAR_IN_OUT 
+      IO_MODE : Int;
+      IO_T_CTRL : Int;
+      IO_SETPOINT : Real;
+      IO_GAIN : Real;
+      IO_TI : Time;
+      IO_TD : Time;
+      POS_EDGE1 : Bool;
+      POS_EDGE2 : Bool;
+   END_VAR
+
+   VAR_TEMP 
+      RetVal : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Mode change
+      A #IN_REQ_MODE;
+      = %L1.0;
+      BLD 103;
+      CALL "MODE_REQ"
+      (  IN_REQ_MODE                 := %L1.0 , 
+         IN_MODE                     := #IN_MODE , 
+         MODULE                      := 'C' , 
+         Ret_Val                     := #RetVal , 
+         OUT_MODE                    := #OUT_MODE , 
+         IO_MODE                     := #IO_MODE , 
+         POS_EDGE1                   := #POS_EDGE1 , 
+         POS_EDGE2                   := #POS_EDGE2
+      );
+      NOP 0;
+NETWORK
+TITLE = Transfer Input Parameters to Output
+      L #IO_MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      = %L1.0;
+      A %L1.0;
+      JNB Label_0;
+      L #IN_T_CTRL;
+      T #IO_T_CTRL;
+Label_0:      NOP 0;
+      A %L1.0;
+      JNB Label_1;
+      L #IN_SETPOINT;
+      T #IO_SETPOINT;
+Label_1:      NOP 0;
+      A %L1.0;
+      JNB Label_2;
+      L #IN_GAIN;
+      T #IO_GAIN;
+Label_2:      NOP 0;
+      A %L1.0;
+      JNB Label_3;
+      L #IN_TI;
+      T #IO_TI;
+Label_3:      NOP 0;
+      A %L1.0;
+      JNB Label_4;
+      L #IN_TD;
+      T #IO_TD;
+Label_4:      NOP 0;
+END_FUNCTION
+

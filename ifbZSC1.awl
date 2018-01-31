@@ -1,0 +1,70 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Name:        ifbZSC1                                                       //
+// Description: Instances of ZSC1                                             //
+//                                                                            //
+// Manway closed Indication and Alarm.                                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 0.4 David Paspa      08-Jan-2018 NA        Reboot from Pharmaniaga.        //
+// 0.3 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to Toggle
+// 0.2 Khairul Basar    04-Sep-2009 CC-09/016 Mode=1 initialized, ALARM renamed
+//                                            as ZSCA
+// 0.1 Khairul Basar    03-Aug-2009           Initial design
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbZSC1"
+TITLE = ZSC1 : Instances of Manway closed Indication and Alarm
+{ S7_Optimized_Access := 'FALSE' }
+NAME : ifbZSC1
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 0.4
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+VAR
+@@TEMPLATE_BEGIN@@
+   @@MODULE@@ : "fbZSC1";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN@@
+   @@MODULE@@_MODE : Struct
+      PosEdge1 : Bool;
+      PosEdge2 : Bool;
+      REQ : Int;   // Request for Required Mode
+   END_STRUCT;
+@@TEMPLATE_END@@
+END_VAR
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL "ifcZSC1"
+      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
+         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
+         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
+         IO_MODE                     := "idbZSC1".@@MODULE@@.MODE ,
+         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+      );
+      NOP 0;
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL #@@MODULE@@
+      (  MODE                        := #@@MODULE@@.MODE ,
+         DI_INPUT                    := "ZSC-@@NUMINSTANCE@@" ,
+         DI_USER                     := #@@MODULE@@.DI_USER ,
+         CUTOUT                      := "idb@@PARENTCLASS@@".@@PARENT@@.ENAB_ALM ,
+         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
+         ZSCA                        := #@@MODULE@@.ZSCA ,
+         DI_PV                       := #@@MODULE@@.DI_PV ,
+         DEV_STATE                   := #@@MODULE@@.DEV_STATE
+      );
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

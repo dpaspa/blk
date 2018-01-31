@@ -1,0 +1,644 @@
+FUNCTION_BLOCK "fbSIC1"
+TITLE = SIC1:Agitator speed control
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : Synertec
+NAME : fbSIC1
+VERSION : 0.8
+////------------------------------------------------------------------------------
+////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
+////------------------------------------------------------------------------------
+//// Title:SIC1
+////Agitator speed control
+////------------------------------------------------------------------------------
+//// Revision History:
+//// Rev   By                  Date             Note
+//// 1.0 Khairul/Steve    15-Oct-2009 CC-09/016 PID loop removed, ref.Mr.Steve
+//// 0.9 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic
+//// 0.8 Khairul Basar    02-Oct-2009 CC-09/016 ALARM_L corrected in NW25.
+//// 0.7 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.
+//// 0.6 Steve Linehan    29-Sep-2009 CC-09/016 Bypass Input Mode Added.
+//// 0.5 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters 
+////                                            deleted auto/manual both now 
+////                                            using same parameters.  
+//// 0.4 Khairul Basar    14-Sep-2009 CC-09/016  DataQuality variable&logic added.
+//// 0.3 Khairul Basar    11-Sep-2009 CC-09/016  Ref2.
+//// 0.2 Khairul Basar    03-Sep-2009 CC-09/016  Ref1.
+//// 0.1 Khairul Basar    03-Aug-2009            Initial design
+////------------------------------------------------------------------------------
+//Ref2:
+//Now Setpoint is moved to PID as per selected mode.TAH,THR & FLT Contact are 
+//corrected as per Failsafe siganl from field & FLT will result device state 
+//'FAULT=5'.In DB1, Device state changed to 3=Stop, 4=Running instead of 
+//4=stop,3=Running.
+//
+//
+//Ref1:
+//MI1 Measure value assigned to MASS_MI1 parameter,Now the Minimum mass condition 
+//is always overridden in manual mode.Now Device states are configured for 
+//ENABLED, when enabled two sub state STOPPED & RUNNING and DISABLED
+//Now Parameters MEASURE_RPM for agitator RPM , MASS_MI1 is for mass of the 
+//vessel, parameter for set point of manual is SETPOINT_MAN, & in auto is 
+//SETPOINT_AUTO configured.Set point SETPOINT_MAN and SETPOINT_AUTO initialized 
+//to 0.0 and GAIN to 1.0.ALARM_HH, ALARM_H, ALARM_L, ALARM_LL are added in SIC1 
+//and programmed.Default value added for following parameters.
+//SL.NO.Parameter NameRange of ValueDefault Value
+//1.MODE=1=Manual
+//2.CMND_AUTO=1=disable
+//3.CMND_MAN=1=disable
+//4.P_SEL=True
+//5.I_SEL=True
+//6.D_SEL=True
+//7.CYCLE=T#1s
+//
+   VAR_INPUT 
+      CMD : Int := 1;
+      SETPOINT : Real;
+      CR_IL : Bool;
+      NCR_IL : Bool;
+      MAN_OVERRIDE : Bool;
+      THR_x010 : Bool;   // CR.IL
+      TAH_x010 : Bool;   // CR.IL
+      FLT_x010 : Bool;   // CR.IL
+      IN_MAN : Bool;
+      MASS_RUN : Real := 250.0;   // M1=250.0 , M2=100.0, M3=40.0
+      MASS_STOP : Real := 200.0;   // M1=200,M2=70,M3=20.0
+      MEASURE_RPM : Int;   // Inverter speed measured value
+      MV_H : Real := 60.0;   // M1=1500,M2=500,M3=100.0
+      MV_L : Real;
+      MV_POLR : Bool;   // 0- no polarity(0 to z), 1= dual polarity(-x to +y)
+      LIMIT_HH : Real := 252.0;   // High High speed alarm limit
+      LIMIT_H : Real := 251.0;   // High speed alarm limit
+      LIMIT_L : Real := -1.0;   // Low speed alarm limit
+      LIMIT_LL : Real := -2.0;   // Low Low speed alarm limit
+      MASS_MI1 : Real;   // Measured Mass
+      FB_TDELAY : Time := T#20S;
+      NON_PID : Bool;
+      P_SEL : Bool := TRUE;
+      I_SEL : Bool := TRUE;
+      D_SEL : Bool := TRUE;
+      GAIN : Real := 1.0;
+      TI : Time := T#20S;
+      TD : Time := T#10S;
+      CYCLE : Time := T#1S;   // SAMPLING TIME:The time between the block calls constant
+   END_VAR
+
+   VAR_OUTPUT 
+      DEV_STATE : Int;
+      OUT_Q : Bool;   // Inverter Motor Run/Stop Command
+      MAN_NONPID : Bool;
+      INTERLOCK : Bool;
+      ALM_THR_x010 : Bool;
+      ALM_TAH_x010 : Bool;
+      ALM_FLT_X010 : Bool;
+      ALARM_HH : Bool;   // Alamr HH
+      ALARM_H : Bool;   // Alarm_H
+      ALARM_L : Bool;   // Alarm_L
+      ALARM_LL : Bool;   // Alarm_LL
+      OUT_Q_F : Bool;
+      OUT_Q_R : Bool;
+      OUT_FR : Bool;
+      FR_SR : Bool;
+      MASS_PV_R : Real;
+      MV_RPM_R : Real;
+      DATA_QUALITY : Bool;
+      RUNNING : Bool;
+      MON_MISMATCH : Bool;
+      RUN_FAULT : Bool;
+      OUT_SETPOINT : Real;   // Setpoint readvalue
+      OUT_LMN_PER : Word;   // Inverter speed reference input
+      OUT_LMN : Real;   // Inverter Speed reference from PID
+   END_VAR
+
+   VAR_IN_OUT 
+      MODE : Int := 2;
+   END_VAR
+
+   VAR 
+      TMR_1 {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+      mv_rpm_at_run : Real;
+      mass_ok : Bool;
+      cmd_mpuls : Bool;
+      cmd_apuls : Bool;
+      sta_enable : Bool;
+      sta_disable : Bool;
+      enable : Bool;
+      TMR_2 {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+   END_VAR
+
+   VAR_TEMP 
+      dev_sate_1 : Int;
+      mv_rpm_R_1 : Real;
+      retval1 : Word;
+      UnscOUT : Int;
+      mass_pv_R_1 : Real;
+      running_percent : Real;
+      mv_rpm_max : Real;
+      tmpSetpoint : Real;
+      out_Q_1 : Bool;
+      mass_low : Bool;
+      Man_non_pid : Bool;
+      RANGE_ERROR : Bool;
+      BROKEN_WIRE : Bool;
+      BYPASS_IP : Bool;
+      Run_SP : Bool;
+      OUTOFSERV : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = INTERLOCK:
+//#MOT_OL=OVER LOAD/ THERMAL RELEASE SENSOR OF MAIN CIRCUIT
+//#MOT_OH=PTC/ OVER HEAT
+//#MOT_INVF= INVERTER FAIL
+//
+      O #CR_IL;
+      O;
+      A #NCR_IL;
+      AN #MAN_OVERRIDE;
+      = #INTERLOCK;
+NETWORK
+TITLE = Out of Service Mode=3
+//Out of service
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      ==I;
+      = #OUTOFSERV;
+NETWORK
+TITLE = Input Bypass Mode In Manual
+      A(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      A #IN_MAN;
+      = #BYPASS_IP;
+NETWORK
+TITLE = SCALLING: MV_RPM: (0-60)
+      A #MV_POLR;
+      = %L27.0;
+      BLD 103;
+      AN #BYPASS_IP;
+      JNB Label_0;
+      CALL SCALE
+      (  IN                          := #MEASURE_RPM , 
+         HI_LIM                      := #MV_H , 
+         LO_LIM                      := #MV_L , 
+         BIPOLAR                     := %L27.0 , 
+         RET_VAL                     := #retval1 , 
+         OUT                         := #mv_rpm_R_1
+      );
+Label_0:      NOP 0;
+NETWORK
+TITLE = 
+      A #BYPASS_IP;
+      JNB Label_1;
+      L #SETPOINT;
+      T #mv_rpm_R_1;
+Label_1:      NOP 0;
+NETWORK
+TITLE = CHECK RANGE ERROR
+      A(;
+      O(;
+      L #MEASURE_RPM;
+      L 27648;
+      >I;
+      );
+      O(;
+      L #MEASURE_RPM;
+      L 0;
+      <I;
+      );
+      );
+      AN #BYPASS_IP;
+      = #RANGE_ERROR;
+NETWORK
+TITLE = CHECK BROKEN WIRE
+//
+//
+      A(;
+      O(;
+      L #MEASURE_RPM;
+      L 32767;
+      ==I;
+      );
+      O(;
+      L #MEASURE_RPM;
+      L -32768;
+      ==I;
+      );
+      );
+      AN #BYPASS_IP;
+      = #BROKEN_WIRE;
+NETWORK
+TITLE = Setting Data Quality
+//If no error set Data Quality DQ=1 (GOOD), else DQ=0 (BAD).
+      AN #RANGE_ERROR;
+      AN #BROKEN_WIRE;
+      O #BYPASS_IP;
+      = #DATA_QUALITY;
+NETWORK
+TITLE = MASS  FEEDBACK
+      A(;
+      L #MASS_MI1;
+      T #MASS_PV_R;
+      SET;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_2;
+      L #MASS_MI1;
+      T #mass_pv_R_1;
+Label_2:      NOP 0;
+NETWORK
+TITLE = SCALED RPM AS REAL VALUE 
+      L #mv_rpm_R_1;
+      T #MV_RPM_R;
+      NOP 0;
+NETWORK
+TITLE = Disable state
+      AN #sta_enable;
+      = %L27.0;
+      A %L27.0;
+      BLD 102;
+      = #sta_disable;
+      A %L27.0;
+      JNB Label_3;
+      L "dbCONST_VAL".CM.SIC1_DEV_STATE.DISABLED;
+      T #DEV_STATE;
+Label_3:      NOP 0;
+NETWORK
+TITLE = Enable and Disable command
+//& Enable state
+      A(;
+      A(;
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      );
+      );
+      A(;
+      L #CMD;
+      L "dbCONST_VAL".CM.EN_DISABLE.ENABLE;
+      ==I;
+      );
+      S #sta_enable;
+      A(;
+      A(;
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      );
+      );
+      A(;
+      L #CMD;
+      L "dbCONST_VAL".CM.EN_DISABLE.DISABLE;
+      ==I;
+      );
+      O;
+      A(;
+      O #INTERLOCK;
+      O #THR_x010;
+      O #TAH_x010;
+      O #FLT_x010;
+      );
+      AN #BYPASS_IP;
+      );
+      R #sta_enable;
+      A #sta_enable;
+      );
+      A #sta_enable;
+      JNB Label_4;
+      L "dbCONST_VAL".CM.SIC1_DEV_STATE.ENABLED;
+      T #DEV_STATE;
+Label_4:      NOP 0;
+NETWORK
+TITLE = Enable stopped and running state
+      A #sta_enable;
+      = %L27.0;
+      A %L27.0;
+      AN #OUT_Q;
+      JNB Label_5;
+      L "dbCONST_VAL".CM.SIC1_DEV_STATE.STOPPED;
+      T #DEV_STATE;
+Label_5:      NOP 0;
+      A %L27.0;
+      A(;
+      O #RUNNING;
+      O;
+      A #OUT_Q;
+      A #BYPASS_IP;
+      );
+      JNB Label_6;
+      L "dbCONST_VAL".CM.SIC1_DEV_STATE.RUNNING;
+      T #DEV_STATE;
+Label_6:      NOP 0;
+NETWORK
+TITLE = MASS OK: GENERATE MASS WEIGHT OK CONDITION
+      L #mass_pv_R_1;
+      L #MASS_RUN;
+      >=R;
+      S #mass_ok;
+NETWORK
+TITLE = MASS LOW: MASS LOW CONDITION WILL STOP THE DIGITAL OUTPUT, OUT_Q
+      L #mass_pv_R_1;
+      L #MASS_STOP;
+      <R;
+      R #mass_ok;
+NETWORK
+TITLE = Command START when there is no fault, no interlock
+//#MODE=1 MANUAL
+//#MODE=2 AUTO
+//#MODE=3 OOS
+      A #sta_enable;
+      A(;
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      );
+      );
+      A #mass_ok;
+      AN #INTERLOCK;
+      A(;
+      AN #FLT_x010;
+      AN #TAH_x010;
+      AN #THR_x010;
+      O #BYPASS_IP;
+      );
+      S #OUT_Q;
+NETWORK
+TITLE = COMMAND: STOP
+      O #sta_disable;
+      O;
+      AN #mass_ok;
+      A(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      );
+      O;
+      AN #mass_ok;
+      A(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      ==I;
+      );
+      R #OUT_Q;
+      R #mass_ok;
+NETWORK
+TITLE = Out Q assigned to temp variable for Timer In to run timer
+      A #OUT_Q;
+      = #out_Q_1;
+NETWORK
+TITLE = PID SETPOINT MANUAL/AUTO 
+      A(;
+      A #OUT_Q;
+      A(;
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      );
+      );
+      JNB Label_7;
+      L #SETPOINT;
+      T #tmpSetpoint;
+      SET;
+      SAVE;
+      CLR;
+Label_7:      A BR;
+      );
+      JNB Label_8;
+      L #tmpSetpoint;
+      T #OUT_SETPOINT;
+Label_8:      NOP 0;
+NETWORK
+TITLE = MOVE SETPOINT ZERO TO PID IF DISABLE/STOP COMMAND IS PRESENT
+      AN #OUT_Q;
+      JNB Label_9;
+      L 0.0;
+      T #OUT_SETPOINT;
+Label_9:      NOP 0;
+NETWORK
+TITLE = Run Forward
+      A #OUT_Q;
+      = #OUT_Q_F;
+NETWORK
+TITLE = Forward Reverse Timer
+//Removed Ref.Mr.Steve
+      A #OUT_Q;
+      AN #TMR_2.Q;
+      = %L27.0;
+      BLD 103;
+      CALL #TMR_2
+      {time_type := 'Time'}
+      (  IN                          := %L27.0 , 
+         PT                          := T#5M , 
+         Q                           := #TMR_2.Q , 
+         ET                          := #TMR_2.ET
+      );
+      NOP 0;
+NETWORK
+TITLE = Switch Direction
+//
+//
+      A #TMR_2.Q;
+      A #OUT_FR;
+      R #FR_SR;
+      A #TMR_2.Q;
+      AN #OUT_FR;
+      S #FR_SR;
+      A #FR_SR;
+      = #OUT_FR;
+NETWORK
+TITLE = 
+      AN #OUT_Q;
+      R #OUT_FR;
+NETWORK
+TITLE = RUN TIMER , CHECK FAIL TO RUN/ RUNNING LOW SPEED
+      A(;
+      A #out_Q_1;
+      = %L27.0;
+      BLD 103;
+      CALL #TMR_1
+      {time_type := 'Time'}
+      (  IN                          := %L27.0 , 
+         PT                          := #FB_TDELAY , 
+         Q                           := #TMR_1.Q , 
+         ET                          := #TMR_1.ET
+      );
+      A BR;
+      );
+      A #TMR_1.Q;
+      AN #BYPASS_IP;
+      AN #RUNNING;
+      AN #OUTOFSERV;
+      = #RUN_FAULT;
+NETWORK
+TITLE = DEVICE  RUNNING:
+//check if Speed is less than 25% of Setpoint
+      A(;
+      A(;
+      A #OUT_Q;
+      JNB Label_10;
+      L #mv_rpm_R_1;
+      L #OUT_SETPOINT;
+      /R;
+      T #running_percent;
+      AN OV;
+      SAVE;
+      CLR;
+Label_10:      A BR;
+      );
+      JNB Label_11;
+      L #running_percent;
+      L 100.0;
+      *R;
+      T #running_percent;
+      AN OV;
+      SAVE;
+      CLR;
+Label_11:      A BR;
+      );
+      A(;
+      L #running_percent;
+      L 25.0;
+      >R;
+      );
+      = #RUNNING;
+NETWORK
+TITLE = Device state Fault when fail any of TAH,THR & FLT inputs.
+      A(;
+      O #THR_x010;
+      O #TAH_x010;
+      O #FLT_x010;
+      );
+      AN #BYPASS_IP;
+      AN #OUTOFSERV;
+      JNB Label_12;
+      L "dbCONST_VAL".CM.SIC1_DEV_STATE.FAULT;
+      T #DEV_STATE;
+      SET;
+      SAVE;
+      CLR;
+Label_12:      A BR;
+      = %L27.0;
+      A %L27.0;
+      A #THR_x010;
+      = #ALM_THR_x010;
+      A %L27.0;
+      A #TAH_x010;
+      = #ALM_TAH_x010;
+      A %L27.0;
+      A #FLT_x010;
+      = #ALM_FLT_X010;
+NETWORK
+TITLE = Speed limit alarms
+      A #OUT_Q;
+      AN #OUTOFSERV;
+      = %L27.0;
+      A %L27.0;
+      A(;
+      L #MV_RPM_R;
+      L #LIMIT_HH;
+      >=R;
+      );
+      = #ALARM_HH;
+      A %L27.0;
+      A(;
+      L #MV_RPM_R;
+      L #LIMIT_H;
+      >R;
+      );
+      = #ALARM_H;
+      A %L27.0;
+      A(;
+      L #MV_RPM_R;
+      L #LIMIT_L;
+      <R;
+      );
+      = #ALARM_L;
+      A %L27.0;
+      A(;
+      L #MV_RPM_R;
+      L #LIMIT_LL;
+      <=R;
+      );
+      = #ALARM_LL;
+NETWORK
+TITLE = OUT SP
+      A #OUT_Q;
+      JNB Label_13;
+      L #tmpSetpoint;
+      T #OUT_LMN;
+Label_13:      NOP 0;
+NETWORK
+TITLE = Unscalling Setpoint
+      A(;
+      A #OUT_Q;
+      AN #OUT_Q;
+      = %L27.0;
+      BLD 103;
+      A #OUT_Q;
+      JNB Label_14;
+      CALL UNSCALE
+      (  IN                          := #tmpSetpoint , 
+         HI_LIM                      := #MV_H , 
+         LO_LIM                      := #MV_L , 
+         BIPOLAR                     := %L27.0 , 
+         RET_VAL                     := #retval1 , 
+         OUT                         := #UnscOUT
+      );
+Label_14:      A BR;
+      );
+      JNB Label_15;
+      L #UnscOUT;
+      T #OUT_LMN_PER;
+Label_15:      NOP 0;
+NETWORK
+TITLE = Monitoring mismatch
+      A(;
+      O(;
+      L #DEV_STATE;
+      L "dbCONST_VAL".CM.SIC1_DEV_STATE.FAULT;
+      ==I;
+      );
+      O #INTERLOCK;
+      );
+      A(;
+      L #CMD;
+      L "dbCONST_VAL".CM.EN_DISABLE.ENABLE;
+      ==I;
+      );
+      = #MON_MISMATCH;
+END_FUNCTION_BLOCK
+

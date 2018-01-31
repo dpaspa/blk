@@ -1,0 +1,334 @@
+FUNCTION_BLOCK "fbPC1"
+TITLE = PC1 - Vessel ON/OFF pressure control loop with output valve sel
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : Synertec
+NAME : fbPC1
+VERSION : 0.5
+////------------------------------------------------------------------------------
+////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
+////------------------------------------------------------------------------------
+//// Title:PC1
+//// 
+//// Description:
+//// Vessel ON/OFF pressure control loop with output valve selection
+////------------------------------------------------------------------------------
+//// Revision History:
+//// Rev   By                  Date             Note
+//// 0.6 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic
+//// 0.5 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Input Parameters deleted
+////                                            auto/manual both now using same
+////                                            parameters,Interface FC used for 
+////                                            Bumpless changeover, IL close vlvs
+//// 0.4 Khairul Basar    15-Sep-2009 CC-09/016  Ref3.
+//// 0.3 Khairul Basar    09-Sep-2009 CC-09/016  Ref2.
+//// 0.2 Khairul Basar    01-Sep-2009 CC-09/016  Ref1.
+//// 0.1 Khairul Basar    03-Aug-2009            Initial design
+////------------------------------------------------------------------------------
+//Ref3:
+//1.If OPEN=3 state is selected, then selected valve should open until commanded 
+//to close.
+//2. When CLOSE=1 state is selected, then all the valves must be closed.
+//3.When P_CTRL=2 state is selected, then Selected valve should open or close 
+//based on FS Requirement F1, F2 & F3.
+//
+//In DB1 these above 3-states are added, P_CTRL data type changed from Bool to 
+//Int.
+//(Note: This PC1 is controlled by EMC1, which says PC1 to operate in all these 
+//3-states, whereas previously there was only two states defined ENABLED & 
+//DISABLED)
+//
+//Ref2:
+//Manual and Auto mode is programed.Manual & auto separate Setpoint, Gas select, 
+//& P_CTRL variable created and programmed accordingly.
+//
+//Ref1:
+//Nw5-:db_low= SETPOINT-DEADBAND_L (not _H, corrected).
+//Nw6: Comparator changed from less_than_or_Equal to Less- than.  Now Valve will 
+//open when value Measured is less than db_low. (P_CTRL mode)
+//Nw4-:db_high= SETPOINT+DEADBAND_H.
+//Nw6: Comparator changed from greater_than_or_Equal to Greater-than.  Now Valve 
+//will close when value Measured greater than db_high.(P_CTRL mode)
+//Output command OUT_Qx is BOOL is changed to CMD_Qx of type INT which is the 
+//normal requirement to which the PC1 is giving command. Ref. Nw8-11.
+//PC1 correct device state PC1_DEV_STATE assigned where corrected value of 
+//ENABLED=1, DISABLED=2. 
+//Initial Value of MEASURE is changed to 1.0
+//
+   VAR_INPUT 
+      SETPOINT : Real := 1.0;   // Setpoint
+      MEASURE : Real := 1.0;   // Measured Value (after scaling)
+      P_CTRL : Int;   // On/Off Pressure Control
+      DEADBAND_L : Real := 0.1;   // Deadband LOW differential
+      DEADBAND_H : Real := 0.1;   // Deadband HIGH differential
+      GAS_SELECT : Int;   // Select Valve to be operated
+      CR_IL : Bool;   // Critical Interlock
+      NCR_IL : Bool;   // Non-Critical Interlock
+      MAN_OVERRIDE : Bool;   // Bypass of Non-Critical Interlock
+   END_VAR
+
+   VAR_OUTPUT 
+      INTERLOCK : Bool;   // Interlock
+      MON_MISMATCH : Bool;
+      OUT_SETPOINT : Real;
+      DEV_STATE : Int;   // Device State
+      CMD_Q1 : Int;   // Output Signal to Device 1
+      CMD_Q2 : Int;   // Output Signal to Device 2
+      CMD_Q3 : Int;   // Output Signal to Device 3
+   END_VAR
+
+   VAR_IN_OUT 
+      MODE : Int := 2;   // Mode of control module (1=MANUAL; 2=AUTO; 3=OOS Out of Service)
+      OUT_Q : Bool;   // Intermediate Output Signal
+   END_VAR
+
+   VAR_TEMP 
+      Interlocked : Bool;   // Intermediate interlocking signal
+      OutOfService : Bool;   // Mode is "Out Of Service"
+      db_high : Real;   // Deadband pressure high
+      db_low : Real;   // Deadband pressure low
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Reset #DEV_STATE to Unknown State to Evaluate the current state
+      L 0;
+      T #DEV_STATE;
+      NOP 0;
+NETWORK
+TITLE = Interlocking Logic
+//Instance Specific/Non critical Interlocks can be bypassed by Override/Inhibit 
+//command from Operator Station (HMI).
+//
+//
+      O #CR_IL;
+      O;
+      A #NCR_IL;
+      AN #MAN_OVERRIDE;
+      = #INTERLOCK;
+      = #Interlocked;
+NETWORK
+TITLE = Out of Service Mode=3
+//Out of Service OOS
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      ==I;
+      = #OutOfService;
+NETWORK
+TITLE = Auto Setpoint
+      L #SETPOINT;
+      T #OUT_SETPOINT;
+      NOP 0;
+NETWORK
+TITLE = Intermediate Calculation
+//Add deadband to Setpoint SP to calculate value when se
+//lected valve should close.
+//
+      L #SETPOINT;
+      L #DEADBAND_H;
+      +R;
+      T #db_high;
+      NOP 0;
+NETWORK
+TITLE = Intermediate Calculation
+//Subtract deadband to Setpoint SP to calculate value when selected valve should 
+//open.
+//
+      L #SETPOINT;
+      L #DEADBAND_L;
+      -R;
+      T #db_low;
+      NOP 0;
+NETWORK
+TITLE = Open Valve when pressure control selected
+//Set output if pressure control enabled and the measured value MV is less than 
+//SP minus P_DB_LOW
+      AN #OutOfService;
+      A(;
+      L #P_CTRL;
+      L "dbCONST_VAL".CM.PC1_DEV_STATE.CONTROL;
+      ==I;
+      );
+      A(;
+      L #MEASURE;
+      L #db_low;
+      <R;
+      );
+      S #OUT_Q;
+NETWORK
+TITLE = Close valve when pressure control selected
+//Reset the output if pressure control enabled and the measured value MV is 
+//greater than SP plus P_DB_HIGH
+//
+      A(;
+      L #P_CTRL;
+      L "dbCONST_VAL".CM.PC1_DEV_STATE.CONTROL;
+      ==I;
+      );
+      A(;
+      L #MEASURE;
+      L #db_high;
+      >R;
+      );
+      O #Interlocked;
+      O #OutOfService;
+      O(;
+      L #P_CTRL;
+      L "dbCONST_VAL".CM.PC1_DEV_STATE.CONTROL;
+      <>I;
+      );
+      R #OUT_Q;
+NETWORK
+TITLE = Set Output to Valve 1
+      AN #OutOfService;
+      A(;
+      L #GAS_SELECT;
+      L 1;
+      ==I;
+      );
+      A(;
+      O #OUT_Q;
+      O(;
+      L #P_CTRL;
+      L "dbCONST_VAL".CM.PC1_DEV_STATE.OPEN;
+      ==I;
+      );
+      );
+      = %L10.0;
+      A %L10.0;
+      JNB Label_0;
+      L "dbCONST_VAL".CM.CMD_VALVE.OPEN;
+      T #CMD_Q1;
+Label_0:      NOP 0;
+      A %L10.0;
+      JNB Label_1;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #CMD_Q2;
+Label_1:      NOP 0;
+      A %L10.0;
+      JNB Label_2;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #CMD_Q3;
+Label_2:      NOP 0;
+NETWORK
+TITLE = Set Output to Valve 2
+      AN #OutOfService;
+      A(;
+      L #GAS_SELECT;
+      L 2;
+      ==I;
+      );
+      A(;
+      O #OUT_Q;
+      O(;
+      L #P_CTRL;
+      L "dbCONST_VAL".CM.PC1_DEV_STATE.OPEN;
+      ==I;
+      );
+      );
+      = %L10.0;
+      A %L10.0;
+      JNB Label_3;
+      L "dbCONST_VAL".CM.CMD_VALVE.OPEN;
+      T #CMD_Q2;
+Label_3:      NOP 0;
+      A %L10.0;
+      JNB Label_4;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #CMD_Q1;
+Label_4:      NOP 0;
+      A %L10.0;
+      JNB Label_5;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #CMD_Q3;
+Label_5:      NOP 0;
+NETWORK
+TITLE = Set Output to Valve 3
+      AN #OutOfService;
+      A(;
+      L #GAS_SELECT;
+      L 3;
+      ==I;
+      );
+      A(;
+      O #OUT_Q;
+      O(;
+      L #P_CTRL;
+      L "dbCONST_VAL".CM.PC1_DEV_STATE.OPEN;
+      ==I;
+      );
+      );
+      = %L10.0;
+      A %L10.0;
+      JNB Label_6;
+      L "dbCONST_VAL".CM.CMD_VALVE.OPEN;
+      T #CMD_Q3;
+Label_6:      NOP 0;
+      A %L10.0;
+      JNB Label_7;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #CMD_Q1;
+Label_7:      NOP 0;
+      A %L10.0;
+      JNB Label_8;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #CMD_Q2;
+Label_8:      NOP 0;
+NETWORK
+TITLE = Close all valves
+      AN #OUT_Q;
+      A(;
+      L #P_CTRL;
+      L "dbCONST_VAL".CM.PC1_DEV_STATE.CONTROL;
+      ==I;
+      );
+      O(;
+      L #GAS_SELECT;
+      L 0;
+      ==I;
+      );
+      O(;
+      L #P_CTRL;
+      L "dbCONST_VAL".CM.PC1_DEV_STATE.CLOSE;
+      ==I;
+      );
+      O #Interlocked;
+      = %L10.0;
+      A %L10.0;
+      JNB Label_9;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #CMD_Q1;
+Label_9:      NOP 0;
+      A %L10.0;
+      JNB Label_10;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #CMD_Q2;
+Label_10:      NOP 0;
+      A %L10.0;
+      JNB Label_11;
+      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      T #CMD_Q3;
+Label_11:      NOP 0;
+NETWORK
+TITLE = Set DEV_STATE to Selected State of control 
+      L #P_CTRL;
+      T #DEV_STATE;
+      NOP 0;
+NETWORK
+TITLE = 
+      A(;
+      O(;
+      L #P_CTRL;
+      L "dbCONST_VAL".CM.PC1_DEV_STATE.CONTROL;
+      ==I;
+      );
+      O(;
+      L #P_CTRL;
+      L "dbCONST_VAL".CM.PC1_DEV_STATE.OPEN;
+      ==I;
+      );
+      );
+      A #Interlocked;
+      = #MON_MISMATCH;
+END_FUNCTION_BLOCK
+

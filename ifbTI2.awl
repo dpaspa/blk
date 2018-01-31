@@ -1,0 +1,86 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Name:        ifbTI2                                                        //
+// Description: Instances of TI2                                              //
+//                                                                            //
+// Line Mounted temperature Indicator.                                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 0.4 David Paspa      08-Jan-2018 NA        Reboot from Pharmaniaga.        //
+// 0.3 Khairul Basar    17-Sep-2009 CC-09/016 USER_INPUT assigned to monitor. //
+// 0.2 Khairul Basar    03-Sep-2009 CC-09/016 Initial value change-Ref.fbTI2. //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbTI2"
+TITLE = Instances of line mounted temperature indicator
+{ S7_Optimized_Access := 'FALSE' }
+NAME : ifbTI2
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 0.4
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+   VAR
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@ : "fbTI2;   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@_MODE : Struct
+         PosEdge1 : Bool;
+         PosEdge2 : Bool;
+         REQ : Int;   // Request for Required Mode
+      END_STRUCT;
+@@TEMPLATE_END@@
+   END_VAR
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      A "AlwaysHighBit";
+      = %L0.0;
+      BLD 103;
+      CALL "ifcTI2"
+      (  IN_REQ_MODE                 := %L0.0 ,
+         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
+         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
+         IO_MODE                     := "idbTI2".@@MODULE@@.MODE ,
+         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+      );
+      NOP 0;
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL #@@MODULE@@
+      (  MODE                        := #@@MODULE@@.MODE ,
+         RAW_INPUT                   := "P_TI-@@NUMINSTANCE@@":P ,
+         USER_INPUT                  := #@@MODULE@@.USER_INPUT ,
+         UPPER_RANGE                 := #@@MODULE@@.UPPER_RANGE ,
+         LOWER_RANGE                 := #@@MODULE@@.LOWER_RANGE ,
+         POLARITY                    := #@@MODULE@@.POLARITY ,
+         LIMIT_HH                    := #@@MODULE@@.LIMIT_HH ,
+         LIMIT_H                     := #@@MODULE@@.LIMIT_H ,
+         LIMIT_L                     := #@@MODULE@@.LIMIT_L ,
+         LIMIT_LL                    := #@@MODULE@@.LIMIT_LL ,
+         ENABLE_HH                   := #@@MODULE@@.ENABLE_HH ,
+         ENABLE_H                    := #@@MODULE@@.ENABLE_H ,
+         ENABLE_L                    := #@@MODULE@@.ENABLE_L ,
+         ENABLE_LL                   := #@@MODULE@@.ENABLE_LL ,
+         MEASURE                     := #@@MODULE@@.MEASURE ,
+         DATA_QUALITY                := #@@MODULE@@.DATA_QUALITY ,
+         ALARM_HH                    := #@@MODULE@@.ALARM_HH ,
+         ALARM_H                     := #@@MODULE@@.ALARM_H ,
+         ALARM_L                     := #@@MODULE@@.ALARM_L ,
+         ALARM_LL                    := #@@MODULE@@.ALARM_LL ,
+         RANGE_ERROR                 := #@@MODULE@@.RANGE_ERROR ,
+         BROKEN_WIRE                 := #@@MODULE@@.BROKEN_WIRE
+      );
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

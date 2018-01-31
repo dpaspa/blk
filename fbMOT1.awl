@@ -1,0 +1,293 @@
+FUNCTION_BLOCK "fbMOT1"
+TITLE = MOT1 - Vacuum Pump Control
+{ S7_Optimized_Access := 'FALSE' }
+NAME : fbMOT1
+VERSION : 0.9
+////------------------------------------------------------------------------------
+////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
+////------------------------------------------------------------------------------
+////Title: MOT1
+////Vacuum Pump control
+////------------------------------------------------------------------------------
+//// Revision History:
+//// Rev   By                  Date             Note
+//// 1.0 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic
+//// 0.9 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized
+//// 0.8 Steve Linehan    30-Sep-2009 CC-09/016 Out of Service Mode Added.
+//// 0.7 Steve Linehan    29-Sep-2009 CC-09/016 Bypass Input Mode Added.
+//// 0.6 Khairul Basar    22-Sep-2009 CC-09/016 Nw3,FAULT_S remove
+//// 0.5 Khairul Basar    17-Sep-2009 CC-09/016 Instead of Auto/Man dual command, 
+////                                            only CMD used now.
+//// 0.4 Khairul Basar    11-Sep-2009 CC-09/016 FAULT_S reset after Out_Q is off.
+//// 0.3 Khairul Basar    11-Sep-2009 CC-09/016 INTERLOCK is now o/p instead of 
+////                                            temporary flag.
+//// 0.3 Khairul Basar    09-Sep-2009 CC-09/016 Ref2
+//// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Ref1
+//// 0.1 Khairul Basar    03-Aug-2009           Initial design
+////------------------------------------------------------------------------------
+//Ref2:Instead of using one timer, another timer is created.One timer will start 
+//when there is Start command , another will start when Stop command.And there is 
+//FAULT_S which will be setting, so operator acknowledge signal must reset that 
+//flag, to be able restart the MOT1 again.Start and Stop command divided into two 
+//networks, NW2 & 3.
+//
+//
+//Ref1.
+//STOPPED & RUNNING states are changed to 1 & 2 respectively while previously it 
+//was 2 & 1. Timer start signal is paralleled with start & Stop flag, every 
+//transition of run to stop or stop to run the timer should start. Previously it 
+//the start flag was duplicated twice. Now Fault state can be verified, 
+//Previously 
+//FAULT_S & FAULT_O was not assigned.
+//Name of parameter DELAY_TIME is changed to TMR.
+//Initial value in code is changed from 10S to 3S.
+//Now Alarm Tag names are corrected, Logic is assigned for them.
+   VAR_INPUT 
+      CMD : Int := 1;   // Command to OPEN/CLOSE (AUTO Mode)
+      TMR : Time := T#3S;   // Motor Start/Stop transition Time for checking status
+      CR_IL : Bool;
+      NCR_IL : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+      MAN_OVERRIDE : Bool;
+      RUNNING_FB : Bool;
+      MOT_OL_TRIP : Bool;
+      IN_MAN : Bool;
+   END_VAR
+
+   VAR_OUTPUT 
+      DEV_STATE : Int;   // Device State
+      INTERLOCK : Bool;   // Temporary digital output signal
+      OUT_Q : Bool;   // Output to OPEN/CLOSE solenoid valve
+      FAULT_S : Bool;   // Fail to start
+      FAULT_O : Bool;   // Overload fault
+      MTR_NS : Bool;
+      MON_MISMATCH : Bool;
+   END_VAR
+
+   VAR_IN_OUT 
+      MODE : Int := 2;   // Mode of control module (1=MANUAL; 2=AUTO; 3=OOS Out of Service)
+   END_VAR
+
+   VAR 
+      StartTimer {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Motor Start/Stop Transition timer
+      StopTimer {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+      startEdge : Bool;
+   END_VAR
+
+   VAR_TEMP 
+      En_tmr_Start : Bool;
+      En_tmr_Stop : Bool;
+      BYPASS_IP : Bool;
+      OUTOFSERV : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Interlock
+      O #CR_IL;
+      O;
+      A #NCR_IL;
+      A #MAN_OVERRIDE;
+      = #INTERLOCK;
+NETWORK
+TITLE = Out of Service Mode=3
+//Out of service
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      ==I;
+      = #OUTOFSERV;
+NETWORK
+TITLE = Start command
+      A(;
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      );
+      );
+      A(;
+      L #CMD;
+      L "dbCONST_VAL".CM.CMD.START;
+      ==I;
+      );
+      FP #startEdge;
+      S #OUT_Q;
+NETWORK
+TITLE = Input Bypass Mode In Manual
+      A(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      A #IN_MAN;
+      = #BYPASS_IP;
+NETWORK
+TITLE = 
+      A(;
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      O(;
+      L #MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      );
+      );
+      A(;
+      L #CMD;
+      L "dbCONST_VAL".CM.CMD.STOP;
+      ==I;
+      );
+      O #INTERLOCK;
+      O #MOT_OL_TRIP;
+      R #OUT_Q;
+NETWORK
+TITLE = Start Timer to Monitor motor running/stopped feedback
+      A #OUT_Q;
+      = %L1.0;
+      A %L1.0;
+      BLD 102;
+      = #En_tmr_Start;
+      A %L1.0;
+      NOT;
+      = #En_tmr_Stop;
+NETWORK
+TITLE = Start Transition Timer in the event of Start or Stop
+      A #En_tmr_Start;
+      = %L1.0;
+      BLD 103;
+      CALL #StartTimer
+      {time_type := 'Time'}
+      (  IN                          := %L1.0 , 
+         PT                          := #TMR , 
+         Q                           := #StartTimer.Q , 
+         ET                          := #StartTimer.ET
+      );
+      NOP 0;
+NETWORK
+TITLE = Stop Transition Timer in the event of Start or Stop
+      A #En_tmr_Stop;
+      = %L1.0;
+      BLD 103;
+      CALL #StopTimer
+      {time_type := 'Time'}
+      (  IN                          := %L1.0 , 
+         PT                          := #TMR , 
+         Q                           := #StopTimer.Q , 
+         ET                          := #StopTimer.ET
+      );
+      NOP 0;
+NETWORK
+TITLE = Device state
+//Device State:Following are applicabe here in case of OUT_Q is High.
+//1.Running
+//4.Fail to run
+//3.Starting
+      A #OUT_Q;
+      = %L1.0;
+      A %L1.0;
+      A(;
+      O #RUNNING_FB;
+      O #BYPASS_IP;
+      );
+      JNB Label_0;
+      L "dbCONST_VAL".CM.MOT1_DEV_STATE.RUNNING;
+      T #DEV_STATE;
+Label_0:      NOP 0;
+      A %L1.0;
+      NOT;
+      AN #StopTimer.Q;
+      AN #BYPASS_IP;
+      A #RUNNING_FB;
+      JNB Label_1;
+      L "dbCONST_VAL".CM.MOT1_DEV_STATE.STARTING_STOPPING;
+      T #DEV_STATE;
+Label_1:      NOP 0;
+      A %L1.0;
+      AN #StartTimer.Q;
+      AN #RUNNING_FB;
+      JNB Label_2;
+      L "dbCONST_VAL".CM.MOT1_DEV_STATE.STARTING_STOPPING;
+      T #DEV_STATE;
+Label_2:      NOP 0;
+      A %L1.0;
+      NOT;
+      A #StopTimer.Q;
+      AN #BYPASS_IP;
+      A #RUNNING_FB;
+      JNB Label_3;
+      L "dbCONST_VAL".CM.MOT1_DEV_STATE.FAULT;
+      T #DEV_STATE;
+Label_3:      NOP 0;
+      A %L1.0;
+      A #StartTimer.Q;
+      AN #BYPASS_IP;
+      AN #RUNNING_FB;
+      = %L1.1;
+      A %L1.1;
+      JNB Label_4;
+      L "dbCONST_VAL".CM.MOT1_DEV_STATE.FAULT;
+      T #DEV_STATE;
+Label_4:      NOP 0;
+      A %L1.1;
+      AN #OUTOFSERV;
+      S #FAULT_S;
+NETWORK
+TITLE = Device state
+//Device State:Following are applicabe here in case of OUT_Q is Low.
+//1.Stopped
+//4.Overload fault
+//
+      AN #OUT_Q;
+      = %L1.0;
+      A %L1.0;
+      A(;
+      ON #RUNNING_FB;
+      O #BYPASS_IP;
+      );
+      AN #FAULT_S;
+      AN #FAULT_O;
+      JNB Label_5;
+      L "dbCONST_VAL".CM.MOT1_DEV_STATE.STOPPED;
+      T #DEV_STATE;
+Label_5:      NOP 0;
+      A %L1.0;
+      A #MOT_OL_TRIP;
+      JNB Label_6;
+      L "dbCONST_VAL".CM.MOT1_DEV_STATE.FAULT;
+      T #DEV_STATE;
+Label_6:      NOP 0;
+      A %L1.0;
+      BLD 102;
+      R #FAULT_S;
+NETWORK
+TITLE = Motor Over load
+      A #MOT_OL_TRIP;
+      AN #BYPASS_IP;
+      AN #OUTOFSERV;
+      = #FAULT_O;
+NETWORK
+TITLE = 
+      A(;
+      O(;
+      L #DEV_STATE;
+      L "dbCONST_VAL".CM.MOT1_DEV_STATE.FAULT;
+      ==I;
+      );
+      O #INTERLOCK;
+      );
+      A(;
+      L #CMD;
+      L "dbCONST_VAL".CM.CMD.START;
+      ==I;
+      );
+      = #MON_MISMATCH;
+END_FUNCTION_BLOCK
+

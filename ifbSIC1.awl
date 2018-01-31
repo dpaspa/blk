@@ -1,0 +1,179 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       ifbDI1                                                        //
+// Description: Instances of DI1                                              //
+//                                                                            //
+// Agitator speed control.                                                    //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 0.9 David Paspa      05-Jan-2018 NA        Reboot from Pharmaniaga.        //
+// 0.8 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.7 Gus Abdallah     01-Oct-2009 CC-09/016 Interlocks are CM processed.    //
+// 0.6 Khairul Basar    18-Sep-2009 CC-09/016 ifcSIC1 is created & interfaced.//
+// 0.5 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters   //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters.          //
+// 0.4 Khairul Basar    14-Sep-2009 CC-09/016 O/P var DataQuality added.      //
+// 0.3 Khairul Basar    11-Sep-2009 CC-09/016 Ref2.                           //
+// 0.2 Khairul Basar    03-Sep-2009 CC-09/016 Ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//                                                                            //
+// Ref2:                                                                      //
+// TAH,THR & FLT are changed from NO to NC contact in the instance logic.     //
+// SIC1 changed: Now Setpoint is moved to PID as per selected mode.           //
+// TAH,THR & FLT will result device state 'FAULT=5'.                          //
+// In DB1, Device state changed to 3=Stop, 4=Running instead of 4=stop,       //
+// 3=Running.                                                                 //
+//                                                                            //
+// Ref1:                                                                      //
+// MI1 Measure value assigned to MASS_MI1 parameter, The only DI ES_1000      //
+// Emergency switch is connected to CR_IL, whereas others MOT_OL, MOT_OH &    //
+// INVF is connected to corresponding input parameters, these are removed     //
+// from AND logic from CR_IL. MV_RPM analog value range is hardcoded, but     //
+// Speed set point range not hard coded, it will be done in HMI.              //
+// Now the Minimum mass condition is always overridden in manual mode         //
+// Now Device states are configured for ENABLED, when enabled two sub state   //
+// STOPPED & RUNNING and DISABLED                                             //
+// Now Parameters MEASURE_RPM for agitator RPM , MASS_MI1 is for mass of the  //
+// vessel(this parameter is not in the FS), parameter for set point of manual //
+// is SETPOINT_MAN, & in auto is SETPOINT_AUTO configured.                    //
+// Set point SETPOINT_MAN and SETPOINT_AUTO initialized to 0.0 and GAIN to 1.0//
+// Emergency stop signal added to CR_IL.                                      //
+// Now logic state for Interlock is corrected, see 2.                         //
+// ALARM_HH, ALARM_H, ALARM_L, ALARM_LL are added in SIC1 and programmed.     //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbSIC1"
+TITLE = Instances of agitator speed control
+{ S7_Optimized_Access := 'FALSE' }
+NAME : ifbSIC1
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 0.9
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+   VAR
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@ : "fbDI1";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@_MODE : Struct
+         PosEdge1 : Bool;
+         PosEdge2 : Bool;
+         REQ : Int;   // Request for Required Mode
+      END_STRUCT;
+@@TEMPLATE_END@@
+   END_VAR
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL "ifcSIC1"
+      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
+         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
+         IN_AGITATOR_CMD             := "idb@@PARENTCLASS@@".@@PARENT@@.@@INSTANCECHILDALIASTAG@@_CMD ,
+         IN_SETPOINT                 := "idb@@PARENTCLASS@@".@@PARENT@@.OUT_SETPOINT ,
+         AGITATOR_INTURRUPT          := "idb@@lnk2Class@@".@@lnk2Tag@@.AGITATOR_INTERRUPT ,
+         OUT_MODE                    := #@@MODULE@@.REQ ,
+         IO_MODE                     := "idbSIC1".@@MODULE@@.MODE ,
+         IO_AGITATOR_CMD             := "idbSIC1".@@MODULE@@.CMD ,
+         IO_SETPOINT                 := "idbSIC1".@@MODULE@@.SETPOINT ,
+         POS_EDGE1                   := #@@MODULE@@.PosEdge1 ,
+         POS_EDGE2                   := #@@MODULE@@.PosEdge2
+      );
+      NOP 0;
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      A(;
+@@ATTR_BEGIN|CR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+@@ATTR_END|CR_IL@@
+      );
+      = %L0.0;
+      BLD 103;
+      A(;
+@@ATTR_BEGIN|NCR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+@@ATTR_END|NCR_IL@@
+      );
+      = %L0.1;
+      BLD 103;
+      AN "THR-@@NUMINSTANCE@@";
+      = %L0.2;
+      BLD 103;
+      AN "TAH-@@NUMINSTANCE@@";
+      = %L0.3;
+      BLD 103;
+      AN "FLT-@@NUMINSTANCE@@";
+      = %L0.4;
+      BLD 103;
+      CALL #@@MODULE@@
+      (  CMD                         := #@@MODULE@@.CMD ,
+         SETPOINT                    := #@@MODULE@@.SETPOINT ,
+         CR_IL                       := %L0.0 ,
+         NCR_IL                      := %L0.1 ,
+         MAN_OVERRIDE                := #@@MODULE@@.MAN_OVERRIDE ,
+         THR                         := %L0.2 ,
+         TAH                         := %L0.3 ,
+         FLT                         := %L0.4 ,
+         MASS_RUN                    := #@@MODULE@@.MASS_RUN ,
+         MASS_STOP                   := #@@MODULE@@.MASS_STOP ,
+         MEASURE_RPM                 := "P_SPM-@@NUMINSTANCE@@":P ,
+         MV_H                        := @@MaxAgit@@ ,
+         MV_L                        := 0.0 ,
+         MV_POLR                     := #@@MODULE@@.MV_POLR ,
+         LIMIT_HH                    := #@@MODULE@@.LIMIT_HH ,
+         LIMIT_H                     := #@@MODULE@@.LIMIT_H ,
+         LIMIT_L                     := #@@MODULE@@.LIMIT_L ,
+         LIMIT_LL                    := #@@MODULE@@.LIMIT_LL ,
+         MASS_MI1                    := "idb@@lnk1Class@@".@@lnk1Tag@@.MEASURE ,
+         FB_TDELAY                   := #@@MODULE@@.FB_TDELAY ,
+         NON_PID                     := #@@MODULE@@.NON_PID ,
+         P_SEL                       := #@@MODULE@@.P_SEL ,
+         I_SEL                       := #@@MODULE@@.I_SEL ,
+         D_SEL                       := #@@MODULE@@.D_SEL ,
+         GAIN                        := #@@MODULE@@.GAIN ,
+         TI                          := #@@MODULE@@.TI ,
+         TD                          := #@@MODULE@@.TD ,
+         CYCLE                       := #@@MODULE@@.CYCLE ,
+         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
+         OUT_Q                       := #@@MODULE@@.OUT_Q ,
+         MAN_NONPID                  := #@@MODULE@@.MAN_NONPID ,
+         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
+         ALM_THR                     := #@@MODULE@@.ALM_THR ,
+         ALM_TAH                     := #@@MODULE@@.ALM_TAH ,
+         ALM_FLT                     := #@@MODULE@@.ALM_FLT ,
+         ALARM_HH                    := #@@MODULE@@.ALARM_HH ,
+         ALARM_H                     := #@@MODULE@@.ALARM_H ,
+         ALARM_L                     := #@@MODULE@@.ALARM_L ,
+         ALARM_LL                    := #@@MODULE@@.ALARM_LL ,
+         OUT_Q_F                     := "@@INSTANCE@@_F" ,
+         OUT_Q_R                     := "@@INSTANCE@@_R" ,
+         OUT_FR                      := #@@MODULE@@.OUT_FR ,
+         MASS_PV_R                   := #@@MODULE@@.MASS_PV_R ,
+         MV_RPM_R                    := #@@MODULE@@.MV_RPM_R ,
+         DATA_QUALITY                := #@@MODULE@@.DATA_QUALITY ,
+         RUNNING                     := #@@MODULE@@.RUNNING ,
+         MON_MISMATCH                := #@@MODULE@@.MON_MISMATCH ,
+         RUN_FAULT                   := #@@MODULE@@.RUN_FAULT ,
+         OUT_SETPOINT                := #@@MODULE@@.OUT_SETPOINT ,
+         OUT_LMN_PER                 := "P_SPS-@@NUMINSTANCE@@":P ,
+         OUT_LMN                     := #@@MODULE@@.OUT_LMN ,
+         MODE                        := #@@MODULE@@.MODE
+      );
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

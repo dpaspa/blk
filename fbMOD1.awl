@@ -1,0 +1,117 @@
+FUNCTION_BLOCK "fbMOD1"
+TITLE = MOD1 - Modulating control valve
+{ S7_Optimized_Access := 'FALSE' }
+NAME : fbMOD1
+VERSION : 0.4
+////------------------------------------------------------------------------------
+////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
+////------------------------------------------------------------------------------
+//// Title:MOD1
+//// 
+//// Description:
+//// Modulating control valve
+////------------------------------------------------------------------------------
+//// Revision History:
+//// Rev   By                  Date             Note
+//// 0.4 Khairul Basar    17-Sep-2009 CC-09/016 RAW_OUTPUT only when Valve Opened
+//// 0.3 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Input Parameters deleted
+////                                            auto/manual both now using same
+////                                            parameters,Interface FC used for 
+////                                            Bumpless changeover
+//// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 MODE initialize to Manual=1
+////                                            Reset POSN to zero if OUT_Q=0
+////                                            Setpoint moved to POSN only when 
+////                                            OUT_Q=1(Nw2,3 & 5)
+//// 0.1 Khairul Basar    03-Aug-2009           Initial design
+////------------------------------------------------------------------------------
+//
+   VAR_INPUT 
+      CMND : Bool;   // Command to OPEN/CLOSE (AUTO Mode)
+      UPPER_RANGE : Real := 100.0;   // Upper Range Limit in engineering units
+      LOWER_RANGE : Real;   // Lower Range Limit in engineering units
+      POLARITY : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+      CR_IL : Bool;
+      NCR_IL : Bool;
+      MAN_OVERRIDE : Bool;
+   END_VAR
+
+   VAR_OUTPUT 
+      RAW_OUTPUT : Int;   // Raw output signal to Field (4mA = 0, 20mA = 27648)
+      DEV_STATE : Int;   // Device State
+      OUT_Q : Bool;   // Output to OPEN/CLOSE solenoid valve
+      INTERLOCK : Bool;
+      MON_MISMATCH : Bool;
+   END_VAR
+
+   VAR_IN_OUT 
+      MODE : Int := 2;   // Mode of control module (1=MANUAL; 2=AUTO; 3=OOS Out of Service)
+      POSN : Real;   // Valve position to set.
+   END_VAR
+
+   VAR_TEMP 
+      RET_VAL1 : Word;   // Returns a value of W#16#0000 if the instruction executes without error.
+      OUT_Q_B_1 : Bool;   // Temporary digital output signal
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = INTERLOCK Logic
+      O #CR_IL;
+      O;
+      A #NCR_IL;
+      AN #MAN_OVERRIDE;
+      = #INTERLOCK;
+NETWORK
+TITLE = ON/OFF valve
+      A #CMND;
+      AN #INTERLOCK;
+      = #OUT_Q_B_1;
+      A #OUT_Q_B_1;
+      = #OUT_Q;
+NETWORK
+TITLE = Unscaling Control Valve Position
+      A #POLARITY;
+      = %L3.0;
+      BLD 103;
+      A #OUT_Q_B_1;
+      JNB Label_0;
+      CALL UNSCALE
+      (  IN                          := #POSN , 
+         HI_LIM                      := #UPPER_RANGE , 
+         LO_LIM                      := #LOWER_RANGE , 
+         BIPOLAR                     := %L3.0 , 
+         RET_VAL                     := #RET_VAL1 , 
+         OUT                         := #RAW_OUTPUT
+      );
+Label_0:      NOP 0;
+NETWORK
+TITLE = Devicestate CLOSED
+//Reset output setpoint to zero.
+      ON #OUT_Q_B_1;
+      O #INTERLOCK;
+      = %L3.0;
+      A %L3.0;
+      JNB Label_1;
+      L "dbCONST_VAL".CM.MOD1_DEV_STATE.CLOSED;
+      T #DEV_STATE;
+Label_1:      NOP 0;
+      A %L3.0;
+      JNB Label_2;
+      L 0;
+      T #RAW_OUTPUT;
+Label_2:      NOP 0;
+NETWORK
+TITLE = Devicestate OPENED
+      A #OUT_Q_B_1;
+      JNB Label_3;
+      L "dbCONST_VAL".CM.MOD1_DEV_STATE.OPENED;
+      T #DEV_STATE;
+Label_3:      NOP 0;
+NETWORK
+TITLE = ON/OFF valve
+      A #CMND;
+      A #INTERLOCK;
+      = #MON_MISMATCH;
+END_FUNCTION_BLOCK
+

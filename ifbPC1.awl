@@ -1,0 +1,125 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       ifbPC1                                                        //
+// Description: Instances of PC1                                              //
+//                                                                            //
+// Vessel ON/OFF pressure control loop with output valve selection.           //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 0.8 David Paspa      05-Jan-2018 NA        Reboot from Pharmaniaga.        //
+// 0.7 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.6 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Input Parameters      //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters,Interface //
+//                                            FC used for Bumpless changeover.//
+// 0.5 Khairul Basar    15-Sep-2009 CC-09/016 PC1 changed.                    //
+// 0.4 Khairul Basar    14-Sep-2009 CC-09/016 PC_1110 Setpoint assignment     //
+//                                            corrected.                      //
+// 0.3 Khairul Basar    09-Sep-2009 CC-09/016 Ref2.                           //
+// 0.2 Khairul Basar    01-Sep-2009 CC-09/016 OUT_Qx(BOOL) is changed to      //
+//                                            CMD_Qx (INT) & are linked to    //
+//                                            POS1valves. Measure variable is //
+//                                            lined with PI1 Measure variable.//
+//                                            CR_IL Interfaced.               //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+// ref2:Manual and Auto mode is programed.For Manual & auto separate Setpoint,//
+// Gas select, & P_CTRL variable created and programmed accordingly.Instance  //
+// parameter calls updated."idbPI1".PI_1010.INTERLOCK is linked with NCR_IL.  //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbPC1"
+TITLE = Instances of PC1 pressure controller
+{ S7_Optimized_Access := 'FALSE' }
+NAME : ifbPC1
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 0.8
+
+//----------------------------------------------------------------------------//
+// Instance declaration:                                                      //
+//----------------------------------------------------------------------------//
+   VAR
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@ : "fbPC1";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN@@
+      @@MODULE@@_MODE : Struct
+         PosEdge1 : Bool;
+         PosEdge2 : Bool;
+         REQ : Int;   // Request for Required Mode
+      END_STRUCT;
+@@TEMPLATE_END@@
+   END_VAR
+
+   VAR_TEMP
+      SP : Real;
+   END_VAR
+
+//----------------------------------------------------------------------------//
+// Instance interface:                                                        //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      CALL "ifcPC1"
+      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
+         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
+         SETPOINT                    := "idb@@PARENTCLASS@@".@@PARENT@@.SETPOINT ,
+         P_CTRL                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|PC@@_P_CTRL ,
+         GAS_SELECT                  := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|PC@@_GASS_SELECT ,
+         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
+         IO_MODE                     := "idbPC1".@@MODULE@@.MODE ,
+         IO_SETPOINT                 := "idbPC1".@@MODULE@@.SETPOINT ,
+         IO_P_CTRL                   := "idbPC1".@@MODULE@@.P_CTRL ,
+         IO_GAS_SELECT               := "idbPC1".@@MODULE@@.GAS_SELECT ,
+         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+      );
+      NOP 0;
+NETWORK
+TITLE = @@MODULE@@ : @@DESCRIPTION@@
+      A(;
+@@ATTR_BEGIN|CR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+@@ATTR_END|CR_IL@@
+      );
+      = %L0.0;
+      BLD 103;
+      A(;
+@@ATTR_BEGIN|NCR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+      A "idbPI1".@@lnk1Tag@@.INTERLOCK;
+@@ATTR_END|NCR_IL@@
+      );
+      = %L0.1;
+      BLD 103;
+      CALL #@@MODULE@@
+      (  SETPOINT                    := #@@MODULE@@.SETPOINT ,
+         MEASURE                     := "idbPI1".@@lnk1Tag@@.MEASURE ,
+         P_CTRL                      := #@@MODULE@@.P_CTRL ,
+         DEADBAND_L                  := #@@MODULE@@.DEADBAND_L ,
+         DEADBAND_H                  := #@@MODULE@@.DEADBAND_H ,
+         GAS_SELECT                  := #@@MODULE@@.GAS_SELECT ,
+         CR_IL                       := %L0.0 ,
+         NCR_IL                      := %L0.1 ,
+         MAN_OVERRIDE                := #@@MODULE@@.MAN_OVERRIDE ,
+         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
+         OUT_SETPOINT                := #@@MODULE@@.OUT_SETPOINT ,
+         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
+         CMD_Q1                      := #@@MODULE@@.CMD_Q1 ,
+         CMD_Q2                      := #@@MODULE@@.CMD_Q2 ,
+         CMD_Q3                      := #@@MODULE@@.CMD_Q3 ,
+         MODE                        := #@@MODULE@@.MODE ,
+         OUT_Q                       := #@@MODULE@@.OUT_Q
+      );
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

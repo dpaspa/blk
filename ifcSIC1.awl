@@ -1,0 +1,75 @@
+FUNCTION "ifcSIC1" : Void
+TITLE = ifcSIC1:
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_INPUT 
+      IN_REQ_MODE : Bool;
+      IN_MODE : Int;
+      IN_AGITATOR_CMD : Int;
+      IN_SETPOINT : Real;
+      AGITATOR_INTURRUPT : Bool;
+   END_VAR
+
+   VAR_OUTPUT 
+      OUT_MODE : Int;
+   END_VAR
+
+   VAR_IN_OUT 
+      IO_MODE : Int;
+      IO_AGITATOR_CMD : Int;
+      IO_SETPOINT : Real;
+      POS_EDGE1 : Bool;
+      POS_EDGE2 : Bool;
+   END_VAR
+
+   VAR_TEMP 
+      RetVal : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Mode change
+      A #IN_REQ_MODE;
+      = %L1.0;
+      BLD 103;
+      CALL "MODE_REQ"
+      (  IN_REQ_MODE                 := %L1.0 , 
+         IN_MODE                     := #IN_MODE , 
+         MODULE                      := 'C' , 
+         Ret_Val                     := #RetVal , 
+         OUT_MODE                    := #OUT_MODE , 
+         IO_MODE                     := #IO_MODE , 
+         POS_EDGE1                   := #POS_EDGE1 , 
+         POS_EDGE2                   := #POS_EDGE2
+      );
+      NOP 0;
+NETWORK
+TITLE = Transfer Input Parameters to Output
+      L #IO_MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      = %L1.0;
+      A %L1.0;
+      JNB Label_0;
+      L #IN_AGITATOR_CMD;
+      T #IO_AGITATOR_CMD;
+Label_0:      NOP 0;
+      A %L1.0;
+      JNB Label_1;
+      L #IN_SETPOINT;
+      T #IO_SETPOINT;
+Label_1:      NOP 0;
+NETWORK
+TITLE = Out Of service
+      A(;
+      L #IO_MODE;
+      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      ==I;
+      );
+      JNB Label_2;
+      L "dbCONST_VAL".CM.EN_DISABLE.DISABLE;
+      T #IO_AGITATOR_CMD;
+Label_2:      NOP 0;
+END_FUNCTION
+

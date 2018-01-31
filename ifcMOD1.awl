@@ -1,0 +1,90 @@
+FUNCTION "ifcMOD1" : Void
+TITLE = ifcMOD1:Interface
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_INPUT 
+      IN_REQ_MODE : Bool;
+      IN_MODE : Int;
+      IN_CMND : Bool;
+      INTERLOCK : Bool;
+      IN_POSN : Real;
+   END_VAR
+
+   VAR_OUTPUT 
+      OUT_MODE : Int;
+   END_VAR
+
+   VAR_IN_OUT 
+      IO_MODE : Int;
+      IO_CMND : Bool;
+      IO_POSN : Real;
+      POS_EDGE1 : Bool;
+      POS_EDGE2 : Bool;
+   END_VAR
+
+   VAR_TEMP 
+      RetVal : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Mode change
+      A #IN_REQ_MODE;
+      = %L1.0;
+      BLD 103;
+      CALL "MODE_REQ"
+      (  IN_REQ_MODE                 := %L1.0 , 
+         IN_MODE                     := #IN_MODE , 
+         MODULE                      := 'C' , 
+         Ret_Val                     := #RetVal , 
+         OUT_MODE                    := #OUT_MODE , 
+         IO_MODE                     := #IO_MODE , 
+         POS_EDGE1                   := #POS_EDGE1 , 
+         POS_EDGE2                   := #POS_EDGE2
+      );
+      NOP 0;
+NETWORK
+TITLE = Mode change
+      A #IN_REQ_MODE;
+      = %L1.0;
+      BLD 103;
+      CALL "MODE_REQ"
+      (  IN_REQ_MODE                 := %L1.0 , 
+         IN_MODE                     := #IN_MODE , 
+         MODULE                      := 'C' , 
+         Ret_Val                     := #RetVal , 
+         OUT_MODE                    := #OUT_MODE , 
+         IO_MODE                     := #IO_MODE , 
+         POS_EDGE1                   := #POS_EDGE1 , 
+         POS_EDGE2                   := #POS_EDGE2
+      );
+      NOP 0;
+NETWORK
+TITLE = Assign Input Parameters to Output 
+      L #IO_MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      = %L1.0;
+      A %L1.0;
+      A #IN_CMND;
+      S #IO_CMND;
+      A %L1.0;
+      AN #IN_CMND;
+      R #IO_CMND;
+      A %L1.0;
+      JNB Label_0;
+      L #IN_POSN;
+      T #IO_POSN;
+Label_0:      NOP 0;
+NETWORK
+TITLE = An Interlock will stop the Module itself
+      A #INTERLOCK;
+      A(;
+      L #IO_MODE;
+      L "dbCONST_VAL".CM.MODE.MANUAL;
+      ==I;
+      );
+      R #IO_CMND;
+END_FUNCTION
+
