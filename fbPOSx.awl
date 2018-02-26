@@ -1,63 +1,62 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbPOSx                                                        //
+// Description:                                                               //
+// On/Off valve with single output and open/close feedback;This CM also can be//
+// used for the valves without feedback, with only open feedback or only close//
+// feedback.                                                                  //
+// 1.POS1: on/off valve with single output & no beedback                      //
+//   In this case FB_O=OUT_Q,FB_C=NOT-OUT_Q ;The FB_C & FB_O both dont have   //
+//   feedback from field;                                                     //
+// 2.POS2:On/Off valve with single output and closed feedback                 //
+//   In this case FB_O=NOT-FB_C/OUT_Q;The FB_C has feedback from field;       //
+// 3.POS3:On/Off valve with single output and open feedback                   //
+//   In this case FB_C=NOT-FB_O/NOT-OUT_Q;The FB_O has feedback from field;   //
+// 4.POS4:On/Off valve with single output and both opened and closed feedback //
+//   In this case FB_O,FB_O both have feedback from field;                    //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.4 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.5 Steve Linehan    29-Sep-2009 CC-09/016 Bypass Input Mode Added.        //
+// 0.4 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters   //
+//                                            deleted. auto/manual both now   //
+//                                            using same parameters.          //
+// 0.3 Khairul Basar    10-Sep-2009 CC-09/016 ref2.                           //
+// 0.2 Khairul Basar    02-Sep-2009 CC-09/016 ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//                                                                            //
+// Ref2:                                                                      //
+// Instead of one timer, two timers namely TMR_OPN and TMR_CLS used for       //
+// opening and closing travel time respectively.                              //
+// Nw13 Travelling logic changed.Logic for travelling is :                    //
+// When command=open, timer running, & still not opened.                      //
+// or command=close, timer running, still not closed.                         //
+// 3. Fail to open/Close divided into two Nw 10 & 11.                         //
+// 4.Openning timer in Nw8, Closing timer in Nw9 start by Command flag.       //
+// 5.Instead of using closing & openneing flag, temp flags are changed to     //
+// closed & opened respectivley & programed in Nw6 & 7.                       //
+//                                                                            //
+// Ref1:                                                                      //
+// 1.Travelling logic changed in NW9 & 10,travelling considered when both the //
+// feedback is unavailable but commanded to open or close.                    //
+// 2.Nw1 deleted, to get previous device state compared with state of fault   //
+// while open/close state.                                                    //
+// 3.Nw10 splitted into Nw10 & 11.                                            //
+// 4.Fault while Opened/Closed coded in the Nw12.Logic is once open or close  //
+// state is confirmed and then feedback lost or wrong feedback comes in, then //
+// it will say fault state.                                                   //
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fbPOSx"
-TITLE = POSx:On/Off valve with single output and  open/close feedback
+TITLE = POSx : On/Off valve with single output and  open/close feedback
 { S7_Optimized_Access := 'FALSE' }
-AUTHOR : Synertec
 NAME : fbPOSx
-VERSION : 0.5
-////------------------------------------------------------------------------------
-////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
-////------------------------------------------------------------------------------
-//// Title: POSx
-//// 
-//// Description:
-//// On/Off valve with single output and open/close feedback;This CM also can be 
-////used for the valves without feedback, with only open feedback or only close 
-////feedback.
-//1.POS1: on/off valve with single output & no beedback
-//In this case FB_O=OUT_Q,FB_C=NOT-OUT_Q ;The FB_C & FB_O both dont have 
-//feedback from field;
-//2.POS2:On/Off valve with single output and closed feedback
-//In this case FB_O=NOT-FB_C/OUT_Q;The FB_C has feedback from field;
-//3.POS3:On/Off valve with single output and open feedback
-//In this case FB_C=NOT-FB_O/NOT-OUT_Q;The FB_O has feedback from field;
-//4.POS4:On/Off valve with single output and both opened and closed feedback
-//In this case FB_O,FB_O both have feedback from field;
-////------------------------------------------------------------------------------
-//// Revision History:
-//// Rev   By                  Date             Note
-//// 0.4 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.
-//// 0.5 Steve Linehan    29-Sep-2009 CC-09/016 Bypass Input Mode Added.
-//// 0.4 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters 
-////                                            deleted. auto/manual both now 
-////                                            using same parameters.
-//// 0.3 Khairul Basar    10-Sep-2009 CC-09/016  ref2.
-//// 0.2 Khairul Basar    02-Sep-2009 CC-09/016  ref1.
-//// 0.1 Khairul Basar    03-Aug-2009            Initial design
-////------------------------------------------------------------------------------
-//Ref2:
-//Instead of one timer, two timers namely TMR_OPN and TMR_CLS used for openning 
-//and closing travel time respectively.
-//Nw13 Travelling logic changed.Logic for travelling is :
-//When command=open, timer running, & still not opened.
-//or command=close, timer running, still not closed.
-//3. Fail to open/Close divided into two Nw 10 & 11.
-//4.Openning timer in Nw8, Closing timer in Nw9 start by Command flag.
-//5.Instead of using closing & openneing flag, temp flags are changed to closed & 
-//opened respectivley & programed in Nw6 & 7.
-//
-//Ref1:
-//1.Travelling logic changed in NW9 & 10,travelling considered when both the 
-//feedback is unavailable but commanded to open or close.
-//2.Nw1 deleted, to get previous device state compared with state of fault while 
-//open/close state.
-//                                  
-//3.Nw10 splitted into Nw10 & 11.
-//4.Fault while Opened/Closed coded in the Nw12.Logic is once open or close state 
-//is confirmed and then feedback lost or wrong feedback comes in, then it will 
-//say fault state.
-//
-//
-   VAR_INPUT 
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 2.0
+
+   VAR_INPUT
       CMD : Int := 1;   // auto command
       CR_IL : Bool;   // Critical Interlock in series
       NCR_IL : Bool;   // Non-critical Interlock in series
@@ -69,7 +68,7 @@ VERSION : 0.5
       INTERLOCKING_TIMER : Timer;
    END_VAR
 
-   VAR_OUTPUT 
+   VAR_OUTPUT
       DEV_STATE : Int;   // Valve Status
       OUT_Q : Bool;   // Valve open/close command
       FAULT_C : Bool;   // Valve fail to close
@@ -80,16 +79,16 @@ VERSION : 0.5
       VLC_NO : Bool;
    END_VAR
 
-   VAR_IN_OUT 
+   VAR_IN_OUT
       MODE : Int := 2;   // 1-man,2-auto,3-out of service
    END_VAR
 
-   VAR 
+   VAR
       TMR_OPN {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
       TMR_CLS {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
    END_VAR
 
-   VAR_TEMP 
+   VAR_TEMP
       Out_Q1 : Bool;
       DEV_STATE1 : Int;
       Closed : Bool;
@@ -105,7 +104,7 @@ VERSION : 0.5
 BEGIN
 NETWORK
 TITLE = Interlocking Logic
-//Instance Specific/Non critical Interlocks can be bypassed by Override/Inhibit 
+//Instance Specific/Non critical Interlocks can be bypassed by Override/Inhibit
 //command from Operator Station(HMI)
 //#DEV_STATE=7----Interlocked
 //
@@ -150,7 +149,7 @@ TITLE = Input Bypass Mode In Manual
 NETWORK
 TITLE = Valve Command open
 //#MODE    = 1---> Manual operation
-//#MODE    = 2---> Auto operation  
+//#MODE    = 2---> Auto operation
 //
       A(;
       O(;
@@ -179,7 +178,7 @@ TITLE = Valve Command open
 NETWORK
 TITLE = Close command
 //Depending on situation:
-//If Fail to Close or Fail to Open fault occurs then Command should Hold to the 
+//If Fail to Close or Fail to Open fault occurs then Command should Hold to the
 //Current state,  Holding current state is safe to do.
 //
 //Mode=3 , Out of Service
@@ -268,9 +267,9 @@ TITLE = Run openning travel timer
       BLD 103;
       CALL #TMR_OPN
       {time_type := 'Time'}
-      (  IN                          := %L5.0 , 
-         PT                          := #TMR , 
-         Q                           := #TMR_OPN.Q , 
+      (  IN                          := %L5.0 ,
+         PT                          := #TMR ,
+         Q                           := #TMR_OPN.Q ,
          ET                          := #TMR_OPN.ET
       );
       NOP 0;
@@ -281,9 +280,9 @@ TITLE = Run Closing travel timer
       BLD 103;
       CALL #TMR_CLS
       {time_type := 'Time'}
-      (  IN                          := %L5.0 , 
-         PT                          := #TMR , 
-         Q                           := #TMR_CLS.Q , 
+      (  IN                          := %L5.0 ,
+         PT                          := #TMR ,
+         Q                           := #TMR_CLS.Q ,
          ET                          := #TMR_CLS.ET
       );
       NOP 0;
@@ -368,4 +367,3 @@ TITLE = State Machine Logic - Valve TRAVEL (3)
       T #DEV_STATE;
 Label_5:      NOP 0;
 END_FUNCTION_BLOCK
-

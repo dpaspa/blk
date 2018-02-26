@@ -8,15 +8,14 @@
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 0.1 David Paspa      24-Jan-2018 NA        Reboot from Pharmaniaga to make //
-//                                            generic EM template.            //
+// 2.0 David Paspa      24-Jan-2018 NA        Reboot for S7-1500.             //
 //----------------------------------------------------------------------------//
 FUNCTION "ifc@@CLASS@@" : Void
 TITLE = ifc@@CLASS@@ : Interface
 { S7_Optimized_Access := 'FALSE' }
 NAME : ifc@@CLASS@@
 AUTHOR : Rieckermann Engineering Operations
-VERSION : 0.1
+VERSION : 2.0
 
 //----------------------------------------------------------------------------//
 // Declare the interface input and output parameters:                         //
@@ -28,9 +27,9 @@ VERSION : 0.1
       IN_MODE : Int;
       IN_CMND : Int;
       IN_SUB : Int;
-@@ATTR_BEGIN|PARAMETER_IN@@
+@@ATTR_BEGIN|PARAMETER_VAR_INPUT@@
       IN_@@PARAMETER@@ : @@PARAMETERTYPE@@;
-@@ATTR_END|PARAMETER_IN@@
+@@ATTR_END|PARAMETER_VAR_INPUT@@
 @@ATTR_BEGIN|TIMER@@
       IN_TIME_H : Int;
       IN_TIME_M : Int;
@@ -40,6 +39,9 @@ VERSION : 0.1
 
    VAR_OUTPUT
       OUT_MODE : Int;
+@@ATTR_BEGIN|PARAMETER_VAR_OUTPUT@@
+      IN_@@PARAMETER@@ : @@PARAMETERTYPE@@;
+@@ATTR_END|PARAMETER_VAR_OUTPUT@@
    END_VAR
 
    VAR_IN_OUT
@@ -49,9 +51,9 @@ VERSION : 0.1
       IO_TOGGLEMODE : Bool;
       POS_EDGE1 : Bool;
       POS_EDGE2 : Bool;
-@@ATTR_BEGIN|PARAMETER_OUT@@
+@@ATTR_BEGIN|PARAMETER_VAR_IN_OUT@@
       IO_@@PARAMETER@@ : @@PARAMETERTYPE@@;
-@@ATTR_END|PARAMETER_OUT@@
+@@ATTR_END|PARAMETER_VAR_IN_OUT@@
 @@ATTR_BEGIN|TIMER@@
       IO_TIME_H : Int;
       IO_TIME_M : Int;
@@ -90,21 +92,21 @@ TITLE = Assign Input Parameters to Output
      ==I
      =     L      1.0
      A     L      1.0
-     JNB   _001
+     JNB   _1
      L     #IN_CMND
      T     #IO_CMND
-_001: NOP   0
+_1: NOP   0
      A     L      1.0
-     JNB   _002
+     JNB   _2
      L     #IN_SUB
      T     #IO_SUB
-@@ATTR_BEGIN|PARAMETER_IN@@
+@@ATTR_BEGIN|PARAMETER_VAR_INPUT@@
 _@@COUNTER|2@@: NOP   0
      A     L      1.0
      JNB   _@@COUNTERNEXT@@
      L     #IN_@@PARAMETER@@
      T     #IO_@@PARAMETER@@
-@@ATTR_END|PARAMETER_IN@@
+@@ATTR_END|PARAMETER_VAR_INPUT@@
 _@@COUNTERMAX@@:      NOP 0;
 
 //----------------------------------------------------------------------------//

@@ -8,8 +8,7 @@
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 0.6 David Paspa      05-Jan-2018 NA        Reboot from Pharmaniaga to make //
-//                                            generic EM template.            //
+// 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
 // 0.5 Khairul Basar    12-Oct-2009 CC-09/023 Toggle Mode coded.              //
 // 0.4 Khairul Basar    30-Sep-2009 CC-09/023 EM Mode var changed to IN_OUT.  //
 // 0.3 Khairul Basar    17-Sep-2009 CC-09/016 Duplicate Auto/man parameters   //
@@ -24,14 +23,14 @@ TITLE = @@CLASS@@ : @@CLASSDESCRIPTION@@
 { S7_Optimized_Access := 'FALSE' }
 NAME : ifb@@CLASS@@
 AUTHOR : Rieckermann Engineering Operations
-VERSION : 0.6
+VERSION : 2.0
 
 //----------------------------------------------------------------------------//
 //                                                                            //
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@ : "fb@@CLASS@@_CLASS";   // @@DESCRIPTION@@
+      @@MODULE@@ : "fb@@CLASS@@";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
       @@MODULE@@_MODE : Struct
@@ -117,9 +116,9 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
 @@ATTR_BEGIN|CHILD_STATE@@
          @@CHILDALIASTAG@@_STATE                := "idb@@CHILDALIASCLASS@@".@@CHILDALIASTAG@@.DEV_STATE ,
 @@ATTR_END|CHILD_STATE@@
-@@ATTR_BEGIN|PARAMETER_IN@@
+@@ATTR_BEGIN|PARAMETER_VAR_INPUT@@
          IN_@@PARAMETER@@               := #@@MODULE@@.@@PARAMETER@@ ,
-@@ATTR_END|PARAMETER_IN@@
+@@ATTR_END|PARAMETER_VAR_INPUT@@
          DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
          RUNNING                     := #@@MODULE@@.RUNNING ,
          RUNNING_SUBS                := #@@MODULE@@.RUNNING_SUBS ,
@@ -137,9 +136,9 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
 @@ATTR_BEGIN|CHILD_CMD@@
          @@CHILDALIASTAG@@_@@COMMANDALIASTYPE@@  := #@@MODULE@@.@@CHILDALIASTAG@@_@@COMMANDALIASTYPE@@ ,
 @@ATTR_END|CHILD_CMD@@
-@@ATTR_BEGIN|PARAMETER_OUT@@
+@@ATTR_BEGIN|PARAMETER_VAR_OUTPUT@@
          IO_@@PARAMETER@@               := #@@MODULE@@.@@PARAMETER@@ ,
-@@ATTR_END|PARAMETER_OUT@@
+@@ATTR_END|PARAMETER_VAR_OUTPUT@@
       );
       NOP 0;
 

@@ -1,56 +1,60 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbSIC1                                                        //
+// Description:                                                               //
+// Agitator speed control.                                                    //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 1.0 Khairul/Steve    15-Oct-2009 CC-09/016 PID loop removed.               //
+// 0.9 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic              //
+// 0.8 Khairul Basar    02-Oct-2009 CC-09/016 ALARM_L corrected in NW25.      //
+// 0.7 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.6 Steve Linehan    29-Sep-2009 CC-09/016 Bypass Input Mode Added.        //
+// 0.5 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters   //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters.          //
+// 0.4 Khairul Basar    14-Sep-2009 CC-09/016 DataQuality variable&logic      //
+//                                            added.                          //
+// 0.3 Khairul Basar    11-Sep-2009 CC-09/016 Ref2.                           //
+// 0.2 Khairul Basar    03-Sep-2009 CC-09/016 Ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design                  //
+//                                                                            //
+// Ref2:                                                                      //
+// Now Setpoint is moved to PID as per selected mode.TAH,THR & FLT Contact are//
+// corrected as per Failsafe siganl from field & FLT will result device state //
+// 'FAULT=5'.In DB1, Device state changed to 3=Stop, 4=Running instead of     //
+// 4=stop,3=Running.                                                          //
+//                                                                            //
+// Ref1:                                                                      //
+// MI1 Measure value assigned to MASS_MI1 parameter,Now the Minimum mass      //
+// condition is always overridden in manual mode.Now Device states are        //
+// configured for ENABLED, when enabled two sub state STOPPED & RUNNING and   //
+// DISABLED. Now Parameters MEASURE_RPM for agitator RPM , MASS_MI1 is for    //
+// mass of the  vessel, parameter for set point of manual is SETPOINT_MAN, &  //
+// in auto is SETPOINT_AUTO configured.Set point SETPOINT_MAN and             //
+// SETPOINT_AUTO initialized to 0.0 and GAIN to 1.0.ALARM_HH, ALARM_H,        //
+// ALARM_L, ALARM_LL are added in SIC1 and programmed.Default value added for //
+// following parameters.                                                      //
+// SL.NO.Parameter NameRange of ValueDefault Value                            //
+// 1.MODE=1=Manual                                                            //
+// 2.CMND_AUTO=1=disable                                                      //
+// 3.CMND_MAN=1=disable                                                       //
+// 4.P_SEL=True                                                               //
+// 5.I_SEL=True                                                               //
+// 6.D_SEL=True                                                               //
+// 7.CYCLE=T#1s                                                               //
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fbSIC1"
-TITLE = SIC1:Agitator speed control
+TITLE = SIC1 : Agitator speed control
 { S7_Optimized_Access := 'FALSE' }
-AUTHOR : Synertec
 NAME : fbSIC1
-VERSION : 0.8
-////------------------------------------------------------------------------------
-////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
-////------------------------------------------------------------------------------
-//// Title:SIC1
-////Agitator speed control
-////------------------------------------------------------------------------------
-//// Revision History:
-//// Rev   By                  Date             Note
-//// 1.0 Khairul/Steve    15-Oct-2009 CC-09/016 PID loop removed, ref.Mr.Steve
-//// 0.9 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic
-//// 0.8 Khairul Basar    02-Oct-2009 CC-09/016 ALARM_L corrected in NW25.
-//// 0.7 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.
-//// 0.6 Steve Linehan    29-Sep-2009 CC-09/016 Bypass Input Mode Added.
-//// 0.5 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters 
-////                                            deleted auto/manual both now 
-////                                            using same parameters.  
-//// 0.4 Khairul Basar    14-Sep-2009 CC-09/016  DataQuality variable&logic added.
-//// 0.3 Khairul Basar    11-Sep-2009 CC-09/016  Ref2.
-//// 0.2 Khairul Basar    03-Sep-2009 CC-09/016  Ref1.
-//// 0.1 Khairul Basar    03-Aug-2009            Initial design
-////------------------------------------------------------------------------------
-//Ref2:
-//Now Setpoint is moved to PID as per selected mode.TAH,THR & FLT Contact are 
-//corrected as per Failsafe siganl from field & FLT will result device state 
-//'FAULT=5'.In DB1, Device state changed to 3=Stop, 4=Running instead of 
-//4=stop,3=Running.
-//
-//
-//Ref1:
-//MI1 Measure value assigned to MASS_MI1 parameter,Now the Minimum mass condition 
-//is always overridden in manual mode.Now Device states are configured for 
-//ENABLED, when enabled two sub state STOPPED & RUNNING and DISABLED
-//Now Parameters MEASURE_RPM for agitator RPM , MASS_MI1 is for mass of the 
-//vessel, parameter for set point of manual is SETPOINT_MAN, & in auto is 
-//SETPOINT_AUTO configured.Set point SETPOINT_MAN and SETPOINT_AUTO initialized 
-//to 0.0 and GAIN to 1.0.ALARM_HH, ALARM_H, ALARM_L, ALARM_LL are added in SIC1 
-//and programmed.Default value added for following parameters.
-//SL.NO.Parameter NameRange of ValueDefault Value
-//1.MODE=1=Manual
-//2.CMND_AUTO=1=disable
-//3.CMND_MAN=1=disable
-//4.P_SEL=True
-//5.I_SEL=True
-//6.D_SEL=True
-//7.CYCLE=T#1s
-//
-   VAR_INPUT 
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 2.0
+
+   VAR_INPUT
       CMD : Int := 1;
       SETPOINT : Real;
       CR_IL : Bool;
@@ -82,7 +86,7 @@ VERSION : 0.8
       CYCLE : Time := T#1S;   // SAMPLING TIME:The time between the block calls constant
    END_VAR
 
-   VAR_OUTPUT 
+   VAR_OUTPUT
       DEV_STATE : Int;
       OUT_Q : Bool;   // Inverter Motor Run/Stop Command
       MAN_NONPID : Bool;
@@ -109,11 +113,11 @@ VERSION : 0.8
       OUT_LMN : Real;   // Inverter Speed reference from PID
    END_VAR
 
-   VAR_IN_OUT 
+   VAR_IN_OUT
       MODE : Int := 2;
    END_VAR
 
-   VAR 
+   VAR
       TMR_1 {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
       mv_rpm_at_run : Real;
       mass_ok : Bool;
@@ -125,7 +129,7 @@ VERSION : 0.8
       TMR_2 {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
    END_VAR
 
-   VAR_TEMP 
+   VAR_TEMP
       dev_sate_1 : Int;
       mv_rpm_R_1 : Real;
       retval1 : Word;
@@ -181,16 +185,16 @@ TITLE = SCALLING: MV_RPM: (0-60)
       AN #BYPASS_IP;
       JNB Label_0;
       CALL SCALE
-      (  IN                          := #MEASURE_RPM , 
-         HI_LIM                      := #MV_H , 
-         LO_LIM                      := #MV_L , 
-         BIPOLAR                     := %L27.0 , 
-         RET_VAL                     := #retval1 , 
+      (  IN                          := #MEASURE_RPM ,
+         HI_LIM                      := #MV_H ,
+         LO_LIM                      := #MV_L ,
+         BIPOLAR                     := %L27.0 ,
+         RET_VAL                     := #retval1 ,
          OUT                         := #mv_rpm_R_1
       );
 Label_0:      NOP 0;
 NETWORK
-TITLE = 
+TITLE =
       A #BYPASS_IP;
       JNB Label_1;
       L #SETPOINT;
@@ -252,7 +256,7 @@ TITLE = MASS  FEEDBACK
       T #mass_pv_R_1;
 Label_2:      NOP 0;
 NETWORK
-TITLE = SCALED RPM AS REAL VALUE 
+TITLE = SCALED RPM AS REAL VALUE
       L #mv_rpm_R_1;
       T #MV_RPM_R;
       NOP 0;
@@ -414,7 +418,7 @@ TITLE = Out Q assigned to temp variable for Timer In to run timer
       A #OUT_Q;
       = #out_Q_1;
 NETWORK
-TITLE = PID SETPOINT MANUAL/AUTO 
+TITLE = PID SETPOINT MANUAL/AUTO
       A(;
       A #OUT_Q;
       A(;
@@ -461,9 +465,9 @@ TITLE = Forward Reverse Timer
       BLD 103;
       CALL #TMR_2
       {time_type := 'Time'}
-      (  IN                          := %L27.0 , 
-         PT                          := T#5M , 
-         Q                           := #TMR_2.Q , 
+      (  IN                          := %L27.0 ,
+         PT                          := T#5M ,
+         Q                           := #TMR_2.Q ,
          ET                          := #TMR_2.ET
       );
       NOP 0;
@@ -480,7 +484,7 @@ TITLE = Switch Direction
       A #FR_SR;
       = #OUT_FR;
 NETWORK
-TITLE = 
+TITLE =
       AN #OUT_Q;
       R #OUT_FR;
 NETWORK
@@ -491,9 +495,9 @@ TITLE = RUN TIMER , CHECK FAIL TO RUN/ RUNNING LOW SPEED
       BLD 103;
       CALL #TMR_1
       {time_type := 'Time'}
-      (  IN                          := %L27.0 , 
-         PT                          := #FB_TDELAY , 
-         Q                           := #TMR_1.Q , 
+      (  IN                          := %L27.0 ,
+         PT                          := #FB_TDELAY ,
+         Q                           := #TMR_1.Q ,
          ET                          := #TMR_1.ET
       );
       A BR;
@@ -611,11 +615,11 @@ TITLE = Unscalling Setpoint
       A #OUT_Q;
       JNB Label_14;
       CALL UNSCALE
-      (  IN                          := #tmpSetpoint , 
-         HI_LIM                      := #MV_H , 
-         LO_LIM                      := #MV_L , 
-         BIPOLAR                     := %L27.0 , 
-         RET_VAL                     := #retval1 , 
+      (  IN                          := #tmpSetpoint ,
+         HI_LIM                      := #MV_H ,
+         LO_LIM                      := #MV_L ,
+         BIPOLAR                     := %L27.0 ,
+         RET_VAL                     := #retval1 ,
          OUT                         := #UnscOUT
       );
 Label_14:      A BR;
@@ -641,4 +645,3 @@ TITLE = Monitoring mismatch
       );
       = #MON_MISMATCH;
 END_FUNCTION_BLOCK
-

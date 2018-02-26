@@ -1,42 +1,42 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbZSC1                                                        //
+// Description:                                                               //
+// Manway closed Indication and Alarm.                                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.5 Khairul Basar    02-Oct-2009 CC-09/016 NW4/5 DI changed from NC to NO. //
+// 0.4 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.3 Khairul Basar    30-Sep-2009           Mode=3 ignored Alarm.           //
+// 0.2 Khairul Basar    04-Sep-2009 CC-09/016 Mode=1 initialized, ALARM       //
+//                                            renamed as ZSCA.                //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fbZSC1"
-TITLE = ZSC1 - Manway closed Indication and Alarm
+TITLE = ZSC1 : Manway closed Indication and Alarm
 { S7_Optimized_Access := 'FALSE' }
-AUTHOR : Synertec
 NAME : fbZSC1
-VERSION : 0.5
-////------------------------------------------------------------------------------
-////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
-////------------------------------------------------------------------------------
-//// Title: ZSC1
-////Manway closed Indication and Alarm
-////------------------------------------------------------------------------------
-//
-////------------------------------------------------------------------------------
-//// Revision History:
-//// Rev   By                  Date             Note
-//// 0.5 Khairul Basar    02-Oct-2009 CC-09/016 NW4/5 DI changed from NC to NO
-//// 0.4 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.
-//// 0.3 Khairul Basar    30-Sep-2009           Mode=3 ignored Alarm
-//// 0.2 Khairul Basar    04-Sep-2009 CC-09/016 Mode=1 initialized, ALARM renamed 
-////                                            as ZSCA
-//// 0.1 Khairul Basar    03-Aug-2009           Initial design
-////------------------------------------------------------------------------------
-//
-   VAR_INPUT 
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 2.0
+
+   VAR_INPUT
       MODE : Int := 2;
       DI_INPUT : Bool;   // Input signal from Field (0 = Alarm, 1 = OK)
       DI_USER : Bool;
       CUTOUT : Bool;   // Flag indicating if alarm is to be cutout (0= Alarm Enabled, 1= Alarm Disabled)
    END_VAR
 
-   VAR_OUTPUT 
+   VAR_OUTPUT
       INTERLOCK : Bool;   // Interlock Flag (0 = Inactive, 1 = Active)
       ZSCA : Bool;   // Alarm Flag (0 = OK Cover Closed, 1 = ALARM)
       DI_PV : Bool;   // Processed DI
       DEV_STATE : Int;   // Device State (1= CLOSED, 2= OPENED)
    END_VAR
 
-   VAR_TEMP 
+   VAR_TEMP
       DI_ALM_B_1 : Bool;   // Temporary processed DI signal
       mode_auto : Bool;
       mode_man : Bool;
@@ -115,4 +115,3 @@ TITLE = Setting Device State to OPENED
       T #DEV_STATE;
 Label_1:      NOP 0;
 END_FUNCTION_BLOCK
-

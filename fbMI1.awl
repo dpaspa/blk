@@ -1,27 +1,27 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbMI1                                                         //
+// Description:                                                               //
+// Load Cell mass indicator.                                                  //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.3 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Upper/Lower range hardcoded.    //
+//                                            USER_INPUT added for manual     //
+//                                            mode simulation.                //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fbMI1"
-TITLE = MI1 - Load Cell mass indicator
+TITLE = MI1 : Load Cell mass indicator
 { S7_Optimized_Access := 'FALSE' }
-AUTHOR : Synertec
 NAME : fbMI1
-VERSION : 0.3
-////------------------------------------------------------------------------------
-////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
-////------------------------------------------------------------------------------
-//// Title: MI1
-//// 
-//// Description:
-//// Load Cell mass indicator
-////------------------------------------------------------------------------------
-//// Revision History:
-//// Rev   By                  Date             Note
-//// 0.3 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.
-//// 0.2 Khairul Basar    31-Aug-2009 CC-09/016  Upper/Lower range hardcoded.
-////                                             USER_INPUT added for manual mode 
-////                                             simulation
-//// 0.1 Khairul Basar    03-Aug-2009            Initial design
-////------------------------------------------------------------------------------
-//
-   VAR_INPUT 
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 2.0
+
+   VAR_INPUT
       MODE : Int := 2;
       RAW_INPUT : Word;   // Raw input signal from Field (4mA = 0, 20mA = 27648)
       USER_INPUT : Int;   // Manual mode , equivallent of Analog input, to be entered by Operator
@@ -32,7 +32,7 @@ VERSION : 0.3
       LIMIT_H : Real;   // High Alarm Limit
    END_VAR
 
-   VAR_OUTPUT 
+   VAR_OUTPUT
       MEASURE : Real;   // Measured Value (after scaling)
       DATA_QUALITY : Bool;   // MV data quality (0=Bad; 1=Good)
       ALARM_HH : Bool;   // HighHigh Alarm
@@ -40,12 +40,12 @@ VERSION : 0.3
       INTERLOCK : Bool;   // Interlock Flag
    END_VAR
 
-   VAR_IN_OUT 
+   VAR_IN_OUT
       RANGE_ERROR : Bool;   // Range Error (<4mA or >20mA)
       BROKEN_WIRE : Bool;   // Broken Wire detection
    END_VAR
 
-   VAR_TEMP 
+   VAR_TEMP
       RET_VAL1 : Word;   // Returns a value of W#16#0000 if the instruction executes without error.
       PV_R_1 : Real;   // Temporary measured value
       HH_ALM_B_1 : Bool;   // Temporary HighHigh alarm
@@ -93,11 +93,11 @@ Label_1:      A BR;
       );
       JNB Label_2;
       CALL SCALE
-      (  IN                          := #iRAW_INPUT , 
-         HI_LIM                      := #UPPER_RANGE , 
-         LO_LIM                      := #LOWER_RANGE , 
-         BIPOLAR                     := %L11.0 , 
-         RET_VAL                     := #RET_VAL1 , 
+      (  IN                          := #iRAW_INPUT ,
+         HI_LIM                      := #UPPER_RANGE ,
+         LO_LIM                      := #LOWER_RANGE ,
+         BIPOLAR                     := %L11.0 ,
+         RET_VAL                     := #RET_VAL1 ,
          OUT                         := #PV_R_1
       );
 Label_2:      NOP 0;
@@ -109,7 +109,7 @@ TITLE = Mode Out Of Service
       = #OUTOFSERV;
 NETWORK
 TITLE = MASS  OUTPUT AS REAL
-//In Manual mode operator can change USER_INPUT variable to simulate Measure 
+//In Manual mode operator can change USER_INPUT variable to simulate Measure
 //output.
       L #PV_R_1;
       T #MEASURE;
@@ -178,10 +178,9 @@ TITLE = High ALARM
       = #ALARM_H;
 NETWORK
 TITLE = INTERLOCK
-//Set interlock flag if data quality is bad (Range error OR Broken Wire) or High 
+//Set interlock flag if data quality is bad (Range error OR Broken Wire) or High
 //High mass limit is reached.
       O #HH_ALM_B_1;
       ON #DATA_QUALITY;
       = #INTERLOCK;
 END_FUNCTION_BLOCK
-

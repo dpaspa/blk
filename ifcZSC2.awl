@@ -1,25 +1,38 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       ifcZSC2                                                       //
+// Description: Interface function for CM class ZSC2.                         //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      24-Jan-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
 FUNCTION "ifcZSC2" : Void
-TITLE = Interface Function
+TITLE = ifcZSC2 : Interface
 { S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
-   VAR_INPUT 
+NAME : ifcZSC2
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 2.0
+
+   VAR_INPUT
       IN_REQ_MODE : Bool;
       IN_MODE : Int;
       IN_REQ : Bool;
    END_VAR
 
-   VAR_OUTPUT 
+   VAR_OUTPUT
       OUT_MODE : Int;
    END_VAR
 
-   VAR_IN_OUT 
+   VAR_IN_OUT
       IO_MODE : Int;
       IO_REQ : Bool;
       POS_EDGE1 : Bool;
       POS_EDGE2 : Bool;
    END_VAR
 
-   VAR_TEMP 
+   VAR_TEMP
       RetVal : Bool;
    END_VAR
 
@@ -31,18 +44,18 @@ TITLE = Mode change
       = %L1.0;
       BLD 103;
       CALL "MODE_REQ"
-      (  IN_REQ_MODE                 := %L1.0 , 
-         IN_MODE                     := #IN_MODE , 
-         MODULE                      := 'C' , 
-         Ret_Val                     := #RetVal , 
-         OUT_MODE                    := #OUT_MODE , 
-         IO_MODE                     := #IO_MODE , 
-         POS_EDGE1                   := #POS_EDGE1 , 
+      (  IN_REQ_MODE                 := %L1.0 ,
+         IN_MODE                     := #IN_MODE ,
+         MODULE                      := 'C' ,
+         Ret_Val                     := #RetVal ,
+         OUT_MODE                    := #OUT_MODE ,
+         IO_MODE                     := #IO_MODE ,
+         POS_EDGE1                   := #POS_EDGE1 ,
          POS_EDGE2                   := #POS_EDGE2
       );
       NOP 0;
 NETWORK
-TITLE = Assign Input Parameters to Output 
+TITLE = Assign Input Parameters to Output
       L #IO_MODE;
       L "dbCONST_VAL".CM.MODE.AUTO;
       ==I;
@@ -54,4 +67,3 @@ TITLE = Assign Input Parameters to Output
       AN #IN_REQ;
       R #IO_REQ;
 END_FUNCTION
-

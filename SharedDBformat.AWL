@@ -1,0 +1,431 @@
+DATA_BLOCK "dbCONST_VAL"
+TITLE =
+{ S7_language := '7(1) German (Germany)  23.02.2010  09:00:05' }
+NAME : CONST_VA
+VERSION : 0.1
+
+
+  STRUCT 	
+   s5T_BAS0_01S : WORD ;	//S5 timer Base 0.01 sec= 2#0000 0000 0000 0000
+   s5T_BAS0_10s : WORD  := W#16#1000;	//S5 timer Base 0.10 sec= 2#0001 0000 0000 0000
+   s5T_BAS1_00s : WORD  := W#16#2000;	//S5 timer Base 1.00 sec= 2#0010 0000 0000 0000
+   s5T_BAS10_s : WORD  := W#16#3000;	//S5 timer Base 10.0 sec= 2#0011 0000 0000 0000
+   CPU_TIME : TIME_OF_DAY ;	
+   CPU_DATE : DATE ;	
+   NEW_TIME : TIME_OF_DAY  := TOD#17:55:0.000;	
+   NEW_DATE : DATE  := D#2009-10-15;	
+   DATE_TIME_SYNCH : STRUCT 	
+    DATE_TIME : DATE_AND_TIME ;	
+    RESERVE : ARRAY  [0 .. 3 ] OF BYTE ;	
+   END_STRUCT ;	
+   DATE_TIME : DATE_AND_TIME ;	
+   WEEKDAY : INT ;	//1=SUNDAY, 7=SATURDAY
+   OB1_prev_cycle : INT ;	
+   FREE : ARRAY  [1 .. 8 ] OF BYTE ;	
+   RESERVE : ARRAY  [1 .. 4 ] OF BYTE ;	
+   RECIPE : STRUCT 	//RCP:RECIPE
+    MODE : STRUCT 	
+     MANUAL : INT  := 1;	
+     AUTO : INT  := 2;	
+     OUT_OF_SERVICE : INT  := 3;	
+    END_STRUCT ;	
+    CMD : STRUCT 	
+     START : INT  := 2;	
+     STOP : INT  := 1;	
+    END_STRUCT ;	
+    RCPSY : STRUCT 	
+     SUBS : STRUCT 	
+      CIPSIP : INT  := 1;	
+      MAKE : INT  := 2;	
+      FILTER : INT  := 3;	
+      FILL : INT  := 4;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    DEV_STATE : STRUCT 	
+     STOPPED : INT ;	//CRP stopped
+     INTERLOCKED : INT  := 50;	//CRP interlocked
+     COMPLETE : INT  := 99;	//CRP substate finished, Finished after SQ is complete(if any) and stng substate
+    END_STRUCT ;	
+    SUBSTATE : STRUCT 	
+     ZERO : INT ;	//CRP substate
+    END_STRUCT ;	
+   END_STRUCT ;	
+   UNIT : STRUCT 	
+    OWNER : STRUCT 	//To Share some Equipement Module
+     NONE : INT ;	//Unshared EM
+     S1 : INT  := 1;	//Shared by S1
+     S2 : INT  := 2;	
+     S3 : INT  := 3;	
+     S4 : INT  := 4;	
+     M1 : INT  := 5;	
+     M2 : INT  := 6;	
+     M3 : INT  := 7;	
+    END_STRUCT ;	
+    HYGIENE_STATE : STRUCT 	//Hygiene Status
+     USED : INT  := 1;	
+     CIP : INT  := 2;	
+     CLEAN : INT  := 3;	
+     CLEAN_TIMEOUT : INT  := 4;	
+     SIP : INT  := 5;	
+     STERILE : INT  := 6;	
+     STERILE_TIMEOUT : INT  := 7;	
+     BATCH : INT  := 8;	
+    END_STRUCT ;	
+    CMD : STRUCT 	
+     START : INT  := 2;	
+     STOP : INT  := 1;	
+    END_STRUCT ;	
+    MODE : STRUCT 	
+     MANUAL : INT  := 1;	
+     AUTO : INT  := 2;	
+     OUT_OF_SERVICE : INT  := 3;	
+    END_STRUCT ;	
+    DEV_STATE : STRUCT 	
+     STOPPED : INT ;	//Em stopped
+     INTERLOCKED : INT  := 50;	//EM interlocked
+     COMPLETE : INT  := 99;	//EM substate finished, Finished after SQ is complete(if any) and Setting Substat
+    END_STRUCT ;	
+    SUBSTATE : STRUCT 	
+     ZERO : INT ;	//Substate for safe state
+    END_STRUCT ;	
+    MX : STRUCT 	//Manufacturing Vessel
+     SUBS : STRUCT 	
+      SETUP : INT  := 1;	
+      VACUUM : INT  := 2;	
+      CIP : INT  := 3;	
+      SIP : INT  := 4;	
+      MAKE : INT  := 5;	
+      FILTER : INT  := 6;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    SY : STRUCT 	//Storage Vessel
+     SUBS : STRUCT 	
+      ISOLATE : INT  := 1;	
+      SETUP : INT  := 2;	
+      VACUUM : INT  := 3;	
+      CIP : INT  := 4;	
+      SIP : INT  := 5;	
+      FILTER : INT  := 6;	
+      FILL : INT  := 7;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    MFL : STRUCT 	//Manufacturing filtration line
+     SUBS : STRUCT 	
+      CIP_SETUP : INT  := 1;	
+      SIP_SETUP : INT  := 2;	
+      VACUUM : INT  := 3;	
+      CIP_MX : INT  := 4;	
+      CIP_SY : INT  := 5;	
+      SIP_MX : INT  := 6;	
+      SIP_SY : INT  := 7;	
+      FILTER : INT  := 8;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    FCZ : STRUCT 	//Filling Line CIP and SIP Lines
+     SUBS : STRUCT 	
+      SETUP : INT  := 1;	
+      CIP : INT  := 2;	
+      SIP : INT  := 3;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    FLZ : STRUCT 	//Filling Line
+     SUBS : STRUCT 	
+      SETUP : INT  := 1;	
+      FILL : INT  := 2;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+   END_STRUCT ;	
+   EM : STRUCT 	
+    CMD : STRUCT 	
+     STOP : INT  := 1;	
+     START : INT  := 2;	
+    END_STRUCT ;	
+    EN_DISABLE : STRUCT 	
+     DISABLE : INT  := 1;	
+     ENABLE : INT  := 2;	
+    END_STRUCT ;	
+    MODE : STRUCT 	
+     MANUAL : INT  := 1;	
+     AUTO : INT  := 2;	
+     OUT_OF_SERVICE : INT  := 3;	
+    END_STRUCT ;	
+    DEV_STATE : STRUCT 	
+     STOPPED : INT ;	//Em stopped
+     INTERLOCKED : INT  := 50;	//EM interlocked
+     COMPLETE : INT  := 99;	//EM substate finished, Finished after SQ is complete(if any) and Setting Substat
+    END_STRUCT ;	
+    SUBSTATE : STRUCT 	
+     ZERO : INT ;	//Substate for safe state
+    END_STRUCT ;	
+    EMA1 : STRUCT 	//Manufacturing vessel agitator
+     SUBS : STRUCT 	
+      MIX : INT  := 1;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMC1 : STRUCT 	//HP N2, CA, LP N2, Vacuum
+     SUBS : STRUCT 	
+      PRESSURE_CONTROL : INT  := 1;	
+      VALVE_OPENED : INT  := 2;	
+     END_STRUCT ;	
+     VALVE : STRUCT 	
+      HPN2 : INT  := 1;	
+      CA : INT  := 2;	
+      LPN2 : INT  := 3;	
+      VENT : INT  := 4;	
+      VACUUM : INT  := 5;	
+      CS : INT  := 6;	
+      DRAIN : INT  := 7;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMC2 : STRUCT 	//WFI, CS, Supply plus PW,CS supply to manufacturing vessel
+     SUBS : STRUCT 	
+      SETUP : INT  := 1;	
+      ISOLATE : INT  := 2;	
+      CHARGE : INT  := 3;	
+      FLUSH : INT  := 4;	
+     END_STRUCT ;	
+     MEDIUM : STRUCT 	
+      WFI : INT  := 1;	
+      PW : INT  := 2;	
+      CS_WFI : INT  := 3;	
+      CS_PW : INT  := 4;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMC3 : STRUCT 	//Shared resource PW, WFI, CS supply to storage vessel
+     SUBS : STRUCT 	
+      SETUP : INT  := 1;	
+      ISOLATE : INT  := 2;	
+      FLUSH : INT  := 3;	
+     END_STRUCT ;	
+     MEDIUM : STRUCT 	
+      WFI : INT  := 1;	
+      PW : INT  := 2;	
+      CS_WFI : INT  := 3;	
+      CS_PW : INT  := 4;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMC4 : STRUCT 	//Shared WFI,CS supply plus PW, CS supply to manufacturing vessels M2 & M3
+     SUBS : STRUCT 	
+      NOTDONE : INT  := 1;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMD1 : STRUCT 	//General SMS inputs
+     SUBS : STRUCT 	
+      SUBS_MIX : INT  := 1;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMG1 : STRUCT 	//vessel gas filter heating element
+     SUBS : STRUCT 	
+      FILTER : INT  := 1;	
+      SIP : INT  := 2;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMJ1 : STRUCT 	//Manufacturing & storage vessel jacket cooling control
+     SUBS : STRUCT 	
+      COOL : INT  := 1;	//Cooling Water Duty
+      DRAIN : INT  := 2;	//Drain Jacket
+      PREEMPT : INT  := 3;	//Cooling Preemptive jacket Drain
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMM1 : STRUCT 	//Manufacturing vessel load cell
+     SUBS : STRUCT 	
+      MEASURE : INT  := 1;	
+      TARE : INT  := 2;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMV1 : STRUCT 	//Vessel manway,bursting disc,inlet conection & bottom outlet valve
+     SUBS : STRUCT 	
+      DISCHARGE : INT  := 1;	
+      CHARGE : INT  := 2;	
+      ISOLATE : INT  := 3;	
+      MANWAY : INT  := 4;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMV2 : STRUCT 	
+     SUBS : STRUCT 	
+      VACUUM : INT  := 1;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMX1 : STRUCT 	//Manuafcturing lines Filtration lines
+     SUBS : STRUCT 	
+      FILTER : INT  := 1;	
+      FILTER_END : INT  := 2;	
+      VACUUM : INT  := 3;	
+      CIP_MX : INT  := 4;	
+      CIP_SY : INT  := 5;	
+      CIP_DRN : INT  := 6;	
+      SIP : INT  := 7;	
+      SIP_MX : INT  := 8;	
+      SIP_SY : INT  := 9;	
+      SIP_BLK : INT  := 10;	
+      SIP_PULSE : INT  := 11;	
+      CIP_SETUP : INT  := 12;	
+      SIP_SETUP : INT  := 13;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMX2 : STRUCT 	//Storage Vessel transfer line to flowplate keypiece & filling lines to vial/Ampl
+     SUBS : STRUCT 	
+      SETUP : INT  := 1;	
+      CIPSIP : INT  := 2;	
+      FILTER : INT  := 3;	
+      ISOLATE : INT  := 4;	
+      FILL : INT  := 5;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMX3 : STRUCT 	//Filling Transfer line
+     SUBS : STRUCT 	
+      SETUP : INT  := 1;	
+      FILL : INT  := 2;	
+      ISOLATE : INT  := 3;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMX4 : STRUCT 	//Filling transfer lines CIP & SIP Drain
+     SUBS : STRUCT 	
+      SETUP : INT  := 1;	
+      CIP : INT  := 2;	
+      SIP : INT  := 3;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+    EMX5 : STRUCT 	//Shared Manufacturing vessels M2 & M3 filtration line
+     SUBS : STRUCT 	
+      FILTER : INT  := 1;	
+      FILTER_END : INT  := 2;	
+      VACUUM : INT  := 3;	
+      CIP_MX : INT  := 4;	
+      CIP_SY : INT  := 5;	
+      CIP_DRN : INT  := 6;	
+      SIP : INT  := 7;	
+      SIP_MX : INT  := 8;	
+      SIP_SY : INT  := 9;	
+      SIP_BLK : INT  := 10;	
+      SIP_PULSE : INT  := 11;	
+      CIP_SETUP : INT  := 12;	
+      SIP_SETUP : INT  := 13;	
+     END_STRUCT ;	
+    END_STRUCT ;	
+   END_STRUCT ;	
+   SQ_CMD : STRUCT 	//Sequencer command common to all
+    STOP : INT ;	
+    START : INT  := 1;	
+    PAUSE : INT  := 2;	
+    RESUME : INT  := 3;	
+    RESERVE1 : INT  := 4;	
+    RESERVE2 : INT  := 5;	
+    ABORT : INT  := 6;	//Or Go to Last Step
+    ACKNOWLEDGE_ERR : INT  := 7;	
+   END_STRUCT ;	
+   SQ_MODE : STRUCT 	
+    MANUAL : INT  := 1;	
+    AUTO : INT  := 2;	
+    OUT_OF_SERVICE : INT  := 3;	
+   END_STRUCT ;	
+   SQ_STATE : STRUCT 	//Sequencer command common to all
+    OFF_IDLE : INT ;	
+    STARTED : INT  := 1;	
+    PAUSED : INT  := 2;	
+    RESUMED : INT  := 3;	
+    WRMODE : INT  := 4;	//Wrong Mode selected
+    WRCMD : INT  := 5;	//Wrong Command selected
+    ABORTED : INT  := 6;	//Or Go to Last Step
+    ACKNOWLEDGED : INT  := 7;	
+    COMPLETE : INT  := 8;	
+   END_STRUCT ;	
+   SQ_STEP_TIME : TIME  := T#1M;	//Step finishing time delay
+   CM : STRUCT 	
+    CMD : STRUCT 	
+     START : INT  := 2;	
+     STOP : INT  := 1;	
+    END_STRUCT ;	
+    CMD_VALVE : STRUCT 	
+     CLOSE : INT  := 1;	
+     OPEN : INT  := 2;	
+    END_STRUCT ;	
+    EN_DISABLE : STRUCT 	
+     DISABLE : INT  := 1;	
+     ENABLE : INT  := 2;	
+    END_STRUCT ;	
+    MODE : STRUCT 	
+     MANUAL : INT  := 1;	
+     AUTO : INT  := 2;	
+     OUT_OF_SERVICE : INT  := 3;	
+    END_STRUCT ;	
+    DI1_DEV_STATE : STRUCT 	//General Alarm Signal digital input
+     OK : INT  := 1;	
+     ALARM : INT  := 2;	
+    END_STRUCT ;	
+    HE1_DEV_STATE : STRUCT 	//Electric heating element
+     OFF : INT  := 1;	
+     ON : INT  := 2;	
+     INTERLOCKED : INT  := 3;	
+     FAILED : INT  := 4;	
+    END_STRUCT ;	
+    MI1_DEV_STATE : STRUCT 	//Load Cell Mass Indicator
+     ENABLED : INT  := 1;	//Always Enabled
+    END_STRUCT ;	
+    MOD1_DEV_STATE : STRUCT 	//Load Cell Mass Indicator
+     CLOSED : INT  := 1;	
+     OPENED : INT  := 2;	
+    END_STRUCT ;	
+    PC1_DEV_STATE : STRUCT 	//Vessel ON/OFF Pressure control loop wth output valve selection
+     CLOSE : INT  := 1;	//Close all the valves
+     CONTROL : INT  := 2;	//Pressure control, open/close selected valve
+     OPEN : INT  := 3;	//Open selected valve
+    END_STRUCT ;	
+    PI1_DEV_STATE : STRUCT 	//Vessel pressure Indicator with alarms and Interlocks
+     ENABLED : INT  := 1;	//Always Enabled
+    END_STRUCT ;	
+    PI2_DEV_STATE : STRUCT 	//Line mounted pressure Indicator
+     ENABLED : INT  := 1;	//Always Enabled
+    END_STRUCT ;	
+    POSx_DEV_STATE : STRUCT 	//On/Off Valve with single output with/without feedback
+     CLOSED : INT  := 1;	
+     OPENED : INT  := 2;	
+     TRAVELLING : INT  := 3;	//Openning or Closing
+     FAULT : INT  := 4;	//Fail to open or Fail to close
+    END_STRUCT ;	
+    SIC1_DEV_STATE : STRUCT 	//Agitator speed control
+     DISABLED : INT  := 1;	
+     ENABLED : INT  := 2;	
+     STOPPED : INT  := 3;	
+     RUNNING : INT  := 4;	
+     FAULT : INT  := 5;	//Fault state-TAH,FLT or THR
+    END_STRUCT ;	
+    TC1_DEV_STATE : STRUCT 	//Vessel Cooling only temperature control
+     DISABLED : INT  := 1;	
+     ENABLED : INT  := 2;	
+    END_STRUCT ;	
+    TI1_DEV_STATE : STRUCT 	//Vessel Cooling temperature Indicator with alarms & Interlocks
+     ENABLED : INT  := 1;	//Always Enabled
+    END_STRUCT ;	
+    TI2_DEV_STATE : STRUCT 	//Vessel Cooling temperature Indicator with alarms & Interlocks
+     ENABLED : INT  := 1;	//Always Enabled
+    END_STRUCT ;	
+    ZSC1_DEV_STATE : STRUCT 	//Manway closed indication and alarm
+     CLOSED : INT  := 1;	
+     OPENED : INT  := 2;	
+    END_STRUCT ;	
+    ZSC2_DEV_STATE : STRUCT 	//Flow patch connection indication
+     IN : INT  := 1;	
+     OUT : INT  := 2;	
+     MISMATCH : INT  := 3;	
+    END_STRUCT ;	
+    MOT1_DEV_STATE : STRUCT 	//Vacuum pump control
+     STOPPED : INT  := 1;	
+     RUNNING : INT  := 2;	
+     STARTING_STOPPING : INT  := 3;	
+     FAULT : INT  := 4;	
+    END_STRUCT ;	
+   END_STRUCT ;	
+   BlockMsgS1 : STRUCT 	
+    MainLib : BYTE ;	
+    TextLib : BYTE  := B#16#1;	
+    BatchID : "udtID";	
+    CipSipNo : DINT ;	
+    SD : "udtALARM_MSG";	
+    BATCH_ID_TEMP : STRING  [6 ];	
+   END_STRUCT ;	
+  END_STRUCT ;	
+BEGIN
+  
+END_DATA_BLOCK
+

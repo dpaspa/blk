@@ -1,25 +1,38 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       ifcMOT1                                                       //
+// Description: Interface function for CM class MOT1.                         //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      24-Jan-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
 FUNCTION "ifcMOT1" : Void
-TITLE = ifcPOSx:
+TITLE = ifcMOT1 : Interface
 { S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
-   VAR_INPUT 
+NAME : ifcMOT1
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 2.0
+
+   VAR_INPUT
       IN_REQ_MODE : Bool;
       IN_MODE : Int;
       IN_CMD : Int;
    END_VAR
 
-   VAR_OUTPUT 
+   VAR_OUTPUT
       OUT_MODE : Int;
    END_VAR
 
-   VAR_IN_OUT 
+   VAR_IN_OUT
       IO_MODE : Int;
       IO_CMD : Int;
       POS_EDGE1 : Bool;
       POS_EDGE2 : Bool;
    END_VAR
 
-   VAR_TEMP 
+   VAR_TEMP
       RetVal : Bool;
    END_VAR
 
@@ -31,13 +44,13 @@ TITLE = Mode change
       = %L1.0;
       BLD 103;
       CALL "MODE_REQ"
-      (  IN_REQ_MODE                 := %L1.0 , 
-         IN_MODE                     := #IN_MODE , 
-         MODULE                      := 'C' , 
-         Ret_Val                     := #RetVal , 
-         OUT_MODE                    := #OUT_MODE , 
-         IO_MODE                     := #IO_MODE , 
-         POS_EDGE1                   := #POS_EDGE1 , 
+      (  IN_REQ_MODE                 := %L1.0 ,
+         IN_MODE                     := #IN_MODE ,
+         MODULE                      := 'C' ,
+         Ret_Val                     := #RetVal ,
+         OUT_MODE                    := #OUT_MODE ,
+         IO_MODE                     := #IO_MODE ,
+         POS_EDGE1                   := #POS_EDGE1 ,
          POS_EDGE2                   := #POS_EDGE2
       );
       NOP 0;
@@ -53,4 +66,3 @@ TITLE = Transfer Input Parameters to Output
       T #IO_CMD;
 Label_0:      NOP 0;
 END_FUNCTION
-

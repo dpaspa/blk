@@ -1,48 +1,51 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbMOT1                                                        //
+// Description:                                                               //
+// Vacuum Pump control.                                                       //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 1.0 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic.             //
+// 0.9 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized.               //
+// 0.8 Steve Linehan    30-Sep-2009 CC-09/016 Out of Service Mode Added.      //
+// 0.7 Steve Linehan    29-Sep-2009 CC-09/016 Bypass Input Mode Added.        //
+// 0.6 Khairul Basar    22-Sep-2009 CC-09/016 Nw3,FAULT_S remove.             //
+// 0.5 Khairul Basar    17-Sep-2009 CC-09/016 Instead of Auto/Man dual command//
+//                                            only CMD used now.              //
+// 0.4 Khairul Basar    11-Sep-2009 CC-09/016 FAULT_S reset after Out_Q is off//
+// 0.3 Khairul Basar    11-Sep-2009 CC-09/016 INTERLOCK is now o/p instead of //
+//                                            temporary flag.                 //
+// 0.3 Khairul Basar    09-Sep-2009 CC-09/016 Ref2.                           //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//                                                                            //
+// Ref2:Instead of using one timer, another timer is created.One timer will   //
+// start when there is Start command , another will start when Stop command.  //
+// And there is FAULT_S which will be setting, so operator acknowledge signal //
+// must reset that flag, to be able restart the MOT1 again.Start and Stop     //
+// command divided into two networks, NW2 & 3.                                //
+//                                                                            //
+// Ref1.                                                                      //
+// STOPPED & RUNNING states are changed to 1 & 2 respectively while previously//
+// it was 2 & 1. Timer start signal is paralleled with start & Stop flag,     //
+// every transition of run to stop or stop to run the timer should start.     //
+// Previously it the start flag was duplicated twice. Now Fault state can be  //
+// verified, Previously FAULT_S & FAULT_O was not assigned.                   //
+// Name of parameter DELAY_TIME is changed to TMR.                            //
+// Initial value in code is changed from 10S to 3S.                           //
+// Now Alarm Tag names are corrected, Logic is assigned for them.             //
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fbMOT1"
-TITLE = MOT1 - Vacuum Pump Control
+TITLE = MOT1 : Vacuum Pump Control
 { S7_Optimized_Access := 'FALSE' }
 NAME : fbMOT1
-VERSION : 0.9
-////------------------------------------------------------------------------------
-////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
-////------------------------------------------------------------------------------
-////Title: MOT1
-////Vacuum Pump control
-////------------------------------------------------------------------------------
-//// Revision History:
-//// Rev   By                  Date             Note
-//// 1.0 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic
-//// 0.9 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized
-//// 0.8 Steve Linehan    30-Sep-2009 CC-09/016 Out of Service Mode Added.
-//// 0.7 Steve Linehan    29-Sep-2009 CC-09/016 Bypass Input Mode Added.
-//// 0.6 Khairul Basar    22-Sep-2009 CC-09/016 Nw3,FAULT_S remove
-//// 0.5 Khairul Basar    17-Sep-2009 CC-09/016 Instead of Auto/Man dual command, 
-////                                            only CMD used now.
-//// 0.4 Khairul Basar    11-Sep-2009 CC-09/016 FAULT_S reset after Out_Q is off.
-//// 0.3 Khairul Basar    11-Sep-2009 CC-09/016 INTERLOCK is now o/p instead of 
-////                                            temporary flag.
-//// 0.3 Khairul Basar    09-Sep-2009 CC-09/016 Ref2
-//// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Ref1
-//// 0.1 Khairul Basar    03-Aug-2009           Initial design
-////------------------------------------------------------------------------------
-//Ref2:Instead of using one timer, another timer is created.One timer will start 
-//when there is Start command , another will start when Stop command.And there is 
-//FAULT_S which will be setting, so operator acknowledge signal must reset that 
-//flag, to be able restart the MOT1 again.Start and Stop command divided into two 
-//networks, NW2 & 3.
-//
-//
-//Ref1.
-//STOPPED & RUNNING states are changed to 1 & 2 respectively while previously it 
-//was 2 & 1. Timer start signal is paralleled with start & Stop flag, every 
-//transition of run to stop or stop to run the timer should start. Previously it 
-//the start flag was duplicated twice. Now Fault state can be verified, 
-//Previously 
-//FAULT_S & FAULT_O was not assigned.
-//Name of parameter DELAY_TIME is changed to TMR.
-//Initial value in code is changed from 10S to 3S.
-//Now Alarm Tag names are corrected, Logic is assigned for them.
-   VAR_INPUT 
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 2.0
+
+   VAR_INPUT
       CMD : Int := 1;   // Command to OPEN/CLOSE (AUTO Mode)
       TMR : Time := T#3S;   // Motor Start/Stop transition Time for checking status
       CR_IL : Bool;
@@ -53,7 +56,7 @@ VERSION : 0.9
       IN_MAN : Bool;
    END_VAR
 
-   VAR_OUTPUT 
+   VAR_OUTPUT
       DEV_STATE : Int;   // Device State
       INTERLOCK : Bool;   // Temporary digital output signal
       OUT_Q : Bool;   // Output to OPEN/CLOSE solenoid valve
@@ -63,17 +66,17 @@ VERSION : 0.9
       MON_MISMATCH : Bool;
    END_VAR
 
-   VAR_IN_OUT 
+   VAR_IN_OUT
       MODE : Int := 2;   // Mode of control module (1=MANUAL; 2=AUTO; 3=OOS Out of Service)
    END_VAR
 
-   VAR 
+   VAR
       StartTimer {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Motor Start/Stop Transition timer
       StopTimer {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
       startEdge : Bool;
    END_VAR
 
-   VAR_TEMP 
+   VAR_TEMP
       En_tmr_Start : Bool;
       En_tmr_Stop : Bool;
       BYPASS_IP : Bool;
@@ -127,7 +130,7 @@ TITLE = Input Bypass Mode In Manual
       A #IN_MAN;
       = #BYPASS_IP;
 NETWORK
-TITLE = 
+TITLE =
       A(;
       O(;
       L #MODE;
@@ -165,9 +168,9 @@ TITLE = Start Transition Timer in the event of Start or Stop
       BLD 103;
       CALL #StartTimer
       {time_type := 'Time'}
-      (  IN                          := %L1.0 , 
-         PT                          := #TMR , 
-         Q                           := #StartTimer.Q , 
+      (  IN                          := %L1.0 ,
+         PT                          := #TMR ,
+         Q                           := #StartTimer.Q ,
          ET                          := #StartTimer.ET
       );
       NOP 0;
@@ -178,9 +181,9 @@ TITLE = Stop Transition Timer in the event of Start or Stop
       BLD 103;
       CALL #StopTimer
       {time_type := 'Time'}
-      (  IN                          := %L1.0 , 
-         PT                          := #TMR , 
-         Q                           := #StopTimer.Q , 
+      (  IN                          := %L1.0 ,
+         PT                          := #TMR ,
+         Q                           := #StopTimer.Q ,
          ET                          := #StopTimer.ET
       );
       NOP 0;
@@ -274,7 +277,7 @@ TITLE = Motor Over load
       AN #OUTOFSERV;
       = #FAULT_O;
 NETWORK
-TITLE = 
+TITLE =
       A(;
       O(;
       L #DEV_STATE;
@@ -290,4 +293,3 @@ TITLE =
       );
       = #MON_MISMATCH;
 END_FUNCTION_BLOCK
-

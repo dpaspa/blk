@@ -1,47 +1,49 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbHE1                                                         //
+// Description:                                                               //
+// Vessel vent filter Electric heater element.                                //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.5 Khairul Basar    09-Oct-2009 CC-09/016 NW4, CMD & IL then Failed.      //
+// 0.4 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic.             //
+// 0.3 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Input Parameter       //
+//                                            deleted auto/manual both now    //
+//                                            using same parameter.           //
+// 0.2 Khairul Basar    28-Aug-2009 CC-09/016 Ref1.Cutout can be ON/OFF when  //
+//                                            key switch is ON.               //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//                                                                            //
+// Ref1.Cutout ON when key switch is OFF and Command is ON or OFF.When Key    //
+// switch is ON cutout can be ON or OFF by using user ON/OFF command.         //
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fbHE1"
-TITLE = HE1 - Vessel vent filter Electric heater element
+TITLE = HE1 : Vessel vent filter Electric heater element
 { S7_Optimized_Access := 'FALSE' }
-AUTHOR : Synertec
 NAME : fbHE1
-VERSION : 0.3
-////------------------------------------------------------------------------------
-////                   Copyright 2009 Synertec Asia (M) Sdn Bhd 
-////------------------------------------------------------------------------------
-//// Title: HE1
-//// 
-//// Description:
-//// Vessel vent filter Electric heater element
-////------------------------------------------------------------------------------
-//// Revision History:
-//// Rev   By                  Date             Note
-//// 0.5 Khairul Basar    09-Oct-2009 CC-09/016 NW4, CMD & IL then Failed
-//// 0.4 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic
-//// 0.3 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Input Parameter deleted
-////                                            auto/manual both now using same
-////                                            parameter.
-//// 0.2 Khairul Basar    28-Aug-2009 CC-09/016  1.Cutout can be ON/OFF when key 
-//                                                 switch is ON 
-//// 0.1 Khairul Basar    03-Aug-2009            Initial design
-////------------------------------------------------------------------------------
-//1.Cutout ON when key switch is OFF and Command is ON or OFF.When Key switch is 
-//ON cutout can be ON or OFF by using user ON/OFF command.
-   VAR_INPUT 
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 2.0
+
+   VAR_INPUT
       CMD : Bool;   // command to switch ON/OFF heating element.
       INTERLOCK : Bool;   // Manually operated key switch to disable heater
    END_VAR
 
-   VAR_OUTPUT 
+   VAR_OUTPUT
       DO_OUTPUT : Bool;   // Output Signal to Heating Element
       CUTOUT : Bool;   // Flag indicating if TI alarm is to cutout (0= Alarm Enabled, 1= Alarm Disabled)
       MON_MISMATCH : Bool;
       DEV_STATE : Int;   // Device State (1= OFF, 2= ON)
    END_VAR
 
-   VAR_IN_OUT 
+   VAR_IN_OUT
       MODE : Int := 2;   // Mode (1= MAN, 2= AUTO)
    END_VAR
 
-   VAR_TEMP 
+   VAR_TEMP
       DO_B_1 : Bool;   // Temporary processed DO signal
    END_VAR
 
@@ -92,10 +94,9 @@ TITLE = Setting Device State to 'Failed'
       T #DEV_STATE;
 Label_3:      NOP 0;
 NETWORK
-TITLE = 
+TITLE =
       L #DEV_STATE;
       L "dbCONST_VAL".CM.HE1_DEV_STATE.FAILED;
       ==I;
       = #MON_MISMATCH;
 END_FUNCTION_BLOCK
-

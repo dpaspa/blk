@@ -1,0 +1,152 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description: The entry point for the entire program called by the system.  //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      09-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+ORGANIZATION_BLOCK "MainOrganizationBlock"
+TITLE =  "Main Program Sweep (Cycle)"
+NAME : MainOrganizationBlock
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 2.0
+
+   VAR_TEMP
+      OB1_EV_CLASS : Byte;   // Bits 0-3 = 1 (Coming event), Bits 4-7 = 1 (Event class 1)
+      OB1_SCAN_1 : Byte;   // 1 (Cold restart scan 1 of OB 1), 3 (Scan 2-n of OB 1)
+      OB1_PRIORITY : Byte;   // Priority of OB Execution
+      OB1_OB_NUMBR : Byte;   // 1 (Organization block 1, OB1)
+      OB1_RESERVED_1 : Byte;   // Reserved for system
+      OB1_RESERVED_2 : Byte;   // Reserved for system
+      OB1_PREV_CYCLE : Int;   // Cycle time of previous OB1 scan (milliseconds)
+      OB1_MIN_CYCLE : Int;   // Minimum cycle time of OB1 (milliseconds)
+      OB1_MAX_CYCLE : Int;   // Maximum cycle time of OB1 (milliseconds)
+      OB1_DATE_TIME : Date_And_Time;   // Date and time OB1 started
+      wabc : Int;
+      wmode : Int;
+   END_VAR
+
+BEGIN
+NETWORK
+TITLE = ALWAYS LOW AND ALWAYS HIGH BIT
+      AN "AlwaysLow";
+      R "AlwaysLow";
+
+      AN "AlwaysLow";
+      S "AlwaysHighBit";
+      CALL "fcTEST";
+
+NETWORK
+TITLE = Communication with SMS1
+      CALL "fcGD_COMM";
+      NOP 0;
+NETWORK
+TITLE = Arbitration & Time management
+      CALL "fcARBITRATION";
+      NOP 0;
+NETWORK
+TITLE = load OB1 previous cycle time into DB memory
+      L #OB1_PREV_CYCLE;
+      T "dbCONST_VAL".OB1_prev_cycle;
+      NOP 0;
+NETWORK
+TITLE = Calling CMs
+      CALL "fcCallCMs";
+      NOP 0;
+NETWORK
+TITLE = Calling EMs
+      CALL "fcCallEMs";
+      NOP 0;
+NETWORK
+TITLE = Calling Units
+      CALL "fcCallUNs";
+      NOP 0;
+NETWORK
+TITLE = Calling Recipes
+      CALL "fcCallRPs";
+      NOP 0;
+NETWORK
+TITLE = Messages
+      CALL "Messages";
+      NOP 0;
+NETWORK
+TITLE = GetLED states
+      CALL "GetLEDState";
+      NOP 0;
+NETWORK
+TITLE = Calling Alarms/Events
+      CALL "fchmiALARMS";
+      NOP 0;
+NETWORK
+TITLE = Filling Line Switch Status
+      CALL "FillingLine_Connection";
+      NOP 0;
+NETWORK
+TITLE = Ownership Arbitration
+      A "dbGD_COMM".SMS1_TO_FL.S1_RELEASE_FCZ;
+      = %L24.0;
+      BLD 103;
+      A "dbGD_COMM".SMS1_TO_FL.S2_RELEASE_FCZ;
+      = %L24.1;
+      BLD 103;
+      A "dbGD_COMM".SMS2_TO_FL.S3_RELEASE_FCZ;
+      = %L24.2;
+      BLD 103;
+      A "dbGD_COMM".SMS2_TO_FL.S4_RELEASE_FCZ;
+      = %L24.3;
+      BLD 103;
+      A "dbGD_COMM".SMS1_TO_FL.S1_RELEASE_FLZ;
+      = %L24.4;
+      BLD 103;
+      A "dbGD_COMM".SMS1_TO_FL.S2_RELEASE_FLZ;
+      = %L24.5;
+      BLD 103;
+      A "dbGD_COMM".SMS2_TO_FL.S3_RELEASE_FLZ;
+      = %L24.6;
+      BLD 103;
+      A "dbGD_COMM".SMS2_TO_FL.S4_RELEASE_FLZ;
+      = %L24.7;
+      BLD 103;
+      CALL "OWNER"
+      (  RELEASE_FCZ_S1              := %L24.0 ,
+         RELEASE_FCZ_S2              := %L24.1 ,
+         RELEASE_FCZ_S3              := %L24.2 ,
+         RELEASE_FCZ_S4              := %L24.3 ,
+         RELEASE_FLZ_S1              := %L24.4 ,
+         RELEASE_FLZ_S2              := %L24.5 ,
+         RELEASE_FLZ_S3              := %L24.6 ,
+         RELEASE_FLZ_S4              := %L24.7 ,
+         OWNER_FLZ_S1                := "dbGD_COMM".FL_TO_SMS1.CRP1_S1_FLZ_OWNER ,
+         OWNER_FLZ_S2                := "dbGD_COMM".FL_TO_SMS1.CRP2_S2_FLZ_OWNER ,
+         OWNER_FLZ_S3                := "dbGD_COMM".FL_TO_SMS2.CRP3_S3_FLZ_OWNER ,
+         OWNER_FLZ_S4                := "dbGD_COMM".FL_TO_SMS2.CRP4_S4_FLZ_OWNER ,
+         OWNER_FCZ_S1                := "dbGD_COMM".FL_TO_SMS1.CRP1_S1_FCZ_OWNER ,
+         OWNER_FCZ_S2                := "dbGD_COMM".FL_TO_SMS1.CRP2_S2_FCZ_OWNER ,
+         OWNER_FCZ_S3                := "dbGD_COMM".FL_TO_SMS2.CRP3_S3_FCZ_OWNER ,
+         OWNER_FCZ_S4                := "dbGD_COMM".FL_TO_SMS2.CRP4_S4_FCZ_OWNER ,
+         OWNER_FCA                   := "idbFCZ".FCA.SY ,
+         OWNER_FCV                   := "idbFCZ".FCV.SY ,
+         OWNER_FLA                   := "idbFLZ".FLA.SY ,
+         OWNER_FLV                   := "idbFLZ".FLV.SY ,
+         HYGIENE_FCA                 := "idbFCZ".FCA.HYGIENE ,
+         HYGIENE_FCV                 := "idbFCZ".FCV.HYGIENE ,
+         HYGIENE_FLA                 := "idbFLZ".FLA.HYGIENE ,
+         HYGIENE_FLV                 := "idbFLZ".FLV.HYGIENE
+      );
+      NOP 0;
+NETWORK
+TITLE = Time Sync from Batch PC
+//Time Sync from Batch PC
+      CALL "TimeSyncPC";
+      NOP 0;
+NETWORK
+TITLE = Initialise All Modes
+//Very Important!!!!!!!!!!!!!!!!!!!!!
+//This MUST be the last instruction of OB1
+      A "FirstScanRestartflag";
+      R "FirstScanRestartflag";
+END_ORGANIZATION_BLOCK

@@ -1,0 +1,25 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description: Calls all Equipment Module instances.                         //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      09-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION "fcCallEMs" : Void
+TITLE = Call all EM Instances
+{ S7_Optimized_Access := 'FALSE' }
+NAME : fcCallEMs
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 2.0
+
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = Calling EM instances for class : @@CLASS@@
+      CALL "ifb@@CLASS@@", "idb@@CLASS@@";
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION
