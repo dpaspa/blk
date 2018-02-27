@@ -1,8 +1,9 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
 //----------------------------------------------------------------------------//
-// Title:       @@CLASS@@                                                     //
-// Description: @@CLASSDESCRIPTION@@                                          //
+// Title:       @@CLASS@@                                                          //
+// Description: @@CLASSDESCRIPTION@@
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
@@ -48,15 +49,19 @@ VERSION : 2.0
       CR_IL : Bool;               // critical Interlock that can not be bypased.
       NCR_IL : Bool;              // Interlock that can be bypased/Override.
       MAN_OVERRIDE : Bool;        // Manual override to bypass NCR_IL
-@@ATTR_BEGIN|CHILD_STATE@@
-      @@CHILDALIASTAG@@_STATE : Int;           // @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD_STATE@@
+      OWNER : Int := 1;           // value to be set or reset by Parent level
+      "NULL" : Int;               // no use to HMI Structure match
+@@ATTR_BEGIN|TIMER@@
+      IN_TIME_H : Int;
+      IN_TIME_M : Int;
+      IN_TIME_S : Int;
+@@ATTR_END|TIMER@@
 @@ATTR_BEGIN|PARAMETER_VAR_INPUT@@
       @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
 @@ATTR_END|PARAMETER_VAR_INPUT@@
-      CurrentMass : Real;
-      OWNER : Int := 1;           // value to be set or reset by Parent level
-      "NULL" : Int;               // no use to HMI Structure match
+@@ATTR_BEGIN|CHILD_STATE@@
+      @@CHILDALIASTAG@@_STATE : Int;           // @@CHILDALIASDESCRIPTION@@
+@@ATTR_END|CHILD_STATE@@
    END_VAR
 
    VAR_OUTPUT
@@ -71,17 +76,17 @@ VERSION : 2.0
       SQ_ERROR : Bool;
       CURSTEP : Int;
       SQ_STATE : Int;
-@@ATTR_BEGIN|PARAMETER_VAR_OUTPUT@@
-      @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARAMETER_VAR_OUTPUT@@
       RUNNING_SUBS : Int;
-@@ATTR_BEGIN|CHILD_CMD@@
-      @@CHILDALIASTAG@@_@@COMMANDALIASTYPE@@ : @@COMMANDALIASDATATYPE@@;     // @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD_CMD@@
       FLOWPATH : Bool;
       ARM_FLAG : Bool;
       MON_MISMATCH : Bool;
       BAD_PARAM : Bool;
+@@ATTR_BEGIN|PARAMETER_VAR_OUTPUT@@
+      @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|PARAMETER_VAR_OUTPUT@@
+@@ATTR_BEGIN|CHILD_CMD@@
+      @@CHILDALIASTAG@@_@@COMMANDALIASTYPE@@ : @@COMMANDALIASDATATYPE@@;     // @@CHILDALIASDESCRIPTION@@
+@@ATTR_END|CHILD_CMD@@
    END_VAR
 
    VAR_IN_OUT
@@ -111,18 +116,22 @@ VERSION : 2.0
    END_VAR
 
    VAR_TEMP
+      sq_finished : Bool;
       tmpRunning : Bool;
+      tmpTimeExpired : Bool;
+@@ATTR_BEGIN|TIMER@@
       tTime : Time;
       dTime : DInt;
+@@ATTR_END|TIMER@@
    END_VAR
 
 BEGIN
 NETWORK
 //----------------------------------------------------------------------------//
-TITLE = Shared Equipment module availability
+TITLE = Flag block as available is not owned
 //----------------------------------------------------------------------------//
       L #OWNER;
-      L "dbCONST_VAL".EM.OWNER.NONE;
+      L "dbCONST".BLK.OWNER.NONE;
       ==I;
       = #AVAILABLE;
 
@@ -140,11 +149,11 @@ TITLE = Call Mode & Command handling block
       (  COMMAND                     := #COMMAND ,
          MODE                        := #MODE ,
          SUBS                        := #SEL_SUBS ,
-         START_CMD                   := "dbCONST_VAL".EM.CMD.START ,
-         STOP_CMD                    := "dbCONST_VAL".EM.CMD.STOP ,
-         MODE_MAN                    := "dbCONST_VAL".EM.MODE.MANUAL ,
-         MODE_AUTO                   := "dbCONST_VAL".EM.MODE.AUTO ,
-         MODE_OOS                    := "dbCONST_VAL".EM.MODE.OUT_OF_SERVICE ,
+         START_CMD                   := "dbCONST".BLK.CMD.START ,
+         STOP_CMD                    := "dbCONST".BLK.CMD.STOP ,
+         MODE_MAN                    := "dbCONST".BLK.MODE.MANUAL ,
+         MODE_AUTO                   := "dbCONST".BLK.MODE.AUTO ,
+         MODE_OOS                    := "dbCONST".BLK.MODE.OUT_OF_SERVICE ,
          CR_IL                       := %L10.0 ,
          NCR_IL                      := #NCR_IL ,
          MAN_OVERRIDE                := #MAN_OVERRIDE ,
@@ -163,6 +172,21 @@ TITLE = Call Mode & Command handling block
          SUBS_H                      := #CMD_FUNC.Subs_hist
       );
       NOP 0;
+
+@@ATTR_BEGIN|TIMER@@
+NETWORK
+//----------------------------------------------------------------------------//
+TITLE = Hour Min & Sec to Time variable
+//----------------------------------------------------------------------------//
+      CALL "hms_time"
+      (  H                           := #TIME_RUN_H ,
+         M                           := #TIME_RUN_M ,
+         S                           := #TIME_RUN_S ,
+         TTIM_VAL                    := #tTime ,
+         dTIM_VAL                    := #dTime
+      );
+      NOP 0;
+@@ATTR_END|TIMER@@
 
 NETWORK
 //----------------------------------------------------------------------------//
@@ -192,8 +216,9 @@ TITLE = Call Substate Handling Block
          RUNNING                     := #CMD_FUNC.Running ,
          MODE                        := #MODE ,
          SEL_SUBS                    := #SEL_SUBS ,
+         PH_FINISHED                 := #SUB.PH_FINISHED ,
 @@ATTR_BEGIN|PARAMETER_VAR_INPUT@@
-      @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
+         @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
 @@ATTR_END|PARAMETER_VAR_INPUT@@
 @@ATTR_BEGIN|CHILD_STATE@@
          @@CHILDALIAS@@_STATE        := #@@CHILDALIASTAG@@_STATE ,
@@ -228,15 +253,12 @@ TITLE = Interlock State
       A #INTERLOCK;
       A(;
       L #SEL_SUBS;
-      L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+      L "dbCONST".BLK.SUBSTATE.ZERO;
       <>I;
       );
       JNB Label_0;
-      L "dbCONST_VAL".EM.DEV_STATE.INTERLOCKED;
+      L "dbCONST".BLK.DEV_STATE.INTERLOCKED;
       T #DEV_STATE;
-      SET;
-      SAVE;
-      CLR;
 Label_0:      A BR;
       = #MON_MISMATCH;
 
@@ -244,13 +266,13 @@ NETWORK
 //----------------------------------------------------------------------------//
 TITLE = Initiate Command variable of SFC Instance
 //----------------------------------------------------------------------------//
-//Command to valves
+//Command to Outputs
 @@ATTR_BEGIN|SFC@@
       AN #SUBS.CALL_@@SFC@@;
 @@ATTR_END|SFC@@
       JCN nini;
-
 @@ATTR_BEGIN|CHILD_CMD@@
+
       L #SUBS.@@CHILDALIAS@@_@@COMMANDALIASTYPE@@;
 @@ATTR_BEGIN|SFC@@
       T #PH_@@STATE@@._@@CHILDALIAS@@_@@COMMANDALIASTYPE@@;
@@ -401,6 +423,9 @@ TITLE = @@STATE@@
       CALL #@@SFC@@
       (  MODE                        := #@@SFC@@.MODE ,
          SQ_CMD                      := #@@SFC@@.SQ_CMD ,
+@@ATTR_BEGIN|PARAMETER_SFC_VAR_INPUT@@
+         _@@PARAMETER@@                 := #@@PARAMETERBLOCK@@ ,
+@@ATTR_END|PARAMETER_SFC_VAR_INPUT@@
 @@ATTR_BEGIN|CHILD_CMD@@
          @@CHILDALIAS@@_state        := #@@CHILDALIASTAG@@_STATE ,
 @@ATTR_END|CHILD_CMD@@
@@ -422,7 +447,7 @@ TITLE = @@STATE@@
          _@@CLASS@@_substate              := #@@CLASS@@_SUBSTATE ,
          _@@CLASS@@_cmd                   := #@@CLASS@@_CMD ,
 @@ATTR_BEGIN|PARAMETER_SFC_VAR_IN_OUT@@
-         _@@PARAMETER@@                 := #@@PARAMETER@@ ,
+         _@@PARAMETER@@                 := #@@PARAMETERBLOCK@@ ,
 @@ATTR_END|PARAMETER_SFC_VAR_IN_OUT@@
 @@ATTR_BEGIN|PARAMETER_FLOWPATH@@
          _flowpath_@@FLOWPATH@@                := #@@SFC@@._flowpath_@@FLOWPATH@@ ,
@@ -537,7 +562,7 @@ pau@@COUNTERMAX@@:      NOP 0;
 ///Reset ACT_PH=0
       A(;
       L #SEL_SUBS;
-      L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+      L "dbCONST".BLK.SUBSTATE.ZERO;
       ==I;
       );
       A(;
@@ -554,7 +579,7 @@ pau@@COUNTERMAX@@:      NOP 0;
       );
       JCN SQCO;
 
-      L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+      L "dbCONST".BLK.SUBSTATE.ZERO;
       T #SQ_STATE;
 
       L 0;
