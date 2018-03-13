@@ -82,7 +82,7 @@ STRUCT
         BATCH_ID_TEMP : STRING  [6 ];
     END_STRUCT ;
     SFC : STRUCT                       // Generic SFC structure
-        SQ_CMD : STRUCT                // Sequencer command common to all
+        CMD : STRUCT                   // Sequencer command common to all
             STOP : INT  := 0;
             START : INT  := 1;
             PAUSE : INT  := 2;
@@ -92,12 +92,12 @@ STRUCT
             ABORT : INT  := 6;         // Or Go to Last Step
             ACKNOWLEDGE_ERR : INT  := 7;
         END_STRUCT ;
-        SQ_MODE : STRUCT
+        MODE : STRUCT
             MANUAL : INT  := 1;
             AUTO : INT  := 2;
             OUT_OF_SERVICE : INT  := 3;
         END_STRUCT ;
-        SQ_STATE : STRUCT              // Sequencer command common to all
+        STATE : STRUCT                 // Sequencer command common to all
             OFF_IDLE : INT ;
             STARTED : INT  := 1;
             PAUSED : INT  := 2;
@@ -108,7 +108,7 @@ STRUCT
             ACKNOWLEDGED : INT  := 7;
             COMPLETE : INT  := 8;
         END_STRUCT ;
-        SQ_STEP_TIME : TIME  := T#1M;  // Step finishing time delay
+        STEP_TIME : TIME  := T#1M;     // Step finishing time delay
     END_STRUCT ;
     CM : STRUCT
         CMD : STRUCT
@@ -190,17 +190,27 @@ STRUCT
             FAULT : INT  := 4;
         END_STRUCT ;
     END_STRUCT ;
-    MEDIUM : STRUCT
-        WFI : INT  := 1;
-        PW : INT  := 2;
-        CS_WFI : INT  := 3;
-        CS_PW : INT  := 4;
-        HPCA : INT  := 1;
-        LPCA : INT  := 2;
-        VENT : INT  := 3;
-        VACUUM : INT  := 4;
+    SEL : STRUCT                       // Selection structures
+        GAS : STRUCT
+            HPCA : INT  := 1;
+            LPCA : INT  := 2;
+            VENT : INT  := 3;
+            VACUUM : INT  := 4;
+        END_STRUCT ;
+        LIQUID : STRUCT
+            WFI : INT  := 1;
+            PW : INT  := 2;
+            CSWFI : INT  := 3;
+            CSPW : INT  := 4;
+        END_STRUCT ;
+        VALVE : STRUCT
+            HPCA : INT  := 1;
+            LPCA : INT  := 2;
+            VENT : INT  := 3;
+            VACUUM : INT  := 4;
+            DRAIN : INT  := 5;
+        END_STRUCT ;
     END_STRUCT ;
 END_STRUCT ;
 BEGIN
-
 END_DATA_BLOCK

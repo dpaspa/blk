@@ -1,0 +1,70 @@
+Declare VAR_INPUT
+Declare VAR_OUTPUT
+Declare VAR_IN_OUT
+Declare VAR
+Declare VAR_TEMP
+
+If any Child in MANUAL mode
+	Set flagChildManual
+
+If any Child in INTERLOCKED state
+	Set flagChildInterlocked
+
+If any Child not Owned or not Available
+	Set flagChildUnavailable
+
+If any Child state does not match command
+	Set flagChildMismatch
+
+If flagChildManual OR flagChildInterlocked OR flagChildUnavailable OR flagChildMismatch
+	Set flagChildFailed 
+
+Call Mode and Command Handling Block
+	If no Owner 
+		Set flagAvailable
+
+	If any Interlock condition
+		Set flagInterlocked
+
+	If flagInterlocked
+		Set block state INTERLOCKED
+
+	If flagChildFailed and block STATE is STOPPED
+		Set block state INTERLOCKED
+
+	If flagChildFailed and block STATE is RUNNING
+		Set block state PAUSED
+
+	Auto/Manual/OOS Mode Change
+	Auto/Manual Command Change
+	Substate Change
+
+  	if new Substate
+		Set flagInitiated
+
+If flagInitiated and not flagChildFailed
+	If child block Available
+		Take Ownership and record for later Release
+
+	Store child device initial commands to current commands
+	Store child device initial commands to previous commands
+	Command child devices to current commands
+
+	If SFC
+		Write current commands to SFC child device commands
+		Initiate SFC
+		Clear flagInitiated
+		Set flagSFCRunning
+
+If flagSFCRunning
+	Write SFC child device commands to current commands
+	Write current commands to previous commands
+		
+	If SFC complete
+		Clear flagSFCRunning
+		Set flagSFCComplete
+
+If flagSFCComplete
+	Release any child devices taken Ownership
+	Set block state COMPLETED
+	Clear flagSFCComplete

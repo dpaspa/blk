@@ -70,7 +70,7 @@ VERSION : 0.6
 @@ATTR_BEGIN|SFC@@
       CALL_@@SFC@@ : Bool;
 @@ATTR_END|SFC@@
-      BAD_PARAM : Bool;
+      BAD_PARAM : Bool := FALSE;
       ACT_PH : Int;
    END_VAR
 
@@ -80,7 +80,6 @@ VERSION : 0.6
 
    VAR
       STATUS {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-      TMR_PULSE : "fbTMR_PULSE";
       TEQ {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
    END_VAR
 
@@ -90,7 +89,12 @@ VERSION : 0.6
 @@ATTR_BEGIN|SFC@@
       Subs_@@STATE@@ : Bool;
 @@ATTR_END|SFC@@
-      SafeSate : Bool;
+      SafeState : Bool;
+@@ATTR_BEGIN|SELECT@@
+@@ATTR_BEGIN|SELECTVALUES@@
+      @@SELNAME@@_@@SELVALUE@@ : Bool;
+@@ATTR_END|SELECTVALUES@@
+@@ATTR_END|SELECT@@
 @@ATTR_BEGIN|PARAMETER_VAR_TEMP@@
       IO_@@PARAMETER@@ : @@PARAMETERTYPE@@;
 @@ATTR_END|PARAMETER_VAR_TEMP@@
@@ -99,89 +103,57 @@ VERSION : 0.6
 
 BEGIN
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Assign selected Substate number into Temporary Variables
 //----------------------------------------------------------------------------//
+// Set boolean flags for running substate values:                             //
+//----------------------------------------------------------------------------//
       O #RUNNING;
       O #INITIATE;
       = %L4.0;
+
+@@ATTR_BEGIN|SFC@@
       A %L4.0;
       A(;
       L #SEL_SUBS;
-      L "dbCONST_VAL".EM.EMC2.SUBS.SETUP;
+      L "dbCONST".BLK.@@CLASS@@.SUBS.@@STATE@@;
       ==I;
       );
-      = #Subs_Setup;
-      A %L4.0;
-      A(;
-      L #SEL_SUBS;
-      L "dbCONST_VAL".EM.EMC2.SUBS.ISOLATE;
-      ==I;
-      );
-      = #Subs_Isolate;
-      A %L4.0;
-      A(;
-      L #SEL_SUBS;
-      L "dbCONST_VAL".EM.EMC2.SUBS.CHARGE;
-      ==I;
-      );
-      = #Subs_Charge;
-      A %L4.0;
-      A(;
-      L #SEL_SUBS;
-      L "dbCONST_VAL".EM.EMC2.SUBS.FLUSH;
-      ==I;
-      );
-      = #Subs_Flush;
+      = #Subs_@@STATE@@;
+@@ATTR_END|SFC@@
 
 NETWORK
+TITLE = Calling Parameter Selection
 //----------------------------------------------------------------------------//
-TITLE = Medium Selection
+// Set boolean flags for calling parameter selection values:                  //
 //----------------------------------------------------------------------------//
-//Medium Selection:
-//
       O #RUNNING;
       O #INITIATE;
       = %L4.0;
+
+@@ATTR_BEGIN|SELECT@@
+@@ATTR_BEGIN|SELECTVALUES@@
       A %L4.0;
       A(;
-      L #MEDIUM;
-      L "dbCONST_VAL".EM.EMC3.MEDIUM.PW;
+      L #@@SELNAME@@;
+      L "dbCONST".SEL.@@SELNAME@@.@@SELVALUE@@;
       ==I;
       );
-      = #Medium_PW;
-      A %L4.0;
-      A(;
-      L #MEDIUM;
-      L "dbCONST_VAL".EM.EMC3.MEDIUM.WFI;
-      ==I;
-      );
-      = #Medium_WFI;
-      A %L4.0;
-      A(;
-      L #MEDIUM;
-      L "dbCONST_VAL".EM.EMC3.MEDIUM.CS_PW;
-      ==I;
-      );
-      = #Medium_CS_PW;
-      A %L4.0;
-      A(;
-      L #MEDIUM;
-      L "dbCONST_VAL".EM.EMC3.MEDIUM.CS_WFI;
-      ==I;
-      );
-      = #Medium_CS_WFI;
+      = #@@SELNAME@@_@@SELVALUE@@;
+@@ATTR_END|SELECTVALUES@@
+@@ATTR_END|SELECT@@
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = If EM is STOPPED/IL then Set a Bit for Safe state
 //----------------------------------------------------------------------------//
+// The Safe State:                                                            //
+//----------------------------------------------------------------------------//
       AN #RUNNING;
-      = #SafeSate;
+      = #SafeState;
 
 NETWORK
+TITLE = Calling Parameter checks
 //----------------------------------------------------------------------------//
-TITLE = Arm flag
+// Check calling parameters are valid:                                        //
 //----------------------------------------------------------------------------//
       A(;
       O #Subs_Flush;
@@ -203,12 +175,12 @@ TITLE = Arm flag
       = #BAD_PARAM;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Item1 to 4:Supply Valves
+//----------------------------------------------------------------------------//
 // [Command=Closed] will be effective for following substate:                 //
 // @@COUNTER|0@@. @@STATE@@                                                   //
 //----------------------------------------------------------------------------//
-// State Needed:Closed
+// Set the initial child device states if initiating a new substate:          //
 //----------------------------------------------------------------------------//
       A #INITIATE;
       A(;
@@ -219,16 +191,17 @@ TITLE = Item1 to 4:Supply Valves
       AN #CALL_@@SFC@@;
 @@ATTR_END|SFC@@
       );
-      O #SafeSate;
+      O #SafeState;
       = %L4.0;
       A(;
       A %L4.0;
       JNB Label_0;
       L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
       T #WFI_VALV_CMD;
-      SET;
-      SAVE;
-      CLR;
+@@ATTR_BEGIN|CHILD_CMD@@
+      L "dbCONST".CM.CMD_VALVE.CLOSE;
+      T #@@CHILDALIAS@@_@@COMMANDALIASTYPE@@;
+@@ATTR_END|CHILD_CMD@@
 Label_0:      A BR;
       );
       JNB Label_1;
@@ -251,7 +224,6 @@ Label_2:      A BR;
 Label_3:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = 5 and 6: CS/PW and CS/WFI supply switch
 //----------------------------------------------------------------------------//
 //=================================Item5 and 6==============================
@@ -269,7 +241,6 @@ TITLE = 5 and 6: CS/PW and CS/WFI supply switch
       S #WFI_CS_REQ;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = 5 and 6: CS/PW and CS/WFI supply switch
 //----------------------------------------------------------------------------//
 //=================================Item5 and 6==============================
@@ -287,7 +258,6 @@ TITLE = 5 and 6: CS/PW and CS/WFI supply switch
       R #WFI_CS_REQ;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Isolate Switch Req
 //----------------------------------------------------------------------------//
       A #FLOWPATH_ISOLATED;
@@ -295,7 +265,6 @@ TITLE = Isolate Switch Req
       R #PW_CS_REQ;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Check Switch state
 //----------------------------------------------------------------------------//
       A(;
@@ -311,7 +280,6 @@ TITLE = Check Switch state
       = #PATH_OK;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE =
 //----------------------------------------------------------------------------//
       L 0;
@@ -319,7 +287,6 @@ TITLE =
       NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Check valve status
 //----------------------------------------------------------------------------//
       L #WFI_VALV_STATE;
@@ -337,7 +304,6 @@ TITLE = Check valve status
 Label_4:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Check valve status
 //----------------------------------------------------------------------------//
       L #PW_VALV_STATE;
@@ -355,7 +321,6 @@ TITLE = Check valve status
 Label_5:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Check valve status
 //----------------------------------------------------------------------------//
       L #CS_WFI_VALV_STATE;
@@ -373,7 +338,6 @@ TITLE = Check valve status
 Label_6:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Check valve status
 //----------------------------------------------------------------------------//
       L #CS_PW_VALV_STATE;
@@ -391,7 +355,6 @@ TITLE = Check valve status
 Label_7:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = States eq cmd
 //----------------------------------------------------------------------------//
       A #ControlBit[1];
@@ -401,7 +364,6 @@ TITLE = States eq cmd
       = #State_Eq_Command;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = START DEVICE STATUS MONITORING TIME OF THE EM_COMMAND
 //----------------------------------------------------------------------------//
       A #RUNNING;
@@ -418,60 +380,6 @@ TITLE = START DEVICE STATUS MONITORING TIME OF THE EM_COMMAND
       NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
-TITLE = CHARGE LOGIC for Open/Close
-//----------------------------------------------------------------------------//
-      A #PULSE;
-      = %L4.0;
-      BLD 103;
-      CALL #TMR_PULSE
-      (  START                       := %L4.0 ,
-         TON                         := #TIME_P_ON ,
-         TOFF                        := #TIME_P_OFF ,
-         Q_PULSE                     := #TMR_PULSE.Q_PULSE
-      );
-      NOP 0;
-
-NETWORK
-//----------------------------------------------------------------------------//
-TITLE = Charge logic in Pulse mode
-//----------------------------------------------------------------------------//
-      A #PULSE;
-      A "CALL_EMC2_PH_CHARGE";
-      = %L4.0;
-      A %L4.0;
-      A #Medium_WFI;
-      = %L4.1;
-      A %L4.1;
-      A #TMR_PULSE.Q_PULSE;
-      JNB Label_8;
-      L "dbCONST_VAL".CM.CMD_VALVE.OPEN;
-      T #WFI_VALV_CMD;
-Label_8:      NOP 0;
-      A %L4.1;
-      AN #TMR_PULSE.Q_PULSE;
-      JNB Label_9;
-      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
-      T #WFI_VALV_CMD;
-Label_9:      NOP 0;
-      A %L4.0;
-      A #Medium_PW;
-      = %L4.2;
-      A %L4.2;
-      A #TMR_PULSE.Q_PULSE;
-      JNB Label_10;
-      L "dbCONST_VAL".CM.CMD_VALVE.OPEN;
-      T #PW_VALV_CMD;
-Label_10:      NOP 0;
-      A %L4.2;
-      AN #TMR_PULSE.Q_PULSE;
-      JNB Label_11;
-      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
-      T #PW_VALV_CMD;
-Label_11:      NOP 0;
-
-NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Error if Device states are not Equivallent to commands
 //Sequencer run condition/EM finish condition
 //----------------------------------------------------------------------------//
@@ -479,7 +387,6 @@ TITLE = Error if Device states are not Equivallent to commands
       = #STATE_VER;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Start Sequencer if Device states are in the commanded states
 //----------------------------------------------------------------------------//
       A #RUNNING;
@@ -502,7 +409,6 @@ Label_12:      A BR;
 @@ATTR_END|SFC@@
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE =
 //----------------------------------------------------------------------------//
       A(;
@@ -516,7 +422,6 @@ TITLE =
 Label_13:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Stop selected sequencer if EM is not running
 //----------------------------------------------------------------------------//
       ON #RUNNING;
@@ -529,7 +434,6 @@ TITLE = Stop selected sequencer if EM is not running
 @@ATTR_END|SFC@@
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Device state of all the CM should be equal to the Commands
 //----------------------------------------------------------------------------//
 @@ATTR_BEGIN|SFC@@
@@ -540,7 +444,6 @@ TITLE = Device state of all the CM should be equal to the Commands
       = #EM_PROCESSED;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = SET DEVICE STATE =NOT RUNNING/STOPPED
 //----------------------------------------------------------------------------//
       A(;
@@ -555,7 +458,6 @@ TITLE = SET DEVICE STATE =NOT RUNNING/STOPPED
 Label_14:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = SET DEVICE STATE =RUNNING SUBSTATE
 //----------------------------------------------------------------------------//
       A #TEQ.Q;
@@ -565,7 +467,6 @@ TITLE = SET DEVICE STATE =RUNNING SUBSTATE
 Label_15:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE =
 //----------------------------------------------------------------------------//
       A #RUNNING;
@@ -581,7 +482,6 @@ TITLE =
       NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = EM complete
 //----------------------------------------------------------------------------//
       A(;
@@ -595,7 +495,6 @@ TITLE = EM complete
 Label_16:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE =
 //----------------------------------------------------------------------------//
       A(;
@@ -612,7 +511,6 @@ TITLE =
       = #WFI_CS_REQ_T;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE =
 //----------------------------------------------------------------------------//
       A(;

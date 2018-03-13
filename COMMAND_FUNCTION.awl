@@ -1,0 +1,303 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Title:       COMMAND_FUNCTION                                              //
+// Description: Common Mode and Command handling block.                       //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      28-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.4 Khairul Basar    05-Oct-2009 NA        Substate change will issue STOP //
+// 0.3 Khairul Basar    17-Sep-2009 NA        Instead of Auto/Man command,    //
+//                                            now only single COMMAND.        //
+// 0.2 Khairul Basar    20-Aug-2009 NA        Ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
+// Ref1.                                                                      //
+// Mode change:#tMode_Changed NO is removed from the parallel path of         //
+// Substate changed for not to generate #tEdgeAutoStart pulse when mode is    //
+// changed.                                                                   //
+//----------------------------------------------------------------------------//
+FUNCTION "COMMAND_FUNCTION" : Void
+TITLE = General Mode, Command & Interlock handling block
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 2.0
+
+   VAR_INPUT
+      OWNER : Int;           // Owner of the block
+      COMMAND : Int;         // command variable for auto mode
+      MODE : Int;            // Mode variable
+      SEL_SUBS : Int;        // Substate variable
+      START_CMD : Int;       // Start command constant value
+      STOP_CMD : Int;        // Stop command constant value
+      MODE_MAN : Int;        // manual mode  constant value
+      MODE_AUTO : Int;       // auto mode  constant value
+      MODE_OOS : Int;        // Out of service mode  constant value
+      CR_IL : Bool;          // Critical Interlock
+      NCR_IL : Bool;         // Non critical Interlock
+      MAN_OVERRIDE : Bool;   // Manual override for Non-critical interlocks
+   END_VAR
+
+   VAR_OUTPUT
+      AVAILABLE : Bool;      // Set High if block is not owned
+      RUNNING : Bool;        // Set High if Start command has given, Reset if Stop
+      INITIATE : Bool;       // Start Positive pulse
+      STOP : Bool;           // Positive pulse, except for Out of Service where always High
+      MAN : Bool;            // selected mode if manual
+      AUTO : Bool;           // selected mode if auto
+      OOS : Bool;            // selected mode if OOS
+      DEV_STATE : Int;       // Device state
+      MON_MISMATCH : Bool;   // State mismatch alarm flag
+      MODE_CHNG : Bool;      // If mode is changed, Command will be re-trigured
+      SUBS_CHNG : Bool;      // if substate changed, commands will be re-triggured
+      INTERLOCK : Bool;      // if there is any interlock
+   END_VAR
+
+   VAR_IN_OUT
+      CMD_M_H : Int;         // Value of previos scan, history of Man cmd
+      CMD_A_H : Int;         // Value of previos scan, history of Auto cmd
+      MODE_H : Int;          // Value of previos scan, history of Mode
+      SUBS_H : Int;          // Previous substate
+   END_VAR
+
+   VAR_TEMP
+      tAutomatic : Bool;
+      tManual : Bool;
+      tOutOfService : Bool;
+      tA_Cmd_Changed : Bool;
+      tM_Cmd_Changed : Bool;
+      tMode_Changed : Bool;
+      tSubs_Changed : Bool;
+      tEdgeAutoStart : Bool;
+      tEdgeManStart : Bool;
+      tEdgeAutoStop : Bool;
+      tEdgeManStop : Bool;
+      tInterlock : Bool;
+      tStart : Bool;
+      tStop : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+//----------------------------------------------------------------------------//
+// Set internal boolean flag if avilable:                                     //
+//----------------------------------------------------------------------------//
+TITLE = Flag block as available if not owned
+      L #OWNER;
+      L "dbCONST".BLK.OWNER.NONE;
+      ==I;
+      = #AVAILABLE;
+
+NETWORK
+TITLE = Interlock Flag
+//----------------------------------------------------------------------------//
+// Set internal boolean flag if any interlock:                                //
+//----------------------------------------------------------------------------//
+      O #CR_IL;
+      O;
+      A #NCR_IL;
+      AN #MAN_OVERRIDE;
+      = #tInterlock;
+      = #INTERLOCK;
+
+NETWORK
+TITLE = Interlock State
+//----------------------------------------------------------------------------//
+// Block should be interlocked state if interlock active:                     //
+//----------------------------------------------------------------------------//
+      A #INTERLOCK;
+      A(;
+      L #SEL_SUBS;
+      L "dbCONST".BLK.SUBSTATE.ZERO;
+      <>I;
+      );
+      JNB Label_0;
+      L "dbCONST".BLK.DEV_STATE.INTERLOCKED;
+      T #DEV_STATE;
+Label_0:      A BR;
+      = #MON_MISMATCH;
+
+NETWORK
+TITLE = Mode change
+      L #MODE;
+      L #MODE_H;
+      <>I;
+      = #tMode_Changed;
+      = #MODE_CHNG;
+NETWORK
+TITLE = Change the History if value changed: Mode changed
+      A #tMode_Changed;
+      JNB Label_0;
+      L #MODE;
+      T #MODE_H;
+Label_0:      NOP 0;
+NETWORK
+TITLE = Subs_Changed
+      L #SEL_SUBS;
+      L #SUBS_H;
+      <>I;
+      = #tSubs_Changed;
+      = #SUBS_CHNG;
+NETWORK
+TITLE = Change the History if value changed: Substate changed
+      A #tSubs_Changed;
+      JNB Label_1;
+      L #SEL_SUBS;
+      T #SUBS_H;
+Label_1:      NOP 0;
+NETWORK
+TITLE = Auto CMD changed
+      A(;
+      L #MODE;
+      L #MODE_AUTO;
+      ==I;
+      );
+      A(;
+      L #COMMAND;
+      L #CMD_A_H;
+      <>I;
+      );
+      = #tA_Cmd_Changed;
+NETWORK
+TITLE = Change the History if value changed: A_Cmd_Changed
+      A(;
+      L #MODE;
+      L #MODE_AUTO;
+      ==I;
+      );
+      A #tA_Cmd_Changed;
+      JNB Label_2;
+      L #COMMAND;
+      T #CMD_A_H;
+Label_2:      NOP 0;
+NETWORK
+TITLE = Man Command changed
+      A(;
+      L #MODE;
+      L #MODE_MAN;
+      ==I;
+      );
+      A(;
+      L #COMMAND;
+      L #CMD_M_H;
+      <>I;
+      );
+      = #tM_Cmd_Changed;
+NETWORK
+TITLE = Change the History if value changed: cmd manual changed
+      A(;
+      L #MODE;
+      L #MODE_MAN;
+      ==I;
+      );
+      A #tM_Cmd_Changed;
+      JNB Label_3;
+      L #COMMAND;
+      T #CMD_M_H;
+Label_3:      NOP 0;
+NETWORK
+TITLE = Mode auto
+      L #MODE;
+      L #MODE_AUTO;
+      ==I;
+      = #tAutomatic;
+      = #AUTO;
+NETWORK
+TITLE = Mode Man
+      L #MODE;
+      L #MODE_MAN;
+      ==I;
+      = #tManual;
+      = #MAN;
+NETWORK
+TITLE = Out of Service
+      L #MODE;
+      L #MODE_OOS;
+      ==I;
+      = #tOutOfService;
+      = #OOS;
+NETWORK
+TITLE = any changes in Mode,will retrigger the output command
+//----------------------------------------------------------------------------//
+// In Auto Mode, #tSubs_Changed will not issue start command, instead it will //
+// issue a stop pulse so that operator must see/enter the parameters.         //
+// Start/Stop Command will give continious start signal (no more command      //
+// change checking):                                                          //
+//----------------------------------------------------------------------------//
+      A #tAutomatic;
+      = %L2.0;
+      A %L2.0;
+      A(;
+      L #COMMAND;
+      L #START_CMD;
+      ==I;
+      );
+      = #tEdgeAutoStart;
+      A %L2.0;
+      A(;
+      L #COMMAND;
+      L #STOP_CMD;
+      ==I;
+      );
+      = #tEdgeAutoStop;
+NETWORK
+TITLE = any changes in Mode will retrigger the output command
+//----------------------------------------------------------------------------//
+// In manual mode, command needs to be changed in order to re-start, after    //
+// clearing interlock conditions. But in auto once the Interlock conditions   //
+// are cleared it should start immediately.                                   //
+// In Manual Mode Start/Stop Command will give continious start signal (no    //
+// more command change checking):                                             //
+//----------------------------------------------------------------------------//
+      A #tManual;
+      = %L2.0;
+      A %L2.0;
+      A(;
+      L #COMMAND;
+      L #START_CMD;
+      ==I;
+      );
+      = #tEdgeManStart;
+      A %L2.0;
+      A(;
+      L #COMMAND;
+      L #STOP_CMD;
+      ==I;
+      );
+      = #tEdgeManStop;
+NETWORK
+TITLE = START
+      A(;
+      O #tEdgeAutoStart;
+      O #tEdgeManStart;
+      );
+      AN #tInterlock;
+      = #tStart;
+NETWORK
+TITLE = STOP
+//----------------------------------------------------------------------------//
+// #tSubs_Changed will issue a STOP command & reset running flag.             //
+//----------------------------------------------------------------------------//
+      O #tEdgeAutoStop;
+      O #tEdgeManStop;
+      O #tInterlock;
+      O #tOutOfService;
+      = #tStop;
+NETWORK
+TITLE = Latched Start Bit
+      A #tStart;
+      S #RUNNING;
+NETWORK
+TITLE = Latched Start Bit
+      A #tStop;
+      R #RUNNING;
+NETWORK
+TITLE = Start output
+      A #tStart;
+      = #INITIATE;
+      R #STOP;
+NETWORK
+TITLE = Stop output
+      A #tStop;
+      S #STOP;
+END_FUNCTION

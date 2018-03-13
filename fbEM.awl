@@ -71,7 +71,7 @@ VERSION : 2.0
       TIME_EXPIRED : Bool;
       ALARM_TIMEOUT : Bool;
       INTERLOCK : Bool;
-      STATE_VER : Bool;
+      STATE_MISMATCH : Bool;
       EM_PROCESSED : Bool;
       SQ_ERROR : Bool;
       CURSTEP : Int;
@@ -127,17 +127,8 @@ VERSION : 2.0
 
 BEGIN
 NETWORK
-//----------------------------------------------------------------------------//
-TITLE = Flag block as available is not owned
-//----------------------------------------------------------------------------//
-      L #OWNER;
-      L "dbCONST".BLK.OWNER.NONE;
-      ==I;
-      = #AVAILABLE;
-
-NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Call Mode & Command handling block
+//----------------------------------------------------------------------------//
 //----------------------------------------------------------------------------//
       A(;
       O #CR_IL;
@@ -146,7 +137,8 @@ TITLE = Call Mode & Command handling block
       = %L10.0;
       BLD 103;
       CALL "COMMAND_FUNCTION"
-      (  COMMAND                     := #COMMAND ,
+      (  OWNER                       := #OWNER ,
+         COMMAND                     := #COMMAND ,
          MODE                        := #MODE ,
          SUBS                        := #SEL_SUBS ,
          START_CMD                   := "dbCONST".BLK.CMD.START ,
@@ -157,12 +149,15 @@ TITLE = Call Mode & Command handling block
          CR_IL                       := %L10.0 ,
          NCR_IL                      := #NCR_IL ,
          MAN_OVERRIDE                := #MAN_OVERRIDE ,
+         AVAILABLE                   := #AVAILABLE ,
          RUNNING                     := #tmpRunning ,
          INITIATE                    := "CMD_INITIATE" ,
          STOP                        := "CMD_STOP" ,
          MAN                         := "MODE_MANUAL" ,
          AUTO                        := "MODE_AUTO" ,
          OOS                         := "MODE_OUT_OF_SERVICE" ,
+         DEV_STATE                   := #DEV_STATE ,
+         MON_MISMATCH                := #MON_MISMATCH ,
          MODE_CHNG                   := "MODE_CHANGED" ,
          SUBS_CHNG                   := "SUBS_CHANGED" ,
          INTERLOCK                   := #INTERLOCK ,
@@ -175,8 +170,8 @@ TITLE = Call Mode & Command handling block
 
 @@ATTR_BEGIN|TIMER@@
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Hour Min & Sec to Time variable
+//----------------------------------------------------------------------------//
 //----------------------------------------------------------------------------//
       CALL "hms_time"
       (  H                           := #TIME_RUN_H ,
@@ -189,8 +184,8 @@ TITLE = Hour Min & Sec to Time variable
 @@ATTR_END|TIMER@@
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = if Started/Initiated, Set running flag
+//----------------------------------------------------------------------------//
 //----------------------------------------------------------------------------//
       A "CMD_INITIATE";
       S #RUNNING;
@@ -198,8 +193,8 @@ TITLE = if Started/Initiated, Set running flag
       = #CMD_FUNC.Initiate_Bit;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = if stopped, Reset Running flags
+//----------------------------------------------------------------------------//
 //----------------------------------------------------------------------------//
       A "CMD_STOP";
       = #CMD_FUNC.Stop_Bit;
@@ -207,8 +202,8 @@ TITLE = if stopped, Reset Running flags
       R #RUNNING;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Call Substate Handling Block
+//----------------------------------------------------------------------------//
 //----------------------------------------------------------------------------//
       CALL #SUBS
       (  INITIATE                    := #CMD_FUNC.Initiate_Bit ,
@@ -218,7 +213,7 @@ TITLE = Call Substate Handling Block
          SEL_SUBS                    := #SEL_SUBS ,
          PH_FINISHED                 := #SUB.PH_FINISHED ,
 @@ATTR_BEGIN|PARAMETER_VAR_INPUT@@
-         @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
+         @@PARAMETER@@                 := #@@PARAMETERBLOCK@@ ,
 @@ATTR_END|PARAMETER_VAR_INPUT@@
 @@ATTR_BEGIN|CHILD_STATE@@
          @@CHILDALIAS@@_STATE        := #@@CHILDALIASTAG@@_STATE ,
@@ -230,15 +225,18 @@ TITLE = Call Substate Handling Block
          FLOWPATH_@@FLOWPATH@@               := #@@SFC@@._flowpath_@@FLOWPATH@@ ,
 @@ATTR_END|PARAMETER_FLOWPATH@@
          DEV_STATE                   := #DEV_STATE ,
-         STATE_VER                   := #STATE_VER ,
+         STATE_MISMATCH              := #STATE_MISMATCH ,
          BLK_PROCESSED               := #BLK_PROCESSED ,
          PATH_OK                     := #SUBS.PATH_OK ,
 @@ATTR_BEGIN|CHILD_CMD@@
          @@CHILDALIAS@@_@@COMMANDALIASTYPE@@ := #@@CHILDALIASTAG@@_@@COMMANDALIASTYPE@@ ,
 @@ATTR_END|CHILD_CMD@@
 @@ATTR_BEGIN|PARAMETER_VAR_IN_OUT@@
-      @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
+         @@PARAMETER@@                 := #@@PARAMETERBLOCK@@ ,
 @@ATTR_END|PARAMETER_VAR_IN_OUT@@
+@@ATTR_BEGIN|PARAMETER_VAR_OUTPUT@@
+         @@PARAMETER@@                 := #@@PARAMETERBLOCK@@ ,
+@@ATTR_END|PARAMETER_VAR_OUTPUT@@
 @@ATTR_BEGIN|SFC@@
          CALL_@@SFC@@                := #SUBS.CALL_@@SFC@@ ,
 @@ATTR_END|SFC@@
@@ -247,24 +245,8 @@ TITLE = Call Substate Handling Block
       NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
-TITLE = Interlock State
-//----------------------------------------------------------------------------//
-      A #INTERLOCK;
-      A(;
-      L #SEL_SUBS;
-      L "dbCONST".BLK.SUBSTATE.ZERO;
-      <>I;
-      );
-      JNB Label_0;
-      L "dbCONST".BLK.DEV_STATE.INTERLOCKED;
-      T #DEV_STATE;
-Label_0:      A BR;
-      = #MON_MISMATCH;
-
-NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Initiate Command variable of SFC Instance
+//----------------------------------------------------------------------------//
 //----------------------------------------------------------------------------//
 //Command to Outputs
 @@ATTR_BEGIN|SFC@@
@@ -282,8 +264,8 @@ TITLE = Initiate Command variable of SFC Instance
 nini:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Start/Stop Sequencer commands
+//----------------------------------------------------------------------------//
 //----------------------------------------------------------------------------//
 @@ATTR_BEGIN|SFC@@
       CALL_@@SFC@@                := #SUBS.CALL_@@SFC@@ ,
@@ -294,51 +276,49 @@ TITLE = Start/Stop Sequencer commands
       FP #FP_i@@FLOWPATH@@;
 @@ATTR_END|PARAMETER_FLOWPATH@@
       JNB _i@@COUNTER|1@@; // Initiate Sequence
-      L "dbCONST_VAL".SQ_CMD.START;
+      L "dbCONST".SFC.CMD.START;
       T #@@SFC@@.SQ_CMD;
 _i@@COUNTER@@:      NOP 0;
 
       AN #SUBS.CALL_@@SFC@@;
       JNB _e@@COUNTER|1@@;//end Sequence
-      L "dbCONST_VAL".SQ_CMD.STOP;
+      L "dbCONST".SFC.CMD.STOP;
       T #@@SFC@@.SQ_CMD;
 _e@@COUNTER@@:      NOP 0;
 @@ATTR_END|SFC@@
 
 NETWORK
+TITLE = Pause SQ, If STATE_MISMATCH when PHASE running
 //----------------------------------------------------------------------------//
-TITLE = Pause SQ, If STATE_VER when PHASE running
 //----------------------------------------------------------------------------//
-      JU psc1;
 @@ATTR_BEGIN|SFC@@
-      A #STATE_VER;
+      A #STATE_MISMATCH;
       A #SUBS.CALL_@@SFC@@;
       JNB pse@@COUNTER|1@@;
-      L "dbCONST_VAL".SQ_CMD.PAUSE;
+      L "dbCONST".SFC.CMD.PAUSE;
       T #@@SFC@@.SQ_CMD;
 pse@@COUNTER@@:      NOP 0;
 @@ATTR_END|SFC@@
-psc1:      NOP 0;
 
 @@ATTR_BEGIN|SFC@@
       AN #FLOWPATH;
       A #SUBS.CALL_@@SFC@@;
       JNB fp@@COUNTER|1@@;
-      L "dbCONST_VAL".SQ_CMD.PAUSE;
+      L "dbCONST".SFC.CMD.PAUSE;
       T #@@SFC@@.SQ_CMD;
 fp@@COUNTER@@:      NOP 0;
 @@ATTR_END|SFC@@
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = SQ Acknowlede Error Fault &  Resume
+//----------------------------------------------------------------------------//
 //----------------------------------------------------------------------------//
 @@ATTR_BEGIN|SFC@@
       A #SQ_ACK;
       A #SQ_ERROR;
       A #SUBS.CALL_@@SFC@@;
       JNB Ack@@COUNTER|1@@;
-      L "dbCONST_VAL".SQ_CMD.ACKNOWLEDGE_ERR;
+      L "dbCONST".SFC.CMD.ACKNOWLEDGE_ERR;
       T #@@SFC@@.SQ_CMD;
       R #SQ_ACK;
 
@@ -349,17 +329,17 @@ Ack@@COUNTER@@:      NOP 0;
       A(;
       O(;
       L #SQ_STATE;
-      L "dbCONST_VAL".SQ_CMD.PAUSE;
+      L "dbCONST".SFC.CMD.PAUSE;
       ==I;
       );
       O(;
       L #SQ_STATE;
-      L "dbCONST_VAL".SQ_CMD.ACKNOWLEDGE_ERR;
+      L "dbCONST".SFC.CMD.ACKNOWLEDGE_ERR;
       ==I;
       );
       );
       JNB Res@@COUNTER|1@@;
-      L "dbCONST_VAL".SQ_CMD.RESUME;
+      L "dbCONST".SFC.CMD.RESUME;
       T #@@SFC@@.SQ_CMD;
       R #SQ_RESUME;
 
@@ -367,7 +347,6 @@ Res@@COUNTER@@:      NOP 0;
 @@ATTR_END|SFC@@
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = All SQ are in Auto mode when EM in Auto
 //----------------------------------------------------------------------------//
       A "MODE_CHANGED";
@@ -381,7 +360,6 @@ TITLE = All SQ are in Auto mode when EM in Auto
 _009:      NOP 0;
 
 @@ATTR_BEGIN|SFC@@
-//----------------------------------------------------------------------------//
 TITLE = @@STATE@@ synchronize commands and settings to the Block
 //----------------------------------------------------------------------------//
       A(;
@@ -395,7 +373,6 @@ TITLE = @@STATE@@ synchronize commands and settings to the Block
 _010:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Syncronize the child commands by commanding the child devices
 //----------------------------------------------------------------------------//
       A(;
@@ -412,7 +389,6 @@ TITLE = Syncronize the child commands by commanding the child devices
 chrg:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = @@STATE@@
 //----------------------------------------------------------------------------//
 @@ATTR_BEGIN|PARAMETER_FLOWPATH@@
@@ -456,7 +432,6 @@ TITLE = @@STATE@@
 Label_@@COUNTER|1@@:      NOP 0;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Set the flowpath for the current state
 //----------------------------------------------------------------------------//
 @@ATTR_BEGIN|PARAMETER_FLOWPATH@@
@@ -467,7 +442,6 @@ TITLE = Set the flowpath for the current state
 @@ATTR_END|PARAMETER_FLOWPATH@@
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = @@STATEDESCRIPTION@@ finished
 //----------------------------------------------------------------------------//
       A #@@SFC@@.SQ_FINISHED;
@@ -476,7 +450,6 @@ TITLE = @@STATEDESCRIPTION@@ finished
 @@ATTR_END|SFC@@
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Arm the flowpath
 //----------------------------------------------------------------------------//
       A(;
@@ -493,7 +466,6 @@ TITLE = Arm the flowpath
       = #ARM_FLAG;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE =
 //----------------------------------------------------------------------------//
       O #SUBS.PATH_OK;
@@ -502,7 +474,6 @@ TITLE =
       = #FLOWPATH;
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = Move Phase Current Step to Output
 //----------------------------------------------------------------------------//
       NOP 0;
@@ -525,7 +496,6 @@ mov@@COUNTER|1@@:      NOP 0;
 @@ATTR_END|SFC@@
 
 NETWORK
-//----------------------------------------------------------------------------//
 TITLE = If Phase Paused/Error
 //----------------------------------------------------------------------------//
 @@ATTR_BEGIN|SFC@@
@@ -568,12 +538,12 @@ pau@@COUNTERMAX@@:      NOP 0;
       A(;
       O(;
       L #SQ_STATE;
-      L "dbCONST_VAL".SQ_STATE.ABORTED;
+      L "dbCONST".SFC.STATE.ABORTED;
       ==I;
       );
       O(;
       L #SQ_STATE;
-      L "dbCONST_VAL".SQ_STATE.COMPLETE;
+      L "dbCONST".SFC.STATE.COMPLETE;
       ==I;
       );
       );
