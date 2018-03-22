@@ -8,7 +8,7 @@
 // 2.0 David Paspa      09-Feb-2018 NA        Reboot for S7-1500.             //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-FUNCTION "fcHygiene_Status" : Void
+FUNCTION "fcHygieneStatus" : Void
 TITLE = HYGIENE STATUS MONITORING FUNCTION
 { S7_Optimized_Access := 'FALSE' }
 NAME : fcHygiene_Status
@@ -48,7 +48,7 @@ BEGIN
 NETWORK
 TITLE = Start cleanliness monitoring timer if Hygiene Status is CLEAN
       L #HYGIENE_STATE;
-      L "dbCONST_VAL".UNIT.HYGIENE_STATE.CLEAN;
+      L "dbCONST".BLK.HYGIENE_STATE.CLEAN;
       ==I;
       = #start_clean_tmr;
       R #CLEAN_TOUT;
@@ -56,7 +56,7 @@ TITLE = Start cleanliness monitoring timer if Hygiene Status is CLEAN
 NETWORK
 TITLE = Start sterile monitoring timer if Hygiene Status is STERILE
       L #HYGIENE_STATE;
-      L "dbCONST_VAL".UNIT.HYGIENE_STATE.STERILE;
+      L "dbCONST".BLK.HYGIENE_STATE.STERILE;
       ==I;
       = #start_sterile_tmr;
       R #STERILE_TOUT;
@@ -64,14 +64,14 @@ TITLE = Start sterile monitoring timer if Hygiene Status is STERILE
 NETWORK
 TITLE = Reset cleanliness timer if Hygiene Status is not CLEAN
       L #HYGIENE_STATE;
-      L "dbCONST_VAL".UNIT.HYGIENE_STATE.CLEAN;
+      L "dbCONST".BLK.HYGIENE_STATE.CLEAN;
       <>I;
       = #reset_clean_tmr;
 
 NETWORK
 TITLE = Reset sterile timer if Hygiene Status is not STERILE
       L #HYGIENE_STATE;
-      L "dbCONST_VAL".UNIT.HYGIENE_STATE.STERILE;
+      L "dbCONST".BLK.HYGIENE_STATE.STERILE;
       <>I;
       = #reset_sterile_tmr;
 NETWORK
@@ -87,7 +87,7 @@ TITLE = Retentive timer for CLEAN
       (  TMR_EN                      := %L1.0 ,
          RESET                       := %L1.1 ,
          PV                          := #CLEAN_TIME ,
-         DELTA_T                     := "dbCONST_VAL".OB1_prev_cycle ,
+         DELTA_T                     := "dbCONST".OB1_prev_cycle ,
          Q                           := #clean_timeout ,
          ET                          := #CLEAN_ELAPSED_TIME
       );
@@ -105,7 +105,7 @@ TITLE = Retentive timer for STERILE
       (  TMR_EN                      := %L1.0 ,
          RESET                       := %L1.1 ,
          PV                          := #STERILE_TIME ,
-         DELTA_T                     := "dbCONST_VAL".OB1_prev_cycle ,
+         DELTA_T                     := "dbCONST".OB1_prev_cycle ,
          Q                           := #sterile_timeout ,
          ET                          := #STERILE_ELAPSED_TIME
       );
@@ -115,7 +115,7 @@ NETWORK
 TITLE = Set the Hygiene Status to USED if cleanliness timer expired
       A #clean_timeout;
       JNB Label_0;
-      L "dbCONST_VAL".UNIT.HYGIENE_STATE.USED;
+      L "dbCONST".BLK.HYGIENE_STATE.USED;
       T #HYGIENE_STATE;
       SET;
       SAVE;
@@ -127,7 +127,7 @@ NETWORK
 TITLE = Set the Hygiene Status to CLEAN if sterile timer expired
       A #sterile_timeout;
       JNB Label_1;
-      L "dbCONST_VAL".UNIT.HYGIENE_STATE.CLEAN;
+      L "dbCONST".BLK.HYGIENE_STATE.CLEAN;
       T #HYGIENE_STATE;
       SET;
       SAVE;

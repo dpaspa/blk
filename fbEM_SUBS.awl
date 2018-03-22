@@ -43,18 +43,15 @@ VERSION : 0.6
       PULSE : Bool;
       TIME_P_ON : Time;
       TIME_P_OFF : Time;
-@@ATTR_BEGIN|CHILD_STATE@@
-      @@CHILDALIASTAG@@_STATE : Int;           // @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD_STATE@@
+@@ATTR_BEGIN|CHILD@@
+      @@CHILDALIAS@@_STATE : Int;           // @@CHILDALIASDESCRIPTION@@
+@@ATTR_END|CHILD@@
 @@ATTR_BEGIN|SFC@@
       @@SFC@@_FINISHED : Bool;
 @@ATTR_END|SFC@@
 @@ATTR_BEGIN|PARAMETER_VAR_INPUT@@
       IO_@@PARAMETER@@ : @@PARAMETERTYPE@@;
 @@ATTR_END|PARAMETER_VAR_INPUT@@
-@@ATTR_BEGIN|PARAMETER_FLOWPATH@@
-      FLOWPATH_@@FLOWPATH@@ : Bool;
-@@ATTR_END|PARAMETER_FLOWPATH@@
    END_VAR
 
    VAR_OUTPUT
@@ -64,9 +61,9 @@ VERSION : 0.6
       PATH_OK : Bool;
       WFI_CS_REQ_T : Bool;
       PW_CS_REQ_T : Bool;
-@@ATTR_BEGIN|CHILD_CMD@@
+@@ATTR_BEGIN|CHILD@@
       @@CHILDALIAS@@_@@COMMANDALIASTYPE@@ : @@COMMANDALIASDATATYPE@@;     // @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD_CMD@@
+@@ATTR_END|CHILD@@
 @@ATTR_BEGIN|SFC@@
       CALL_@@SFC@@ : Bool;
 @@ATTR_END|SFC@@
@@ -90,57 +87,11 @@ VERSION : 0.6
       Subs_@@STATE@@ : Bool;
 @@ATTR_END|SFC@@
       SafeState : Bool;
-@@ATTR_BEGIN|SELECT@@
-@@ATTR_BEGIN|SELECTVALUES@@
-      @@SELNAME@@_@@SELVALUE@@ : Bool;
-@@ATTR_END|SELECTVALUES@@
-@@ATTR_END|SELECT@@
 @@ATTR_BEGIN|PARAMETER_VAR_TEMP@@
       IO_@@PARAMETER@@ : @@PARAMETERTYPE@@;
 @@ATTR_END|PARAMETER_VAR_TEMP@@
       ControlBit : Array[1..8] of Bool;
    END_VAR
-
-BEGIN
-NETWORK
-TITLE = Assign selected Substate number into Temporary Variables
-//----------------------------------------------------------------------------//
-// Set boolean flags for running substate values:                             //
-//----------------------------------------------------------------------------//
-      O #RUNNING;
-      O #INITIATE;
-      = %L4.0;
-
-@@ATTR_BEGIN|SFC@@
-      A %L4.0;
-      A(;
-      L #SEL_SUBS;
-      L "dbCONST".BLK.@@CLASS@@.SUBS.@@STATE@@;
-      ==I;
-      );
-      = #Subs_@@STATE@@;
-@@ATTR_END|SFC@@
-
-NETWORK
-TITLE = Calling Parameter Selection
-//----------------------------------------------------------------------------//
-// Set boolean flags for calling parameter selection values:                  //
-//----------------------------------------------------------------------------//
-      O #RUNNING;
-      O #INITIATE;
-      = %L4.0;
-
-@@ATTR_BEGIN|SELECT@@
-@@ATTR_BEGIN|SELECTVALUES@@
-      A %L4.0;
-      A(;
-      L #@@SELNAME@@;
-      L "dbCONST".SEL.@@SELNAME@@.@@SELVALUE@@;
-      ==I;
-      );
-      = #@@SELNAME@@_@@SELVALUE@@;
-@@ATTR_END|SELECTVALUES@@
-@@ATTR_END|SELECT@@
 
 NETWORK
 TITLE = If EM is STOPPED/IL then Set a Bit for Safe state
@@ -198,10 +149,10 @@ TITLE = Item1 to 4:Supply Valves
       JNB Label_0;
       L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
       T #WFI_VALV_CMD;
-@@ATTR_BEGIN|CHILD_CMD@@
+@@ATTR_BEGIN|CHILD@@
       L "dbCONST".CM.CMD_VALVE.CLOSE;
       T #@@CHILDALIAS@@_@@COMMANDALIASTYPE@@;
-@@ATTR_END|CHILD_CMD@@
+@@ATTR_END|CHILD@@
 Label_0:      A BR;
       );
       JNB Label_1;

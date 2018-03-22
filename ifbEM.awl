@@ -44,6 +44,8 @@ VERSION : 2.0
    END_VAR
 
    VAR_TEMP
+      crInterlock;
+      ncrInterlock;
       RetVal : Int;
    END_VAR
 
@@ -62,6 +64,70 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
       );
       NOP 0;
 
+
+
+
+      NETWORK
+      TITLE = S1-M1-Load CIPSIP
+            A(;
+            L #M1.SY;
+            L "dbCONST_VAL".UNIT.OWNER.S1;
+            ==I;
+            );
+            JNB Label_0;
+            CALL BLKMOV
+            {blk_type := 'Any'}
+            (  SRCBLK                      := "CTRL_RECIPE".CRP1.CIPSIP ,
+               RET_VAL                     := #RetVal ,
+               DSTBLK                      := "CTRL_RECIPE".M1.CIPSIP
+            );
+      Label_0:      NOP 0;
+      NETWORK
+      TITLE = CRP1 Batch ID
+            A(;
+            L #M1.SY;
+            L "dbCONST_VAL".UNIT.OWNER.S1;
+            ==I;
+            );
+            JNB _002;
+            CALL BLKMOV
+            {blk_type := 'Any'}
+            (  SRCBLK                      := "idbCRP".CRP1.BATCHCYCLE ,
+               RET_VAL                     := #RetVal ,
+               DSTBLK                      := "idbMX".M1.BATCHCYCLE
+            );
+      _002:      NOP 0;
+      NETWORK
+      TITLE = S1-M1-Load Make
+            A(;
+            L #M1.SY;
+            L "dbCONST_VAL".UNIT.OWNER.S1;
+            ==I;
+            );
+            JNB Label_1;
+            CALL BLKMOV
+            {blk_type := 'Any'}
+            (  SRCBLK                      := "CTRL_RECIPE".CRP1.MAKE ,
+               RET_VAL                     := #RetVal ,
+               DSTBLK                      := "CTRL_RECIPE".M1.MAKE
+            );
+      Label_1:      NOP 0;
+      NETWORK
+      TITLE = S1-M1-Load Filtration
+            A(;
+            L #M1.SY;
+            L "dbCONST_VAL".UNIT.OWNER.S1;
+            ==I;
+            );
+            JNB Label_2;
+            CALL BLKMOV
+            {blk_type := 'Any'}
+            (  SRCBLK                      := "CTRL_RECIPE".CRP1.FILTER.M1.FILTER ,
+               RET_VAL                     := #RetVal ,
+               DSTBLK                      := "CTRL_RECIPE".M1.FILTER
+            );
+      Label_2:      NOP 0;
+
 //----------------------------------------------------------------------------//
 // If EM is in AUTO mode then parameters and command are written by parent.   //
 //----------------------------------------------------------------------------//
@@ -71,9 +137,9 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          INTERLOCK                   := "idb@@CLASS@@".@@MODULE@@.INTERLOCK ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@.MODE ,
-         IN_CMND                     := "idb@@PARENTCLASS@@".@@PARENT@@.@@INSTANCECHILDALIASTAG@@_CMD ,
-         IN_SUB                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@INSTANCECHILDALIASTAG@@_SUB ,
-         IN_SETPOINT                 := "idb@@PARENTCLASS@@".@@PARENT@@.@@INSTANCECHILDALIASTAG@@_SETPOINT ,
+         IN_CMND                     := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
+         IN_SUB                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_SUB ,
+         IN_SETPOINT                 := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_SETPOINT ,
          OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
          IO_MODE                     := "idb@@CLASS@@".@@MODULE@@.MODE ,
          IO_CMND                     := "idb@@CLASS@@".@@MODULE@@.COMMAND ,
@@ -89,36 +155,34 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "AlwaysLow";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
 @@ATTR_END|CR_IL@@
       );
-      = %L2.0;
+      = #crInterlock;
       BLD 103;
 @@ATTR_BEGIN|NCR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "AlwaysLow";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
 @@ATTR_END|NCR_IL@@
-      = %L2.1;
+      = #ncrInterlock;
       BLD 103;
       CALL #@@MODULE@@
       (  COMMAND                     := #@@MODULE@@.COMMAND ,
-         SETPOINT                    := #@@MODULE@@.SETPOINT ,
-@@ATTR_BEGIN|MEASURE@@
-         MEASURE                     := "idb@@MEASURECLASS@@".@@MEASUREALIAS@@.MEASURE ,
-@@ATTR_END|MEASURE@@
          SEL_SUBS                    := #@@MODULE@@.SEL_SUBS ,
-         CR_IL                       := %L2.0 ,
-         NCR_IL                      := %L2.1 ,
+         CR_IL                       := #crInterlock ,
+         NCR_IL                      := #ncrInterlock ,
          MAN_OVERRIDE                := #@@MODULE@@.MAN_OVERRIDE ,
-@@ATTR_BEGIN|CHILD_STATE@@
-         @@CHILDALIASTAG@@_STATE                := "idb@@CHILDALIASCLASS@@".@@CHILDALIASTAG@@.DEV_STATE ,
-@@ATTR_END|CHILD_STATE@@
+         OWNER                       := #@@MODULE@@.OWNER ,
+         CHILD_RELEASE               := #@@MODULE@@.CHILD_RELEASE ,
+@@ATTR_BEGIN|CHILD@@
+         @@CHILDALIAS@@_STATE                := "idb@@CHILDALIASCLASS@@".@@CHILDALIAS@@.DEV_STATE ,
+@@ATTR_END|CHILD@@
 @@ATTR_BEGIN|PARAMETER_VAR_INPUT@@
-         IN_@@PARAMETER@@               := #@@MODULE@@.@@PARAMETER@@ ,
+         @@PARAMETER@@               := #@@MODULE@@.@@PARAMETER@@ ,
 @@ATTR_END|PARAMETER_VAR_INPUT@@
          DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
          RUNNING                     := #@@MODULE@@.RUNNING ,
@@ -134,12 +198,15 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
          MODE                        := #@@MODULE@@.MODE
          SQ_ACK                      := #@@MODULE@@.SQ_ACK ,
          SQ_RESUME                   := #@@MODULE@@.SQ_RESUME
-@@ATTR_BEGIN|CHILD_CMD@@
-         @@CHILDALIASTAG@@_@@COMMANDALIASTYPE@@  := #@@MODULE@@.@@CHILDALIASTAG@@_@@COMMANDALIASTYPE@@ ,
-@@ATTR_END|CHILD_CMD@@
+@@ATTR_BEGIN|CHILD@@
+         @@CHILDALIAS@@_@@COMMANDALIASTYPE@@  := #@@MODULE@@.@@CHILDALIAS@@_@@COMMANDALIASTYPE@@ ,
+@@ATTR_END|CHILD@@
 @@ATTR_BEGIN|PARAMETER_VAR_OUTPUT@@
-         IO_@@PARAMETER@@               := #@@MODULE@@.@@PARAMETER@@ ,
+         @@PARAMETER@@               := #@@MODULE@@.@@PARAMETER@@ ,
 @@ATTR_END|PARAMETER_VAR_OUTPUT@@
+@@ATTR_BEGIN|PARAMETER_VAR_IN_OUT@@
+         @@PARAMETER@@               := #@@MODULE@@.@@PARAMETER@@ ,
+@@ATTR_END|PARAMETER_VAR_IN_OUT@@
       );
       NOP 0;
 

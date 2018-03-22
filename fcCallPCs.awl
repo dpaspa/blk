@@ -2,15 +2,15 @@
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //                Automatically Generated File - Do Not Edit                  //
 //----------------------------------------------------------------------------//
-// Description: Calls all Equipment Module instances.                         //
+// Description: Calls all Process Cell instances.                             //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
 // 2.0 David Paspa      09-Feb-2018 NA        Reboot for S7-1500.             //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-FUNCTION "fcCallRPs" : Void
-TITLE = Call all RP Instances
+FUNCTION "fcCallPCs" : Void
+TITLE = Call all PCell Instances
 { S7_Optimized_Access := 'FALSE' }
 NAME : fcCallRPs
 AUTHOR : Rieckermann Engineering Operations
@@ -19,7 +19,7 @@ VERSION : 2.0
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = Calling RP instances for class : @@CLASS@@
+TITLE = Calling PCell instances for class : @@CLASS@@
       CALL "ifb@@CLASS@@", "idb@@CLASS@@";
       NOP 0;
 @@TEMPLATE_END@@

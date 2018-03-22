@@ -1,0 +1,90 @@
+FUNCTION "EM MODE REQ" : Bool
+TITLE = Cascaded mode function
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+//Notes:
+//IN_REQ_MODE: Batch Asking For All UNIT/EM/CM To Go To Auto
+//IN_MODE: Parent Mode Request For Auto Or OOS
+//IO_MODE: This Modules Mode
+//OUT_MODE: Request To Child To Set AUTO/OOS
+//Note: Module Will Refuse To Go Auto If It Is OOS
+//Note2: If Parent Moves From OOS -> AUTO Force Child AUTO
+//
+   VAR_INPUT 
+      IN_REQ_MODE : Bool;   // Activate Cascaded Mode Request function
+      IN_MODE : Int;   // Mode Request from uper level module example=from Unit to EM
+      MODULE : Char;   // 'U' for UNIT,'E' for EM, and 'C' for CM interface
+   END_VAR
+
+   VAR_OUTPUT 
+      OUT_MODE : Int;   // Mode Request to Lower level module , example from Unit to EM
+   END_VAR
+
+   VAR_IN_OUT 
+      IO_MODE : Int;   // Set to /Check from current Module example EM, Unit,CM
+      POS_EDGE1 : Bool;   // Positive edge flag1
+      POS_EDGE2 : Bool;   // Positive edge flag2
+   END_VAR
+
+   VAR_TEMP 
+      ReqAutoTop : Bool;
+      InModeAuto : Bool;
+      InOutModeAuto : Bool;
+      InModeOOS : Bool;
+      InOutModeOOS : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = If Parent Changes To Auto Set Auto And Request Child Auto
+      A(;
+      A "FirstScanRestartflag";
+      JNB Label_0;
+      L "dbCONST_VAL".UNIT.MODE.AUTO;
+      T #OUT_MODE;
+      SET;
+      SAVE;
+      CLR;
+Label_0:      A BR;
+      );
+      JNB Label_1;
+      L "dbCONST_VAL".UNIT.MODE.AUTO;
+      T #IO_MODE;
+Label_1:      NOP 0;
+NETWORK
+TITLE = 
+      A(;
+      A(;
+      L #IN_MODE;
+      L "dbCONST_VAL".UNIT.MODE.AUTO;
+      ==I;
+      );
+      FP #POS_EDGE2;
+      O(;
+      A #IN_REQ_MODE;
+      FP #POS_EDGE1;
+      );
+      );
+      JNB Label_2;
+      L "dbCONST_VAL".UNIT.MODE.AUTO;
+      T #IO_MODE;
+Label_2:      NOP 0;
+NETWORK
+TITLE = If Parent Request Changes To OOS Switch To OOS
+      A(;
+      L #IN_MODE;
+      L "dbCONST_VAL".UNIT.MODE.OUT_OF_SERVICE;
+      ==I;
+      );
+      JNB Label_3;
+      L "dbCONST_VAL".UNIT.MODE.OUT_OF_SERVICE;
+      T #IO_MODE;
+Label_3:      NOP 0;
+NETWORK
+TITLE = If OOS Request Child OOS
+      L #IO_MODE;
+      T #OUT_MODE;
+      NOP 0;
+END_FUNCTION
+

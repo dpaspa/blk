@@ -38,20 +38,20 @@ TITLE = ALWAYS LOW AND ALWAYS HIGH BIT
 
       AN "AlwaysLow";
       S "AlwaysHighBit";
-      CALL "fcTEST";
+//      CALL "fcTEST";
 
 NETWORK
 TITLE = Communication with SMS1
-      CALL "fcGD_COMM";
+//      CALL "fcGD_COMM";
       NOP 0;
 NETWORK
 TITLE = Arbitration & Time management
-      CALL "fcARBITRATION";
+//      CALL "fcARBITRATION";
       NOP 0;
 NETWORK
 TITLE = load OB1 previous cycle time into DB memory
       L #OB1_PREV_CYCLE;
-      T "dbCONST_VAL".OB1_prev_cycle;
+      T "dbCONST".OB1_prev_cycle;
       NOP 0;
 NETWORK
 TITLE = Calling CMs
@@ -66,8 +66,12 @@ TITLE = Calling Units
       CALL "fcCallUNs";
       NOP 0;
 NETWORK
-TITLE = Calling Recipes
-      CALL "fcCallRPs";
+TITLE = Calling Process Cells
+      CALL "fcCallPCs";
+      NOP 0;
+NETWORK
+TITLE = Calling HMI Interlocks
+      CALL "fcCallILs";
       NOP 0;
 NETWORK
 TITLE = Messages

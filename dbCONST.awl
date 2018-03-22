@@ -33,25 +33,16 @@ STRUCT
             START : INT  := 2;
         END_STRUCT ;
         DEV_STATE : STRUCT
-            STOPPED : INT  :=0;        //Block stopped
-            INTERLOCKED : INT  := 1;   //Block interlocked
-            COMPLETE : INT  := 2;      //Block substate finished, Finished after SFC (if any) is complete.
+            STOPPED : INT  := 0;       //Block stopped. Running substates below
+            INTERLOCKED : INT  := 50;  //Block interlocked
+            COMPLETED : INT  := 99;    //Block substate finished, Finished after SFC (if any) is complete.
         END_STRUCT ;
         EN_DISABLE : STRUCT
             DISABLE : INT  := 1;
             ENABLE : INT  := 2;
         END_STRUCT ;
-        SUBSTATE : STRUCT
-            ZERO : INT ;               // Substate for safe state
-        END_STRUCT ;
-        OWNER : STRUCT                 // Resource arbitration
-            NONE : INT ;               // Available
-            M1 : INT  := 1;
-            M2 : INT  := 2;
-            S1 : INT  := 3;
-            S2 : INT  := 4;
-            S3 : INT  := 5;
-            S4 : INT  := 6;
+        SUBS : STRUCT
+            SAFE : INT  := 0;          // Substate for safe state
         END_STRUCT ;
         HYGIENE_STATE : STRUCT         // Hygiene Status
             USED : INT  := 1;
@@ -64,13 +55,15 @@ STRUCT
             BATCH : INT  := 8;
         END_STRUCT ;
 @@TEMPLATE_BEGIN@@
+@@ATTR_BEGIN|PARENT@@
         @@CLASS@@ : STRUCT             // @@DESCRIPTION@@
             SUBS : STRUCT
-@@ATTR_BEGIN|SFC@@
+@@ATTR_BEGIN|STATE@@
                 @@STATE@@ : INT  := @@COUNTER|1@@;
-@@ATTR_END|SFC@@
+@@ATTR_END|STATE@@
             END_STRUCT ;
         END_STRUCT ;
+@@ATTR_END|PARENT@@
 @@TEMPLATE_END@@
     END_STRUCT ;
     BlockMsg : STRUCT
@@ -81,7 +74,7 @@ STRUCT
         SD : "udtALARM_MSG";
         BATCH_ID_TEMP : STRING  [6 ];
     END_STRUCT ;
-    SFC : STRUCT                       // Generic SFC structure
+    BLKSFC : STRUCT                       // Generic SFC structure
         CMD : STRUCT                   // Sequencer command common to all
             STOP : INT  := 0;
             START : INT  := 1;
@@ -151,7 +144,7 @@ STRUCT
         PI2_DEV_STATE : STRUCT         // Line mounted pressure Indicator
             ENABLED : INT  := 1;       // Always Enabled
         END_STRUCT ;
-        POSx_DEV_STATE : STRUCT        // On/Off Valve with single output with/without feedback
+        POS_DEV_STATE : STRUCT         // On/Off Valve with single output with/without feedback
             CLOSED : INT  := 1;
             OPENED : INT  := 2;
             TRAVELLING : INT  := 3;    // Openning or Closing
@@ -191,25 +184,39 @@ STRUCT
         END_STRUCT ;
     END_STRUCT ;
     SEL : STRUCT                       // Selection structures
+        FILLZ : STRUCT
+            FILL1 : INT  := 1;
+            FILL2 : INT  := 2;
+        END_STRUCT ;
         GAS : STRUCT
-            HPCA : INT  := 1;
-            LPCA : INT  := 2;
-            VENT : INT  := 3;
-            VACUUM : INT  := 4;
-        END_STRUCT ;
-        LIQUID : STRUCT
-            WFI : INT  := 1;
-            PW : INT  := 2;
-            CSWFI : INT  := 3;
-            CSPW : INT  := 4;
-        END_STRUCT ;
-        VALVE : STRUCT
             HPCA : INT  := 1;
             LPCA : INT  := 2;
             VENT : INT  := 3;
             VACUUM : INT  := 4;
             DRAIN : INT  := 5;
         END_STRUCT ;
+        LIQUID : STRUCT
+            WFI : INT  := 1;
+            PW : INT  := 2;
+            PSWFI : INT  := 3;
+            PSPW : INT  := 4;
+        END_STRUCT ;
+        MX : STRUCT
+            M1 : INT  := 1;
+            M2 : INT  := 2;
+        END_STRUCT ;
+        SY : STRUCT
+            S1 : INT  := 1;
+            S2 : INT  := 2;
+        END_STRUCT ;
+    END_STRUCT ;
+    OWNER : STRUCT                     // Resource arbitration
+        NONE : INT := 0;               // Available
+@@TEMPLATE_BEGIN@@
+@@ATTR_BEGIN|OWNER@@
+        @@INSTANCE@@ : INT  := @@PARENTID@@;
+@@ATTR_END|OWNER@@
+@@TEMPLATE_END@@
     END_STRUCT ;
 END_STRUCT ;
 BEGIN

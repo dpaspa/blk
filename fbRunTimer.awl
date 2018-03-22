@@ -1,0 +1,329 @@
+FUNCTION_BLOCK "fbRunTimer"
+TITLE = Run Rimer
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+//<V0.2 Khairul 20/07/09>
+//
+//This function can be used to run Non-retentive as well as retentive On delay 
+//timer.User Can select any of these timer. For retentive timer reset must be 
+//done 
+//to restart the timer next time.For non rtentive timer automatically will be 
+//reset in every positive edge of EABLE signal.
+//
+//User can give set point in Hour, min, & Sec also be able to read out the 
+//remaining time as integer variable.
+//
+   VAR_INPUT 
+      TIME_H : Int;
+      TIME_M : Int;
+      TIME_S : Int;
+      ENABLE : Bool;
+      RESET : Bool;
+      PAUSE : Bool;   // Can be paused if Retentive timer is selected
+      NON_RET : Bool;
+   END_VAR
+
+   VAR_OUTPUT 
+      RMNG_H : Int;
+      RMNG_M : Int;
+      RMNG_S : Int;
+      TIME_EXPIRED : Bool;
+      TMR_RUNNG : Bool;
+   END_VAR
+
+   VAR 
+      RUNTMRNonRet {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+      RetElapsedTime : DInt;
+      NonRetElapsedTime : Time;
+      Time_hist : DInt;
+      Tmr_Running : Bool;
+      RunTmrQbit : Bool;
+      Time_Remain : DInt;
+   END_VAR
+
+   VAR_TEMP 
+      h_1 : DInt;
+      m_1 : DInt;
+      s_1 : DInt;
+      s_ms : DInt;
+      m_ms : DInt;
+      h_ms : DInt;
+      tot_ms : DInt;
+      TimeValue : Time;
+      dTimeValue : DInt;
+      ExpiredNonRetTmr : Bool;
+      ExpiredRetTmr : Bool;
+      Time_ET : DInt;
+      Time_PV : DInt;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Int to Dint
+      A(;
+      A(;
+      L #TIME_H;
+      ITD;
+      T #h_1;
+      SET;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_0;
+      L #TIME_M;
+      ITD;
+      T #m_1;
+      SET;
+      SAVE;
+      CLR;
+Label_0:      A BR;
+      );
+      JNB Label_1;
+      L #TIME_S;
+      ITD;
+      T #s_1;
+Label_1:      NOP 0;
+NETWORK
+TITLE =  Sec to ms
+      L #s_1;
+      L DINT#1000;
+      *D;
+      T #s_ms;
+      NOP 0;
+NETWORK
+TITLE = Min---> ms
+      A(;
+      L #m_1;
+      L DINT#60;
+      *D;
+      T #m_ms;
+      AN OV;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_2;
+      L #m_ms;
+      L DINT#1000;
+      *D;
+      T #m_ms;
+Label_2:      NOP 0;
+NETWORK
+TITLE = Hour---> ms
+      A(;
+      A(;
+      L #h_1;
+      L DINT#60;
+      *D;
+      T #h_ms;
+      AN OV;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_3;
+      L #h_ms;
+      L DINT#60;
+      *D;
+      T #h_ms;
+      AN OV;
+      SAVE;
+      CLR;
+Label_3:      A BR;
+      );
+      JNB Label_4;
+      L #h_ms;
+      L DINT#1000;
+      *D;
+      T #h_ms;
+Label_4:      NOP 0;
+NETWORK
+TITLE = h_ms+ m_ms+ s_ms= total mili seconds
+      A(;
+      L #h_ms;
+      L #m_ms;
+      +D;
+      T #tot_ms;
+      AN OV;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_5;
+      L #tot_ms;
+      L #s_ms;
+      +D;
+      T #tot_ms;
+Label_5:      NOP 0;
+NETWORK
+TITLE = Output Time variable 
+      A(;
+      L #tot_ms;
+      T #TimeValue;
+      SET;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_6;
+      L #tot_ms;
+      T #dTimeValue;
+Label_6:      NOP 0;
+NETWORK
+TITLE = Non-Retentive
+      A #ENABLE;
+      = %L46.0;
+      BLD 103;
+      A #NON_RET;
+      JNB Label_7;
+      CALL #RUNTMRNonRet
+      {time_type := 'Time'}
+      (  IN                          := %L46.0 , 
+         PT                          := #TimeValue , 
+         Q                           := #ExpiredNonRetTmr , 
+         ET                          := #NonRetElapsedTime
+      );
+Label_7:      NOP 0;
+NETWORK
+TITLE = Retentive timer
+      A #ENABLE;
+      = %L46.0;
+      BLD 103;
+      A #RESET;
+      = %L46.1;
+      BLD 103;
+      AN #NON_RET;
+      AN #PAUSE;
+      JNB Label_8;
+      CALL TONR_X
+      (  TMR_EN                      := %L46.0 , 
+         RESET                       := %L46.1 , 
+         PV                          := #dTimeValue , 
+         DELTA_T                     := %DB1.DBW36 , 
+         Q                           := #ExpiredRetTmr , 
+         ET                          := #RetElapsedTime
+      );
+Label_8:      NOP 0;
+NETWORK
+TITLE = Non-retentive Elapsed Time Time to Dint
+      A #NON_RET;
+      JNB Label_9;
+      L #NonRetElapsedTime;
+      T #Time_ET;
+Label_9:      NOP 0;
+NETWORK
+TITLE = Retentive Elapsed Time Dint to Dint
+      AN #NON_RET;
+      JNB Label_10;
+      L #RetElapsedTime;
+      T #Time_ET;
+Label_10:      NOP 0;
+NETWORK
+TITLE = Time Setpoint=Time_PV
+      L #dTimeValue;
+      T #Time_PV;
+      NOP 0;
+NETWORK
+TITLE = remaining time calc & running feedback
+// time remain
+      L #Time_PV;
+      L #Time_ET;
+      -D;
+      T #Time_Remain;
+
+// timer running
+      L #Time_Remain;
+      L #Time_hist;
+      <>D;
+      = #Tmr_Running;
+
+      AN #RunTmrQbit;
+      A #Tmr_Running;
+      = #Tmr_Running;
+// load time into data block for history 
+      L #Time_Remain;
+      T #Time_hist;
+
+NETWORK
+TITLE = Timer Running
+      A #Tmr_Running;
+      = #TMR_RUNNG;
+NETWORK
+TITLE = Time Expired
+      O #ExpiredNonRetTmr;
+      O #ExpiredRetTmr;
+      = #TIME_EXPIRED;
+NETWORK
+TITLE = Remaining Time Calculation converted in Hour, min, & Sec
+NETWORK
+TITLE = Time to DINT
+      L #Time_Remain;
+      T #dTimeValue;
+      NOP 0;
+NETWORK
+TITLE = Dint---> Sec
+      L #dTimeValue;
+      L DINT#1000;
+      /D;
+      T #dTimeValue;
+      NOP 0;
+NETWORK
+TITLE = Extract Hours
+      A(;
+      L #dTimeValue;
+      L DINT#3600;
+      /D;
+      T #h_1;
+      AN OV;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_11;
+      L #dTimeValue;
+      L DINT#3600;
+      MOD;
+      T #dTimeValue;
+Label_11:      NOP 0;
+NETWORK
+TITLE = extract Min
+      A(;
+      L #dTimeValue;
+      L DINT#60;
+      /D;
+      T #m_1;
+      AN OV;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_12;
+      L #dTimeValue;
+      L DINT#60;
+      MOD;
+      T #dTimeValue;
+Label_12:      NOP 0;
+NETWORK
+TITLE = finally extract seconds
+      L #dTimeValue;
+      T #s_1;
+      NOP 0;
+NETWORK
+TITLE = Conv sec: Dint to Int
+      L #s_1;
+      T #RMNG_S;
+      NOP 0;
+NETWORK
+TITLE = Conv min: Dint to Int
+      L #m_1;
+      T #RMNG_M;
+      NOP 0;
+NETWORK
+TITLE = Conv Hour: Dint to Int
+      L #h_1;
+      T #RMNG_H;
+      NOP 0;
+END_FUNCTION_BLOCK
+

@@ -2,11 +2,12 @@
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //                Automatically Generated File - Do Not Edit                  //
 //----------------------------------------------------------------------------//
-// Class:       ifbPOS1                                                       //
-// Description: Instances of POS1                                             //
+// Class:       ifbPOS2                                                       //
+// Description: Instances of POS2                                             //
 //                                                                            //
-// Uses the generic fbPOSx class. In this case FB_O=OUT_Q,FB_C=Negative-OUT_Q //
-// because the FB_C & FB_O don't have feedback from field.                    //
+// POS2 On/Off valve with single output and closed feedback. Uses the generic //
+// fbPOSx class. The FB_C has feedback from field.                            //
+// In this case FB_O = NOT-FB_C/OUT_Q because FB_O has no field feedback.     //
 //                                                                            //
 // INDEX = 3                                                                  //
 // IL_INDEX = 3                                                               //
@@ -14,32 +15,26 @@
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
 // 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
-// 0.8 Gus Abdallah     01-Oct-2009 CC-09/016 Interlocks are CM processed     //
-// 0.7 Khairul Basar    21-Sep-2009 CC-09/016 XV_1031/1231 interlock DV-1x20  //
-//                                            Added.                          //
-// 0.6 Khairul Basar    18-Sep-2009 CC-09/016 ifcPOSx interface created.      //
-// 0.5 Khairul Basar    17-Sep-2009 CC-09/016 XV_1242,1222 FB_O changed to NC.//
-// 0.4 Khairul Basar    16-Sep-2009 CC-09/016 DV_1080, CR_IL ZSC-1010 changed //
-//                                            from NO to NC.XV_1031,XV_1131 CR//
-//                                            Duplicate Auto/man parameters   //
+// 0.7 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.6 Gus Abdallah     01-Oct-2009 CC-09/016 Interlocks are CM processed.    //
+// 0.5 Khairul Basar    18-Sep-2009 CC-09/016 ifcPOSx is called for           //
+//                                            interfacing.                    //
+// 0.4 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters   //
 //                                            deleted auto/manual both now    //
 //                                            using same parameters.          //
-//                                            instance specific IL configured.//
-// 0.3 Khairul Basar    09-Sep-2009 CC-09/016 Ref2.                           //
-// 0.2 Khairul Basar    02-Sep-2009 CC-09/016 Ref1.                           //
-// 0.1 Khairul Basar    03-Aug-2009           Initial design                  //
-//                                                                            //
-// Ref2: In DV_1041 & Dv1040 TI_1010 is changed to PI_1010 for the interlock. //
-//                                                                            //
-// Ref1: For XV_1090, FB_C is NC of "XV-1090" and FB_O is NO "XV-1090"        //
-// assigned. Class interlocks & Instance specific interlocks are assigned.    //
-// Instance Comment added.                                                    //
-// All the Instances are updated after POSx module code changed (ref fbPOSx). //
+// 0.3 Khairul Basar    10-Sep-2009 CC-09/016 Only POSx updated.              //
+// 0.2 Khairul Basar    02-Sep-2009 CC-09/016 FB_O=NOT-FB_C assigned.         //
+//                                            Instances are updated after     //
+//                                            modification on POSx(ref-fbPOSx)//
+//                                            Class/instance interlocks are   //
+//                                            added.                          //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "ifbPOS1"
-TITLE = Instances of POS1 On/Off valve without feedback
+FUNCTION_BLOCK "ifbPOS2"
+TITLE = Instances of POS2 On/Off valve with single output and closed feedback
 { S7_Optimized_Access := 'FALSE' }
-NAME : ifbPOS1
+NAME : ifbPOS2
 AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
@@ -66,29 +61,16 @@ BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@MODULE@@ : @@DESCRIPTION@@
-      A "AlwaysHighBit";
-      = %L0.0;
-      BLD 103;
-      A(;
-@@ATTR_BEGIN|CR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|CR_IL@@
-      );
-      = %L0.1;
-      BLD 103;
       CALL "ifcPOSx"
-      (  IN_REQ_MODE                 := %L0.0 ,
-         INTERLOCK                   := %L0.1 ,
+      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
+         INTERLOCK                   := "idbPOS2".@@MODULE@@.INTERLOCK ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
          IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
-         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
-         IO_MODE                     := "idbPOS1".@@MODULE@@.MODE ,
-         IO_CMD                      := "idbPOS1".@@MODULE@@.CMD ,
-         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+         OUT_MODE                    := #@@MODULE@@.REQ ,
+         IO_MODE                     := "idbPOS2".@@MODULE@@.MODE ,
+         IO_CMD                      := "idbPOS2".@@MODULE@@.CMD ,
+         POS_EDGE1                   := #@@MODULE@@.PosEdge1 ,
+         POS_EDGE2                   := #@@MODULE@@.PosEdge2
       );
       NOP 0;
 NETWORK
@@ -113,19 +95,19 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
       );
       = %L0.1;
       BLD 103;
-      AN "@@INSTANCE@@";
-      = %L0.2;
-      BLD 103;
-      A "@@INSTANCE@@";
+      A "@@INSTANCE@@-ZSC";
       = %L0.3;
+      BLD 103;
+      AN "@@INSTANCE@@-ZSC";
+      = %L0.4;
       BLD 103;
       CALL #@@MODULE@@
       (  CMD                         := #@@MODULE@@.CMD ,
          CR_IL                       := %L0.0 ,
          NCR_IL                      := %L0.1 ,
          MAN_OVERRIDE                := #@@MODULE@@.MAN_OVERRIDE ,
-         FB_C                        := %L0.2 ,
-         FB_O                        := %L0.3 ,
+         FB_C                        := %L0.3 ,
+         FB_O                        := %L0.4 ,
          TMR                         := #@@MODULE@@.TMR ,
          INTERLOCKING_TIMER          := "Tag_@@COUNTER|1@@" ,
          DEV_STATE                   := #@@MODULE@@.DEV_STATE ,

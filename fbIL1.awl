@@ -1,0 +1,32 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbIL1                                                         //
+// Description:                                                               //
+// Interlock calculation with one input.                                      //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      20-Mar-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbIL1"
+TITLE = IL1 : Interlock calculation with 1 input
+{ S7_Optimized_Access := 'FALSE' }
+NAME : fbIL1
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 2.0
+
+   VAR_OUTPUT
+      INTERLOCK : Bool;   // Interlock Flag (0 = Inactive, 1 = Active)
+   END_VAR
+
+   VAR_IN_OUT
+      IN1 : Bool;
+   END_VAR
+
+BEGIN
+NETWORK
+TITLE = Calculate the interlock
+      A #IN1;
+      = #INTERLOCK;
+END_FUNCTION_BLOCK

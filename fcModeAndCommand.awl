@@ -17,24 +17,26 @@
 // Substate changed for not to generate #tEdgeAutoStart pulse when mode is    //
 // changed.                                                                   //
 //----------------------------------------------------------------------------//
-FUNCTION "COMMAND_FUNCTION" : Void
+FUNCTION "ModeAndCommand" : Void
 TITLE = General Mode, Command & Interlock handling block
 { S7_Optimized_Access := 'FALSE' }
 VERSION : 2.0
 
    VAR_INPUT
       OWNER : Int;           // Owner of the block
-      COMMAND : Int;         // command variable for auto mode
+      COMMAND : Int;         // Command variable for auto mode
       MODE : Int;            // Mode variable
       SEL_SUBS : Int;        // Substate variable
       START_CMD : Int;       // Start command constant value
       STOP_CMD : Int;        // Stop command constant value
-      MODE_MAN : Int;        // manual mode  constant value
-      MODE_AUTO : Int;       // auto mode  constant value
-      MODE_OOS : Int;        // Out of service mode  constant value
+      MODE_MAN : Int;        // Manual mode constant value
+      MODE_AUTO : Int;       // Auto mode constant value
+      MODE_OOS : Int;        // Out of service mode constant value
       CR_IL : Bool;          // Critical Interlock
       NCR_IL : Bool;         // Non critical Interlock
       MAN_OVERRIDE : Bool;   // Manual override for Non-critical interlocks
+      CHILD_FAIL : Bool;     // Non critical Interlock
+      BAD_PARAM : Bool;      // Bad Calling Parameters
    END_VAR
 
    VAR_OUTPUT
@@ -79,10 +81,10 @@ VERSION : 2.0
 
 BEGIN
 NETWORK
-//----------------------------------------------------------------------------//
-// Set internal boolean flag if avilable:                                     //
-//----------------------------------------------------------------------------//
 TITLE = Flag block as available if not owned
+//----------------------------------------------------------------------------//
+// Set internal boolean flag if the block has no owner and is available:      //
+//----------------------------------------------------------------------------//
       L #OWNER;
       L "dbCONST".BLK.OWNER.NONE;
       ==I;
@@ -94,28 +96,63 @@ TITLE = Interlock Flag
 // Set internal boolean flag if any interlock:                                //
 //----------------------------------------------------------------------------//
       O #CR_IL;
+      O #BAD_PARAM;
       O;
       A #NCR_IL;
       AN #MAN_OVERRIDE;
       = #tInterlock;
-      = #INTERLOCK;
 
 NETWORK
 TITLE = Interlock State
 //----------------------------------------------------------------------------//
-// Block should be interlocked state if interlock active:                     //
+// Block should be interlocked state if STOPPED and any child failure:        //
 //----------------------------------------------------------------------------//
+      A #tInterlock;
+      JC Label_0;
+      A #CHILD_FAIL;
+      A(;
+      L #DEV_STATE;
+      L "dbCONST".BLK.SUBSTATE.STOPPED;
+      ==I;
+      );
+      = #tInterlock;
+Label_0:      NOP 0;
+
+NETWORK
+TITLE = Interlock State
+//----------------------------------------------------------------------------//
+// Block should be interlocked state if STOPPED and interlock active:         //
+//----------------------------------------------------------------------------//
+      L #tInterlock;
+      T #INTERLOCK;
+
       A #INTERLOCK;
       A(;
-      L #SEL_SUBS;
-      L "dbCONST".BLK.SUBSTATE.ZERO;
-      <>I;
+      L #DEV_STATE;
+      L "dbCONST".BLK.DEV_STATE.STOPPED;
+      ==I;
       );
-      JNB Label_0;
+      JNB Label_1;
       L "dbCONST".BLK.DEV_STATE.INTERLOCKED;
       T #DEV_STATE;
-Label_0:      A BR;
+Label_1:      A BR;
       = #MON_MISMATCH;
+
+NETWORK
+TITLE = Paused State
+//----------------------------------------------------------------------------//
+// Block should be paused state if RUNNING and any child failure:             //
+//----------------------------------------------------------------------------//
+      A #CHILD_FAIL;
+      A(;
+      L #SEL_SUBS;
+      L "dbCONST".BLK.SUBS.SAFE;
+      <>I;
+      );
+      JNB Label_2;
+      L "dbCONST".BLK.DEV_STATE.PAUSED;
+      T #DEV_STATE;
+Label_2:      NOP 0;
 
 NETWORK
 TITLE = Mode change
@@ -127,10 +164,10 @@ TITLE = Mode change
 NETWORK
 TITLE = Change the History if value changed: Mode changed
       A #tMode_Changed;
-      JNB Label_0;
+      JNB Label_3;
       L #MODE;
       T #MODE_H;
-Label_0:      NOP 0;
+Label_3:      NOP 0;
 NETWORK
 TITLE = Subs_Changed
       L #SEL_SUBS;
@@ -138,13 +175,15 @@ TITLE = Subs_Changed
       <>I;
       = #tSubs_Changed;
       = #SUBS_CHNG;
+      = #flagInitiated;
+
 NETWORK
 TITLE = Change the History if value changed: Substate changed
       A #tSubs_Changed;
-      JNB Label_1;
+      JNB Label_4;
       L #SEL_SUBS;
       T #SUBS_H;
-Label_1:      NOP 0;
+Label_4:      NOP 0;
 NETWORK
 TITLE = Auto CMD changed
       A(;
@@ -166,10 +205,10 @@ TITLE = Change the History if value changed: A_Cmd_Changed
       ==I;
       );
       A #tA_Cmd_Changed;
-      JNB Label_2;
+      JNB Label_5;
       L #COMMAND;
       T #CMD_A_H;
-Label_2:      NOP 0;
+Label_5:      NOP 0;
 NETWORK
 TITLE = Man Command changed
       A(;
@@ -191,10 +230,10 @@ TITLE = Change the History if value changed: cmd manual changed
       ==I;
       );
       A #tM_Cmd_Changed;
-      JNB Label_3;
+      JNB Label_6;
       L #COMMAND;
       T #CMD_M_H;
-Label_3:      NOP 0;
+Label_6:      NOP 0;
 NETWORK
 TITLE = Mode auto
       L #MODE;
@@ -225,15 +264,13 @@ TITLE = any changes in Mode,will retrigger the output command
 // change checking):                                                          //
 //----------------------------------------------------------------------------//
       A #tAutomatic;
-      = %L2.0;
-      A %L2.0;
       A(;
       L #COMMAND;
       L #START_CMD;
       ==I;
       );
       = #tEdgeAutoStart;
-      A %L2.0;
+      A #tAutomatic;
       A(;
       L #COMMAND;
       L #STOP_CMD;
@@ -250,15 +287,13 @@ TITLE = any changes in Mode will retrigger the output command
 // more command change checking):                                             //
 //----------------------------------------------------------------------------//
       A #tManual;
-      = %L2.0;
-      A %L2.0;
       A(;
       L #COMMAND;
       L #START_CMD;
       ==I;
       );
       = #tEdgeManStart;
-      A %L2.0;
+      A #tManual;
       A(;
       L #COMMAND;
       L #STOP_CMD;

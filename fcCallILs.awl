@@ -1,0 +1,25 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Calls all Interlock HMI tag instances.                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      20-Mar-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+FUNCTION "fcCallILs" : Void
+TITLE = Call all HMI Interlock Instances
+{ S7_Optimized_Access := 'FALSE' }
+NAME : fcCallILs
+AUTHOR : Rieckermann Engineering Operations
+VERSION : 1.0
+
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = Calling HMI Interlock instances for class : @@CLASS@@
+      CALL "ifb@@CLASS@@", "idb@@CLASS@@";
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION
