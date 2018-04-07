@@ -1,0 +1,772 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 20/3/2018 5:19:31 PM by MAC_IZZ
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+Name:- CHARGE
+Title:- PH_CHARGE
+Description:- Add specified amount of WFI or PW to the vessel Mx
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+Class:- EMC2
+Level:- PH
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- C2PCHAR
+Version:- 0.5
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.6 Srinivas Nimmala  19-May-2010           Report Trigger Added    
+
+// 0.5 Khairul Basar  20-Sep-2009 CC-09/023    SQ_TIMER is removed from Visio variable list.Timeout_alarm 
+//                                             programmed.Start/Stop of EMM1 to request mass measurement.
+//                                             Reset Pulse mode in S007.Mass_current compare logic with >=R
+//                                             instead of ==R.
+// 0.4 Khairul Basar  25-Aug-2009 CC-09/023    Change in Verific. & TRN code OR to AND. 
+//                                             Change in the Last step.SQ_TIMER added.
+// 0.3 David Paspa    24-Aug-2009 CC-09/023    Removed repeated setup steps.
+// 0.2 Khairul Basar  18-Aug-2009              Added logic code
+// 0.1 David Paspa    13-Jul-2009              SFC structural design
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- Report_End_Event
+Type:- BOOL
+Description:- WFI End event log for report
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- Report_Start_Event
+Type:- BOOL
+Description:- WFI Valve open command and event for report log
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- Opr_confirm_tryagain
+Type:- BOOL
+Description:- Charge Target Value Invalid Operator comfirm try again
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- Opr_confirm_abort
+Type:- BOOL
+Description:- Charge Target Value Invalid Operator comfirm abort
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- Mass_Charge_Invalid
+Type:- BOOL
+Description:- Mass Charge Valve Invalid message to operator
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- mass_final
+Type:- REAL
+Description:- mass_final
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- mass_current
+Type:- REAL
+Description:- Mass from field EMM1
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- mass_ready
+Type:- BOOL
+Description:- An accurate mass reading is available
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- pos_wfi_state
+Type:- INT
+Description:- WFI supply valve state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- pos_pw_state
+Type:- INT
+Description:- PW supply valve state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- pos_pspw_state
+Type:- INT
+Description:- PS supply for PW loop valve state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- pos_pswfi_state
+Type:- INT
+Description:- PS supply for WFI loop valve state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- pos_pswfi_cmd
+Type:- INT
+Description:- PS supply for WFI loop valve cmd
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- pos_pspw_cmd
+Type:- INT
+Description:- PS supply for PW loop valve cmd
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- pos_wfi_cmd
+Type:- INT
+Description:- WFI supply valve cmd
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- pos_pw_cmd
+Type:- INT
+Description:- PW supply valve cmd
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::17
+--------------------------------------------------
+Name:- confirm_tryagain
+Type:- BOOL
+Description:- confirm_try again
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::18
+--------------------------------------------------
+Name:- confirm_abort
+Type:- BOOL
+Description:- confirm_abort
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::19
+--------------------------------------------------
+Name:- prompt_abort_try
+Type:- BOOL
+Description:- prompt_try_ or abort
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::20
+--------------------------------------------------
+Name:- timeout_alarm
+Type:- BOOL
+Description:- Raise timeout_alarm 
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::21
+--------------------------------------------------
+Name:- timeout
+Type:- TIME
+Description:- timeout
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::22
+--------------------------------------------------
+Name:- mass_actual
+Type:- REAL
+Description:- mass_actual
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::23
+--------------------------------------------------
+Name:- mass_initial
+Type:- REAL
+Description:- mass_initial
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::24
+--------------------------------------------------
+Name:- mass_charge
+Type:- REAL
+Description:- mass charge
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::25
+--------------------------------------------------
+Name:- medium
+Type:- INT
+Description:- selected medium
+ParameterInOut:- IN
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- PH_EMC2_CHARGE : Request current mass in vessel
+Description:- Clear Out Old Setting
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Clear Out Old Setting
+Action:- SET;
+R #_Mass_Charge_Invalid;
+R #_Opr_confirm_tryagain;
+R #_Opr_confirm_abort;
+
+//Reset report event for WFI Charge
+SET;
+R #_Report_End_Event;
+R #_Report_Start_Event;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Phase Parameter Check
+EmptyTransition:- False
+Description:- Mass Charge Target Parameter Invalid
+Condition:-  A(; 
+ L     #_mass_charge; 
+ L     1.000000e+000;
+ >R; 
+  ); 
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
+Title:- Phase Parameter ready
+EmptyTransition:- False
+Description:- Vessel mass Targer value is available.
+Condition:- A M1.1;
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- PH_EMC2_CHARGE : Phase Parameter Invalid
+Description:- Mass Charge Target Parameter Invalid message set to operator and ask for confirmation
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Mass calculation fail try again.
+Action:- SET;
+S #_Mass_Charge_Invalid;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- Operator abort
+EmptyTransition:- False
+Description:- Operator decided to abort.
+Condition:-  A #_Opr_confirm_abort;
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- Try again
+EmptyTransition:- False
+Description:- Operator decided to try again.
+Condition:- A #_Opr_confirm_tryagain;
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- PH_EMC2_CHARGE : Store current vessel mass
+Description:- Fetch the current vessel mass and store in mass_initial
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Clear out mass_initial.
+Action:- L     0.000000e+000; 
+T     #_mass_initial; 
+Verification:-   A(; 
+  L     #_mass_initial; 
+  L     0.000000e+000; 
+  ==R; 
+  );
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Store current mass to initial mass.
+Action:- L     #_mass_current; 
+T     #_mass_initial; 
+Verification:-   A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 5.0000
+Title:- Jump
+EmptyTransition:- 0.0000
+Description:- Jump unconditionally
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- PH_EMC2_CHARGE : Open selected duty supply valve
+Description:- Open WFI or PW supply valve. Start the sequence timer.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open WFI or PW supply valve. 
+Action:- SET;
+R #_confirm_tryagain;
+R #_prompt_abort_try;
+R #_timeout_alarm;
+
+//Enable flow path and Open selected WFI/PW valve
+L #_medium;
+L "dbCONST".SEL.LIQUID.WFI;
+==I;
+JC v021;
+
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSWFI;
+==I;
+JC v022;
+
+
+L #_medium;
+L "dbCONST".SEL.LIQUID.PW;
+==I;
+JC v023;
+
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSPW;
+==I;
+JC v024;
+
+
+
+v021:NOP 0;
+L  "dbCONST".CM.CMD_VALVE.OPEN ;
+T #_pos_wfi_cmd;
+JU en02;
+
+
+v022:NOP 0;
+L  "dbCONST".CM.CMD_VALVE.OPEN ;
+T #_pos_pswfi_cmd;
+JU en02;
+
+
+v023:NOP 0;
+L  "dbCONST".CM.CMD_VALVE.OPEN ;
+T #_pos_pw_cmd;
+JU en02;
+
+
+v024:NOP 0;
+L  "dbCONST".CM.CMD_VALVE.OPEN ;
+T #_pos_pspw_cmd;
+JU en02;
+
+en02: NOP 0;
+
+
+//Log Report Start for WFI Charge
+SET;
+S #_Report_Start_Event;
+Verification:- //Verify state open of selected WFI/PW valve
+A(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.WFI;
+==I;
+);
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.OPENED ;
+L #_pos_wfi_state;
+==I;
+);
+O;
+A(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSWFI;
+==I;
+);
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.OPENED ;
+L #_pos_pswfi_state;
+==I;
+);
+O;
+A(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PW;
+==I;
+);
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.OPENED ;
+L #_pos_pw_state;
+==I;
+);
+O;
+A(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSPW;
+==I;
+);
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.OPENED ;
+L #_pos_pspw_state;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Start the sequence timer.
+Action:- L #_timeout;
+T #SQ_TIMER.PT;
+
+SET;
+S #SQ_TIMER.IN;
+
+Verification:- A M1.1;
+
+
+
+--------------------------------------------------
+TRANSITION::06
+--------------------------------------------------
+TRNNo:- 06
+Title:- Wait for mass endpoint
+EmptyTransition:- False
+Description:- Jump if current vessel mass is mass_initial + mass_charge
+Condition:- // vessel mass >= Mass Inital + Mass charge
+ L #_mass_initial;
+L #_mass_charge;
++R;
+L #_mass_current;
+<=R;
+
+
+--------------------------------------------------
+TRANSITION::07
+--------------------------------------------------
+TRNNo:- 7.0000
+Title:- Check timeout exceeded
+EmptyTransition:- False
+Description:- Jump if the timeout period has expired.
+Condition:- A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
+Title:- PH_EMC2_CHARGE : Vessel filling timeout. Wait for operator retry.
+Description:- Close the WFI or PW valve. Stop the sequence timer. Raise the timeout alarm. Prompt operator to try again or abort.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close WFI or PW supply valve. 
+Action:- //Close selected WFI/PW valve
+
+L #_medium;
+L "dbCONST".SEL.LIQUID.WFI;
+==I;
+JC v041;
+
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSWFI;
+==I;
+JC v042;
+
+L #_medium;
+L "dbCONST".SEL.LIQUID.PW;
+==I;
+JC v043;
+
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSPW;
+==I;
+JC v044;
+
+
+
+v041:NOP 0;
+L  "dbCONST".CM.CMD_VALVE.CLOSE ;
+T #_pos_wfi_cmd;
+JU en04;
+
+
+v042:NOP 0;
+L  "dbCONST".CM.CMD_VALVE.CLOSE;
+T #_pos_pswfi_cmd;
+JU en04;
+
+
+v043:NOP 0;
+L  "dbCONST".CM.CMD_VALVE.CLOSE;
+T #_pos_pw_cmd;
+JU en04;
+
+
+v044:NOP 0;
+L  "dbCONST".CM.CMD_VALVE.CLOSE;
+T #_pos_pspw_cmd;
+JU en04;
+
+en04: NOP 0;	
+
+SET;
+S #_prompt_abort_try;
+S #_timeout_alarm;
+R #SQ_TIMER.IN;
+Verification:- //Verify state open of selected WFI/PW valve
+A(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.WFI;
+==I;
+);
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.CLOSED ; 
+L #_pos_wfi_state;
+==I;
+);
+O;
+A(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSWFI;
+==I;
+);
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.CLOSED ;
+L #_pos_pswfi_state;
+==I;
+);
+O;
+A(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PW;
+==I;
+);
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.CLOSED ;
+L #_pos_pw_state;
+==I;
+);
+O;
+A(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSPW;
+==I;
+);
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.CLOSED ;
+L #_pos_pspw_state;
+==I;
+);
+
+
+
+--------------------------------------------------
+TRANSITION::08
+--------------------------------------------------
+TRNNo:- 8.0000
+Title:- Operator abort
+EmptyTransition:- False
+Description:- Operator decided to abort.
+Condition:-  A #_confirm_abort;
+
+
+--------------------------------------------------
+TRANSITION::09
+--------------------------------------------------
+TRNNo:- 9.0000
+Title:- Try again
+EmptyTransition:- False
+Description:- Operator decided to try again.
+Condition:- A #_confirm_tryagain;
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 06
+Title:- PH_EMC2_CHARGE : Close supply valve
+Description:- Close supply valves.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close WFI and PW supply valve. 
+Action:- //Close WFI and PW valves.
+
+L  "dbCONST".CM.CMD_VALVE.CLOSE ;
+T #_pos_wfi_cmd; 
+T #_pos_pswfi_cmd;
+T #_pos_pw_cmd;  
+T #_pos_pspw_valve_cmd; 
+Verification:- //Verify state open of selected WFI/PW valve
+
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.CLOSED ;
+L #_pos_wfi_state; 
+==I;
+);
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.CLOSED ;
+L #_pos_pswfi_state;  
+==I;
+);
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.CLOSED ;
+L #_pos_pw_state;  
+==I;
+);
+A(;
+L  "dbCONST".CM.POS_DEV_STATE.CLOSED ;
+L #_pos_pspw_state;  
+==I;
+);
+
+
+
+--------------------------------------------------
+TRANSITION::10
+--------------------------------------------------
+TRNNo:- 10
+Title:- Vessel mass measurement ready
+EmptyTransition:- False
+Description:- Vessel mass module indicates an accurate mass reading is available.
+Condition:-  A #_mass_ready;
+
+
+--------------------------------------------------
+STEP::07
+--------------------------------------------------
+StepNo:- 07
+Title:- PH_EMC2_CHARGE : Calculate mass added
+Description:- Fetch the final vessel mass ans store in the mass final.Calculate actual mass added.
+mass actual=mass_final-mass_initial;Log mass mass actual.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Clear out mass_actual.
+Action:-   L     0.000000e+000; 
+  T     #_mass_actual; 
+Verification:-  A(; 
+ L     #_mass_actual; 
+ L     0.000000e+000; 
+ ==R; 
+ ); 
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- /Calculate Actual Charge
+Action:-  L #_mass_current; 
+ T #_mass_final; 
+ L #_mass_initial; 
+ -R; 
+ T #_mass_actual; 
+Verification:-  A(; 
+L  #_mass_actual; 
+L  0.000000e+000; 
+>R; 
+ ); 
+
+
+--------------------------------------------------
+TRANSITION::11
+--------------------------------------------------
+TRNNo:- 11
+Title:- TRN Title
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::08
+--------------------------------------------------
+StepNo:- 08
+Title:- PH_EMC2_CHARGE : Last Step
+Description:- Last Step
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Last Step
+Action:- SET;
+R #_confirm_abort;
+R #_timeout_alarm;
+R #_prompt_abort_try;
+R #_confirm_tryagain;
+R #_Mass_calculation_fail;
+R #SQ_TIMER.IN;
+
+//Log Report End for WFI Charge
+SET;
+S #_Report_End_Event;
+
+SET;
+R #_Report_Start_Event;
+Verification:- A M1.1; //Always High flag
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

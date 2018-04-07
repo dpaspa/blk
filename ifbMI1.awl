@@ -22,8 +22,8 @@
 FUNCTION_BLOCK "ifbMI1"
 TITLE = MI1 Instance
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbMI1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -31,10 +31,10 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@ : "fbMI1";   // @@DESCRIPTION@@
+      @@INSTANCE@@ : "fbMI1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@_MODE : Struct
+      @@INSTANCE@@_MODE : Struct
          PosEdge1 : Bool;
          PosEdge2 : Bool;
          REQ : Int;   // Request for Required Mode
@@ -48,35 +48,35 @@ VERSION : 2.0
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcMI1"
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
-         IO_MODE                     := "idbMI1".@@MODULE@@.MODE ,
-         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
+         IO_MODE                     := "idbMI1".@@INSTANCE@@.MODE ,
+         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
 NETWORK
 
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
-      CALL #@@MODULE@@
-      (  MODE                        := #@@MODULE@@.MODE ,
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+      CALL #@@INSTANCE@@
+      (  MODE                        := #@@INSTANCE@@.MODE ,
          RAW_INPUT                   := "P_@@INSTANCE@@":P ,
-         USER_INPUT                  := #@@MODULE@@.USER_INPUT ,
+         USER_INPUT                  := #@@INSTANCE@@.USER_INPUT ,
          UPPER_RANGE                 := @@MaxMass@@ ,
          LOWER_RANGE                 := -100.0 ,
-         POLARITY                    := #@@MODULE@@.POLARITY ,
-         LIMIT_HH                    := #@@MODULE@@.LIMIT_HH ,
-         LIMIT_H                     := #@@MODULE@@.LIMIT_H ,
-         MEASURE                     := #@@MODULE@@.MEASURE ,
-         DATA_QUALITY                := #@@MODULE@@.DATA_QUALITY ,
-         ALARM_HH                    := #@@MODULE@@.ALARM_HH ,
-         ALARM_H                     := #@@MODULE@@.ALARM_H ,
-         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
-         RANGE_ERROR                 := #@@MODULE@@.RANGE_ERROR ,
-         BROKEN_WIRE                 := #@@MODULE@@.BROKEN_WIRE
+         POLARITY                    := #@@INSTANCE@@.POLARITY ,
+         LIMIT_HH                    := #@@INSTANCE@@.LIMIT_HH ,
+         LIMIT_H                     := #@@INSTANCE@@.LIMIT_H ,
+         MEASURE                     := #@@INSTANCE@@.MEASURE ,
+         DATA_QUALITY                := #@@INSTANCE@@.DATA_QUALITY ,
+         ALARM_HH                    := #@@INSTANCE@@.ALARM_HH ,
+         ALARM_H                     := #@@INSTANCE@@.ALARM_H ,
+         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
+         RANGE_ERROR                 := #@@INSTANCE@@.RANGE_ERROR ,
+         BROKEN_WIRE                 := #@@INSTANCE@@.BROKEN_WIRE
       );
       NOP 0;
 @@TEMPLATE_END@@

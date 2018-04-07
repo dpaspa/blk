@@ -1,0 +1,56 @@
+FUNCTION "fcHMIMessages" : Void
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+
+BEGIN
+NETWORK
+TITLE = Log Duration Time Value
+      CALL "fbLOG_TIME", "dbTIME_LOG"
+      (  EV_ID_1                     := DWORD#16#6000_01E1
+      );
+      NOP 0;
+
+NETWORK
+TITLE = Log Real Value
+      CALL "fbLOG_REAL", "dbREAL_LOG"
+      (  EV_ID_1                     := DWORD#16#6000_01E2
+      );
+      NOP 0;
+
+NETWORK
+TITLE =
+    CALL "fbSFCPromptMessage", "idbSFCPromptMessage"
+    (
+        EV_ID_1                     := DWORD#16#6000_0133 ,
+        EV_ID_2                     := DWORD#16#6000_0134 ,
+        EV_ID_3                     := DWORD#16#6000_0135 ,
+        EV_ID_4                     := DWORD#16#6000_0136 ,
+        EV_ID_5                     := DWORD#16#6000_0137 ,
+        EV_ID_6                     := DWORD#16#6000_0138 ,
+        EV_ID_7                     := DWORD#16#6000_0139 ,
+        EV_ID_8                     := DWORD#16#6000_013A ,
+        EV_ID_9                     := DWORD#16#6000_013B ,
+        EV_ID_10                    := DWORD#16#6000_013C ,
+        EV_ID_11                    := DWORD#16#6000_013D ,
+        EV_ID_12                    := DWORD#16#6000_013E ,
+        EV_ID_13                    := DWORD#16#6000_013F ,
+        EV_ID_14                    := DWORD#16#6000_0140 ,
+        EV_ID_15                    := DWORD#16#6000_0141 ,
+        EV_ID_16                    := DWORD#16#6000_0142 ,
+        EV_ID_79                    := DWORD#16#6000_0181 ,
+        EV_ID_80                    := DWORD#16#6000_0182
+    );
+    NOP 0;
+NETWORK
+TITLE =
+    CALL "fbSFCStepMessage", "idbSFCStepMessage"
+    (
+        EV_ID_1                     := DWORD#16#6000_01E0 ,
+        EV_ID_2                     := DWORD#16#6000_01DF ,
+        EV_ID_3                     := DWORD#16#6000_01DE ,
+        EV_ID_4                     := DWORD#16#6000_01DD ,
+        EV_ID_5                     := DWORD#16#6000_01DC ,
+        EV_ID_6                     := DWORD#16#6000_01DB
+    );
+    NOP 0;
+END_FUNCTION

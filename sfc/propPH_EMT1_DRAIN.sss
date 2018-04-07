@@ -1,0 +1,282 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 20/3/2018 5:19:40 PM by MAC_IZZ
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+Name:- DRAIN
+Title:- Drain the cooling water
+Class:- PH
+Level:- EMT1
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- J1PDRAI
+Version:- 0.4
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.4 Khairul Basar    20-Sep-2009 CC-09/023  SQ_TIMER is removed from Visio variable list.
+// 0.3 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific,& TRN code OR to AND
+//                                             Change in the Last step.SQ_TIMER added in VAR
+// 0.2 Khairul Basar    18-Aug-2009            Added logic code
+// 0.1 David Paspa      13-Jul-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- mod_tcv_cmd
+Type:- INT
+Description:- MOD1 cmd
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- mod_tcv_state
+Type:- INT
+Description:- MOD1 state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- pos_returndrain_cmd
+Type:- INT
+Description:- Cooling Water Return drain valve command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- pos_returndrain_state
+Type:- INT
+Description:- Cooling Water Return drain valve state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- pos_return_state
+Type:- Type
+Description:- Cooling Water Return Valve State
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- pos_supply_state
+Type:- INT
+Description:- Cooling Water Supply Valve State
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- pos_return_cmd
+Type:- INT
+Description:- Cooling Water Return Valve Cmd
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- pos_supply_cmd
+Type:- INT
+Description:- Cooling Water Supply Valve Cmd
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- pos_supplydrain_state
+Type:- INT
+Description:- Cooling Water Supply drain valve state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- pos_supplydrain_cmd
+Type:- INT
+Description:- Cooling Water Supply drain valve command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- time_drain
+Type:- TIME
+Description:- drain time setpoint
+ParameterInOut:- IN
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- PH_EMT1_DRAIN : Commence vessel jacket draining
+Description:- Disable cooling and close cooling water valves.
+Open Supply TCV, Cooling Water Supply and Return Drain valve.
+Close Cooling Water Supply and Return valve.
+Start DRAIN_TIMER.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open Supply TCV, Cooling Water Supply and Return Drain valve.
+Close Cooling Water Supply and Return valve.
+Action:- //Open Supply Drain valve.
+L "dbCONST".CM.CMD_VALVE.OPEN;
+T #_pos_supplydrain_cmd;
+
+//Open Return Drain valve.
+L "dbCONST".CM.CMD_VALVE.OPEN;
+T #_pos_returndrain_cmd;
+
+//Open MOD 1 TCV.
+L "dbCONST".CM.CMD_VALVE.OPEN;
+T #_mod_tcv_cmd;
+
+//Close Supply valve.
+L "dbCONST".CM.CMD_VALVE.CLOSE;
+T #_pos_supply_cmd;
+
+//Close Return valve.
+L "dbCONST".CM.CMD_VALVE.CLOSE;
+T #_pos_return_cmd;
+Verification:- //Verify Supply Drain valve was opened.
+A(;
+L #_pos_supplydrain_state;
+L "dbCONST".CM.POS_DEV_STATE.OPENED;
+==I;
+);
+//Verify Return Drain valve was opened.
+A(;
+L #_pos_returndrain_state;
+L "dbCONST".CM.POS_DEV_STATE.OPENED;
+==I;
+);
+//Verify Supply TCV was opened.
+A(;
+L #_mod_tcv_state;
+L dbCONST".CM.MOD1_DEV_STATE.OPENED;  
+==I;
+);
+//Verify Supply valve was closed.
+A(;
+L #_pos_supply_state;
+L "dbCONST".CM.POS_DEV_STATE.CLOSED;
+==I;
+);
+//Verify Return valve was closed.
+A(;
+L #_pos_return_state;
+L "dbCONST".CM.POS_DEV_STATE.CLOSED;
+==I;
+);
+
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Start DRAIN_TIMER.
+Action:- // Start Timer.
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+
+//Load the drain time setpoint.
+L #_time_drain;
+T #SQ_TIMER.PT;
+
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Wait until drain time expired
+EmptyTransition:- False
+Description:- Continue to the next step after the timer expired.
+Condition:-  A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- PH_EMT1_DRAIN : Vessel jacket draining completed
+Description:- Close all valves.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close all valves.
+Action:- //Disable the timer.
+SET;
+R #SQ_TIMER.IN;
+
+//Open Supply Drain valve.
+L "dbCONST".CM.CMD_VALVE.CLOSE;
+T #_pos_supplydrain_cmd;
+
+//Open Return Drain valve.
+L "dbCONST".CM.CMD_VALVE.CLOSE;
+T #_pos_returndrain_cmd;
+
+//Open MOD 1 TCV.
+L "dbCONST".CM.CMD_VALVE.CLOSE;
+T #_mod_tcv_cmd;
+
+//Close Supply valve.
+L "dbCONST".CM.CMD_VALVE.CLOSE;
+T #_pos_supply_cmd;
+
+//Close Return valve.
+L "dbCONST".CM.CMD_VALVE.CLOSE;
+T #_pos_return_cmd;
+Verification:- //Verify Supply Drain valve was closed.
+A(;
+L #_pos_supplydrain_state;
+L "dbCONST".CM.POS_DEV_STATE.CLOSED;
+==I;
+);
+//Verify Return Drain valve was closed.
+A(;
+L #_pos_returndrain_state;
+L "dbCONST".CM.POS_DEV_STATE.CLOSED;
+==I;
+);
+//Verify Supply TCV was closed.
+A(;
+L #_mod_tcv_state;
+L dbCONST".CM.MOD1_DEV_STATE.CLOSED; 
+==I;
+);
+//Verify Supply valve was closed.
+A(;
+L #_pos_supply_state;
+L "dbCONST".CM.POS_DEV_STATE.CLOSED;
+==I;
+);
+//Verify Return valve was closed.
+A(;
+L #_pos_return_state;
+L "dbCONST".CM.POS_DEV_STATE.CLOSED;
+==I;
+);
+
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

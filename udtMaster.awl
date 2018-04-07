@@ -1,0 +1,134 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Title:       udtMaster                                                     //
+// Description: Master definition of user defined data structures.            //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      28-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    30-Sep-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+﻿TYPE "udtAlarmMessage"
+VERSION : 0.1
+   STRUCT
+      MainTextLib : Byte;              // Select Main Library
+      TextLib : Byte;                  // Select second Library
+      BatchID : Array[1..6] of Char;
+      CipSipNo : DWord;
+   END_STRUCT;
+END_TYPE
+
+TYPE "udtHygiene"
+VERSION : 2.0
+    STRUCT
+        CLEAN_TIME : DInt := DINT#604_800_000;
+        STERILE_TIME : DInt := DINT#604_800_000;
+        CLEAN_TOUT : Bool;             // LAST STATUS
+        STERILE_TOUT : Bool;           // LAST STATUS
+        HYGIENE_STATE : Int;
+        CLEAN_ELAPSED_TIME : DInt;
+        STERILE_ELAPSED_TIME : DInt;
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtID"
+VERSION : 2.0
+    STRUCT
+        ID : Array[1..6] of Char;      // Batch or cycle number identification number
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtLogValue"
+VERSION : 0.1
+    STRUCT
+        Real_Value : Real;
+        BatchID : Array[1..6] of Char;
+        Index : Int;
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtMsgEvent"
+VERSION : 2.0
+    STRUCT
+        prompt : Bool;
+        confirm_yes : Bool;
+        confirm_no : Bool;
+        ackRequired : Bool;
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtLogEvent"
+VERSION : 2.0
+    STRUCT
+        edge : Bool;
+        Time_Index : Int;
+        Real_Index : Int;
+        timeValue : Time;
+        realValue : Real;
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtSFCCommand"
+VERSION : 0.1
+   STRUCT
+      New : Int;                       // New SQ command
+      Old : Int;                       // Old SQ command
+      Start : Bool;                    // Initiate/start command
+      Stop : Bool;                     // Stop command
+      Pause : Bool;                    // Pause command
+      Resume : Bool;                   // Resume command
+      Abort : Bool;                    // Abort command
+      Ack : Bool;                      // Acknowledge error/fault
+      wrong : Bool;                    // unspecified command
+      Changed : Bool;                  // command changed
+      Reserved1 : Array[1..16] of Bool;//reset Sq?
+   END_STRUCT;
+END_TYPE
+
+TYPE "udtSFCMode"
+VERSION : 0.1
+   STRUCT
+      current : Int;
+      history : Int;
+      manual : Bool;
+      auto : Bool;
+      oos : Bool;
+      wrong : Bool;
+      changed : Bool;
+      Reserve : Array[1..16] of Bool;
+   END_STRUCT;
+END_TYPE
+
+TYPE "udtSFCStep"
+VERSION : 0.1
+   STRUCT
+      Done : Array[1..16] of Bool;     // Step succesfully finished
+      WithError : Array[1..16] of Bool;// Step unsuccesfully finished
+      Initial : Int := 1;              // Initial/Starting Step number
+      NumberCurrent : Int;             // Step number currently Processing
+      NumberNext : Int;                // Next Step number to jump to
+      ActionNumber : Int := 1;         // Step Action number,default=1
+      Active : Bool;                   // Current Step number is active
+      Finished : Bool;                 // Last step finished
+      ActionFinished : Bool;           // Last Step Action finished
+      JumpCtrl : Bool;                 // in Manual Jump , bypass transion code
+      Jump : Bool;                     // Transition satisfied, jump to next Step specified
+      TimerExpired : Bool;             // Step timer expired, Step taking too long time to finish
+      Error_Fault : Bool;              // Step Error occurred
+      NoVerification : Bool;           // No action verification , Bypass action verification
+      ActionVerified : Bool;           // Action Verification satisfied
+   END_STRUCT;
+END_TYPE
+
+TYPE "udtSFCSequencer"
+VERSION : 2.0
+   STRUCT
+      STEP : "udtSFCStep";
+      MODE : "udtSFCMode";
+      CMD : "udtSFCCommand";
+      FinalStep : Int;                 // LastStep number
+      Finished : Bool;                 // Sequencer Finished
+      Error_Fault : Bool;              // Sequence error
+   END_STRUCT;
+END_TYPE

@@ -1,0 +1,195 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 20/3/2018 5:19:28 PM by MAC_IZZ
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+Name:- ISOLATE
+Title:- PH_ISOLATE
+Description:- Remove all the Mx WFI and Pw inlet line connections & isolate the vessel
+Class:- EMC2
+Level:- PH
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- C2PISOL
+Version:- 0.4
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.4 Khairul Basar    20-Sep-2009 CC-09/023  Regenerated to add SQ_FINISH flag.
+// 0.3 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific,& TRN code OR to AND
+//                                             Change in the Last step.
+// 0.2 Khairul Basar    18-Aug-2009            Added logic code
+// 0.1 David Paspa      13-Jul-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- flowpath_isolated
+Type:- BOOL
+Description:- Flow path of WFI line and PW line is isolated and no more integral
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- zsc_fpwfi_state
+Type:- INT
+Description:- WFI line connection sensor switch
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- zsc_fppw_state
+Type:- INT
+Description:- PW line connection sensor switch
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- confirm_isolate
+Type:- BOOL
+Description:- Operator confirmed that WFI and PW line is disconnected.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- prompt_isolate
+Type:- BOOL
+Description:- Prompt operator to disconnect WFI and PW line
+ParameterInOut:- VAR
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- PH_EMC2_ISOLATE: Prompt to disconnect WFI and PW supply
+Description:- Prompt operator to disconnect WFI and PW supply and isolate the vessel inlet line.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt operator to disconnect WFI and PW supply and isolate the vessel inlet line.
+Action:- SET;
+S #_prompt_isolate; //Prompt to isolate the PW & WFI line.
+R #_confirm_isolate; //Reset WFI and PW line isolation confirmation.
+R #_flowpath_isolated;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Operator confirmation
+EmptyTransition:- False
+Description:- Wait for operator to confirm WFI and PW line connections have been removed.
+Condition:- A #_confirm_isolate;
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- PH_EMC2_ISOLATE : Check connection
+Description:- Check connection
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Reset line isolation prompt and line isolation confirmation
+
+Action:- //Reset old bits
+SET;
+R #_prompt_isolate;
+R #_confirm_isolate;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- Connections removed
+EmptyTransition:- False
+Description:- Jump if ZSCx103 and ZSCx105 are removed
+Condition:- //Check whether PW line connection sensor switch is off, or flowpath device is not in place, or wiring fault exists.    
+ A(    ;
+    L #_zsc_fppw_state; //PW and PW PS line is removed;
+    L "dbCONST".CM.ZSC2_DEV_STATE.OUT;
+      ==I ;  
+      )     ;
+//Check whether WFI line connection sensor switch is off, or flowpath device is not in place, or wiring fault exists.    
+ A(    ;
+   L #_zsc_fpwfi_state; //WFI and WFI PS line is removed;
+   L "dbCONST".CM.ZSC2_DEV_STATE.OUT;
+      ==I ;  
+    )     ;
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- Operator do not remove connections correctly
+EmptyTransition:- False
+Description:- Jump unconditionally, the connections have not been removed correctly
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- PH_EMC2_ISOLATE : Setup completed
+Description:- flowpath interlock isolated
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Flow path of WFI line and PW line is isolated.
+Action:- SET;
+S #_flowpath_isolated;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 4.0000
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- PH_EMC2_ISOLATE : Last Step
+Description:- Last Step
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Resets the used bit signal.
+Action:- SET;
+R #_confirm_isolate;
+R #_prompt_isolate;
+Verification:- A M1.1; //Always High flag
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

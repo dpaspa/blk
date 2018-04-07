@@ -1,0 +1,224 @@
+FUNCTION_BLOCK "fbTimeSyncHMI"
+TITLE = Time synchronisation
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : ZW
+FAMILY : SIMATIC
+NAME : SYS_CLK
+VERSION : 0.2
+//** SYS_CLK_WinCE_V2
+//v0.2
+//================================================================================
+//This function reads and synchronizes the system time of the PLC with the system
+//time of the HMI (WinCE Panels). You need in addition the SFC0 "SET_CLK" and
+//SFC1 "READ_CLK" form the STEP7 Library.
+//
+//Inputs of the function:
+//I_SetTime BOOL     - Bit, which set the system time of the HMI to the PLC
+//IO_Job_No          - Job number of control job
+//IO_Param_1 .. 3    - Paramters of the job control
+//
+//Use the same adresses in your HMI-Project, which is defined in the I-DB
+//(static tags).
+//================================================================================
+//Tested with STEP 7 V5.4 SP1
+   VAR_IN_OUT
+      IO_SetTime : Bool;   // Starts the contol job 40 to set the system time of the PLC
+      IO_Job_No : Word;   // Job number of the control job
+      IO_Param_1 : Word;   // Parameter 1 of the control job
+      IO_Param_2 : Word;   // Parameter 2 of the control job
+      IO_Param_3 : Word;   // Parameter 3 of the control job
+   END_VAR
+
+   VAR
+      AreaPointerPLC : Struct   // Date/time PLC
+         DateTime : Date_And_Time;   // Date/time PLC
+         Res_08 : Byte;
+         Res_09 : Byte;
+         Res_10 : Byte;
+         Res_11 : Byte;
+      END_STRUCT;
+      AreaPointer : Struct   // Date/time
+         DateTime : Date_And_Time;   // Date/time
+         Res_08 : Byte;
+         Res_09 : Byte;
+         Res_10 : Byte;
+         Res_11 : Byte;
+      END_STRUCT;
+      Flag : Bool;   // bit for internal operation
+      SaveData_1 : DWord;   // Cache for the comparison
+      SaveData_2 : DWord;   // Cache for the comparison
+   END_VAR
+
+   VAR_TEMP
+      t_RetVal : Int;
+      t_DateTime : Date_And_Time;
+      t_address_AR1 : DWord;
+      t_address_AR2 : DWord;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Save address registers
+      TAR1 #t_address_AR1;
+      TAR2 #t_address_AR2;
+
+NETWORK
+TITLE = Read system clock of the PLC
+      A #IO_SetTime;
+      O #Flag;
+      JC _NOR;
+
+      CALL RD_SYS_T
+      {date_type := 'Date_And_Time'}
+      (  RET_VAL                     := #t_RetVal ,
+         OUT                         := #t_DateTime
+      );
+
+_NOR:      NOP 0;
+NETWORK
+TITLE = Split MSEC and Day of week
+// Write ZERO to the reserved Byte
+      L 0;
+      L %LB8;// MSEC
+
+// Split MSEC and day of week
+      L %LB9;// MSEC + Day of week
+      L 7;
+      AW;
+      T %LB9;// Day of week
+
+NETWORK
+TITLE = Transfer local data to the global data
+      LAR1 P##AreaPointerPLC;// Area Pointer "Date/time PLC"
+
+      L %LB2;
+      T B[ AR1, P#0.0];// Year
+      L %LB3;
+      T B[ AR1, P#1.0];// Month
+      L %LB4;
+      T B[ AR1, P#2.0];// Day
+      L %LB5;
+      T B[ AR1, P#3.0];// Hours
+      L %LB6;
+      T B[ AR1, P#4.0];// Minutes
+      L %LB7;
+      T B[ AR1, P#5.0];// Seconds
+      L %LB9;
+      T B[ AR1, P#7.0];// Day of week
+
+NETWORK
+TITLE = Set system time of the HMI to the PLC
+
+//////////////////////////////////////
+// Start control job '40'
+//////////////////////////////////////
+      A #IO_SetTime;
+      A(;
+      L #IO_Job_No;
+      L WORD#16#0000;
+      ==I;
+      );
+      JCN _NOS;
+
+// 28 hex => 40 dez
+      L WORD#16#0028;
+      T #IO_Job_No;
+
+      L WORD#16#0000;
+      T #IO_Param_1;
+      T #IO_Param_2;
+      T #IO_Param_3;
+
+//////////////////////////////////////
+// Save actual data of area pointer
+//////////////////////////////////////
+
+      LAR1 P##AreaPointer;
+
+      L D[ AR1, P#0.0];
+      T #SaveData_1;
+
+      L D[ AR1, P#4.0];
+      T #SaveData_2;
+
+///////////////////////////////
+
+      SET;
+      = #Flag;
+
+      CLR;
+      = #IO_SetTime;
+
+_NOS:      NOP 0;
+
+
+/////////////////////////////////////////
+// Read Data of area pointer "Date/time"
+/////////////////////////////////////////
+
+      A #Flag;
+      A(;
+      L #IO_Job_No;
+      L WORD#16#0000;
+      ==I;
+      );
+      JCN _SET;
+
+      LAR1 P##AreaPointer;// AreaPointer "Date/time"
+
+      L B[ AR1, P#0.0];// Year
+      T %LB2;
+      L B[ AR1, P#1.0];// Month
+      T %LB3;
+      L B[ AR1, P#2.0];// Day
+      T %LB4;
+      L B[ AR1, P#3.0];// Hours
+      T %LB5;
+      L B[ AR1, P#4.0];// Minutes
+      T %LB6;
+      L B[ AR1, P#5.0];// Seconds
+      T %LB7;
+      L B[ AR1, P#7.0];// Day of week
+      T %LB9;
+
+//////////////////////////////////////
+// Check whether new data are
+// inserted in the area pointer
+//////////////////////////////////////
+
+      A(;
+      L #SaveData_1;
+      L D[ AR1, P#0.0];
+      ==D;
+      );
+      A(;
+      L #SaveData_2;
+      L D[ AR1, P#4.0];
+      ==D;
+      );
+      JC _RET;
+
+/////////////////////////////
+// Set system time to the PLC
+      CALL WR_SYS_T
+      {date_type := 'Date_And_Time'}
+      (  IN                          := #t_DateTime ,
+         RET_VAL                     := #t_RetVal
+      );
+
+// Reset Counter
+      CLR;
+      = #Flag;
+
+_RET:      NOP 0;
+_SET:      NOP 0;
+
+NETWORK
+TITLE = Restauration of the address registers
+      LAR1 #t_address_AR1;
+      LAR2 #t_address_AR2;
+
+      SAVE;
+      CLR;
+END_FUNCTION_BLOCK

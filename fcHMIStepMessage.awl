@@ -1,0 +1,351 @@
+FUNCTION "fcHMIStepMessage" : Void
+TITLE = Block Message
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_INPUT
+      EV_ID : DWord;   // Event ID, systemID
+      TestSignal : Byte;
+      Event : Bool;   // Select=1 if Permanently acknowledge, =0 if need to ack
+      BatchID : "udtID";
+      DisplayBatchID : Int;   // Index1 =1, Batch ID will be displayed
+      UnitNO : Int;   // Unit No information
+      CURSTEP : Int;   // Current Step
+   END_VAR
+
+   VAR_OUTPUT
+      Q_State : Bool;
+      AckedOnly : Bool;
+      AckAnd2ndBit : Bool;
+   END_VAR
+
+   VAR_IN_OUT
+      Hmi2ndBit : Bool;
+      SD : "udtSTAGE_MSG";
+      Stage : "udtSTAGE_CHG";
+   END_VAR
+
+   VAR_TEMP
+      scRetval : Int;
+      scState : Bool;
+      sRetval : Int;
+      MessageIndex : Word;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE =
+      L #CURSTEP;
+      T #Stage.current;
+      NOP 0;
+NETWORK
+TITLE = Select Display BatchId, the Message index and Value at stage
+//#DisplayBatchID=0, Batch ID will be displayed empty
+//#DisplayBatchID=1, Batch ID will be displayed
+      A(;
+      L #DisplayBatchID;
+      T #SD.DisplayBatchID;
+      SET;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_0;
+      L #UnitNO;
+      T #SD.UnitNo;
+Label_0:      NOP 0;
+NETWORK
+TITLE = if Batch ID to be displayed
+      L #DisplayBatchID;
+      L 1;
+      ==I;
+      = %L8.0;
+      A(;
+      A(;
+      A %L8.0;
+      JNB Label_1;
+      L #BatchID.ID[1];
+      T #SD.BatchID[1];
+      SET;
+      SAVE;
+      CLR;
+Label_1:      A BR;
+      );
+      JNB Label_2;
+      L #BatchID.ID[2];
+      T #SD.BatchID[2];
+      SET;
+      SAVE;
+      CLR;
+Label_2:      A BR;
+      );
+      JNB Label_3;
+      L #BatchID.ID[3];
+      T #SD.BatchID[3];
+Label_3:      NOP 0;
+      A(;
+      A(;
+      A %L8.0;
+      JNB Label_4;
+      L #BatchID.ID[4];
+      T #SD.BatchID[4];
+      SET;
+      SAVE;
+      CLR;
+Label_4:      A BR;
+      );
+      JNB Label_5;
+      L #BatchID.ID[5];
+      T #SD.BatchID[5];
+      SET;
+      SAVE;
+      CLR;
+Label_5:      A BR;
+      );
+      JNB Label_6;
+      L #BatchID.ID[6];
+      T #SD.BatchID[6];
+Label_6:      NOP 0;
+NETWORK
+TITLE =
+      L #Stage.current;//Load to Accu-1
+      L #Stage.history;//Move Accu-1 into Accu-2,Load to Accu-1
+      ==I;
+      JC _00c;//Stage not changed, exit function
+
+      L #Stage.Mode;//Load to Accu-1
+      L 0;//Move Accu-1 into Accu-2,Load to Accu-1
+      ==I;
+      JC MN00;
+
+      L #Stage.Mode;//Load to Accu-1
+      L 1;//Move Accu-1 into Accu-2,Load to Accu-1
+      ==I;
+      JC MN01;
+
+      R #Stage.changed;
+      L 1;
+      T #Stage.Mode;
+      JU MN02;
+
+MN01:      NOP 0;
+      R #Stage.changed;
+      L 2;
+      T #Stage.Mode;
+      JU MN02;
+
+MN00:      NOP 0;
+      R #Stage.changed;
+      L 1;
+      T #Stage.Mode;
+
+MN02:      NOP 0;
+      L #Stage.history;//Load to Accu-1
+      L 0;//Move Accu-1 into Accu-2,Load to Accu-1
+      ==I;
+      JC _00a;
+
+
+NETWORK
+TITLE =
+      L #Stage.history;
+      T #MessageIndex;
+
+      L #MessageIndex;
+      T #SD.MessageIndex;
+
+NETWORK
+TITLE = If Event, without acknowledgement/Permanently acknowledge
+//If TestSignal value is 0, then messaging is normal, if equals to 32000 then all
+//messages are bypassed(no messages to be displayed), if other than 0 & 32000
+//then
+//only that message in the index number of test library will be displayed.
+      A(;
+      A #Stage.changed;
+      A(;
+      L #TestSignal;
+      L 0;
+      ==I;
+      );
+      A(;
+      L #TestSignal;
+      L 32000;
+      <>I;
+      );
+      O(;
+      L #TestSignal;
+      L #DisplayBatchID;
+      ==I;
+      );
+      );
+      = %L6.0;
+      BLD 103;
+      A #Event;
+      JNB _009;
+
+      CALL ALARM_S
+      (  SIG                         := %L6.0 ,
+         ID                          := WORD#16#EEEE ,
+         EV_ID                       := #EV_ID ,
+         SD                          := "dbSTATE_VAL".STEP_SD ,
+         RET_VAL                     := #sRetval
+      );
+_009:      NOP 0;
+NETWORK
+TITLE = If Alarm, Need acknowledgement
+      A(;
+      A #Stage.changed;
+      A(;
+      L #TestSignal;
+      L 0;
+      ==I;
+      );
+      A(;
+      L #TestSignal;
+      L 32000;
+      <>I;
+      );
+      O(;
+      L #TestSignal;
+      L #DisplayBatchID;
+      ==I;
+      );
+      );
+      = %L6.0;
+      BLD 103;
+      AN #Event;
+      JNB _00a;
+
+      CALL ALARM_SQ
+      (  SIG                         := %L6.0 ,
+         ID                          := WORD#16#EEEE ,
+         EV_ID                       := #EV_ID ,
+         SD                          := "dbSTATE_VAL".STEP_SD ,
+         RET_VAL                     := #sRetval
+      );
+_00a:      NOP 0;
+
+NETWORK
+TITLE =
+      L #Stage.current;//Load current mode
+      T #Stage.history;//Save current mode
+      NOP 0;
+      SET;
+      S #Stage.changed;//End Mode function
+
+      L #Stage.history;//Load to Accu-1
+      L 0;//Move Accu-1 into Accu-2,Load to Accu-1
+      ==I;
+      JC _00c;
+
+NETWORK
+TITLE =
+      L #Stage.current;
+      T #MessageIndex;
+
+      L #MessageIndex;
+      T #SD.MessageIndex;
+
+NETWORK
+TITLE = If Event, without acknowledgement/Permanently acknowledge
+//If TestSignal value is 0, then messaging is normal, if equals to 32000 then all
+//messages are bypassed(no messages to be displayed), if other than 0 & 32000
+//then
+//only that message in the index number of test library will be displayed.
+      A(;
+      A #Stage.changed;
+      A(;
+      L #TestSignal;
+      L 0;
+      ==I;
+      );
+      A(;
+      L #TestSignal;
+      L 32000;
+      <>I;
+      );
+      O(;
+      L #TestSignal;
+      L #DisplayBatchID;
+      ==I;
+      );
+      );
+      = %L6.0;
+      BLD 103;
+      A #Event;
+      JNB _00b;
+
+      CALL ALARM_S
+      (  SIG                         := %L6.0 ,
+         ID                          := WORD#16#EEEE ,
+         EV_ID                       := #EV_ID ,
+         SD                          := "dbSTATE_VAL".STEP_SD ,
+         RET_VAL                     := #sRetval
+      );
+_00b:      NOP 0;
+NETWORK
+TITLE = If Alarm, Need acknowledgement
+      A(;
+      A #Stage.changed;
+      A(;
+      L #TestSignal;
+      L 0;
+      ==I;
+      );
+      A(;
+      L #TestSignal;
+      L 32000;
+      <>I;
+      );
+      O(;
+      L #TestSignal;
+      L #DisplayBatchID;
+      ==I;
+      );
+      );
+      = %L6.0;
+      BLD 103;
+      AN #Event;
+      JNB _00c;
+
+      CALL ALARM_SQ
+      (  SIG                         := %L6.0 ,
+         ID                          := WORD#16#EEEE ,
+         EV_ID                       := #EV_ID ,
+         SD                          := "dbSTATE_VAL".STEP_SD ,
+         RET_VAL                     := #sRetval
+      );
+
+_00c:      NOP 0;
+NETWORK
+TITLE = Acknowledge
+      CALL ALARM_SC
+      (  EV_ID                       := #EV_ID ,
+         RET_VAL                     := #scRetval ,
+         STATE                       := #scState ,
+         Q_STATE                     := #Q_State
+      );
+      NOP 0;
+NETWORK
+TITLE = Only Acknowledge or Ack plus Cancel
+      A #Q_State;
+      = %L8.0;
+      A %L8.0;
+      AN #Hmi2ndBit;
+      AN #AckAnd2ndBit;
+      S #AckedOnly;
+      A %L8.0;
+      A #Hmi2ndBit;
+      S #AckAnd2ndBit;
+      R #Hmi2ndBit;
+NETWORK
+TITLE = Reset Acked bit
+      A #AckedOnly;
+      AN #Q_State;
+      R #AckedOnly;
+NETWORK
+TITLE = #AckAnd2ndBit
+      A #AckAnd2ndBit;
+      AN #Q_State;
+      R #AckAnd2ndBit;
+END_FUNCTION

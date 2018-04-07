@@ -1,0 +1,306 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Logs a time value to the batch report.                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Mar-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbLogTime"
+TITLE = Process Time Value Logging
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : ifbLogTime
+VERSION : 2.0
+
+VAR_INPUT
+    EV_ID_1 : C_Alarm_s;
+END_VAR
+
+VAR
+    EV1_Pos : Array[1..16] of Bool;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Duration Time Logging for CRP
+      A "idbCRP".CRP1.RP_CIPSIP.sqSequencer.STEP.Done[12];
+      L "idbCRP".CRP1.RP_CIPSIP._log_VacHeldTime;
+      T "dbLOG_VAL".Process_Time;
+
+      A "idbCRP".CRP1.RP_CIPSIP.sqSequencer.STEP.Done[12];
+      L @@COUNTER@@;
+      T "dbLOG_VAL".Time_Index;
+
+      A "idbCRP".CRP1.RP_CIPSIP.sqSequencer.STEP.Done[12];
+      FP #EV1_Pos[@@COUNTER@@];
+
+
+
+
+      O(;
+      A(;
+      A(;
+      A "idbCRP".CRP1.RP_CIPSIP.sqSequencer.STEP.Done[12];
+      JNB Label_2;
+      L "idbCRP".CRP2.RP_CIPSIP._log_VacHeldTime;
+      T "dbLOG_VAL".Process_Time;
+      SET;
+      SAVE;
+      CLR;
+Label_2:      A BR;
+      );
+      JNB Label_3;
+      L 2;
+      T "dbLOG_VAL".Time_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_3:      A BR;
+      );
+      FP #EV1_Pos[2];
+      );
+      = "dbLOG_VAL".EV_Trigger[1];
+NETWORK
+TITLE = Duration Time Logging for M1
+      A "idbMX".M1.UO_CIP.sqSequencer.STEP.Done[9];
+      L "idbMX".M1.UO_CIP._log_PWWashTime;
+      T "dbLOG_VAL".Process_Time;
+
+      A "idbMX".M1.UO_CIP.sqSequencer.STEP.Done[9];
+      L 3;
+      T "dbLOG_VAL".Time_Index;
+
+      A "idbMX".M1.UO_CIP.sqSequencer.STEP.Done[9];
+      FP #EV1_Pos[3];
+      JNB Label_10;
+      L "idbMX".M1.UO_CIP._log_WFIRinseTime;
+      T "dbLOG_VAL".Process_Time;
+      SET;
+      SAVE;
+      CLR;
+Label_10:      A BR;
+      );
+      JNB Label_11;
+      L 6;
+      T "dbLOG_VAL".Time_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_11:      A BR;
+      );
+      FP #EV1_Pos[6];
+      );
+      = "dbLOG_VAL".EV_Trigger[2];
+NETWORK
+TITLE = Duration Time Logging for S1
+      A(;
+      A(;
+      A "idbSY".S1.UO_CIP.sqSequencer.STEP.Done[3];
+      JNB Label_12;
+      L "idbSY".S1.UO_CIP._log_PWWashTime;
+      T "dbLOG_VAL".Process_Time;
+      SET;
+      SAVE;
+      CLR;
+Label_12:      A BR;
+      );
+      JNB Label_13;
+      L 7;
+      T "dbLOG_VAL".Time_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_13:      A BR;
+      );
+      FP #EV1_Pos[7];
+      O(;
+      A(;
+      A(;
+      A "idbSY".S1.UO_CIP.sqSequencer.STEP.Done[6];
+      JNB Label_14;
+      L "idbSY".S1.UO_CIP._log_WFIRinseTime;
+      T "dbLOG_VAL".Process_Time;
+      SET;
+      SAVE;
+      CLR;
+Label_14:      A BR;
+      );
+      JNB Label_15;
+      L 8;
+      T "dbLOG_VAL".Time_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_15:      A BR;
+      );
+      FP #EV1_Pos[8];
+      );
+      O(;
+      A(;
+      A(;
+      A "idbSY".S1.UO_CIP.sqSequencer.STEP.Done[7];
+      JNB Label_16;
+
+
+      A "idbSY".S1.UO_CIP._log_msg_WFI_FTLRinseTime;
+
+      A "idbSY".S1.UO_CIP._log_time_value_WFI_FTLRinseTime;
+      L "idbSY".S1.UO_CIP._log_time_WFI_FTLRinse;
+
+
+      A "idbSY".S1.UO_CIP._log_real_value_mass_charged;
+      L "idbSY".S1.UO_CIP._log_real_mass_charged;
+
+
+      T "dbLOG_VAL".Process_Time;
+      SET;
+      SAVE;
+      CLR;
+Label_16:      A BR;
+      );
+      JNB Label_17;
+      L 9;
+      T "dbLOG_VAL".Time_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_17:      A BR;
+      );
+      FP #EV1_Pos[9];
+      );
+      O(;
+      A(;
+      A(;
+      A "idbSY".S1.UO_CIP.sqSequencer.STEP.Done[11];
+      JNB Label_18;
+      L "idbSY".S1.UO_CIP._log_SteamingTime;
+      T "dbLOG_VAL".Process_Time;
+      SET;
+      SAVE;
+      CLR;
+Label_18:      A BR;
+      );
+      JNB Label_19;
+      L 10;
+      T "dbLOG_VAL".Time_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_19:      A BR;
+      );
+      FP #EV1_Pos[10];
+      );
+      = "dbLOG_VAL".EV_Trigger[3];
+NETWORK
+TITLE = Duration Time Logging for S2
+      A(;
+      A(;
+      A "idbSY".S2.UO_CIP.sqSequencer.STEP.Done[3];
+      JNB Label_20;
+      L "idbSY".S2.UO_CIP._log_PWWashTime;
+      T "dbLOG_VAL".Process_Time;
+      SET;
+      SAVE;
+      CLR;
+Label_20:      A BR;
+      );
+      JNB Label_21;
+      L 11;
+      T "dbLOG_VAL".Time_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_21:      A BR;
+      );
+      FP #EV1_Pos[11];
+      O(;
+      A(;
+      A(;
+      A "idbSY".S2.UO_CIP.sqSequencer.STEP.Done[6];
+      JNB Label_22;
+      L "idbSY".S2.UO_CIP._log_WFIRinseTime;
+      T "dbLOG_VAL".Process_Time;
+      SET;
+      SAVE;
+      CLR;
+Label_22:      A BR;
+      );
+      JNB Label_23;
+      L 12;
+      T "dbLOG_VAL".Time_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_23:      A BR;
+      );
+      FP #EV1_Pos[12];
+      );
+      O(;
+      A(;
+      A(;
+      A "idbSY".S2.UO_CIP.sqSequencer.STEP.Done[7];
+      JNB Label_24;
+      L "idbSY".S2.UO_CIP._log_WFI_FTLRinseTime;
+      T "dbLOG_VAL".Process_Time;
+      SET;
+      SAVE;
+      CLR;
+Label_24:      A BR;
+      );
+      JNB Label_25;
+      L 13;
+      T "dbLOG_VAL".Time_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_25:      A BR;
+      );
+      FP #EV1_Pos[13];
+      );
+      O(;
+      A(;
+      A(;
+      A "idbSY".S2.UO_CIP.sqSequencer.STEP.Done[11];
+      JNB Label_26;
+      L "idbSY".S2.UO_CIP._log_SteamingTime;
+      T "dbLOG_VAL".Process_Time;
+      SET;
+      SAVE;
+      CLR;
+Label_26:      A BR;
+      );
+      JNB Label_27;
+      L 14;
+      T "dbLOG_VAL".Time_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_27:      A BR;
+      );
+      FP #EV1_Pos[14];
+      );
+      = "dbLOG_VAL".EV_Trigger[4];
+NETWORK
+TITLE = Process Time value logging
+      A(;
+      O "dbLOG_VAL".EV_Trigger[1];
+      O "dbLOG_VAL".EV_Trigger[2];
+      O "dbLOG_VAL".EV_Trigger[3];
+      O "dbLOG_VAL".EV_Trigger[4];
+      );
+      = %L0.0;
+      BLD 103;
+      CALL "fcLOG_TIME"
+      (  Log_Trigger                 := %L0.0 ,
+         EV_ID                       := #EV_ID_1 ,
+         Index                       := "dbLOG_VAL".Time_Index ,
+         BatchID                     := "dbCONST_VAL".BlockMsgS1.BatchID ,
+         Duration                    := "dbLOG_VAL".Process_Time ,
+         Real_SD                     := "dbLOG_VAL".RealLog
+      );
+      NOP 0;
+END_FUNCTION_BLOCK

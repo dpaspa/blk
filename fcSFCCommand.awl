@@ -1,0 +1,153 @@
+FUNCTION "fcSFCCommand" : Void
+TITLE = Command checking function
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_IN_OUT
+      Comand : "udtSFCCommand";
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Command checking function
+      L #Comand.New;//load current command
+      L #Comand.Old;// load old command
+      ==I;// check if equal
+      JC CNCH;//if equal, Command not changed, end function
+// Command changed, lets check what is now
+      SET;
+      S #Comand.Changed;
+      L #Comand.New;//load current command
+      T #Comand.Old;
+
+
+      L #Comand.New;// Current command
+      L "dbCONST".SEQ.CMD.START;//start comand equiv
+      ==I;
+      JC STRT;
+
+      L #Comand.New;// Current command
+      L "dbCONST".SEQ.CMD.STOP;//stop command equiv
+      ==I;
+      JC STOP;
+
+
+      L #Comand.New;// Current command
+      L "dbCONST".SEQ.CMD.PAUSE;//Pause command equiv
+      ==I;
+      JC PAUS;
+
+      L #Comand.New;// Current command
+      L "dbCONST".SEQ.CMD.RESUME;//Resume command equiv
+      ==I;
+      JC RESM;
+
+      L #Comand.New;// Current command
+      L "dbCONST".SEQ.CMD.ABORT;//Abort command equiv
+      ==I;
+      JC ABRT;
+
+      L #Comand.New;// Current command
+      L "dbCONST".SEQ.CMD.ACKNOWLEDGE_ERR;//Acknowledge command equiv
+      ==I;
+      JC ACKN;
+//No more specified command
+      JU WCMD;//Wrong command/not specified command
+
+
+
+
+//End Comand function
+NETWORK
+TITLE = Comand action function
+STRT:      NOP 0;
+      S #Comand.Start;
+      R #Comand.Stop;
+      R #Comand.Pause;
+      R #Comand.Resume;
+      R #Comand.Abort;
+      R #Comand.Ack;
+      R #Comand.wrong;
+      JU ECMD;//End Function
+STOP:      NOP 0;
+      R #Comand.Start;
+      S #Comand.Stop;
+      R #Comand.Pause;
+      R #Comand.Resume;
+      R #Comand.Abort;
+      R #Comand.Ack;
+      R #Comand.wrong;
+
+      JU ECMD;//End Function
+PAUS:      NOP 0;
+      R #Comand.Start;
+      R #Comand.Stop;
+      S #Comand.Pause;
+      R #Comand.Resume;
+      R #Comand.Abort;
+      R #Comand.Ack;
+      R #Comand.wrong;
+
+      JU ECMD;//End Function
+RESM:      NOP 0;
+      R #Comand.Start;
+      R #Comand.Stop;
+      R #Comand.Pause;
+      S #Comand.Resume;
+      R #Comand.Abort;
+      R #Comand.Ack;
+      R #Comand.wrong;
+
+      JU ECMD;//End Function
+ABRT:      NOP 0;
+      R #Comand.Start;
+      R #Comand.Stop;
+      R #Comand.Pause;
+      R #Comand.Resume;
+      S #Comand.Abort;
+      R #Comand.Ack;
+      R #Comand.wrong;
+
+      JU ECMD;
+
+ACKN:      NOP 0;
+      R #Comand.Start;
+      R #Comand.Stop;
+      R #Comand.Pause;
+      R #Comand.Resume;
+      R #Comand.Abort;
+      S #Comand.Ack;
+      R #Comand.wrong;
+
+      JU ECMD;//End Function
+
+WCMD:      NOP 0;
+      R #Comand.Start;
+      R #Comand.Stop;
+      R #Comand.Pause;
+      R #Comand.Resume;
+      R #Comand.Abort;
+      R #Comand.Ack;
+      S #Comand.wrong;
+
+      JU ECMD;
+
+CNCH:      NOP 0;// Command not changed
+      R #Comand.Changed;
+
+
+//Default command
+      L #Comand.New;// Current command
+      L "dbCONST".SEQ.CMD.STOP;//Acknowledge command equiv
+      ==I;
+      S #Comand.Stop;
+
+
+NETWORK
+TITLE = End Function
+ECMD:      NOP 0;
+
+      SAVE;
+      A BR;
+
+END_FUNCTION

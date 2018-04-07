@@ -1,0 +1,32 @@
+FUNCTION "fcMoveBits" : Void
+TITLE = Move Bits
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+VAR_INPUT
+    MOVE_BIT_1 : Bool;
+    MOVE_BIT_2 : Bool;
+    MOVE_BIT_3 : Bool;
+END_VAR
+
+VAR_OUTPUT
+    OUT_BIT_1 : Bool;
+    OUT_BIT_2 : Bool;
+    OUT_BIT_3 : Bool;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Move Bit 1
+    A #MOVE_BIT_1;
+    = #OUT_BIT_1;
+
+NETWORK
+TITLE = Move Bit 2
+    A #MOVE_BIT_2;
+    = #OUT_BIT_2;
+
+NETWORK
+TITLE = Move Bit 3
+    A #MOVE_BIT_3;
+    = #OUT_BIT_3;
+END_FUNCTION

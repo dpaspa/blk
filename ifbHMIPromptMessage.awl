@@ -1,0 +1,80 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Handles the HMI interface for SFC operator prompt messages.   //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      29-Mar-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbHMIPromptMessage"
+TITLE = SFC Prompt Messaging Index
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fbHMIPromptMessage
+VERSION : 2.0
+
+VAR_INPUT
+@@TEMPLATE_BEGIN@@
+    EV_ID_@@COUNTER|1@@ : C_Alarm_s;
+@@TEMPLATE_END@@
+END_VAR
+
+VAR
+    OP_PROMPT@@COUNTER|1@@ : "OP_MSG_FB";
+END_VAR
+
+VAR_TEMP
+    Q_State : Bool;
+    AckedOnly : Bool;
+    AckAnd2ndBit : Bool;
+END_VAR
+
+BEGIN
+
+NETWORK
+TITLE = Operator Acknowledge Abort Due to Invalid Hygiene Status
+      A "idbCRP".CRP1.RP_CIPSIP._confirm_abort;
+      = "idbCRP".CRP1.RP_MAKE._confirm_abort;
+      = "idbCRP".CRP1.RP_FILTER._confirm_abort;
+      = "idbCRP".CRP1.RP_FILL._confirm_abort;
+NETWORK
+TITLE = Operator Acknowledge Abort Due to Invalid Hygiene Status
+      A "idbCRP".CRP2.RP_CIPSIP._confirm_abort;
+      = "idbCRP".CRP2.RP_MAKE._confirm_abort;
+      = "idbCRP".CRP2.RP_FILTER._confirm_abort;
+      = "idbCRP".CRP2.RP_FILL._confirm_abort;
+END_FUNCTION_BLOCK
+
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    L "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@._confirm_@@SIGNAL@@;
+    T #AckedOnly;
+
+    T #AckAnd2ndBit;
+
+         AckedOnly                   := "idbCRP".CRP1.RP_CIPSIP._confirm_try_again ,
+         AckAnd2ndBit                := "idbCRP".CRP1.RP_CIPSIP._confirm_no_try ,
+
+      CALL "fcHMIPromptMessage"
+      (  EV_ID                       := #EV_ID_@@COUNTER|1@@ ,
+         Signal                      := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@._prompt_@@SIGNAL@@ ,
+         TestSignal                  := "testEventSignal" ,
+         Event                       := "AlwaysLow" ,
+         CipSipNo                    := "dbCONST_VAL".BlockMsgS1.CipSipNo ,
+         BatchID                     := "idb@@CLASS@@".@@INSTANCE@@.BATCHCYCLE ,
+         TextLib                     := "dbCONST_VAL".BlockMsgS1.TextLib ,
+         MessageIndex                := @@SIGNALINDEX@@ ,
+         Q_State                     := #Q_State ,
+         AckedOnly                   := #AckedOnly ,
+         AckAnd2ndBit                := #AckAnd2ndBit ,
+         Hmi2ndBit                   := "HMI_Ack_Cancel" ,
+         SD                          := "dbCONST_VAL".BlockMsgS1.SD
+      );
+      NOP 0;
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

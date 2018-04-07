@@ -50,84 +50,85 @@
 FUNCTION_BLOCK "fbSIC1"
 TITLE = SIC1 : Agitator speed control
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : fbSIC1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
-   VAR_INPUT
-      CMD : Int := 1;
-      SETPOINT : Real;
-      CR_IL : Bool;
-      NCR_IL : Bool;
-      MAN_OVERRIDE : Bool;
-      THR_x010 : Bool;   // CR.IL
-      TAH_x010 : Bool;   // CR.IL
-      FLT_x010 : Bool;   // CR.IL
-      IN_MAN : Bool;
-      MASS_RUN : Real := 250.0;   // M1=250.0 , M2=100.0, M3=40.0
-      MASS_STOP : Real := 200.0;   // M1=200,M2=70,M3=20.0
-      MEASURE_RPM : Int;   // Inverter speed measured value
-      MV_H : Real := 60.0;   // M1=1500,M2=500,M3=100.0
-      MV_L : Real;
-      MV_POLR : Bool;   // 0- no polarity(0 to z), 1= dual polarity(-x to +y)
-      LIMIT_HH : Real := 252.0;   // High High speed alarm limit
-      LIMIT_H : Real := 251.0;   // High speed alarm limit
-      LIMIT_L : Real := -1.0;   // Low speed alarm limit
-      LIMIT_LL : Real := -2.0;   // Low Low speed alarm limit
-      MASS_MI1 : Real;   // Measured Mass
-      FB_TDELAY : Time := T#20S;
-      NON_PID : Bool;
-      P_SEL : Bool := TRUE;
-      I_SEL : Bool := TRUE;
-      D_SEL : Bool := TRUE;
-      GAIN : Real := 1.0;
-      TI : Time := T#20S;
-      TD : Time := T#10S;
-      CYCLE : Time := T#1S;   // SAMPLING TIME:The time between the block calls constant
-   END_VAR
+    VAR_INPUT
+        CMD : Int := 1;
+        SETPOINT : Real;
+        CR_IL : Bool;
+        NCR_IL : Bool;
+        MAN_OVERRIDE : Bool;
+        THR_x010 : Bool;   // CR.IL
+        TAH_x010 : Bool;   // CR.IL
+        FLT_x010 : Bool;   // CR.IL
+        IN_MAN : Bool;
+        MASS_RUN : Real := 250.0;   // M1=250.0 , M2=100.0, M3=40.0
+        MASS_STOP : Real := 200.0;   // M1=200,M2=70,M3=20.0
+        MEASURE_RPM : Int;   // Inverter speed measured value
+        MV_H : Real := 60.0;   // M1=1500,M2=500,M3=100.0
+        MV_L : Real;
+        MV_POLR : Bool;   // 0- no polarity(0 to z), 1= dual polarity(-x to +y)
+        LIMIT_HH : Real := 252.0;   // High High speed alarm limit
+        LIMIT_H : Real := 251.0;   // High speed alarm limit
+        LIMIT_L : Real := -1.0;   // Low speed alarm limit
+        LIMIT_LL : Real := -2.0;   // Low Low speed alarm limit
+        MASS_MI1 : Real;   // Measured Mass
+        FB_TDELAY : Time := T#20S;
+        NON_PID : Bool;
+        P_SEL : Bool := TRUE;
+        I_SEL : Bool := TRUE;
+        D_SEL : Bool := TRUE;
+        GAIN : Real := 1.0;
+        TI : Time := T#20S;
+        TD : Time := T#10S;
+        CYCLE : Time := T#1S;   // SAMPLING TIME:The time between the block calls constant
+    END_VAR
 
-   VAR_OUTPUT
-      DEV_STATE : Int;
-      OUT_Q : Bool;   // Inverter Motor Run/Stop Command
-      MAN_NONPID : Bool;
-      INTERLOCK : Bool;
-      ALM_THR_x010 : Bool;
-      ALM_TAH_x010 : Bool;
-      ALM_FLT_X010 : Bool;
-      ALARM_HH : Bool;   // Alamr HH
-      ALARM_H : Bool;   // Alarm_H
-      ALARM_L : Bool;   // Alarm_L
-      ALARM_LL : Bool;   // Alarm_LL
-      OUT_Q_F : Bool;
-      OUT_Q_R : Bool;
-      OUT_FR : Bool;
-      FR_SR : Bool;
-      MASS_PV_R : Real;
-      MV_RPM_R : Real;
-      DATA_QUALITY : Bool;
-      RUNNING : Bool;
-      MON_MISMATCH : Bool;
-      RUN_FAULT : Bool;
-      OUT_SETPOINT : Real;   // Setpoint readvalue
-      OUT_LMN_PER : Word;   // Inverter speed reference input
-      OUT_LMN : Real;   // Inverter Speed reference from PID
-   END_VAR
+    VAR_OUTPUT
+        STATE : Int;
+        OUT_Q : Bool;   // Inverter Motor Run/Stop Command
+        MAN_NONPID : Bool;
+        INTERLOCK : Bool;
+        ALM_THR_x010 : Bool;
+        ALM_TAH_x010 : Bool;
+        ALM_FLT_X010 : Bool;
+        ALARM_HH : Bool;   // Alamr HH
+        ALARM_H : Bool;   // Alarm_H
+        ALARM_L : Bool;   // Alarm_L
+        ALARM_LL : Bool;   // Alarm_LL
+        OUT_Q_F : Bool;
+        OUT_Q_R : Bool;
+        OUT_FR : Bool;
+        FR_SR : Bool;
+        MASS_PV_R : Real;
+        MV_RPM_R : Real;
+        DATA_QUALITY : Bool;
+        RUNNING : Bool;
+        MON_MISMATCH : Bool;
+        RUN_FAULT : Bool;
+        OUT_SETPOINT : Real;   // Setpoint readvalue
+        OUT_LMN_PER : Word;   // Inverter speed reference input
+        OUT_LMN : Real;   // Inverter Speed reference from PID
+    END_VAR
 
-   VAR_IN_OUT
-      MODE : Int := 2;
-   END_VAR
+    VAR_IN_OUT
+        MODE : Int := 1;     // Control Mode, Auto by default
+        OWNER : Int;         // Value to be set or reset by Parent
+    END_VAR
 
-   VAR
-      TMR_1 {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-      mv_rpm_at_run : Real;
-      mass_ok : Bool;
-      cmd_mpuls : Bool;
-      cmd_apuls : Bool;
-      sta_enable : Bool;
-      sta_disable : Bool;
-      enable : Bool;
-      TMR_2 {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-   END_VAR
+    VAR
+        TMR_1 {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+        mv_rpm_at_run : Real;
+        mass_ok : Bool;
+        cmd_mpuls : Bool;
+        cmd_apuls : Bool;
+        sta_enable : Bool;
+        sta_disable : Bool;
+        enable : Bool;
+        TMR_2 {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+    END_VAR
 
    VAR_TEMP
       dev_sate_1 : Int;
@@ -145,9 +146,9 @@ VERSION : 2.0
       BROKEN_WIRE : Bool;
       BYPASS_IP : Bool;
       Run_SP : Bool;
-      OUTOFSERV : Bool;
+      modeOOS : Bool;
+      temp : Bool;
    END_VAR
-
 
 BEGIN
 NETWORK
@@ -165,30 +166,27 @@ NETWORK
 TITLE = Out of Service Mode=3
 //Out of service
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      L "dbCONST".BLK.MODE.OOS;
       ==I;
-      = #OUTOFSERV;
+      = #modeOOS;
 NETWORK
 TITLE = Input Bypass Mode In Manual
       A(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       A #IN_MAN;
       = #BYPASS_IP;
 NETWORK
 TITLE = SCALLING: MV_RPM: (0-60)
-      A #MV_POLR;
-      = %L27.0;
-      BLD 103;
       AN #BYPASS_IP;
       JNB Label_0;
       CALL SCALE
       (  IN                          := #MEASURE_RPM ,
          HI_LIM                      := #MV_H ,
          LO_LIM                      := #MV_L ,
-         BIPOLAR                     := %L27.0 ,
+         BIPOLAR                     := #MV_POLR ,
          RET_VAL                     := #retval1 ,
          OUT                         := #mv_rpm_R_1
       );
@@ -263,14 +261,11 @@ TITLE = SCALED RPM AS REAL VALUE
 NETWORK
 TITLE = Disable state
       AN #sta_enable;
-      = %L27.0;
-      A %L27.0;
-      BLD 102;
       = #sta_disable;
-      A %L27.0;
+      AN #sta_enable;
       JNB Label_3;
-      L "dbCONST_VAL".CM.SIC1_DEV_STATE.DISABLED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.SIC1.STATE.DISABLED;
+      T #STATE;
 Label_3:      NOP 0;
 NETWORK
 TITLE = Enable and Disable command
@@ -279,18 +274,18 @@ TITLE = Enable and Disable command
       A(;
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
       );
       );
       A(;
       L #CMD;
-      L "dbCONST_VAL".CM.EN_DISABLE.ENABLE;
+      L "dbCONST".BLK.SIC1.CMD.ENABLE;
       ==I;
       );
       S #sta_enable;
@@ -298,18 +293,18 @@ TITLE = Enable and Disable command
       A(;
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
       );
       );
       A(;
       L #CMD;
-      L "dbCONST_VAL".CM.EN_DISABLE.DISABLE;
+      L "dbCONST".BLK.SIC1.CMD.DISABLE;
       ==I;
       );
       O;
@@ -326,20 +321,18 @@ TITLE = Enable and Disable command
       );
       A #sta_enable;
       JNB Label_4;
-      L "dbCONST_VAL".CM.SIC1_DEV_STATE.ENABLED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.SIC1.STATE.ENABLED;
+      T #STATE;
 Label_4:      NOP 0;
 NETWORK
 TITLE = Enable stopped and running state
       A #sta_enable;
-      = %L27.0;
-      A %L27.0;
       AN #OUT_Q;
       JNB Label_5;
-      L "dbCONST_VAL".CM.SIC1_DEV_STATE.STOPPED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.SIC1.STATE.STOPPED;
+      T #STATE;
 Label_5:      NOP 0;
-      A %L27.0;
+      A #sta_enable;
       A(;
       O #RUNNING;
       O;
@@ -347,8 +340,8 @@ Label_5:      NOP 0;
       A #BYPASS_IP;
       );
       JNB Label_6;
-      L "dbCONST_VAL".CM.SIC1_DEV_STATE.RUNNING;
-      T #DEV_STATE;
+      L "dbCONST".BLK.SIC1.STATE.RUNNING;
+      T #STATE;
 Label_6:      NOP 0;
 NETWORK
 TITLE = MASS OK: GENERATE MASS WEIGHT OK CONDITION
@@ -371,12 +364,12 @@ TITLE = Command START when there is no fault, no interlock
       A(;
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
       );
       );
@@ -396,19 +389,19 @@ TITLE = COMMAND: STOP
       AN #mass_ok;
       A(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
       );
       O;
       AN #mass_ok;
       A(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      L "dbCONST".BLK.MODE.OOS;
       ==I;
       );
       R #OUT_Q;
@@ -424,12 +417,12 @@ TITLE = PID SETPOINT MANUAL/AUTO
       A(;
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
       );
       );
@@ -458,14 +451,12 @@ TITLE = Run Forward
       = #OUT_Q_F;
 NETWORK
 TITLE = Forward Reverse Timer
-//Removed Ref.Mr.Steve
       A #OUT_Q;
       AN #TMR_2.Q;
-      = %L27.0;
-      BLD 103;
+      = #temp;
       CALL #TMR_2
       {time_type := 'Time'}
-      (  IN                          := %L27.0 ,
+      (  IN                          := #temp ,
          PT                          := T#5M ,
          Q                           := #TMR_2.Q ,
          ET                          := #TMR_2.ET
@@ -491,11 +482,10 @@ NETWORK
 TITLE = RUN TIMER , CHECK FAIL TO RUN/ RUNNING LOW SPEED
       A(;
       A #out_Q_1;
-      = %L27.0;
-      BLD 103;
+      = #temp;
       CALL #TMR_1
       {time_type := 'Time'}
-      (  IN                          := %L27.0 ,
+      (  IN                          := #temp ,
          PT                          := #FB_TDELAY ,
          Q                           := #TMR_1.Q ,
          ET                          := #TMR_1.ET
@@ -505,7 +495,7 @@ TITLE = RUN TIMER , CHECK FAIL TO RUN/ RUNNING LOW SPEED
       A #TMR_1.Q;
       AN #BYPASS_IP;
       AN #RUNNING;
-      AN #OUTOFSERV;
+      AN #modeOOS;
       = #RUN_FAULT;
 NETWORK
 TITLE = DEVICE  RUNNING:
@@ -547,51 +537,51 @@ TITLE = Device state Fault when fail any of TAH,THR & FLT inputs.
       O #FLT_x010;
       );
       AN #BYPASS_IP;
-      AN #OUTOFSERV;
+      AN #modeOOS;
       JNB Label_12;
-      L "dbCONST_VAL".CM.SIC1_DEV_STATE.FAULT;
-      T #DEV_STATE;
+      L "dbCONST".BLK.SIC1.STATE.FAULT;
+      T #STATE;
       SET;
       SAVE;
       CLR;
 Label_12:      A BR;
-      = %L27.0;
-      A %L27.0;
+      = #temp;
+      A #temp;
       A #THR_x010;
       = #ALM_THR_x010;
-      A %L27.0;
+      A #temp;
       A #TAH_x010;
       = #ALM_TAH_x010;
-      A %L27.0;
+      A #temp;
       A #FLT_x010;
       = #ALM_FLT_X010;
 NETWORK
 TITLE = Speed limit alarms
       A #OUT_Q;
-      AN #OUTOFSERV;
-      = %L27.0;
-      A %L27.0;
+      AN #modeOOS;
+      = #temp;
+      A #temp;
       A(;
       L #MV_RPM_R;
       L #LIMIT_HH;
       >=R;
       );
       = #ALARM_HH;
-      A %L27.0;
+      A #temp;
       A(;
       L #MV_RPM_R;
       L #LIMIT_H;
       >R;
       );
       = #ALARM_H;
-      A %L27.0;
+      A #temp;
       A(;
       L #MV_RPM_R;
       L #LIMIT_L;
       <R;
       );
       = #ALARM_L;
-      A %L27.0;
+      A #temp;
       A(;
       L #MV_RPM_R;
       L #LIMIT_LL;
@@ -610,15 +600,14 @@ TITLE = Unscalling Setpoint
       A(;
       A #OUT_Q;
       AN #OUT_Q;
-      = %L27.0;
-      BLD 103;
+      = #temp;
       A #OUT_Q;
       JNB Label_14;
       CALL UNSCALE
       (  IN                          := #tmpSetpoint ,
          HI_LIM                      := #MV_H ,
          LO_LIM                      := #MV_L ,
-         BIPOLAR                     := %L27.0 ,
+         BIPOLAR                     := #temp ,
          RET_VAL                     := #retval1 ,
          OUT                         := #UnscOUT
       );
@@ -632,15 +621,15 @@ NETWORK
 TITLE = Monitoring mismatch
       A(;
       O(;
-      L #DEV_STATE;
-      L "dbCONST_VAL".CM.SIC1_DEV_STATE.FAULT;
+      L #STATE;
+      L "dbCONST".BLK.SIC1.STATE.FAULT;
       ==I;
       );
       O #INTERLOCK;
       );
       A(;
       L #CMD;
-      L "dbCONST_VAL".CM.EN_DISABLE.ENABLE;
+      L "dbCONST".BLK.SIC1.CMD.ENABLE;
       ==I;
       );
       = #MON_MISMATCH;

@@ -21,8 +21,8 @@
 FUNCTION_BLOCK "ifbPI1"
 TITLE = Instances of PI1 pressure indicator
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbPI1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -30,10 +30,10 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@ : "fbPI1";   // @@DESCRIPTION@@
+      @@INSTANCE@@ : "fbPI1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@_MODE : Struct
+      @@INSTANCE@@_MODE : Struct
          PosEdge1 : Bool;
          PosEdge2 : Bool;
          REQ : Int;   // Request for Required Mode
@@ -47,41 +47,41 @@ VERSION : 2.0
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcPI1"
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
-         IO_MODE                     := "idbPI1".@@MODULE@@.MODE ,
-         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
+         IO_MODE                     := "idbPI1".@@INSTANCE@@.MODE ,
+         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
-      CALL #@@MODULE@@
-      (  MODE                        := #@@MODULE@@.MODE ,
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+      CALL #@@INSTANCE@@
+      (  MODE                        := #@@INSTANCE@@.MODE ,
          RAW_INPUT                   := "P_@@INSTANCE@@":P ,
-         USER_INPUT                  := #@@MODULE@@.USER_INPUT ,
-         UPPER_RANGE                 := #@@MODULE@@.UPPER_RANGE ,
-         LOWER_RANGE                 := #@@MODULE@@.LOWER_RANGE ,
-         POLARITY                    := #@@MODULE@@.POLARITY ,
+         USER_INPUT                  := #@@INSTANCE@@.USER_INPUT ,
+         UPPER_RANGE                 := #@@INSTANCE@@.UPPER_RANGE ,
+         LOWER_RANGE                 := #@@INSTANCE@@.LOWER_RANGE ,
+         POLARITY                    := #@@INSTANCE@@.POLARITY ,
          PSH                         := "idbDI1".PSH_@@NUMINSTANCE@@.DI_PV ,
-         LIMIT_HH                    := #@@MODULE@@.LIMIT_HH ,
-         LIMIT_H                     := #@@MODULE@@.LIMIT_H ,
-         LIMIT_L                     := #@@MODULE@@.LIMIT_L ,
-         LIMIT_LL                    := #@@MODULE@@.LIMIT_LL ,
-         ENABLE_L                    := #@@MODULE@@.ENABLE_L ,
-         ENABLE_LL                   := #@@MODULE@@.ENABLE_LL ,
-         MEASURE                     := #@@MODULE@@.MEASURE ,
-         DATA_QUALITY                := #@@MODULE@@.DATA_QUALITY ,
-         ALARM_HH                    := #@@MODULE@@.ALARM_HH ,
-         ALARM_H                     := #@@MODULE@@.ALARM_H ,
-         ALARM_L                     := #@@MODULE@@.ALARM_L ,
-         ALARM_LL                    := #@@MODULE@@.ALARM_LL ,
-         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
-         RANGE_ERROR                 := #@@MODULE@@.RANGE_ERROR ,
-         BROKEN_WIRE                 := #@@MODULE@@.BROKEN_WIRE
+         LIMIT_HH                    := #@@INSTANCE@@.LIMIT_HH ,
+         LIMIT_H                     := #@@INSTANCE@@.LIMIT_H ,
+         LIMIT_L                     := #@@INSTANCE@@.LIMIT_L ,
+         LIMIT_LL                    := #@@INSTANCE@@.LIMIT_LL ,
+         ENABLE_L                    := #@@INSTANCE@@.ENABLE_L ,
+         ENABLE_LL                   := #@@INSTANCE@@.ENABLE_LL ,
+         MEASURE                     := #@@INSTANCE@@.MEASURE ,
+         DATA_QUALITY                := #@@INSTANCE@@.DATA_QUALITY ,
+         ALARM_HH                    := #@@INSTANCE@@.ALARM_HH ,
+         ALARM_H                     := #@@INSTANCE@@.ALARM_H ,
+         ALARM_L                     := #@@INSTANCE@@.ALARM_L ,
+         ALARM_LL                    := #@@INSTANCE@@.ALARM_LL ,
+         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
+         RANGE_ERROR                 := #@@INSTANCE@@.RANGE_ERROR ,
+         BROKEN_WIRE                 := #@@INSTANCE@@.BROKEN_WIRE
       );
       NOP 0;
 @@TEMPLATE_END@@

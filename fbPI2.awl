@@ -19,61 +19,58 @@
 FUNCTION_BLOCK "fbPI2"
 TITLE = PI2 : Line mounted pressure Indicator
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : fbPI2
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
-   VAR_INPUT
-      MODE : Int := 2;
-      RAW_INPUT : Int;   // Raw input signal from Field (4mA = 0, 20mA = 27648)
-      USER_INPUT : Int;   // for Manual mode, Equivallent to Analog value
-      UPPER_RANGE : Real := 5.0;   // Upper Range Limit in engineering units
-      LOWER_RANGE : Real := -1.0;   // Lower Range Limit in engineering units
-      POLARITY : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
-      LIMIT_HH : Real := 2.0;   // High High Alarm Limit
-      LIMIT_H : Real := 1.9;   // High Alarm Limit
-      LIMIT_L : Real := 0.2;   // Low Alarm Limit
-      LIMIT_LL : Real := 0.1;   // LowLow Alarm Limit
-      ENABLE_HH : Bool := TRUE;   // Flag to Enable/Disable HighHigh Alarm
-      ENABLE_H : Bool := TRUE;   // Flag to Enable/Disable High Alarm
-      ENABLE_L : Bool := TRUE;   // Flag to Enable/Disable Low Alarm
-      ENABLE_LL : Bool := TRUE;   // Flag to Enable/Disable LowLow Alarm
-   END_VAR
+    VAR_INPUT
+        RAW_INPUT : Int;   // Raw input signal from Field (4mA = 0, 20mA = 27648)
+        USER_INPUT : Int;   // for Manual mode, Equivallent to Analog value
+        UPPER_RANGE : Real := 5.0;   // Upper Range Limit in engineering units
+        LOWER_RANGE : Real := -1.0;   // Lower Range Limit in engineering units
+        POLARITY : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+        LIMIT_HH : Real := 2.0;   // High High Alarm Limit
+        LIMIT_H : Real := 1.9;   // High Alarm Limit
+        LIMIT_L : Real := 0.2;   // Low Alarm Limit
+        LIMIT_LL : Real := 0.1;   // LowLow Alarm Limit
+        ENABLE_HH : Bool := TRUE;   // Flag to Enable/Disable HighHigh Alarm
+        ENABLE_H : Bool := TRUE;   // Flag to Enable/Disable High Alarm
+        ENABLE_L : Bool := TRUE;   // Flag to Enable/Disable Low Alarm
+        ENABLE_LL : Bool := TRUE;   // Flag to Enable/Disable LowLow Alarm
+    END_VAR
 
-   VAR_OUTPUT
-      MEASURE : Real;   // Measured Value (after scaling)
-      DATA_QUALITY : Bool := TRUE;   // MV data quality (0=Bad; 1=Good)
-      ALARM_HH : Bool;   // HighHigh Alarm
-      ALARM_H : Bool;   // High Alarm
-      ALARM_L : Bool;   // Low Alarm
-      ALARM_LL : Bool;   // LowLow Alarm
-   END_VAR
+    VAR_OUTPUT
+        MEASURE : Real;   // Measured Value (after scaling)
+        DATA_QUALITY : Bool := TRUE;   // MV data quality (0=Bad; 1=Good)
+        ALARM_HH : Bool;   // HighHigh Alarm
+        ALARM_H : Bool;   // High Alarm
+        ALARM_L : Bool;   // Low Alarm
+        ALARM_LL : Bool;   // LowLow Alarm
+    END_VAR
 
-   VAR_IN_OUT
-      RANGE_ERROR : Bool;   // Range Error (<4mA or >20mA)
-      BROKEN_WIRE : Bool;   // Broken Wire detection
-   END_VAR
+    VAR_IN_OUT
+        MODE : Int := 1;     // Control Mode, Auto by default
+        OWNER : Int;         // Value to be set or reset by Parent
+        RANGE_ERROR : Bool;   // Range Error (<4mA or >20mA)
+        BROKEN_WIRE : Bool;   // Broken Wire detection
+    END_VAR
 
-   VAR_TEMP
-      RET_VAL1 : Word;   // Returns a value of W#16#0000 if the instruction executes without error.
-      PV_R_1 : Real;   // Temporary measured value
-      AnalogInput : Int;
-      OUTOFSERV : Bool;
-   END_VAR
-
+    VAR_TEMP
+        RET_VAL1 : Word;   // Returns a value of W#16#0000 if the instruction executes without error.
+        PV_R_1 : Real;   // Temporary measured value
+        AnalogInput : Int;
+        modeOOS : Bool;
+    END_VAR
 
 BEGIN
 NETWORK
 TITLE = SCALING: PRESSURE
 //Scale of Manufacturing vessel:
-      A #POLARITY;
-      = %L9.0;
-      BLD 103;
       A(;
       O(;
       A(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       JNB Label_0;
@@ -87,7 +84,7 @@ Label_0:      A BR;
       O(;
       A(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
       );
       JNB Label_1;
@@ -104,7 +101,7 @@ Label_1:      A BR;
       (  IN                          := #AnalogInput ,
          HI_LIM                      := #UPPER_RANGE ,
          LO_LIM                      := #LOWER_RANGE ,
-         BIPOLAR                     := %L9.0 ,
+         BIPOLAR                     := #POLARITY ,
          RET_VAL                     := #RET_VAL1 ,
          OUT                         := #PV_R_1
       );
@@ -112,9 +109,9 @@ Label_2:      NOP 0;
 NETWORK
 TITLE = Mode Out Of Service
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      L "dbCONST".BLK.MODE.OOS;
       ==I;
-      = #OUTOFSERV;
+      = #modeOOS;
 NETWORK
 TITLE = PRESSURE OUTPUT AS REAL
 //In Manual Mode Process field value will not be updated in HMI in MEASURE
@@ -157,17 +154,17 @@ TITLE = Setting Data Quality
 //If no error set Data Quality DQ=1 (GOOD), else DQ=0 (BAD).
       AN #RANGE_ERROR;
       AN #BROKEN_WIRE;
-      AN #OUTOFSERV;
+      AN #modeOOS;
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       = #DATA_QUALITY;
 NETWORK
 TITLE = HighHigh ALARM
 //If HighHigh limit reached
-      AN #OUTOFSERV;
+      AN #modeOOS;
       A(;
       L #PV_R_1;
       L #LIMIT_HH;
@@ -177,7 +174,7 @@ TITLE = HighHigh ALARM
       = #ALARM_HH;
 NETWORK
 TITLE = High ALARM
-      AN #OUTOFSERV;
+      AN #modeOOS;
       A(;
       L #PV_R_1;
       L #LIMIT_H;
@@ -187,7 +184,7 @@ TITLE = High ALARM
       = #ALARM_H;
 NETWORK
 TITLE = Low ALARM
-      AN #OUTOFSERV;
+      AN #modeOOS;
       A(;
       L #PV_R_1;
       L #LIMIT_L;
@@ -197,7 +194,7 @@ TITLE = Low ALARM
       = #ALARM_L;
 NETWORK
 TITLE = LowLow ALARM
-      AN #OUTOFSERV;
+      AN #modeOOS;
       A(;
       L #PV_R_1;
       L #LIMIT_LL;

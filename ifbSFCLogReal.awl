@@ -1,0 +1,118 @@
+FUNCTION_BLOCK "fbLOG_REAL"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_INPUT 
+      EV_ID_1 : C_Alarm_s;
+   END_VAR
+
+   VAR 
+      EV2_Pos : Array[1..16] of Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = REAL Value Logging for M1, S1 and S2
+      A(;
+      A(;
+      A "idbMX".M1.UO_CIP.sqSequencer.STEP.Done[6];
+      JNB Label_0;
+      L "idbMX".M1.UO_CIP._log_PWFloodMass;
+      T "dbLOG_VAL".Process_Value;
+      SET;
+      SAVE;
+      CLR;
+Label_0:      A BR;
+      );
+      JNB Label_1;
+      L 1;
+      T "dbLOG_VAL".Real_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_1:      A BR;
+      );
+      FP #EV2_Pos[1];
+      O(;
+      A(;
+      A(;
+      A "idbMX".M1.UO_SIP.sqSequencer.STEP.Done[2];
+      JNB Label_2;
+      L "idbMX".M1.UO_SIP._log_PositivePressure;
+      T "dbLOG_VAL".Process_Value;
+      SET;
+      SAVE;
+      CLR;
+Label_2:      A BR;
+      );
+      JNB Label_3;
+      L 2;
+      T "dbLOG_VAL".Real_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_3:      A BR;
+      );
+      FP #EV2_Pos[2];
+      );
+      O(;
+      A(;
+      A(;
+      A "idbSY".S1.UO_SIP.sqSequencer.STEP.Done[5];
+      JNB Label_4;
+      L "idbSY".S1.UO_SIP._log_Pressure;
+      T "dbLOG_VAL".Process_Value;
+      SET;
+      SAVE;
+      CLR;
+Label_4:      A BR;
+      );
+      JNB Label_5;
+      L 3;
+      T "dbLOG_VAL".Real_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_5:      A BR;
+      );
+      FP #EV2_Pos[3];
+      );
+      O(;
+      A(;
+      A(;
+      A "idbSY".S2.UO_SIP.sqSequencer.STEP.Done[5];
+      JNB Label_6;
+      L "idbSY".S2.UO_SIP._log_Pressure;
+      T "dbLOG_VAL".Process_Value;
+      SET;
+      SAVE;
+      CLR;
+Label_6:      A BR;
+      );
+      JNB Label_7;
+      L 4;
+      T "dbLOG_VAL".Real_Index;
+      SET;
+      SAVE;
+      CLR;
+Label_7:      A BR;
+      );
+      FP #EV2_Pos[4];
+      );
+      = "dbLOG_VAL".EV_Trigger[1];
+NETWORK
+TITLE = Process Real value logging
+      A "dbLOG_VAL".EV_Trigger[1];
+      = %L0.0;
+      BLD 103;
+      CALL "fcLOG_REAL"
+      (  Log_Trigger                 := %L0.0 , 
+         EV_ID                       := #EV_ID_1 , 
+         Index                       := "dbLOG_VAL".Real_Index , 
+         BatchID                     := "dbCONST_VAL".BlockMsgS1.BatchID , 
+         RealValue                   := "dbLOG_VAL".Process_Value , 
+         Real_SD                     := "dbLOG_VAL".RealLog
+      );
+      NOP 0;
+END_FUNCTION_BLOCK
+

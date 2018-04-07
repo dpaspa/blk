@@ -1,0 +1,92 @@
+FUNCTION "fcSFCMode" : Void
+TITLE = Mode checking function
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_IN_OUT
+      Mode : "udtSFCMode";
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE =
+      L #Mode.current;//Load to Accu-1
+      L #Mode.history;//Move Accu-1 into Accu-2,Load to Accu-1
+      ==I;
+      JC MNCH;//Mode not changed, exit function
+//Mode is changed
+      SET;
+      S #Mode.changed;//Mode changed flag
+      L #Mode.current;//Load current mode
+      T #Mode.history;//Save current mode
+
+      L #Mode.current;//Load to Accu-1=Mode
+      L "dbCONST".SEQ.MODE.MANUAL;//Move Accu-1 into Accu-2,Load to Accu-1=Manual eqv
+      ==I;
+      JC MANU;//Jump to Manual label
+
+      L #Mode.current;//Load to Accu-1=Mode
+      L "dbCONST".SEQ.MODE.AUTO;//Move Accu-1 into Accu-2,Load to Accu-1= Auto Eqv
+      ==I;
+      JC AUTO;//Jump to Auto label
+
+      L #Mode.current;//Load to Accu-1=Mode
+      L "dbCONST".SEQ.MODE.OOS;//Move Accu-1 into Accu-2,Load to Accu-1=OOS eqv
+      ==I;
+      JC OOS;//Jump to OOS label
+
+//No more mode specified
+
+      JU WRMD;//End Mode function
+
+
+MANU:      NOP 0;
+
+      S #Mode.manual;
+      R #Mode.auto;
+      R #Mode.oos;
+      R #Mode.wrong;
+
+
+      JU EMOD;//End Mode function
+AUTO:      NOP 0;
+
+      R #Mode.manual;
+      S #Mode.auto;
+      R #Mode.oos;
+      R #Mode.wrong;
+
+      JU EMOD;//End Mode function
+OOS:      NOP 0;
+
+      R #Mode.manual;
+      R #Mode.auto;
+      S #Mode.oos;
+      R #Mode.wrong;
+
+      JU EMOD;//End Mode function
+WRMD:      NOP 0;
+
+      R #Mode.manual;
+      R #Mode.auto;
+      R #Mode.oos;
+      S #Mode.wrong;
+
+      JU EMOD;//End Mode function
+MNCH:      NOP 0;
+      R #Mode.changed;
+
+
+NETWORK
+TITLE = End Function
+EMOD:      NOP 0;//End Mode function
+
+
+      SAVE;
+      A BR;
+
+NETWORK
+TITLE =
+
+
+END_FUNCTION

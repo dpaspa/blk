@@ -1,0 +1,55 @@
+FUNCTION "fcHMIBatchReport" : Void
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+
+//----------------------------------------------------------------------------//
+// Description: Clear the bits for the next batch if any bits are not         //
+// Acknowledged.                                                              //
+//----------------------------------------------------------------------------//
+BEGIN
+NETWORK
+TITLE = Clear the bits
+      A "COMMAND_START_HMI_CRP1";
+      L INT#0;
+      T %DB8.DBD0;
+NETWORK
+TITLE = Clear the bits
+      A "COMMAND_START_HMI_CRP1";
+      L INT#0;
+      T %DB8.DBD4;
+NETWORK
+TITLE = Clear the bits
+      A "COMMAND_START_HMI_CRP1";
+      L INT#0;
+      T %DB8.DBD16;
+NETWORK
+TITLE = Clear the bits
+      A "COMMAND_START_HMI_CRP1";
+      L INT#0;
+      T %DB8.DBD20;
+NETWORK
+TITLE = Clear the bits
+      A "COMMAND_START_HMI_CRP2";
+      L INT#0;
+      T %DB8.DBD8;
+NETWORK
+TITLE = Clear the bits
+      A "COMMAND_START_HMI_CRP2";
+      L INT#0;
+      T %DB8.DBD12;
+NETWORK
+TITLE = Clear the bits
+      A "COMMAND_START_HMI_CRP2";
+      L INT#0;
+      T %DB8.DBD24;
+NETWORK
+TITLE = Clear the bits
+      A "COMMAND_START_HMI_CRP2";
+      L INT#0;
+      T %DB8.DBD28;
+
+NETWORK
+TITLE = CALL FB700
+      CALL "fbHMIBatchReport", "idbHMIBatchReport";
+      NOP 0;
+END_FUNCTION

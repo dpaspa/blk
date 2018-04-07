@@ -1,0 +1,23 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Title:       udtHygiene                                                    //
+// Description: Block hygiene status structure.                               //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      29-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    30-Sep-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+TYPE "udtHygiene"
+VERSION : 2.0
+    STRUCT
+        CLEAN_TIME : DInt := DINT#604_800_000;
+        STERILE_TIME : DInt := DINT#604_800_000;
+        CLEAN_TOUT : Bool;   // LAST STATUS
+        STERILE_TOUT : Bool;   // LAST STATUS
+        HYGIENE_STATE : Int;
+        CLEAN_ELAPSED_TIME : DInt;
+        STERILE_ELAPSED_TIME : DInt;
+    END_STRUCT;
+END_TYPE

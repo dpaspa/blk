@@ -1,0 +1,49 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Handles the HMI interface for SFC operator prompt messages.   //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      29-Mar-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbHMIBatchReport"
+TITLE = Report data logging from PLC to HMI with Acknowledge
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fbHMIBatchReport
+VERSION : 2.0
+
+VAR
+@@TEMPLATE_BEGIN@@
+    BATCH_REPORT_EV_@@COUNTER|1@@ : "fbHMIReportTrigger";
+@@TEMPLATE_END@@
+END_VAR
+
+VAR_TEMP
+    bitTrigger: Bool;
+END_VAR
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = Batch Report Event @@COUNTER|1@@ : @@DESCRIPTION@@
+    @@ReportCondition@@
+    L "idbCRP".CRP1.RP_FILTER._start_hpn2_Mx;
+    L "idbMX".M1.UO_SIP._n2_blow;
+    = #bitTrigger;
+    L "idbCRP".CRP1.RP_CIPSIP._Report_Evnt_@@COUNTER@@;
+    = #bitTrigger;
+    L "idbEMC2".EC1002.PH_CHARGE._Report_End_Event;
+    L "idbEMJ1".EJ1003.PH_PREEMPT._Report_Evnt_Start;
+    = #bitTrigger;
+    CALL #BATCH_REPORT_EV_@@COUNTER@@
+    (   TRIGGER_BIT                 := #bitTrigger ,
+        ALARM_OUT                   := "dbHMIBatchReport".BATCH_REPORT_PLC_TRIG.REPORT_EVENT_@@COUNTER@@ ,
+        ACKNOWLEDGE                 := "dbHMIBatchReport".BATCH_REPORT_HMI_TRIG.REPORT_EVENT_@@COUNTER@@
+    );
+    NOP 0;
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

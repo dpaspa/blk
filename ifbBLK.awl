@@ -1,0 +1,119 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Class:       ifb@@CLASS@@                                                  //
+// Description: Instances of Equipment Module @@CLASS@@                       //
+//                                                                            //
+// @@CLASSDESCRIPTION@@.                                                      //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.5 Khairul Basar    12-Oct-2009 CC-09/023 Toggle Mode coded.              //
+// 0.4 Khairul Basar    30-Sep-2009 CC-09/023 EM Mode var changed to IN_OUT.  //
+// 0.3 Khairul Basar    17-Sep-2009 CC-09/016 Duplicate Auto/man parameters   //
+//                                            deleted auto/manual,Instaed     //
+//                                            single command,Setpoint is used //
+//                                            for both mode.                  //
+// 0.2 Khairul Basar    28-Aug-2009 CC-09/023 Phases are updated.             //
+// 0.1 Khairul Basar    14-Aug-2009 CC-09/023 Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifb@@CLASS@@"
+TITLE = @@CLASS@@ : @@CLASSDESCRIPTION@@
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : ifb@@CLASS@@
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+    VAR
+@@TEMPLATE_BEGIN@@
+        @@INSTANCE@@ : "fb@@CLASS@@";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+    END_VAR
+
+    VAR_TEMP
+        crInterlock;
+        ncrInterlock;
+        RetVal : Int;
+    END_VAR
+
+//----------------------------------------------------------------------------//
+// Get the batch number from the parent:                                      //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    A(;
+@@ATTR_BEGIN|CR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "AlwaysLow";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+@@ATTR_END|CR_IL@@
+    );
+    = #crInterlock;
+@@ATTR_BEGIN|NCR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "AlwaysLow";
+@@ATTR_DEFAULT_END@@
+    @@INTERLOCK@@
+@@ATTR_END|NCR_IL@@
+    = #ncrInterlock;
+    CALL #@@INSTANCE@@
+    (   CR_IL                       := #crInterlock ,
+        NCR_IL                      := #ncrInterlock ,
+        MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
+        CHILD_RELEASE               := #@@INSTANCE@@.CHILD_RELEASE ,
+@@ATTR_BEGIN|CHILD@@
+        @@CHILDALIAS@@_STATE                := "idb@@CHILDALIASCLASS@@".@@CHILDALIAS@@.STATE ,
+@@ATTR_END|CHILD@@
+@@ATTR_BEGIN|PARAMETER_VAR_INPUT@@
+        @@PARAMETER@@               := #@@INSTANCE@@.@@PARAMETER@@ ,
+@@ATTR_END|PARAMETER_VAR_INPUT@@
+        STATE                       := #@@INSTANCE@@.STATE ,
+        RUNNING                     := #@@INSTANCE@@.RUNNING ,
+        RUNNING_SUBS                := #@@INSTANCE@@.RUNNING_SUBS ,
+        INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
+        FLOWPATH                    := #@@INSTANCE@@.FLOWPATH ,
+        STATE_VER                   := #@@INSTANCE@@.STATE_VER ,
+        OUT_SETPOINT                := #@@INSTANCE@@.OUT_SETPOINT ,
+        EM_PROCESSED                := #@@INSTANCE@@.EM_PROCESSED ,
+        SQ_ERROR                    := #@@INSTANCE@@.SQ_ERROR ,
+        CURSTEP                     := #@@INSTANCE@@.CURSTEP ,
+        SQ_STATE                    := #@@INSTANCE@@.SQ_STATE ,
+        CMD                         := #@@INSTANCE@@.CMD ,
+        MODE                        := #@@INSTANCE@@.MODE
+        SUBSelected                 := #@@INSTANCE@@.SUBSelected ,
+        ME                          := @@ID@@ ,
+        OWNER                       := @@PARENTID@@ ,
+        SQ_ACK                      := #@@INSTANCE@@.SQ_ACK ,
+        SQ_RESUME                   := #@@INSTANCE@@.SQ_RESUME
+@@ATTR_BEGIN|CHILD@@
+        @@CHILDALIAS@@_CMD                  := "idb@@CHILDALIASCLASS@@".@@CHILDALIAS@@.CMD ,
+@@ATTR_END|CHILD@@
+@@ATTR_BEGIN|PARAMETER_VAR_OUTPUT@@
+        @@PARAMETER@@               := #@@INSTANCE@@.@@PARAMETER@@ ,
+@@ATTR_END|PARAMETER_VAR_OUTPUT@@
+@@ATTR_BEGIN|PARAMETER_VAR_IN_OUT@@
+        @@PARAMETER@@               := #@@INSTANCE@@.@@PARAMETER@@ ,
+@@ATTR_END|PARAMETER_VAR_IN_OUT@@
+@@ATTR_BEGIN|PARAMETER_SFC_PROMPT@@
+        blk_@@SFCPARAMETER@@      := "dbEVENT".PROMPT.@@INSTANCE@@_@@SFC@@_@@SFCPARAMETER@@.prompt ,
+@@ATTR_END|PARAMETER_SFC_PROMPT@@
+@@ATTR_BEGIN|PARAMETER_SFC_CONFIRM@@
+        blk_@@SFCPARAMETER@@     := "dbEVENT".PROMPT.@@INSTANCE@@_@@SFC@@_@@dbEventParameter@@ ,
+@@ATTR_END|PARAMETER_SFC_CONFIRM@@
+@@ATTR_BEGIN|PARAMETER_SFC_LOG@@
+        blk_@@SFCPARAMETER@@         := "dbEVENT".LOG.@@INSTANCE@@_@@SFC@@_@@SFCPARAMETER@@.realValue;
+@@ATTR_END|PARAMETER_SFC_LOG@@
+        ME                          := #@@INSTANCE@@.ME
+    );
+    NOP 0;
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

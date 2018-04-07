@@ -22,8 +22,8 @@
 FUNCTION_BLOCK "ifbMOD1"
 TITLE = MOD1 Instances
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbMOD1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -31,10 +31,10 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@ : "fbMOD1";   // @@DESCRIPTION@@
+      @@INSTANCE@@ : "fbMOD1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@_MODE : Struct
+      @@INSTANCE@@_MODE : Struct
          PosEdge1 : Bool;
          PosEdge2 : Bool;
          REQ : Int;   // Request for Required Mode
@@ -48,23 +48,23 @@ VERSION : 2.0
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcMOD1"
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          IN_MODE                     := "idbTC1".@@lnk1Tag@@_MODE.REQ ,
          IN_CMND                     := "idbTC1".@@lnk1Tag@@.OUT_CMD ,
          INTERLOCK                   := "idbTC1".@@lnk1Tag@@.INTERLOCK ,
          IN_POSN                     := "idbTC1".@@lnk1Tag@@.LMN ,
-         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
-         IO_MODE                     := "idbMOD1".@@MODULE@@.MODE ,
-         IO_CMND                     := "idbMOD1".@@MODULE@@.CMND ,
-         IO_POSN                     := "idbMOD1".@@MODULE@@.POSN ,
-         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
+         IO_MODE                     := "idbMOD1".@@INSTANCE@@.MODE ,
+         IO_CMND                     := "idbMOD1".@@INSTANCE@@.CMND ,
+         IO_POSN                     := "idbMOD1".@@INSTANCE@@.POSN ,
+         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
@@ -86,19 +86,19 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
       );
       = %L0.1;
       BLD 103;
-      CALL #@@MODULE@@
-      (  CMND                        := #@@MODULE@@.CMND ,
-         UPPER_RANGE                 := #@@MODULE@@.UPPER_RANGE ,
-         LOWER_RANGE                 := #@@MODULE@@.LOWER_RANGE ,
-         POLARITY                    := #@@MODULE@@.POLARITY ,
+      CALL #@@INSTANCE@@
+      (  CMND                        := #@@INSTANCE@@.CMND ,
+         UPPER_RANGE                 := #@@INSTANCE@@.UPPER_RANGE ,
+         LOWER_RANGE                 := #@@INSTANCE@@.LOWER_RANGE ,
+         POLARITY                    := #@@INSTANCE@@.POLARITY ,
          CR_IL                       := %L0.0 ,
-         NCR_IL                       := %L0.1 ,
+         NCR_IL                      := %L0.1 ,
          RAW_OUTPUT                  := "P_MOD-@@NUMINSTANCE@@":P ,
-         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
+         STATE                       := #@@INSTANCE@@.STATE ,
          OUT_Q                       := "@@INSTANCE@@" ,
          INTERLOCK                   := "idbTC1".@@lnk1Tag@@.INTERLOCK ,
-         MODE                        := #@@MODULE@@.MODE ,
-         POSN                        := #@@MODULE@@.POSN
+         MODE                        := #@@INSTANCE@@.MODE ,
+         POSN                        := #@@INSTANCE@@.POSN
       );
       NOP 0;
 @@TEMPLATE_END@@

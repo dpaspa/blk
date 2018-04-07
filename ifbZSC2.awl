@@ -20,8 +20,8 @@
 FUNCTION_BLOCK "ifbZSC2"
 TITLE = ZSC2 : Instances of Flow path proximity switch connection indication
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbZSC2
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -29,10 +29,10 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 VAR
 @@TEMPLATE_BEGIN@@
-   @@MODULE@@ : "fbZSC2";   // @@DESCRIPTION@@
+   @@INSTANCE@@ : "fbZSC2";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
-   @@MODULE@@_MODE : Struct
+   @@INSTANCE@@_MODE : Struct
       PosEdge1 : Bool;
       PosEdge2 : Bool;
       REQ : Int;   // Request for Required Mode
@@ -46,28 +46,28 @@ END_VAR
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcZSC2"
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         IN_REQ                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@MODULE@@_REQ ,
-         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
-         IO_MODE                     := "idbZSC2".@@MODULE@@.MODE ,
-         IO_REQ                      := "idbZSC2".@@MODULE@@.REQ_STATE ,
-         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+         IN_REQ                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@INSTANCE@@_REQ ,
+         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
+         IO_MODE                     := "idbZSC2".@@INSTANCE@@.MODE ,
+         IO_REQ                      := "idbZSC2".@@INSTANCE@@.REQ_STATE ,
+         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
-      CALL #@@MODULE@@
-      (  MODE                        := #@@MODULE@@.MODE ,
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+      CALL #@@INSTANCE@@
+      (  MODE                        := #@@INSTANCE@@.MODE ,
          DI_INPUT                    := "ZSC-@@NUMINSTANCE@@" ,
-         DI_USER                     := #@@MODULE@@.DI_USER ,
-         REQ_STATE                   := #@@MODULE@@.REQ_STATE ,
+         DI_USER                     := #@@INSTANCE@@.DI_USER ,
+         REQ_STATE                   := #@@INSTANCE@@.REQ_STATE ,
          ARM_FLAG                    := "idb@@PARENTCLASS@@".@@PARENT@@.ARM_FLAG ,
-         DI_PV                       := #@@MODULE@@.DI_PV ,
-         DEV_STATE                   := #@@MODULE@@.DEV_STATE
+         DI_PV                       := #@@INSTANCE@@.DI_PV ,
+         STATE                       := #@@INSTANCE@@.STATE
       );
       NOP 0;
 @@TEMPLATE_END@@

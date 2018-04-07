@@ -1,0 +1,242 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 20/3/2018 5:19:49 PM by MAC_IZZ
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+Name:- PULSE
+Title:- PH_EMV2_PULSE
+Description:- Open and close valves for specified duration.
+Class:- PH
+Level:- EMV2
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- V1PUL
+Version:- 0.5
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.1 David Paspa      13-Jul-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- pos_sprayball2_state
+Type:- INT
+Description:- Spray Ball Valve 02 state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- pos_sprayball1_state
+Type:- INT
+Description:- Spray Ball Valve 01 state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- pos_sprayball1_cmd
+Type:- INT
+Description:- Spray Ball Valve 01 command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- pos_sprayball2_cmd
+Type:- INT
+Description:- Spray Ball Valve 02 command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- time_opened
+Type:- TIME
+Description:- Required open time for each spraybal inlet valve
+ParameterInOut:- IN
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- PH_EMV2_PULSE: Open & Close valves
+Description:- Open sprayball inlet valve 1 and close valve 2.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open valve 1 and close valve 2.
+Action:- //Load setpoint for valve open duration.
+L #_time_opened;
+T #SQ_TIMER.PT;
+
+//Open valve 01
+L   "dbCONST".CM.CMD_VALVE.OPEN;
+T  #_pos_sprayball1_cmd;
+//Close valve 02
+L   "dbCONST".CM.CMD_VALVE.CLOSE;
+T  #_pos_sprayball2_cmd;
+
+//Start timer
+SET;
+S #SQ_TIMER.IN;
+Verification:- //Valve 01 opened.
+A(;
+L   "dbCONST".CM.POS_DEV_STATE.OPENED;
+L  #_pos_sprayball1_state;
+==I;
+);
+//Valve 02 closed.
+A(;
+L   "dbCONST".CM.POS_DEV_STATE.CLOSED;
+L #_pos_sprayball2_state;
+==I;
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Wait until timer expired
+EmptyTransition:- False
+Description:- Wait until delay time expired
+Condition:- //Continue the sequence after the time delay expired.
+A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- PH_EMV2_PULSE : Open & Close valves
+Description:- Open sprayball inlet valve 2 and close valve 1.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open valve 2 and close valve 1.
+Action:- SET;
+R #SQ_TIMER.IN;
+
+//Open valve 02
+L   "dbCONST".CM.CMD_VALVE.OPEN;
+T  #_pos_sprayball2_cmd;
+//Close valve 01
+L   "dbCONST".CM.CMD_VALVE.CLOSE;
+T  #_pos_sprayball1_cmd;
+Verification:- //Valve 02 opened.
+A(;
+L   "dbCONST".CM.POS_DEV_STATE.OPENED;
+L  #_Vlv_02_State;
+==I;
+);
+//Valve 01 closed.
+A(;
+L   "dbCONST".CM.POS_DEV_STATE.CLOSED;
+L #_Vlv_01_State;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Unconditional Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- PH_EMV2_PULSE : Start timer
+Description:- Start timer
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Start timer
+Action:- //Start timer
+SET;
+S #SQ_TIMER.IN;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- Last Step
+EmptyTransition:- False
+Description:- Last Step
+Condition:- AN M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
+Title:- Wait until timer expired
+EmptyTransition:- False
+Description:- Wait until delay time expired
+Condition:- A #SQ_TIMER.Q; 
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- PH_EMV2_PULSE : Reset timer
+Description:- Reset timer
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Last Step
+Action:- SET;
+R #SQ_TIMER.IN;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 05
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Unconditional Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
+Title:- PH_EMV2_PULSE : Last Step
+Description:- Last Step
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Last Step
+Action:- SET;
+R #SQ_TIMER.IN;
+Verification:- A M1.1;
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

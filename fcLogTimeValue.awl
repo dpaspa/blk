@@ -1,0 +1,82 @@
+FUNCTION "fcLogTimeValue" : Void
+TITLE = Log Duration in Second (BatchID, Message = Value
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+VAR_INPUT
+    Log_Trigger : Bool;
+    EV_ID : DWord;         // Event ID, systemID
+    Index : Int;           // File Index
+    BatchID : "udtID";
+    Duration : Time;
+END_VAR
+
+VAR_IN_OUT
+    Real_SD : "udtLogValue";
+END_VAR
+
+VAR_TEMP
+    sRetval : Int;
+    DInt_mS : DInt;
+    Real_mS : Real;
+    RealSec : Real;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Convert MiliSecond Time to Real Second Time
+    L #Duration;
+    T #DInt_mS;
+
+    L #DInt_mS;
+    DTR;
+    T #Real_mS;
+
+    L #Real_mS;
+    L 1000.0;
+    /R;
+    T #RealSec;
+
+NETWORK
+TITLE = time type log
+      L #BatchID.ID[1];
+      T #Real_SD.BatchID[1];
+NETWORK
+TITLE = time type log
+      L #BatchID.ID[2];
+      T #Real_SD.BatchID[2];
+NETWORK
+TITLE = time type log
+      L #BatchID.ID[3];
+      T #Real_SD.BatchID[3];
+NETWORK
+TITLE = time type log
+      L #BatchID.ID[4];
+      T #Real_SD.BatchID[4];
+NETWORK
+TITLE = time type log
+      L #BatchID.ID[5];
+      T #Real_SD.BatchID[5];
+NETWORK
+TITLE = time type log
+      L #BatchID.ID[6];
+      T #Real_SD.BatchID[6];
+NETWORK
+TITLE = time type log
+      L #Index;
+      T #Real_SD.Index;
+NETWORK
+TITLE = time type log
+      L #RealSec;
+      T #Real_SD.Real_Value;
+
+NETWORK
+TITLE = If Event, without acknowledgement/Permanently acknowledge
+    CALL ALARM_S
+    (   SIG                         := #Log_Trigger ,
+        ID                          := WORD#16#EEEE ,
+        EV_ID                       := #EV_ID ,
+        SD                          := "dbLogValue".RealLog , 
+        RET_VAL                     := #sRetval
+    );
+    NOP 0;
+END_FUNCTION

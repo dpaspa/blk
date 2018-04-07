@@ -1,0 +1,64 @@
+FUNCTION "fcLogRealValue" : Void
+TITLE = Log Real Process Value (BatchID, Message = Value)
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+VAR_INPUT
+    Log_Trigger : Bool;
+    EV_ID : DWord;         // Event ID, systemID
+    Index : Int;           // File Index
+    BatchID : "udtID";
+    RealValue : Real;
+END_VAR
+
+VAR_IN_OUT
+    Real_SD : "udtLogValue";
+END_VAR
+
+VAR_TEMP
+    sRetval : Int;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Real type log
+    L #BatchID.ID[1];
+    T #Real_SD.BatchID[1];
+NETWORK
+TITLE = Real type log
+    L #BatchID.ID[2];
+    T #Real_SD.BatchID[2];
+NETWORK
+TITLE = Real type log
+    L #BatchID.ID[3];
+    T #Real_SD.BatchID[3];
+NETWORK
+TITLE = Real type log
+    L #BatchID.ID[4];
+    T #Real_SD.BatchID[4];
+NETWORK
+TITLE = Real type log
+    L #BatchID.ID[5];
+    T #Real_SD.BatchID[5];
+NETWORK
+TITLE = Real type log
+    L #BatchID.ID[6];
+    T #Real_SD.BatchID[6];
+NETWORK
+TITLE = Real type log
+    L #Index;
+    T #Real_SD.Index;
+NETWORK
+TITLE = Real type log
+    L #RealValue;
+    T #Real_SD.Real_Value;
+NETWORK
+TITLE = If Event, without acknowledgement/Permanently acknowledge
+    CALL ALARM_S
+    (   SIG                         := #Log_Trigger ,
+        ID                          := WORD#16#EEEE ,
+        EV_ID                       := #EV_ID ,
+        SD                          := "dbLogValue".RealLog ,
+        RET_VAL                     := #sRetval
+    );
+    NOP 0;
+END_FUNCTION

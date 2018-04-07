@@ -49,8 +49,8 @@
 FUNCTION_BLOCK "ifbSIC1"
 TITLE = Instances of agitator speed control
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbSIC1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -58,10 +58,10 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@ : "fbDI1";   // @@DESCRIPTION@@
+      @@INSTANCE@@ : "fbDI1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@_MODE : Struct
+      @@INSTANCE@@_MODE : Struct
          PosEdge1 : Bool;
          PosEdge2 : Bool;
          REQ : Int;   // Request for Required Mode
@@ -75,23 +75,23 @@ VERSION : 2.0
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcSIC1"
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
          IN_AGITATOR_CMD             := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
          IN_SETPOINT                 := "idb@@PARENTCLASS@@".@@PARENT@@.OUT_SETPOINT ,
          AGITATOR_INTURRUPT          := "idb@@lnk2Class@@".@@lnk2Tag@@.AGITATOR_INTERRUPT ,
-         OUT_MODE                    := #@@MODULE@@.REQ ,
-         IO_MODE                     := "idbSIC1".@@MODULE@@.MODE ,
-         IO_AGITATOR_CMD             := "idbSIC1".@@MODULE@@.CMD ,
-         IO_SETPOINT                 := "idbSIC1".@@MODULE@@.SETPOINT ,
-         POS_EDGE1                   := #@@MODULE@@.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@.PosEdge2
+         OUT_MODE                    := #@@INSTANCE@@.REQ ,
+         IO_MODE                     := "idbSIC1".@@INSTANCE@@.MODE ,
+         IO_AGITATOR_CMD             := "idbSIC1".@@INSTANCE@@.CMD ,
+         IO_SETPOINT                 := "idbSIC1".@@INSTANCE@@.SETPOINT ,
+         POS_EDGE1                   := #@@INSTANCE@@.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@.PosEdge2
       );
       NOP 0;
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
@@ -121,59 +121,59 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
       AN "FLT-@@NUMINSTANCE@@";
       = %L0.4;
       BLD 103;
-      CALL #@@MODULE@@
-      (  CMD                         := #@@MODULE@@.CMD ,
-         SETPOINT                    := #@@MODULE@@.SETPOINT ,
+      CALL #@@INSTANCE@@
+      (  CMD                         := #@@INSTANCE@@.CMD ,
+         SETPOINT                    := #@@INSTANCE@@.SETPOINT ,
          CR_IL                       := %L0.0 ,
          NCR_IL                      := %L0.1 ,
-         MAN_OVERRIDE                := #@@MODULE@@.MAN_OVERRIDE ,
+         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
          THR                         := %L0.2 ,
          TAH                         := %L0.3 ,
          FLT                         := %L0.4 ,
-         MASS_RUN                    := #@@MODULE@@.MASS_RUN ,
-         MASS_STOP                   := #@@MODULE@@.MASS_STOP ,
+         MASS_RUN                    := #@@INSTANCE@@.MASS_RUN ,
+         MASS_STOP                   := #@@INSTANCE@@.MASS_STOP ,
          MEASURE_RPM                 := "P_SPM-@@NUMINSTANCE@@":P ,
          MV_H                        := @@MaxAgit@@ ,
          MV_L                        := 0.0 ,
-         MV_POLR                     := #@@MODULE@@.MV_POLR ,
-         LIMIT_HH                    := #@@MODULE@@.LIMIT_HH ,
-         LIMIT_H                     := #@@MODULE@@.LIMIT_H ,
-         LIMIT_L                     := #@@MODULE@@.LIMIT_L ,
-         LIMIT_LL                    := #@@MODULE@@.LIMIT_LL ,
+         MV_POLR                     := #@@INSTANCE@@.MV_POLR ,
+         LIMIT_HH                    := #@@INSTANCE@@.LIMIT_HH ,
+         LIMIT_H                     := #@@INSTANCE@@.LIMIT_H ,
+         LIMIT_L                     := #@@INSTANCE@@.LIMIT_L ,
+         LIMIT_LL                    := #@@INSTANCE@@.LIMIT_LL ,
          MASS_MI1                    := "idb@@lnk1Class@@".@@lnk1Tag@@.MEASURE ,
-         FB_TDELAY                   := #@@MODULE@@.FB_TDELAY ,
-         NON_PID                     := #@@MODULE@@.NON_PID ,
-         P_SEL                       := #@@MODULE@@.P_SEL ,
-         I_SEL                       := #@@MODULE@@.I_SEL ,
-         D_SEL                       := #@@MODULE@@.D_SEL ,
-         GAIN                        := #@@MODULE@@.GAIN ,
-         TI                          := #@@MODULE@@.TI ,
-         TD                          := #@@MODULE@@.TD ,
-         CYCLE                       := #@@MODULE@@.CYCLE ,
-         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
-         OUT_Q                       := #@@MODULE@@.OUT_Q ,
-         MAN_NONPID                  := #@@MODULE@@.MAN_NONPID ,
-         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
-         ALM_THR                     := #@@MODULE@@.ALM_THR ,
-         ALM_TAH                     := #@@MODULE@@.ALM_TAH ,
-         ALM_FLT                     := #@@MODULE@@.ALM_FLT ,
-         ALARM_HH                    := #@@MODULE@@.ALARM_HH ,
-         ALARM_H                     := #@@MODULE@@.ALARM_H ,
-         ALARM_L                     := #@@MODULE@@.ALARM_L ,
-         ALARM_LL                    := #@@MODULE@@.ALARM_LL ,
+         FB_TDELAY                   := #@@INSTANCE@@.FB_TDELAY ,
+         NON_PID                     := #@@INSTANCE@@.NON_PID ,
+         P_SEL                       := #@@INSTANCE@@.P_SEL ,
+         I_SEL                       := #@@INSTANCE@@.I_SEL ,
+         D_SEL                       := #@@INSTANCE@@.D_SEL ,
+         GAIN                        := #@@INSTANCE@@.GAIN ,
+         TI                          := #@@INSTANCE@@.TI ,
+         TD                          := #@@INSTANCE@@.TD ,
+         CYCLE                       := #@@INSTANCE@@.CYCLE ,
+         STATE                       := #@@INSTANCE@@.STATE ,
+         OUT_Q                       := #@@INSTANCE@@.OUT_Q ,
+         MAN_NONPID                  := #@@INSTANCE@@.MAN_NONPID ,
+         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
+         ALM_THR                     := #@@INSTANCE@@.ALM_THR ,
+         ALM_TAH                     := #@@INSTANCE@@.ALM_TAH ,
+         ALM_FLT                     := #@@INSTANCE@@.ALM_FLT ,
+         ALARM_HH                    := #@@INSTANCE@@.ALARM_HH ,
+         ALARM_H                     := #@@INSTANCE@@.ALARM_H ,
+         ALARM_L                     := #@@INSTANCE@@.ALARM_L ,
+         ALARM_LL                    := #@@INSTANCE@@.ALARM_LL ,
          OUT_Q_F                     := "@@INSTANCE@@_F" ,
          OUT_Q_R                     := "@@INSTANCE@@_R" ,
-         OUT_FR                      := #@@MODULE@@.OUT_FR ,
-         MASS_PV_R                   := #@@MODULE@@.MASS_PV_R ,
-         MV_RPM_R                    := #@@MODULE@@.MV_RPM_R ,
-         DATA_QUALITY                := #@@MODULE@@.DATA_QUALITY ,
-         RUNNING                     := #@@MODULE@@.RUNNING ,
-         MON_MISMATCH                := #@@MODULE@@.MON_MISMATCH ,
-         RUN_FAULT                   := #@@MODULE@@.RUN_FAULT ,
-         OUT_SETPOINT                := #@@MODULE@@.OUT_SETPOINT ,
+         OUT_FR                      := #@@INSTANCE@@.OUT_FR ,
+         MASS_PV_R                   := #@@INSTANCE@@.MASS_PV_R ,
+         MV_RPM_R                    := #@@INSTANCE@@.MV_RPM_R ,
+         DATA_QUALITY                := #@@INSTANCE@@.DATA_QUALITY ,
+         RUNNING                     := #@@INSTANCE@@.RUNNING ,
+         MON_MISMATCH                := #@@INSTANCE@@.MON_MISMATCH ,
+         RUN_FAULT                   := #@@INSTANCE@@.RUN_FAULT ,
+         OUT_SETPOINT                := #@@INSTANCE@@.OUT_SETPOINT ,
          OUT_LMN_PER                 := "P_SPS-@@NUMINSTANCE@@":P ,
-         OUT_LMN                     := #@@MODULE@@.OUT_LMN ,
-         MODE                        := #@@MODULE@@.MODE
+         OUT_LMN                     := #@@INSTANCE@@.OUT_LMN ,
+         MODE                        := #@@INSTANCE@@.MODE
       );
       NOP 0;
 @@TEMPLATE_END@@

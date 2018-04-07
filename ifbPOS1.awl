@@ -7,9 +7,6 @@
 //                                                                            //
 // Uses the generic fbPOSx class. In this case FB_O=OUT_Q,FB_C=Negative-OUT_Q //
 // because the FB_C & FB_O don't have feedback from field.                    //
-//                                                                            //
-// INDEX = 3                                                                  //
-// IL_INDEX = 3                                                               //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
@@ -39,8 +36,8 @@
 FUNCTION_BLOCK "ifbPOS1"
 TITLE = Instances of POS1 On/Off valve without feedback
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbPOS1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -48,10 +45,10 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@ : "fbPOSx";   // @@DESCRIPTION@@
+      @@INSTANCE@@ : "fbPOSx";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@_MODE : Struct
+      @@INSTANCE@@_MODE : Struct
          PosEdge1 : Bool;
          PosEdge2 : Bool;
          REQ : Int;   // Request for Required Mode
@@ -65,7 +62,7 @@ VERSION : 2.0
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A "AlwaysHighBit";
       = %L0.0;
       BLD 103;
@@ -84,15 +81,15 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
          INTERLOCK                   := %L0.1 ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
          IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
-         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
-         IO_MODE                     := "idbPOS1".@@MODULE@@.MODE ,
-         IO_CMD                      := "idbPOS1".@@MODULE@@.CMD ,
-         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
+         IO_MODE                     := "idbPOS1".@@INSTANCE@@.MODE ,
+         IO_CMD                      := "idbPOS1".@@INSTANCE@@.CMD ,
+         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
@@ -119,21 +116,21 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
       A "@@INSTANCE@@";
       = %L0.3;
       BLD 103;
-      CALL #@@MODULE@@
-      (  CMD                         := #@@MODULE@@.CMD ,
+      CALL #@@INSTANCE@@
+      (  CMD                         := #@@INSTANCE@@.CMD ,
          CR_IL                       := %L0.0 ,
          NCR_IL                      := %L0.1 ,
-         MAN_OVERRIDE                := #@@MODULE@@.MAN_OVERRIDE ,
+         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
          FB_C                        := %L0.2 ,
          FB_O                        := %L0.3 ,
-         TMR                         := #@@MODULE@@.TMR ,
-         INTERLOCKING_TIMER          := "Tag_@@COUNTER|1@@" ,
-         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
-         OUT_Q                       := "@@INSTANCE@@" ,
-         FAULT_C                     := #@@MODULE@@.FAULT_C ,
-         FAULT_O                     := #@@MODULE@@.FAULT_O ,
-         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
-         MODE                        := #@@MODULE@@.MODE
+         TMR                         := #@@INSTANCE@@.TMR ,
+         INTERLOCKING_TIMER          := "@@INSTANCE@@-ILT" ,
+         STATE                       := #@@INSTANCE@@.STATE ,
+         OUT_Q                       := "@@INSTANCE@@-CMD" ,
+         FAULT_C                     := #@@INSTANCE@@.FAULT_C ,
+         FAULT_O                     := #@@INSTANCE@@.FAULT_O ,
+         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
+         MODE                        := #@@INSTANCE@@.MODE
       );
       NOP 0;
 @@TEMPLATE_END@@

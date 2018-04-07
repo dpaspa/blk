@@ -26,8 +26,8 @@
 FUNCTION_BLOCK "ifbHE1"
 TITLE = Instances of Manufacturing Filtration Line Heat Exchanger
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbHE1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -35,10 +35,10 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@ : "fbHE1";   // @@DESCRIPTION@@
+      @@INSTANCE@@ : "fbHE1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@_MODE : Struct
+      @@INSTANCE@@_MODE : Struct
          PosEdge1 : Bool;
          PosEdge2 : Bool;
          REQ : Int;   // Request for Required Mode
@@ -52,20 +52,20 @@ VERSION : 2.0
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcHE1"
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
          IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|HE@@_CMD ,
-         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
-         IO_MODE                     := #@@MODULE@@.MODE ,
-         OUT_CMD                     := "idbHE1".@@MODULE@@.CMD ,
-         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
+         IO_MODE                     := #@@INSTANCE@@.MODE ,
+         OUT_CMD                     := "idbHE1".@@INSTANCE@@.CMD ,
+         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
@@ -87,13 +87,13 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
       = %L0.1;
       BLD 103;
       CALL #HE_1010
-      (  CMD                         := #@@MODULE@@.CMD ,
+      (  CMD                         := #@@INSTANCE@@.CMD ,
          CR_IL                       := %L0.0 ,
          NCR_IL                      := %L0.1 ,
          DO_OUTPUT                   := "@@INSTANCE@@" ,
-         CUTOUT                      := #@@MODULE@@.CUTOUT ,
-         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
-         MODE                        := #@@MODULE@@.MODE
+         CUTOUT                      := #@@INSTANCE@@.CUTOUT ,
+         STATE                       := #@@INSTANCE@@.STATE ,
+         MODE                        := #@@INSTANCE@@.MODE
       );
       NOP 0;
 @@TEMPLATE_END@@

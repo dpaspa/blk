@@ -34,8 +34,8 @@
 FUNCTION_BLOCK "ifbPC1"
 TITLE = Instances of PC1 pressure controller
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbPC1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -43,10 +43,10 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@ : "fbPC1";   // @@DESCRIPTION@@
+      @@INSTANCE@@ : "fbPC1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@_MODE : Struct
+      @@INSTANCE@@_MODE : Struct
          PosEdge1 : Bool;
          PosEdge2 : Bool;
          REQ : Int;   // Request for Required Mode
@@ -64,24 +64,24 @@ VERSION : 2.0
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcPC1"
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
          SETPOINT                    := "idb@@PARENTCLASS@@".@@PARENT@@.SETPOINT ,
          P_CTRL                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|PC@@_P_CTRL ,
          GAS_SELECT                  := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|PC@@_GASS_SELECT ,
-         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
-         IO_MODE                     := "idbPC1".@@MODULE@@.MODE ,
-         IO_SETPOINT                 := "idbPC1".@@MODULE@@.SETPOINT ,
-         IO_P_CTRL                   := "idbPC1".@@MODULE@@.P_CTRL ,
-         IO_GAS_SELECT               := "idbPC1".@@MODULE@@.GAS_SELECT ,
-         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
+         IO_MODE                     := "idbPC1".@@INSTANCE@@.MODE ,
+         IO_SETPOINT                 := "idbPC1".@@INSTANCE@@.SETPOINT ,
+         IO_P_CTRL                   := "idbPC1".@@INSTANCE@@.P_CTRL ,
+         IO_GAS_SELECT               := "idbPC1".@@INSTANCE@@.GAS_SELECT ,
+         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
@@ -103,24 +103,24 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
       );
       = %L0.1;
       BLD 103;
-      CALL #@@MODULE@@
-      (  SETPOINT                    := #@@MODULE@@.SETPOINT ,
+      CALL #@@INSTANCE@@
+      (  SETPOINT                    := #@@INSTANCE@@.SETPOINT ,
          MEASURE                     := "idbPI1".@@lnk1Tag@@.MEASURE ,
-         P_CTRL                      := #@@MODULE@@.P_CTRL ,
-         DEADBAND_L                  := #@@MODULE@@.DEADBAND_L ,
-         DEADBAND_H                  := #@@MODULE@@.DEADBAND_H ,
-         GAS_SELECT                  := #@@MODULE@@.GAS_SELECT ,
+         P_CTRL                      := #@@INSTANCE@@.P_CTRL ,
+         DEADBAND_L                  := #@@INSTANCE@@.DEADBAND_L ,
+         DEADBAND_H                  := #@@INSTANCE@@.DEADBAND_H ,
+         GAS_SELECT                  := #@@INSTANCE@@.GAS_SELECT ,
          CR_IL                       := %L0.0 ,
          NCR_IL                      := %L0.1 ,
-         MAN_OVERRIDE                := #@@MODULE@@.MAN_OVERRIDE ,
-         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
-         OUT_SETPOINT                := #@@MODULE@@.OUT_SETPOINT ,
-         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
-         CMD_Q1                      := #@@MODULE@@.CMD_Q1 ,
-         CMD_Q2                      := #@@MODULE@@.CMD_Q2 ,
-         CMD_Q3                      := #@@MODULE@@.CMD_Q3 ,
-         MODE                        := #@@MODULE@@.MODE ,
-         OUT_Q                       := #@@MODULE@@.OUT_Q
+         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
+         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
+         OUT_SETPOINT                := #@@INSTANCE@@.OUT_SETPOINT ,
+         STATE                       := #@@INSTANCE@@.STATE ,
+         CMD_Q1                      := #@@INSTANCE@@.CMD_Q1 ,
+         CMD_Q2                      := #@@INSTANCE@@.CMD_Q2 ,
+         CMD_Q3                      := #@@INSTANCE@@.CMD_Q3 ,
+         MODE                        := #@@INSTANCE@@.MODE ,
+         OUT_Q                       := #@@INSTANCE@@.OUT_Q
       );
       NOP 0;
 @@TEMPLATE_END@@

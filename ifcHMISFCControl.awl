@@ -1,0 +1,38 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Handles the HMI interface for operator control of each SFC.   //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      29-Mar-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+FUNCTION "fcHMISFCControl" : Void
+TITLE = SFC Prompt Messaging Index
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcHMISFCControl
+VERSION : 2.0
+
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@CLASS@@_@@SFC@@
+    CALL "fcHMISFCSelect"
+    (   SEL_CONSTANT                := @@COUNTER|1@@ ,
+        SELECTION                   := "dbHMI_SCNT".HMI_SEQ_SELECTION , 
+        SA                          := "dbHMI_SEQ".@@CLASS@@_@@SFC@@_SA ,
+        SQ_STATE                    := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.SQ_STATE ,
+        MODE                        := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.MODE ,
+        SQ_CMD                      := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.SQ_CMD ,
+        STEPNO_JUMP                 := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.STEPNO_JUMP ,
+        MAN_JUMP                    := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.MAN_JUMP ,
+        NO_VERIFIC                  := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.NO_VERIFIC ,
+        TRN_AND_JUMP                := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.TRN_AND_JUMP
+    );
+    NOP 0;
+
+@@TEMPLATE_END@@
+END_FUNCTION

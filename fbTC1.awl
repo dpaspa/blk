@@ -28,52 +28,55 @@
 FUNCTION_BLOCK "fbTC1"
 TITLE = TC1 : Vesel cooling only temperature controller
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : fbTC1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
-   VAR_INPUT
-      T_CTRL : Int := 1;
-      MEASURE : Real;   // Measured Value received from control module
-      SETPOINT : Real;   // Setpoint
-      GAIN : Real := 1.0;   // Proportional Gain
-      TI : Time := T#20S;   // Integral Time
-      TD : Time := T#10S;   // Derivative Time
-      MAN : Real;   // PID controller output signal if disabled (=0%)
-      CR_IL : Bool;   // Critical Interlock
-      NCR_IL : Bool;   // Non-Critical Interlock
-      MAN_OVERRIDE : Bool;   // Bypass of Non-Critical Interlock
-      NON_PID : Bool;   // Manual non pid selection
-      CYCLE : Time := T#100MS;   // PID Block Sampling Time
-      P_SEL : Bool := TRUE;   // Proportional Action ON/OFF
-      I_SEL : Bool := TRUE;   // Integral Action ON/OFF
-      D_SEL : Bool := TRUE;   // Derivative Action ON/OFF
-      LMN_HLM : Real := 100.0;   // Manipulated Value High Limit 100%
-      LMN_LLM : Real;   // Manipulated Value Low Limit 0%
-   END_VAR
+    VAR_INPUT
+        T_CTRL : Int := 1;
+        MEASURE : Real;   // Measured Value received from control module
+        SETPOINT : Real;   // Setpoint
+        GAIN : Real := 1.0;   // Proportional Gain
+        TI : Time := T#20S;   // Integral Time
+        TD : Time := T#10S;   // Derivative Time
+        MAN : Real;   // PID controller output signal if disabled (=0%)
+        CR_IL : Bool;   // Critical Interlock
+        NCR_IL : Bool;   // Non-Critical Interlock
+        MAN_OVERRIDE : Bool;   // Bypass of Non-Critical Interlock
+        NON_PID : Bool;   // Manual non pid selection
+        CYCLE : Time := T#100MS;   // PID Block Sampling Time
+        P_SEL : Bool := TRUE;   // Proportional Action ON/OFF
+        I_SEL : Bool := TRUE;   // Integral Action ON/OFF
+        D_SEL : Bool := TRUE;   // Derivative Action ON/OFF
+        LMN_HLM : Real := 100.0;   // Manipulated Value High Limit 100%
+        LMN_LLM : Real;   // Manipulated Value Low Limit 0%
+    END_VAR
 
-   VAR_OUTPUT
-      DEV_STATE : Int;
-      LMN : Real;   // PID controller output (0-100%)
-      OUT_CMD : Bool;   // Open/Close command to MOD1
-      INTERLOCK : Bool;
-      MAN_NON_PID : Bool;
-      MON_MISMATCH : Bool;
-   END_VAR
+    VAR_OUTPUT
+        STATE : Int;
+        LMN : Real;   // PID controller output (0-100%)
+        OUT_CMD : Bool;   // Open/Close command to MOD1
+        INTERLOCK : Bool;
+        MAN_NON_PID : Bool;
+        MON_MISMATCH : Bool;
+    END_VAR
 
-   VAR_IN_OUT
-      MODE : Int := 2;
-   END_VAR
+    VAR_IN_OUT
+        MODE : Int := 1;     // Control Mode, Auto by default
+        OWNER : Int;         // Value to be set or reset by Parent
+    END_VAR
 
-   VAR
-      PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
-   END_VAR
+    VAR
+        PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
+    END_VAR
 
-   VAR_TEMP
-      tSetpoint : Real;
-      tmpman_non_pid : Bool;
-   END_VAR
-
+    VAR_TEMP
+        cmdEnable : Bool;
+        cmdDisable : Bool;
+        notOOS : Bool;
+        tSetpoint : Real;
+        tmpman_non_pid : Bool;
+    END_VAR
 
 BEGIN
 NETWORK
@@ -87,7 +90,7 @@ NETWORK
 TITLE = Disable Temperature Control
       A(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       A #NON_PID;
@@ -97,23 +100,23 @@ NETWORK
 TITLE = Enable or Disable
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
       );
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
-      = %L6.0;
-      A %L6.0;
+      = #notOOS;
+      A #notOOS;
       A(;
       L #T_CTRL;
-      L "dbCONST_VAL".CM.EN_DISABLE.ENABLE;
+      L "dbCONST".BLK.TC1.CMD.ENABLE;
       ==I;
       );
-      = %L6.1;
-      A %L6.1;
+      = #cmdEnable;
+      A #cmdEnable;
       JNB _001;
       L #SETPOINT;
       T #tSetpoint;
@@ -122,22 +125,22 @@ TITLE = Enable or Disable
       CLR;
 _001:      A BR;
       S #OUT_CMD;
-      A %L6.1;
+      A #cmdEnable;
       JNB _002;
-      L "dbCONST_VAL".CM.TC1_DEV_STATE.ENABLED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.TC1.STATE.ENABLED;
+      T #STATE;
 _002:      NOP 0;
-      A %L6.0;
+      A #notOOS;
       A(;
       O(;
       L #T_CTRL;
-      L "dbCONST_VAL".CM.EN_DISABLE.DISABLE;
+      L "dbCONST".BLK.TC1.CMD.DISABLE;
       ==I;
       );
       O #INTERLOCK;
       );
-      = %L6.1;
-      A %L6.1;
+      = #cmdDisable;
+      A #cmdDisable;
       JNB _003;
       L 0;
       T #tSetpoint;
@@ -146,35 +149,20 @@ _002:      NOP 0;
       CLR;
 _003:      A BR;
       R #OUT_CMD;
-      A %L6.1;
+      A #cmdDisable;
       JNB _004;
-      L "dbCONST_VAL".CM.TC1_DEV_STATE.DISABLED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.TC1.STATE.DISABLED;
+      T #STATE;
 _004:      NOP 0;
 NETWORK
 TITLE = PID Controller
       A(;
-      A "FirstScanRestartflag";
-      = %L7.0;
-      BLD 103;
-      A #tmpman_non_pid;
-      = %L7.1;
-      BLD 103;
-      A #P_SEL;
-      = %L7.2;
-      BLD 103;
-      A #I_SEL;
-      = %L7.3;
-      BLD 103;
-      A #D_SEL;
-      = %L7.4;
-      BLD 103;
       CALL #PID1
-      (  COM_RST                     := %L7.0 ,
-         MAN_ON                      := %L7.1 ,
-         P_SEL                       := %L7.2 ,
-         I_SEL                       := %L7.3 ,
-         D_SEL                       := %L7.4 ,
+      (  COM_RST                     := "FirstScanRestartflag" ,
+         MAN_ON                      := #tmpman_non_pid ,
+         P_SEL                       := #P_SEL ,
+         I_SEL                       := #I_SEL ,
+         D_SEL                       := #D_SEL ,
          CYCLE                       := #CYCLE ,
          SP_INT                      := #tSetpoint ,
          PV_IN                       := #MEASURE ,
@@ -205,7 +193,7 @@ NETWORK
 TITLE =
       A(;
       L #T_CTRL;
-      L "dbCONST_VAL".CM.EN_DISABLE.ENABLE;
+      L "dbCONST".BLK.TC1.CMD.ENABLE;
       ==I;
       );
       A #INTERLOCK;

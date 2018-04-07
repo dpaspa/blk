@@ -1,0 +1,50 @@
+FUNCTION "fbTimeSyncPLC" : Void
+TITLE = Time sync from Batch PC to CPUs
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_TEMP
+      Error1 : Int;
+      Error2 : Int;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Read time from CPU and transfer for display on Batch PC
+//Read time from CPU and transfer for display on Batch PC
+      CALL RD_SYS_T
+      {date_type := 'Date_And_Time'}
+      (  RET_VAL                     := #Error1 ,
+         OUT                         := "TimeSyncBlock".PLC_DateAndTime
+      );
+      NOP 0;
+NETWORK
+TITLE = Set time on CPU which is transfered from Batch PC
+      A "TimeSyncBlock".SettimefromPC;
+      = %L4.0;
+      A(;
+      A %L4.0;
+      JNB Label_0;
+      L INT#40;
+      T "TimeSyncBlock".JOB_MailBoxHMI1;
+      SET;
+      SAVE;
+      CLR;
+Label_0:      A BR;
+      );
+      JNB Label_1;
+      CALL WR_SYS_T
+      {date_type := 'Date_And_Time'}
+      (  IN                          := "TimeSyncBlock".HMI_PLC_DateAndTime ,
+         RET_VAL                     := #Error2
+      );
+Label_1:      NOP 0;
+      A %L4.0;
+      L S5T#50MS;
+      SD "timerPCSync";
+      NOP 0;
+      NOP 0;
+      NOP 0;
+      A "timerPCSync";
+      R "TimeSyncBlock".SettimefromPC;
+END_FUNCTION

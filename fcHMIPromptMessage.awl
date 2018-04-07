@@ -1,0 +1,166 @@
+FUNCTION "fcHMIPromptMessage" : Void
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_INPUT
+      EV_ID : DWord;   // Event ID, systemID
+      Signal : Bool;   // Message Triger bit
+      TestSignal : Byte;
+      Event : Bool;   // Select=1 if Permanently acknowledge, =0 if need to ack
+      CipSipNo : DInt;
+      BatchID : "udtID";
+      TextLib : Byte;   // Select Library, 0=Batch, 1=CipSip
+      MessageIndex : Byte;   // Message number to be triggured/sent to HMI
+   END_VAR
+
+   VAR_OUTPUT
+      Q_State : Bool;
+      AckedOnly : Bool;
+      AckAnd2ndBit : Bool;
+   END_VAR
+
+   VAR_IN_OUT
+      Hmi2ndBit : Bool;
+      SD : "udtAlarmMessage";
+   END_VAR
+
+    VAR_TEMP
+        raiseEvent : Bool;
+      scRetval : Int;
+      scState : Bool;
+      sRetval : Int;
+    END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Select Main text library and Triger the Message index
+//#MessageIndex=0, Oth of Index of Main text library will be displayed.
+//#MessageIndex=1, 1st of Index of Main text library will be displayed.So on.
+//....
+//UserSignal=255,No message
+//
+//#TextLib=0, Batch ID will be displayed
+//#TextLib=1, CipSip cycle number will be displayed
+      L #MessageIndex;
+      T #SD.MainTextLib;
+
+NETWORK
+TITLE = Select Main text library and Triger the Message index
+      L #TextLib;
+      T #SD.TextLib;
+
+NETWORK
+TITLE = if Batch ID to be displayed
+      L #TextLib;
+      L 1;
+      ==I;
+      JCN noDisplayBatchID;
+
+NETWORK
+TITLE = if Batch ID to be displayed
+      L #BatchID.ID[1];
+      T #SD.BatchID[1];
+      L #BatchID.ID[2];
+      T #SD.BatchID[2];
+      L #BatchID.ID[3];
+      T #SD.BatchID[3];
+      L #BatchID.ID[4];
+      T #SD.BatchID[4];
+      L #BatchID.ID[5];
+      T #SD.BatchID[5];
+      L #BatchID.ID[6];
+      T #SD.BatchID[6];
+
+noDisplayBatchID:      NOP 0;
+
+NETWORK
+TITLE = if CipSip Cycle number to be displayed
+      L #TextLib;
+      L 2;
+      ==I;
+      L #CipSipNo;
+      T #SD.CipSipNo;
+
+NETWORK
+TITLE = Check if alarm or event needs to be raised
+      A(;
+      A #Signal;
+      A(;
+      L #TestSignal;
+      L 0;
+      ==I;
+      );
+      A(;
+      L #TestSignal;
+      L 255;
+      <>I;
+      );
+      O(;
+      L #TestSignal;
+      L #MessageIndex;
+      ==I;
+      );
+      );
+      = #raiseEvent;
+
+NETWORK
+TITLE = If Event, without acknowledgement/Permanently acknowledge
+      A #raiseEvent;
+      A #Event;
+      CALL ALARM_D
+      (  SIG                         := #raiseEvent ,
+         ID                          := WORD#16#EEEE ,
+         EV_ID                       := #EV_ID ,
+         CMP_ID                      := #EV_ID ,
+         SD                          := "dbCONST_VAL".BlockMsgS1.SD ,
+         RET_VAL                     := #sRetval
+      );
+
+NETWORK
+TITLE = If Alarm, Need acknowledgement
+      A #raiseEvent;
+      AN #Event;
+      CALL ALARM_DQ
+      (  SIG                         := #raiseEvent ,
+         ID                          := WORD#16#EEEE ,
+         EV_ID                       := #EV_ID ,
+         CMP_ID                      := #EV_ID ,
+         SD                          := "dbCONST_VAL".BlockMsgS1.SD ,
+         RET_VAL                     := #sRetval
+      );
+
+NETWORK
+TITLE = Acknowledge
+      CALL ALARM_SC
+      (  EV_ID                       := #EV_ID ,
+         RET_VAL                     := #scRetval ,
+         STATE                       := #scState ,
+         Q_STATE                     := #Q_State
+      );
+      NOP 0;
+NETWORK
+TITLE = Only Acknowledge or Ack plus Cancel
+      A #Q_State;
+      AN #Hmi2ndBit;
+      AN #AckAnd2ndBit;
+      S #AckedOnly;
+
+      A #Q_State;
+      A #Hmi2ndBit;
+      S #AckAnd2ndBit;
+
+      A #Q_State;
+      A #Hmi2ndBit;
+      A #AckAnd2ndBit;
+      R #Hmi2ndBit;
+NETWORK
+TITLE = Reset Acked bit
+      A #AckedOnly;
+      AN #Q_State;
+      R #AckedOnly;
+NETWORK
+TITLE = #AckAnd2ndBit
+      A #AckAnd2ndBit;
+      AN #Q_State;
+      R #AckAnd2ndBit;
+END_FUNCTION_BLOCK

@@ -28,8 +28,8 @@
 FUNCTION_BLOCK "ifbMOT1"
 TITLE = MOT1:Instance
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbMOT1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -37,10 +37,10 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@ : "fbMOT1";   // @@DESCRIPTION@@
+      @@INSTANCE@@ : "fbMOT1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@_MODE : Struct
+      @@INSTANCE@@_MODE : Struct
          PosEdge1 : Bool;
          PosEdge2 : Bool;
          REQ : Int;   // Request for Required Mode
@@ -54,7 +54,7 @@ VERSION : 2.0
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A "AlwaysHighBit";
       = %L0.0;
       BLD 103;
@@ -62,15 +62,15 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
       (  IN_REQ_MODE                 := %L0.0 ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@.MODE ,
          IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|PUMP@@_CMD ,
-         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
-         IO_MODE                     := "idbMOT1".@@MODULE@@.MODE ,
-         IO_CMD                      := "idbMOT1".@@MODULE@@.CMD ,
-         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
+         IO_MODE                     := "idbMOT1".@@INSTANCE@@.MODE ,
+         IO_CMD                      := "idbMOT1".@@INSTANCE@@.CMD ,
+         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
 NETWORK
-TITLE = @@MODULE@@:SMS1 Vacuum Pump
+TITLE = @@INSTANCE@@:SMS1 Vacuum Pump
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
@@ -97,20 +97,20 @@ TITLE = @@MODULE@@:SMS1 Vacuum Pump
       A "OVL-@@NUMINSTANCE@@";
       = %L0.3;
       BLD 103;
-      CALL #@@MODULE@@
-      (  CMD                         := #@@MODULE@@.CMD ,
-         TMR                         := #@@MODULE@@.TMR ,
+      CALL #@@INSTANCE@@
+      (  CMD                         := #@@INSTANCE@@.CMD ,
+         TMR                         := #@@INSTANCE@@.TMR ,
          CR_IL                       := %L0.0 ,
          NCR_IL                      := %L0.1 ,
-         MAN_OVERRIDE                := #@@MODULE@@.MAN_OVERRIDE ,
+         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
          RUNNING_FB                  := %L0.2 ,
          MOT_OL_TRIP                 := %L0.3 ,
-         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
-         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
+         STATE                       := #@@INSTANCE@@.STATE ,
+         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
          OUT_Q                       := "@@INSTANCE@@" ,
-         FAULT_S                     := #@@MODULE@@.FAULT_S ,
-         FAULT_O                     := #@@MODULE@@.FAULT_O ,
-         MODE                        := #@@MODULE@@.MODE
+         FAULT_S                     := #@@INSTANCE@@.FAULT_S ,
+         FAULT_O                     := #@@INSTANCE@@.FAULT_O ,
+         MODE                        := #@@INSTANCE@@.MODE
       );
       NOP 0;
 @@TEMPLATE_END@@

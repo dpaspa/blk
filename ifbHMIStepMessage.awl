@@ -1,0 +1,53 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Handles the HMI interface for SFC step messages.              //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      29-Mar-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbHMIStepMessage"
+TITLE = SFC Step Messaging Index
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fbHMIStepMessage
+VERSION : 2.0
+
+VAR_INPUT
+@@TEMPLATE_BEGIN@@
+    EV_ID_@@COUNTER|1@@ : C_Alarm_s;
+@@TEMPLATE_END@@
+END_VAR
+
+VAR_TEMP
+    Q_State : Bool;
+    AckedOnly : Bool;
+    AckAnd2ndBit : Bool;
+END_VAR
+
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@INSTANCE@@ @@SFC@@ Step Message
+      CALL "fcHMIStepMessage"
+      (  EV_ID                       := #EV_ID_@@COUNTER|1@@ ,
+         TestSignal                  := "testStepSignal" ,
+         Event                       := "AlwaysLow" ,
+         BatchID                     := "idb@@CLASS@@".@@INSTANCE@@.BATCHCYCLE ,
+         DisplayBatchID              := 1 ,
+         UnitNO                      := 4101 ,
+         CURSTEP                     := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.CURSTEP ,
+         Q_State                     := #Q_State ,
+         AckedOnly                   := #AckedOnly ,
+         AckAnd2ndBit                := #AckAnd2ndBit ,
+         Hmi2ndBit                   := "HMI_Ack_Cancel" ,
+         SD                          := "dbSTATE_VAL".STEP_SD ,
+         Stage                       := "dbSTATE_VAL".@@INSTANCE@@_@@SFC@@
+      );
+      NOP 0;
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

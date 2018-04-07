@@ -23,80 +23,73 @@
 FUNCTION_BLOCK "fbHE1"
 TITLE = HE1 : Vessel vent filter Electric heater element
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : fbHE1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
-   VAR_INPUT
-      CMD : Bool;   // command to switch ON/OFF heating element.
-      INTERLOCK : Bool;   // Manually operated key switch to disable heater
-   END_VAR
+    VAR_INPUT
+        CMD : Bool;          // command to switch ON/OFF heating element.
+        INTERLOCK : Bool;    // Manually operated key switch to disable heater
+    END_VAR
 
-   VAR_OUTPUT
-      DO_OUTPUT : Bool;   // Output Signal to Heating Element
-      CUTOUT : Bool;   // Flag indicating if TI alarm is to cutout (0= Alarm Enabled, 1= Alarm Disabled)
-      MON_MISMATCH : Bool;
-      DEV_STATE : Int;   // Device State (1= OFF, 2= ON)
-   END_VAR
+    VAR_OUTPUT
+        DO_OUTPUT : Bool;    // Output Signal to Heating Element
+        CUTOUT : Bool;       // Flag indicating if TI alarm is to cutout (0= Alarm Enabled, 1= Alarm Disabled)
+        MON_MISMATCH : Bool;
+        STATE : Int;         // Device State (1= OFF, 2= ON)
+    END_VAR
 
-   VAR_IN_OUT
-      MODE : Int := 2;   // Mode (1= MAN, 2= AUTO)
-   END_VAR
+    VAR_IN_OUT
+        MODE : Int := 1;     // Control Mode, Auto by default
+        OWNER : Int;         // Value to be set or reset by Parent
+    END_VAR
 
-   VAR_TEMP
-      DO_B_1 : Bool;   // Temporary processed DO signal
-   END_VAR
-
+    VAR_TEMP
+        tempDO : Bool;       // Temporary processed DO signal
+    END_VAR
 
 BEGIN
 NETWORK
-TITLE = Process Digital Input Signal
-      A #INTERLOCK;
-      A #CMD;
-      = #DO_B_1;
-      A #DO_B_1;
-      = #DO_OUTPUT;
+TITLE = Process Digital Output Signal
+    A #INTERLOCK;
+    A #CMD;
+    = #tempDO;
+    = #DO_OUTPUT;
 NETWORK
 TITLE = Setting CUTOUT Flag
-//Flage indicating if TI alarm is to be cutout (i.e. disabled) whenever HE is OFF.
-//0 = ALARM ENABLED
-//1 = ALARM DISABLED
-      AN #DO_B_1;
-      = #CUTOUT;
+    //------------------------------------------------------------------------//
+    // Flag indicating if TI alarm is to be cutout (i.e. disabled) whenever   //
+    // HE is OFF:                                                             //
+    // 0 = ALARM ENABLED                                                      //
+    // 1 = ALARM DISABLED                                                     //
+    //------------------------------------------------------------------------//
+    AN #tempDO;
+    = #CUTOUT;
 NETWORK
 TITLE = Setting Device State to OFF
-      AN #DO_B_1;
-      A #INTERLOCK;
-      JNB Label_0;
-      L "dbCONST_VAL".CM.HE1_DEV_STATE.OFF;
-      T #DEV_STATE;
-Label_0:      NOP 0;
+    AN #tempDO;
+    A #INTERLOCK;
+    L "dbCONST".BLK.HE1.STATE.DISABLED;
+    T #STATE;
 NETWORK
 TITLE = Setting Device State to ON
-      A #DO_B_1;
-      JNB Label_1;
-      L "dbCONST_VAL".CM.HE1_DEV_STATE.ON;
-      T #DEV_STATE;
-Label_1:      NOP 0;
+    A #tempDO;
+    L "dbCONST".BLK.HE1.STATE.ENABLED;
+    T #STATE;
 NETWORK
 TITLE = Setting Device State to 'Interlock'
-      AN #INTERLOCK;
-      JNB Label_2;
-      L "dbCONST_VAL".CM.HE1_DEV_STATE.INTERLOCKED;
-      T #DEV_STATE;
-Label_2:      NOP 0;
+    AN #INTERLOCK;
+    L "dbCONST".BLK.STATE.INTERLOCKED;
+    T #STATE;
 NETWORK
 TITLE = Setting Device State to 'Failed'
-      AN #INTERLOCK;
-      A #CMD;
-      JNB Label_3;
-      L "dbCONST_VAL".CM.HE1_DEV_STATE.FAILED;
-      T #DEV_STATE;
-Label_3:      NOP 0;
+    AN #INTERLOCK;
+    A #CMD;
+    L "dbCONST".BLK.HE1.STATE.FAULT;
+    T #STATE;
 NETWORK
 TITLE =
-      L #DEV_STATE;
-      L "dbCONST_VAL".CM.HE1_DEV_STATE.FAILED;
-      ==I;
-      = #MON_MISMATCH;
+    AN #INTERLOCK;
+    A #CMD;
+    = #MON_MISMATCH;
 END_FUNCTION_BLOCK

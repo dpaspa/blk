@@ -1,0 +1,247 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description: Generic Block Common Mode and Command handling function block.//
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      28-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.4 Khairul Basar    05-Oct-2009 NA        Substate change will issue STOP //
+// 0.3 Khairul Basar    17-Sep-2009 NA        Instead of Auto/Man command,    //
+//                                            now only single COMMAND.        //
+// 0.2 Khairul Basar    20-Aug-2009 NA        Ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
+// Ref1.                                                                      //
+// Mode change:#tMode_Changed NO is removed from the parallel path of         //
+// Substate changed for not to generate #tEdgeAutoStart pulse when mode is    //
+// changed.                                                                   //
+//----------------------------------------------------------------------------//
+FUNCTION "fcBLKModeAndCommand" : Void
+TITLE = General Mode, Command & Interlock handling block
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcBLKModeAndCommand
+VERSION : 2.0
+
+   VAR_INPUT
+        MODE : Int;                    // Block Mode
+        CMD : Int;                     // Block Command for auto mode
+        CR_IL : Bool;                  // Critical Interlock
+        NCR_IL : Bool;                 // Non critical Interlock
+        MAN_OVERRIDE : Bool;           // Manual override for Non-critical interlocks
+        permitStart: Bool;
+   END_VAR
+
+   VAR_OUTPUT
+        STATE : Int;                   // Device state
+        INTERLOCK : Bool;              // if there is any interlock
+        eventCommandStart : Bool;
+        eventCommandStop : Bool;
+        eventModeAuto : Bool;
+        eventModeManual : Bool;
+        eventModeOOS : Bool;
+   END_VAR
+
+   VAR_IN_OUT
+        SUBSelected : Int;                // Selected substate
+        SUBLast : Int;
+   END_VAR
+
+   VAR_TEMP
+        edgeCommandStart : Bool;
+        edgeCommandStop : Bool;
+        edgeModeAuto : Bool;
+        edgeModeManual : Bool;
+        edgeModeOOS : Bool;
+   END_VAR
+
+BEGIN
+NETWORK
+TITLE = Set block to Auto mode if restarting the PLC
+    //------------------------------------------------------------------------//
+    // Set block Mode Auto on PLC restart:                                    //
+    //------------------------------------------------------------------------//
+    A "FirstScanRestartflag";
+    L "dbCONST".BLK.MODE.AUTO;
+    T #MODE;
+
+NETWORK
+TITLE = Flag if a new block running substate command issued
+    //------------------------------------------------------------------------//
+    // START COMMAND   START COMMAND   START COMMAND   START COMMAND   START  //
+    //                                                                        //
+    // Check if the start command has just been issued if the bit positive    //
+    // edge. The result will only last for one scan after the positive edge:  //
+    //------------------------------------------------------------------------//
+    A #permitStart;
+    A(;
+    O(;
+    L #CMD;
+    L "dbCONST".BLK.CMD.START;
+    ==I;
+    );
+    O(;
+    L #SUBSelected;
+    L #SUBLast;
+    <>I;
+    );
+    );
+    FP #edgeCommandStart;
+    = #eventCommandStart;
+
+NETWORK
+TITLE = Save last running substate if starting
+    //------------------------------------------------------------------------//
+    // SAVE SUBSTATE    SAVE SUBSTATE    SAVE SUBSTATE    SAVE SUBSTATE       //
+    //                                                                        //
+    // Save the running substate for next scan check if starting. It may have //
+    // changed:                                                               //
+    //------------------------------------------------------------------------//
+    A #eventCommandStart;
+    L #SUBSelected;
+    T #SUBLast;
+
+NETWORK
+TITLE = Flag if block stop command issued
+    //------------------------------------------------------------------------//
+    // STOP COMMAND   STOP COMMAND   STOP COMMAND   STOP COMMAND   STOP COMM  //
+    //                                                                        //
+    // Check if the stop command has just been issued if the bit positive     //
+    // edge. The result will only last for one scan after the positive edge:  //
+    //------------------------------------------------------------------------//
+    L #CMD;
+    L "dbCONST".BLK.CMD.STOP;
+    ==I;
+    FP #edgeCommandStop;
+    = #eventCommandStop;
+
+NETWORK
+TITLE = Stop command takes precedence over Start command
+    //------------------------------------------------------------------------//
+    // If commanded to Stop then reset any Start command:                     //
+    //------------------------------------------------------------------------//
+    A #eventCommandStop;
+    R #eventCommandStart;
+
+NETWORK
+TITLE = Flag if block Mode just changed to Auto
+    //------------------------------------------------------------------------//
+    // AUTO MODE   AUTO MODE   AUTO MODE   AUTO MODE   AUTO MODE   AUTO MODE  //
+    //                                                                        //
+    // Check if the mode has just been changed to Auto if the bit positive    //
+    // edge. The result will only last for one scan after the positive edge:  //
+    //------------------------------------------------------------------------//
+    L #MODE;
+    L "dbCONST".BLK.MODE.AUTO;
+    ==I;
+    FP #edgeModeAuto;
+    = #eventModeAuto;
+
+NETWORK
+TITLE = Flag if block Mode just changed to Manual
+    //------------------------------------------------------------------------//
+    // MANUAL MODE   MANUAL MODE   MANUAL MODE   MANUAL MODE   MANUAL MODE    //
+    //                                                                        //
+    // Check if the mode has just been changed to Manual if the bit positive  //
+    // edge. The result will only last for one scan after the positive edge:  //
+    //------------------------------------------------------------------------//
+    L #MODE;
+    L "dbCONST".BLK.MODE.MANUAL;
+    ==I;
+    FP #edgeModeManual;
+    = #eventModeManual;
+
+NETWORK
+TITLE = Flag if block Mode just changed to Out Of Service
+    //------------------------------------------------------------------------//
+    // OOS MODE   OOS MODE   OOS MODE   OOS MODE   OOS MODE   OOS MODE   OOS  //
+    //                                                                        //
+    // Check if the mode has just been changed to Out of Service if the bit   //
+    // positive edge. The result will only last for one scan after the        //
+    // positive edge:                                                         //
+    //------------------------------------------------------------------------//
+    L #MODE;
+    L "dbCONST".BLK.MODE.OOS;
+    ==I;
+    FP #edgeModeOOS;
+    = #eventModeOOS;
+
+NETWORK
+TITLE = Interlock Flag
+    //------------------------------------------------------------------------//
+    // Set boolean interlock flag if any interlock condition exists:          //
+    //------------------------------------------------------------------------//
+    O #CR_IL;
+    O(;
+    A #NCR_IL;
+    AN #MAN_OVERRIDE;
+    );
+    = #INTERLOCK;
+
+NETWORK
+TITLE = Interlocked State if Stopped
+    //------------------------------------------------------------------------//
+    // Block should be interlocked state if STOPPED and interlock active or   //
+    // child failed:                                                          //
+    //------------------------------------------------------------------------//
+    A(;
+    L #STATE;
+    L "dbCONST".BLK.STATE.STOPPED;
+    ==I;
+    );
+    A(;
+    O #INTERLOCK;
+    ON #permitStart;
+    );
+    L "dbCONST".BLK.STATE.INTERLOCKED;
+    T #STATE;
+
+NETWORK
+TITLE = Paused State if Running
+    //------------------------------------------------------------------------//
+    // Block should be paused state if RUNNING and interlock active or child  //
+    // failed:                                                                //
+    //------------------------------------------------------------------------//
+    A(;
+    L #STATE;
+    L "dbCONST".BLK.STATE.INTERLOCKED;
+    <>I;
+    );
+    A(;
+    L #STATE;
+    L "dbCONST".BLK.STATE.PAUSED;
+    <>I;
+    );
+    A(;
+    L #STATE;
+    L "dbCONST".BLK.STATE.STOPPED;
+    <>I;
+    );
+    A(;
+    O #INTERLOCK;
+    ON #permitStart;
+    );
+    L "dbCONST".BLK.STATE.PAUSED;
+    T #STATE;
+
+NETWORK
+TITLE = Send stop command in case of any interlock or failure
+    //------------------------------------------------------------------------//
+    // Stop the block if any interlock:                                       //
+    //------------------------------------------------------------------------//
+    L #STATE;
+    L "dbCONST".BLK.STATE.INTERLOCKED;
+    ==I;
+    L "dbCONST".BLK.CMD.STOP;
+    T #CMD;
+
+    //------------------------------------------------------------------------//
+    // Set the substate safe if any interlock:                                //
+    //------------------------------------------------------------------------//
+    L #STATE;
+    L "dbCONST".BLK.STATE.INTERLOCKED;
+    ==I;
+    L "dbCONST".BLK.SAFE.CMD;
+    T #SUBSelected;
+
+END_FUNCTION

@@ -1,0 +1,110 @@
+TYPE "udtSQ_STRUCT"
+TYPE "udtSFC"
+VERSION : 0.1
+   STRUCT
+      SFC_IN : Struct
+         _SQ_cmd_A_M_hist : Int;
+         _SQ_cmd_hist_spare : Int;     // ~spare
+         _mode : Int;
+         _SQ_man_jump_to_step : Int;   // MANUAL JUMP TO STEP NO.WHEN IDLE
+         _cyclic : Bool;               // AUTO, CYCLIC OPERATION
+         _init_SQ : Bool;              // INITIATE STEP SEQUENCER
+         _pause_cmd : Bool;
+         _resume_cmd : Bool;
+         _ack_err_flt : Bool;          // ACKNOWLEDGE ERROR OR FAULT
+         _off_SQ : Bool;               // OFF SEQUENCE WHEN NOT IN CYCLIC
+         _abort_SQ : Bool;
+         _step_ON : Bool;              // MANUAL STEP ON
+         _step_OFF : Bool;             // MANUAL, STEP OFF
+         _step_FWD : Bool;             // ONE STEP FORWARD
+         _step_BWD : Bool;             // ONE STEP BACKWARD
+      END_STRUCT;
+      SFC_INOUT : Struct
+         _step_NO : Int;
+         _trans_NO : Int;
+         _nxtstep : Int;
+         _nxttrans : Int;
+         _action_NO : Int;
+         _action_finished : Bool;
+         _step_idle : Bool;
+         _step_paused : Bool;
+         _step_active : Bool;
+         _SQ_err_flt : Bool;
+         _ackd_err_flt : Bool;
+         _step_temp_IL : Bool;
+         _Jump : Bool;                 // Jump from transition to step
+         _SQ_man_jump : Bool;
+         _step_done : Bool;            // Step is finished( does not matter with/without error)
+         _step_not_done : Bool;        // Step still need to finished
+         _step_finished_wo_err : Bool; // Step finished without error
+         _step_finished_w_err : Bool;  // Step finished with error
+         _step_finished : Bool;        // exit step if completed
+         _trans_finished : Bool;
+         _step_TMR_ON : Bool;
+         _step_finished_ontime : Bool;
+         _step_delayed : Bool;
+         _FP_init : Bool;
+         _FP_abort : Bool;
+      END_STRUCT;
+      SFC_OUT : Struct
+         _SQ_state : Int;
+         _step_desc : String[50] := 'THIS IS BASIC STRUCTURE OF SQ';
+         _trans_desc : String[50] := 'THIS IS DESC OF TRANSITION';
+         _SQ_is_off : Bool;
+         _SQ_halted : Bool;
+         _SQ_finished : Bool;
+         _SQ_not_finished : Bool;
+      END_STRUCT;
+      _running : Bool;                 // CM is running
+      _stopped : Bool;
+      _time_expired : Bool;            // run time expired
+      _start_time : Time;
+      _start_date : Date;
+      _stop_time : Time;
+      _stop_date : Date;
+   END_STRUCT;
+END_TYPE
+
+TYPE "udtSTAGE_CHG"
+TYPE "udtSFCJump"
+VERSION : 0.1
+   STRUCT
+      current : Int;
+      history : Int;
+      Mode : Int := 1;
+      changed : Bool := TRUE;
+      Reserve : Bool;
+   END_STRUCT;
+END_TYPE
+
+TYPE "udtSTAGE_MSG"
+TYPE "udtStepMessage"
+VERSION : 0.1
+   STRUCT
+      DisplayBatcnID : Int;
+      BatchID : Array[1..6] of Char;
+      MessageIndex : Word;
+      UnitNo : Int;
+   END_STRUCT;
+END_TYPE
+
+TYPE "udtHMI_SEQ"
+TYPE "udtSFCHMI"
+VERSION : 0.1
+   STRUCT
+      MODE : Int;
+      SQ_STATE : Int;
+      CURSTEP : Int;
+      S_ACTIVE : Bool;
+      ERR_FAULT : Bool;
+      PAUSED : Bool;
+      OFF_IDLE : Bool;
+      SQ_FINISHED : Bool;
+      STEPNO_JUMP : Int;
+      MAN_JUMP : Bool;
+      NO_VERIFIC : Bool;
+      TRN_AND_JUMP : Bool;
+      DONE : Array[1..104] of Bool;
+      WITHERROR : Array[1..104] of Bool;
+   END_STRUCT;
+END_TYPE

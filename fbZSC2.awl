@@ -16,120 +16,124 @@
 FUNCTION_BLOCK "fbZSC2"
 TITLE = ZSC2 : Flowpath connection indication
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : fbZSC2
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
-   VAR_INPUT
-      MODE : Int := 2;
-      DI_INPUT : Bool;   // Input signal from Field (0 = Device is OUT, 1 = Device is IN)
-      DI_USER : Bool;
-      REQ_STATE : Bool;   // The required state, either IN or OUT, of the flowpath device.
-      ARM_FLAG : Bool;
-   END_VAR
+    VAR_INPUT
+        CMD : Int := -1;     // Safe command
+        DI_INPUT : Bool;     // Input signal from Field (0 = Device is OUT, 1 = Device is IN)
+        DI_USER : Bool;
+        REQ_STATE : Bool;    // The required state, either IN or OUT, of the flowpath device.
+        ARM_FLAG : Bool;
+    END_VAR
 
-   VAR_OUTPUT
-      DI_PV : Bool;   // Processed DI
-      DEV_STATE : Int;   // Device State (1= IN, 2= OUT, 3= MISMATCH)
-      MON_MISMATCH : Bool;
-   END_VAR
+    VAR_OUTPUT
+        STATE : Int;         // Device State (1= IN, 2= OUT, 3= MISMATCH)
+        INTERLOCK : Bool;    // Interlock Flag (0 = Inactive, 1 = Active)
+        DI_PV : Bool;        // Processed DI
+        MON_MISMATCH : Bool;
+    END_VAR
 
-   VAR_TEMP
-      DI_POS_B_1 : Bool;   // Temporary processed DI signal
-      mode_auto : Bool;
-      mode_man : Bool;
-      mode_oos : Bool;
-   END_VAR
+    VAR_IN_OUT
+        OWNER : Int;         // Value to be set or reset by Parent
+        MODE : Int := 1;     // Control Mode, Auto by default
+    END_VAR
 
+    VAR_TEMP
+        DI_POS_B_1 : Bool;   // Temporary processed DI signal
+        isMismatch : Bool;
+        modeAuto : Bool;
+        modeManual : Bool;
+        modeOOS : Bool;
+    END_VAR
 
 BEGIN
 NETWORK
 TITLE = Mode auto
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
-      = #mode_auto;
+      = #modeAuto;
 NETWORK
 TITLE = Mode man
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
-      = #mode_man;
+      = #modeManual;
 NETWORK
 TITLE = Mode oos
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      L "dbCONST".BLK.MODE.OOS;
       ==I;
-      = #mode_oos;
+      = #modeOOS;
 NETWORK
 TITLE = Process Digital Input Signal
       A #DI_INPUT;
-      A #mode_auto;
+      A #modeAuto;
       O;
       A #DI_USER;
-      A #mode_man;
+      A #modeManual;
       = #DI_PV;
 NETWORK
 TITLE = Setting Device State to IN
       A(;
       A #DI_INPUT;
-      A #mode_auto;
+      A #modeAuto;
       O;
       A #DI_USER;
-      A #mode_man;
+      A #modeManual;
       );
       A #REQ_STATE;
       JNB Label_0;
-      L "dbCONST_VAL".CM.ZSC2_DEV_STATE.IN;
-      T #DEV_STATE;
+      L "dbCONST".BLK.ZSC2.STATE.IN;
+      T #STATE;
 Label_0:      NOP 0;
 NETWORK
 TITLE = Setting Device State to OUT
       A(;
       AN #DI_INPUT;
-      A #mode_auto;
+      A #modeAuto;
       O;
       AN #DI_USER;
-      A #mode_man;
+      A #modeManual;
       );
       AN #REQ_STATE;
       JNB Label_1;
-      L "dbCONST_VAL".CM.ZSC2_DEV_STATE.OUT;
-      T #DEV_STATE;
+      L "dbCONST".BLK.ZSC2.STATE.OUT;
+      T #STATE;
 Label_1:      NOP 0;
 NETWORK
-TITLE = Setting Device State to MISMATCH
+TITLE = Check if Device State is MISMATCH
       A(;
       A(;
       A #DI_INPUT;
-      A #mode_auto;
+      A #modeAuto;
       O;
       A #DI_USER;
-      A #mode_man;
+      A #modeManual;
       );
       AN #REQ_STATE;
       O;
       A(;
       AN #DI_INPUT;
-      A #mode_auto;
+      A #modeAuto;
       O;
       AN #DI_USER;
-      A #mode_man;
+      A #modeManual;
       );
       A #REQ_STATE;
       );
-      JNB Label_2;
-      L "dbCONST_VAL".CM.ZSC2_DEV_STATE.MISMATCH;
-      T #DEV_STATE;
-Label_2:      NOP 0;
+      = #isMismatch;
+NETWORK
+TITLE = Setting Device State to MISMATCH
+      A #isMismatch;
+      L "dbCONST".BLK.ZSC2.STATE.MISMATCH;
+      T #STATE;
 NETWORK
 TITLE =
-      A(;
-      L #DEV_STATE;
-      L "dbCONST_VAL".CM.ZSC2_DEV_STATE.MISMATCH;
-      ==I;
-      );
+      A #isMismatch;
       A #ARM_FLAG;
-      AN #mode_oos;
+      AN #modeOOS;
       = #MON_MISMATCH;
 END_FUNCTION_BLOCK

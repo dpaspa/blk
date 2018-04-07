@@ -1,0 +1,180 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description: The entry point for the entire program called by the system.  //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      09-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+ORGANIZATION_BLOCK "obMain"
+TITLE =  "Main Program Sweep (Cycle)"
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : MainOrganizationBlock
+VERSION : 2.0
+
+VAR_TEMP
+    OB1_EV_CLASS : Byte;     // Bits 0-3 = 1 (Coming event), Bits 4-7 = 1 (Event class 1)
+    OB1_SCAN_1 : Byte;       // 1 (Cold restart scan 1 of OB 1), 3 (Scan 2-n of OB 1)
+    OB1_PRIORITY : Byte;     // Priority of OB Execution
+    OB1_OB_NUMBR : Byte;     // 1 (Organization block 1, OB1)
+    OB1_RESERVED_1 : Byte;   // Reserved for system
+    OB1_RESERVED_2 : Byte;   // Reserved for system
+    OB1_PREV_CYCLE : Int;    // Cycle time of previous OB1 scan (milliseconds)
+    OB1_MIN_CYCLE : Int;     // Minimum cycle time of OB1 (milliseconds)
+    OB1_MAX_CYCLE : Int;     // Maximum cycle time of OB1 (milliseconds)
+    OB1_DATE_TIME : Date_And_Time;  // Date and time OB1 started
+    TmRetVal : Int;
+    wabc : Int;
+    wmode : Int;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Always Low bit
+    A "AlwaysLow";
+    R "AlwaysLow";
+    R "AlarmMsgEvent";
+
+NETWORK
+TITLE = Always High bit
+    AN "AlwaysLow";
+    S "AlwaysHigh";
+
+NETWORK
+TITLE = Communication with SMS1
+//      CALL "fcGD_COMM";
+    NOP 0;
+
+NETWORK
+TITLE = Time Management
+    CALL "fcTimeManagement"
+    (   SET                         := "timeManagement" ,
+        NEW_DATE                    := "dbCONST".CHRONO.NEW_DATE ,
+        NEW_TIME                    := "dbCONST".CHRONO.NEW_TIME ,
+        Ret_Val                     := #TmRetVal ,
+        CPU_TIME                    := "dbCONST".CHRONO.CPU_TIME ,
+        CPU_DATE                    := "dbCONST".CHRONO.CPU_DATE ,
+        WEEKDAY                     := "dbCONST".CHRONO.WEEKDAY
+    );
+    NOP 0;
+
+NETWORK
+TITLE = load OB1 previous cycle time into DB memory
+    L #OB1_PREV_CYCLE;
+    T "dbCONST".CHRONO.OB1_prev_cycle;
+
+NETWORK
+TITLE = load OB1 maximum cycle time into DB memory
+    L #OB1_PREV_CYCLE;
+    L #OB1_MAX_CYCLE;
+    >I;
+    JCN notMaximum;
+    L #OB1_PREV_CYCLE;
+    T #OB1_MAX_CYCLE;
+    T "timeOBMax";
+notMaximum:      NOP 0;
+
+NETWORK
+TITLE = Calling all Control Modules (CM)
+    //------------------------------------------------------------------------//
+    // Call all user control module blocks to execute the user application.   //
+    // Each CM is a bespoke hand coded module with specific I/O and function: //
+    //------------------------------------------------------------------------//
+    CALL "fcCallCMs";
+    NOP 0;
+
+NETWORK
+TITLE = Calling all Interlocks
+    //------------------------------------------------------------------------//
+    // Call all user Interlock blocks to execute the user application.        //
+    // These are all instances of the various interlock logic templates:      //
+    //------------------------------------------------------------------------//
+    CALL "fcCallILs";
+    NOP 0;
+
+NETWORK
+TITLE = Calling all Equipment Modules (EM)
+    //------------------------------------------------------------------------//
+    // Call all user equipment module blocks to execute the user application. //
+    // These are all instances of the generic block logic:                    //
+    //------------------------------------------------------------------------//
+    CALL "fcCallEMs";
+    NOP 0;
+
+NETWORK
+TITLE = Calling all Units (UN)
+    //------------------------------------------------------------------------//
+    // Call all user Unit blocks to execute the user application.             //
+    // These are all instances of the generic block logic:                    //
+    //------------------------------------------------------------------------//
+    CALL "fcCallUNs";
+    NOP 0;
+
+NETWORK
+TITLE = Calling all Process Cells (PC)
+    //------------------------------------------------------------------------//
+    // Call all user Process Cell blocks to execute the user application.     //
+    // These are all instances of the generic block logic:                    //
+    //------------------------------------------------------------------------//
+    CALL "fcCallPCs";
+    NOP 0;
+
+NETWORK
+TITLE = Calling all HMI Messages
+    //------------------------------------------------------------------------//
+    // Call the message function to interface the PLC to the HMI. Messages    //
+    // have prompt and confirm handshake:                                     //
+    //------------------------------------------------------------------------//
+    CALL "fcHMIMessages";
+    NOP 0;
+
+NETWORK
+TITLE = Calling all HMI Alarms
+    //------------------------------------------------------------------------//
+    // Call the alarm function to interface the PLC to the HMI:               //
+    //------------------------------------------------------------------------//
+    CALL "fcHMIAlarms";
+    NOP 0;
+
+NETWORK
+TITLE = HMI Sequence animation and control
+    //------------------------------------------------------------------------//
+    // Call the sequence control function for the HMI sequence interface:     //
+    //------------------------------------------------------------------------//
+    CALL "fcHMISFCControl";
+    NOP 0;
+
+NETWORK
+TITLE = HMI DATA LOG FOR THE REPORT WITH ACK IN DB8
+      CALL "fcBatch_Report";
+      NOP 0;
+
+
+NETWORK
+TITLE = Get PLC CPU LED states
+    //------------------------------------------------------------------------//
+    // Get the PLC health information for the CPU:                            //
+    //------------------------------------------------------------------------//
+    CALL "fcLEDState";
+    NOP 0;
+
+NETWORK
+TITLE = Time Sync from Batch PC
+    //------------------------------------------------------------------------//
+    // Synchronise the PLC CPU time with the master time keeper from the PC:  //
+    //------------------------------------------------------------------------//
+    CALL "fbTimeSyncPLC";
+    NOP 0;
+
+NETWORK
+TITLE = Initialise All Modes
+    //------------------------------------------------------------------------//
+    // Very Important!!!!!!!!!!!!!!!!!!!!!                                    //
+    // This MUST be the last instruction of OB1:                              //
+    //------------------------------------------------------------------------//
+    A "FirstScanRestartflag";
+    R "FirstScanRestartflag";
+END_ORGANIZATION_BLOCK

@@ -1,0 +1,20 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Title:       udtBatchCycle                                                 //
+// Description: Batch number and CIPCIP cycle number structure.               //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      28-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    30-Sep-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+TYPE "udtBatchCycle"
+VERSION : 2.0
+   STRUCT
+      MainTextLib : Byte;    // Select Main Library
+      TextLib : Byte;        // Select Second Library
+      BatchID : Array[1..6] of Char;
+      CipSipNo : DWord;
+   END_STRUCT;
+END_TYPE

@@ -41,46 +41,50 @@
 FUNCTION_BLOCK "fbMOT1"
 TITLE = MOT1 : Vacuum Pump Control
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : fbMOT1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
-   VAR_INPUT
-      CMD : Int := 1;   // Command to OPEN/CLOSE (AUTO Mode)
-      TMR : Time := T#3S;   // Motor Start/Stop transition Time for checking status
-      CR_IL : Bool;
-      NCR_IL : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
-      MAN_OVERRIDE : Bool;
-      RUNNING_FB : Bool;
-      MOT_OL_TRIP : Bool;
-      IN_MAN : Bool;
-   END_VAR
+    VAR_INPUT
+        CMD : Int := 1;   // Command to OPEN/CLOSE (AUTO Mode)
+        TMR : Time := T#3S;   // Motor Start/Stop transition Time for checking status
+        CR_IL : Bool;
+        NCR_IL : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+        MAN_OVERRIDE : Bool;
+        RUNNING_FB : Bool;
+        MOT_OL_TRIP : Bool;
+        IN_MAN : Bool;
+    END_VAR
 
-   VAR_OUTPUT
-      DEV_STATE : Int;   // Device State
-      INTERLOCK : Bool;   // Temporary digital output signal
-      OUT_Q : Bool;   // Output to OPEN/CLOSE solenoid valve
-      FAULT_S : Bool;   // Fail to start
-      FAULT_O : Bool;   // Overload fault
-      MTR_NS : Bool;
-      MON_MISMATCH : Bool;
-   END_VAR
+    VAR_OUTPUT
+        STATE : Int;   // Device State
+        INTERLOCK : Bool;   // Temporary digital output signal
+        OUT_Q : Bool;   // Output to OPEN/CLOSE solenoid valve
+        FAULT_S : Bool;   // Fail to start
+        FAULT_O : Bool;   // Overload fault
+        MTR_NS : Bool;
+        MON_MISMATCH : Bool;
+    END_VAR
 
-   VAR_IN_OUT
-      MODE : Int := 2;   // Mode of control module (1=MANUAL; 2=AUTO; 3=OOS Out of Service)
-   END_VAR
+    VAR_IN_OUT
+        MODE : Int := 2;   // Mode of control module (1=MANUAL; 2=AUTO; 3=OOS Out of Service)
+        OWNER : Int;         // Value to be set or reset by Parent
+    END_VAR
 
-   VAR
-      StartTimer {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Motor Start/Stop Transition timer
-      StopTimer {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-      startEdge : Bool;
-   END_VAR
+    VAR
+        StartTimer {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Motor Start/Stop Transition timer
+        StopTimer {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+        startEdge : Bool;
+    END_VAR
 
    VAR_TEMP
       En_tmr_Start : Bool;
       En_tmr_Stop : Bool;
+      fault: Bool;
       BYPASS_IP : Bool;
-      OUTOFSERV : Bool;
+      modeAuto : Bool;
+      modeManual : Bool;
+      modeOOS : Bool;
    END_VAR
 
 
@@ -93,59 +97,51 @@ TITLE = Interlock
       A #MAN_OVERRIDE;
       = #INTERLOCK;
 NETWORK
-TITLE = Out of Service Mode=3
-//Out of service
+TITLE = Auto Mode
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
-      = #OUTOFSERV;
+      = #modeAuto;
+NETWORK
+TITLE = Manual Mode
+      L #MODE;
+      L "dbCONST".BLK.MODE.MANUAL;
+      ==I;
+      = #modeManual;
+NETWORK
+TITLE = Out of Service Mode
+      L #MODE;
+      L "dbCONST".BLK.MODE.OOS;
+      ==I;
+      = #modeOOS;
+
 NETWORK
 TITLE = Start command
       A(;
-      O(;
-      L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
-      ==I;
-      );
-      O(;
-      L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
-      ==I;
-      );
+      O #modeAuto;
+      O #modeManual;
       );
       A(;
       L #CMD;
-      L "dbCONST_VAL".CM.CMD.START;
+      L "dbCONST".BLK.MOT1.CMD.START;
       ==I;
       );
       FP #startEdge;
       S #OUT_Q;
 NETWORK
 TITLE = Input Bypass Mode In Manual
-      A(;
-      L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
-      ==I;
-      );
+      A #modeManual;
       A #IN_MAN;
       = #BYPASS_IP;
 NETWORK
 TITLE =
       A(;
-      O(;
-      L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
-      ==I;
-      );
-      O(;
-      L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
-      ==I;
-      );
+      O #modeAuto;
+      O #modeManual;
       );
       A(;
       L #CMD;
-      L "dbCONST_VAL".CM.CMD.STOP;
+      L "dbCONST".BLK.MOT1.CMD.STOP;
       ==I;
       );
       O #INTERLOCK;
@@ -154,21 +150,16 @@ TITLE =
 NETWORK
 TITLE = Start Timer to Monitor motor running/stopped feedback
       A #OUT_Q;
-      = %L1.0;
-      A %L1.0;
-      BLD 102;
       = #En_tmr_Start;
-      A %L1.0;
-      NOT;
+NETWORK
+TITLE = Stop Timer to Monitor motor running/stopped feedback
+      AN #OUT_Q;
       = #En_tmr_Stop;
 NETWORK
 TITLE = Start Transition Timer in the event of Start or Stop
-      A #En_tmr_Start;
-      = %L1.0;
-      BLD 103;
       CALL #StartTimer
       {time_type := 'Time'}
-      (  IN                          := %L1.0 ,
+      (  IN                          := #En_tmr_Start ,
          PT                          := #TMR ,
          Q                           := #StartTimer.Q ,
          ET                          := #StartTimer.ET
@@ -176,12 +167,9 @@ TITLE = Start Transition Timer in the event of Start or Stop
       NOP 0;
 NETWORK
 TITLE = Stop Transition Timer in the event of Start or Stop
-      A #En_tmr_Stop;
-      = %L1.0;
-      BLD 103;
       CALL #StopTimer
       {time_type := 'Time'}
-      (  IN                          := %L1.0 ,
+      (  IN                          := #En_tmr_Stop ,
          PT                          := #TMR ,
          Q                           := #StopTimer.Q ,
          ET                          := #StopTimer.ET
@@ -194,53 +182,50 @@ TITLE = Device state
 //4.Fail to run
 //3.Starting
       A #OUT_Q;
-      = %L1.0;
-      A %L1.0;
       A(;
       O #RUNNING_FB;
       O #BYPASS_IP;
       );
       JNB Label_0;
-      L "dbCONST_VAL".CM.MOT1_DEV_STATE.RUNNING;
-      T #DEV_STATE;
+      L "dbCONST".BLK.MOT1.STATE.RUNNING;
+      T #STATE;
 Label_0:      NOP 0;
-      A %L1.0;
-      NOT;
+      AN #OUT_Q;
       AN #StopTimer.Q;
       AN #BYPASS_IP;
       A #RUNNING_FB;
       JNB Label_1;
-      L "dbCONST_VAL".CM.MOT1_DEV_STATE.STARTING_STOPPING;
-      T #DEV_STATE;
+      L "dbCONST".BLK.MOT1.STATE.STARTING_STOPPING;
+      T #STATE;
 Label_1:      NOP 0;
-      A %L1.0;
+      A #OUT_Q;
       AN #StartTimer.Q;
       AN #RUNNING_FB;
       JNB Label_2;
-      L "dbCONST_VAL".CM.MOT1_DEV_STATE.STARTING_STOPPING;
-      T #DEV_STATE;
+      L "dbCONST".BLK.MOT1.STATE.STARTING_STOPPING;
+      T #STATE;
 Label_2:      NOP 0;
-      A %L1.0;
+      AN #OUT_Q;
       NOT;
       A #StopTimer.Q;
       AN #BYPASS_IP;
       A #RUNNING_FB;
       JNB Label_3;
-      L "dbCONST_VAL".CM.MOT1_DEV_STATE.FAULT;
-      T #DEV_STATE;
+      L "dbCONST".BLK.MOT1.STATE.FAULT;
+      T #STATE;
 Label_3:      NOP 0;
-      A %L1.0;
+      AN #OUT_Q;
       A #StartTimer.Q;
       AN #BYPASS_IP;
       AN #RUNNING_FB;
-      = %L1.1;
-      A %L1.1;
+      = #fault;
+      A #fault;
       JNB Label_4;
-      L "dbCONST_VAL".CM.MOT1_DEV_STATE.FAULT;
-      T #DEV_STATE;
+      L "dbCONST".BLK.MOT1.STATE.FAULT;
+      T #STATE;
 Label_4:      NOP 0;
-      A %L1.1;
-      AN #OUTOFSERV;
+      A #fault;
+      AN #modeOOS;
       S #FAULT_S;
 NETWORK
 TITLE = Device state
@@ -249,8 +234,6 @@ TITLE = Device state
 //4.Overload fault
 //
       AN #OUT_Q;
-      = %L1.0;
-      A %L1.0;
       A(;
       ON #RUNNING_FB;
       O #BYPASS_IP;
@@ -258,37 +241,36 @@ TITLE = Device state
       AN #FAULT_S;
       AN #FAULT_O;
       JNB Label_5;
-      L "dbCONST_VAL".CM.MOT1_DEV_STATE.STOPPED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.MOT1.STATE.STOPPED;
+      T #STATE;
 Label_5:      NOP 0;
-      A %L1.0;
+      AN #OUT_Q;
       A #MOT_OL_TRIP;
       JNB Label_6;
-      L "dbCONST_VAL".CM.MOT1_DEV_STATE.FAULT;
-      T #DEV_STATE;
+      L "dbCONST".BLK.MOT1.STATE.FAULT;
+      T #STATE;
 Label_6:      NOP 0;
-      A %L1.0;
-      BLD 102;
+      AN #OUT_Q;
       R #FAULT_S;
 NETWORK
 TITLE = Motor Over load
       A #MOT_OL_TRIP;
       AN #BYPASS_IP;
-      AN #OUTOFSERV;
+      AN #modeOOS;
       = #FAULT_O;
 NETWORK
 TITLE =
       A(;
       O(;
-      L #DEV_STATE;
-      L "dbCONST_VAL".CM.MOT1_DEV_STATE.FAULT;
+      L #STATE;
+      L "dbCONST".BLK.MOT1.STATE.FAULT;
       ==I;
       );
       O #INTERLOCK;
       );
       A(;
       L #CMD;
-      L "dbCONST_VAL".CM.CMD.START;
+      L "dbCONST".BLK.MOT1.CMD.START;
       ==I;
       );
       = #MON_MISMATCH;

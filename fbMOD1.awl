@@ -23,38 +23,38 @@
 FUNCTION_BLOCK "fbMOD1"
 TITLE = MOD1 : Modulating control valve
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : fbMOD1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
-   VAR_INPUT
-      CMND : Bool;   // Command to OPEN/CLOSE (AUTO Mode)
-      UPPER_RANGE : Real := 100.0;   // Upper Range Limit in engineering units
-      LOWER_RANGE : Real;   // Lower Range Limit in engineering units
-      POLARITY : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
-      CR_IL : Bool;
-      NCR_IL : Bool;
-      MAN_OVERRIDE : Bool;
-   END_VAR
+    VAR_INPUT
+        CMND : Bool;         // Command to OPEN/CLOSE (AUTO Mode)
+        UPPER_RANGE : Real := 100.0;   // Upper Range Limit in engineering units
+        LOWER_RANGE : Real;  // Lower Range Limit in engineering units
+        POLARITY : Bool;     // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+        CR_IL : Bool;
+        NCR_IL : Bool;
+        MAN_OVERRIDE : Bool;
+    END_VAR
 
-   VAR_OUTPUT
-      RAW_OUTPUT : Int;   // Raw output signal to Field (4mA = 0, 20mA = 27648)
-      DEV_STATE : Int;   // Device State
-      OUT_Q : Bool;   // Output to OPEN/CLOSE solenoid valve
-      INTERLOCK : Bool;
-      MON_MISMATCH : Bool;
-   END_VAR
+    VAR_OUTPUT
+        RAW_OUTPUT : Int;    // Raw output signal to Field (4mA = 0, 20mA = 27648)
+        STATE : Int;         // Device State
+        OUT_Q : Bool;        // Output to OPEN/CLOSE solenoid valve
+        INTERLOCK : Bool;
+        MON_MISMATCH : Bool;
+    END_VAR
 
    VAR_IN_OUT
-      MODE : Int := 2;   // Mode of control module (1=MANUAL; 2=AUTO; 3=OOS Out of Service)
-      POSN : Real;   // Valve position to set.
-   END_VAR
+        MODE : Int := 2;     // Mode of control module (1=MANUAL; 2=AUTO; 3=OOS Out of Service)
+        OWNER : Int;         // Value to be set or reset by Parent
+        POSN : Real;         // Valve position to set.
+    END_VAR
 
-   VAR_TEMP
-      RET_VAL1 : Word;   // Returns a value of W#16#0000 if the instruction executes without error.
-      OUT_Q_B_1 : Bool;   // Temporary digital output signal
-   END_VAR
-
+    VAR_TEMP
+        RET_VAL1 : Word;    // Returns a value of W#16#0000 if the instruction executes without error.
+        OUT_Q_B_1 : Bool;   // Temporary digital output signal
+    END_VAR
 
 BEGIN
 NETWORK
@@ -73,32 +73,28 @@ TITLE = ON/OFF valve
       = #OUT_Q;
 NETWORK
 TITLE = Unscaling Control Valve Position
-      A #POLARITY;
-      = %L3.0;
-      BLD 103;
       A #OUT_Q_B_1;
       JNB Label_0;
       CALL UNSCALE
       (  IN                          := #POSN ,
          HI_LIM                      := #UPPER_RANGE ,
          LO_LIM                      := #LOWER_RANGE ,
-         BIPOLAR                     := %L3.0 ,
+         BIPOLAR                     := #POLARITY ,
          RET_VAL                     := #RET_VAL1 ,
          OUT                         := #RAW_OUTPUT
       );
 Label_0:      NOP 0;
 NETWORK
-TITLE = Devicestate CLOSED
+TITLE = Devicestate DISABLED
 //Reset output setpoint to zero.
       ON #OUT_Q_B_1;
       O #INTERLOCK;
-      = %L3.0;
-      A %L3.0;
       JNB Label_1;
-      L "dbCONST_VAL".CM.MOD1_DEV_STATE.CLOSED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.MOD1.STATE.DISABLED;
+      T #STATE;
 Label_1:      NOP 0;
-      A %L3.0;
+      ON #OUT_Q_B_1;
+      O #INTERLOCK;
       JNB Label_2;
       L 0;
       T #RAW_OUTPUT;
@@ -107,8 +103,8 @@ NETWORK
 TITLE = Devicestate OPENED
       A #OUT_Q_B_1;
       JNB Label_3;
-      L "dbCONST_VAL".CM.MOD1_DEV_STATE.OPENED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.MOD1.STATE.ENABLED_REMOTE;
+      T #STATE;
 Label_3:      NOP 0;
 NETWORK
 TITLE = ON/OFF valve

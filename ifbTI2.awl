@@ -17,8 +17,8 @@
 FUNCTION_BLOCK "ifbTI2"
 TITLE = Instances of line mounted temperature indicator
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbTI2
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -26,10 +26,10 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@ : "fbTI2;   // @@DESCRIPTION@@
+      @@INSTANCE@@ : "fbTI2;   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@_MODE : Struct
+      @@INSTANCE@@_MODE : Struct
          PosEdge1 : Bool;
          PosEdge2 : Bool;
          REQ : Int;   // Request for Required Mode
@@ -43,44 +43,44 @@ VERSION : 2.0
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A "AlwaysHighBit";
       = %L0.0;
       BLD 103;
       CALL "ifcTI2"
       (  IN_REQ_MODE                 := %L0.0 ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
-         IO_MODE                     := "idbTI2".@@MODULE@@.MODE ,
-         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
+         IO_MODE                     := "idbTI2".@@INSTANCE@@.MODE ,
+         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
-      CALL #@@MODULE@@
-      (  MODE                        := #@@MODULE@@.MODE ,
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+      CALL #@@INSTANCE@@
+      (  MODE                        := #@@INSTANCE@@.MODE ,
          RAW_INPUT                   := "P_TI-@@NUMINSTANCE@@":P ,
-         USER_INPUT                  := #@@MODULE@@.USER_INPUT ,
-         UPPER_RANGE                 := #@@MODULE@@.UPPER_RANGE ,
-         LOWER_RANGE                 := #@@MODULE@@.LOWER_RANGE ,
-         POLARITY                    := #@@MODULE@@.POLARITY ,
-         LIMIT_HH                    := #@@MODULE@@.LIMIT_HH ,
-         LIMIT_H                     := #@@MODULE@@.LIMIT_H ,
-         LIMIT_L                     := #@@MODULE@@.LIMIT_L ,
-         LIMIT_LL                    := #@@MODULE@@.LIMIT_LL ,
-         ENABLE_HH                   := #@@MODULE@@.ENABLE_HH ,
-         ENABLE_H                    := #@@MODULE@@.ENABLE_H ,
-         ENABLE_L                    := #@@MODULE@@.ENABLE_L ,
-         ENABLE_LL                   := #@@MODULE@@.ENABLE_LL ,
-         MEASURE                     := #@@MODULE@@.MEASURE ,
-         DATA_QUALITY                := #@@MODULE@@.DATA_QUALITY ,
-         ALARM_HH                    := #@@MODULE@@.ALARM_HH ,
-         ALARM_H                     := #@@MODULE@@.ALARM_H ,
-         ALARM_L                     := #@@MODULE@@.ALARM_L ,
-         ALARM_LL                    := #@@MODULE@@.ALARM_LL ,
-         RANGE_ERROR                 := #@@MODULE@@.RANGE_ERROR ,
-         BROKEN_WIRE                 := #@@MODULE@@.BROKEN_WIRE
+         USER_INPUT                  := #@@INSTANCE@@.USER_INPUT ,
+         UPPER_RANGE                 := #@@INSTANCE@@.UPPER_RANGE ,
+         LOWER_RANGE                 := #@@INSTANCE@@.LOWER_RANGE ,
+         POLARITY                    := #@@INSTANCE@@.POLARITY ,
+         LIMIT_HH                    := #@@INSTANCE@@.LIMIT_HH ,
+         LIMIT_H                     := #@@INSTANCE@@.LIMIT_H ,
+         LIMIT_L                     := #@@INSTANCE@@.LIMIT_L ,
+         LIMIT_LL                    := #@@INSTANCE@@.LIMIT_LL ,
+         ENABLE_HH                   := #@@INSTANCE@@.ENABLE_HH ,
+         ENABLE_H                    := #@@INSTANCE@@.ENABLE_H ,
+         ENABLE_L                    := #@@INSTANCE@@.ENABLE_L ,
+         ENABLE_LL                   := #@@INSTANCE@@.ENABLE_LL ,
+         MEASURE                     := #@@INSTANCE@@.MEASURE ,
+         DATA_QUALITY                := #@@INSTANCE@@.DATA_QUALITY ,
+         ALARM_HH                    := #@@INSTANCE@@.ALARM_HH ,
+         ALARM_H                     := #@@INSTANCE@@.ALARM_H ,
+         ALARM_L                     := #@@INSTANCE@@.ALARM_L ,
+         ALARM_LL                    := #@@INSTANCE@@.ALARM_LL ,
+         RANGE_ERROR                 := #@@INSTANCE@@.RANGE_ERROR ,
+         BROKEN_WIRE                 := #@@INSTANCE@@.BROKEN_WIRE
       );
       NOP 0;
 @@TEMPLATE_END@@

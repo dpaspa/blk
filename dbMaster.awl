@@ -1,0 +1,30 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Title:       dbMaster                                                      //
+// Description: Master definition of data blocks.                             //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      20-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+DATA_BLOCK "dbLOG_VAL"
+DATA_BLOCK "dbLogValue"
+TITLE = DB interface for data logging
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : dbLogValue
+VERSION : 2.0
+
+STRUCT
+    RealLog : "udtLogValue";
+    Time_Index : Int;
+    Real_Index : Int;
+    Process_Time : Time;
+    Process_Value : Real;
+    EV_Trigger : Array[1..16] of Bool;
+END_STRUCT;
+
+BEGIN
+END_DATA_BLOCK

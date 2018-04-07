@@ -18,60 +18,64 @@
 FUNCTION_BLOCK "fbZSC1"
 TITLE = ZSC1 : Manway closed Indication and Alarm
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : fbZSC1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
-   VAR_INPUT
-      MODE : Int := 2;
-      DI_INPUT : Bool;   // Input signal from Field (0 = Alarm, 1 = OK)
-      DI_USER : Bool;
-      CUTOUT : Bool;   // Flag indicating if alarm is to be cutout (0= Alarm Enabled, 1= Alarm Disabled)
-   END_VAR
+    VAR_INPUT
+        CMD : Int := -1;     // Safe command
+        DI_INPUT : Bool;     // Input signal from Field (0 = Alarm, 1 = OK)
+        DI_USER : Bool;
+        CUTOUT : Bool;       // Flag indicating if alarm is to be cutout (0= Alarm Enabled, 1= Alarm Disabled)
+    END_VAR
 
-   VAR_OUTPUT
-      INTERLOCK : Bool;   // Interlock Flag (0 = Inactive, 1 = Active)
-      ZSCA : Bool;   // Alarm Flag (0 = OK Cover Closed, 1 = ALARM)
-      DI_PV : Bool;   // Processed DI
-      DEV_STATE : Int;   // Device State (1= CLOSED, 2= OPENED)
-   END_VAR
+    VAR_OUTPUT
+        STATE : Int;         // Device State (1= CLOSED, 2= OPENED)
+        INTERLOCK : Bool;    // Interlock Flag (0 = Inactive, 1 = Active)
+        ZSCA : Bool;         // Alarm Flag (0 = OK Cover Closed, 1 = ALARM)
+        DI_PV : Bool;        // Processed DI
+    END_VAR
 
-   VAR_TEMP
-      DI_ALM_B_1 : Bool;   // Temporary processed DI signal
-      mode_auto : Bool;
-      mode_man : Bool;
-      OUTOFSERV : Bool;
-   END_VAR
+    VAR_IN_OUT
+        MODE : Int := 1;     // Control Mode, Auto by default
+        OWNER : Int;         // Value to be set or reset by Parent
+    END_VAR
 
+    VAR_TEMP
+        DI_ALM_B_1 : Bool;   // Temporary processed DI signal
+        modeAuto : Bool;
+        modeManual : Bool;
+        modeOOS : Bool;
+    END_VAR
 
 BEGIN
 NETWORK
 TITLE = Mode auto
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
-      = #mode_auto;
+      = #modeAuto;
 NETWORK
 TITLE = Mode Manual
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
-      = #mode_man;
+      = #modeManual;
 NETWORK
 TITLE = Out of Service Mode=3
 //Out of service
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      L "dbCONST".BLK.MODE.OOS;
       ==I;
-      = #OUTOFSERV;
+      = #modeOOS;
 NETWORK
 TITLE = Process Digital Input Signal
       A(;
       A #DI_INPUT;
-      A #mode_auto;
+      A #modeAuto;
       O;
       A #DI_USER;
-      A #mode_man;
+      A #modeManual;
       );
       = #DI_ALM_B_1;
       A #DI_ALM_B_1;
@@ -82,7 +86,7 @@ TITLE = Setting ALARM Flag
 //
       AN #DI_ALM_B_1;
       AN #CUTOUT;
-      AN #OUTOFSERV;
+      AN #modeOOS;
       = #ZSCA;
 NETWORK
 TITLE = Setting INTERLOCK Flag
@@ -92,26 +96,26 @@ NETWORK
 TITLE = Setting Device State to CLOSED
       A(;
       A #DI_INPUT;
-      A #mode_auto;
+      A #modeAuto;
       O;
       A #DI_USER;
-      A #mode_man;
+      A #modeManual;
       );
       JNB Label_0;
-      L "dbCONST_VAL".CM.ZSC1_DEV_STATE.CLOSED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.ZSC1.STATE.CLOSED;
+      T #STATE;
 Label_0:      NOP 0;
 NETWORK
 TITLE = Setting Device State to OPENED
       A(;
       AN #DI_INPUT;
-      A #mode_auto;
+      A #modeAuto;
       O;
       AN #DI_USER;
-      A #mode_man;
+      A #modeManual;
       );
       JNB Label_1;
-      L "dbCONST_VAL".CM.ZSC1_DEV_STATE.OPENED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.ZSC1.STATE.OPENED;
+      T #STATE;
 Label_1:      NOP 0;
 END_FUNCTION_BLOCK

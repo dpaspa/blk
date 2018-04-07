@@ -4,16 +4,16 @@ TITLE = Run Rimer
 VERSION : 0.1
 //<V0.2 Khairul 20/07/09>
 //
-//This function can be used to run Non-retentive as well as retentive On delay 
-//timer.User Can select any of these timer. For retentive timer reset must be 
-//done 
-//to restart the timer next time.For non rtentive timer automatically will be 
+//This function can be used to run Non-retentive as well as retentive On delay
+//timer.User Can select any of these timer. For retentive timer reset must be
+//done
+//to restart the timer next time.For non rtentive timer automatically will be
 //reset in every positive edge of EABLE signal.
 //
-//User can give set point in Hour, min, & Sec also be able to read out the 
+//User can give set point in Hour, min, & Sec also be able to read out the
 //remaining time as integer variable.
 //
-   VAR_INPUT 
+   VAR_INPUT
       TIME_H : Int;
       TIME_M : Int;
       TIME_S : Int;
@@ -23,7 +23,7 @@ VERSION : 0.1
       NON_RET : Bool;
    END_VAR
 
-   VAR_OUTPUT 
+   VAR_OUTPUT
       RMNG_H : Int;
       RMNG_M : Int;
       RMNG_S : Int;
@@ -31,7 +31,7 @@ VERSION : 0.1
       TMR_RUNNG : Bool;
    END_VAR
 
-   VAR 
+   VAR
       RUNTMRNonRet {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
       RetElapsedTime : DInt;
       NonRetElapsedTime : Time;
@@ -41,7 +41,7 @@ VERSION : 0.1
       Time_Remain : DInt;
    END_VAR
 
-   VAR_TEMP 
+   VAR_TEMP
       h_1 : DInt;
       m_1 : DInt;
       s_1 : DInt;
@@ -158,7 +158,7 @@ TITLE = h_ms+ m_ms+ s_ms= total mili seconds
       T #tot_ms;
 Label_5:      NOP 0;
 NETWORK
-TITLE = Output Time variable 
+TITLE = Output Time variable
       A(;
       L #tot_ms;
       T #TimeValue;
@@ -173,36 +173,27 @@ TITLE = Output Time variable
 Label_6:      NOP 0;
 NETWORK
 TITLE = Non-Retentive
-      A #ENABLE;
-      = %L46.0;
-      BLD 103;
       A #NON_RET;
       JNB Label_7;
       CALL #RUNTMRNonRet
       {time_type := 'Time'}
-      (  IN                          := %L46.0 , 
-         PT                          := #TimeValue , 
-         Q                           := #ExpiredNonRetTmr , 
+      (  IN                          := #ENABLE ,
+         PT                          := #TimeValue ,
+         Q                           := #ExpiredNonRetTmr ,
          ET                          := #NonRetElapsedTime
       );
 Label_7:      NOP 0;
 NETWORK
 TITLE = Retentive timer
-      A #ENABLE;
-      = %L46.0;
-      BLD 103;
-      A #RESET;
-      = %L46.1;
-      BLD 103;
       AN #NON_RET;
       AN #PAUSE;
       JNB Label_8;
       CALL TONR_X
-      (  TMR_EN                      := %L46.0 , 
-         RESET                       := %L46.1 , 
-         PV                          := #dTimeValue , 
+      (  TMR_EN                      := #ENABLE ,
+         RESET                       := #RESET ,
+         PV                          := #dTimeValue ,
          DELTA_T                     := %DB1.DBW36 , 
-         Q                           := #ExpiredRetTmr , 
+         Q                           := #ExpiredRetTmr ,
          ET                          := #RetElapsedTime
       );
 Label_8:      NOP 0;
@@ -242,7 +233,7 @@ TITLE = remaining time calc & running feedback
       AN #RunTmrQbit;
       A #Tmr_Running;
       = #Tmr_Running;
-// load time into data block for history 
+// load time into data block for history
       L #Time_Remain;
       T #Time_hist;
 
@@ -326,4 +317,3 @@ TITLE = Conv Hour: Dint to Int
       T #RMNG_H;
       NOP 0;
 END_FUNCTION_BLOCK
-

@@ -1,192 +1,44 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable program constants and structures.  //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      20-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
 DATA_BLOCK "dbCONST"
-TITLE =
-{ S7_language := '7(1) German (Germany)  27.02.2018  09:00:05' }
-NAME : CONST
-VERSION : 0.1
+TITLE = Global program constants
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : dbCONST
+VERSION : 2.0
 
 STRUCT
-    s5T_BAS0_01S : WORD ;              //S5 timer Base 0.01 sec= 2#0000 0000 0000 0000
-    s5T_BAS0_10s : WORD  := W#16#1000; //S5 timer Base 0.10 sec= 2#0001 0000 0000 0000
-    s5T_BAS1_00s : WORD  := W#16#2000; //S5 timer Base 1.00 sec= 2#0010 0000 0000 0000
-    s5T_BAS10_s : WORD  := W#16#3000;  //S5 timer Base 10.0 sec= 2#0011 0000 0000 0000
-    CPU_TIME : TIME_OF_DAY ;
-    CPU_DATE : DATE ;
-    NEW_TIME : TIME_OF_DAY  := TOD#17:55:0.000;
-    NEW_DATE : DATE  := D#2009-10-15;
-    DATE_TIME_SYNCH : STRUCT
+    CHRONO : STRUCT                    // Chronological functions
+        OB1_prev_cycle : INT ;
+        s5T_BAS0_01S : WORD ;              //S5 timer Base 0.01 sec= 2#0000 0000 0000 0000
+        s5T_BAS0_10s : WORD  := W#16#1000; //S5 timer Base 0.10 sec= 2#0001 0000 0000 0000
+        s5T_BAS1_00s : WORD  := W#16#2000; //S5 timer Base 1.00 sec= 2#0010 0000 0000 0000
+        s5T_BAS10_s : WORD  := W#16#3000;  //S5 timer Base 10.0 sec= 2#0011 0000 0000 0000
+        CPU_TIME : TIME_OF_DAY ;
+        CPU_DATE : DATE ;
+        NEW_TIME : TIME_OF_DAY  := TOD#17:55:0.000;
+        NEW_DATE : DATE  := D#2009-10-15;
+        DATE_TIME_SYNCH : STRUCT
+            DATE_TIME : DATE_AND_TIME ;
+            RESERVE : ARRAY  [0 .. 3 ] OF BYTE ;
+        END_STRUCT ;
         DATE_TIME : DATE_AND_TIME ;
-        RESERVE : ARRAY  [0 .. 3 ] OF BYTE ;
-    END_STRUCT ;
-    DATE_TIME : DATE_AND_TIME ;
-    WEEKDAY : INT ;                    // 1=SUNDAY, 7=SATURDAY
-    OB1_prev_cycle : INT ;
-    FREE : ARRAY  [1 .. 8 ] OF BYTE ;
-    RESERVE : ARRAY  [1 .. 4 ] OF BYTE ;
-    BLK : STRUCT                       // Generic block structure
-        MODE : STRUCT
-            MANUAL : INT  := 1;
-            AUTO : INT  := 2;
-            OUT_OF_SERVICE : INT  := 3;
-        END_STRUCT ;
-        CMD : STRUCT
-            STOP : INT  := 1;
-            START : INT  := 2;
-        END_STRUCT ;
-        DEV_STATE : STRUCT
-            STOPPED : INT  := 0;       //Block stopped. Running substates below
-            INTERLOCKED : INT  := 50;  //Block interlocked
-            COMPLETED : INT  := 99;    //Block substate finished, Finished after SFC (if any) is complete.
-        END_STRUCT ;
-        EN_DISABLE : STRUCT
-            DISABLE : INT  := 1;
-            ENABLE : INT  := 2;
-        END_STRUCT ;
-        SUBS : STRUCT
-            SAFE : INT  := 0;          // Substate for safe state
-        END_STRUCT ;
-        HYGIENE_STATE : STRUCT         // Hygiene Status
-            USED : INT  := 1;
-            CIP : INT  := 2;
-            CLEAN : INT  := 3;
-            CLEAN_TIMEOUT : INT  := 4;
-            SIP : INT  := 5;
-            STERILE : INT  := 6;
-            STERILE_TIMEOUT : INT  := 7;
-            BATCH : INT  := 8;
-        END_STRUCT ;
-@@TEMPLATE_BEGIN@@
-@@ATTR_BEGIN|PARENT@@
-        @@CLASS@@ : STRUCT             // @@DESCRIPTION@@
-            SUBS : STRUCT
-@@ATTR_BEGIN|STATE@@
-                @@STATE@@ : INT  := @@COUNTER|1@@;
-@@ATTR_END|STATE@@
-            END_STRUCT ;
-        END_STRUCT ;
-@@ATTR_END|PARENT@@
-@@TEMPLATE_END@@
-    END_STRUCT ;
-    BlockMsg : STRUCT
-        MainLib : BYTE ;
-        TextLib : BYTE  := B#16#1;
-        BatchID : "udtID";
-        CipSipNo : DINT ;
-        SD : "udtALARM_MSG";
-        BATCH_ID_TEMP : STRING  [6 ];
-    END_STRUCT ;
-    BLKSFC : STRUCT                       // Generic SFC structure
-        CMD : STRUCT                   // Sequencer command common to all
-            STOP : INT  := 0;
-            START : INT  := 1;
-            PAUSE : INT  := 2;
-            RESUME : INT  := 3;
-            RESERVE1 : INT  := 4;
-            RESERVE2 : INT  := 5;
-            ABORT : INT  := 6;         // Or Go to Last Step
-            ACKNOWLEDGE_ERR : INT  := 7;
-        END_STRUCT ;
-        MODE : STRUCT
-            MANUAL : INT  := 1;
-            AUTO : INT  := 2;
-            OUT_OF_SERVICE : INT  := 3;
-        END_STRUCT ;
-        STATE : STRUCT                 // Sequencer command common to all
-            OFF_IDLE : INT ;
-            STARTED : INT  := 1;
-            PAUSED : INT  := 2;
-            RESUMED : INT  := 3;
-            WRMODE : INT  := 4;        // Wrong Mode selected
-            WRCMD : INT  := 5;         // Wrong Command selected
-            ABORTED : INT  := 6;       // Or Go to Last Step
-            ACKNOWLEDGED : INT  := 7;
-            COMPLETE : INT  := 8;
-        END_STRUCT ;
-        STEP_TIME : TIME  := T#1M;     // Step finishing time delay
-    END_STRUCT ;
-    CM : STRUCT
-        CMD : STRUCT
-            STOP : INT  := 1;
-            START : INT  := 2;
-        END_STRUCT ;
-        CMD_VALVE : STRUCT
-            CLOSE : INT  := 1;
-            OPEN : INT  := 2;
-        END_STRUCT ;
-        EN_DISABLE : STRUCT
-            DISABLE : INT  := 1;
-            ENABLE : INT  := 2;
-        END_STRUCT ;
-        DI1_DEV_STATE : STRUCT         // General Alarm Signal digital input
-            OK : INT  := 1;
-            ALARM : INT  := 2;
-        END_STRUCT ;
-        HE1_DEV_STATE : STRUCT         // Electric heating element
-            OFF : INT  := 1;
-            ON : INT  := 2;
-            INTERLOCKED : INT  := 3;
-            FAILED : INT  := 4;
-        END_STRUCT ;
-        MI1_DEV_STATE : STRUCT         // Load Cell Mass Indicator
-            ENABLED : INT  := 1;       // Always Enabled
-        END_STRUCT ;
-        MOD1_DEV_STATE : STRUCT        // Load Cell Mass Indicator
-            CLOSED : INT  := 1;
-            OPENED : INT  := 2;
-        END_STRUCT ;
-        PC1_DEV_STATE : STRUCT         // Vessel ON/OFF Pressure control loop wth output valve selection
-            CLOSE : INT  := 1;         // Close all the valves
-            CONTROL : INT  := 2;       // Pressure control, open/close selected valve
-            OPEN : INT  := 3;          // Open selected valve
-        END_STRUCT ;
-        PI1_DEV_STATE : STRUCT         // Vessel pressure Indicator with alarms and Interlocks
-            ENABLED : INT  := 1;       // Always Enabled
-        END_STRUCT ;
-        PI2_DEV_STATE : STRUCT         // Line mounted pressure Indicator
-            ENABLED : INT  := 1;       // Always Enabled
-        END_STRUCT ;
-        POS_DEV_STATE : STRUCT         // On/Off Valve with single output with/without feedback
-            CLOSED : INT  := 1;
-            OPENED : INT  := 2;
-            TRAVELLING : INT  := 3;    // Openning or Closing
-            FAULT : INT  := 4;         // Fail to open or Fail to close
-        END_STRUCT ;
-        SIC1_DEV_STATE : STRUCT        // Agitator speed control
-            DISABLED : INT  := 1;
-            ENABLED : INT  := 2;
-            STOPPED : INT  := 3;
-            RUNNING : INT  := 4;
-            FAULT : INT  := 5;         // Fault state-TAH,FLT or THR
-        END_STRUCT ;
-        TC1_DEV_STATE : STRUCT         // Cooling only temperature control
-            DISABLED : INT  := 1;
-            ENABLED : INT  := 2;
-        END_STRUCT ;
-        TI1_DEV_STATE : STRUCT         // Vessel temperature Indicator with alarms & Interlocks
-            ENABLED : INT  := 1;       // Always Enabled
-        END_STRUCT ;
-        TI2_DEV_STATE : STRUCT         // Temperature Indicator
-            ENABLED : INT  := 1;       // Always Enabled
-        END_STRUCT ;
-        ZSC1_DEV_STATE : STRUCT        // Manway closed indication and alarm
-            CLOSED : INT  := 1;
-            OPENED : INT  := 2;
-        END_STRUCT ;
-        ZSC2_DEV_STATE : STRUCT        // Flow path connection indication
-            IN : INT  := 1;
-            OUT : INT  := 2;
-            MISMATCH : INT  := 3;
-        END_STRUCT ;
-        MOT1_DEV_STATE : STRUCT        // Vacuum pump control
-            STOPPED : INT  := 1;
-            RUNNING : INT  := 2;
-            STARTING_STOPPING : INT  := 3;
-            FAULT : INT  := 4;
-        END_STRUCT ;
+        WEEKDAY : INT ;                // 1=SUNDAY, 7=SATURDAY
     END_STRUCT ;
     SEL : STRUCT                       // Selection structures
-        FILLZ : STRUCT
-            FILL1 : INT  := 1;
-            FILL2 : INT  := 2;
+        FLZ : STRUCT
+            FL1 : INT  := 1;
+            FL2 : INT  := 2;
         END_STRUCT ;
         GAS : STRUCT
             HPCA : INT  := 1;
@@ -210,13 +62,380 @@ STRUCT
             S2 : INT  := 2;
         END_STRUCT ;
     END_STRUCT ;
-    OWNER : STRUCT                     // Resource arbitration
-        NONE : INT := 0;               // Available
+    SEQ : STRUCT                       // Generic SFC structure
+        CMD : STRUCT                   // Sequencer command common to all
+            STOP : INT  := 0;
+            START : INT  := 1;
+            PAUSE : INT  := 2;
+            RESUME : INT  := 3;
+            ABORT : INT  := 6;         // Or Go to Last Step
+            ACKNOWLEDGE_ERR : INT  := 7;
+        END_STRUCT ;
+        MODE : STRUCT
+            AUTO : INT  := 1;
+            MANUAL : INT  := 2;
+            OOS : INT  := 3;
+        END_STRUCT ;
+        SAFE : STRUCT
+            CMD : INT  := 0;           // Substate for safe state
+        END_STRUCT ;
+        STATE : STRUCT                 // Sequencer command common to all
+            OFF_IDLE : INT ;
+            STARTED : INT  := 1;
+            PAUSED : INT  := 2;
+            RESUMED : INT  := 3;
+            WRMODE : INT  := 4;        // Wrong Mode selected
+            WRCMD : INT  := 5;         // Wrong Command selected
+            ABORTED : INT  := 6;       // Or Go to Last Step
+            ACKNOWLEDGED : INT  := 7;
+            COMPLETED : INT  := 8;
+        END_STRUCT ;
+        STEP_TIME : TIME  := T#1M;     // Step finishing time delay
+    END_STRUCT ;
+    BLK : STRUCT                       // Generic block structure
+        CMD : STRUCT
+            STOP : INT  := 1;
+            START : INT  := 2;
+        END_STRUCT ;
+        MODE : STRUCT
+            AUTO : INT  := 1;
+            MANUAL : INT  := 2;
+            OOS : INT  := 3;
+        END_STRUCT ;
+        MSG : STRUCT
+            MainLib : BYTE ;
+            TextLib : BYTE  := B#16#1;
+            BatchID : "udtID";
+            CipSipNo : DINT ;
+            SD : "udtAlarmMessage";
+            BATCH_ID_TEMP : STRING  [6 ];
+        END_STRUCT ;
+        SAFE : STRUCT
+            CMD : INT  := 0;           // Substate for safe state
+        END_STRUCT ;
+        STATE : STRUCT
+            STOPPED : INT  := 0;       // Block stopped
+            PAUSED : INT  := 50;       // Block paused
+            INTERLOCKED : INT  := 51;  // Block interlocked
+            COMPLETED : INT  := 99;    // Block substate finished, Finished after SFC (if any) is complete.
+        END_STRUCT ;
+        HYGIENE : STRUCT               // Hygiene Status
+            USED : INT  := 1;
+            CIP : INT  := 2;
+            CLEAN : INT  := 3;
+            CLEAN_TIMEOUT : INT  := 4;
+            SIP : INT  := 5;
+            STERILE : INT  := 6;
+            STERILE_TIMEOUT : INT  := 7;
+            BATCH : INT  := 8;
+        END_STRUCT ;
+        DI1 : STRUCT                   // General Alarm Signal digital input
+            CMD : STRUCT
+                ENABLE : INT  := 1;    // Always Enabled
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                ENABLED : INT  := 1;
+                ALARM : INT  := 2;
+            END_STRUCT ;
+        END_STRUCT ;
+        DI2 : STRUCT                   // General Alarm Signal software input
+            CMD : STRUCT
+                ENABLE : INT  := 1;    // Always Enabled
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                ENABLED : INT  := 1;
+                ALARM : INT  := 2;
+            END_STRUCT ;
+        END_STRUCT ;
+        HE1 : STRUCT                   // Electric heating element
+            CMD : STRUCT
+                DISABLE : INT  := 1;
+                ENABLE : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                DISABLED : INT  := 1;
+                ENABLED : INT  := 2;
+                FAULT : INT  := 3;
+            END_STRUCT ;
+        END_STRUCT ;
+        MI1 : STRUCT                   // Load Cell Mass Indicator
+            CMD : STRUCT
+                ENABLE : INT  := 1;    // Always Enabled
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                ENABLED : INT  := 1;   // Always Enabled
+                FAULT : INT  := 2;
+            END_STRUCT ;
+        END_STRUCT ;
+        MOD1 : STRUCT                  // Modulating control valve
+            CMD : STRUCT
+                DISABLE : INT  := 1;
+                LOCAL : INT  := 2;     // Enable in local setpoint mode
+                REMOTE : INT  := 3;    // Enable in remote setpoint mode
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                DISABLED : INT  := 1;
+                LOCAL : INT  := 2;     // Enabled in local setpoint mode
+                REMOTE : INT  := 3;    // Enabled in remote setpoint mode
+            END_STRUCT ;
+        END_STRUCT ;
+        MOT1 : STRUCT                  // Vacuum pump control
+            CMD : STRUCT
+                STOP : INT  := 1;
+                START : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                STOPPED : INT  := 1;
+                RUNNING : INT  := 2;
+                STARTING_STOPPING : INT  := 3;
+                FAULT : INT  := 4;
+            END_STRUCT ;
+        END_STRUCT ;
+        PC1 : STRUCT                   // Vessel ON-OFF Pressure control loop wth output valve selection
+            CMD : STRUCT
+                DISABLE : INT  := 1;
+                PRESSURE : INT  := 2;  // Enable in pressure control mode
+                VALVE : INT  := 3;     // Enable in valve opened mode
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                DISABLED : INT  := 1;
+                PRESSURE : INT  := 2;  // Enabled in pressure control mode
+                VALVE : INT  := 3;     // Enabled in valve opened mode
+            END_STRUCT ;
+        END_STRUCT ;
+        PI1 : STRUCT                   // Vessel pressure Indicator with alarms and Interlocks
+            CMD : STRUCT
+                ENABLE : INT  := 1;    // Always Enabled
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                ENABLED : INT  := 1;   // Always Enabled
+                FAULT : INT  := 2;
+            END_STRUCT ;
+        END_STRUCT ;
+        PI2 : STRUCT                   // Line mounted pressure Indicator
+            CMD : STRUCT
+                ENABLE : INT  := 1;    // Always Enabled
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                ENABLED : INT  := 1;   // Always Enabled
+                FAULT : INT  := 2;
+            END_STRUCT ;
+        END_STRUCT ;
+        POSx : STRUCT                  // Generic On-Off Valve
+            CMD : STRUCT
+                CLOSE : INT  := 1;
+                OPEN : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                CLOSED : INT  := 1;
+                OPENED : INT  := 2;
+                TRAVEL : INT  := 3;    // Opening or Closing
+                FAULT : INT  := 4;     // Failed to Open or Failed to Close
+            END_STRUCT ;
+        END_STRUCT ;
+        POS1 : STRUCT                  // On-Off Valve with single output without feedback
+            CMD : STRUCT
+                CLOSE : INT  := 1;
+                OPEN : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                CLOSED : INT  := 1;
+                OPENED : INT  := 2;
+                TRAVEL : INT  := 3;    // Opening or Closing
+                FAULT : INT  := 4;     // Failed to Open or Failed to Close
+            END_STRUCT ;
+        END_STRUCT ;
+        POS2 : STRUCT                  // On-Off Valve with single output with Closed feedback
+            CMD : STRUCT
+                CLOSE : INT  := 1;
+                OPEN : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                CLOSED : INT  := 1;
+                OPENED : INT  := 2;
+                TRAVEL : INT  := 3;    // Opening or Closing
+                FAULT : INT  := 4;     // Failed to Open or Failed to Close
+            END_STRUCT ;
+        END_STRUCT ;
+        POS3 : STRUCT                  // On-Off Valve with single output with Opened feedback
+            CMD : STRUCT
+                CLOSE : INT  := 1;
+                OPEN : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                CLOSED : INT  := 1;
+                OPENED : INT  := 2;
+                TRAVEL : INT  := 3;    // Opening or Closing
+                FAULT : INT  := 4;     // Failed to Open or Failed to Close
+            END_STRUCT ;
+        END_STRUCT ;
+        POS4 : STRUCT                  // On-Off Valve with single output with both Closed and Opened feedback
+            CMD : STRUCT
+                CLOSE : INT  := 1;
+                OPEN : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                CLOSED : INT  := 1;
+                OPENED : INT  := 2;
+                TRAVEL : INT  := 3;    // Opening or Closing
+                FAULT : INT  := 4;     // Failed to Open or Failed to Close
+            END_STRUCT ;
+        END_STRUCT ;
+        SIC1 : STRUCT                  // Agitator speed control
+            CMD : STRUCT
+                DISABLE : INT  := 1;
+                ENABLE : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                DISABLED : INT  := 1;
+                ENABLED : INT  := 2;
+                STOPPED : INT  := 3;
+                RUNNING : INT  := 4;
+                FAULT : INT  := 5;     // Fault state
+            END_STRUCT ;
+        END_STRUCT ;
+        TC1 : STRUCT                   // Cooling only temperature control
+            CMD : STRUCT
+                DISABLE : INT  := 1;
+                ENABLE : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                DISABLED : INT  := 1;
+                ENABLED : INT  := 2;
+            END_STRUCT ;
+        END_STRUCT ;
+        TI1 : STRUCT                   // Vessel temperature Indicator with alarms & Interlocks
+            CMD : STRUCT
+                ENABLE : INT  := 1;    // Always Enabled
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                ENABLED : INT  := 1;   // Always Enabled
+                FAULT : INT  := 2;     // Fault state
+            END_STRUCT ;
+        END_STRUCT ;
+        TI2 : STRUCT                   // Line temperature Indicator
+            CMD : STRUCT
+                ENABLE : INT  := 1;    // Always Enabled
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                ENABLED : INT  := 1;   // Always Enabled
+                FAULT : INT  := 2;     // Fault state
+            END_STRUCT ;
+        END_STRUCT ;
+        ZSC1 : STRUCT                  // Manway closed indication and alarm
+            CMD : STRUCT
+                CLOSE : INT  := 1;
+                OPEN : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := -1;      // Class safe command is no change
+            END_STRUCT ;
+            STATE : STRUCT
+                CLOSED : INT  := 1;
+                OPENED : INT  := 2;
+                MISMATCH : INT  := 3;
+            END_STRUCT ;
+        END_STRUCT ;
+        ZSC2 : STRUCT                  // Flow path connection indication
+            CMD : STRUCT
+                IN : INT  := 1;
+                OUT : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := -1;      // Class safe command is no change
+            END_STRUCT ;
+            STATE : STRUCT
+                IN : INT  := 1;
+                OUT : INT  := 2;
+                MISMATCH : INT  := 3;
+            END_STRUCT ;
+        END_STRUCT ;
+@@TEMPLATE_BEGIN@@
+@@ATTR_BEGIN|PARENT@@
+        @@CLASS@@ : STRUCT             // @@DESCRIPTION@@
+            CMD : STRUCT
+                STOP : INT  := 1;
+                START : INT  := 2;
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 0;       // Substate for safe state
+            END_STRUCT ;
+            STATE : STRUCT
+                STOPPED : INT  := 0;      //Block stopped. Running substates below
+                INTERLOCKED : INT  := 51; //Block Interlocked
+                PAUSED : INT  := 52;      //Block Paused
+                COMPLETED : INT  := 99;   //Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT ;
+            SUBS : STRUCT
+@@ATTR_BEGIN|STATE@@
+                @@STATE@@ : INT  := @@COUNTER|1@@;
+@@ATTR_END|STATE@@
+            END_STRUCT ;
+        END_STRUCT ;
+@@ATTR_END|PARENT@@
+@@TEMPLATE_END@@
+        OWNER : STRUCT                 // Resource arbitration
+            AVAILABLE : INT := 0;      // Block is available for parent acquisition
 @@TEMPLATE_BEGIN@@
 @@ATTR_BEGIN|OWNER@@
-        @@INSTANCE@@ : INT  := @@PARENTID@@;
+            @@INSTANCE@@ : INT  := @@ID@@;
 @@ATTR_END|OWNER@@
 @@TEMPLATE_END@@
+        END_STRUCT ;
     END_STRUCT ;
 END_STRUCT ;
 BEGIN

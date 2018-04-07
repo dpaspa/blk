@@ -1,0 +1,28 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description: HMI Alarm bits.                                               //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      29-Mar-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
+//----------------------------------------------------------------------------//
+﻿FUNCTION "fcHMIAlarms" : Void
+TITLE = HMI bit Messaging type Alarms
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcHMIAlarms
+VERSION : 2.0
+
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@INSTANCE@@ : @@ALARMDESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Set the HMI interface alarm bit if the alarm is active:                //
+    //------------------------------------------------------------------------//
+    A "idb@@CLASS@@".@@INSTANCE@@.@@ALARM@@;
+    = %@@ALARMDB@@.@@ALARMDBX@@.@@ALARMNO@@;
+@@TEMPLATE_END@@
+END_FUNCTION

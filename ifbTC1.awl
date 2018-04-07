@@ -33,8 +33,8 @@
 FUNCTION_BLOCK "ifbTC1"
 TITLE = TC1 : Manufacturing Transfer Line cooling only temperature controller
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbTC1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -42,10 +42,10 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@ : "fbTC1";   // @@DESCRIPTION@@
+      @@INSTANCE@@ : "fbTC1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN@@
-      @@MODULE@@_MODE : Struct
+      @@INSTANCE@@_MODE : Struct
          PosEdge1 : Bool;
          PosEdge2 : Bool;
          REQ : Int;   // Request for Required Mode
@@ -59,7 +59,7 @@ VERSION : 2.0
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcTC1"
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
@@ -68,19 +68,19 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
          IN_GAIN                     := "idb@@PARENTCLASS@@".@@PARENT@@.GAIN ,
          IN_TI                       := "idb@@PARENTCLASS@@".@@PARENT@@.TI ,
          IN_TD                       := "idb@@PARENTCLASS@@".@@PARENT@@.TD ,
-         OUT_MODE                    := #@@MODULE@@_MODE.REQ ,
-         IO_MODE                     := "idbTC1".@@MODULE@@.MODE ,
-         IO_T_CTRL                   := "idbTC1".@@MODULE@@.T_CTRL ,
-         IO_SETPOINT                 := "idbTC1".@@MODULE@@.SETPOINT ,
-         IO_GAIN                     := "idbTC1".@@MODULE@@.GAIN ,
-         IO_TI                       := "idbTC1".@@MODULE@@.TI ,
-         IO_TD                       := "idbTC1".@@MODULE@@.TD ,
-         POS_EDGE1                   := #@@MODULE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@MODULE@@_MODE.PosEdge2
+         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
+         IO_MODE                     := "idbTC1".@@INSTANCE@@.MODE ,
+         IO_T_CTRL                   := "idbTC1".@@INSTANCE@@.T_CTRL ,
+         IO_SETPOINT                 := "idbTC1".@@INSTANCE@@.SETPOINT ,
+         IO_GAIN                     := "idbTC1".@@INSTANCE@@.GAIN ,
+         IO_TI                       := "idbTC1".@@INSTANCE@@.TI ,
+         IO_TD                       := "idbTC1".@@INSTANCE@@.TD ,
+         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
@@ -102,30 +102,30 @@ TITLE = @@MODULE@@ : @@DESCRIPTION@@
       );
       = %L0.1;
       BLD 103;
-      CALL #@@MODULE@@
-      (  T_CTRL                      := "idbTC1".@@MODULE@@.T_CTRL ,
+      CALL #@@INSTANCE@@
+      (  T_CTRL                      := "idbTC1".@@INSTANCE@@.T_CTRL ,
          MEASURE                     := "idbTI1".TI_@@NUMINSTANCE@@.MEASURE ,
-         SETPOINT                    := "idbTC1".@@MODULE@@.SETPOINT ,
-         GAIN                        := "idbTC1".@@MODULE@@.GAIN ,
-         TI                          := "idbTC1".@@MODULE@@.TI ,
-         TD                          := "idbTC1".@@MODULE@@.TD ,
-         MAN                         := #@@MODULE@@.MAN ,
+         SETPOINT                    := "idbTC1".@@INSTANCE@@.SETPOINT ,
+         GAIN                        := "idbTC1".@@INSTANCE@@.GAIN ,
+         TI                          := "idbTC1".@@INSTANCE@@.TI ,
+         TD                          := "idbTC1".@@INSTANCE@@.TD ,
+         MAN                         := #@@INSTANCE@@.MAN ,
          CR_IL                       := %L0.0 ,
          NCR_IL                      := %L0.1 ,
-         MAN_OVERRIDE                := #@@MODULE@@.MAN_OVERRIDE ,
-         NON_PID                     := #@@MODULE@@.NON_PID ,
-         CYCLE                       := #@@MODULE@@.CYCLE ,
-         P_SEL                       := #@@MODULE@@.P_SEL ,
-         I_SEL                       := #@@MODULE@@.I_SEL ,
-         D_SEL                       := #@@MODULE@@.D_SEL ,
-         LMN_HLM                     := #@@MODULE@@.LMN_HLM ,
-         LMN_LLM                     := #@@MODULE@@.LMN_LLM ,
-         DEV_STATE                   := #@@MODULE@@.DEV_STATE ,
-         LMN                         := #@@MODULE@@.LMN ,
-         OUT_CMD                     := #@@MODULE@@.OUT_CMD ,
-         INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
-         MAN_NON_PID                 := #@@MODULE@@.MAN_NON_PID ,
-         MODE                        := #@@MODULE@@.MODE
+         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
+         NON_PID                     := #@@INSTANCE@@.NON_PID ,
+         CYCLE                       := #@@INSTANCE@@.CYCLE ,
+         P_SEL                       := #@@INSTANCE@@.P_SEL ,
+         I_SEL                       := #@@INSTANCE@@.I_SEL ,
+         D_SEL                       := #@@INSTANCE@@.D_SEL ,
+         LMN_HLM                     := #@@INSTANCE@@.LMN_HLM ,
+         LMN_LLM                     := #@@INSTANCE@@.LMN_LLM ,
+         STATE                       := #@@INSTANCE@@.STATE ,
+         LMN                         := #@@INSTANCE@@.LMN ,
+         OUT_CMD                     := #@@INSTANCE@@.OUT_CMD ,
+         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
+         MAN_NON_PID                 := #@@INSTANCE@@.MAN_NON_PID ,
+         MODE                        := #@@INSTANCE@@.MODE
       );
       NOP 0;
 @@TEMPLATE_END@@

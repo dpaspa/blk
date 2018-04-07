@@ -1,0 +1,191 @@
+﻿FUNCTION "fcLEDState" : Void
+TITLE = fcLEDState
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+//Returns the status of CPU LED.  LED is selected by LED_Index, which must be one
+//of the following values:
+// 1: SF (group error)
+// 2: INTF (internal error)
+// 3: EXTF (external error)
+// 4: RUN
+// 5: STOP
+// 6: FRCE (force)
+// 7: CRST (restart)
+// 8: BAF (battery fault/overload, short circuit of battery voltage on bus)
+// 9: USR (user-defined)
+//10: USR1 (user-defined)
+//11: BUS1F (bus error interface 1)
+//12: BUS2F (bus error interface 2)
+//13: REDF (redundancy error)
+//14: MSTR (master)
+//15: RACK0 (rack number 0)
+//16: RACK1 (rack number 1)
+//17: RACK2 (rack number 2)
+//18: IFM1F (interface error interface module 1)
+//19: IFM2F (interface error interface module 2)
+//
+   VAR_TEMP
+      HEART_BEAT : Bool;   // always on bit
+      Busy : Bool;
+      RVal : Int;
+      NumRec : Int;
+      LED_Int : Int;   // Led_On as integer
+      Flash_Int : Int;   // LED_Flashing as integer
+      SZL_HEADER : Struct
+         LENTHDR : Word;
+         N_DR : Word;
+      END_STRUCT;
+      LED_Data : Struct
+         CPU : Byte;   // F8=Rack0 master, F1=Rack1 stdby, F0=Rack0 Stdby, F9=Rack1 master
+         LED_ID : Byte;
+         LED_ON : Byte;   // 0=off, 1=on
+         LED_Flashing : Byte;   // 0=none, 1=slow, 2=fast
+      END_STRUCT;
+      tempLED_On : Bool;
+      LED_Index : Word;   // LED index from SSL 0x0174
+      Flash_Slow : Bool;   // true = LED is flashing slowly
+      Flash_Fast : Bool;   // true = LED is flashing rapidly
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = SMS1 HEART BEAT- for SMS1 & FL PLC communication
+      AN "HEART_BEAT_FL";
+      L S5T#2S;
+      SP "timerHeartRate";
+      NOP 0;
+      NOP 0;
+      NOP 0;
+      A "timerHeartRate";
+      = "HREAT_BEAT_ToSMS1";
+NETWORK
+TITLE =
+      BEU;
+
+NETWORK
+TITLE = Always on bit
+      AN #HEART_BEAT;
+      S #HEART_BEAT;
+NETWORK
+TITLE =
+NETWORK
+TITLE = Call SFC51 with SSL 0119
+      A #HEART_BEAT;
+      = %L23.0;
+      BLD 103;
+      CALL RDSYSST
+      (  REQ                         := %L23.0 ,
+         SZL_ID                      := WORD#16#0119 ,
+         INDEX                       := #LED_Index ,
+         RET_VAL                     := #RVal ,
+         BUSY                        := #Busy ,
+         SZL_HEADER                  := #SZL_HEADER ,
+         DR                          := #LED_Data
+      );
+      NOP 0;
+NETWORK
+TITLE = If SSL 0119 not supported, try 0174
+//If SFC51 fails with SSL 0119, it returns -32638 (W#16#8082) in the RET_VAL
+//parameter.
+      A #HEART_BEAT;
+      = %L23.0;
+      BLD 103;
+      A(;
+      L #RVal;
+      L -32638;
+      ==I;
+      );
+      JNB Label_0;
+      CALL RDSYSST
+      (  REQ                         := %L23.0 ,
+         SZL_ID                      := WORD#16#0174 ,
+         INDEX                       := #LED_Index ,
+         RET_VAL                     := #RVal ,
+         BUSY                        := #Busy ,
+         SZL_HEADER                  := #SZL_HEADER ,
+         DR                          := #LED_Data
+      );
+Label_0:      NOP 0;
+NETWORK
+TITLE = Set parameter for LED_On
+      A(;
+      L #LED_Data.LED_ON;
+      T #LED_Int;
+      SET;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      A(;
+      L #LED_Int;
+      L 0;
+      <>I;
+      );
+      = #tempLED_On;
+NETWORK
+TITLE = Set parameter for Flash_Slow
+      A(;
+      L #LED_Data.LED_Flashing;
+      T #Flash_Int;
+      SET;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      A(;
+      L #Flash_Int;
+      L 2;
+      ==I;
+      );
+      = #Flash_Slow;
+NETWORK
+TITLE = Set parameter for Flash_Fast
+      L #Flash_Int;
+      L 1;
+      ==I;
+      = #Flash_Fast;
+NETWORK
+TITLE = Use ENO to return success/fail state
+//On success, SFC51 RET_VAL will be 0, and the number of data records returned,
+//SZL_HEADER.N_DR, will be 1.
+//SZL_HEADER.N_DR is a Word data type.  Compare instructions only work on Int,
+//Dint, or Real data types.  Therefore, we MOVE SZL_HEADER.N_DR to NumRec (an Int
+//in TEMP memory) before comparing it to 1.
+//The SAVE output sets the state of ENO in the calling block
+      A(;
+      AN #Busy;
+      A(;
+      L #RVal;
+      L 0;
+      ==I;
+      );
+      JNB Label_1;
+      L #SZL_HEADER.N_DR;
+      T #NumRec;
+      SET;
+      SAVE;
+      CLR;
+Label_1:      A BR;
+      );
+      A(;
+      L #NumRec;
+      L 1;
+      ==I;
+      );
+      SAVE;
+NETWORK
+TITLE = LED Status
+      A #tempLED_On;
+      A(;
+      A #Flash_Slow;
+      A "Clock_2_0S_0_5Hz";
+      O;
+      A #Flash_Fast;
+      A "Clock_0_5S_2Hz";
+      O;
+      AN #Flash_Slow;
+      AN #Flash_Fast;
+      );
+      = #HEART_BEAT;
+END_FUNCTION

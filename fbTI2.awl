@@ -22,61 +22,58 @@
 FUNCTION_BLOCK "fbTI2"
 TITLE = TI2 : Line Mounted temperature Indicator
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : fbTI2
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
    VAR_INPUT
-      MODE : Int := 2;
-      RAW_INPUT : Int;   // Raw input signal from Field (4mA = 0, 20mA = 27648)
-      USER_INPUT : Int;   // Equivallent of Analog Field value from HMI in manual mode
-      UPPER_RANGE : Real := 150.0;   // Upper Range Limit in engineering units
-      LOWER_RANGE : Real;   // Lower Range Limit in engineering units
-      POLARITY : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
-      LIMIT_HH : Real := 132.0;   // High High Alarm Limit
-      LIMIT_H : Real := 129.0;   // High Alarm Limit
-      LIMIT_L : Real := 2.0;   // Low Alarm Limit
-      LIMIT_LL : Real;   // LowLow Alarm Limit
-      ENABLE_HH : Bool := TRUE;   // Flag to Enable/Disable HighHigh Alarm
-      ENABLE_H : Bool := TRUE;   // Flag to Enable/Disable High Alarm
-      ENABLE_L : Bool := TRUE;   // Flag to Enable/Disable Low Alarm
-      ENABLE_LL : Bool := TRUE;   // Flag to Enable/Disable LowLow Alarm
+        RAW_INPUT : Int;   // Raw input signal from Field (4mA = 0, 20mA = 27648)
+        USER_INPUT : Int;   // Equivallent of Analog Field value from HMI in manual mode
+        UPPER_RANGE : Real := 150.0;   // Upper Range Limit in engineering units
+        LOWER_RANGE : Real;   // Lower Range Limit in engineering units
+        POLARITY : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+        LIMIT_HH : Real := 132.0;   // High High Alarm Limit
+        LIMIT_H : Real := 129.0;   // High Alarm Limit
+        LIMIT_L : Real := 2.0;   // Low Alarm Limit
+        LIMIT_LL : Real;   // LowLow Alarm Limit
+        ENABLE_HH : Bool := TRUE;   // Flag to Enable/Disable HighHigh Alarm
+        ENABLE_H : Bool := TRUE;   // Flag to Enable/Disable High Alarm
+        ENABLE_L : Bool := TRUE;   // Flag to Enable/Disable Low Alarm
+        ENABLE_LL : Bool := TRUE;   // Flag to Enable/Disable LowLow Alarm
    END_VAR
 
    VAR_OUTPUT
-      MEASURE : Real;   // Measured Value (after scaling)
-      DATA_QUALITY : Bool := TRUE;   // MV data quality (0=Bad; 1=Good)
-      ALARM_HH : Bool;   // HighHigh Alarm
-      ALARM_H : Bool;   // High Alarm
-      ALARM_L : Bool;   // Low Alarm
-      ALARM_LL : Bool;   // LowLow Alarm
+        MEASURE : Real;   // Measured Value (after scaling)
+        DATA_QUALITY : Bool := TRUE;   // MV data quality (0=Bad; 1=Good)
+        ALARM_HH : Bool;   // HighHigh Alarm
+        ALARM_H : Bool;   // High Alarm
+        ALARM_L : Bool;   // Low Alarm
+        ALARM_LL : Bool;   // LowLow Alarm
    END_VAR
 
-   VAR_IN_OUT
-      RANGE_ERROR : Bool;   // Range Error (<4mA or >20mA)
-      BROKEN_WIRE : Bool;   // Broken Wire detection
-   END_VAR
+    VAR_IN_OUT
+        MODE : Int := 1;     // Control Mode, Auto by default
+        OWNER : Int;         // Value to be set or reset by Parent
+        RANGE_ERROR : Bool;   // Range Error (<4mA or >20mA)
+        BROKEN_WIRE : Bool;   // Broken Wire detection
+    END_VAR
 
-   VAR_TEMP
-      RET_VAL1 : Word;   // Returns a value of W#16#0000 if the instruction executes without error.
-      PV_R_1 : Real;   // Temporary measured value
-      AnalogInput : Int;
-      OUTOFSERV : Bool;
-   END_VAR
-
+    VAR_TEMP
+        RET_VAL1 : Word;   // Returns a value of W#16#0000 if the instruction executes without error.
+        PV_R_1 : Real;   // Temporary measured value
+        AnalogInput : Int;
+        modeOOS : Bool;
+    END_VAR
 
 BEGIN
 NETWORK
 TITLE = SCALING: TEMPERATURE
 //Scale of Manufacturing vessel:
-      A #POLARITY;
-      = %L9.0;
-      BLD 103;
       A(;
       O(;
       A(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
       );
       JNB Label_0;
@@ -90,7 +87,7 @@ Label_0:      A BR;
       O(;
       A(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       JNB Label_1;
@@ -107,7 +104,7 @@ Label_1:      A BR;
       (  IN                          := #AnalogInput ,
          HI_LIM                      := #UPPER_RANGE ,
          LO_LIM                      := #LOWER_RANGE ,
-         BIPOLAR                     := %L9.0 ,
+         BIPOLAR                     := #POLARITY ,
          RET_VAL                     := #RET_VAL1 ,
          OUT                         := #PV_R_1
       );
@@ -115,9 +112,9 @@ Label_2:      NOP 0;
 NETWORK
 TITLE = Mode Out Of Service
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      L "dbCONST".BLK.MODE.OOS;
       ==I;
-      = #OUTOFSERV;
+      = #modeOOS;
 NETWORK
 TITLE = TEMPERATURE OUTPUT AS REAL
 //In Manual mode, USER_INPUT to modify the MEASURE value.
@@ -138,7 +135,7 @@ TITLE = CHECK RANGE ERROR
       <I;
       );
       );
-      AN #OUTOFSERV;
+      AN #modeOOS;
       = #RANGE_ERROR;
 NETWORK
 TITLE = CHECK BROKEN WIRE
@@ -156,24 +153,24 @@ TITLE = CHECK BROKEN WIRE
       ==I;
       );
       );
-      AN #OUTOFSERV;
+      AN #modeOOS;
       = #BROKEN_WIRE;
 NETWORK
 TITLE = Setting Data Quality
 //If no error set Data Quality DQ=1 (GOOD), else DQ=0 (BAD).
       AN #RANGE_ERROR;
       AN #BROKEN_WIRE;
-      AN #OUTOFSERV;
+      AN #modeOOS;
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       = #DATA_QUALITY;
 NETWORK
 TITLE = HighHigh ALARM
 //If HighHigh limit reached
-      AN #OUTOFSERV;
+      AN #modeOOS;
       A(;
       L #PV_R_1;
       L #LIMIT_HH;
@@ -183,7 +180,7 @@ TITLE = HighHigh ALARM
       = #ALARM_HH;
 NETWORK
 TITLE = High ALARM
-      AN #OUTOFSERV;
+      AN #modeOOS;
       A(;
       L #PV_R_1;
       L #LIMIT_H;
@@ -193,7 +190,7 @@ TITLE = High ALARM
       = #ALARM_H;
 NETWORK
 TITLE = Low ALARM
-      AN #OUTOFSERV;
+      AN #modeOOS;
       A(;
       L #PV_R_1;
       L #LIMIT_L;
@@ -203,7 +200,7 @@ TITLE = Low ALARM
       = #ALARM_L;
 NETWORK
 TITLE = LowLow ALARM
-      AN #OUTOFSERV;
+      AN #modeOOS;
       A(;
       L #PV_R_1;
       L #LIMIT_LL;

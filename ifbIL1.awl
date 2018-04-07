@@ -14,8 +14,8 @@
 FUNCTION_BLOCK "ifbIL1"
 TITLE = Instances of Interlck Template IL1
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : ifbIL1
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -23,19 +23,19 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
     VAR
 @@TEMPLATE_BEGIN@@
-        @@MODULE@@ : "fbIL1";   // @@DESCRIPTION@@
+        @@INSTANCE@@ : "fbIL1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
     END_VAR
 
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
-TITLE = @@MODULE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the instance FB passing in the specific instance parameters:      //
     //------------------------------------------------------------------------//
-    CALL #@@MODULE@@
-    (   INTERLOCK                   := #@@MODULE@@.INTERLOCK ,
+    CALL #@@INSTANCE@@
+    (   INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
         IN1                         := "@@SOURCE1@@".@@CLASS1@@.@@STATE1@@
     );
     NOP 0;

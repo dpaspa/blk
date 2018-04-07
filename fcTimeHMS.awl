@@ -1,0 +1,141 @@
+FUNCTION "fcTimeHMS" : Void
+TITLE = HOUR , MIN AND SEC TO TIME VARIABLE
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_INPUT 
+      H : Int;
+      M : Int;
+      S : Int;
+   END_VAR
+
+   VAR_OUTPUT 
+      TTIM_VAL : Time;
+      dTIM_VAL : DInt;
+   END_VAR
+
+   VAR_TEMP 
+      h_1 : DInt;
+      m_1 : DInt;
+      s_1 : DInt;
+      s_ms : DInt;
+      m_ms : DInt;
+      h_ms : DInt;
+      tot_ms : DInt;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Int to Dint
+      A(;
+      A(;
+      L #H;
+      ITD;
+      T #h_1;
+      SET;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_0;
+      L #M;
+      ITD;
+      T #m_1;
+      SET;
+      SAVE;
+      CLR;
+Label_0:      A BR;
+      );
+      JNB Label_1;
+      L #S;
+      ITD;
+      T #s_1;
+Label_1:      NOP 0;
+NETWORK
+TITLE =  Sec to ms
+      L #s_1;
+      L DINT#1000;
+      *D;
+      T #s_ms;
+      NOP 0;
+NETWORK
+TITLE = Min---> ms
+      A(;
+      L #m_1;
+      L DINT#60;
+      *D;
+      T #m_ms;
+      AN OV;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_2;
+      L #m_ms;
+      L DINT#1000;
+      *D;
+      T #m_ms;
+Label_2:      NOP 0;
+NETWORK
+TITLE = Hour---> ms
+      A(;
+      A(;
+      L #h_1;
+      L DINT#60;
+      *D;
+      T #h_ms;
+      AN OV;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_3;
+      L #h_ms;
+      L DINT#60;
+      *D;
+      T #h_ms;
+      AN OV;
+      SAVE;
+      CLR;
+Label_3:      A BR;
+      );
+      JNB Label_4;
+      L #h_ms;
+      L DINT#1000;
+      *D;
+      T #h_ms;
+Label_4:      NOP 0;
+NETWORK
+TITLE = h_ms+ m_ms+ s_ms= total mili seconds
+      A(;
+      L #h_ms;
+      L #m_ms;
+      +D;
+      T #tot_ms;
+      AN OV;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_5;
+      L #tot_ms;
+      L #s_ms;
+      +D;
+      T #tot_ms;
+Label_5:      NOP 0;
+NETWORK
+TITLE = Output Time variable 
+      A(;
+      L #tot_ms;
+      T #TTIM_VAL;
+      SET;
+      SAVE;
+      CLR;
+      A BR;
+      );
+      JNB Label_6;
+      L #tot_ms;
+      T #dTIM_VAL;
+Label_6:      NOP 0;
+END_FUNCTION
+

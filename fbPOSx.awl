@@ -52,72 +52,74 @@
 FUNCTION_BLOCK "fbPOSx"
 TITLE = POSx : On/Off valve with single output and  open/close feedback
 { S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
 NAME : fbPOSx
-AUTHOR : Rieckermann Engineering Operations
 VERSION : 2.0
 
-   VAR_INPUT
-      CMD : Int := 1;   // auto command
-      CR_IL : Bool;   // Critical Interlock in series
-      NCR_IL : Bool;   // Non-critical Interlock in series
-      MAN_OVERRIDE : Bool;   // Critical Interlock in series can be Override by this Input
-      FB_C : Bool;   // Close feedback signal from field
-      FB_O : Bool;   // Open feedback signal from field
-      IN_MAN : Bool;
-      TMR : Time := T#3S;   // Close/Open feedback delay limit
-      INTERLOCKING_TIMER : Timer;
-   END_VAR
+    VAR_INPUT
+        CMD : Int := 1;   // Close command
+        CR_IL : Bool;   // Critical Interlock in series
+        NCR_IL : Bool;   // Non-critical Interlock in series
+        MAN_OVERRIDE : Bool;   // Critical Interlock in series can be Override by this Input
+        FB_C : Bool;   // Close feedback signal from field
+        FB_O : Bool;   // Open feedback signal from field
+        IN_MAN : Bool;
+        TMR : Time := T#3S;   // Close/Open feedback delay limit
+        INTERLOCKING_TIMER : Timer;
+    END_VAR
 
-   VAR_OUTPUT
-      DEV_STATE : Int;   // Valve Status
-      OUT_Q : Bool;   // Valve open/close command
-      FAULT_C : Bool;   // Valve fail to close
-      FAULT_O : Bool;   // Valve fail to Open
-      INTERLOCK : Bool;   // Valve operation interlocked
-      VLC_NC : Bool;
-      FAIL_IL : Bool;
-      VLC_NO : Bool;
-   END_VAR
+    VAR_OUTPUT
+        STATE : Int;   // Valve Status
+        OUT_Q : Bool;   // Valve open/close command
+        FAULT_C : Bool;   // Valve fail to close
+        FAULT_O : Bool;   // Valve fail to Open
+        INTERLOCK : Bool;   // Valve operation interlocked
+        VLC_NC : Bool;
+        FAIL_IL : Bool;
+        VLC_NO : Bool;
+    END_VAR
 
-   VAR_IN_OUT
-      MODE : Int := 2;   // 1-man,2-auto,3-out of service
-   END_VAR
+    VAR_IN_OUT
+        MODE : Int := 1;     // Control Mode, Auto by default
+        OWNER : Int;         // Value to be set or reset by Parent
+    END_VAR
 
-   VAR
-      TMR_OPN {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-      TMR_CLS {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-   END_VAR
+    VAR
+        TMR_OPN {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+        TMR_CLS {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+    END_VAR
 
-   VAR_TEMP
-      Out_Q1 : Bool;
-      DEV_STATE1 : Int;
-      Closed : Bool;
-      Opened : Bool;
-      Interlocked : Bool;
-      F2C1 : Bool;
-      F2O1 : Bool;
-      OUTOFSERV : Bool;
-      BYPASS_IP : Bool;
-   END_VAR
-
+    VAR_TEMP
+        Out_Q1 : Bool;
+        STATE1 : Int;
+        Closed : Bool;
+        Opened : Bool;
+        isCommand : Bool;
+        Interlocked : Bool;
+        tInterlock : Bool;
+        F2C1 : Bool;
+        F2O1 : Bool;
+        modeOOS : Bool;
+        BYPASS_IP : Bool;
+    END_VAR
 
 BEGIN
 NETWORK
 TITLE = Interlocking Logic
 //Instance Specific/Non critical Interlocks can be bypassed by Override/Inhibit
 //command from Operator Station(HMI)
-//#DEV_STATE=7----Interlocked
+//#STATE=7----Interlocked
 //
 //
       O #CR_IL;
       O;
       A #NCR_IL;
       AN #MAN_OVERRIDE;
-      = %L5.0;
-      A %L5.0;
+      = #tInterlock;
+      A #tInterlock;
       A(;
       L #CMD;
-      L "dbCONST_VAL".CM.CMD_VALVE.OPEN;
+      L "dbCONST".BLK.POSx.CMD.OPEN;
       ==I;
       );
       L S5T#5S;
@@ -127,21 +129,20 @@ TITLE = Interlocking Logic
       NOP 0;
       A #INTERLOCKING_TIMER;
       = #Interlocked;
-      A %L5.0;
-      BLD 102;
+      A #tInterlock;
       = #INTERLOCK;
 NETWORK
 TITLE = Out of Service Mode=3
-//#DEV_STATE=8----Out of service
+//#STATE=8----Out of service
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.OUT_OF_SERVICE;
+      L "dbCONST".BLK.MODE.OOS;
       ==I;
-      = #OUTOFSERV;
+      = #modeOOS;
 NETWORK
 TITLE = Input Bypass Mode In Manual
       A(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       A #IN_MAN;
@@ -154,25 +155,25 @@ TITLE = Valve Command open
       A(;
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
       );
       );
       A(;
       L #CMD;
-      L "dbCONST_VAL".CM.CMD_VALVE.OPEN;
+      L "dbCONST".BLK.POSx.CMD.OPEN;
       ==I;
       );
-      = %L5.0;
-      A %L5.0;
+      = #isCommand;
+      A #isCommand;
       AN #Interlocked;
       S #OUT_Q;
-      A %L5.0;
+      A #isCommand;
       A #Interlocked;
       = #FAIL_IL;
 NETWORK
@@ -185,21 +186,21 @@ TITLE = Close command
       A(;
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.MANUAL;
+      L "dbCONST".BLK.MODE.MANUAL;
       ==I;
       );
       O(;
       L #MODE;
-      L "dbCONST_VAL".CM.MODE.AUTO;
+      L "dbCONST".BLK.MODE.AUTO;
       ==I;
       );
       );
       A(;
       L #CMD;
-      L "dbCONST_VAL".CM.CMD_VALVE.CLOSE;
+      L "dbCONST".BLK.POSx.CMD.CLOSE;
       ==I;
       );
-      O #OUTOFSERV;
+      O #modeOOS;
       O #Interlocked;
       R #OUT_Q;
 NETWORK
@@ -214,14 +215,13 @@ TITLE = State Machine Logic - Valve CLOSED (1)
       AN #FB_O;
       O #BYPASS_IP;
       );
-      = %L5.0;
-      A %L5.0;
+      = #isCommand;
+      A #isCommand;
       JNB Label_0;
-      L "dbCONST_VAL".CM.POSx_DEV_STATE.CLOSED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.POSx.STATE.CLOSED;
+      T #STATE;
 Label_0:      NOP 0;
-      A %L5.0;
-      BLD 102;
+      A #isCommand;
       = #Closed;
 NETWORK
 TITLE = State Machine Logic - Valve OPENED (2)
@@ -231,14 +231,13 @@ TITLE = State Machine Logic - Valve OPENED (2)
       AN #FB_C;
       O #BYPASS_IP;
       );
-      = %L5.0;
-      A %L5.0;
+      = #isCommand;
+      A #isCommand;
       JNB Label_1;
-      L "dbCONST_VAL".CM.POSx_DEV_STATE.OPENED;
-      T #DEV_STATE;
+      L "dbCONST".BLK.POSx.STATE.OPENED;
+      T #STATE;
 Label_1:      NOP 0;
-      A %L5.0;
-      BLD 102;
+      A #isCommand;
       = #Opened;
 NETWORK
 TITLE = Valve Status Not Confirmed Closed
@@ -263,11 +262,10 @@ TITLE = Valve Status Not Confirmed Open
 NETWORK
 TITLE = Run openning travel timer
       A #Out_Q1;
-      = %L5.0;
-      BLD 103;
+      = #isCommand;
       CALL #TMR_OPN
       {time_type := 'Time'}
-      (  IN                          := %L5.0 ,
+      (  IN                          := #isCommand ,
          PT                          := #TMR ,
          Q                           := #TMR_OPN.Q ,
          ET                          := #TMR_OPN.ET
@@ -276,11 +274,10 @@ TITLE = Run openning travel timer
 NETWORK
 TITLE = Run Closing travel timer
       AN #Out_Q1;
-      = %L5.0;
-      BLD 103;
+      = #isCommand;
       CALL #TMR_CLS
       {time_type := 'Time'}
-      (  IN                          := %L5.0 ,
+      (  IN                          := #isCommand ,
          PT                          := #TMR ,
          Q                           := #TMR_CLS.Q ,
          ET                          := #TMR_CLS.ET
@@ -293,10 +290,10 @@ TITLE = Fault while openning
       AN #Opened;
       O #FAIL_IL;
       );
-      AN #OUTOFSERV;
+      AN #modeOOS;
       JNB Label_2;
-      L "dbCONST_VAL".CM.POSx_DEV_STATE.FAULT;
-      T #DEV_STATE;
+      L "dbCONST".BLK.POSx.STATE.FAULT;
+      T #STATE;
       SET;
       SAVE;
       CLR;
@@ -307,10 +304,10 @@ NETWORK
 TITLE = Fault while Closing
       A #TMR_CLS.Q;
       AN #Closed;
-      AN #OUTOFSERV;
+      AN #modeOOS;
       JNB Label_3;
-      L "dbCONST_VAL".CM.POSx_DEV_STATE.FAULT;
-      T #DEV_STATE;
+      L "dbCONST".BLK.POSx.STATE.FAULT;
+      T #STATE;
       SET;
       SAVE;
       CLR;
@@ -324,8 +321,8 @@ TITLE = Fault while Closed/Opened
       A(;
       A #Out_Q1;
       A(;
-      L #DEV_STATE;
-      L "dbCONST_VAL".CM.POSx_DEV_STATE.OPENED;
+      L #STATE;
+      L "dbCONST".BLK.POSx.STATE.OPENED;
       ==I;
       );
       A(;
@@ -335,8 +332,8 @@ TITLE = Fault while Closed/Opened
       O;
       AN #Out_Q1;
       A(;
-      L #DEV_STATE;
-      L "dbCONST_VAL".CM.POSx_DEV_STATE.CLOSED;
+      L #STATE;
+      L "dbCONST".BLK.POSx.STATE.CLOSED;
       ==I;
       );
       A(;
@@ -346,8 +343,8 @@ TITLE = Fault while Closed/Opened
       );
       AN #BYPASS_IP;
       JNB Label_4;
-      L "dbCONST_VAL".CM.POSx_DEV_STATE.FAULT;
-      T #DEV_STATE;
+      L "dbCONST".BLK.POSx.STATE.FAULT;
+      T #STATE;
 Label_4:      NOP 0;
 NETWORK
 TITLE = State Machine Logic - Valve TRAVEL (3)
@@ -363,7 +360,7 @@ TITLE = State Machine Logic - Valve TRAVEL (3)
       AN #Closed;
       );
       JNB Label_5;
-      L "dbCONST_VAL".CM.POSx_DEV_STATE.TRAVELLING;
-      T #DEV_STATE;
+      L "dbCONST".BLK.POSx.STATE.TRAVEL;
+      T #STATE;
 Label_5:      NOP 0;
 END_FUNCTION_BLOCK

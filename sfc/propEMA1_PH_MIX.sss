@@ -1,0 +1,425 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 20/3/2018 5:19:24 PM by MAC_IZZ
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+Name:- MIX
+Title:- Mixing ..
+Description:- Run manufacturing vessel mixer for predefined run time. Log accumulated running time.
+Class:- EMA1
+Level:- PH
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- A1PMIX
+Version:- 0.5
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.5 Khairul Basar    04-Oct-2009 CC-09/023  T002 A(<>I) instruction corrected.
+//                                             Accumulative run time loading corrected.
+// 0.4 Khairul Basar    11-Sep-2009 CC-09/023  Ref1.
+// 0.3 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific,& TRN code OR to AND
+//                                             Change in the Last step.Run timer added.
+// 0.2 Khairul Basar    18-Aug-2009            Added logic code
+// 0.1 David Paspa      13-Jul-2009            SFC structural design
+
+//Ref1:
+//SIC_start_time data type changed from TIME to TOD(TIME_OF_DAY),
+//Reset of Timer done on start up.
+//In Step2 Dev_state saved & to be compared in the Trans2 well.
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+SFCCommCode:- 
+////Comm from visio
+
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- Report_Evnt_End
+Type:- BOOL
+Description:- Make Mix End for batch report
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- Report_Evnt_Start
+Type:- BOOL
+Description:- Make Mix Start for batch report
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- sic_agit_running
+Type:- BOOL
+Description:- Agitator running
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- ResetRunTimer
+Type:- BOOL
+Description:- Reset Run timer
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- RunTimeS
+Type:- INT
+Description:- RunTimeS
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- RunTimeM
+Type:- INT
+Description:- RunTimeM
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- RunTimeH
+Type:- INT
+Description:- RunTimeH
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- AcumTimeS
+Type:- INT
+Description:- AcumTimeS
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- AcumTimeM
+Type:- INT
+Description:- AcumTimeM
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- AcumTimeH
+Type:- INT
+Description:- Total acumulated running time
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- FP_SicState
+Type:- Bool
+Description:- Positive pulse to store state change
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- sic_agit_hist
+Type:- INT
+Description:- Previous state of SIC 
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- Running_time
+Type:- TIME
+Description:- Total accumulative running time
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- sic_agit_stopped
+Type:- BOOL
+Description:- Agitator stopped message to be logged
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- sic_agit_state
+Type:- INT
+Description:- Agitator state 
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- disableSIC_StopEM
+Type:- BOOL
+Description:- Disable SIC and Stop EM
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::17
+--------------------------------------------------
+Name:- SIC_start_date
+Type:- DATE
+Description:- SIC start time will be logged into Batch Report.
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::18
+--------------------------------------------------
+Name:- SIC_start_time
+Type:- TOD
+Description:- SIC start time will be logged into Batch Report.
+ParameterInOut:- OUT
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- PH_EMA1_MIX : SIC Running
+Description:- Log SIC running start time to the batch report.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log SIC running start time to the batch report.
+Action:- // Initialise the run timer
+S #sqRunTimer.RESET;
+R #sqRunTimer.NON_RET;
+
+//Assign the run time setpoint
+L #_RunTimeH;
+T #sqRunTimer.TIME_H;
+
+L #_RunTimeM;
+T #sqRunTimer.TIME_M;
+
+L #_RunTimeS;
+T #sqRunTimer.TIME_S;
+
+// Mixer is running so start accumulating the run time.
+S #sqRunTimer.ENABLE;
+
+//The  mixer is now be running. 
+L "dbCONST".CM.SIC1_DEV_STATE.RUNNING;
+T #_sic_agit_hist;
+
+//Report Event Set
+SET;
+S #_Report_Evnt_Start;
+
+//Report Event Reset
+SET;
+R #_Report_Evnt_End;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 1.0000
+Title:- Unconditional Jump
+EmptyTransition:- 0.0000
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- PH_EMA1_MIX : Wait for state change
+Description:- Wait for state change
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Make sure the timer is not being reset
+Action:- // Make sure the timer is not being reset
+SET;
+R #sqRunTimer.RESET;
+R #sqRunTimer.NON_RET;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 2.0000
+Title:- TIME_RUN expired
+EmptyTransition:- False
+Description:- Jump if running time has expired
+Condition:- A #sqRunTimer.TIME_EXPIRED;
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- Change of State
+EmptyTransition:- False
+Description:- SIC State Changed
+Condition:- //Check whether the last SIC state is not equal to current state
+A(;
+L #_sic_agit_hist;
+L #_sic_agit_state;
+<>I;
+);
+
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- PH_EMA1_MIX : SIC State Change
+Description:- Log SIC Running/Stopped to the batch report. Store Running time if now Stopped.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log SIC RUnning/Stopped to the batch report. Store Running time if now Stopped.
+Action:- //If mixer is not running for some reason then don't start the timer
+A(;
+L "dbCONST".CM.SIC1_DEV_STATE.RUNNING;
+L #_sic_agit_state;
+<>I;
+);
+JC S011 ;
+
+// RUNNING RUNNING RUNNING RUNNING RUNNING
+// Mixer is running again so start the run timer.
+S #sqRunTimer.ENABLE;
+
+S #_sic_agit_running;
+R #_sic_agit_stopped;
+
+// Jump around the stopped logic below
+JU S022 ;
+
+
+S011:NOP 0;
+
+// STOPPED STOPPED STOPPED STOPPED STOPPED
+// Mixer is currently not running
+// Stop the timer
+R #sqRunTimer.ENABLE;
+
+R #_sic_agit_running;
+S #_sic_agit_stopped;
+
+//Report accumulative total running time
+   CALL  Dint_hms(
+       TIM_VAL:=#sqRunTimer.RetElapsedTime,
+       H      :=#_AcumTimeH,
+       M      :=#_AcumTimeM,
+       S      :=#_AcumTimeS);
+      NOP   0;
+
+
+S022:NOP 0;
+// Save the previous run or stopped state of the mixer
+L #_sic_agit_state;
+T #_sic_agit_hist;
+Verification:- A M1.1; //Always High flag
+
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 4.0000
+Title:- Unconditional Jump
+EmptyTransition:- 0.0000
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- PH_EMA1_MIX : Disable SIC
+Description:- Disable SIC, Log accumulated Running time to the batch report. Send EM STOP command.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Disable SIC, Log accumulated Running time to the batch report. Send EM STOP command.
+Action:- SET;
+R #_FP_SicState;
+S #_disableSIC_StopEM;
+//S  #sqRunTimer.RESET;
+//Report acumulative total running time
+Verification:- A M1.1; //Always High flag
+
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 05
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- //Proceed to next step if SIC has been disabled
+A(;
+L "dbCONST".CM.SIC1_DEV_STATE.DISABLED;
+L #_SIC_AGIT_state;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
+Title:- PH_EMA1_MIX : Last Step
+Description:- Reset the timer, store current SIC state and report the event.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Reset the timer, store current SIC state and report the event.
+Action:- A #_ResetRunTimer;
+=#sqRunTimer.RESET;
+//Store current SIC state.
+L #_sic_agit_state;
+T #_sic_agit_hist;
+
+S #sqRunTimer.RESET;
+//Set timer ON delay.
+R #sqRunTimer.ENABLE;
+
+   CALL  Dint_hms(
+       TIM_VAL:=#sqRunTimer.RetElapsedTime,
+       H      :=#_AcumTimeH,
+       M      :=#_AcumTimeM,
+       S      :=#_AcumTimeS);
+      NOP   0;
+
+//Report Event Set.
+SET;
+S #_Report_Evnt_End;
+
+//Report Event Reset.
+SET;
+R #_Report_Evnt_Start;
+Verification:- A M1.1; //Always High flag
+
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************
