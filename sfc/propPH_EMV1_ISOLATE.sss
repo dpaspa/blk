@@ -1,0 +1,97 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 7/04/2018 11:32:43 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+Name:- ISOLATE
+Title:- PH_EMX6_SETUP_SIP
+Description:- Setup M1 Manufacturing Filtration line flowpath for SIP
+Class:- EMV1
+Level:- PH
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- V1ISOL
+Version:- 0.4
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.4 Khairul Basar    07-Sep-2009 CC-09/023  confirm_CIPinout flag is reset in Step1.
+// 0.3 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific,& TRN code OR to AND
+//                                             Change in the Last step.
+// 0.2 Khairul Basar    18-Aug-2009            Added logic code
+// 0.1 David Paspa      13-Jul-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- CIP_Interlock_Armed
+Type:- BOOL
+Description:- CIP interlock armed flag
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- SIP_Interlock_Armed
+Type:- BOOL
+Description:- SIP interlock armed flag
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- zsc_filter_state
+Type:- INT
+Description:- SIP connection sensor switch.
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- confirm_SIP
+Type:- BOOL
+Description:- Confirm SIP path connection
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- prompt_SIP
+Type:- BOOL
+Description:- Prompt to connect SIP path
+ParameterInOut:- VAR
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- PH_EMX6_SETUP_SIP : Prompt to connect SMFLx SIP flowpath 
+Description:- Prompt Operator to connect SIP flowpath jumpers
+MMFLx to SIP Drain: ZSCx109
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt operator to connect SIP flowpath ZSCx109
+Action:- //Prompt to connect SIP.
+SET;
+S #_prompt_SIP;
+R #_confirm_SIP;
+
+//Reset CIP and SIP interlock flag
+R #_SIP_Interlock_Armed;
+R #_CIP_Interlock_Armed;
+Verification:- A M1.1; //Always High flag
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

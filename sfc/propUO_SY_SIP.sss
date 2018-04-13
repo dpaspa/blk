@@ -1,0 +1,1658 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 7/04/2018 11:24:35 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+SFCNo:- 0
+Title:- UO_SY_SIP
+Description:- Sequence for Mx sterilise in place operation
+Name:- SIP
+Class:- SY
+Level:- UO
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- MUSIP
+Version:- 0.3
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.3 Srinivas Nimmala  19-May-2010  Wong(Changed Cooling-Preempt)
+// 0.2 David Paspa      26-Oct-2009            Added synch flags
+// 0.1 Gerald Kontriner 09-Sep-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- pulse_drain_complete
+Type:- BOOL
+Description:- Pulsing of the drains has completed
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- n2_blow_complete
+Type:- BOOL
+Description:- Parent synchronisation flag indicating N2 blowing is complete
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- pressure_proceed
+Type:- BOOL
+Description:- Proceed after reaching positive pressure
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- log_disconnect
+Type:- BOOL
+Description:- Logging operator confirmed all vessel utility at pipe entry are disconnected.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- log_LowPres_reached
+Type:- TOD
+Description:- Logging time when low pressure reached.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- close_outlet
+Type:- BOOL
+Description:- Parent synchronisation flag to close the vessel outlet valve
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- pulse_drain
+Type:- BOOL
+Description:- Parent synchronisation flag indicating to pulse steam trap drain valves.
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- log_pressure_reached
+Type:- TOD
+Description:- Logging time when pressure reached.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- log_ClosedSystem
+Type:- TOD
+Description:- Logging closed system start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- log_PositivePressure
+Type:- REAL
+Description:- Logging positive pressure measurment.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- log_MxSIPEnd
+Type:- TOD
+Description:- Logging Mx SIP Operation End Time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- log_MxSteamOpen
+Type:- TOD
+Description:- Logging Steam Opened Time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- AUXDRAIN_ECn001
+Type:- BOOL
+Description:- AUXDRAIN selection in ECn001
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- CMD_ECn002
+Type:- INT
+Description:- Command to ECn002
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- SUB_ECn002
+Type:- INT
+Description:- Substate selection to ECn002
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- MEASURE_ECn001
+Type:- REAL
+Description:- Measured Pressure from PI1
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::17
+--------------------------------------------------
+Name:- MEDIUM_ECn002
+Type:- INT
+Description:- Medium selection to ECn002
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::18
+--------------------------------------------------
+Name:- SETPOINT_ECn001
+Type:- REAL
+Description:- PID Pressure Setpoint
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::19
+--------------------------------------------------
+Name:- DEV_STATE_EGn005
+Type:- INT
+Description:- Device State of EGn005
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::20
+--------------------------------------------------
+Name:- DEV_STATE_ECn002
+Type:- INT
+Description:- Device State of ECn002
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::21
+--------------------------------------------------
+Name:- SUB_EJn003
+Type:- INT
+Description:- Substate selection to EJn003
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::22
+--------------------------------------------------
+Name:- SUB_EGn005
+Type:- INT
+Description:- Substate selection to EGn005
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::23
+--------------------------------------------------
+Name:- AUXVENT_ECn001
+Type:- BOOL
+Description:- AUXVENT selection in ECn001
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::24
+--------------------------------------------------
+Name:- DEV_STATE_EJn003
+Type:- INT
+Description:- Device state of EJn003
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::25
+--------------------------------------------------
+Name:- CMD_EGn005
+Type:- INT
+Description:- Command to EGn005
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::26
+--------------------------------------------------
+Name:- SETPOINT_EJn003
+Type:- REAL
+Description:- PID Temperature Setpoint
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::27
+--------------------------------------------------
+Name:- CMD_EJn003
+Type:- INT
+Description:- Command to EJn003
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::28
+--------------------------------------------------
+Name:- VALVE_ECn001
+Type:- INT
+Description:- Valve Selection ECn001
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::29
+--------------------------------------------------
+Name:- SUB_ECn001
+Type:- INT
+Description:- Substate selection to ECn001
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::30
+--------------------------------------------------
+Name:- SUB_EVn004
+Type:- INT
+Description:- Substate selection to EVn004
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::31
+--------------------------------------------------
+Name:- CMD_EVn004
+Type:- INT
+Description:- COmmand to EVn004
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::32
+--------------------------------------------------
+Name:- DEV_STATE_ECn001
+Type:- INT
+Description:- Device State of ECn001
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::33
+--------------------------------------------------
+Name:- CMD_ECn001
+Type:- INT
+Description:- Command to ECn001
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::34
+--------------------------------------------------
+Name:- TIME_DRAIN_PULSE
+Type:- TIME
+Description:- Time for drain pulsing.
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::35
+--------------------------------------------------
+Name:- n2_blow
+Type:- BOOL
+Description:- Parent synchronisation flag indicating N2 blowing is underway
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::36
+--------------------------------------------------
+Name:- positive_pressure
+Type:- BOOL
+Description:- Parent synchronisation flag indicating positive steam pressure has been reached.
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::37
+--------------------------------------------------
+Name:- PRES_N2_LEAVE
+Type:- REAL
+Description:- N2 pressure to leave 
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::38
+--------------------------------------------------
+Name:- sip_complete
+Type:- BOOL
+Description:- Set by parent to indicate steaming is complete.
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::39
+--------------------------------------------------
+Name:- TIME_STM_VENT
+Type:- TIME
+Description:- Time to steam the vent line
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::40
+--------------------------------------------------
+Name:- PRES_N2_BLOW
+Type:- REAL
+Description:- Pressure
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::41
+--------------------------------------------------
+Name:- PRES_N2_BLANK
+Type:- REAL
+Description:- Nitrogen blanket pressure
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::42
+--------------------------------------------------
+Name:- TEMP_COOL_SIP
+Type:- REAL
+Description:- Temperature to cool MX after SIP
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::43
+--------------------------------------------------
+Name:- PRES_STM_POS
+Type:- REAL
+Description:- Positive steam pressure threshold
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::44
+--------------------------------------------------
+Name:- DEV_STATE_EVn004
+Type:- INT
+Description:- Device state of EVn004
+ParameterInOut:- IN
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 1.0000
+Title:- MX_UO_SIP : Connect Sterile Filter to to Spool Piece SPx2.
+Description:- Prompt Operator to connect Sterile Filter to SPx1 ZSCx109. 
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set equipment to SAFE state.
+Action:- L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECn002;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECn002;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EJn003;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EJn003;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EVn004;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EVn004;
+
+// Enable Mx LPN2 pressure control
+L "dbCONST_VAL".EM.EMC1.VALVE.LPN2;
+T #_VALVE_ECn001;
+L #_PRES_N2_BLANK;
+T #_SETPOINT_ECn001;
+SET;
+R #_AUXDRAIN_ECn001;
+R #_AUXVENT_ECn001;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+T #_SUB_ECn001;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECn001;
+
+// EGn005 (STATE=FILTER)
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EGn005;
+L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
+T #_SUB_EGn005;
+
+//Clear used flags
+SET;
+R #_positive_pressure;
+R #_n2_blow;
+R #_pulse_drain_complete;
+R #_n2_blow_complete;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 2.0000
+Title:- SY_UO_SIP : Unit Operation Commenced
+Description:- Sy EVy004 STATE= SIP
+Sy Drain EXy006 STATE=SIP
+SMFLx Drain EXx011 STATE=SIP
+SMFLx Filtration EXy007 STATE=SIP
+Filling Pipe EXzz01 STATE=SIP
+Filling Machine Drain EXzz01=SIP
+
+Open all paths in Sy transfer line.
+Set Mx to Sy Transfer Line EXy007 STATE=SIP 
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- No Action
+Action:- SET;
+R #_second_path;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 3.0000
+Title:- SY_UO_SIP : Open SY steam supply
+Description:- Open Sy steam supply on WFI/CS.
+ECy002 STATE=FLUSH MEDIUM=CS(WFI)
+
+Log steam opened valve.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open Sy steam supply on PW/WFI/CS and LPN2/CS lines.
+ECxy01 STATE=VALVE_OPENED VALVE=CS
+ECxy03 STATE=FLUSH MEDIUM=CS(WFI)
+
+Log steam opened valve.
+Action:- // Open CS steam supply valve
+L "dbCONST_VAL".EM.EMC1.VALVE.CS;
+T #_VALVE_ECxy01;
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+
+//Open WFI line CS supply valve
+L "dbCONST_VAL".EM.EMC3.MEDIUM.CS_WFI;
+T #_MEDIUM_ECxy03;
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH;
+T #_SUB_ECxy03;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy03;
+
+//Log steam opened time
+L "dbCONST_VAL".CPU_TIME;
+T #_log_SteamVlvOpen;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+==I;
+);
+A(;
+L #_DEV_STATE_ECxy03;
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 3.0000
+Title:- Check pressure
+EmptyTransition:- False
+Description:- Pressure increased above PRES_STM_POS. PI_y103 > PRES_STM_POS
+
+Condition:- A(;
+L 	#_MEASURE_ECxy01;
+L 	#_PRES_STM_POS;
+>R;
+);
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 4.0000
+Title:- SY_UO_SIP : Positive pressure. Open SY VENT valve for free steaming
+Description:- Flag positive pressure has been achieved by setting the positive_pressure flag.
+Log actual positive pressure.
+
+Continue Steam Supply
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Flag positive pressure has been achieved by setting the positive_pressure flag.
+Log actual positive pressure.
+Stop ECxy01 to be able to apply start of substate with different settings
+Action:- SET;
+S #_positive_pressure;
+
+//Log actual positive pressure
+L #_MEASURE_ECxy01;
+T #_log_Pressure;
+
+//Stop ECxy01 to be able to apply start of substate with different settings
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+Verification:- A(;
+L 	#_DEV_STATE_ECxy01;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Open Sy VENT valve
+ECxy01 STATE=VALVE_OPENED VALVE=VENT AUXDRAIN=true;
+
+Start timer TIME_STM_VENT
+Action:- // Open Sy VENT valve
+L "dbCONST_VAL".EM.EMC1.VALVE.VENT;
+T #_VALVE_ECxy01;
+SET;
+S #_AUXDRAIN_ECxy01;
+S #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+
+// Set vessel VENT filter EM to substate SIP
+L "dbCONST_VAL".EM.EMG1.SUBS.SIP; 
+T #_SUB_EGxy05;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EGxy05;
+
+//Start Timer for venting
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_STM_VENT;
+T #SQ_TIMER.PT;
+
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+==I;
+);
+A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 4.0000
+Title:- Parent indicates proceed
+EmptyTransition:- False
+Description:- Wait for the parent to set the positive_pressure_proceed flag to indicate to start timing the vent steaming time.
+Condition:- A #_pressure_proceed;
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 5.0000
+Title:- SY_UO_SIP : Wait for free steaming timer
+Description:- Start timer TIME_STM_VENT
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Start timer TIME_STM_VENT
+Action:- //Start Timer for steaming
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_STM_VENT;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 5.0000
+Title:- Timer expired?
+EmptyTransition:- False
+Description:- Timer TIME_STM_VENT expired?
+Condition:- A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 6.0000
+Title:- SY_UO_SIP : Free steam complete. Wait for SIP to be complete
+Description:- Close Sy VENT valve and all vent line valves:
+ECxy01 STATE=VALVE_OPENED VALVE=CS AUX_DRAIN=false AUX_VENT=false;
+
+Log closed system steaming start time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Stop ECxy01 to be able to apply start of substate with different settings
+Action:- L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+
+Verification:- A(;
+L 	#_DEV_STATE_ECxy01;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Close Sy VENT valve and all vent line valves:
+ECxy01 STATE=VALVE_OPENED VALVE=CS AUX_DRAIN=false AUX_VENT=false;
+
+Log closed system steaming start time.
+Action:- // Close Sy VENT valve and all vent line valves
+// Open Sy CS valve 
+L "dbCONST_VAL".EM.EMC1.VALVE.CS;
+T #_VALVE_ECxy01;
+SET;
+S #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+//Open Discharge
+L "dbCONST_VAL".EM.EMV1.SUBS.DISCHARGE;
+T #_SUB_EVxy04;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EVxy04;
+
+//Log closed system steaming start time
+L "dbCONST_VAL".CPU_TIME;
+T #_log_SteamingBegin;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::06
+--------------------------------------------------
+TRNNo:- 6.0000
+Title:- SIP complete?
+EmptyTransition:- False
+Description:- Wait for parent to indicate SIP is complete when it sets the sip_complete flag.
+Condition:- A #_sip_complete;
+
+
+--------------------------------------------------
+STEP::07
+--------------------------------------------------
+StepNo:- 7.0000
+Title:- SY_UO_SIP : SIP Complete
+Description:- Log SIP completion time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close Sy steam supply on PW/WFI/CS and LPN2/CS lines.
+ECxy01 STATE=STOPPED
+ECxy03 STATE=STOPPED
+
+Log SIP completion time.
+Action:- //Log SIP completion time
+L "dbCONST_VAL".CPU_TIME;
+T #_log_SIPComplete;
+
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::07
+--------------------------------------------------
+TRNNo:- 7.0000
+Title:- Steam paths parallel.
+EmptyTransition:- False
+Description:- Steam Sy paths are in parallel.
+Condition:- O #_paths_parallel;
+O #_second_path;
+
+
+--------------------------------------------------
+TRANSITION::08
+--------------------------------------------------
+TRNNo:- 8.0000
+Title:- Paths NOT parallel and second path not done
+EmptyTransition:- False
+Description:- Steam Sy paths are NOT in parallel and second path not yet done.
+Condition:- AN #_paths_parallel;
+AN #_second_path;
+
+
+--------------------------------------------------
+STEP::08
+--------------------------------------------------
+StepNo:- 8.0000
+Title:- SY_UO_SIP : Open Filling Transfer Line path
+Description:- Open filling transfer line isolation valve DVx192 or DVx292.
+Close filtration line isolation valve DVx191 or DVx291.
+
+EXxy07 STATE=CIPSIP, S_FIRST=Sy, FILL_A=Fz
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open filling transfer line isolation valve DVx192 or DVx292.
+Action:- A(;
+L 	"dbCONST_VAL".UNIT.OWNER.S1;
+L 	#_SY;
+==I;
+);
+O;
+A(;
+L 	"dbCONST_VAL".UNIT.OWNER.S3;
+L 	#_SY;
+==I;
+);
+JCN S801;
+SET;
+S #_S_FIRST_EXxy07;
+JU end0;
+
+S801: NOP 0;
+A(;
+L 	"dbCONST_VAL".UNIT.OWNER.S2;
+L 	#_SY;
+==I;
+);
+O;
+A(;
+L 	"dbCONST_VAL".UNIT.OWNER.S4;
+L 	#_SY;
+==I;
+);
+R #_S_FIRST_EXxy07;
+
+end0: NOP 0;
+Verification:- A M1.1; //Always High flag
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Close filtration line isolation valve DVx191 or DVx291.
+Action:- A(;
+L 1;
+L #_FZ;
+==I;
+);
+JCN S802;
+SET;
+S #_FILL_A_EXxy07;
+JU end1;
+
+S802: NOP 0;
+A(;
+L 2;
+L #_FZ;
+==I;
+);
+R #_FILL_A_EXxy07;
+
+end1: NOP 0;
+Verification:- A M1.1; //Always High flag
+
+--------------------------------------------------
+ACTION::03
+--------------------------------------------------
+Description:- EXxy07 STATE=FILL, S_FIRST=Sy, FILL_A=Fz
+Action:- L "dbCONST_VAL".EM.EMX2.SUBS.CIPSIP;
+T #_SUB_EXxy07;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EXxy07;
+
+// Open CS steam supply valve
+L "dbCONST_VAL".EM.EMC1.VALVE.CS;
+T #_VALVE_ECxy01;
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+Verification:- A(;
+L #_DEV_STATE_EXxy07;
+L "dbCONST_VAL".EM.EMX2.SUBS.CIPSIP;
+==I;
+);
+A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::04
+--------------------------------------------------
+Description:- Set flag to indicate SIP for second path 
+Action:- SET;
+S #_second_path;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::09
+--------------------------------------------------
+TRNNo:- 9.0000
+Title:- Empty transition
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::09
+--------------------------------------------------
+StepNo:- 9.0000
+Title:- SY_UO_SIP : Start SY cooling
+Description:- Close Sy steam supply on WFI/CS.
+ECxy01 STATE=STOPPED
+ECxy03 STATE=STOPPED
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close Sy steam supply on PW/WFI/CS and LPN2/CS lines.
+ECxy01 STATE=STOPPED
+ECxy03 STATE=STOPPED
+Action:- //Close SY steam supply on WFI/CS line
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECxy01;
+
+//Close SY steam supply on LPN2/CS line
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy03;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECxy03;
+Verification:- A(;
+L 	#_DEV_STATE_ECxy01;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+A(;
+L 	#_DEV_STATE_ECxy03;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Enable Sy cooling at 100%.
+EJxy03 STATE=COOL, SETPIONT=TEMP_COOL_SIP
+
+Action:- // Enable Sy cooling at 100%
+L #_TEMP_COOL_SIP;
+T #_SETPOINT_EJxy03;
+
+L "dbCONST_VAL".EM.EMJ1.SUBS.PREEMPT; 
+T #_SUB_EJxy03;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EJxy03;
+
+Verification:- A(;
+L #_DEV_STATE_EJxy03;
+L "dbCONST_VAL".EM.EMJ1.SUBS.PREEMPT; 
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::10
+--------------------------------------------------
+TRNNo:- 10.0000
+Title:- Pressure below PRES_HPCA_BLOW?
+EmptyTransition:- False
+Description:- Pressure dropped to PRES_HPCA_BLOW. PI-xy10 <= PRES_HPCA_BLOW
+Condition:- A(;
+L 	#_MEASURE_ECxy01;
+L 	#_PRES_N2_BLOW;
+<=R;
+);
+
+
+--------------------------------------------------
+STEP::10
+--------------------------------------------------
+StepNo:- 10.0000
+Title:- SY_UO_SIP : Enable HPCA pressure control
+Description:- Log time when pressure reached.
+
+Enable Sy HPCA pressure control at setpoint PRES_CA_BLOW.
+ECxy01 STATE= PRESSURE_CONTROL, VALVE= HPCA, SETPOINT= PRES_HPCA_BLOW
+
+Set HPCA_blow flag to indicate HPCA blowing now under way.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log time when pressure reached.
+Action:- //Log time when pressure reached
+L "dbCONST_VAL".CPU_TIME;
+T #_log_PresN2Blow;
+
+//Stop ECxy01 to be able to apply start of substate with different settings
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECxy01;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Log time when pressure reached.
+
+Enable Sy HPN2 pressure control at setpoint PRES_N2_BLOW.
+ECxy01 STATE= PRESSURE_CONTROL, VALVE= HPN2, SETPOINT= PRES_N2_BLOW
+Action:- // Open Sy HPN2 pressure control at setpoint PRES_N2_BLOW
+L "dbCONST_VAL".EM.EMC1.VALVE.HPN2;
+T #_VALVE_ECxy01;
+L #_PRES_N2_BLOW;
+T #_SETPOINT_ECxy01;
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+//Set EGn005 to FILTER
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EGxy05;
+L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
+T #_SUB_EGxy05;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+==I;
+);
+
+--------------------------------------------------
+ACTION::03
+--------------------------------------------------
+Description:- Set n2_blow flag to indicate N2 blowing now under way.
+Action:- SET;
+S #_n2_blow;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::11
+--------------------------------------------------
+TRNNo:- 11.0000
+Title:- Empty transition.
+EmptyTransition:- False
+Description:- Empty transition.
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::11
+--------------------------------------------------
+StepNo:- 11.0000
+Title:- SY_UO_SIP : Wait for HPCA blow complete or to pulse drain
+Description:- No action required.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- No action here.
+Action:- SET;
+R #_pulse_drain_complete;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::12
+--------------------------------------------------
+TRNNo:- 12.0000
+Title:- HPCA blowing is complete?
+EmptyTransition:- False
+Description:- Wait for parent to confirm HPCA blowing is complete when parent sets the HPCA_blow_complete flag.
+Condition:- A #_n2_blow_complete;
+
+
+--------------------------------------------------
+TRANSITION::13
+--------------------------------------------------
+TRNNo:- 13.0000
+Title:- TRN Title
+EmptyTransition:- False
+Description:- Wait for parent to indicate to pulse steam trap drain valves by setting the pulse_drain flag.
+Condition:- A #_pulse_drain;
+
+
+--------------------------------------------------
+STEP::12
+--------------------------------------------------
+StepNo:- 12.0000
+Title:- SY_UO_SIP : Wait for time to pulse drain valve
+Description:- ECxy01 STATE=PRESSURE_CONTROL, VALVE= HPCA, SETPOINT= PRES_HPCA_BLOW AUXVENT=TRUE AUXDRAIN=FALSE
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Stop ECn001 to be able to apply start same substate with different settings
+Action:- L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+Verification:- A(;
+L 	#_DEV_STATE_ECxy01;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- High Pressure N2 valve and VENT valve open, DRAIN valve closed.
+Action:- // Enable Mx HPN2 pressure control
+L "dbCONST_VAL".EM.EMC1.VALVE.HPN2;
+T #_VALVE_ECxy01;
+L #_PRES_N2_BLOW;
+T #_SETPOINT_ECxy01;
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+==I;
+);
+
+
+--------------------------------------------------
+ACTION::03
+--------------------------------------------------
+Description:- Timer
+Action:- //Start Timer
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_DRAIN_PULSE;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::14
+--------------------------------------------------
+TRNNo:- 14.0000
+Title:- Timer expired?
+EmptyTransition:- False
+Description:- Time for drain pulsing TIME_DRAIN_PULSE expired.
+Condition:- A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::13
+--------------------------------------------------
+StepNo:- 13.0000
+Title:- SY_UO_SIP : Pulse SIP drain valve opened
+Description:- ECxy01 STATE=PRESSURE_CONTROL, VALVE= HPCA, SETPOINT= PRES_HPCA_BLOW AUXVENT=FALSE AUXDRAIN=TRUE
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Stop ECn001 to be able to apply start same substate with different settings
+Action:- L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+Verification:- A(;
+L 	#_DEV_STATE_ECxy01;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- High Pressure N2 valve and DRAIN valve open, VENT valve closed.
+Action:- // Enable Mx HPN2 pressure control
+L "dbCONST_VAL".EM.EMC1.VALVE.HPN2;
+T #_VALVE_ECxy01;
+L #_PRES_N2_BLOW;
+T #_SETPOINT_ECxy01;
+SET;
+S #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+==I;
+);
+
+--------------------------------------------------
+ACTION::03
+--------------------------------------------------
+Description:- Timer
+Action:- //Start Timer
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_DRAIN_PULSE;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::15
+--------------------------------------------------
+TRNNo:- 15.0000
+Title:- Timer expired?
+EmptyTransition:- False
+Description:- Time for drain pulsing TIME_DRAIN_PULSE expired.
+Condition:- A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::14
+--------------------------------------------------
+StepNo:- 14.0000
+Title:- SY_UO_SIP : Finish drain pulsing and open VENT drain valve
+Description:- Enable Mx HPCA pressure control at setpoint PRES_HPCA_BLOW.
+ECxy01 STATE=PRESSURE_CONTROL, VALVE= HPCA, SETPOINT= PRES_HPCA_BLOW AUXVENT=FALSE AUXDRAIN=FALSE
+
+SET EGxy05 (STATE = SIP)
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Stop ECn001 to be able to apply start same substate with different settings
+Action:- L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- High Pressure N2 valve open and VENT & DRAIN valve closed.
+Action:- // Enable Mx HPN2 pressure control
+L "dbCONST_VAL".EM.EMC1.VALVE.HPN2;
+T #_VALVE_ECxy01;
+L #_PRES_N2_BLOW;
+T #_SETPOINT_ECxy01;
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+
+// Set vessel VENT filter EM to substate SIP
+L "dbCONST_VAL".EM.EMG1.SUBS.SIP; 
+T #_SUB_EGxy05;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EGxy05;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+==I;
+);
+A(;
+L #_DEV_STATE_EGxy05;
+L "dbCONST_VAL".EM.EMG1.SUBS.SIP; 
+==I;
+);
+
+--------------------------------------------------
+ACTION::03
+--------------------------------------------------
+Description:- Timer
+Action:- //Start Timer
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_DRAIN_PULSE;
+T #SQ_TIMER.PT;
+
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::16
+--------------------------------------------------
+TRNNo:- 16.0000
+Title:- Timer expired?
+EmptyTransition:- False
+Description:- Time for drain pulsing TIME_DRAIN_PULSE expired.
+Condition:- A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::15
+--------------------------------------------------
+StepNo:- 15.0000
+Title:- SY_UO_SIP : Close VENT filter line SIP drain valve
+Description:- SET EGxy05 (STATE = FILTER)
+
+Set the pulse_drain_complete flag to indicate to the parent that pulsing is now complete
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close VENT filter line SIP valve.
+Action:- //Set EGn005 to FILTER
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EGxy05;
+L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
+T #_SUB_EGxy05;
+Verification:- A(;
+L #_DEV_STATE_EGxy05;
+L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Flag that drain pulsing is complete
+Action:- SET;
+S #_pulse_drain_complete;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::17
+--------------------------------------------------
+TRNNo:- 17.0000
+Title:- Empty transition.
+EmptyTransition:- False
+Description:- Empty transition.
+Condition:- AN #_pulse_drain;
+
+
+--------------------------------------------------
+STEP::16
+--------------------------------------------------
+StepNo:- 16.0000
+Title:- SY_UO_SIP : Disable HPCA,Cooling and wait for reduced pressure
+Description:- Disable Sy HPCA pressure control.
+ECy001 STATE=STOPPED
+
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Disable Sy HPN2 pressure control.
+ECxy01 STATE=STOPPED
+
+Stop Sy cooling.
+EJxy03 STATE=STOPPED
+Action:- //Stop EJxy01 COOLING
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EJxy03;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EJxy03;
+
+//Disable Sy HPN2 pressure control.
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECxy01;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+A(;
+L #_DEV_STATE_EJxy03;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Action Description
+Action:- R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+L "dbCONST_VAL".EM.EMC1.VALVE.VENT;
+T #_VALVE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::18
+--------------------------------------------------
+TRNNo:- 18.0000
+Title:- Pressure below PRES_HPCA_LEAVE
+EmptyTransition:- False
+Description:- Pressure below PRES_HPCA_LEAVE. PI_xy10 <= PRES_HPCA_LEAVE
+Condition:- A(;
+L 	#_MEASURE_ECxy01;
+L 	#_PRES_N2_LEAVE;
+<=R;
+);
+
+
+--------------------------------------------------
+STEP::17
+--------------------------------------------------
+StepNo:- 17.0000
+Title:- SY_UO_SIP : Pressure reduced. Wait to close vessel outlet valve
+Description:- Log time pressure reached.
+
+Close Sy vent filter drain valve
+EGy005 STATE=FILTER
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log time pressure reached.
+
+Close Sy vent filter drain valve
+EGxy005 STATE=FILTER
+Action:- //Log time when pressure reached
+L "dbCONST_VAL".CPU_TIME;
+T #_log_PresN2Leave;
+
+
+//Close Sy vent filter drain valve
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EGxy05;
+L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
+T #_SUB_EGxy05;
+Verification:- A(;
+L #_DEV_STATE_EGxy05;
+L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::19
+--------------------------------------------------
+TRNNo:- 19.0000
+Title:- Flag ready_close_outlet set?
+EmptyTransition:- False
+Description:- Wait for parent to signal to close the SY tank outlet valve by setting flag ready_close_outlet.
+Condition:- A #_close_outlet;
+
+
+--------------------------------------------------
+STEP::18
+--------------------------------------------------
+StepNo:- 18.0000
+Title:- SY_UO_SIP : Close outlet valve and start LPCA blanketing
+Description:- Close Sy outlet valve
+EVy004 STATE=STOPPED
+
+Enable Sy LPCA pressure control at setpoint PRES_LPCA_BLANK with VENT valve closed.
+ECy001 STATE=PRESSURE_CONTROL, VALVE=LPCA, SP=PRES_LPCA_BLANK, AUXVENT=true
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close Sy outlet valve EVxy04 STATE=STOPPED
+Stop ECxy01 to be able to apply start of substate with different settings
+Action:- //Close Sy outlet valve
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EVxy04;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EVxy04;
+
+//Stop ECxy01 to be able to apply start of substate with different settings
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECxy01;
+Verification:- A(;
+L #_DEV_STATE_EVxy04;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Enable Sy LPN2 pressure control at setpoint PRES_N2_BLANK with VENT valve closed.
+ECxy01 STATE=PRESSURE_CONTROL, VALVE=LPN2, SP=PRES_N2_BLANK, AUXVENT=true
+Action:- // Enable Sy LPN2 pressure control at setpoint PRES_N2_BLANK with VENT valve open
+L "dbCONST_VAL".EM.EMC1.VALVE.LPN2;
+T #_VALVE_ECxy01;
+L #_PRES_N2_BLANK;
+T #_SETPOINT_ECxy01;
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::20
+--------------------------------------------------
+TRNNo:- 20.0000
+Title:- Empty transition
+EmptyTransition:- False
+Description:- Unconditional jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::19
+--------------------------------------------------
+StepNo:- 19.0000
+Title:- SY_UO_SIP : Wait for OPER to isolate vessel SY
+Description:- Prompt operator to disconnect all vessel utility pipe entry.
+Set EVy004 to substate ISOLATE.
+Set EXy007 to substate OFF.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt operator to disconnect all vessel utility pipe entry.
+Action:- //Remove all connections
+L "dbCONST_VAL".EM.EMC3.SUBS.ISOLATE;
+T #_SUB_ECxy03;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy03;
+
+// Log Mx SIP operation end time.
+L "dbCONST_VAL".CPU_TIME;
+T #_log_SIPComplete;
+Verification:- A(;
+L #_DEV_STATE_ECxy03;
+L "dbCONST_VAL".EM.EMC3.SUBS.ISOLATE;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Prompt operator to disconnect all vessel utility pipe entry.
+Action:- //Remove all connections
+L "dbCONST_VAL".EM.EMV1.SUBS.ISOLATE;
+T #_SUB_EVxy04;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EVxy04;
+Verification:- A(;
+L #_DEV_STATE_EVxy04;
+L "dbCONST_VAL".EM.EMV1.SUBS.ISOLATE;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::21
+--------------------------------------------------
+TRNNo:- 21.0000
+Title:- Empty transition.
+EmptyTransition:- False
+Description:- Unconditional jump
+Condition:- A(;
+L 	#_DEV_STATE_EVxy04;
+L 	"dbCONST_VAL".EM.DEV_STATE.COMPLETE;
+==I;
+);
+A(;
+L 	#_DEV_STATE_ECxy03;
+L 	"dbCONST_VAL".EM.DEV_STATE.COMPLETE;
+==I;
+);
+
+
+
+--------------------------------------------------
+STEP::20
+--------------------------------------------------
+StepNo:- 20.0000
+Title:- SY_UO_SIP : Unit Operation Completed
+Description:- Set equipment to SAFE state.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set equipment to SAFE state.
+Action:- // Enable Sy LPN2 pressure control at setpoint PRES_N2_BLANK with VENT valve open
+L "dbCONST_VAL".EM.EMC1.VALVE.LPN2;
+T #_VALVE_ECxy01;
+L #_PRES_N2_BLANK;
+T #_SETPOINT_ECxy01;
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+
+// EGxy05 (STATE=FILTER)
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EGxy05;
+L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
+T #_SUB_EGxy05;
+
+
+// Set safe state
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy03;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECxy03;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EVxy04;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EVxy04;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EJxy03;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EJxy03;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EXxy07;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EXxy07;
+
+//Reset flags
+SET;
+R #_positive_pressure;
+R #_pulse_drain;
+R #_second_path;
+R #_n2_blow;
+R #_pulse_drain_complete;
+R #_n2_blow_complete;
+Verification:- A M1.1; //Always High flag
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

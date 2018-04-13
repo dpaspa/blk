@@ -1,0 +1,722 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 7/04/2018 11:28:03 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+SFCNo:- 3
+Title:- PC_PCSY_FILL
+Description:- Recipe Procedure for Transfer from Storage Vessel Sy to Filling (Vial or Ampoule)
+Name:- FILL
+Class:- PCSY
+Level:- PC
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- PCSFIL
+Version:- 0.2
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.2 Khairul Bhasar   02-Nov-2009 09/058     Added Ampoule and Vial Filling switches
+// 0.1 Gerald Kontriner 18-Sep-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- FLV_UNIT_ACQUIRE
+Type:- BOOL
+Description:- FLA UNIT NUMBER TO BE RESERVED
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- FLA_UNIT_ACQUIRE
+Type:- BOOL
+Description:- FLA UNIT TO BE RESERVED
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- FCV_UNIT_NUMBER
+Type:- INT
+Description:- FCV RESERVED UNIT NUMBER
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- FCA_UNIT_NUMBER
+Type:- INT
+Description:- FCA RESERVED UNIT NUMBER
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- SY_OWNER_NUMBER
+Type:- INT
+Description:- SY UNIT NUMBER TO BE WRITTEN TO FLZ
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- Release_FCZ
+Type:- BOOL
+Description:- Release FCZ after FLZ acquired
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- FCZ_OWNED
+Type:- INT
+Description:- FCZ OWNED TO CHECK THE STATUS
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- Flz_prompt_abort
+Type:- BOOL
+Description:- Prompt operator to abort the recipe s unit not available
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- Flz_confrim_abort
+Type:- BOOL
+Description:- Flz confirm abort as unit not available
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- RELEASE_FLZ
+Type:- BOOL
+Description:- Description
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- FLZ_OWNED_BY
+Type:- INT
+Description:- Description
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- FCZ_OWNED_BY
+Type:- INT
+Description:- Description
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- HYG_STATE_FCZ
+Type:- INT
+Description:- Description
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- fill_proceed
+Type:- BOOL
+Description:- Synchronisation flag indicating Sy to proceed with filling
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- confirm_abort
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- prompt_abort
+Type:- BOOL
+Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::17
+--------------------------------------------------
+Name:- path_ready
+Type:- BOOL
+Description:- Synchronisation flag indicating Filling path ready
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::18
+--------------------------------------------------
+Name:- msg_WrongHygiene
+Type:- BOOL
+Description:- HMI message: Sy has incorrect Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::19
+--------------------------------------------------
+Name:- HYG_STATE_FLZ
+Type:- INT
+Description:- Hygiene Status of unit FLZ
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::20
+--------------------------------------------------
+Name:- DEV_STATE_FLZ
+Type:- INT
+Description:- Device State of unit FLZ
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::21
+--------------------------------------------------
+Name:- SUB_FLZ
+Type:- INT
+Description:- Substate selection to unit FLZ
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::22
+--------------------------------------------------
+Name:- CMD_FLZ
+Type:- INT
+Description:- Command to unit FLZ
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::23
+--------------------------------------------------
+Name:- log_BatchID
+Type:- STRING
+Description:- Logging Batch ID of storage vessel SY
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::24
+--------------------------------------------------
+Name:- BatchID_SY
+Type:- STRING[6]
+Description:- Batch ID of storage vessel Sy
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::25
+--------------------------------------------------
+Name:- HYG_STATE_Sy
+Type:- INT
+Description:- Hygiene Status of unit Sy
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::26
+--------------------------------------------------
+Name:- toggle_mode
+Type:- BOOL
+Description:- Toggle mode of all used units
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::27
+--------------------------------------------------
+Name:- log_WrongHygiene
+Type:- TOD
+Description:- Logging that Sy has incorrect Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::28
+--------------------------------------------------
+Name:- log_FILLEnd
+Type:- TOD
+Description:- Logging FILL operation end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::29
+--------------------------------------------------
+Name:- log_FILLBegin
+Type:- TOD
+Description:- Logging FILL operation start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::30
+--------------------------------------------------
+Name:- DEV_STATE_Sy
+Type:- INT
+Description:- Device State of unit Sy
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::31
+--------------------------------------------------
+Name:- SUB_Sy
+Type:- INT
+Description:- Substate selection to unit Sy
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::32
+--------------------------------------------------
+Name:- CMD_Sy
+Type:- INT
+Description:- Command to unit Sy
+ParameterInOut:- OUT
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- RP_FILL : Recipe Procedure Commenced
+Description:- Log transfer from storage to filling operation begin time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log transfer from storage to filling operation begin time.
+Action:- //Log Sy FILL operation begin
+L "dbCONST_VAL".CPU_TIME;
+T #_log_FILLBegin;
+
+// Reset used flags
+SET;
+R #_toggle_mode;
+R #_prompt_abort;
+R #_Flz_prompt_abort;
+R #_Flz_confrim_abort;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- IF Sy SELECTED AND FLz and FPz ARE both owned
+EmptyTransition:- False
+Description:- Check if Sy; FLz and FPz are both owned by the same CRP or if FLZ & FPZ is available.
+Condition:- A(;
+O(;
+L #_FCZ_OWNED;
+L #_FLZ_OWNED_BY;
+==I;
+);
+O(;
+L #_FLZ_OWNED_BY;
+L 0;
+==I;
+);
+);
+
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 2.0000
+Title:- TRN Title
+EmptyTransition:- False
+Description:- TRN description
+Condition:- A(;
+L #_FCZ_OWNED;
+L #_FLZ_OWNED_BY;
+<>I;
+);
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- RP_FILL : Abort as filling can't acquire
+Description:- PROMPT OPERATOR TO CONFIRM ABORT 
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Action Description
+Action:- S #_Flz_prompt_abort;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 3.0000
+Title:- Confirm abort by opeator
+EmptyTransition:- False
+Description:- TRN description
+Condition:- A #_Flz_confrim_abort;
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- RP_FILL : Acquire FLz and FPz
+Description:- ACQUIRE FLz and FPz
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- ACQUIRE FLZ
+Action:- A(;
+L #_SY_OWNER_NUMBER;
+L #_FCA_UNIT_NUMBER;
+==I;
+);
+JC SN31;
+A(;
+L #_SY_OWNER_NUMBER;
+L #_FCV_UNIT_NUMBER;
+==I;
+);
+JC SN32;
+
+SN31:NOP 0;
+S #_FLA_UNIT_ACQUIRE;
+JU SN33;
+SN32:NOP 0;
+S #_FLV_UNIT_ACQUIRE;
+
+SN33:NOP 0;
+
+L "dbCONST_VAL".UNIT.HYGIENE_STATE.STERILE;
+T #_HYG_STATE_FLZ;
+
+Verification:- A(;
+L #_FLZ_OWNED_BY;
+L 0;
+>I;
+) ;
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 4.0000
+Title:- Check Hygiene Status
+EmptyTransition:- False
+Description:- Selected Sy is in Hygiene status BATCH?
+Condition:- A(;
+L "dbCONST_VAL".UNIT.HYGIENE_STATE.BATCH;
+L #_HYG_STATE_Sy;
+==I;
+);
+A(;
+L "dbCONST_VAL".UNIT.HYGIENE_STATE.STERILE;
+L #_HYG_STATE_FLZ;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 5.0000
+Title:- Incorrect Hygiene Status
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 4.0000
+Title:- RP_FILL : Incorrect Hygiene Status
+Description:- Log that Sy is not in Hygiene status BATCH.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log that Sy is not in Hygiene status BATCH.
+Action:- //Log time if Sy not in correct Hygiene status BATCH
+L "dbCONST_VAL".CPU_TIME;
+T #_log_WrongHygiene;
+
+SET;
+S #_msg_WrongHygiene;
+S #_prompt_abort;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::06
+--------------------------------------------------
+TRNNo:- 6.0000
+Title:- Confirm Abort (Incorrect Hygiene Status)
+EmptyTransition:- False
+Description:- Confirm Abort (Incorrect Hygiene Status)
+Condition:- A #_confirm_abort;
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
+Title:- RP_FILL : Initiate FLz & FPz SETUP operation
+Description:- Log BatchID Number.
+
+Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+
+Initiate Unit Operation
+FLz STATE=SETUP
+FPz STATE=SETUP 
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log previous operation BatchID Number.
+Set Mx, Sy and FCz equipment to Hygiene Status to CIP
+Set CIPSIP Cycle Number.
+
+Log BatchID Number.
+Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+
+Initiate Unit Operation
+FLZ STATE=SETUP
+Action:- //Log BatchID Number.
+//L #_BatchID_SY;
+//T #_log_BatchID;
+
+//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+SET;
+S #_toggle_mode;
+
+//Initiate Unit Operation for unit FLZ (other PLC)
+L "dbCONST_VAL".UNIT.FLZ.SUBS.SETUP;
+T #_SUB_FLZ;
+L "dbCONST_VAL".UNIT.CMD.START;
+T #_CMD_FLZ;
+
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::07
+--------------------------------------------------
+TRNNo:- 07
+Title:- SETUP operations complete?
+EmptyTransition:- False
+Description:- Setup operation complete. 
+FLZ STATE=SETUP
+FPZ STATE=SETUP
+Condition:- A(;
+L #_DEV_STATE_FLZ;
+L "dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 06
+Title:- RP_FILL : Start Sy and FLz FILL Unit Operations
+Description:- Initiate Unit Operations
+SY STATE=FILL
+FLZ STATE=FILL
+FPZ STATE=FILL
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Initiate SY STATE=FILL Unit Operation
+Action:- //Log BatchID Number.
+//L #_BatchID_SY;
+//T #_log_BatchID;
+
+//Release FCZ and keep it at used state 
+S #_Release_FCZ;
+
+SET;
+S #_path_ready;
+
+//Initiate SY STATE=FILL Unit Operation
+L "dbCONST_VAL".UNIT.SY.SUBS.FILL;
+T #_SUB_Sy;
+L "dbCONST_VAL".UNIT.CMD.START; 
+T #_CMD_Sy;
+
+//Initiate Unit Operation for unit FLZ (other PLC)
+L "dbCONST_VAL".UNIT.FLZ.SUBS.FILL;
+T #_SUB_FLZ;
+L "dbCONST_VAL".UNIT.CMD.START;
+T #_CMD_FLZ;
+
+//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+SET;
+R #_toggle_mode;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::08
+--------------------------------------------------
+TRNNo:- 08
+Title:- Filling path setup?
+EmptyTransition:- False
+Description:- Check if Sy and FLZ & FPZ filling paths are setup
+Condition:- A(;
+L #_DEV_STATE_FLZ;
+L "dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
+==I;
+);
+A #_path_ready;
+
+
+--------------------------------------------------
+STEP::07
+--------------------------------------------------
+StepNo:- 07
+Title:- RP_FILL : Start SY Filling
+Description:- Flag Sy to start the filling operation by setting flag fill_proceed
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Start filling operation
+Action:- SET;
+S #_fill_proceed;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::09
+--------------------------------------------------
+TRNNo:- 09
+Title:- FILL operations complete?
+EmptyTransition:- False
+Description:- SY and FLZ & FPZ FILL operations are complete
+Condition:- A(;
+L #_DEV_STATE_Sy;
+L "dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::08
+--------------------------------------------------
+StepNo:- 08
+Title:- RP_FILL : Sy Filling Unit Operation Finished
+Description:- Now finished with Sy. 
+Set Sy Hygiene Status to USED.
+Set FPz Hygiene Status to USED
+Set FLz Hygiene status to USED
+
+Log filling operation complete.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set Sy Hygiene Status to USED.
+Log filling operation complete.
+Action:- //Set Sy Hygiene Status to USED.
+L "dbCONST_VAL".UNIT.HYGIENE_STATE.USED;
+T #_HYG_STATE_Sy;
+T #_HYG_STATE_FLZ;
+L "dbCONST_VAL".UNIT.CMD.STOP;
+T #_CMD_FLZ;
+
+//Log product manufacture operation end
+L "dbCONST_VAL".CPU_TIME;
+T #_log_FILLEnd;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+STEP::09
+--------------------------------------------------
+StepNo:- 09
+Title:- RP_FILL : Release FLZ and FPz unit from the CRP
+Description:- Check FLz and FPz released from the CRP
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Releasing the unit from the crp
+Action:- //Release FLZ
+SET;
+S #_RELEASE_FLZ;
+Verification:- A(;
+L #_FLZ_OWNED_BY;
+L 0;
+==I;
+);
+
+
+
+--------------------------------------------------
+TRANSITION::11
+--------------------------------------------------
+TRNNo:- 11.0000
+Title:- Empty step
+EmptyTransition:- False
+Description:- Jump unconditionally
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::10
+--------------------------------------------------
+StepNo:- 10
+Title:- RP_FILL : Recipe Procedure Completed
+Description:- Set equipment to SAFE state.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set equipment to SAFE state.
+Action:- A(;
+L "dbCONST_VAL".UNIT.HYGIENE_STATE.USED;
+L #_HYG_STATE_Sy;
+==I;
+);
+
+//put substate to none of sy
+L "dbCONST_VAL".UNIT.SUBSTATE.ZERO; 
+T #_SUB_Sy;
+
+//Stop FLZ Unit Operation
+L "dbCONST_VAL".UNIT.CMD.STOP; 
+T #_CMD_FLZ;
+L "dbCONST_VAL".UNIT.SUBSTATE.ZERO; 
+T #_SUB_FLZ;
+
+//Clear used flags
+SET;
+R #_fill_proceed;
+R #_toggle_mode;
+R #_path_ready;
+R #_msg_WrongHygiene;
+R #_prompt_abort;
+R #_RELEASE_FLZ;
+R #_Flz_prompt_abort;
+R #_Flz_confrim_abort;
+Verification:- A M1.1;
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

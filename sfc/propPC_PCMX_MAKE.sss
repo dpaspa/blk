@@ -1,0 +1,373 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 7/04/2018 11:28:08 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+SFCNo:- 3
+Title:- PC_PCMX_MAKE
+Description:- Recipe Procedure for Product Manufacture
+Name:- MAKE
+Class:- PCMX
+Level:- PC
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- PCMAKE
+Version:- 0.1
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.1 Gerald Kontriner 18-Sep-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- Release_Water_System_Mx
+Type:- BOOL
+Description:- Release the water sytem of Mx
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- confirm_abort
+Type:- BOOL
+Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- prompt_abort
+Type:- BOOL
+Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- msg_WrongHygiene
+Type:- BOOL
+Description:- HMI message: Mx is in the wrong Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- log_BatchID
+Type:- STRING
+Description:- Logging previous SIP Batch ID of Manufacturing vessel Mx
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- BatchID_MX
+Type:- STRING[6]
+Description:- Batch ID of manufacturing vessel Mx
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- BatchID
+Type:- STRING[6]
+Description:- Batch ID
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- toggle_mode
+Type:- BOOL
+Description:- Toggle mode of all used units
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- HYG_STATE_Mx
+Type:- INT
+Description:- Hygiene Status of unit Mx
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- log_MxMAKEEnd
+Type:- TOD
+Description:- Logging Mx recipe MAKE operation end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- log_MxMAKEBegin
+Type:- TOD
+Description:- Logging Mx recipe MAKE operation start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- log_WrongHygiene
+Type:- TOD
+Description:- Logging that Mx is in the wrong Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- log_SIPBatchID
+Type:- STRING
+Description:- Logging SIP BatchID of Manufacturing Vessel Mx 
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- CMD_Mx
+Type:- INT
+Description:- Command to unit Mx
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- DEV_STATE_Mx
+Type:- INT
+Description:- Device State of unit Mx
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- SUB_Mx
+Type:- INT
+Description:- Substate selection to unit Mx
+ParameterInOut:- OUT
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- RP_MAKE : Recipe Procedure Commenced
+Description:- Log product manufacture operation begin time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log product manufacture operation begin time.
+Action:- //Log product manufacture operation begin
+L "dbCONST_VAL".CPU_TIME;
+T #_log_MxMAKEBegin;
+
+// Reset used flags
+SET;
+R #_toggle_mode;
+R #_prompt_abort;
+R #_confirm_abort;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 1.0000
+Title:- Check Hygiene Status
+EmptyTransition:- False
+Description:- Selected Mx is in Hygiene status STERILE?
+Condition:- A(;
+L "dbCONST_VAL".UNIT.HYGIENE_STATE.STERILE;
+L #_HYG_STATE_Mx;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 2.0000
+Title:- Incorrect Hygiene Status
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- RP_MAKE : Incorrect Hygiene Status
+Description:- Log that Mx is not in Hygiene status STERILE.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log that Mx is not in Hygiene status STERILE.
+Action:- //Log time if Mx not in correct Hygiene status STERILE
+L "dbCONST_VAL".CPU_TIME;
+T #_log_WrongHygiene;
+
+SET;
+S #_msg_WrongHygiene;
+S #_prompt_abort;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 3.0000
+Title:- Confirm Abort (Incorrect Hygiene Status)
+EmptyTransition:- False
+Description:- Confirm Abort (Incorrect Hygiene Status)
+Condition:- A #_confirm_abort;
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- RP_MAKE : Initiate MAKE Unit Operation
+Description:- Log SIP BatchID Number.
+Set Mx Hygiene Status to BATCH.
+Set BatchID Number.
+
+Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+
+Initiate MX STATE=MAKE Unit Operation
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log SIP BatchID Number.
+Set Mx Hygiene Status to BATCH.
+Set BatchID Number.
+
+Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+
+Initiate MX STATE=MAKE Unit Operation
+Action:- // Log SIP BatchID Number.
+//L #_BatchID_MX;
+//T #_log_BatchID;
+
+//Set Mx Hygiene Status to BATCH.
+L "dbCONST_VAL".UNIT.HYGIENE_STATE.BATCH;
+T #_HYG_STATE_Mx;
+
+//Set BatchID Number.
+//L #_BatchID;
+//T #_BatchID_MX;
+
+//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+SET;
+S #_toggle_mode;
+
+//Initiate MX STATE=MAKE Unit Operation
+L "dbCONST_VAL".UNIT.MX.SUBS.MAKE; 
+T #_SUB_Mx;
+L "dbCONST_VAL".UNIT.CMD.START; 
+T #_CMD_Mx;
+
+Verification:- A(;
+L #_DEV_STATE_Mx;
+L "dbCONST_VAL".UNIT.MX.SUBS.MAKE;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
+Title:- MAKE operation complete?
+EmptyTransition:- False
+Description:- MX MAKE operation is complete
+Condition:- A(;
+L 	#_DEV_STATE_Mx;
+L 	"dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- RP_MAKE : Release the water system
+Description:- Log product manufacture operation end
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log product manufacture operation end
+Release Water System of Mx
+Action:- //Log product manufacture operation end
+L "dbCONST_VAL".CPU_TIME;
+T #_log_MxMAKEEnd;
+
+//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+SET;
+R #_toggle_mode;
+
+//Release the water system
+S #_Release_Water_System_Mx;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 5.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
+Title:- RP_MAKE : Recipe Procedure Completed
+Description:- Stop Mx unit operation
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Stop Mx unit operation
+Action:- A(;
+L "dbCONST_VAL".UNIT.HYGIENE_STATE.BATCH; 
+L #_HYG_STATE_Mx;
+==I;
+);
+JC NORM;
+
+//Stop MX Unit Operation
+L "dbCONST_VAL".UNIT.CMD.STOP; 
+T #_CMD_Mx;
+L "dbCONST_VAL".UNIT.SUBSTATE.ZERO; 
+T #_SUB_Mx;
+
+NORM: NOP 0;
+
+//Clear used flags
+SET;
+R #_toggle_mode;
+R #_msg_WrongHygiene;
+R #_prompt_abort;
+R #_confirm_abort;
+Verification:- A M1.1;
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

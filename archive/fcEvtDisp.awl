@@ -1,0 +1,123 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file processes each event and calls the S7 Alarm functions.           //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      11-Apr-2018 NA        Initial design for S7-1500.     //
+// 0.1 Khairul Basar    27-Aug-2009 CC-09/023 Path_IL added, Phase updated.   //
+//----------------------------------------------------------------------------//
+FUNCTION "fcEvtDisp" : Void
+TITLE = Event dispatch function for HMI messages and alarms
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcEvtDisp
+VERSION : 1.0
+
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+VAR_IN_OUT
+    evtElem : "udtMsgEvent";
+END_VAR
+
+VAR_TEMP
+    edgeEvent : Bool;
+    raiseEvent : Bool;
+    sRetval : Int;
+    scComplete : Bool;
+    scRetval : Int;
+    scState : Bool;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Check if event needs to be raised
+    //------------------------------------------------------------------------//
+    // Check if real message event or test signal number requested:           //
+    //------------------------------------------------------------------------//
+    A #evtElem.trigger;
+    A(;
+    O(;
+    L "numTestMessage";
+    L 255;
+    <>I;
+    );
+    O(;
+    L "numTestMessage";
+    L #evtElem.idxMessage;
+    ==I;
+    );
+    );
+    FP #edgeEvent;
+    = #raiseEvent;
+
+NETWORK
+TITLE = Check if event needs to be raised
+    //------------------------------------------------------------------------//
+    // Clear the alarm response confirm flags:                                //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    R #evtElem.confirmYes;
+    R #evtElem.confirmNo;
+
+NETWORK
+TITLE = Raise event without acknowledgement if required
+    //------------------------------------------------------------------------//
+    // Raise the event if requested:                                          //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    AN #evtElem.ackRequired;
+    CALL ALARM_D
+    (   SIG                         := #evtElem.trigger ,
+        ID                          := WORD#16#EEEE ,         // S7 Data Channel for alarms
+        EV_ID                       := #evtElem.eventID ,     // Alarm number (cannot be 0)
+        CMP_ID                      := 7 ,                    // The DB number with the message data
+        SD                          := #evtElem ,
+        RET_VAL                     := #sRetval
+    );
+
+NETWORK
+TITLE = Raise event with acknowledgement if confirm bits defined
+    //------------------------------------------------------------------------//
+    // Raise the event if requested:                                          //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    A #evtElem.ackRequired;
+    CALL ALARM_DQ
+    (   SIG                         := #evtElem.trigger ,
+        ID                          := WORD#16#EEEE ,         // S7 Data Channel for alarms
+        EV_ID                       := #evtElem.eventID ,     // Alarm number (cannot be 0)
+        CMP_ID                      := 7 ,                    // The DB number with the message data
+        SD                          := #evtElem ,
+        RET_VAL                     := #sRetval
+    );
+
+NETWORK
+TITLE = Acknowledge
+    //------------------------------------------------------------------------//
+    // Get the acknowledgement response if it was requested:                  //
+    //------------------------------------------------------------------------//
+    A #evtElem.ackRequired;
+    CALL ALARM_SC
+    (   EV_ID                       := #evtElem.eventID ,
+        RET_VAL                     := #scRetval ,
+        STATE                       := #scState ,
+        Q_STATE                     := #scComplete
+    );
+    NOP 0;
+
+NETWORK
+TITLE = Only Acknowledge or Ack plus Cancel
+    //------------------------------------------------------------------------//
+    // Check if the operator did not cancel. If not then it must have been a  //
+    // confirm yes event:                                                     //
+    //------------------------------------------------------------------------//
+    A #scComplete;
+    AN #evtElem.confirmNo;
+    = #evtElem.confirmYes;
+
+END_FUNCTION

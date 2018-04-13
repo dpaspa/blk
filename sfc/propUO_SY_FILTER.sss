@@ -1,0 +1,343 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 7/04/2018 11:24:03 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+SFCNo:- 4
+Title:- UO_SY_FILTER
+Description:- Sequence for receipt of product Filtration from Manufacturing Vessel Mx into Storage Vessel Sy.
+Name:- FILTER
+Class:- SY
+Level:- UO
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- SUFILT
+Version:- 0.1
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.1 Gerald Kontriner 14-Sep-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- press_lpca_purge
+Type:- REAL
+Description:- Pressure LPCA purge after filtration complete
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- emc_water_state
+Type:- INT
+Description:- Device state of emc_water
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- emc_water_subs
+Type:- INT
+Description:- Substate selection to emc_water
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- emc_water_cmd
+Type:- INT
+Description:- Command to emc_water
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- emv_vessel_state
+Type:- INT
+Description:- Device state of emv_vessel
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- emv_vessel_subs
+Type:- INT
+Description:- Substate selection to emv_vessel
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- emv_vessel_cmd
+Type:- INT
+Description:- Command to emv_vessel
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- emc_gas_setpoint
+Type:- REAL
+Description:- Setpoint to emc_gas
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- emc_gas_medium
+Type:- INT
+Description:- emc_gas medium
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- emc_gas_state
+Type:- INT
+Description:- Device State of emc_gas
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- emc_gas_subs
+Type:- INT
+Description:- Substate selection to emc_gas
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- emc_gas_cmd
+Type:- INT
+Description:- Command to emc_gas
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- filtration_complete
+Type:- BOOL
+Description:- Filtration complete flag
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- path_ready
+Type:- BOOL
+Description:- Indicates flow path has been opened
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- time_lpca_purge
+Type:- Time
+Description:- Time setting for LPCA purging
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- press_lpca_blanket
+Type:- REAL
+Description:- Pressure LPCA blanket
+ParameterInOut:- IN
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- UO_SY_FILTER : Filtration Unit Operation Commenced
+Description:- Open Sy vent valve without LPCA control.
+
+Set Sy Outlet valve open (STATE=DISCHARGE).
+
+Set remaining Sy equipment to SAFE state.
+
+Set flag path_ready.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open Sy vent valve without LPCA control.
+Set Sy Outlet valve open (STATE=DISCHARGE).
+Set remaining Sy equipment to SAFE state:
+
+Action:- // Open Sy vent valve without LPCA control
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emc_gas_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emc_gas_cmd;
+
+// Open Sy outlet valve
+L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
+T #_emv_vessel_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emv_vessel_cmd;
+
+
+L "dbCONST_VAL".EM.EMX2.SUBS.FILTER; 
+T #_SUB_EXxy07;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EXxy07;
+
+// Set remaining Sy equipment to SAFE state:
+L "dbCONST".BLK.CMD.STOP;
+T  #_emc_water_cmd;
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emc_water_subs;
+
+Verification:- A(;
+L #_emc_gas_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L #_emv_vessel_state;
+L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
+==I;
+);
+A(;
+L #_emc_water_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Set flag path_ready.
+Action:- // Set flag path_ready.
+SET;
+S #_path_ready;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Filtration complete?
+EmptyTransition:- False
+Description:- Wait for parent to indicate filtration transfer is complete when flag filtration_complete is set by the parent.
+Condition:- A #_filtration_complete;
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- UO_SY_FILTER : Enable Sy LPCA control
+Description:- Enable Sy LPCA control at PRES_LPCA_PURGE.
+
+Start Timer with TIME_LPCA_PURGE.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Enable Sy LPCA control at PRES_LPCA_PURGE.
+
+Start Timer with TIME_LPCA_PURGE.
+Action:- //Enable Sy LPCA control at PRES_LPCA_PURGE.
+L  #_pres_lpca_purge;
+T  #_emc_gas_setpoint;
+L  "dbCONST".SEL.GAS.LPCA;
+T  #_emc_gas_medium;
+L  "dbCONST".BLK.EMC1.SUBS.PRESSURE;
+T  #_emc_gas_subs;
+L  "dbCONST".BLK.CMD.START;
+T  #_emc_gas_cmd;
+
+
+// Start Timer
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_time_lpca_purge;
+T #SQ_TIMER.PT;
+R #_path_ready;
+Verification:- A(;
+L #_emc_gas_state;
+L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
+==I;
+);
+A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- Timer expired?
+EmptyTransition:- False
+Description:- Wait until TIME_LPCA_PURGE expired.
+Condition:- A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- UO_SY_FILTER : Filtration Unit Operation Completed
+Description:- Adjust Sy LPCA pressure control setpoint to PRES_LPCA_BLANKET with the Vent valve closed.
+
+Set other equipment to safe state.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Adjust Sy LPCA pressure control setpoint to PRES_CA_BLANKET with the Vent valve closed.
+
+Set other equipment to safe state:
+
+Action:- // Adjust Sy LPCA pressure control setpoint to PRES_LPCA_BLANKET with the Vent valve closed.
+L  #_pres_lpca_blanket;
+T  #_emc_gas_setpoint;
+L  "dbCONST".SEL.GAS.LPCA;
+T  #_emc_gas_medium;
+L  "dbCONST".BLK.EMC1.SUBS.PRESSURE;
+T  #_emc_gas_subs;
+L  "dbCONST".BLK.CMD.START;
+T  #_emc_gas_cmd;
+
+
+
+// Set other equipment to safe state.
+L "dbCONST".BLK.SAFE.CMD;
+T #_emv_vessel_subs;
+L "dbCONST".BLK.CMD.STOP;
+T #_emv_vessel_cmd;
+
+
+//Clear used flags
+SET;
+R #_path_ready;
+Verification:- A(;
+L #_emc_gas_state;
+L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
+==I;
+);
+A(;
+L #_emv_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

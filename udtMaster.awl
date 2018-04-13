@@ -9,14 +9,14 @@
 // 2.0 David Paspa      28-Feb-2018 NA        Reboot for S7-1500.             //
 // 0.1 Khairul Basar    30-Sep-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-﻿TYPE "udtAlarmMessage"
-VERSION : 0.1
-   STRUCT
-      MainTextLib : Byte;              // Select Main Library
-      TextLib : Byte;                  // Select second Library
-      BatchID : Array[1..6] of Char;
-      CipSipNo : DWord;
-   END_STRUCT;
+TYPE "udtAlarmMessage"
+VERSION : 2.0
+    STRUCT
+        MainTextLib : Byte;            // Select Main Library
+        TextLib : Byte;                // Select Second Library
+        BatchID : Array[1..6] of Char;
+        CipSipNo : DWord;
+    END_STRUCT;
 END_TYPE
 
 TYPE "udtHygiene"
@@ -48,20 +48,34 @@ VERSION : 0.1
     END_STRUCT;
 END_TYPE
 
+TYPE "udtMsgPayload"
+VERSION : 2.0
+    STRUCT
+        isReal : Bool;
+        isBatch : Bool;
+        numSerial : Int;               // Unique batch or CIPSIP serial number
+        dataValue : Real;
+    END_STRUCT;
+END_TYPE
+
 TYPE "udtMsgEvent"
 VERSION : 2.0
     STRUCT
-        prompt : Bool;
-        confirm_yes : Bool;
-        confirm_no : Bool;
+        trigger : Bool;
+        confirmYes : Bool;
+        confirmNo : Bool;
+        ackPending : Bool;
         ackRequired : Bool;
+        eventID : DWord;
+        idxMessage : Byte;
+        payLoad : "udtMsgPayload";
     END_STRUCT;
 END_TYPE
 
 TYPE "udtLogEvent"
 VERSION : 2.0
     STRUCT
-        edge : Bool;
+        trigger : Bool;
         Time_Index : Int;
         Real_Index : Int;
         timeValue : Time;

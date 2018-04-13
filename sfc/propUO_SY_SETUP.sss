@@ -1,0 +1,436 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 7/04/2018 11:24:09 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+SFCNo:- 2
+Title:- UO_SY_SETUP
+Description:- Unit Operation for setup of storage vessel equipment
+Name:- SETUP
+Class:- SY
+Level:- UO
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- SUSET
+Version:- 0.1
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.1 Gerald Kontriner 14-Sep-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- log_confirmation
+Type:- TOD
+Description:- Logging operator confirmation
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- zsc_smfl1_state
+Type:- INT
+Description:- SMFLx Filtrationoutlet flowpath indicator
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- FILL_A_EXxy07
+Type:- BOOL
+Description:- EM Path Selection For Ampoule Or Vial
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- FZ
+Type:- INT
+Description:- Selection Of What Path Required For Ampoule Or Drain
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- confirm_connect_ok
+Type:- BOOL
+Description:- Confirmation that all vessel connections are properly made.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- prompt_connect_ok
+Type:- BOOL
+Description:- Prompt operator to confirm all vessel connections are properly made.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- MEDIUM_ECxy02
+Type:- INT
+Description:- Medium selection for ECxy02
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- emx_smfl_cmd
+Type:- INT
+Description:- Command to emx_smfl
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- emx_smfl_state
+Type:- INT
+Description:- Device State of emx_smfl
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- SUB_EVxy04
+Type:- INT
+Description:- Substate selection to EVxy04
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- DEV_STATE_EVxy04
+Type:- INT
+Description:- Device State of EVxy04
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- emx_smfl_subs
+Type:- INT
+Description:- Substate selection to emx_smfl
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- CMD_EVxy04
+Type:- INT
+Description:- Command to EVxy04
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- emg_filter_state
+Type:- INT
+Description:- Device State of emg_filter
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- CMD_EXxy07
+Type:- INT
+Description:- Command to EXxy07
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- emg_filter_cmd
+Type:- INT
+Description:- Command to emg_filter
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::17
+--------------------------------------------------
+Name:- SUB_EXxy07
+Type:- INT
+Description:- Substate selection to EXxy07
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::18
+--------------------------------------------------
+Name:- DEV_STATE_EXxy07
+Type:- INT
+Description:- Device State of EXxy07
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::19
+--------------------------------------------------
+Name:- emg_filter_subs
+Type:- INT
+Description:- Substate selection to emg_filter
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::20
+--------------------------------------------------
+Name:- emc_gas_state
+Type:- INT
+Description:- Device State of emc_gas
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::21
+--------------------------------------------------
+Name:- emc_gas_cmd
+Type:- INT
+Description:- Command to emc_gas
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::22
+--------------------------------------------------
+Name:- emc_gas_subs
+Type:- INT
+Description:- Substate selection to emc_gas
+ParameterInOut:- OUT
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- UO_SY_SETUP : Setup Unit Operation Commenced
+Description:- Prompt operator to confirm that all vessel connections, including the permanent flexible connections are properly made.
+
+Prompt Operator to make manual plant connections to connect spool piece SPx2 to ZSCx111 SMFLx drain line.
+
+Set Sy equipment to SAFE state:
+emc_gas  (STATE=STOPPED)
+EGxy05 (STATE=FILTER)
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt operator to confirm correct vessel connections.
+Action:- SET;
+S #_prompt_connect_ok;
+R #_confirm_connect_ok;
+
+
+// ECxy01 (STATE=STOPPED)
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emc_gas_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emc_gas_cmd;
+
+// EGxy05 (STATE=FILTER)
+L "dbCONST".BLK.CMD.START;
+T #_emg_filter_cmd;
+L "dbCONST".BLK.EMG1.SUBS.FILTER;
+T #_emg_filter_subs;
+
+Verification:- A(;
+L #_emg_filter_state;
+L "dbCONST".BLK.EMG1.SUBS.FILTER;
+==I;
+);
+A(;
+L #_emc_gas_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 2.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 2.0000
+Title:- UO_SY_SETUP : Setup Unit Operation Commenced
+Description:- Setup spool piece SPx2 SMFLx to ZSCx111
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Setup spool piece SPx2 SMFLx to ZSCx111
+Action:- // Start CIP_SETUP.
+L "dbCONST".BLK.CMD.START;
+T #_emx_smfl_cmd;
+L "dbCONST".BLK.EMX6.SUBS.CIP_SETUP;
+T #_emx_smfl_subs;
+Verification:- A(;
+L #_emx_smfl_state;
+L "dbCONST".BLK.EMX6.SUBS.CIP_SETUP;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 3.0000
+Title:- UO_SY_SETUP : Reset prompt.
+Description:- Reset prompt.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt operator to confirm correct vessel connections.
+Action:- SET;
+R #_prompt_connect_ok;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 4.0000
+Title:- SY_UO_SETUP : Unit Operation Commenced
+Description:- Log operator confirmation.
+
+Connect PW inlet line to Sy.
+Set ECxy02 to substate SETUP and MEDIUM=PW.
+
+Connect Sy to manufacturing filtration line and Filling Drain.
+Set EXxy07 to substate SETUP.
+
+Set EVxy04 to substate CHARGE.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set Sy equipment to requested states.
+Connect PW inlet line to Sy.
+Connect Sy to manufacturing filtration line and Filling Drain
+/Set EXxy07 to substate SETUP.
+Set EVxy04 to substate CHARGE.
+Action:- // Log operator confirmation time.
+L "dbCONST_VAL".CPU_TIME;
+T #_log_confirmation;
+
+//Clear used flags
+SET;
+R #_prompt_connect_ok;
+R #_confirm_connect_ok;
+
+
+// Connect PW inlet line to Sy.
+// Set ECxy02 to substate SETUP and MEDIUM=PW.
+
+L "dbCONST".SEL.LIQUID.PW;
+T #_MEDIUM_ECxy02;
+
+L "dbCONST_VAL".EM.EMC2.SUBS.SETUP; 
+T #_SUB_ECxy02;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy02;
+
+
+// Connect Sy to manufacturing filtration line and Filling Drain.
+// Set EXxy07 to substate SETUP.
+A(;
+L 1;
+L #_FZ;
+==I;
+);
+JCN S302;
+SET;
+S #_FILL_A_EXxy07;
+JU end1;
+
+S302: NOP 0;
+A(;
+L 2;
+L #_FZ;
+==I;
+);
+R #_FILL_A_EXxy07;
+
+end1: NOP 0;
+
+//Set EXxy07 to substate SETUP.
+L "dbCONST_VAL".EM.EMX2.SUBS.SETUP;
+T #_SUB_EXxy07;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EXxy07;
+
+
+// Set EVxy04 to substate CHARGE.
+
+L "dbCONST_VAL".EM.EMV1.SUBS.CHARGE;
+T #_SUB_EVxy04;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EVxy04;
+
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 4.0000
+Title:- SETUP Complete?
+EmptyTransition:- False
+Description:- Sy jacket status EJxy03 STATUS=DRAIN AND ECx102 SETUP complete AND EXxy07 SETUP complete.
+Condition:- A(;
+L 	#_DEV_STATE_ECxy02;
+L 	"dbCONST_VAL".EM.DEV_STATE.COMPLETE;
+==I;
+);
+A(;
+L 	#_DEV_STATE_EXxy07;
+L 	"dbCONST_VAL".EM.DEV_STATE.COMPLETE;
+==I;
+);
+A(;
+L 	#_DEV_STATE_EVxy04;
+L 	"dbCONST_VAL".EM.DEV_STATE.COMPLETE;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 5.0000
+Title:- SY_UO_SETUP : Unit Operation Completed
+Description:- Close Sy vent valve.
+End of Setup
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Reset flags
+Action:- // EGxy05 (STATE=FILTER)
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EGxy05;
+L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
+T #_SUB_EGxy05;
+
+//Clear used flags
+SET;
+R #_prompt_connect_ok;
+R #_confirm_connect_ok;
+Verification:- A M1.1; //Always High flag
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

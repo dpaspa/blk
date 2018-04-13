@@ -1,0 +1,303 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 7/04/2018 11:32:34 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+Name:- SETUP
+Title:- PH_SETUP
+Description:- Setup Sy WFI and PW inlet line connection
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+Class:- EMC3
+Level:- PH
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- C3PSET
+Version:- 0.4
+RevisionHistory:- 
+// SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.4 Khairul Basar    23-Sep-2009 CC-09/023  Regenerated for SQ Snippet file update.
+// 0.3 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific,& TRN code OR to AND
+//                                             Change in the Last step.
+// 0.2 Khairul Basar    18-Aug-2009            Added logic code
+// 0.1 David Paspa      13-Jul-2009            SFC structural design
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- flowpath_PW
+Type:- BOOL
+Description:- Flow path of PW line is integral & ready for operation
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- flowpath_WFI
+Type:- BOOL
+Description:- Flow path of WFI line is integral & ready for operation
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- zsc_fpwfi_state
+Type:- INT
+Description:- WFI line connection sensor switch
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- zsc_fppw_state
+Type:- INT
+Description:- PW line connection sensor switch
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- confirm_PW
+Type:- BOOL
+Description:- operator confirmed the PW Connection
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- confirm_WFI
+Type:- BOOL
+Description:- operator confirmed the WFI Connection
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- prompt_PW
+Type:- BOOL
+Description:- Prompt operator to connect PW line
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- prompt_WFI
+Type:- BOOL
+Description:- Prompt operator to connect WFI line
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- medium
+Type:- INT
+Description:- Select Medium
+ParameterInOut:- IN
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- PH_EMC3_SETUP : Prompt to connect WFI or PW supply
+Description:- Prompt operator to connect WFI or PW supply to the vessel Sy inlet line, based on selected medium
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt operator to connect WFI or PW supply to the vessel Sy inlet line, based on selected medium.
+Action:- //Reset Old Bits
+SET;
+R #_confirm_WFI;
+R #_confirm_PW;
+R #_flowpath_PW;
+R #_flowpath_WFI;
+
+//Check if WFI or PS_WFI medium selected, then prompt to connect WFI.
+O(     ;
+L #_medium;
+L "dbCONST".SEL.LIQUID.WFI;
+==I;
+);
+O(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSWFI;
+==I;
+);
+S #_prompt_WFI;
+CLR;
+
+// Check if PW or PS_PW selected, then prompt to connect PW
+O(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PW;
+==I;
+);
+O(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSPW;
+==I;
+);
+S #_prompt_PW;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Operator confirmation
+EmptyTransition:- False
+Description:- Wait for operator to confirm connections have been made.
+Condition:- A(;
+O #_confirm_WFI;
+O #_confirm_PW;
+);
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- EMC3_PH_SETUP : Check connection
+Description:- Check connection
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Reset flags.
+Action:- SET;
+R #_prompt_PW;
+R #_prompt_WFI;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- WFI/PW/PS connections made
+EmptyTransition:- False
+Description:- Jump if correct switch ZSCxy103 or ZSCxy105 are made
+Condition:- //Check PW connection confirmation, PW or PS_PW medium selected and the line connection status.
+A #_confirm_PW;
+A(;
+O(     ;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PW;
+==I;
+   );
+O(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSPW;
+==I;
+   );
+);
+A(    ;
+    L #_zsc_fppw_state; //PW or PW PS line is selected.
+    L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+      ==I ;  
+   )     ;
+
+//Or Check WFI connection confirmation, WFI or PS_WFI medium selected and the line connection status.
+O;
+A #_confirm_WFI;
+A(;
+O(     ;
+L #_medium;
+L "dbCONST".SEL.LIQUID.WFI;
+==I;
+  );
+O(;
+L #_medium;
+L "dbCONST".SEL.LIQUID.PSWFI;
+==I;
+  );
+);
+A(;
+   L #_zsc_fpwfi_state;  //WFI or WFI PS line is selcted.
+   L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+   ==I ;  
+  );
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- Operator not setup correctly
+EmptyTransition:- False
+Description:- Jump unconditionally, the connections are not made correctly
+Condition:- //None
+A  M1.1 ;// Always High Bit
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- PH_EMC3_SETUP : Setup Completed
+Description:- Enable flowpath interlock
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set the flowpath flag according to the selected medium.
+Action:- //If PW or PW PS line is selected, then set flowpath_PW flag. 
+A(    ;
+L #_zsc_fppw_state;
+L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+      ==I;   
+      ) ;
+ S #_flowpath_PW;
+
+//If WFI or WFI PS line is selected, then set flowpath_WFI flag.    
+A(  ;
+L #_zsc_fpwfi_state;
+L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+ ==I ;  
+ ) ;
+S #_flowpath_WFI;
+
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
+Title:- Phase Finish Normal
+EmptyTransition:- False
+Description:- Phase Finish Normal
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- PH_EMC3_SETUP : Last Step
+Description:- Last Step
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Last Step
+Action:- SET;
+R #_prompt_PW;
+R #_prompt_WFI;
+R #_confirm_WFI;
+R #_confirm_PW;
+Verification:- A M1.1; //Always High flag
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

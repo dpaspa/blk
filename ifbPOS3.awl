@@ -1,0 +1,119 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Class:       ifbPOS3                                                       //
+// Description: Instances of POS3                                             //
+//                                                                            //
+// POS3 On/Off valve with single output and opened feedback. Uses the generic //
+// fbPOSx class. The FB_O has feedback from field.                            //
+// In this case FB_C = NOT-FB_C/OUT_Q because FB_C has no field feedback.     //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.7 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.6 Gus Abdallah     01-Oct-2009 CC-09/016 Interlocks are CM processed.    //
+// 0.5 Khairul Basar    18-Sep-2009 CC-09/016 ifcPOSx is called for           //
+//                                            interfacing.                    //
+// 0.4 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters   //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters.          //
+// 0.3 Khairul Basar    10-Sep-2009 CC-09/016 Only POSx updated.              //
+// 0.2 Khairul Basar    02-Sep-2009 CC-09/016 FB_O=NOT-FB_C assigned.         //
+//                                            Instances are updated after     //
+//                                            modification on POSx(ref-fbPOSx)//
+//                                            Class/instance interlocks are   //
+//                                            added.                          //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbPOS3"
+TITLE = Instances of POS3 On/Off valve with single output and closed feedback
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : ifbPOS3
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+   VAR
+@@TEMPLATE_BEGIN@@
+      @@INSTANCE@@ : "fbPOSx";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN@@
+      @@INSTANCE@@_MODE : Struct
+         PosEdge1 : Bool;
+         PosEdge2 : Bool;
+         REQ : Int;   // Request for Required Mode
+      END_STRUCT;
+@@TEMPLATE_END@@
+   END_VAR
+
+//----------------------------------------------------------------------------//
+//                                                                            //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+      CALL "ifcPOSx"
+      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
+         INTERLOCK                   := "idbPOS3".@@INSTANCE@@.INTERLOCK ,
+         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
+         IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
+         OUT_MODE                    := #@@INSTANCE@@.REQ ,
+         IO_MODE                     := "idbPOS3".@@INSTANCE@@.MODE ,
+         IO_CMD                      := "idbPOS3".@@INSTANCE@@.CMD ,
+         POS_EDGE1                   := #@@INSTANCE@@.PosEdge1 ,
+         POS_EDGE2                   := #@@INSTANCE@@.PosEdge2
+      );
+      NOP 0;
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+      A(;
+@@ATTR_BEGIN|CR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+@@ATTR_END|CR_IL@@
+      );
+      = %L0.0;
+      BLD 103;
+      A(;
+@@ATTR_BEGIN|NCR_IL@@
+@@ATTR_DEFAULT_BEGIN@@
+      A "AlwaysHighBit";
+@@ATTR_DEFAULT_END@@
+      @@INTERLOCK@@
+@@ATTR_END|NCR_IL@@
+      );
+      = %L0.1;
+      BLD 103;
+      AN "@@INSTANCE@@-ZSO";
+      = %L0.3;
+      BLD 103;
+      A "@@INSTANCE@@-ZSO";
+      = %L0.4;
+      BLD 103;
+      CALL #@@INSTANCE@@
+      (  CMD                         := #@@INSTANCE@@.CMD ,
+         CR_IL                       := %L0.0 ,
+         NCR_IL                      := %L0.1 ,
+         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
+         FB_C                        := %L0.3 ,
+         FB_O                        := %L0.4 ,
+         TMR                         := #@@INSTANCE@@.TMR ,
+         INTERLOCKING_TIMER          := "@@INSTANCE@@-ILT" ,
+         STATE                       := #@@INSTANCE@@.STATE ,
+         OUT_Q                       := "@@INSTANCE@@" ,
+         FAULT_C                     := #@@INSTANCE@@.FAULT_C ,
+         FAULT_O                     := #@@INSTANCE@@.FAULT_O ,
+         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
+         MODE                        := #@@INSTANCE@@.MODE
+      );
+      NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

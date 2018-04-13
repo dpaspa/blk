@@ -1,0 +1,1862 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 7/04/2018 11:23:41 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+SFCNo:- 2
+Title:- UO_SY_CIP
+Description:- Unit Operation for setup of storage vessel equipment
+Name:- CIP
+Class:- SY
+Level:- UO
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- SUCIP
+Version:- 0.1
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.1 Gerald Kontriner 14-Sep-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- TIME_WFI_STEAM_Sy
+Type:- TIME
+Description:- Timer For WFI PS Steam
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- log_PW_FTLRinseTime
+Type:- TIME
+Description:- Logging time used for rinsing filling transfer line with PW
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- TIME_PW_FPZ
+Type:- TIME
+Description:- PW FPZ rinse time
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- Report_Evnt_016
+Type:- BOOL
+Description:- WFI Rinse Line Fill End for batch report
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- Report_Evnt_015
+Type:- BOOL
+Description:- WFI Rinse Line Fill Start for batch Report
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- Report_Evnt_014
+Type:- BOOL
+Description:- WFI Rinse End for Batch Report
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- Report_Evnt_013
+Type:- BOOL
+Description:- WFI Rinse Start for Batch Report
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- Report_Evnt_012
+Type:- BOOL
+Description:- PW Wash End for Batch Report
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- Report_Evnt_011
+Type:- BOOL
+Description:- PW Wash Start for batch Report
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- RUNTIME_ECxy01
+Type:- TIME
+Description:- Run Timer
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- log_PWEmptyTime
+Type:- TIME
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- AUXVENT_ECxy01
+Type:- BOOL
+Description:- Description
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- AUXDRAIN_ECxy01
+Type:- BOOL
+Description:- Description
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- RUNtoTIME_ECxy01
+Type:- BOOL
+Description:- Description
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- TIME_PW_STEAM
+Type:- TIME
+Description:- Timer For PW PS Steam
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- log_PWSteamTime
+Type:- TIME
+Description:- Log time for PW CS
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::17
+--------------------------------------------------
+Name:- FZ
+Type:- INT
+Description:- Filling Line Selection
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::18
+--------------------------------------------------
+Name:- FILL_A_EXxy07
+Type:- BOOL
+Description:- Filling Line Selection
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::19
+--------------------------------------------------
+Name:- steaming_proceed
+Type:- BOOL
+Description:- Steaming to proceed flag
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::20
+--------------------------------------------------
+Name:- steaming_ready
+Type:- BOOL
+Description:- Ready to steam filling line
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::21
+--------------------------------------------------
+Name:- cip_fill_ready
+Type:- BOOL
+Description:- Sy is setup to wash fill line
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::22
+--------------------------------------------------
+Name:- wash_drain_done
+Type:- BOOL
+Description:- Set Wash Drain Complete
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::23
+--------------------------------------------------
+Name:- SHARE_BY_ECx102
+Type:- INT
+Description:- Equipment arbitration ECx102
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::24
+--------------------------------------------------
+Name:- VALVE_ECxy01
+Type:- INT
+Description:- Valve selection for ECxy01
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::25
+--------------------------------------------------
+Name:- SUB_ECx102
+Type:- INT
+Description:- Substate selection to ECx102
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::26
+--------------------------------------------------
+Name:- SUB_EGxy05
+Type:- INT
+Description:- Substate selection to EGxy05
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::27
+--------------------------------------------------
+Name:- DEV_STATE_EVxy04
+Type:- INT
+Description:- Device State of EVxy04
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::28
+--------------------------------------------------
+Name:- SUB_EXxy07
+Type:- INT
+Description:- Substate selection to EXxy07
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::29
+--------------------------------------------------
+Name:- SUB_EVxy04
+Type:- INT
+Description:- Substate selection to EVxy04
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::30
+--------------------------------------------------
+Name:- CMD_EVxy04
+Type:- INT
+Description:- Command to EVxy04
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::31
+--------------------------------------------------
+Name:- CMD_EXxy07
+Type:- INT
+Description:- Command to EXxy07
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::32
+--------------------------------------------------
+Name:- DEV_STATE_EXxy07
+Type:- INT
+Description:- Device State of EXxy07
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::33
+--------------------------------------------------
+Name:- DEV_STATE_EGxy05
+Type:- INT
+Description:- Device State of EGxy05
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::34
+--------------------------------------------------
+Name:- CMD_EGxy05
+Type:- INT
+Description:- Command to EGxy05
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::35
+--------------------------------------------------
+Name:- MEDIUM_ECx102
+Type:- INT
+Description:- Medium selection ECx102
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::36
+--------------------------------------------------
+Name:- DEV_STATE_ECx102
+Type:- INT
+Description:- Device State of ECx102
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::37
+--------------------------------------------------
+Name:- CMD_ECx102
+Type:- INT
+Description:- Command to ECx102
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::38
+--------------------------------------------------
+Name:- SUB_ECxy01
+Type:- INT
+Description:- Substate selection to ECxy01
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::39
+--------------------------------------------------
+Name:- DEV_STATE_ECxy01
+Type:- INT
+Description:- Device State of ECxy01
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::40
+--------------------------------------------------
+Name:- CMD_ECxy01
+Type:- INT
+Description:- Command to ECxy01
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::41
+--------------------------------------------------
+Name:- log_SteamingTime
+Type:- TIME
+Description:- Logging time used for steaming
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::42
+--------------------------------------------------
+Name:- log_WFI_FTLRinseTime
+Type:- TIME
+Description:- Logging time used for rinsing filling transfer line with WFI
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::43
+--------------------------------------------------
+Name:- log_WFIRinseTime
+Type:- TIME
+Description:- Logging time used for rinsing wash drain with WFI.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::44
+--------------------------------------------------
+Name:- log_PWWashTime
+Type:- TIME
+Description:- Logging time used for washing with PW
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::45
+--------------------------------------------------
+Name:- log_SyCIPEnd
+Type:- TOD
+Description:- Logging Sy CIP Operation End Time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::46
+--------------------------------------------------
+Name:- log_SyCIPBegin
+Type:- TOD
+Description:- Logging Sy CIP Operation Begin Time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::47
+--------------------------------------------------
+Name:- TIME_CS_FTL
+Type:- TIME
+Description:- Time for steaming of the filling line
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::48
+--------------------------------------------------
+Name:- TIME_WFI_EMPTY
+Type:- TIME
+Description:- Time to wait to empty the vessel after WFI rinse
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::49
+--------------------------------------------------
+Name:- TIME_WFI_LINE
+Type:- TIME
+Description:- Time for WFI rinse of filling line
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::50
+--------------------------------------------------
+Name:- TIME_WFI_TANK
+Type:- TIME
+Description:- Time for WFI rinse of vessel
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::51
+--------------------------------------------------
+Name:- TIME_PW_EMPTY_Sy
+Type:- TIME
+Description:- Time to empty the vessel after the PW wash
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::52
+--------------------------------------------------
+Name:- TIME_PW_WASH
+Type:- TIME
+Description:- PW vessel wash time
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::53
+--------------------------------------------------
+Name:- steaming_required
+Type:- BOOL
+Description:- Flag indicating if steaming is required
+ParameterInOut:- IN_OUT
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- SY_UO_CIP : Unit Operation Commenced
+Description:- Log CIP operation begin time.
+Open tank path to wash drain: EXy006 STATE=CIP
+Open Sy tank outlet valve: EVy004 STATE=DISCHARGE
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log CIP operation begin time.
+Open tank path to wash drain: EXxy07 STATE=FILTER
+Open Sy tank outlet valve: EVxy04 STATE=DISCHARGE
+Reset ECx102.
+Action:- L "dbCONST_VAL".CPU_TIME;
+T #_log_SyCIPBegin;
+
+
+// Open tank path to wash drain
+A(;
+L 1;
+L #_FZ;
+==I;
+);
+JCN S302;
+SET;
+S #_FILL_A_EXxy07;
+JU end1;
+
+S302: NOP 0;
+A(;
+L 2;
+L #_FZ;
+==I;
+);
+R #_FILL_A_EXxy07;
+
+end1: NOP 0;
+
+L "dbCONST_VAL".EM.EMX2.SUBS.FILTER;
+T #_SUB_EXxy07;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EXxy07;
+
+
+// Open Sy outlet valve
+L "dbCONST_VAL".EM.EMV1.SUBS.DISCHARGE; 
+T #_SUB_EVxy04;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EVxy04;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECx102;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECx102;
+SET;
+S #_RUNtoTIME_ECxy01;
+
+
+//Report Event Reset
+SET;
+R #_Report_Evnt_011;
+R #_Report_Evnt_012;
+R #_Report_Evnt_013;
+R #_Report_Evnt_014;
+R #_Report_Evnt_015;
+R #_Report_Evnt_016;
+Verification:- //Verify if EXxy07 changed to substate FILTER.
+A(;
+L #_DEV_STATE_EXxy07;
+L "dbCONST_VAL".EM.EMX2.SUBS.FILTER;
+==I;
+);
+//Verify if EVxy04 changed to substate DISCHARGE.
+A(;
+L #_DEV_STATE_EVxy04;
+L "dbCONST_VAL".EM.EMV1.SUBS.DISCHARGE; 
+==I;
+);
+//Verify if ECx102 stopped.
+A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Discharge Complete?
+EmptyTransition:- False
+Description:- EVn004 substate DISCHARGE is complete and Parent indicates SMFLx, FPz and FLz Units ready for flushing.
+Condition:- A M1.1;
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- SY_UO_CIP : Commence Flush with PW
+Description:- OPEN HPCA supply valve. 
+Start timer to flush Tank Sy_TIME_PW_WASH.
+
+Open PW supply to flush tank: ECy002 STATE=FLUSH; MEDIUM=PW
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open CA supply valve: ECxy01 STATE=VALVE_OPENED; VALVE=CA.
+Load TIME_PW_WASH.
+
+Action:- // Open CA supply
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+R #_RUNtoTIME_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.VALVE.CA;
+T #_VALVE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+//Load TIME_PW_WASH.
+SET;
+L #_TIME_PW_WASH;
+T #_RUNTIME_ECxy01;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+==I;
+);
+A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Open PW supply and start ECxy02 STATE=FLUSH.
+Action:- // Open PW supply.
+L "dbCONST_VAL".EM.EMC3.MEDIUM.PW;
+T #_MEDIUM_ECx102;
+
+//Start EMC3 FLUSH.
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH; 
+T #_SUB_ECx102;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECx102;
+
+//Report Event Set
+SET;
+S #_Report_Evnt_011;
+Verification:- A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH; 
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- Timer expired
+EmptyTransition:- False
+Description:- Timer Sy_TIME_PW_WASH expired.
+Condition:- A(;
+L #_DEV_STATE_ECx102;
+L 	"dbCONST_VAL".EM.DEV_STATE.COMPLETE;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- Sy_UO_CIP : Set Flag for Sy_PW_Wash_Complete
+Description:- Log actual Sy PW wash time.
+Divert Wash to FLz
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log actual tank PW wash time and close PW supply valve.
+Action:- //Log actual tank PW wash time
+L #SQ_TIMER.PT;
+T #_log_PWWashTime;
+
+//Close PW supply valve
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECn002;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECn002;
+
+
+//Report Event Set
+SET;
+S #_Report_Evnt_008;
+Verification:- A(;
+L 	#_DEV_STATE_ECn002;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Start Timer for PW Empty.
+Action:- //Start Timer for PW Empty
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_PW_EMPTY2;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 4.0000
+Title:- Sy_UO_CIP : Set Flag for Sy_PW_Wash_Complete
+Description:- Log actual Sy PW wash time.
+Divert path to Filling Line FPz, Filling Machine FLz and Drain Line.???
+
+Start Timer for rinse FPz and FLz with PW.
+Clear Flag for FLz_PW_Wash_Complete??
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log actual tank PW wash time
+Divert path to Filling Line FPz, Filling Machine FLz and Drain Line.
+Action:- //Log actual tank PW wash time
+L #SQ_TIMER.PT;
+T #_log_PWWashTime;
+
+//Switch path to Fillling Line FPz and Fillling Machine FLz???
+      L     "dbCONST".BLK.EMX2.SUBS.FILL_SY;
+      T     #_SUB_EXxy07;
+      L     "dbCONST".BLK.CMD.START;
+      T     #_CMD_EXxy07;
+
+//Switch path to drain line???
+      L     "dbCONST".BLK.EMX2.SUBS.CIP_SY;
+      T     #_SUB_EXxy07;
+      L     "dbCONST".BLK.CMD.START;
+      T     #_CMD_EXxy07;
+
+Verification:- A(;    
+      L     #_DEV_STATE_EXxy07;
+      L     "dbCONST".BLK.EMX2.SUBS.FILL_SY;
+      ==I   
+ );
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Start Timer for rinse FPz and FLz with PW.
+Action:- //Start Timer 
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_PW_FPZ;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- FLz Rinse Complete
+EmptyTransition:- False
+Description:- FLz Rinse Complete
+Condition:- A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 5.0000
+Title:- Sy_UO_CIP : Set Flag for FLz_PW_Wash_Complete
+Description:- Log actual FLz PW rinse time.
+Set Flag for FLz_PW_Wash_Complete???
+Divert Wash to SMFLx
+Close path to Filling Line FPz, Filling Macine FLz and Drain Line????
+
+Start Timer for SMFLx rinse.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log actual PW Filling Transfer Line and Filling Machine rinse time.
+Action:- //Log actual PW Filling Transfer Line and Filling Machine rinse time.
+L #SQ_TIMER.PT;
+T #_log_PW_FTLRinseTime;
+
+
+//Switch path to Filtration Line SMFLx Drain.
+      L     "dbCONST".BLK.EMX2.SUBS.SIP;
+      T     #_SUB_EXxy07;
+      L     "dbCONST".BLK.CMD.START;
+      T     #_CMD_EXxy07;
+
+Verification:- A(;    
+      L     #_DEV_STATE_EXxy07;
+      L     "dbCONST".BLK.EMX2.SUBS.SIP;
+      ==I   
+ );
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Start Timer for SMFLx rinse.
+Action:- //Start Timer for SMFLx rinse.
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_PW_LINE_SMFLx;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
+Title:- SMFLx Wash Complete
+EmptyTransition:- False
+Description:- SMFLx Wash Complete
+Clear Flag for SMFLx_PW_Wash_Complete
+Condition:- A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 6.0000
+Title:- Sy_UO_CIP : Set Flag for FLz_PW_Wash_Complete
+Description:- Log actual FLz PW wash time.
+Set Flag for FLz_PW_Wash_Complete; 
+Divert Wash to SMFLx
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close PW supply valve.
+Action:- //Log actual tank PW wash time
+L #SQ_TIMER.PT;
+T #_log_PWWashTime;
+
+//Close PW supply valve
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECn002;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECn002;
+
+
+//Report Event Set
+SET;
+S #_Report_Evnt_008;
+Verification:- A(;
+L 	#_DEV_STATE_ECn002;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Action Description
+Action:- //Start Timer for PW Empty
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_PW_EMPTY2;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+STEP::07
+--------------------------------------------------
+StepNo:- 7.0000
+Title:- Sy_UO_CIP : Set Flag for FLz_PW_Wash_Complete
+Description:- Log actual PW SMFLx rinse time.
+Close PW supply valve.
+
+Start Timer for PW_EMPTY.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log actual PW SMFLx rinse time.
+Close PW supply valve.
+Action:- //Log actual PW Filling Transfer Line and Filling Machine rinse time.
+L #SQ_TIMER.PT;
+T #_log_PW_FTLRinseTime;
+
+//Close PW supply valve.
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECx102;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECx102;
+Verification:- A(;
+L 	#_DEV_STATE_ECx102;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Start Timer for PW_EMPTY.
+Action:- //Start Timer for PW_EMPTY.
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_PW_EMPTY_Sy;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+STEP::08
+--------------------------------------------------
+StepNo:- 08
+Title:- SY_UO_CIP : Steaming PW inlet line
+Description:- Close CA supply valve.
+Open PW line PS supply valve, STATE=FLUSH
+Start timer for TIME_PW_STEAM.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close CA supply valve. ECn001 (STATE=STOPPED).
+Reset ECx102 state.
+Action:- // Close CA supply valve
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECxy01;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECx102;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECx102;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Open PW line PS supply valve ECn002 (STATE=FLUSH, MEDIUM=PS(PW)
+Action:- //Open PW line CS supply valve
+L "dbCONST".SEL.LIQUID.PSPW;
+T #_MEDIUM_ECx102;
+SET;
+S #_RUNtoTIME_ECxy01;
+L #_TIME_PW_STEAM;
+T #_RUNTIME_ECxy01;
+
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH;
+T #_SUB_ECx102;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECx102;
+Verification:- A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::06
+--------------------------------------------------
+TRNNo:- 06
+Title:- Timer Expired?
+EmptyTransition:- False
+Description:- TIME_PW_STEAM_Sy expired?
+Condition:- A(;
+L #_DEV_STATE_ECx102;
+L 	"dbCONST_VAL".EM.DEV_STATE.COMPLETE;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::09
+--------------------------------------------------
+StepNo:- 9.0000
+Title:- SY_UO_CIP : Steaming PW inlet line
+Description:- Log actual tank PW empty time.
+Close CA supply valve. ECy001 (STATE=STOPPED)
+Open PW line CS supply valve ECn002 (STATE=FLUSH, MEDIUM=CS(PW),RUN_TO_TIME=FALSE)
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log actual tank PW empty time.
+Close CA supply valve. ECn001 (STATE=STOPPED).
+Open PW line CS supply valve ECn002 (STATE=FLUSH, MEDIUM=CS(PW),RUN_TO_TIME=FALSE).
+Action:- //Log actual tank PW empty time
+L #SQ_TIMER.PT;
+T #_log_PWEmptyTime;
+
+// Close CA supply valve
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECxy01;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECx102;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECx102;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Action Description
+Action:- //Open PW line CS supply valve
+L "dbCONST_VAL".EM.EMC3.MEDIUM.CS_PW;  
+T #_MEDIUM_ECx102;
+SET;
+S #_RUNtoTIME_ECxy01;
+L #_TIME_CS_STEAM;
+T #_RUNTIME_ECxy01;
+
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH;
+T #_SUB_ECx102;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECx102;
+Verification:- A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::10
+--------------------------------------------------
+StepNo:- 10
+Title:- SY_UO_CIP : Stop Steaming PW inlet line
+Description:- Log actual PW line steaming time.
+Close PW line PS supply valve.
+
+Connect WFI inlet line to Sy.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log actual PW line steaming time.
+Close PW-line PS supply valve.
+Action:- //Log actual PW line steaming time.
+L #SQ_TIMER.PT;
+T #_log_PWSteamTime;
+
+//Close PW line PS supply valve.
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECx102;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECx102;
+Verification:- A(;
+L 	#_DEV_STATE_ECx102;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Connect WFI inlet line to Sy.
+Set ECx102 to substate SETUP and MEDIUM=WFI.
+Action:- //Connect WFI inlet line to Sy.
+L "dbCONST_VAL".EM.EMC3.MEDIUM.WFI;
+T #_MEDIUM_ECx102;
+L "dbCONST_VAL".EM.EMC3.SUBS.SETUP; 
+T #_SUB_ECx102;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECx102;
+Verification:- A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.EMC3.SUBS.SETUP; 
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::08
+--------------------------------------------------
+TRNNo:- 8.0000
+Title:- Setup complete?
+EmptyTransition:- False
+Description:- ECy002 SETUP complete
+Condition:- A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.DEV_STATE.COMPLETE; 
+==I;
+);
+
+
+--------------------------------------------------
+STEP::11
+--------------------------------------------------
+StepNo:- 11.0000
+Title:- SY_UO_CIP : Stop Steaming PW inlet line
+Description:- Log actual PW line steaming time.
+Close PW line PS supply valve ECy002 (STATE=STOPPED)
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log actual PW line steaming time.
+Close PW-line PS supply valve.
+Action:- //Log actual PW line steaming time.
+L #SQ_TIMER.PT;
+T #_log_PWSteamTime;
+
+//Close PW line PS supply valve.
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECx102;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECx102;
+Verification:- A(;
+L 	#_DEV_STATE_ECx102;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Action Description
+Action:- //Start Timer for CS Steam
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L T#10S;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+STEP::12
+--------------------------------------------------
+StepNo:- 12.0000
+Title:- SY_UO_CIP : Wait for OPER connect WFI
+Description:- Connect WFI inlet line to Sy.
+Open Vent Valve
+Set ECy002 to substate SETUP and MEDIUM=WFI.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Connect WFI inlet line to Sy.
+Set ECx102 to substate SETUP and MEDIUM=WFI.
+
+Start timer to empty Tank TIME_PW_EMPTY
+Action:- //Connect WFI inlet line to Sy.
+L "dbCONST_VAL".EM.EMC3.MEDIUM.WFI;
+T #_MEDIUM_ECx102;
+L "dbCONST_VAL".EM.EMC3.SUBS.SETUP; 
+T #_SUB_ECx102;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECx102;
+
+// Open VENT valve:
+SET;
+R #_RUNtoTIME_ECxy01;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+L "dbCONST_VAL".EM.EMC1.VALVE.VENT;
+T #_VALVE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+Verification:- A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.EMC3.SUBS.SETUP; 
+==I;
+);
+A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Action Description
+Action:- //Start Timer for PW Empty
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_PW_EMPTY;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+STEP::13
+--------------------------------------------------
+StepNo:- 13
+Title:- SY_UO_CIP : Commence WFI Rinse of vessel
+Description:- Open Sy path to Wash Drain.
+
+Open WFI supply to rinse tank.
+Start timer to rinse tank by TIME_WFI_TANK.
+Open HPCA supply valve.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Reset ECxy002 state.
+Action:- //Switch path to drain line.
+L     "dbCONST".BLK.EMX2.SUBS.CIP_SY;
+T     #_SUB_EXxy07;
+L     "dbCONST".BLK.CMD.START;
+T     #_CMD_EXxy07;
+
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECx102;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECx102;
+Verification:- A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Open WFI supply to rinse tank: ECxy02 STATE=FLUSH; MEDIUM=WFI.
+Start timer to rinse tank by TIME_WFI_TANK.
+Open HPCA supply valve.
+Action:- //Open WFI supply to rinse tank
+L "dbCONST_VAL".EM.EMC3.MEDIUM.WFI;
+T #_MEDIUM_ECx102;
+SET;
+S #_RUNtoTIME_ECxy01;
+L #_TIME_WFI_TANK;
+T #_RUNTIME_ECxy01;
+
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH; 
+T #_SUB_ECx102;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECx102;
+
+//Report Event Set
+SET;
+S #_Report_Evnt_013;
+
+
+
+// Open CA supply
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.VALVE.CA;
+T #_VALVE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+Verification:- A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH; 
+==I;
+);
+
+A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+==I;
+);
+
+
+
+--------------------------------------------------
+TRANSITION::09
+--------------------------------------------------
+TRNNo:- 9.0000
+Title:- Timer expired?
+EmptyTransition:- False
+Description:- Timer TIME_WFI_TANK expired.
+Condition:- A(;
+L #_DEV_STATE_ECx102;
+L 	"dbCONST_VAL".EM.DEV_STATE.COMPLETE;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::14
+--------------------------------------------------
+StepNo:- 14.0000
+Title:- SY_UO_CIP : Commence WFI Rinse of vessel
+Description:- Open WFI supply to rinse tank: ECy002 STATE=FLUSH; MEDIUM=WFI
+
+Start timer to rinse Sy_TIME_WFI_WASH
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open WFI supply to rinse tank: ECxy02 STATE=FLUSH; MEDIUM=WFI
+
+Start timer to rinse Tank TIME_WFI_TANK
+Action:- // Open CA supply
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.VALVE.CA;
+T #_VALVE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECx102;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECx102;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+==I;
+);
+A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Action Description
+Action:- //Open WFI supply to rinse tank
+L "dbCONST_VAL".EM.EMC3.MEDIUM.WFI;
+T #_MEDIUM_ECx102;
+SET;
+S #_RUNtoTIME_ECxy01;
+L #_TIME_WFI_TANK;
+T #_RUNTIME_ECxy01;
+
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH; 
+T #_SUB_ECx102;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECx102;
+
+//Report Event Set
+SET;
+S #_Report_Evnt_013;
+Verification:- A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH; 
+==I;
+);
+
+
+--------------------------------------------------
+STEP::15
+--------------------------------------------------
+StepNo:- 15.0000
+Title:- Sy_UO_CIP : Set Flag for Sy_WFI_Wash_Complete
+Description:- Log actual Sy WFI wash time.
+Set Flag for Sy_WFI_Wash_Complete; 
+
+Divert Wash to FLz
+Set EXy007 to substate CIP_FILL
+Open DVy129
+Close DVy127
+
+Flag parent ready for CIP_FLz
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+
+--------------------------------------------------
+STEP::16
+--------------------------------------------------
+StepNo:- 16.0000
+Title:- Sy_UO_CIP : Set Flag for Sy_WFI_Wash_Complete
+Description:- Log actual Sy WFI wash time.
+Set Flag for Sy_WFI_Wash_Complete; 
+
+Divert Wash to FLz
+Set EXy007 to substate CIP_FILL
+Open DVy129
+Close DVy127
+
+Flag parent ready for CIP_FLz
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close PW supply valve.
+Action:- //Log actual tank PW wash time
+L #SQ_TIMER.PT;
+T #_log_PWWashTime;
+
+//Close PW supply valve
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECn002;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECn002;
+
+
+//Report Event Set
+SET;
+S #_Report_Evnt_008;
+Verification:- A(;
+L 	#_DEV_STATE_ECn002;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Action Description
+Action:- //Start Timer for PW Empty
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_PW_EMPTY2;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+STEP::17
+--------------------------------------------------
+StepNo:- 17.0000
+Title:- Sy_UO_CIP : Set Flag for FLz_WFI_Wash_Complete
+Description:- Log actual FLz WFI wash time.
+Set Flag for FLz_WFI_Wash_Complete; 
+
+Divert Wash to SMFLx
+Set Transfer Path EXy007 to substate Filtration_Mx
+Open DVy125
+Close DVy129
+
+Flag parent ready for CIP_SMFLx
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+
+--------------------------------------------------
+STEP::18
+--------------------------------------------------
+StepNo:- 18.0000
+Title:- Sy_UO_CIP : SMFLx Wash Complete
+Description:- Log actual WFI SMFLx wash time.
+Set Flag for SMFLx_WFI_Wash_Complete; 
+
+Divert Wash to Sy_Drain
+Set Transfer Path EXy007 to substate Sy_Drain
+Open DVy127
+Close DVy125
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close PW supply valve.
+Action:- //Log actual tank PW wash time
+L #SQ_TIMER.PT;
+T #_log_PWWashTime;
+
+//Close PW supply valve
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECn002;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECn002;
+
+
+//Report Event Set
+SET;
+S #_Report_Evnt_008;
+Verification:- A(;
+L 	#_DEV_STATE_ECn002;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Action Description
+Action:- //Start Timer for PW Empty
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_PW_EMPTY2;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+STEP::19
+--------------------------------------------------
+StepNo:- 19
+Title:- SY_UO_CIP : WFI Line Wash Complete. Wait for vessel to drain
+Description:- Log actual WFI Filling Transfer Line rinse time.
+Close WFI supply valve.
+
+Start timer to empty Tank TIME_WFI_EMPTY_Sy.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log actual WFI Filling Transfer Line rinse time.
+Close WFI supply valve. ECxy02 (STATE=STOPPED)
+Start timer to empty Tank TIME_WFI_EMPTY
+Action:- //Log actual tank WFI wash time
+L #SQ_TIMER.PT;
+T #_log_WFI_FTLRinseTime;
+
+//Close WFI supply valve.
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECx102;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECx102;
+
+//Report Event set
+SET;
+S #_Report_Evnt_016;
+Verification:- A(;
+L 	#_DEV_STATE_ECx102;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Start Timer for WFI Empty.
+Action:- //Start Timer for WFI Empty.
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_TIME_WFI_EMPTY;
+T #SQ_TIMER.PT;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::13
+--------------------------------------------------
+TRNNo:- 13.0000
+Title:- Timer expire?
+EmptyTransition:- False
+Description:- Timer TIME_WFI_EMPTY_Sy expired.
+Condition:- A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::20
+--------------------------------------------------
+StepNo:- 20.0000
+Title:- SY_UO_CIP : Close CA supply valve
+Description:- Close CA supply valve: ECy001 STATE=STOPPED
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close CA supply valve
+Action:- //Close CA supply valve
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy01;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECxy01;
+Verification:- A(;
+L 	#_DEV_STATE_ECxy01;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::14
+--------------------------------------------------
+TRNNo:- 14.0000
+Title:- Is Steaming required?
+EmptyTransition:- False
+Description:- Steaming is required.
+Condition:- A #_steaming_required;
+
+
+--------------------------------------------------
+TRANSITION::15
+--------------------------------------------------
+TRNNo:- 15.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::21
+--------------------------------------------------
+StepNo:- 21.0000
+Title:- SY_UO_CIP : Wait for Steaming to be ready
+Description:- Flag parent ready for steaming by setting steaming_ready flag.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Flag parent ready for steaming by setting steaming_ready flag.
+Action:- //Flag parent ready for steaming.
+SET;
+S #_steaming_ready;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::16
+--------------------------------------------------
+TRNNo:- 16.0000
+Title:- Waiting for steaming to proceed
+EmptyTransition:- False
+Description:- Parent indicates to proceed with steaming by setting the steaming_proceed flag.
+Condition:- A #_steaming_proceed;
+
+
+--------------------------------------------------
+STEP::22
+--------------------------------------------------
+StepNo:- 22.0000
+Title:- SY_UO_CIP : Commence Filling Line steaming
+Description:- Open PS supply to steam tank and filling line: ECy002 STATE=FLUSH; MEDIUM=CS(WFI)
+
+Start timer TIME_WFI_STEAM_Sy for CS supply.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open PS supply to steam tank and filling line: ECxy02 STATE=FLUSH; MEDIUM=PS(WFI)
+Start timer TIME_WFI_STEAM_Sy for PS supply.
+Action:- //Open PS(WFI) supply to steam tank and filling line.
+L "dbCONST".SEL.LIQUID.PSWFI;
+T #_MEDIUM_ECx102;
+SET;
+S #_RUNtoTIME_ECxy01;
+L #_TIME_WFI_STEAM_Sy;
+T #_RUNTIME_ECxy01;
+
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH;
+T #_SUB_ECx102;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECx102;
+
+SET;
+R #_steaming_ready;
+Verification:- A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.EMC3.SUBS.FLUSH; 
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::17
+--------------------------------------------------
+TRNNo:- 17.0000
+Title:- Timer expired?
+EmptyTransition:- False
+Description:- TIME_WFI_STEAM_Sy expired?
+Condition:- A(;
+L #_DEV_STATE_ECx102;
+L 	"dbCONST_VAL".EM.DEV_STATE.COMPLETE;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::23
+--------------------------------------------------
+StepNo:- 23
+Title:- SY_UO_CIP : Filling Line steaming complete
+Description:- Close PS supply valve.
+Log actual post CIP CS steaming time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close CS supply valve. ECxy02 (STATE=STOPPED)
+Log actual post CIP PS steaming time.
+Action:- //Close PS supply valve
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECx102;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECx102;
+
+//Log actual post CIP CS steaming time.
+L #SQ_TIMER.PT;
+T #_log_SteamingTime;
+Verification:- A(;
+L 	#_DEV_STATE_ECx102;
+L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::18
+--------------------------------------------------
+TRNNo:- 18.0000
+Title:- Empty transition.
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::24
+--------------------------------------------------
+StepNo:- 24.0000
+Title:- SY_UO_CIP : Open vent valve
+Description:- Open Sy VENT valve: ECxy01 STATE=VALVE_OPEN VALVE=VENT
+
+Log Sy CIP operation end time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open Sy VENT valve: ECxy01 STATE=VALVE_OPEN VALVE=VENT
+Action:- // Open VENT valve:
+SET;
+R #_RUNtoTIME_ECxy01;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.VALVE.VENT;
+T #_VALVE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Log Sy CIP operation end time.
+Action:- // Log Sy CIP operation end time.
+L "dbCONST_VAL".CPU_TIME;
+T #_log_SyCIPEnd;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::19
+--------------------------------------------------
+TRNNo:- 19.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::25
+--------------------------------------------------
+StepNo:- 25.0000
+Title:- SY_UO_CIP : Unit Operation Completed
+Description:- Set Sy equipment to SAFE state:
+ECx001 (STATE=STOPPED)
+ECx102 (STATE=STOPPED)
+EVxy04 (STATE=STOPPED)
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set Sy equipment to SAFE state:
+ECxy01 (STATE=STOPPED)
+ECx102 (STATE=STOPPED)
+EVxy04 (STATE=STOPPED)
+Action:- // Open VENT valve:
+L "dbCONST_VAL".EM.EMC1.VALVE.VENT;
+T #_VALVE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+// Set Sy equipment to safe state:
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECx102;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECx102;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EVxy04;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EVxy04;
+
+
+//Clear all used flags
+SET;
+R #_steaming_ready;
+R #_wash_drain_done;
+R #_RUNtoTIME_ECxy01;
+
+//Report Event Reset
+SET;
+R #_Report_Evnt_011;
+R #_Report_Evnt_012;
+R #_Report_Evnt_013;
+R #_Report_Evnt_014;
+R #_Report_Evnt_015;
+R #_Report_Evnt_016;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+==I;
+);
+A(;
+L #_DEV_STATE_ECx102;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+A(;
+L #_DEV_STATE_EVxy04;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

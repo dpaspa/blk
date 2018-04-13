@@ -54,6 +54,11 @@ VERSION : 2.0
 @@TEMPLATE_END@@
    END_VAR
 
+   VAR_TEMP
+      cril : Bool;
+      ncril : Bool;
+   END_VAR
+
 //----------------------------------------------------------------------------//
 //                                                                            //
 //----------------------------------------------------------------------------//
@@ -83,8 +88,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       @@INTERLOCK@@
 @@ATTR_END|CR_IL@@
       );
-      = %L0.0;
-      BLD 103;
+      = #cril;
       A(;
 @@ATTR_BEGIN|NCR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
@@ -93,21 +97,14 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       @@INTERLOCK@@
 @@ATTR_END|NCR_IL@@
       );
-      = %L0.1;
-      BLD 103;
-      A "@@INSTANCE@@-ZSC";
-      = %L0.2;
-      BLD 103;
-      A "@@INSTANCE@@-ZSO";
-      = %L0.3;
-      BLD 103;
+      = #ncril;
       CALL #@@INSTANCE@@
       (  CMD                         := #@@INSTANCE@@.CMD ,
-         CR_IL                       := %L0.0 ,
-         NCR_IL                      := %L0.1 ,
+         CR_IL                       := #cril ,
+         NCR_IL                      := #ncril ,
          MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
-         FB_C                        := %L0.2 ,
-         FB_O                        := %L0.3 ,
+         FB_C                        := "@@INSTANCE@@-ZSC" ,
+         FB_O                        := "@@INSTANCE@@-ZSO" ,
          TMR                         := #@@INSTANCE@@.TMR ,
          INTERLOCKING_TIMER          := "@@INSTANCE@@-ILT" ,
          STATE                       := #@@INSTANCE@@.STATE ,

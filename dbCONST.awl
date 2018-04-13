@@ -57,6 +57,10 @@ STRUCT
             M1 : INT  := 1;
             M2 : INT  := 2;
         END_STRUCT ;
+        SMFLX : STRUCT
+            SMFL1 : INT  := 1;
+            SMFL2 : INT  := 2;
+        END_STRUCT ;
         SY : STRUCT
             S1 : INT  := 1;
             S2 : INT  := 2;
@@ -432,11 +436,16 @@ STRUCT
             AVAILABLE : INT := 0;      // Block is available for parent acquisition
 @@TEMPLATE_BEGIN@@
 @@ATTR_BEGIN|OWNER@@
-            @@INSTANCE@@ : INT  := @@ID@@;
+            @@INSTANCE@@ : INT;
 @@ATTR_END|OWNER@@
-@@TEMPLATE_END@@
         END_STRUCT ;
     END_STRUCT ;
 END_STRUCT ;
+
 BEGIN
+@@ATTR_BEGIN|OWNER@@
+    BLK.OWNER.@@INSTANCE@@ := @@ID@@;
+@@ATTR_END|OWNER@@
+@@TEMPLATE_END@@
+
 END_DATA_BLOCK

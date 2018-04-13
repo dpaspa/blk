@@ -1,0 +1,1089 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 7/04/2018 11:23:54 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+SFCNo:- 005
+Title:- UO_SY_FILL :Sy Transfer to Filling
+Description:- Sequence for Transfer from Storage Vessel Sy to Filling (Vial or Ampoule)
+Name:- FILL
+Class:- SY
+Level:- UO
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- SUFILL
+Version:- 0.2
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.2 Srinivas Nimmala 28-Dec-2009 09/073     Added Ampoule and Vial 
+//                                             pause buttons to stop filling
+// 0.1 Gerald Kontriner 14-Sep-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- fill_proceed
+Type:- BOOL
+Description:- Parent synchronisation flag to proceed with filling operation
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- SHARE_BY_ECxy02
+Type:- INT
+Description:- Equipment arbitration ECxy02
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- prompt_TransferComp
+Type:- BOOL
+Description:- Prompt operator to confirm when transfer is complete
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- confirm_Abort
+Type:- BOOL
+Description:- Operator confirmed to ABORT filling
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- confirm_TransferComp
+Type:- BOOL
+Description:- Operator confirmed completion
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- confirm_FilterBled
+Type:- BOOL
+Description:- Operator confirmed Filling machine filter has been bled.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- prompt_FilterBled
+Type:- BOOL
+Description:- Prompt operator to confirm that filling machine sterile filter has been bled
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- log_FLready
+Type:- TOD
+Description:- Logging time operator confirmation Filling Line ready.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- log_FilterBled
+Type:- TOD
+Description:- Logging time operator confirmed filter has been bled.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- confirm_Resume
+Type:- BOOL
+Description:- Operator confirmed to RESUME filling
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- prompt_ResumeAbort
+Type:- BOOL
+Description:- Prompt operator to RESET Filling Paused button else ABORT the sequence
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- prompt_StartFilling
+Type:- BOOL
+Description:- Prompt operator to confirm to start Filling
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- confirm_StartFilling
+Type:- BOOL
+Description:- Operator confirms to Start Filling
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- log_ConfStartFill
+Type:- TOD
+Description:- Logging FILL begin time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- log_HPN2Begin
+Type:- TOD
+Description:- Logging HPN2 begin time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- log_FillBegin
+Type:- TOD
+Description:- Logging FILL begin time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::17
+--------------------------------------------------
+Name:- log_FillEnd
+Type:- TOD
+Description:- Logging FILL end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::18
+--------------------------------------------------
+Name:- confirm_FLready
+Type:- BOOL
+Description:- Operator confirms Filling Line is ready
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::19
+--------------------------------------------------
+Name:- prompt_FLready
+Type:- BOOL
+Description:- Prompt operator when Filling Line is ready
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::20
+--------------------------------------------------
+Name:- PAUSE_Button
+Type:- BOOL
+Description:- Filling Pause Button
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::21
+--------------------------------------------------
+Name:- FZ
+Type:- INT
+Description:- Filling Line Selection
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::22
+--------------------------------------------------
+Name:- VALVE_ECxy01
+Type:- INT
+Description:- Valve selection ECxy01
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::23
+--------------------------------------------------
+Name:- SETPOINT_ECxy01
+Type:- REAL
+Description:- Pressure setpoint ECxy01 
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::24
+--------------------------------------------------
+Name:- AUXDRAIN_ECxy01
+Type:- BOOL
+Description:- DRAIN valve selection
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::25
+--------------------------------------------------
+Name:- CMD_ECxy02
+Type:- INT
+Description:- Command to ECxy02
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::26
+--------------------------------------------------
+Name:- AUXVENT_ECxy01
+Type:- BOOL
+Description:- VENT valve selection
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::27
+--------------------------------------------------
+Name:- DEV_STATE_ECxy02
+Type:- INT
+Description:- Device State of ECxy02
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::28
+--------------------------------------------------
+Name:- SUB_ECxy02
+Type:- INT
+Description:- Substate selection to ECxy02
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::29
+--------------------------------------------------
+Name:- DEV_STATE_ECxy01
+Type:- INT
+Description:- Device State of ECxy01
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::30
+--------------------------------------------------
+Name:- CMD_EGxy05
+Type:- INT
+Description:- Command to EGxy05
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::31
+--------------------------------------------------
+Name:- SUB_EGxy05
+Type:- INT
+Description:- Substate selection to EGxy05
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::32
+--------------------------------------------------
+Name:- SUB_ECxy01
+Type:- INT
+Description:- Substate selection to ECxy01
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::33
+--------------------------------------------------
+Name:- CMD_EJxy03
+Type:- INT
+Description:- Command to EJxy03
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::34
+--------------------------------------------------
+Name:- DEV_STATE_EGxy05
+Type:- INT
+Description:- Device State of EGxy05
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::35
+--------------------------------------------------
+Name:- SUB_EJxy03
+Type:- INT
+Description:- Substate selection to EJxy03
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::36
+--------------------------------------------------
+Name:- DEV_STATE_EJxy03
+Type:- INT
+Description:- Device State of EJxy03
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::37
+--------------------------------------------------
+Name:- CMD_ECxy01
+Type:- INT
+Description:- Command to ECxy01
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::38
+--------------------------------------------------
+Name:- DEV_STATE_EVxy04
+Type:- INT
+Description:- Device State of EVxy04
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::39
+--------------------------------------------------
+Name:- CMD_EXxy07
+Type:- INT
+Description:- Command to EXxy07
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::40
+--------------------------------------------------
+Name:- SUB_EVxy04
+Type:- INT
+Description:- Substate selection to EVxy04
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::41
+--------------------------------------------------
+Name:- FILL_A_EXxy07
+Type:- BOOL
+Description:- Filling Line Selection to EXxy07
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::42
+--------------------------------------------------
+Name:- S_FIRST_EXxy07
+Type:- BOOL
+Description:- Storage Vessel Selection to EXxy07
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::43
+--------------------------------------------------
+Name:- DEV_STATE_EXxy07
+Type:- INT
+Description:- Device State of EXxy07
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::44
+--------------------------------------------------
+Name:- SY
+Type:- INT
+Description:- Storage Vessel Selection
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::45
+--------------------------------------------------
+Name:- SUB_EXxy07
+Type:- INT
+Description:- Substate selection to EXxy07
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::46
+--------------------------------------------------
+Name:- CMD_EVxy04
+Type:- INT
+Description:- Command to EVxy04
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::47
+--------------------------------------------------
+Name:- normal_completion
+Type:- BOOL
+Description:- Indicates normal completion
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::48
+--------------------------------------------------
+Name:- PRES_N2_FILL
+Type:- REAL
+Description:- HPN2 setpoint for filling after filter has been bled
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::49
+--------------------------------------------------
+Name:- path_ready
+Type:- BOOL
+Description:- Filling path ready parent synchronisation flag
+ParameterInOut:- OUT
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- UO_SY_FILL : Filling Unit Operation Commenced
+Description:- Set all Sy equipment to SAFE state with Sy LPCA control enabled and VENT closed.
+
+EVy004 (STATE=STOPPED)
+ECy001 (STATE= PRESSURE_CONTROL; VALVE selection= LPN2; AUXVENT = FALSE and AUXDRAIN = FALSE)
+ECy002 (STATE=STOPPED)
+EGy005 (STATE=STOPPED)
+
+filtration transfer line:
+EXy007 (STATE=SY_FILL)
+
+Prompt operator to confirm when Filling Line is ready.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set all Sy equipment to SAFE state with Sy LPN2 control enabled and VENT closed.
+
+EVxy04 (STATE=STOPPED)
+ECxy01 (STATE= PRESSURE_CONTROL; VALVE selection= LPN2; AUXVENT = FALSE and AUXDRAIN = FALSE)
+ECxy02 (STATE=STOPPED)
+EJxy03 (STATE=STOPPED)
+EGxy05 (STATE=STOPPED)
+
+filtration transfer line:
+EXxy07 (STATE=STOPPED)
+
+Prompt operator to confirm when Filling Line is ready.
+Action:- // Start LPN2 valve pressure control and VENT valve closed
+L "dbCONST_VAL".EM.EMC1.VALVE.LPN2;
+T #_VALVE_ECxy01;
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+
+// Set remaining Sy equipment to SAFE state:
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy02;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECxy02;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EGxy05;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EGxy05;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EJxy03;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EJxy03;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EVxy04;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EVxy04;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EXxy07;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EXxy07;
+
+
+
+// Prompt operator to confirm when Filling Line is ready.
+SET;
+S #_prompt_FLready;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+==I;
+);
+A(;
+L #_DEV_STATE_ECxy02;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+A(;
+L #_DEV_STATE_EGxy05;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+A(;
+L #_DEV_STATE_EJxy03;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+A(;
+L #_DEV_STATE_EVxy04;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+A(;
+L #_DEV_STATE_EXxy07;
+L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Filling Line is ready?
+EmptyTransition:- False
+Description:- Operator confirms Filling Line is ready
+Condition:- A #_confirm_FLready;
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- SY_UO_FILL : Wait for OPER to confirm start FILLING
+Description:- Log operator confirmation Filling Line ready.
+
+Prompt operator to confirm to start Filling.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator confirmation Filling Line ready.
+
+Prompt operator to confirm to start Filling.
+Action:- //Log time operator confirmed Filling Line is ready.
+L "dbCONST_VAL".CPU_TIME;
+T #_log_FLready;
+
+// Prompt operator to confirm start Filling.
+SET;
+R #_prompt_FLready;
+R #_confirm_FLready;
+S #_prompt_StartFilling;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 2.0000
+Title:- Start Filling?
+EmptyTransition:- False
+Description:- Operator confirms to Start Filling
+Condition:- A #_confirm_StartFilling;
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- SY_UO_FILL : Set path and wait for ready to start
+Description:- Log operator confirmed ready to start Filling.
+
+Set EXy007 transfer line to STATE=FILL with S_FIRST and FILL_A parameters set for Sy and FLz.
+
+Flag parent path ready to start filling operation by setting flag path_ready.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log time operator confirmed ready to start Filling.
+Action:- L "dbCONST_VAL".CPU_TIME;
+T #_log_ConfStartFill;
+
+SET;
+R #_prompt_StartFilling;
+R #_confirm_StartFilling;
+Verification:- A M1.1;
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Action:- A(;
+L 	"dbCONST_VAL".UNIT.OWNER.S1;
+L 	#_SY;
+==I;
+);
+O;
+A(;
+L 	"dbCONST_VAL".UNIT.OWNER.S3;
+L 	#_SY;
+==I;
+);
+JCN S301;
+SET;
+S #_S_FIRST_EXxy07;
+JU end0;
+
+S301: NOP 0;
+A(;
+L 	"dbCONST_VAL".UNIT.OWNER.S2;
+L 	#_SY;
+==I;
+);
+O;
+A(;
+L 	"dbCONST_VAL".UNIT.OWNER.S4;
+L 	#_SY;
+==I;
+);
+R #_S_FIRST_EXxy07;
+
+end0: NOP 0;
+Verification:- A M1.1;
+
+--------------------------------------------------
+ACTION::03
+--------------------------------------------------
+Description:- Set Ampoule Filling Line
+Action:- A(;
+L 1;
+L #_FZ;
+==I;
+);
+JCN S302;
+SET;
+S #_FILL_A_EXxy07;
+JU end1;
+
+S302: NOP 0;
+A(;
+L 2;
+L #_FZ;
+==I;
+);
+R #_FILL_A_EXxy07;
+
+end1: NOP 0;
+Verification:- A M1.1;
+
+--------------------------------------------------
+ACTION::04
+--------------------------------------------------
+Description:- Set EXxy07 transfer line to STATE=FILL with S_FIRST and FILL_A parameters set for Sy and Fz.
+Action:- L "dbCONST_VAL".EM.EMX2.SUBS.FILL;
+T #_SUB_EXxy07;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EXxy07;
+Verification:- A(;
+L #_DEV_STATE_EXxy07;
+L "dbCONST_VAL".EM.EMX2.SUBS.FILL;
+==I;
+);
+
+--------------------------------------------------
+ACTION::05
+--------------------------------------------------
+Description:- Flag parent path ready to start filling operation by setting flag path_ready.
+Action:- // Flag parent path ready to start filling operation
+SET;
+S #_path_ready;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- Path ready?
+EmptyTransition:- False
+Description:- Parent indicates ready to proceed by setting synchronisation flag fill_proceed.
+Condition:- A #_fill_proceed;
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- SY_UO_FILL : Wait for OPER to confirm filling machine bled
+Description:- Log Fill begin time.
+
+Open Sy Outlet valve EVy004 STATE=DISCHARGE
+
+Set Sy LPCA valve fully opened ECy001 (STATE=VALVE_OPENED, VALVE=LPCA, AUXVENT= false, AUXDRAIN=false)
+
+Prompt operator to confirm that filling machine sterile filter has been bled.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log FILL begin time. Open Sy outlet valve by setting EVxy04.
+Action:- // Log FILL begin time.
+L "dbCONST_VAL".CPU_TIME;
+T #_log_FillBegin;
+
+
+// Open Sy outlet valve by setting EVxy04
+L "dbCONST_VAL".EM.EMV1.SUBS.DISCHARGE;
+T #_SUB_EVxy04;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EVxy04;
+
+SET;
+R #_path_ready;
+Verification:- A(;
+L 	#_DEV_STATE_EVxy04;
+L "dbCONST_VAL".EM.EMV1.SUBS.DISCHARGE; 
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Set Sy LPN2 valve fully open
+Action:- // Set Sy LPN2 valve fully open
+L "dbCONST_VAL".EM.EMC1.VALVE.LPN2;
+T #_VALVE_ECxy01;
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+Verification:- A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED; 
+==I;
+);
+
+--------------------------------------------------
+ACTION::03
+--------------------------------------------------
+Description:- Prompt operator to confirm that filling machine sterile filter has been bled.
+Action:- // Prompt operator to confirm that filling machine sterile filter has been bled
+SET;
+S #_prompt_FilterBled;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 4.0000
+Title:- Filling machine has been bled?
+EmptyTransition:- False
+Description:- Operator confimed Filling machine filter has been bled.
+Condition:- A #_confirm_FilterBled;
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
+Title:- SY_UO_FILL : Start HPCA and wait for OPER confirm filling complete
+Description:- Log operator confirmation filter has been bled.
+
+Enable HPCA pressure control.
+ECy001 (STATE=PRESSURE_CONTROL, VALVE=HPCA, AUXVENT= false, AUXDRAIN=false, SETPOINT=PRES_HPCA_FILL)
+
+Log HPCA begin time.
+
+Prompt operator to confirm when TRANSFER is complete.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator confirmation filter has been bled.
+
+Enable HPN2 pressure control.
+ECxy01 (STATE=PRESSURE_CONTROL, VALVE=HPN2, AUXVENT= false, AUXDRAIN=false, SETPOINT=PRES_N2_FILL)
+
+Log HPN2 begin time.
+
+Prompt operator to confirm when TRANSFER is complete.
+Action:- // Log time operator confirmed filter has been bled.
+L "dbCONST_VAL".CPU_TIME;
+T #_log_FilterBled;
+
+A #_confirm_Resume;
+AN #_PAUSE_Button;
+JCN C03;
+SET;
+
+// Open Sy outlet valve by setting EVxy04
+L "dbCONST_VAL".EM.EMV1.SUBS.DISCHARGE;
+T #_SUB_EVxy04;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EVxy04;
+
+// Open Filling Line
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EXxy07;
+L  "dbCONST_VAL".EM.EMX2.SUBS.FILL;
+T #_SUB_EXxy07;
+
+C03:NOP 0;
+// Enable HPN2 pressure control
+L #_PRES_N2_FILL;
+T #_SETPOINT_ECxy01;
+L "dbCONST_VAL".EM.EMC1.VALVE.HPN2;
+T #_VALVE_ECxy01;
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+
+// Log HPN2 begin time
+L "dbCONST_VAL".CPU_TIME;
+T #_log_HPN2Begin;
+
+
+// Prompt operator to confirm when TRANSFER is complete
+SET;
+R #_prompt_FilterBled;
+R #_confirm_FilterBled;
+R #_confirm_Abort;
+R #_confirm_Resume;
+R #_prompt_ResumeAbort;
+S #_prompt_TransferComp;
+Verification:- A(;
+L 	#_DEV_STATE_EVxy04;
+L "dbCONST_VAL".EM.EMV1.SUBS.DISCHARGE; 
+==I;
+);
+A(;
+L #_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 05
+Title:- Completion confirmed?
+EmptyTransition:- False
+Description:- Operator confirmed completion
+Condition:- A #_confirm_TransferComp;
+
+
+--------------------------------------------------
+TRANSITION::06
+--------------------------------------------------
+TRNNo:- 6.0000
+Title:- Filling Pause Button is pressed.
+EmptyTransition:- False
+Description:- Filling Pause Button is pressed.
+Condition:- A #_PAUSE_Button;
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 06
+Title:- SY_UO_FILL : Wait for OPER to RESUME or ABORT
+Description:- Prompt Operator to RESET Filling Paused Button else ABORT the sequence.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt Operator to RESET Filling Paused Button else ABORT the sequence.
+
+Close Sy outlet valve by setting EVxy04
+Close Filling Line
+Action:- // Prompt Operator to RESET Filling Paused Button else ABORT the sequence.
+SET;
+S #_prompt_ResumeAbort;
+R #_prompt_TransferComp;
+
+// Close Sy outlet valve by setting EVxy04
+L 0;
+T #_SUB_EVxy04;
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EVxy04;
+
+// Close Filling Line
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EXxy07;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EXxy07;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::07
+--------------------------------------------------
+TRNNo:- 7.0000
+Title:- ABORT Filling?
+EmptyTransition:- False
+Description:- Operator confirmed to ABORT filling.
+Condition:- A #_confirm_Abort;
+
+
+--------------------------------------------------
+TRANSITION::08
+--------------------------------------------------
+TRNNo:- 08
+Title:- Resume confirmed and NO pause button
+EmptyTransition:- False
+Description:- Operator confirmed to RESUME & Filling Pause Button is NOT pressed (RESET).
+Condition:- A #_confirm_Resume;
+AN #_PAUSE_Button;
+
+
+--------------------------------------------------
+STEP::07
+--------------------------------------------------
+StepNo:- 07
+Title:- SY_UO_FILL : Disable HPCA control and open VENT
+Description:- Disable Sy HPCA control and open VENT valve.
+ECy001 (STATE=VALVE_OPENED, VALVE=VENT, AUXVENT= false, AUXDRAIN=false)
+
+Set the normal_completion flag.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Disable Sy HPN2 control and open VENT valve.
+ECxy01 (STATE=VALVE_OPENED, VALVE=VENT, AUXVENT= false, AUXDRAIN=false)
+
+Set the normal_completion flag.
+Action:- // Open VENT valve
+L "dbCONST_VAL".EM.EMC1.VALVE.VENT;
+T #_VALVE_ECxy01;
+SET;
+R #_AUXDRAIN_ECxy01;
+R #_AUXVENT_ECxy01;
+
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+T #_SUB_ECxy01;
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_ECxy01;
+
+// Set flag for normal completion
+SET;
+R #_confirm_TransferComp;
+R #_prompt_TransferComp;
+S #_normal_completion;
+Verification:- A(;
+L 	#_DEV_STATE_ECxy01;
+L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::09
+--------------------------------------------------
+TRNNo:- 9.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::08
+--------------------------------------------------
+StepNo:- 08
+Title:- SY_UO_FILL : Filling Unit Operation Completed
+Description:- Set Sy product to safe state if not normal completion...
+
+EVy004 (STATE=STOPPED)
+EXy007 (STATE=STOPPED)
+
+If normal completion then finished with Sy. Leave it venting with everything off...
+ECy001 (STATE=STOPPED) vent valve open
+EXy007 (STATE=STOPPED)
+EXzz02 (STATE=STOPPED)
+
+ Log FILLING operation end time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set Sy product to safe state if not normal completion...
+
+EVxy04 (STATE=STOPPED)
+EXxy07 (STATE=STOPPED)
+EGxy05 (STATE=FILTER)
+
+If normal completion then finished with Sy. Leave it venting with everything off...
+ECxy02 (STATE=STOPPED)
+EJxy03 (STATE=STOPPED)
+Action:- A #_normal_completion;
+JC LAST;
+
+//Close vessel outlet valve
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EVxy04;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EVxy04;
+
+LAST:NOP 0;
+
+// Set remaining Sy equipment to SAFE state:
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_ECxy02;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_ECxy02;
+
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EJxy03;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EJxy03;
+
+// EGxy05 (STATE=FILTER)
+L "dbCONST_VAL".EM.CMD.START;
+T #_CMD_EGxy05;
+L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
+T #_SUB_EGxy05;
+
+//Close vessel outlet valve
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EVxy04;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EVxy04;
+
+// Close Filling Line
+L "dbCONST_VAL".EM.CMD.STOP;
+T #_CMD_EXxy07;
+L "dbCONST_VAL".EM.SUBSTATE.ZERO;
+T #_SUB_EXxy07;
+Verification:- A M1.1;
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:-  Log FILLING operation end time if normal completion.
+Action:- //Clear used flags
+SET;
+R #_prompt_TransferComp;
+R #_confirm_Abort;
+R #_confirm_TransferComp;
+R #_confirm_FilterBled;
+R #_prompt_FilterBled;
+R #_confirm_Resume;
+R #_prompt_ResumeAbort;
+R #_prompt_StartFilling;
+R #_confirm_StartFilling;
+R #_confirm_FLready;
+R #_prompt_FLready;
+R #_path_ready;
+
+
+A #_normal_completion;
+// Log FILLING operation end time.
+L "dbCONST_VAL".CPU_TIME;
+T #_log_FillEnd;
+
+SET;
+R #_normal_completion;
+Verification:- A M1.1;
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

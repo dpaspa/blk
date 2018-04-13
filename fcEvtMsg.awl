@@ -1,0 +1,304 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable event flags and data.              //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      11-Apr-2018 NA        Initial design for S7-1500.     //
+//----------------------------------------------------------------------------//
+// Function definition:                                                       //
+//----------------------------------------------------------------------------//
+FUNCTION "fcEvtMsg" : Void
+TITLE = Event indexing function for operator messages on the HMI
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcEvtMsg
+VERSION : 1.0
+
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+VAR_TEMP
+    raiseEvent : Bool;
+    scanEIMessage : Bool;
+    scComplete : Bool;
+    scState : Bool;
+    counterEIMessage : Int;
+    blockCount : Int;                  // Number of elements in the data block
+    sRetval : Int;
+    scRetval : Int;
+    blockSize : DWORD;                 // Size of the entire data block
+    evtElem : "udtMsgEvent";
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Open globally shared event DB
+    //------------------------------------------------------------------------//
+    // Open the Event global data block and save the block length locally:    //
+    //------------------------------------------------------------------------//
+    OPN "dbEVENT";
+    L DBLG;
+    T #blockSize;
+
+NETWORK
+TITLE = Calculate iteration loop dimensions based on block size
+    //------------------------------------------------------------------------//
+    // Calculate loop dimensions based on block size divided by block         //
+    // element data structure size:                                           //
+    //------------------------------------------------------------------------//
+    L #blockSize;
+    L 11.7;
+    /R;
+    T #blockCount;
+
+    // or by subtracting the next element in the array
+//    L P##nextVar
+//    L P##dummyUDT
+//    -D
+//    SRD 3
+
+NETWORK
+TITLE = Initialise loop counter
+    //------------------------------------------------------------------------//
+    // Initialise the loop countdown counter value with the number of block   //
+    // data elements and enable the loop:                                     //
+    //------------------------------------------------------------------------//
+    L #blockCount;
+    T #counterEIMessage;
+    S #scanEIMessage;
+
+NETWORK
+TITLE = Initialise the starting address of the DB pointer
+    //------------------------------------------------------------------------//
+    // Initialise DB pointer starting address to the first element at 0:      //
+    //------------------------------------------------------------------------//
+    L P#0.0;
+    LAR1;
+
+NETWORK
+TITLE = Check if loop scanning is enabled
+    //------------------------------------------------------------------------//
+    // Bypass the loop if not enabled:                                        //
+    //------------------------------------------------------------------------//
+_nextCycle:   NOP 0;
+    A #scanEIMessage;
+    JCN   _dbTraversed;
+
+NETWORK
+TITLE = Read message event element DB data into local variable
+    //------------------------------------------------------------------------//
+    // LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP    //
+    // LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP    //
+    // LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP   LOOP    //
+    //                                                                        //
+    // Traverse the datablock UDT structure to see if any event bits have     //
+    // been raised.                                                           //
+    // Read the current DB element data. Here the pointer value is relative   //
+    // to the pointer offset:                                                 //
+    //------------------------------------------------------------------------//
+NEXT:   NOP 0;
+    L DBD[AR1,P#0.0];
+    = #evtElem.trigger;
+    L DBD[AR1,P#0.1];
+    = #evtElem.confirmYes;
+    L DBD[AR1,P#0.2];
+    = #evtElem.confirmNo;
+    L DBD[AR1,P#0.3];
+    = #evtElem.ackPending;
+    L DBD[AR1,P#0.4];
+    = #evtElem.ackRequired;
+    L DBD[AR1,P#0.5];
+    T #evtElem.eventID;
+    L DBD[AR1,P#4.6];
+    T #evtElem.idxMessage;
+    L DBD[AR1,P#4.7];
+    = #evtElem.payLoad.isReal;
+    L DBD[AR1,P#5.0];
+    = #evtElem.payLoad.isBatch;
+    L DBD[AR1,P#5.1];
+    T #evtElem.payLoad.numSerial;
+    L DBD[AR1,P#7.2];
+    T #evtElem.payLoad.dataValue;
+
+//    T #evtElem.eventID;
+//    T #evtElem.idxMessage;
+//    T #evtElem.payLoad.isReal;
+//    T #evtElem.payLoad.isBatch;
+//    T #evtElem.payLoad.numSerial;
+//    T #evtElem.payLoad.dataValue;
+
+//      CALL BLKMOV
+//      {blk_type := 'Any'}
+//      (  SRCBLK                      := "CTRL_RECIPE".MRP ,
+//         RET_VAL                     := #RetVal ,
+//         DSTBLK                      := "CTRL_RECIPE".CRP1
+//      );
+
+NETWORK
+TITLE = Check if message event needs to be raised
+    //------------------------------------------------------------------------//
+    // Check if real message event or test signal number requested:           //
+    //------------------------------------------------------------------------//
+    O #evtElem.trigger;
+    O(;
+    L "numTestMessage";
+    L #evtElem.idxMessage;
+    ==I;
+    );
+    = #raiseEvent;
+
+NETWORK
+TITLE = Clear response flags if message event needs to be raised
+    //------------------------------------------------------------------------//
+    // Clear the alarm request and response flags if raising a new event:     //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    NOT;
+    = #evtElem.confirmNo;
+    = #evtElem.confirmYes;
+    = #evtElem.trigger;
+    = #evtElem.ackPending;
+    = #scComplete;
+
+NETWORK
+TITLE = Raise message event without acknowledgement if required
+    //------------------------------------------------------------------------//
+    // Raise the simple message event if requested. No acknowledge required:  //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    AN #evtElem.ackRequired;
+    CALL ALARM_D
+    (   SIG                         := #evtElem.trigger ,
+        ID                          := WORD#16#EEEE ,         // S7 Data Channel for alarms
+        EV_ID                       := #evtElem.eventID ,     // Alarm number (cannot be 0)
+        CMP_ID                      := 7 ,                    // The DB number with the message data
+        SD                          := #evtElem.payLoad ,
+        RET_VAL                     := #sRetval
+    );
+
+NETWORK
+TITLE = Raise event with acknowledgement if required
+    //------------------------------------------------------------------------//
+    // Raise the acknowledge event if requested:                              //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    A #evtElem.ackRequired;
+    CALL ALARM_DQ
+    (   SIG                         := #evtElem.trigger ,
+        ID                          := WORD#16#EEEE ,         // S7 Data Channel for alarms
+        EV_ID                       := #evtElem.eventID ,     // Alarm number (cannot be 0)
+        CMP_ID                      := 7 ,                    // The DB number with the message data
+        SD                          := #evtElem.payLoad ,
+        RET_VAL                     := #sRetval
+    );
+
+NETWORK
+TITLE = Flag acknowledgement pending
+    //------------------------------------------------------------------------//
+    // Flag that an acknowledge event has been raised. In that case the       //
+    // acknowledgement response is pending:                                   //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    A #evtElem.ackRequired;
+    S #evtElem.ackPending;
+
+NETWORK
+TITLE = Get acknowledgement if pending
+    //------------------------------------------------------------------------//
+    // Get the acknowledgement response if it was still pending. Response is  //
+    // asynchronous and it may take a long time for the operator to attend to //
+    // the event message:                                                     //
+    //------------------------------------------------------------------------//
+    A #evtElem.ackPending;
+    CALL ALARM_SC
+    (   EV_ID                       := #evtElem.eventID ,
+        RET_VAL                     := #scRetval ,
+        STATE                       := #scState ,
+        Q_STATE                     := #scComplete
+    );
+    NOP 0;
+
+NETWORK
+TITLE = Flag acknowledge response received if so
+    //------------------------------------------------------------------------//
+    // Flag acknowledgement no longer pending if finally received:            //
+    //------------------------------------------------------------------------//
+    A #evtElem.ackPending;
+    A #scComplete;
+    NOT;
+    = #evtElem.ackPending;
+
+NETWORK
+TITLE = Only Acknowledge or Ack plus Cancel
+    //------------------------------------------------------------------------//
+    // Check if the operator did not cancel. If not then it must have been a  //
+    // confirm yes event:                                                     //
+    //------------------------------------------------------------------------//
+    A #scComplete;
+    AN #evtElem.confirmNo;
+    = #evtElem.confirmYes;
+
+NETWORK
+TITLE = Save the current element data back into the global DB
+    //------------------------------------------------------------------------//
+    // Write the current element data back to the global shared DB:           //
+    //------------------------------------------------------------------------//
+    A #evtElem.trigger;
+    T DBD[AR1,P#0.0];
+    A #evtElem.confirmYes;
+    T DBD[AR1,P#0.1];
+    A #evtElem.confirmNo;
+    T DBD[AR1,P#0.2];
+    A #evtElem.ackPending;
+    T DBD[AR1,P#0.3];
+
+NETWORK
+TITLE = Increment the DB point offset
+    //------------------------------------------------------------------------//
+    // Increase the DB pointer offset by the size of the DB data structure:   //
+    //------------------------------------------------------------------------//
+    +AR1 P#11.7;
+
+NETWORK
+TITLE = Decrement the loop counter
+    //------------------------------------------------------------------------//
+    // Traverse the datablock UDT structure to see if any event bits have     //
+    // been raised. Decrement the loop counter:                               //
+    //------------------------------------------------------------------------//
+    L #counterEIMessage;
+    L 1;
+    -I;
+    T #counterEIMessage;
+
+NETWORK
+TITLE = Exit the loop if the countdown is finished
+    //------------------------------------------------------------------------//
+    // END LOOP   END LOOP   END LOOP   END LOOP   END LOOP   END LOOP   END  //
+    // END LOOP   END LOOP   END LOOP   END LOOP   END LOOP   END LOOP   END  //
+    // END LOOP   END LOOP   END LOOP   END LOOP   END LOOP   END LOOP   END  //
+    //                                                                        //
+    // Disable the loop scan flag to exit the loop if the loop countdown has  //
+    // finished:                                                              //
+    //------------------------------------------------------------------------//
+    L #counterEIMessage;
+    L 0;
+    <>I;
+    = #scanEIMessage;
+    JC NEXT;
+
+NETWORK
+TITLE = Restart the countdown counter for another cycle
+    //------------------------------------------------------------------------//
+    // Program only reaches here when the countdown is zero. Load the size of //
+    // the datablock and restart the countdown timer:                         //
+    //------------------------------------------------------------------------//
+_dbTraversed:   NOP 0;
+    L #blockCount;
+    T #counterEIMessage;
+    S #scanEIMessage;
+JC _nextCycle;
+
+END_FUNCTION

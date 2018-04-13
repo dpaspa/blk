@@ -56,6 +56,13 @@ VERSION : 2.0
 @@TEMPLATE_END@@
    END_VAR
 
+   VAR_TEMP
+      cril : Bool;
+      ncril : Bool;
+      FBC : Bool;
+      FBO : Bool;
+   END_VAR
+
 //----------------------------------------------------------------------------//
 //                                                                            //
 //----------------------------------------------------------------------------//
@@ -63,9 +70,6 @@ BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A "AlwaysHighBit";
-      = %L0.0;
-      BLD 103;
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
@@ -74,11 +78,10 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       @@INTERLOCK@@
 @@ATTR_END|CR_IL@@
       );
-      = %L0.1;
-      BLD 103;
+      = #cril;
       CALL "ifcPOSx"
-      (  IN_REQ_MODE                 := %L0.0 ,
-         INTERLOCK                   := %L0.1 ,
+      (  IN_REQ_MODE                 := "AlwaysHighBit" ,
+         INTERLOCK                   := #cril ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
          IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
          OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
@@ -98,8 +101,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       @@INTERLOCK@@
 @@ATTR_END|CR_IL@@
       );
-      = %L0.0;
-      BLD 103;
+      = #cril;
       A(;
 @@ATTR_BEGIN|NCR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
@@ -108,21 +110,19 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       @@INTERLOCK@@
 @@ATTR_END|NCR_IL@@
       );
-      = %L0.1;
-      BLD 103;
+      = #ncril;
       AN "@@INSTANCE@@";
-      = %L0.2;
+      = #FBC;
       BLD 103;
       A "@@INSTANCE@@";
-      = %L0.3;
-      BLD 103;
+      = #FBO;
       CALL #@@INSTANCE@@
       (  CMD                         := #@@INSTANCE@@.CMD ,
-         CR_IL                       := %L0.0 ,
-         NCR_IL                      := %L0.1 ,
+         CR_IL                       := #cril ,
+         NCR_IL                      := #ncril ,
          MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
-         FB_C                        := %L0.2 ,
-         FB_O                        := %L0.3 ,
+         FB_C                        := #FBC ,
+         FB_O                        := #FBO ,
          TMR                         := #@@INSTANCE@@.TMR ,
          INTERLOCKING_TIMER          := "@@INSTANCE@@-ILT" ,
          STATE                       := #@@INSTANCE@@.STATE ,

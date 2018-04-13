@@ -132,7 +132,7 @@
 // S5 timer. ERR_FLT is changed to TIMEOUT_VER, PATH_IL to FLOWPATH.Shared    //
 // Equipment availability flag programmed,BatchCycle variable added.          //
 //----------------------------------------------------------------------------//
-// Declare variables:                                                         //
+// Function definition:                                                       //
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fb@@CLASS@@"
 TITLE = @@CLASSDESCRIPTION@@
@@ -141,6 +141,9 @@ AUTHOR : REO
 NAME : fb@@CLASS@@
 VERSION : 2.0
 
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
 @@TEMPLATE_BEGIN@@
 VAR_INPUT
     CR_IL : Bool;                    // critical Interlock that cannot be bypased.
@@ -158,15 +161,16 @@ VAR_INPUT
 @@ATTR_BEGIN|CHILD@@
     @@CHILDALIAS@@_STATE : Int;    // @@CHILDALIASDESCRIPTION@@
 @@ATTR_END|CHILD@@
-@@ATTR_BEGIN|PARAMETER_VAR_INPUT@@
+PARM_CHILD_STATE_VAR_INPUT
+@@ATTR_BEGIN|PARM_INSTANCE_VAR_INPUT@@
     @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARAMETER_VAR_INPUT@@
-@@ATTR_BEGIN|PARAMETER_SFC_DATA_VAR_INPUT@@
+@@ATTR_END|PARM_INSTANCE_VAR_INPUT@@
+@@ATTR_BEGIN|PARM_SFC_DATA_VAR_INPUT@@
     @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARAMETER_SFC_DATA_VAR_INPUT@@
-@@ATTR_BEGIN|PARAMETER_SFC_CONFIRM@@
+@@ATTR_END|PARM_SFC_DATA_VAR_INPUT@@
+@@ATTR_BEGIN|PARM_SFC_CONFIRM@@
     blk_@@SFCPARAMETER@@ : Bool;
-@@ATTR_END|PARAMETER_SFC_CONFIRM@@
+@@ATTR_END|PARM_SFC_CONFIRM@@
 END_VAR
 
 VAR_OUTPUT
@@ -190,36 +194,38 @@ VAR_OUTPUT
     REM_TIME_M : Int;
     REM_TIME_S : Int;
 @@ATTR_END|TIMER@@
-@@ATTR_BEGIN|PARAMETER_VAR_OUTPUT@@
+@@ATTR_BEGIN|PARM_VAR_OUTPUT@@
     @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARAMETER_VAR_OUTPUT@@
-@@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|PARAMETER_CHILD_VAR_INPUT@@
-    @@CHILDALIAS@@_@@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARAMETER_CHILD_VAR_INPUT@@
-@@ATTR_END|STATE@@
+@@ATTR_END|PARM_VAR_OUTPUT@@
+@@ATTR_BEGIN|PARM_CHILD_VAR_INPUT@@
+    @@PARAMETER@@_@@CHILDALIAS@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|PARM_CHILD_VAR_INPUT@@
 @@ATTR_BEGIN|CHILD@@
     @@CHILDALIAS@@_SERIALNUM : Int;     // @@CHILDALIASDESCRIPTION@@
 @@ATTR_END|CHILD@@
-@@ATTR_BEGIN|PARAMETER_SFC_DATA_VAR_OUTPUT@@
+@@ATTR_BEGIN|CHILD@@
+    @@CHILDALIAS@@_isBatch : Bool;      // @@CHILDALIASDESCRIPTION@@
+@@ATTR_END|CHILD@@
+@@ATTR_BEGIN|PARM_SFC_DATA_VAR_OUTPUT@@
     @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARAMETER_SFC_DATA_VAR_OUTPUT@@
+@@ATTR_END|PARM_SFC_DATA_VAR_OUTPUT@@
 END_VAR
 
 VAR_IN_OUT
-    CMD : Int := 1;                  // Start/Stop command
-    MODE : Int := 1;               // Select auto mode by default
-    SUBSelected : Int := 0;          // Currently selected running substate
-    SERIALNUM : Int;               // Unique batch or CIPSIP serial number
-    ME : Int;                      // Block unique ID
-    OWNER : Int;                   // Value to be set or reset by Parent
+    CMD : Int := 1;                    // Start/Stop command
+    MODE : Int := 1;                   // Select auto mode by default
+    SUBSelected : Int := 0;            // Currently selected running substate
+    SERIALNUM : Int;                   // Unique batch or CIPSIP serial number
+    isBatch : Bool;
+    ME : Int;                          // Block unique ID
+    OWNER : Int;                       // Value to be set or reset by Parent
     SQ_STATE : Int;
     SQ_ACK : Bool;
     SQ_RESUME : Bool;
     SUBLast : Int;
-@@ATTR_BEGIN|PARAMETER_VAR_IN_OUT@@
+@@ATTR_BEGIN|PARM_VAR_IN_OUT@@
     @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARAMETER_VAR_IN_OUT@@
+@@ATTR_END|PARM_VAR_IN_OUT@@
 @@ATTR_BEGIN|HYGIENE@@
     HYGIENE : Int;   // Hygiene status of the unit
 @@ATTR_END|HYGIENE@@
@@ -232,15 +238,15 @@ VAR_IN_OUT
 @@ATTR_BEGIN|CHILD@@
     @@CHILDALIAS@@_OWNER : Int;     // @@CHILDALIASDESCRIPTION@@
 @@ATTR_END|CHILD@@
-@@ATTR_BEGIN|PARAMETER_SFC_DATA_VAR_IN_OUT@@
+@@ATTR_BEGIN|PARM_SFC_DATA_VAR_IN_OUT@@
     @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARAMETER_SFC_DATA_VAR_IN_OUT@@
-@@ATTR_BEGIN|PARAMETER_SFC_PROMPT@@
+@@ATTR_END|PARM_SFC_DATA_VAR_IN_OUT@@
+@@ATTR_BEGIN|PARM_SFC_PROMPT@@
     blk_@@SFCPARAMETER@@ : Bool;
-@@ATTR_END|PARAMETER_SFC_PROMPT@@
-@@ATTR_BEGIN|PARAMETER_SFC_LOG@@
+@@ATTR_END|PARM_SFC_PROMPT@@
+@@ATTR_BEGIN|PARM_SFC_LOG@@
     blk_@@SFCPARAMETER@@ : Real;
-@@ATTR_END|PARAMETER_SFC_LOG@@
+@@ATTR_END|PARM_SFC_LOG@@
 END_VAR
 
 VAR
@@ -573,7 +579,7 @@ TITLE = Cascade Batch Serial Number to children
 @@ATTR_END|STATE@@
 
 @@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|PARAMETER_CHILD_VAR_INPUT@@
+@@ATTR_BEGIN|PARM_CHILD_VAR_INPUT@@
 NETWORK
 TITLE = Download calling parameter @@PARAMETER@@ value to child device @@CHILDALIAS@@ for state @@STATE@@
     //------------------------------------------------------------------------//
@@ -584,9 +590,9 @@ TITLE = Download calling parameter @@PARAMETER@@ value to child device @@CHILDAL
     A #events.commandStart;
     A #subs.@@STATE@@;
     L #@@PARAMETER@@;
-    T #@@CHILDALIAS@@_@@PARAMETER@@;
+    T #@@PARAMETER@@_@@CHILDALIAS@@;
 
-@@ATTR_END|PARAMETER_CHILD_VAR_INPUT@@
+@@ATTR_END|PARM_CHILD_VAR_INPUT@@
 @@ATTR_END|STATE@@
 
 @@ATTR_BEGIN|STATE@@
@@ -644,9 +650,9 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
     (
         MODE                        := #@@SFC@@.MODE ,
         SQ_CMD                      := #@@SFC@@.SQ_CMD ,
-@@ATTR_BEGIN|PARAMETER_SFC_VAR_INPUT@@
+@@ATTR_BEGIN|PARM_SFC_VAR_INPUT@@
         _@@SFCPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
-@@ATTR_END|PARAMETER_SFC_VAR_INPUT@@
+@@ATTR_END|PARM_SFC_VAR_INPUT@@
         SQ_STATE                    := #@@SFC@@.SQ_STATE ,
         CURSTEP                     := #@@SFC@@.CURSTEP ,
         NXT_STEP                    := #@@SFC@@.NXT_STEP ,
@@ -655,15 +661,15 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
         PAUSED                      := #@@SFC@@.PAUSED ,
         OFF_IDLE                    := #@@SFC@@.OFF_IDLE ,
         SQ_FINISHED                 := #@@SFC@@.SQ_FINISHED ,
-@@ATTR_BEGIN|PARAMETER_SFC_VAR_OUTPUT@@
+@@ATTR_BEGIN|PARM_SFC_VAR_OUTPUT@@
         _@@SFCPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
-@@ATTR_END|PARAMETER_SFC_VAR_OUTPUT@@
+@@ATTR_END|PARM_SFC_VAR_OUTPUT@@
         STEPNO_JUMP                 := #@@SFC@@.STEPNO_JUMP ,
         MAN_JUMP                    := #@@SFC@@.MAN_JUMP ,
         NO_VERIFIC                  := #@@SFC@@.NO_VERIFIC ,
-@@ATTR_BEGIN|PARAMETER_SFC_VAR_IN_OUT@@
+@@ATTR_BEGIN|PARM_SFC_VAR_IN_OUT@@
         _@@SFCPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
-@@ATTR_END|PARAMETER_SFC_VAR_IN_OUT@@
+@@ATTR_END|PARM_SFC_VAR_IN_OUT@@
         TRN_AND_JUMP                := #@@SFC@@.TRN_AND_JUMP
     );
 
@@ -686,7 +692,7 @@ TITLE = Make sure any non-active SFCs are stopped
 
 @@ATTR_END|SFC@@
 
-@@ATTR_BEGIN|PARAMETER_SFC_PROMPT@@
+@@ATTR_BEGIN|PARM_SFC_PROMPT@@
 NETWORK
 TITLE = Clear the operator prompt flag
     //------------------------------------------------------------------------//
@@ -702,9 +708,9 @@ TITLE = Clear the global event DB operator prompt flag
     AN #events.commandStart;
     = #blk_@@SFCPARAMETER@@;
 
-@@ATTR_END|PARAMETER_SFC_PROMPT@@
+@@ATTR_END|PARM_SFC_PROMPT@@
 
-@@ATTR_BEGIN|PARAMETER_SFC_CONFIRM@@
+@@ATTR_BEGIN|PARM_SFC_CONFIRM@@
 NETWORK
 TITLE = Clear the operator confirm flag
     //------------------------------------------------------------------------//
@@ -720,10 +726,10 @@ TITLE = Clear the global event DB operator confirm flag
     AN #events.commandStart;
     = #blk_@@SFCPARAMETER@@;
 
-@@ATTR_END|PARAMETER_SFC_CONFIRM@@
+@@ATTR_END|PARM_SFC_CONFIRM@@
 
 @@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|PARAMETER_SFC_CHILD_VAR_INPUT@@
+@@ATTR_BEGIN|PARM_SFC_CHILD_VAR_INPUT@@
 NETWORK
 TITLE = Synchronise SFC @@SFC@@ child state for child @@SFCPARAMETER@@
     //------------------------------------------------------------------------//
@@ -740,11 +746,11 @@ TITLE = Synchronise SFC @@SFC@@ child state for child @@SFCPARAMETER@@
     L #@@BLOCKPARAMETER@@;
     T #@@SFC@@._@@SFCPARAMETER@@;
 
-@@ATTR_END|PARAMETER_SFC_CHILD_VAR_INPUT@@
+@@ATTR_END|PARM_SFC_CHILD_VAR_INPUT@@
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|PARAMETER_SFC_CHILD_VAR_OUTPUT@@
+@@ATTR_BEGIN|PARM_SFC_CHILD_VAR_OUTPUT@@
 NETWORK
 TITLE = Synchronise SFC @@SFC@@ child command for child @@SFCPARAMETER@@
     //------------------------------------------------------------------------//
@@ -758,7 +764,7 @@ TITLE = Synchronise SFC @@SFC@@ child command for child @@SFCPARAMETER@@
     L #@@BLOCKPARAMETER@@;
     T #@@SFC@@._@@SFCPARAMETER@@;
 
-@@ATTR_END|PARAMETER_SFC_CHILD_VAR_OUTPUT@@
+@@ATTR_END|PARM_SFC_CHILD_VAR_OUTPUT@@
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
@@ -800,7 +806,7 @@ TITLE = Check if any new Child command if SFC @@SFC@@ is running
     AN #@@SFC@@.ERR_FAULT;
     JCN _notSFCRunning_1_@@STATE@@;
 
-@@ATTR_BEGIN|PARAMETER_SFC_CHILD_VAR_OUTPUT@@
+@@ATTR_BEGIN|PARM_SFC_CHILD_VAR_OUTPUT@@
 NETWORK
 TITLE = Check if the SFC Child command has changed
     //------------------------------------------------------------------------//
@@ -822,7 +828,7 @@ TITLE = Send the updated SFC Child command to the child
 
 _noCommandChange_@@COUNTER@@_@@STATE@@:      NOP 0;
 
-@@ATTR_END|PARAMETER_SFC_CHILD_VAR_OUTPUT@@
+@@ATTR_END|PARM_SFC_CHILD_VAR_OUTPUT@@
 
 _notSFCRunning_1_@@STATE@@:      NOP 0;
 
@@ -873,7 +879,7 @@ TITLE = Reset the new child command flag if a mismatch
     A #timeCheckChildState.Q;
     R #flags.childCommandChange;
 
-@@ATTR_BEGIN|PARAMETER_SFC_PROMPT@@
+@@ATTR_BEGIN|PARM_SFC_PROMPT@@
 NETWORK
 TITLE = Raise operator prompt if required
     //------------------------------------------------------------------------//
@@ -884,9 +890,9 @@ TITLE = Raise operator prompt if required
     A #@@SFC@@._@@SFCPARAMETER@@;
     = #blk_@@SFCPARAMETER@@;
 
-@@ATTR_END|PARAMETER_SFC_PROMPT@@
+@@ATTR_END|PARM_SFC_PROMPT@@
 
-@@ATTR_BEGIN|PARAMETER_SFC_CONFIRM@@
+@@ATTR_BEGIN|PARM_SFC_CONFIRM@@
 NETWORK
 TITLE = Return operator bit if made
     //------------------------------------------------------------------------//
@@ -897,9 +903,9 @@ TITLE = Return operator bit if made
     A #blk_@@SFCPARAMETER@@;
     = #@@SFC@@._@@SFCPARAMETER@@;
 
-@@ATTR_END|PARAMETER_SFC_CONFIRM@@
+@@ATTR_END|PARM_SFC_CONFIRM@@
 
-@@ATTR_BEGIN|PARAMETER_SFC_LOG@@
+@@ATTR_BEGIN|PARM_SFC_LOG@@
 NETWORK
 TITLE = Log data if required
     //------------------------------------------------------------------------//
@@ -910,7 +916,7 @@ TITLE = Log data if required
     A #@@SFC@@._@@SFCPARAMETER@@;
     = #blk_@@SFCPARAMETER@@;
 
-@@ATTR_END|PARAMETER_SFC_LOG@@
+@@ATTR_END|PARM_SFC_LOG@@
 
 @@ATTR_BEGIN|SFC@@
 NETWORK

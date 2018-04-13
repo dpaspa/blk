@@ -1,0 +1,214 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 7/04/2018 11:22:56 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+SFCNo:- 001
+Title:- UO_MX_SETUP
+Description:- Unit Operation for setup of equipment for manufacturing operations.
+Name:- SETUP
+Class:- MX
+Level:- UO
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- MUSET
+Version:- 0.1
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.1 Gerald Kontriner 07-Sep-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- emx_mfl_state
+Type:- INT
+Description:- Device State of emx_mfl
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- emx_mfl_subs
+Type:- INT
+Description:- Substate selection to emx_mfl
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- emx_mfl_cmd
+Type:- INT
+Description:- Command to emx_mfl
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- emc_water_state
+Type:- INT
+Description:- Device State of emc_water
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- emc_water_subs
+Type:- INT
+Description:- Substate selection to emc_water
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- emc_water_cmd
+Type:- INT
+Description:- Command to emc_water
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- emc_water_medium
+Type:- INT
+Description:- Medium selection for emc_water
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- prompt_connect_ok
+Type:- BOOL
+Description:- Prompt operator to confirm all vessel connections are properly made.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- confirm_connect_ok
+Type:- BOOL
+Description:- Confirmation that all vessel connections are properly made.
+ParameterInOut:- VAR
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- UO_MX_SETUP : Setup Unit Operation Commenced
+Description:- Prompt operator to confirm that all vessel connections, including the permanent flexible connections are properly made.
+
+Start EMX1_CIPSIP_SETUP to connect MMFLx to Drain.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt operator to confirm correct vessel connections.
+Start EMX1_CIPSIP_SETUP.
+Action:- SET;
+S #_prompt_connect_ok;
+
+//Start EMX1_CIPSIP_SETUP.
+L "dbCONST".BLK.EMX1.SUBS.CIPSIP_SETUP;
+T #_emx_mfl_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_mfl_cmd;
+Verification:- A(;
+L #_emx_mfl_state;
+L "dbCONST".BLK.EMX1.SUBS.CIPSIP_SETUP;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Confirmation received.
+EmptyTransition:- False
+Description:- Confirmation from operator received and CIPSIP_SETUP finished.
+Condition:- A #_confirm_connect_ok;
+A(;
+L #_emx_mfl_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- UO_MX_SETUP : Setup for PW
+Description:- Set state of selected Manufacturing Vessel Mx and start it.
+
+Set emc_water to substate SETUP with MEDIUM PW.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set emc_water to substate SETUP (Medium PW).
+Set EVn004, EVn008 to substate CHARGE.
+
+Action:- //Clear used flags
+SET;
+R #_prompt_connect_ok;
+R #_confirm_connect_ok;
+
+//Set to Medium PW and start EMC2_SETUP.
+L    "dbCONST".SEL.LIQUID.PW;
+T    #_emc_water_medium;
+L    "dbCONST".   BLK.EMC2.SUBS.SETUP;
+T    #_emc_water_subs;
+L    "dbCONST".BLK.CMD.START;
+T    #_emc_water_cmd;
+Verification:- //Verify if current substate changed to SETUP & CHARGE.
+A(;
+L #_DEV_STATE_ECn002;
+L "dbCONST_VAL".EM.EMC2.SUBS.SETUP;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- ECn002 substate SETUP complete.
+EmptyTransition:- False
+Description:- ECn002 substate SETUP is complete.
+Condition:- A(;
+L   #_emc_water_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- UO_MX_SETUP : Setup Unit Operation Completed
+Description:- Clear used flags.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Clear used flags.
+Action:- //Clear used flags
+SET;
+R #_prompt_connect_ok;
+R #_confirm_connect_ok;
+Verification:- A M1.1; //Always High flag
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************
