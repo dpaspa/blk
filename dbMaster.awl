@@ -9,22 +9,154 @@
 // 2.0 David Paspa      20-Jan-2018 NA        Reboot for S7-1500.             //
 // 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
 //----------------------------------------------------------------------------//
-DATA_BLOCK "dbLOG_VAL"
-DATA_BLOCK "dbLogValue"
-TITLE = DB interface for data logging
+DATA_BLOCK "dbCommLink"
 { S7_Optimized_Access := 'FALSE' }
-AUTHOR : REO
-NAME : dbLogValue
-VERSION : 2.0
+VERSION : 0.1
+    STRUCT
+        GD_STATUS : DWord;   // Global data communication status
+        SendBuffer : Struct
+            DataID : DWord;   // Data Counter
+            Data : Array[1..8] of Word;
+        END_STRUCT;
+        RcvBuffer : Struct
+            DataID : DWord;   // Data Counter
+            Data : Array[1..8] of Word;
+        END_STRUCT;
+        CPU1_TO_CPU2 : Struct   // FL>>>>SMS1
+            FL_HEART_BEAT : Bool;
+            TI_4102_PV : Real;
+        END_STRUCT;
+        CPU2_TO_CPU1 : Struct   // SMS1>>>>FL
+            FL_HEART_BEAT : Bool;
+            EX1207_DV_xy71_CMD : Int;
+        END_STRUCT;
+    END_STRUCT;
 
-STRUCT
-    RealLog : "udtLogValue";
-    Time_Index : Int;
-    Real_Index : Int;
-    Process_Time : Time;
-    Process_Value : Real;
-    EV_Trigger : Array[1..16] of Bool;
-END_STRUCT;
+    BEGIN
+        RcvBuffer.Data[1] := WORD#16#0005;
+        RcvBuffer.Data[8] := WORD#16#0008;
+END_DATA_BLOCK
+
+
+
+
+//DATA_BLOCK "dbLogValue"
+//TITLE = DB interface for data logging
+//{ S7_Optimized_Access := 'FALSE' }
+//AUTHOR : REO
+//NAME : dbLogValue
+//VERSION : 2.0
+//
+//    STRUCT
+//        RealLog : "udtLogValue";
+//        Time_Index : Int;
+//        Real_Index : Int;
+//        Process_Time : Time;
+//        Process_Value : Real;
+//        EV_Trigger : Array[1..16] of Bool;
+//    END_STRUCT;
+//
+//    BEGIN
+//END_DATA_BLOCK
+
+DATA_BLOCK "dbTONR"
+{OriginalPartName := 'IEC_TIMER';
+ VersionGUID := 'b68d17d6-3fcc-4468-818a-b36d847990bb';
+ S7_Optimized_Access := 'TRUE' }
+AUTHOR : Simatic
+FAMILY : IEC
+NAME : IEC_TMR
+VERSION : 1.0
+NON_RETAIN
+IEC_TIMER
 
 BEGIN
+
+END_DATA_BLOCK
+
+DATA_BLOCK "dbHMISFCControl"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+    STRUCT
+        HMI_SEQ_SELECTION : Int;
+        HMI_SEQ_OFFSET : Int;
+        HMI_CB_OFFSET : Int;
+        HMI_TEXT_LENGTH : Int;
+        HMI_SEQ_MODE : Int;
+        HMI_SEQ_MODE_CMD : Int;
+        HMI_SEQ_SQ_CMD : Int;
+        HMI_SEQ_STEPNO_JUMP : Int;
+        HMI_SEQ_MAN_JUMP : Bool;
+        HMI_SEQ_NO_VERIFIC : Bool;
+        HMI_SEQ_TRN_AND_JUMP : Bool;
+        HMI_SEQ_PAUSED : Bool;
+        HMI_SEQ_CUR : Int;
+    END_STRUCT;
+
+    BEGIN
+        HMI_TEXT_LENGTH := 10;
+END_DATA_BLOCK
+
+DATA_BLOCK "dbHMISFCSelect"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+    STRUCT
+        HMI_SEQ_DONE_SA : Int;
+        HMI_SEQ_WITHERROR_SA : Int;
+        HMI_SEQ_LENGTH : Int;
+        HMI_SEQ_SA : Int;
+        HMI_Common_Buffer_OFFSET : Int;
+        HMI_Common_SEQ_DATA : "udtHMISequence";
+        HMI_TextField_Anim : Array[1..10] of Int;
+        HMI_TextField_Anim_SA : Int;
+        HMI_Common_Buffer : Array[1..104] of Int;
+        HMI_Common_Buffer_SA : Int;
+        CRP1_RP_CIPSIP : Array[1..104] of Int;
+        CRP1_RP_CIPSIP_SA : Int;
+        CRP1_RP_MAKE : Array[1..104] of Int;
+        CRP1_RP_MAKE_SA : Int;
+        CRP1_RP_FILTER : Array[1..104] of Int;
+        CRP1_RP_FILTER_SA : Int;
+    END_STRUCT;
+
+    BEGIN
+        HMI_SEQ_DONE_SA := 22;
+        HMI_SEQ_WITHERROR_SA := 36;
+        HMI_SEQ_LENGTH := 104;
+        HMI_TextField_Anim_SA := 50;
+        HMI_Common_Buffer_SA := 72;
+        CRP1_RP_CIPSIP_SA := 282;
+        CRP1_RP_MAKE_SA := 492;
+        CRP1_RP_FILTER_SA := 702;
+END_DATA_BLOCK
+
+DATA_BLOCK "TimeSyncBlock"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+    STRUCT
+        PLC_DateAndTime : Date_And_Time;
+        JOB_MailBoxHMI1 : Word;
+        JOB_MailBoxHMI2 : Word;
+        JOB_MailBoxHMI3 : Word;
+        JOB_MailBoxHMI4 : Word;
+        SettimefromPC : Bool;
+        HMI_PLC_DateAndTime : Date_And_Time;
+    END_STRUCT;
+
+    BEGIN
+END_DATA_BLOCK
+
+DATA_BLOCK "HMIDateTime"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+    STRUCT
+        AreaPointer : Struct   // job mailbox
+            Job_No : Word;   // job number
+            Para_1 : Word;   // parameter 1
+            Para_2 : Word;   // parameter 2
+            Para_3 : Word;   // parameter 3
+        END_STRUCT;
+    END_STRUCT;
+
+    BEGIN
 END_DATA_BLOCK

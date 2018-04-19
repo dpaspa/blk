@@ -10,8 +10,8 @@
 //----------------------------------------------------------------------------//
 // Function definition:                                                       //
 //----------------------------------------------------------------------------//
-FUNCTION "fcEvtMsg" : Void
-TITLE = Event indexing function for operator messages on the HMI
+FUNCTION "fcEventProcess" : Void
+TITLE = Event indexing function for SFC messages on the HMI
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
 NAME : fcEvtMsg
@@ -50,7 +50,7 @@ TITLE = Calculate iteration loop dimensions based on block size
     // element data structure size:                                           //
     //------------------------------------------------------------------------//
     L #blockSize;
-    L 11.7;
+    L 16.0;
     /R;
     T #blockCount;
 
@@ -110,32 +110,18 @@ NEXT:   NOP 0;
     = #evtElem.ackPending;
     L DBD[AR1,P#0.4];
     = #evtElem.ackRequired;
-    L DBD[AR1,P#0.5];
+    L DBD[AR1,P#2.0];
     T #evtElem.eventID;
-    L DBD[AR1,P#4.6];
+    L DBD[AR1,P#6.0];
     T #evtElem.idxMessage;
-    L DBD[AR1,P#4.7];
+    L DBD[AR1,P#8.0];
     = #evtElem.payLoad.isReal;
-    L DBD[AR1,P#5.0];
+    L DBD[AR1,P#8.1];
     = #evtElem.payLoad.isBatch;
-    L DBD[AR1,P#5.1];
+    L DBD[AR1,P#10.0];
     T #evtElem.payLoad.numSerial;
-    L DBD[AR1,P#7.2];
+    L DBD[AR1,P#12.0];
     T #evtElem.payLoad.dataValue;
-
-//    T #evtElem.eventID;
-//    T #evtElem.idxMessage;
-//    T #evtElem.payLoad.isReal;
-//    T #evtElem.payLoad.isBatch;
-//    T #evtElem.payLoad.numSerial;
-//    T #evtElem.payLoad.dataValue;
-
-//      CALL BLKMOV
-//      {blk_type := 'Any'}
-//      (  SRCBLK                      := "CTRL_RECIPE".MRP ,
-//         RET_VAL                     := #RetVal ,
-//         DSTBLK                      := "CTRL_RECIPE".CRP1
-//      );
 
 NETWORK
 TITLE = Check if message event needs to be raised

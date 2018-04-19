@@ -31,69 +31,58 @@ NAME : ifbHE1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
-   VAR
+VAR
 @@TEMPLATE_BEGIN@@
-      @@INSTANCE@@ : "fbHE1";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbHE1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-      @@INSTANCE@@_MODE : Struct
-         PosEdge1 : Bool;
-         PosEdge2 : Bool;
-         REQ : Int;   // Request for Required Mode
-      END_STRUCT;
-@@TEMPLATE_END@@
-   END_VAR
+END_VAR
+
+VAR_TEMP
+    cril : Bool;
+    ncril : Bool;
+END_VAR
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Call the class function to process each instance:                          //
 //----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL "ifcHE1"
-      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
-         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|HE@@_CMD ,
-         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
-         IO_MODE                     := #@@INSTANCE@@.MODE ,
-         OUT_CMD                     := "idbHE1".@@INSTANCE@@.CMD ,
-         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
-      );
-      NOP 0;
-NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A(;
+    A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+    A "alwaysLow";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
 @@ATTR_END|CR_IL@@
-      );
-      = %L0.0;
-      BLD 103;
-      A(;
+    );
+    = #cril;
+    A(;
 @@ATTR_BEGIN|NCR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+    A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
+    @@INTERLOCK@@
 @@ATTR_END|NCR_IL@@
-      );
-      = %L0.1;
-      BLD 103;
-      CALL #HE_1010
-      (  CMD                         := #@@INSTANCE@@.CMD ,
-         CR_IL                       := %L0.0 ,
-         NCR_IL                      := %L0.1 ,
-         DO_OUTPUT                   := "@@INSTANCE@@" ,
-         CUTOUT                      := #@@INSTANCE@@.CUTOUT ,
-         STATE                       := #@@INSTANCE@@.STATE ,
-         MODE                        := #@@INSTANCE@@.MODE
+    );
+    = #ncril;
+    CALL #@@INSTANCE@@
+    (   OWNER                          := #@@INSTANCE@@.OWNER ,
+        SERIAL                         := #@@INSTANCE@@.SERIAL ,
+        CR_IL                          := #cril ,
+        NCR_IL                         := #ncril ,
+        MAN_OVERRIDE                   := #@@INSTANCE@@.MAN_OVERRIDE ,
+        FAULT                          := "@@INSTANCE@@-FLT" ,
+        INTERLOCK                      := #@@INSTANCE@@.INTERLOCK ,
+        DO                             := "@@INSTANCE@@-CMD" ,
+        ALARM                          := #@@INSTANCE@@.ALARM ,
+        CUTOUT                         := #@@INSTANCE@@.CUTOUT ,
+        MODE                           := #@@INSTANCE@@.MODE ,
+        CMD                            := #@@INSTANCE@@.CMD ,
+        STATE                          := #@@INSTANCE@@.STATE
       );
       NOP 0;
 @@TEMPLATE_END@@

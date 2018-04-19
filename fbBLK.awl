@@ -146,10 +146,12 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 @@TEMPLATE_BEGIN@@
 VAR_INPUT
-    CR_IL : Bool;                    // critical Interlock that cannot be bypased.
-    NCR_IL : Bool;                   // Interlock that can be manually bypassed.
-    MAN_OVERRIDE : Bool;             // Manual override to bypass NCR_IL
-    CHILD_RELEASE : Bool;            // Request to release children when complete
+    OWNER : Int;                       // Value to be set or reset by Parent
+    SERIALNUM : Int;                   // Unique batch or CIPSIP serial number
+    CR_IL : Bool;                      // Critical Interlock that cannot be bypased.
+    NCR_IL : Bool;                     // Non-Critical Interlock that can be manually bypassed.
+    MAN_OVERRIDE : Bool;               // Manual override to bypass NCR_IL
+    CHILD_RELEASE : Bool;              // Request to release children when complete
 @@ATTR_BEGIN|TIMER@@
     TIME_H : Int;
     TIME_M : Int;
@@ -215,10 +217,8 @@ VAR_IN_OUT
     CMD : Int := 1;                    // Start/Stop command
     MODE : Int := 1;                   // Select auto mode by default
     SUBSelected : Int := 0;            // Currently selected running substate
-    SERIALNUM : Int;                   // Unique batch or CIPSIP serial number
     isBatch : Bool;
     ME : Int;                          // Block unique ID
-    OWNER : Int;                       // Value to be set or reset by Parent
     SQ_STATE : Int;
     SQ_ACK : Bool;
     SQ_RESUME : Bool;
@@ -328,7 +328,7 @@ TITLE = Check if calling parameters are valid
     //                                                                        //
     // TODO: Check each calling parameter to make sure it is valid:           //
     //------------------------------------------------------------------------//
-    A "AlwaysLow";
+    A "alwaysLow";
     = #flags.badParameter;
     = #BAD_PARAM;
 
@@ -438,13 +438,6 @@ TITLE = Set Start command permitted flag if all okay
     AN #flags.badParameter;
     = #flags.permitStart;
 
-//----------------------------------------------------------------------------//
-// MODE AND COMMAND    MODE AND COMMAND    MODE AND COMMAND    MODE AND COMMA //
-// MODE AND COMMAND    MODE AND COMMAND    MODE AND COMMAND    MODE AND COMMA //
-// MODE AND COMMAND    MODE AND COMMAND    MODE AND COMMAND    MODE AND COMMA //
-//                                                                            //
-// Process block mode and command.                                            //
-//----------------------------------------------------------------------------//
 NETWORK
 TITLE = Call Mode and Command handling block
     //------------------------------------------------------------------------//
@@ -453,23 +446,23 @@ TITLE = Call Mode and Command handling block
     // Process the standard block functions for command, mode, interlock and  //
     // state:                                                                 //
     //------------------------------------------------------------------------//
-    CALL "fcBLKModeAndCommand"
+    CALL "fcModeCmdBLK"
     (
-        MODE                        := #MODE ,
-        CMD                         := #CMD ,
         CR_IL                       := #CR_IL ,
         NCR_IL                      := #NCR_IL ,
         MAN_OVERRIDE                := #MAN_OVERRIDE ,
         permitStart                 := #flags.permitStart ,
-        STATE                       := #STATE ,
-        INTERLOCK                   := #INTERLOCK ,
-        eventCommandStart           := #events.commandStart ,
-        eventCommandStop            := #events.commandStop ,
         eventModeAuto               := #events.modeAuto ,
         eventModeManual             := #events.modeManual ,
         eventModeOOS                := #events.modeOOS ,
+        MODE                        := #MODE ,
+        CMD                         := #CMD ,
+        STATE                       := #STATE ,
+        eventCmdStart               := #events.commandStart ,
+        eventCmdStop                := #events.commandStop ,
         SUBSelected                 := #SUBSelected ,
-        SUBLast                     := #SUBLast
+        SUBLast                     := #SUBLast ,
+        INTERLOCK                   := #INTERLOCK
     );
     NOP 0;
 
@@ -1228,7 +1221,7 @@ TITLE = HYGIENE STATE CALCULATION
     //                                                                        //
     // Calculate the hygiene status of the block:                             //
     //------------------------------------------------------------------------//
-    CALL "fcBLKHygiene"
+    CALL "fcHygiene"
     (
         CLEAN_TIME                  := #HYGIENE_DATA.CLEAN_TIME ,
         STERILE_TIME                := #HYGIENE_DATA.STERILE_TIME ,

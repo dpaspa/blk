@@ -30,49 +30,37 @@ NAME : ifbDI1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
-   VAR
+VAR
 @@TEMPLATE_BEGIN@@
-      @@INSTANCE@@ : "fbDI1";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbDI1";  // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-      @@INSTANCE@@_MODE : Struct
-         PosEdge1 : Bool;
-         PosEdge2 : Bool;
-         REQ : Int;   // Request for Required Mode
-      END_STRUCT;
-@@TEMPLATE_END@@
-   END_VAR
+END_VAR
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Call the class function to process each instance:                          //
 //----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL "ifcDI1"
-      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
-         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
-         IO_MODE                     := "idbDI1".@@INSTANCE@@.MODE ,
-         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
-      );
-      NOP 0;
-NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL #@@INSTANCE@@
-      (  DI_INPUT                    := "@@INSTANCE@@" ,
-         DI_USER                     := #@@INSTANCE@@.DI_USER ,
-         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-         ALARM                       := #@@INSTANCE@@.ALARM ,
-         DI_PV                       := #@@INSTANCE@@.DI_PV ,
-         STATE                       := #@@INSTANCE@@.STATE ,
-         MODE                        := #@@INSTANCE@@.MODE ,
-         OWNER                       := #@@INSTANCE@@.OWNER
-      );
-      NOP 0;
+    CALL #@@INSTANCE@@
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CR_IL                := #@@INSTANCE@@.CR_IL ,
+        NCR_IL               := #@@INSTANCE@@.CR_IL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        CMD_SAFE             := #@@INSTANCE@@.CMD_SAFE ,
+        DI_Auto              := "@@INSTANCE@@-DI" ,
+        DI_Manual            := #@@INSTANCE@@.DI_Manual ,
+        ALARM                := #@@INSTANCE@@.ALARM ,
+        PV                   := #@@INSTANCE@@.PV ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
+    );
+    NOP 0;
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

@@ -1,24 +1,24 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       ifcHE1                                                        //
-// Description: Interface function for CM class HE1.                          //
+// Class:       ifcMOT1                                                       //
+// Description: Interface function for CM class MOT1.                         //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
 // 2.0 David Paspa      24-Jan-2018 NA        Reboot for S7-1500.             //
 //----------------------------------------------------------------------------//
-FUNCTION "ifcHE1" : Void
-TITLE = ifcHE1 : Interface
+FUNCTION "ifcMOT1" : Void
+TITLE = ifcMOT1 : Interface
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
-NAME : ifcHE1
+NAME : ifcMOT1
 VERSION : 2.0
 
    VAR_INPUT
       IN_REQ_MODE : Bool;
       IN_MODE : Int;
-      IN_CMD : Bool;
+      IN_CMD : Int;
    END_VAR
 
    VAR_OUTPUT
@@ -27,7 +27,7 @@ VERSION : 2.0
 
    VAR_IN_OUT
       IO_MODE : Int;
-      OUT_CMD : Bool;
+      IO_CMD : Int;
       POS_EDGE1 : Bool;
       POS_EDGE2 : Bool;
    END_VAR
@@ -55,15 +55,14 @@ TITLE = Mode change
       );
       NOP 0;
 NETWORK
-TITLE = Assign Input Parameters to Output
+TITLE = Transfer Input Parameters to Output
+      A(;
       L #IO_MODE;
       L "dbCONST_VAL".CM.MODE.AUTO;
       ==I;
-      = %L1.0;
-      A %L1.0;
-      A #IN_CMD;
-      S #OUT_CMD;
-      A %L1.0;
-      AN #IN_CMD;
-      R #OUT_CMD;
+      );
+      JNB Label_0;
+      L #IN_CMD;
+      T #IO_CMD;
+Label_0:      NOP 0;
 END_FUNCTION

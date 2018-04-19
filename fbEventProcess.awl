@@ -1,0 +1,314 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable event flags and data. The function //
+// traverses the event datablock UDT structures to see if any event bits have //
+// been raised. This is called each scan from the main program block OB1      //
+// which therefore takes care of the looping required.                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      11-Apr-2018 NA        Initial design for S7-1500.     //
+//----------------------------------------------------------------------------//
+// Function definition:                                                       //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbEventProcess"
+TITLE = Event indexing function for SFC messages on the HMI
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fbEventProcess
+VERSION : 1.0
+
+//----------------------------------------------------------------------------//
+// Declare variables which must retain their values between block calls:      //
+//----------------------------------------------------------------------------//
+VAR
+    elementCount : Int;                // Number of elements in the data block
+    elementSize : Int;                 // Size of the entire data block
+    scanCount : Int;
+    blockSize : DWORD;                 // Size of an individual UDT element
+END_VAR
+
+//----------------------------------------------------------------------------//
+// Declare temporary variables. The order of the first two is important to    //
+// be able to measure the size of the UDT:                                    //
+//----------------------------------------------------------------------------//
+VAR_TEMP
+    eventElement : "udtMsgEvent";
+    elementTerminationBit : Bool;
+    edgeStart : Bool;
+    raiseEvent : Bool;
+    scanEnabled : Bool;
+    scanStart : Bool;
+    scComplete : Bool;
+    scState : Bool;
+    sRetval : Int;
+    scRetval : Int;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Check if request to start
+    //------------------------------------------------------------------------//
+    // Open the Event global data block and save the block length locally:    //
+    //------------------------------------------------------------------------//
+    A "enableEventsProcess";
+    T #scanEnabled;
+
+NETWORK
+TITLE = Check if starting up
+    //------------------------------------------------------------------------//
+    // Open the Event global data block and save the block length locally:    //
+    //------------------------------------------------------------------------//
+    A #scanEnabled;
+    FP #edgeStart;
+    = #scanStart;
+
+NETWORK
+TITLE = Open globally shared event DB if starting
+    //------------------------------------------------------------------------//
+    // Open the Event global data block if starting to scan:                  //
+    //------------------------------------------------------------------------//
+    A #scanStart;
+    OPN "dbEVENTProcess";
+
+NETWORK
+TITLE = Get shared event DB size
+    //------------------------------------------------------------------------//
+    // Get the overall size of the shared event data block if starting:       //
+    //------------------------------------------------------------------------//
+    A #scanStart;
+    L DBLG;
+    T #blockSize;
+
+NETWORK
+TITLE = Get the size of a single DB UDT element
+    //------------------------------------------------------------------------//
+    // Calculate the size of a single UDT element based on the size of the    //
+    // temporary variables defined in this function:                          //
+    //------------------------------------------------------------------------//
+    A #scanStart;
+    L P##elementTerminationBit;        // Pointer to the first element after the measured one
+    L P##eventElement;                 // Pointer to the temp element to mesure it
+    -D;                                // Pointer subtraction to determine length
+    SRD 3;                             // Shift pointer to only have length
+    T #elementSize;
+
+NETWORK
+TITLE = Calculate iteration loop dimensions based on block size
+    //------------------------------------------------------------------------//
+    // Calculate loop dimensions based on block size divided by block         //
+    // element data structure size if starting:                               //
+    //------------------------------------------------------------------------//
+    A #scanStart;
+    L #blockSize;
+    L #elementSize;
+    /D;
+    T #elementCount;
+
+NETWORK
+TITLE = Initialise the counter if starting
+    //------------------------------------------------------------------------//
+    // Start counting at 1 if starting up:                                    //
+    //------------------------------------------------------------------------//
+    A #scanStart;
+    L 1;
+    T #scanCount;
+
+NETWORK
+TITLE = Start at the first block element if reached the end
+    //------------------------------------------------------------------------//
+    // Start scanning at the first element if reached the end of the block:   //
+    //------------------------------------------------------------------------//
+    L #scanCount;
+    L #elementCount;
+    >I;
+    L 1;
+    T #scanCount;
+
+NETWORK
+TITLE = Initialise the starting address of the DB pointer if first element
+    //------------------------------------------------------------------------//
+    // Initialise DB pointer starting address to the first element at offset  //
+    // of 0 if the counter is at the first element:                           //
+    //------------------------------------------------------------------------//
+    L #scanCount;
+    L 1;
+    ==I;
+    L P#0.0;
+    LAR1;
+
+NETWORK
+TITLE = Bypass scanning if not currently enabled
+    //------------------------------------------------------------------------//
+    // Bypass the data scanning of the DB if not enabled:                     //
+    //------------------------------------------------------------------------//
+    A #scanEnabled;
+    JCN _scanBypass;
+
+NETWORK
+TITLE = Read message event element DB data into local UDT variable
+    //------------------------------------------------------------------------//
+    // Read the current DB element data. Here the pointer value is relative   //
+    // to the pointer offset:                                                 //
+    //------------------------------------------------------------------------//
+    L DBD[AR1,P#0.0];
+    = #eventElement.trigger;
+    L DBD[AR1,P#0.1];
+    = #eventElement.confirmYes;
+    L DBD[AR1,P#0.2];
+    = #eventElement.confirmNo;
+    L DBD[AR1,P#0.3];
+    = #eventElement.ackPending;
+    L DBD[AR1,P#0.4];
+    = #eventElement.ackRequired;
+    L DBD[AR1,P#2.0];
+    T #eventElement.eventID;
+    L DBD[AR1,P#6.0];
+    T #eventElement.idxMessage;
+    L DBD[AR1,P#8.0];
+    = #eventElement.payLoad.isReal;
+    L DBD[AR1,P#8.1];
+    = #eventElement.payLoad.isBatch;
+    L DBD[AR1,P#10.0];
+    T #eventElement.payLoad.numSerial;
+    L DBD[AR1,P#12.0];
+    T #eventElement.payLoad.dataValue;
+
+NETWORK
+TITLE = Check if message event needs to be raised
+    //------------------------------------------------------------------------//
+    // Check if real message event or test signal number requested:           //
+    //------------------------------------------------------------------------//
+    O #eventElement.trigger;
+    O(;
+    L "testEventProcessNum";
+    L #eventElement.idxMessage;
+    ==I;
+    );
+    = #raiseEvent;
+
+NETWORK
+TITLE = Clear response flags if message event needs to be raised
+    //------------------------------------------------------------------------//
+    // Clear the alarm request and response flags if raising a new event:     //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    R #eventElement.confirmNo;
+    R #eventElement.confirmYes;
+    R #eventElement.trigger;
+    R #eventElement.ackPending;
+    R #scComplete;
+
+NETWORK
+TITLE = Raise message event without acknowledgement if required
+    //------------------------------------------------------------------------//
+    // Raise the simple message event if requested. No acknowledge required:  //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    AN #eventElement.ackRequired;
+    CALL ALARM_D
+    (   SIG                         := #eventElement.trigger ,
+        ID                          := WORD#16#EEEE ,         // S7 Data Channel for alarms
+        EV_ID                       := #eventElement.eventID ,     // Alarm number (cannot be 0)
+        CMP_ID                      := 7 ,                    // The DB number with the message data
+        SD                          := #eventElement.payLoad ,
+        RET_VAL                     := #sRetval
+    );
+
+NETWORK
+TITLE = Flag acknowledgement will be pending
+    //------------------------------------------------------------------------//
+    // Flag that an acknowledge event has been raised. In that case the       //
+    // acknowledgement response is pending. Raise the event next:             //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    A #eventElement.ackRequired;
+    S #eventElement.ackPending;
+
+NETWORK
+TITLE = Raise event with acknowledgement if required
+    //------------------------------------------------------------------------//
+    // Raise the acknowledge event if requested:                              //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    A #eventElement.ackRequired;
+    CALL ALARM_DQ
+    (   SIG                         := #eventElement.trigger ,
+        ID                          := WORD#16#EEEE ,         // S7 Data Channel for alarms
+        EV_ID                       := #eventElement.eventID ,     // Alarm number (cannot be 0)
+        CMP_ID                      := 7 ,                    // The DB number with the message data
+        SD                          := #eventElement.payLoad ,
+        RET_VAL                     := #sRetval
+    );
+
+NETWORK
+TITLE = Get acknowledgement if pending
+    //------------------------------------------------------------------------//
+    // Get the acknowledgement response if it was still pending. Response is  //
+    // asynchronous and it may take a long time for the operator to attend to //
+    // the event message:                                                     //
+    //------------------------------------------------------------------------//
+    A #eventElement.ackPending;
+    CALL ALARM_SC
+    (   EV_ID                       := #eventElement.eventID ,
+        RET_VAL                     := #scRetval ,
+        STATE                       := #scState ,
+        Q_STATE                     := #scComplete
+    );
+    NOP 0;
+
+NETWORK
+TITLE = Flag acknowledge response received if so
+    //------------------------------------------------------------------------//
+    // Flag acknowledgement no longer pending if finally received:            //
+    //------------------------------------------------------------------------//
+    A #eventElement.ackPending;
+    A #scComplete;
+    R #eventElement.ackPending;
+
+NETWORK
+TITLE = Only Acknowledge or Ack plus Cancel
+    //------------------------------------------------------------------------//
+    // Check if the operator did not cancel. If not then it must have been a  //
+    // confirm yes event:                                                     //
+    //------------------------------------------------------------------------//
+    A #scComplete;
+    AN #eventElement.confirmNo;
+    = #eventElement.confirmYes;
+
+NETWORK
+TITLE = Save the current element data back into the global DB
+    //------------------------------------------------------------------------//
+    // Write the current element data back to the global shared DB:           //
+    //------------------------------------------------------------------------//
+    A #eventElement.trigger;
+    T DBD[AR1,P#0.0];
+    A #eventElement.confirmYes;
+    T DBD[AR1,P#0.1];
+    A #eventElement.confirmNo;
+    T DBD[AR1,P#0.2];
+    A #eventElement.ackPending;
+    T DBD[AR1,P#0.3];
+
+NETWORK
+TITLE = Increment the DB point offset
+    //------------------------------------------------------------------------//
+    // Increase the DB pointer offset by the size of the UDT data structure:  //
+    //------------------------------------------------------------------------//
+    +AR1 P##elementSize;
+
+NETWORK
+TITLE = Increment the DB element counter
+    //------------------------------------------------------------------------//
+    // Incrementt he loop counter to keep track of the element number:        //
+    //------------------------------------------------------------------------//
+    L #scanCount;
+    L 1;
+    +I;
+    T #scanCount;
+
+_scanBypass:   NOP 0;
+
+END_FUNCTION_BLOCK

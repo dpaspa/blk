@@ -9,15 +9,15 @@
 // 2.0 David Paspa      28-Feb-2018 NA        Reboot for S7-1500.             //
 // 0.1 Khairul Basar    30-Sep-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-TYPE "udtAlarmMessage"
-VERSION : 2.0
-    STRUCT
-        MainTextLib : Byte;            // Select Main Library
-        TextLib : Byte;                // Select Second Library
-        BatchID : Array[1..6] of Char;
-        CipSipNo : DWord;
-    END_STRUCT;
-END_TYPE
+//TYPE "udtAlarmMessage"
+//VERSION : 2.0
+//    STRUCT
+//        MainTextLib : Byte;            // Select Main Library
+//        TextLib : Byte;                // Select Second Library
+//        BatchID : Array[1..6] of Char;
+//        CipSipNo : DWord;
+//    END_STRUCT;
+//END_TYPE
 
 TYPE "udtHygiene"
 VERSION : 2.0
@@ -39,14 +39,14 @@ VERSION : 2.0
     END_STRUCT;
 END_TYPE
 
-TYPE "udtLogValue"
-VERSION : 0.1
-    STRUCT
-        Real_Value : Real;
-        BatchID : Array[1..6] of Char;
-        Index : Int;
-    END_STRUCT;
-END_TYPE
+//TYPE "udtLogValue"
+//VERSION : 0.1
+//    STRUCT
+//        Real_Value : Real;
+//        BatchID : Array[1..6] of Char;
+//        Index : Int;
+//    END_STRUCT;
+//END_TYPE
 
 TYPE "udtMsgPayload"
 VERSION : 2.0
@@ -58,7 +58,7 @@ VERSION : 2.0
     END_STRUCT;
 END_TYPE
 
-TYPE "udtMsgEvent"
+TYPE "udtEventProcess"
 VERSION : 2.0
     STRUCT
         trigger : Bool;
@@ -72,16 +72,26 @@ VERSION : 2.0
     END_STRUCT;
 END_TYPE
 
-TYPE "udtLogEvent"
+TYPE "udtEventSequence"
 VERSION : 2.0
     STRUCT
-        trigger : Bool;
-        Time_Index : Int;
-        Real_Index : Int;
-        timeValue : Time;
-        realValue : Real;
+        DisplayBatcnID : Int;
+        BatchID : Array[1..6] of Char;
+        MessageIndex : Word;
+        UnitNo : Int;
     END_STRUCT;
 END_TYPE
+
+//TYPE "udtLogEvent"
+//VERSION : 2.0
+//    STRUCT
+//        trigger : Bool;
+//        Time_Index : Int;
+//        Real_Index : Int;
+//        timeValue : Time;
+//        realValue : Real;
+//    END_STRUCT;
+//END_TYPE
 
 TYPE "udtSFCCommand"
 VERSION : 0.1
@@ -135,7 +145,7 @@ VERSION : 0.1
    END_STRUCT;
 END_TYPE
 
-TYPE "udtSFCSequencer"
+TYPE "udtSFCSequence"
 VERSION : 2.0
    STRUCT
       STEP : "udtSFCStep";
@@ -145,4 +155,25 @@ VERSION : 2.0
       Finished : Bool;                 // Sequencer Finished
       Error_Fault : Bool;              // Sequence error
    END_STRUCT;
+END_TYPE
+
+TYPE "udtHMISequence"
+VERSION : 0.1
+   STRUCT
+      MODE : Int;
+      SQ_STATE : Int;
+      CURSTEP : Int;
+      S_ACTIVE : Bool;
+      ERR_FAULT : Bool;
+      PAUSED : Bool;
+      OFF_IDLE : Bool;
+      SQ_FINISHED : Bool;
+      STEPNO_JUMP : Int;
+      MAN_JUMP : Bool;
+      NO_VERIFIC : Bool;
+      TRN_AND_JUMP : Bool;
+      DONE : Array[1..104] of Bool;
+      WITHERROR : Array[1..104] of Bool;
+   END_STRUCT;
+
 END_TYPE

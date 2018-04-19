@@ -3,30 +3,54 @@
 //----------------------------------------------------------------------------//
 // Class:       fbIL1                                                         //
 // Description:                                                               //
-// Interlock calculation with one input.                                      //
+// Interlock calculation with up to five inputs.                              //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 1.0 David Paspa      20-Mar-2018 NA        Reboot for S7-1500.             //
+// 1.0 David Paspa      17-Apr-2018 NA        Reboot for S7-1500.             //
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fbIL1"
-TITLE = IL1 : Interlock calculation with 1 input
+TITLE = IL1 : Interlock calculation with up to 5 inputs
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
 NAME : fbIL1
 VERSION : 2.0
 
-   VAR_OUTPUT
-      INTERLOCK : Bool;   // Interlock Flag (0 = Inactive, 1 = Active)
-   END_VAR
+VAR_OUTPUT
+    INTERLOCK : Bool;   // Interlock Flag (0 = Inactive, 1 = Active)
+END_VAR
 
-   VAR_IN_OUT
-      IN1 : Bool;
-   END_VAR
+VAR_IN_OUT
+    IN1 : Bool;
+    IN2 : Bool;
+    IN3 : Bool;
+    IN4 : Bool;
+    IN5 : Bool;
+    OPR1 : Char;   // 'A' for AND or 'O' for OR
+END_VAR
 
 BEGIN
 NETWORK
-TITLE = Calculate the interlock
-      A #IN1;
-      = #INTERLOCK;
+TITLE = Calculate the interlock if operator is OR
+    L #OPR1;
+    L 'O';
+    ==I;
+    O #IN1;
+    O #IN2;
+    O #IN3;
+    O #IN4;
+    O #IN5;
+    = #INTERLOCK;
+
+NETWORK
+TITLE = Calculate the interlock if operator is AND
+    L #OPR1;
+    L 'A';
+    ==I;
+    A #IN1;
+    A #IN2;
+    A #IN3;
+    A #IN4;
+    A #IN5;
+    = #INTERLOCK;
 END_FUNCTION_BLOCK

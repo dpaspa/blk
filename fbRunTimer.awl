@@ -33,7 +33,7 @@ VERSION : 0.1
 
    VAR
       RUNTMRNonRet {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-      RetElapsedTime : DInt;
+      RetElapsedTime : Time;
       NonRetElapsedTime : Time;
       Time_hist : DInt;
       Tmr_Running : Bool;
@@ -50,7 +50,7 @@ VERSION : 0.1
       h_ms : DInt;
       tot_ms : DInt;
       TimeValue : Time;
-      dTimeValue : DInt;
+      dTimeValue : Time;
       ExpiredNonRetTmr : Bool;
       ExpiredRetTmr : Bool;
       Time_ET : DInt;
@@ -188,11 +188,10 @@ TITLE = Retentive timer
       AN #NON_RET;
       AN #PAUSE;
       JNB Label_8;
-      CALL TONR_X
-      (  TMR_EN                      := #ENABLE ,
-         RESET                       := #RESET ,
-         PV                          := #dTimeValue ,
-         DELTA_T                     := %DB1.DBW36 , 
+      CALL TONR, "dbTONR"
+      (  IN                          := #ENABLE ,
+         R                           := #RESET ,
+         PT                          := #dTimeValue ,
          Q                           := #ExpiredRetTmr ,
          ET                          := #RetElapsedTime
       );

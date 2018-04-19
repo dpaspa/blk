@@ -2,77 +2,54 @@
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //                Automatically Generated File - Do Not Edit                  //
 //----------------------------------------------------------------------------//
-// Class:       ifbDI1                                                        //
-// Description: Instances of DI1                                              //
+// Class:       ifbDI2                                                        //
+// Description: Instances of DI2                                              //
 //                                                                            //
-// General alarm single digital input.                                        //
+// General alarm input using software only. No field I/O.                     //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
-// 0.6 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
-//                                            Toggle.                         //
-// 0.5 Khairul Basar    03-Oct-2009 CC-09/016 PSH_parameters corrected.       //
-// 0.4 Khairul Basar    15-Sep-2009 CC-09/016 PSA_1010 DI_USER assigned       //
-//                                            correctly.                      //
-// 0.3 Khairul Basar    09-Sep-2009 CC-09/016 I/O assignment associated with  //
-//                                            corresponding Instance is       //
-//                                            corrected.                      //
-// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Mode=1 initialized.             //
-//                                            Instance comment added.         //
-// 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
+// 1.0 David Paspa      17-Apr-2018 NA        Initial design from DI1.        //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "ifbDI1"
-TITLE = Instances of DI1 General alarm single digital input
+FUNCTION_BLOCK "ifbDI2"
+TITLE = Instances of DI2 General alarm with software input
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
-NAME : ifbDI1
-VERSION : 2.0
+NAME : ifbDI2
+VERSION : 1.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
-   VAR
+VAR
 @@TEMPLATE_BEGIN@@
-      @@INSTANCE@@ : "fbDI1";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbDI2";  // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-      @@INSTANCE@@_MODE : Struct
-         PosEdge1 : Bool;
-         PosEdge2 : Bool;
-         REQ : Int;   // Request for Required Mode
-      END_STRUCT;
-@@TEMPLATE_END@@
-   END_VAR
+END_VAR
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Call the class function to process each instance:                          //
 //----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL "ifcDI1"
-      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
-         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
-         IO_MODE                     := "idbDI1".@@INSTANCE@@.MODE ,
-         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
-      );
-      NOP 0;
-NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL #@@INSTANCE@@
-      (  DI_INPUT                    := "@@INSTANCE@@" ,
-         DI_USER                     := #@@INSTANCE@@.DI_USER ,
-         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-         ALARM                       := #@@INSTANCE@@.ALARM ,
-         DI_PV                       := #@@INSTANCE@@.DI_PV ,
-         STATE                       := #@@INSTANCE@@.STATE ,
-         MODE                        := #@@INSTANCE@@.MODE ,
-         OWNER                       := #@@INSTANCE@@.OWNER
-      );
-      NOP 0;
+    CALL #@@INSTANCE@@
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CR_IL                := #@@INSTANCE@@.CR_IL ,
+        NCR_IL               := #@@INSTANCE@@.CR_IL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        CMD_SAFE             := #@@INSTANCE@@.CMD_SAFE ,
+        DI_Auto              := "@@INSTANCE@@-DI" ,
+        DI_Manual            := #@@INSTANCE@@.DI_Manual ,
+        ALARM                := #@@INSTANCE@@.ALARM ,
+        PV                   := #@@INSTANCE@@.PV ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
+    );
+    NOP 0;
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

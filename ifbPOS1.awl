@@ -73,14 +73,14 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "alwaysHigh";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
 @@ATTR_END|CR_IL@@
       );
       = #cril;
       CALL "ifcPOSx"
-      (  IN_REQ_MODE                 := "AlwaysHighBit" ,
+      (  IN_REQ_MODE                 := "alwaysHigh" ,
          INTERLOCK                   := #cril ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
          IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
@@ -96,7 +96,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "alwaysHigh";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
 @@ATTR_END|CR_IL@@
@@ -105,7 +105,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|NCR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "alwaysHigh";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
 @@ATTR_END|NCR_IL@@
@@ -124,7 +124,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
          FB_C                        := #FBC ,
          FB_O                        := #FBO ,
          TMR                         := #@@INSTANCE@@.TMR ,
-         INTERLOCKING_TIMER          := "@@INSTANCE@@-ILT" ,
+         INTERLOCKING_TIMER          := "@@INSTANCE@@-TTM" ,
          STATE                       := #@@INSTANCE@@.STATE ,
          OUT_Q                       := "@@INSTANCE@@-CMD" ,
          FAULT_C                     := #@@INSTANCE@@.FAULT_C ,

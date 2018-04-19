@@ -9,21 +9,22 @@
 // 2.0 David Paspa      29-Mar-2018 NA        Reboot for S7-1500.             //
 // 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
 //----------------------------------------------------------------------------//
-FUNCTION "fcHMISFCControl" : Void
-TITLE = SFC Prompt Messaging Index
+FUNCTION "ifcHMISFCControl" : Void
+TITLE = SFC Selection
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
-NAME : fcHMISFCControl
+NAME : ifcHMISFCControl
 VERSION : 2.0
 
 BEGIN
 @@TEMPLATE_BEGIN@@
+@@ATTR_BEGIN|SFC@@
 NETWORK
 TITLE = @@CLASS@@_@@SFC@@
     CALL "fcHMISFCSelect"
     (   SEL_CONSTANT                := @@COUNTER|1@@ ,
-        SELECTION                   := "dbHMI_SCNT".HMI_SEQ_SELECTION , 
-        SA                          := "dbHMI_SEQ".@@CLASS@@_@@SFC@@_SA ,
+        SELECTION                   := "dbHMISFCControl".HMI_SEQ_SELECTION ,
+        SA                          := "dbHMISFCSelect".@@CLASS@@_@@SFC@@_SA ,
         SQ_STATE                    := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.SQ_STATE ,
         MODE                        := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.MODE ,
         SQ_CMD                      := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.SQ_CMD ,
@@ -34,5 +35,6 @@ TITLE = @@CLASS@@_@@SFC@@
     );
     NOP 0;
 
+@@ATTR_END|SFC@@
 @@TEMPLATE_END@@
 END_FUNCTION

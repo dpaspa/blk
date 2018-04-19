@@ -16,112 +16,57 @@
 // Substate changed for not to generate #tEdgeAutoStart pulse when mode is    //
 // changed.                                                                   //
 //----------------------------------------------------------------------------//
-FUNCTION "fcBLKModeAndCommand" : Void
-TITLE = General Mode, Command & Interlock handling block
+FUNCTION "fcModeCmdBLK" : Void
+TITLE = Generic Block Mode, Command & Interlock handling block
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
-NAME : fcBLKModeAndCommand
+NAME : fcModeCmdBLK
 VERSION : 2.0
 
-   VAR_INPUT
-        MODE : Int;                    // Block Mode
-        CMD : Int;                     // Block Command for auto mode
-        CR_IL : Bool;                  // Critical Interlock
-        NCR_IL : Bool;                 // Non critical Interlock
-        MAN_OVERRIDE : Bool;           // Manual override for Non-critical interlocks
-        permitStart: Bool;
-   END_VAR
+VAR_INPUT
+    CR_IL : Bool;                  // Critical Interlock
+    NCR_IL : Bool;                 // Non critical Interlock
+    MAN_OVERRIDE : Bool;           // Manual override for Non-critical interlocks
+    permitStart: Bool;
+END_VAR
 
-   VAR_OUTPUT
-        STATE : Int;                   // Device state
-        INTERLOCK : Bool;              // if there is any interlock
-        eventCommandStart : Bool;
-        eventCommandStop : Bool;
-        eventModeAuto : Bool;
-        eventModeManual : Bool;
-        eventModeOOS : Bool;
-   END_VAR
+VAR_OUTPUT
+    eventModeAuto : Bool;
+    eventModeManual : Bool;
+    eventModeOOS : Bool;
+END_VAR
 
-   VAR_IN_OUT
-        SUBSelected : Int;                // Selected substate
-        SUBLast : Int;
-   END_VAR
+VAR_IN_OUT
+    MODE : Int;                    // Block Mode
+    CMD : Int;                     // Block Command for auto mode
+    STATE : Int;                   // Device state
+    eventCmdStart : Bool;
+    eventCmdStop : Bool;
+    SUBSelected : Int;             // Selected substate
+    SUBLast : Int;
+    INTERLOCK : Bool;              // if there is any interlock
+END_VAR
 
-   VAR_TEMP
-        edgeCommandStart : Bool;
-        edgeCommandStop : Bool;
-        edgeModeAuto : Bool;
-        edgeModeManual : Bool;
-        edgeModeOOS : Bool;
-   END_VAR
+VAR_TEMP
+    edgeCommandStart : Bool;
+    edgeCommandStop : Bool;
+    edgeModeAuto : Bool;
+    edgeModeManual : Bool;
+    edgeModeOOS : Bool;
+END_VAR
 
 BEGIN
 NETWORK
-TITLE = Set block to Auto mode if restarting the PLC
+TITLE = Auto Mode on CPU startup
     //------------------------------------------------------------------------//
-    // Set block Mode Auto on PLC restart:                                    //
+    // RESTART   RESTART   RESTART   RESTART   RESTART   RESTART   RESTART    //
+    // RESTART   RESTART   RESTART   RESTART   RESTART   RESTART   RESTART    //
+    //                                                                        //
+    // Set the mode to Auto if CPU has restarted:                             //
     //------------------------------------------------------------------------//
-    A "FirstScanRestartflag";
+    A "flagFirstScanRestart";
     L "dbCONST".BLK.MODE.AUTO;
     T #MODE;
-
-NETWORK
-TITLE = Flag if a new block running substate command issued
-    //------------------------------------------------------------------------//
-    // START COMMAND   START COMMAND   START COMMAND   START COMMAND   START  //
-    //                                                                        //
-    // Check if the start command has just been issued if the bit positive    //
-    // edge. The result will only last for one scan after the positive edge:  //
-    //------------------------------------------------------------------------//
-    A #permitStart;
-    A(;
-    O(;
-    L #CMD;
-    L "dbCONST".BLK.CMD.START;
-    ==I;
-    );
-    O(;
-    L #SUBSelected;
-    L #SUBLast;
-    <>I;
-    );
-    );
-    FP #edgeCommandStart;
-    = #eventCommandStart;
-
-NETWORK
-TITLE = Save last running substate if starting
-    //------------------------------------------------------------------------//
-    // SAVE SUBSTATE    SAVE SUBSTATE    SAVE SUBSTATE    SAVE SUBSTATE       //
-    //                                                                        //
-    // Save the running substate for next scan check if starting. It may have //
-    // changed:                                                               //
-    //------------------------------------------------------------------------//
-    A #eventCommandStart;
-    L #SUBSelected;
-    T #SUBLast;
-
-NETWORK
-TITLE = Flag if block stop command issued
-    //------------------------------------------------------------------------//
-    // STOP COMMAND   STOP COMMAND   STOP COMMAND   STOP COMMAND   STOP COMM  //
-    //                                                                        //
-    // Check if the stop command has just been issued if the bit positive     //
-    // edge. The result will only last for one scan after the positive edge:  //
-    //------------------------------------------------------------------------//
-    L #CMD;
-    L "dbCONST".BLK.CMD.STOP;
-    ==I;
-    FP #edgeCommandStop;
-    = #eventCommandStop;
-
-NETWORK
-TITLE = Stop command takes precedence over Start command
-    //------------------------------------------------------------------------//
-    // If commanded to Stop then reset any Start command:                     //
-    //------------------------------------------------------------------------//
-    A #eventCommandStop;
-    R #eventCommandStart;
 
 NETWORK
 TITLE = Flag if block Mode just changed to Auto
@@ -165,6 +110,64 @@ TITLE = Flag if block Mode just changed to Out Of Service
     ==I;
     FP #edgeModeOOS;
     = #eventModeOOS;
+
+NETWORK
+TITLE = Flag if a new block running substate command issued
+    //------------------------------------------------------------------------//
+    // START COMMAND   START COMMAND   START COMMAND   START COMMAND   START  //
+    //                                                                        //
+    // Check if the start command has just been issued if the bit positive    //
+    // edge. The result will only last for one scan after the positive edge:  //
+    //------------------------------------------------------------------------//
+    A #permitStart;
+    A(;
+    O(;
+    L #CMD;
+    L "dbCONST".BLK.CMD.START;
+    ==I;
+    );
+    O(;
+    L #SUBSelected;
+    L #SUBLast;
+    <>I;
+    );
+    );
+    FP #edgeCommandStart;
+    = #eventCmdStart;
+
+NETWORK
+TITLE = Save last running substate if starting
+    //------------------------------------------------------------------------//
+    // SAVE SUBSTATE    SAVE SUBSTATE    SAVE SUBSTATE    SAVE SUBSTATE       //
+    //                                                                        //
+    // Save the running substate for next scan check if starting. It may have //
+    // changed:                                                               //
+    //------------------------------------------------------------------------//
+    A #eventCmdStart;
+    L #SUBSelected;
+    T #SUBLast;
+
+NETWORK
+TITLE = Flag if block stop command issued
+    //------------------------------------------------------------------------//
+    // STOP COMMAND   STOP COMMAND   STOP COMMAND   STOP COMMAND   STOP COMM  //
+    //                                                                        //
+    // Check if the stop command has just been issued if the bit positive     //
+    // edge. The result will only last for one scan after the positive edge:  //
+    //------------------------------------------------------------------------//
+    L #CMD;
+    L "dbCONST".BLK.CMD.STOP;
+    ==I;
+    FP #edgeCommandStop;
+    = #eventCmdStop;
+
+NETWORK
+TITLE = Stop command takes precedence over Start command
+    //------------------------------------------------------------------------//
+    // If commanded to Stop then reset any Start command:                     //
+    //------------------------------------------------------------------------//
+    A #eventCmdStop;
+    R #eventCmdStart;
 
 NETWORK
 TITLE = Interlock Flag
@@ -224,17 +227,6 @@ TITLE = Paused State if Running
     L "dbCONST".BLK.STATE.PAUSED;
     T #STATE;
 
-NETWORK
-TITLE = Send stop command in case of any interlock or failure
-    //------------------------------------------------------------------------//
-    // Stop the block if any interlock:                                       //
-    //------------------------------------------------------------------------//
-    L #STATE;
-    L "dbCONST".BLK.STATE.INTERLOCKED;
-    ==I;
-    L "dbCONST".BLK.CMD.STOP;
-    T #CMD;
-
     //------------------------------------------------------------------------//
     // Set the substate safe if any interlock:                                //
     //------------------------------------------------------------------------//
@@ -244,4 +236,24 @@ TITLE = Send stop command in case of any interlock or failure
     L "dbCONST".BLK.SAFE.CMD;
     T #SUBSelected;
 
+NETWORK
+TITLE = Send safe command in case of any interlock or failure
+    //------------------------------------------------------------------------//
+    // Send safe command if any interlock:                                    //
+    //------------------------------------------------------------------------//
+    O #INTERLOCK;
+    ON #permitStart;
+    L "dbCONST".BLK.SAFE.CMD;
+    T #CMD;
+
+NETWORK
+TITLE = Set the safe state in case of any interlock or failure
+    //------------------------------------------------------------------------//
+    // Set safe state to match command if any interlock. The safe command     //
+    // must match the safe state index number in dbCONST.                     //
+    //------------------------------------------------------------------------//
+    O #INTERLOCK;
+    ON #permitStart;
+    L "dbCONST".BLK.SAFE.CMD;
+    T #STATE;
 END_FUNCTION

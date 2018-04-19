@@ -1,0 +1,114 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description: Generic Block Common Mode and Command handling function block.//
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      28-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.4 Khairul Basar    05-Oct-2009 NA        Substate change will issue STOP //
+// 0.3 Khairul Basar    17-Sep-2009 NA        Instead of Auto/Man command,    //
+//                                            now only single COMMAND.        //
+// 0.2 Khairul Basar    20-Aug-2009 NA        Ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
+// Ref1.                                                                      //
+// Mode change:#tMode_Changed NO is removed from the parallel path of         //
+// Substate changed for not to generate #tEdgeAutoStart pulse when mode is    //
+// changed.                                                                   //
+//----------------------------------------------------------------------------//
+FUNCTION "fcModeCmd" : Void
+TITLE = General Mode, Command & Interlock handling block
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcModeCmd
+VERSION : 2.0
+
+VAR_INPUT
+    CR_IL : Bool;                      // Critical Interlock
+    NCR_IL : Bool;                     // Non critical Interlock
+    MAN_OVERRIDE : Bool;               // Manual override for Non-critical interlocks
+    CMD_SAFE : Int;                    // Safe command for the module
+END_VAR
+
+VAR_OUTPUT
+    modeAuto : Bool;
+    modeManual : Bool;
+    modeOOS : Bool;
+END_VAR
+
+VAR_IN_OUT
+    MODE : Int;                        // Block Mode
+    CMD : Int;                         // Block Command for auto mode
+    STATE : Int;                       // Device state
+    INTERLOCK : Bool;                  // if there is any interlock
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Auto Mode on CPU startup
+    //------------------------------------------------------------------------//
+    // RESTART   RESTART   RESTART   RESTART   RESTART   RESTART   RESTART    //
+    // RESTART   RESTART   RESTART   RESTART   RESTART   RESTART   RESTART    //
+    //                                                                        //
+    // Set the mode to Auto if CPU has restarted:                             //
+    //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    L "dbCONST".BLK.MODE.AUTO;
+    T #MODE;
+
+NETWORK
+TITLE = Mode Auto
+    //------------------------------------------------------------------------//
+    // MODE   MODE   MODE   MODE   MODE   MODE   MODE   MODE   MODE   MODE    //
+    // MODE   MODE   MODE   MODE   MODE   MODE   MODE   MODE   MODE   MODE    //
+    //                                                                        //
+    // Get the mode of the module:                                            //
+    //------------------------------------------------------------------------//
+    L #MODE;
+    L "dbCONST".BLK.MODE.AUTO;
+    ==I;
+    = #modeAuto;
+NETWORK
+TITLE = Mode Manual
+    L #MODE;
+    L "dbCONST".BLK.MODE.MANUAL;
+    ==I;
+    = #modeManual;
+NETWORK
+TITLE = Mode Out Of Service
+    L #MODE;
+    L "dbCONST".BLK.MODE.OOS;
+    ==I;
+    = #modeOOS;
+
+NETWORK
+TITLE = Interlock Flag
+    //------------------------------------------------------------------------//
+    // Set boolean interlock flag if any interlock condition exists:          //
+    //------------------------------------------------------------------------//
+    O #CR_IL;
+    O(;
+    A #NCR_IL;
+    AN #MAN_OVERRIDE;
+    );
+    = #INTERLOCK;
+
+NETWORK
+TITLE = Send safe command in case of any interlock or failure
+    //------------------------------------------------------------------------//
+    // Send safe command if any interlock:                                    //
+    //------------------------------------------------------------------------//
+    A #INTERLOCK;
+    L #CMD_SAFE;
+    T #CMD;
+
+NETWORK
+TITLE = Set the safe state in case of any interlock or failure
+    //------------------------------------------------------------------------//
+    // Set safe state to match command if any interlock. The safe command     //
+    // must match the safe state index number in dbCONST.                     //
+    //------------------------------------------------------------------------//
+    A #INTERLOCK;
+    L #CMD_SAFE;
+    T #STATE;
+END_FUNCTION

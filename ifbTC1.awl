@@ -63,7 +63,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcTC1"
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         IN_T_CTRL                   := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|TC@@_CTRL ,
+         IN_T_CTRL                   := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CTRL ,
          IN_SETPOINT                 := "idb@@PARENTCLASS@@".@@PARENT@@.OUT_SETPOINT ,
          IN_GAIN                     := "idb@@PARENTCLASS@@".@@PARENT@@.GAIN ,
          IN_TI                       := "idb@@PARENTCLASS@@".@@PARENT@@.TI ,
@@ -84,7 +84,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "alwaysHigh";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
 @@ATTR_END|CR_IL@@
@@ -94,7 +94,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|NCR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "alwaysHigh";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
       A "idbTI1".TI_@@NUMINSTANCE@@.INTERLOCK;

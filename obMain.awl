@@ -34,14 +34,13 @@ END_VAR
 BEGIN
 NETWORK
 TITLE = Always Low bit
-    A "AlwaysLow";
-    R "AlwaysLow";
-    R "AlarmMsgEvent";
+    A "alwaysLow";
+    R "alwaysLow";
 
 NETWORK
 TITLE = Always High bit
-    AN "AlwaysLow";
-    S "AlwaysHigh";
+    AN "alwaysLow";
+    S "alwaysHigh";
 
 NETWORK
 TITLE = Communication with SMS1
@@ -123,12 +122,21 @@ TITLE = Calling all Process Cells (PC)
     NOP 0;
 
 NETWORK
-TITLE = Calling all HMI Messages
+TITLE = Calling all process message events
     //------------------------------------------------------------------------//
     // Call the message function to interface the PLC to the HMI. Messages    //
     // have prompt and confirm handshake:                                     //
     //------------------------------------------------------------------------//
-    CALL "fcHMIMessages";
+    CALL "fbEventProcess";
+    NOP 0;
+
+NETWORK
+TITLE = Calling all sequence message events
+    //------------------------------------------------------------------------//
+    // Call the message function to interface the PLC to the HMI. Messages    //
+    // have prompt and confirm handshake:                                     //
+    //------------------------------------------------------------------------//
+    CALL "fbEventSequence";
     NOP 0;
 
 NETWORK
@@ -175,6 +183,6 @@ TITLE = Initialise All Modes
     // Very Important!!!!!!!!!!!!!!!!!!!!!                                    //
     // This MUST be the last instruction of OB1:                              //
     //------------------------------------------------------------------------//
-    A "FirstScanRestartflag";
-    R "FirstScanRestartflag";
+    A "flagFirstScanRestart";
+    R "flagFirstScanRestart";
 END_ORGANIZATION_BLOCK

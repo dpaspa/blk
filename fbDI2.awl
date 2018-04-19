@@ -1,116 +1,145 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fbDI1                                                         //
+// Class:       fbDI2                                                         //
 // Description:                                                               //
 // General alarm single digital input.                                        //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
-// 0.5 Khairul Basar    02-Oct-2009 CC-09/016 NW4 DI changed from NC to NO.   //
-// 0.4 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
-// 0.3 Khairul Basar    30-Sep-2009           Mode=2 initialized and Out of   //
-//                                            Service without Alarm.          //
-// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Mode=1 initialized.             //
-// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+// 1.0 David Paspa      17-Apr-2018 NA        Initial design from DI1.        //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "fbDI1"
-TITLE = DI1 : General alarm single digital input
+FUNCTION_BLOCK "fbDI2"
+TITLE = DI2 : General alarm with software input
 { S7_Optimized_Access := 'FALSE' }
-NAME : fbDI1
+NAME : fbDI2
 AUTHOR : REO
-VERSION : 2.0
+VERSION : 1.0
 
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
 VAR_INPUT
-    CMD : Int := 1;      // Enable command
-    DI_INPUT : Bool;     // Input signal from Field (0 = Alarm, 1 = OK)
-    DI_USER : Bool;      // User digital signal for simulating
+    OWNER : Int;             // Value to be set or reset by Parent
+    SERIAL : Int;            // Unique batch or CIPSIP serial number
+    CR_IL : Bool;            // Critical Interlock in series
+    NCR_IL : Bool;           // Non-critical Interlock in series
+    MAN_OVERRIDE : Bool;     // Critical Interlock in series can be Override by this Input
+    CMD_SAFE : Int;          // Safe command for the module
+    DI_Manual : Bool;        // User digital signal for simulating
 END_VAR
 
 VAR_OUTPUT
-    INTERLOCK : Bool;    // Interlock Flag (0 = Inactive, 1 = Active)
-    ALARM : Bool;        // Alarm Flag (0 = OK, 1 = ALARM)
-    DI_PV : Bool;        // Processed DI
-    STATE : Int;         // Device State
+    ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
+    PV : Bool;               // Processed DI
 END_VAR
 
 VAR_IN_OUT
-    MODE : Int := 1;     // Control Mode, Auto by default
-    OWNER : Int;         // Value to be set or reset by Parent
-END_VAR
-
-VAR
-    BATCHCYCLE : "udtID";
+    CMD : Int;               // Command
+    MODE : Int;              // Control Mode
+    STATE : Int;             // Device State from dbCONST
+    INTERLOCK : Bool;        // Interlock Flag
 END_VAR
 
 VAR_TEMP
-    tempDI : Bool;       // Temporary processed DI signal
     modeAuto : Bool;
     modeManual : Bool;
     modeOOS : Bool;
+    tPV : Bool;              // Temporary processed DI signal
 END_VAR
 
 BEGIN
 NETWORK
-TITLE = Mode Auto
-    L #MODE;
-    L "dbCONST".BLK.MODE.AUTO;
-    ==I;
-    = #modeAuto;
-NETWORK
-TITLE = Mode manual
-    L #MODE;
-    L "dbCONST".BLK.MODE.MANUAL;
-    ==I;
-    = #modeManual;
-NETWORK
-TITLE = Mode Out Of Service
-    L #MODE;
-    L "dbCONST".BLK.MODE.OOS;
-    ==I;
-    = #modeOOS;
-NETWORK
-
-TITLE = Process Digital Input Signal
-    A(;
-    A #modeAuto;
-    A #DI_INPUT;
-    O;
-    A #modeManual;
-    A #DI_USER;
+TITLE = Call Mode and Command handling function
+    //------------------------------------------------------------------------//
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (
+        CR_IL                := #CR_IL ,
+        NCR_IL               := #NCR_IL ,
+        MAN_OVERRIDE         := #MAN_OVERRIDE ,
+        CMD_SAFE             := #CMD_SAFE ,
+        modeAuto             := #modeAuto ,
+        modeManual           := #modeManual ,
+        modeOOS              := #modeOOS ,
+        MODE                 := #MODE ,
+        CMD                  := #CMD ,
+        STATE                := #STATE ,
+        INTERLOCK            := #INTERLOCK
     );
-    = #tempDI;
-    = #DI_PV;
+    NOP 0;
+
+NETWORK
+TITLE = Process user input signal
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Calculate the process value based on the mode:                         //
+    //------------------------------------------------------------------------//
+    A #modeManual;
+    A #DI_Manual;
+    = #tPV;
+    = #PV;
+
 NETWORK
 TITLE = Setting ALARM Flag
-    AN #tempDI;
+    //------------------------------------------------------------------------//
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    //                                                                        //
+    // Set alarms:                                                            //
+    //------------------------------------------------------------------------//
+    AN #tPV;
     AN #modeOOS;
     = #ALARM;
+
 NETWORK
 TITLE = Setting INTERLOCK Flag
-    A #tempDI;
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Set interlocks:                                                        //
+    //------------------------------------------------------------------------//
+    O #INTERLOCK;
+    O #tPV;
     = #INTERLOCK;
+
 NETWORK
-TITLE = Setting Device State to OK
-    A(;
-    A #DI_INPUT;
-    A #modeAuto;
-    O;
-    A #DI_USER;
-    A #modeManual;
-    );
-    L "dbCONST".BLK.DI1.STATE.ENABLED;
+TITLE = Set Device command which can only be ENABLE.
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is always ENABLE:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.DI2.CMD.ENABLE;
+    T #CMD;
+
+NETWORK
+TITLE = Set Device State to Enabled if user input is on
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // ENABLED if switch is on:                                               //
+    //------------------------------------------------------------------------//
+    A #tPV;
+    L "dbCONST".BLK.DI2.STATE.ENABLED;
     T #STATE;
+
 NETWORK
 TITLE = Setting Device State to ALARM
-    A(;
-    AN #DI_INPUT;
-    A #modeAuto;
-    O;
-    AN #DI_USER;
-    A #modeManual;
-    );
-    L "dbCONST".BLK.DI1.STATE.ALARM;
+    //------------------------------------------------------------------------//
+    // ALARM if user input is off and not OOS:                                //
+    //------------------------------------------------------------------------//
+    A #ALARM;
+    L "dbCONST".BLK.DI2.STATE.ALARM;
     T #STATE;
 END_FUNCTION_BLOCK

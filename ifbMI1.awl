@@ -27,57 +27,49 @@ NAME : ifbMI1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
-   VAR
+VAR
 @@TEMPLATE_BEGIN@@
-      @@INSTANCE@@ : "fbMI1";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbMI1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-      @@INSTANCE@@_MODE : Struct
-         PosEdge1 : Bool;
-         PosEdge2 : Bool;
-         REQ : Int;   // Request for Required Mode
-      END_STRUCT;
-@@TEMPLATE_END@@
-   END_VAR
+END_VAR
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Call the class function to process each instance:                          //
 //----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL "ifcMI1"
-      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
-         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
-         IO_MODE                     := "idbMI1".@@INSTANCE@@.MODE ,
-         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
-      );
-      NOP 0;
-NETWORK
-
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL #@@INSTANCE@@
-      (  MODE                        := #@@INSTANCE@@.MODE ,
-         RAW_INPUT                   := "P_@@INSTANCE@@":P ,
-         USER_INPUT                  := #@@INSTANCE@@.USER_INPUT ,
-         UPPER_RANGE                 := @@MaxMass@@ ,
-         LOWER_RANGE                 := -100.0 ,
-         POLARITY                    := #@@INSTANCE@@.POLARITY ,
-         LIMIT_HH                    := #@@INSTANCE@@.LIMIT_HH ,
-         LIMIT_H                     := #@@INSTANCE@@.LIMIT_H ,
-         MEASURE                     := #@@INSTANCE@@.MEASURE ,
-         DATA_QUALITY                := #@@INSTANCE@@.DATA_QUALITY ,
-         ALARM_HH                    := #@@INSTANCE@@.ALARM_HH ,
-         ALARM_H                     := #@@INSTANCE@@.ALARM_H ,
-         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-         RANGE_ERROR                 := #@@INSTANCE@@.RANGE_ERROR ,
-         BROKEN_WIRE                 := #@@INSTANCE@@.BROKEN_WIRE
-      );
-      NOP 0;
+    CALL #@@INSTANCE@@
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CR_IL                := #@@INSTANCE@@.CR_IL ,
+        NCR_IL               := #@@INSTANCE@@.CR_IL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        CMD_SAFE             := #@@INSTANCE@@.CMD_SAFE ,
+        RAW                  := "@@INSTANCE@@_RAW":P ,
+        USER_INPUT           := #@@INSTANCE@@.USER_INPUT ,
+        UPPER_RANGE          := @@MAXMASS@@ ,
+        LOWER_RANGE          := -100.0 ,
+        POLARITY             := #@@INSTANCE@@.POLARITY ,
+        LIMIT_HH             := #@@INSTANCE@@.LIMIT_HH ,
+        LIMIT_H              := #@@INSTANCE@@.LIMIT_H ,
+        CMD_SAFE             := "dbCONST".BLK.MI1.SAFE.CMD ,
+        STATE_ENABLED        := "dbCONST".BLK.MI1.STATE.ENABLED ,
+        STATE_FAULT          := "dbCONST".BLK.MI1.STATE.FAULT ,
+        PV                   := #@@INSTANCE@@.PV ,
+        DQ                   := #@@INSTANCE@@.DQ ,
+        ALARM_HH             := #@@INSTANCE@@.ALARM_HH ,
+        ALARM_H              := #@@INSTANCE@@.ALARM_H ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK ,
+        RANGE_ERROR          := #@@INSTANCE@@.RANGE_ERROR ,
+        BROKEN_WIRE          := #@@INSTANCE@@.BROKEN_WIRE
+    );
+    NOP 0;
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

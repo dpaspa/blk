@@ -1,0 +1,251 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcAnalog                                                      //
+// Description:                                                               //
+// Reads a raw analog value in counts and scaled to engineering units. Also   //
+// checks for underrange or overrange value error or open wire fault. Sets a  //
+// Data Quality flag if the reading is healthy.                               //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      18-Apr-2018 NA        Reboot for S7-1500 extracted    //
+//                                            from existing analog FBs, such  //
+//                                            as MI1, PI1, TI1, etc.          //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fcAnalog"
+TITLE = Analog input scaling and error checking
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcAnalog
+VERSION : 1.0
+
+VAR_INPUT
+    RAW_INPUT : Int;                   // Raw input signal from Field (4mA = 0, 20mA = 27648)
+    USER_INPUT : Int;
+    RANGE_UPPER : Real;                // Upper Range Limit in engineering units
+    RANGE_LOWER : Real;                // Lower Range Limit in engineering units
+    POLARITY : Bool;                   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+    LIMIT_HH : Real;                   // High High Alarm Limit
+    LIMIT_H : Real;                    // High Alarm Limit
+    LIMIT_L : Real;                    // Low Alarm Limit
+    LIMIT_LL : Real;                   // LowLow Alarm Limit
+    ENABLE_HH : Bool;                  // Flag to Enable/Disable High High Alarm
+    ENABLE_H : Bool;                   // Flag to Enable/Disable High Alarm
+    ENABLE_L : Bool;                   // Flag to Enable/Disable Low Alarm
+    ENABLE_LL : Bool;                  // Flag to Enable/Disable Low Low Alarm
+    STATE_ENABLED : Int;               // ENABLED state value from dbCONST
+    STATE_FAULT : Int;                 // FAULT state value from dbCONST
+    modeAuto : Bool;
+    modeManual : Bool;
+    modeOOS : Bool;
+END_VAR
+
+VAR_OUTPUT
+    PV : Real;                         // Measured Value (after scaling)
+    DQ : Bool;                         // MV data quality (0=Bad; 1=Good)
+    ALARM_HH : Bool;                   // HighHigh Alarm
+    ALARM_H : Bool;                    // High Alarm
+    ALARM_L : Bool;                    // Low Alarm
+    ALARM_LL : Bool;                   // LowLow Alarm
+    INTERLOCK : Bool;                  // Interlock Flag
+    STATE : Int;                       // Device State (1= OFF, 2= ON)
+END_VAR
+
+VAR_IN_OUT
+    RANGE_ERROR : Bool;                // Range Error (<4mA or >20mA)
+    BROKEN_WIRE : Bool;                // Broken Wire detection
+END_VAR
+
+VAR_TEMP
+    RET_VAL1 : Word;                   // Returns a value of W#16#0000 if the instruction executes without error.
+    tRAW : Int;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Raw field input scaling in Auto mode
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Get the raw field input reading in Auto mode:                          //
+    //------------------------------------------------------------------------//
+    A #modeAuto;
+    L #RAW_INPUT;
+    T #tRAW;
+
+NETWORK
+TITLE = User input scaling in Manual mode
+    //------------------------------------------------------------------------//
+    // Scale the user input in Manual mode:                                   //
+    //------------------------------------------------------------------------//
+    A #modeManual;
+    L #USER_INPUT;
+    T #tRAW;
+
+NETWORK
+TITLE = Scale the input
+    //------------------------------------------------------------------------//
+    // Scale the raw input reading:                                           //
+    //------------------------------------------------------------------------//
+    CALL SCALE
+    (   IN                             := #tRAW ,
+        HI_LIM                         := #RANGE_UPPER ,
+        LO_LIM                         := #RANGE_LOWER ,
+        BIPOLAR                        := #POLARITY ,
+        RET_VAL                        := #RET_VAL1 ,
+        OUT                            := #tPV
+    );
+
+NETWORK
+TITLE = Check for out of range error
+    //------------------------------------------------------------------------//
+    // Check if the raw input value is underrange or overrange:               //
+    //------------------------------------------------------------------------//
+    A(;
+    O(;
+    L #tRAW;
+    L 27648;
+    >I;
+    );
+    O(;
+    L #tRAW;
+    L 0;
+    <I;
+    );
+    );
+    AN #modeOOS;
+    = #RANGE_ERROR;
+
+NETWORK
+TITLE = Check for broken wire
+    //------------------------------------------------------------------------//
+    // Check if the raw input indicates open loop:                            //
+    //------------------------------------------------------------------------//
+    A(;
+    O(;
+    L #tRAW;
+    L 32767;
+    ==I;
+    );
+    O(;
+    L #tRAW;
+    L -32768;
+    ==I;
+    );
+    );
+    AN #modeOOS;
+    = #BROKEN_WIRE;
+
+NETWORK
+TITLE = Set Data Quality
+    //------------------------------------------------------------------------//
+    // If no error set Data Quality DQ=1 (GOOD), else DQ=0 (BAD):             //
+    //------------------------------------------------------------------------//
+    AN #RANGE_ERROR;
+    AN #BROKEN_WIRE;
+    AN #modeOOS;
+    O #modeManual;
+    = #DQ;
+
+NETWORK
+TITLE = HighHigh ALARM
+    //------------------------------------------------------------------------//
+    // Set HighHigh Alarm if limit reached:                                   //
+    //------------------------------------------------------------------------//
+    AN #modeOOS;
+    A #ENABLE_HH;
+    A(;
+    L #tPV;
+    L #LIMIT_HH;
+    >=R;
+    );
+    = #ALARM_HH;
+
+NETWORK
+TITLE = High ALARM
+    //------------------------------------------------------------------------//
+    // Set High Alarm if limit reached:                                       //
+    //------------------------------------------------------------------------//
+    AN #modeOOS;
+    A #ENABLE_H;
+    A(;
+    L #tPV;
+    L #LIMIT_H;
+    >=R;
+    );
+    = #ALARM_H;
+
+NETWORK
+TITLE = Low ALARM
+    //------------------------------------------------------------------------//
+    // Set Low Alarm if limit reached:                                        //
+    //------------------------------------------------------------------------//
+    AN #modeOOS;
+    A #ENABLE_L;
+    A(;
+    L #tPV;
+    L #LIMIT_L;
+    <=R;
+    );
+    = #ALARM_L;
+
+NETWORK
+TITLE = LowLow ALARM
+    //------------------------------------------------------------------------//
+    // Set LowLow Alarm if limit reached:                                     //
+    //------------------------------------------------------------------------//
+    AN #modeOOS;
+    A #ENABLE_LL;
+    A(;
+    L #tPV;
+    L #LIMIT_LL;
+    <=R;
+    );
+    = #ALARM_LL;
+
+NETWORK
+TITLE = INTERLOCK if bad data quality or high high limit
+    //------------------------------------------------------------------------//
+    // Set interlock flag if data quality is bad (Range error OR Broken Wire) //
+    // or if High High limit reached:                                         //
+    //------------------------------------------------------------------------//
+    O #INTERLOCK;
+    O #ALARM_HH;
+    ON #DQ;
+    = #INTERLOCK;
+
+NETWORK
+TITLE = Set scaled analog process value
+    //------------------------------------------------------------------------//
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    //                                                                        //
+    // Set the process value regardless of any error:                         //
+    //------------------------------------------------------------------------//
+    L #tPV;
+    T #PV;
+    NOP 0;
+
+NETWORK
+TITLE = Set Device State to Enabled if healthy
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // ENABLED if input signal is healthy:                                    //
+    //------------------------------------------------------------------------//
+    A #DQ;
+    L #STATE_ENABLED;
+    T #STATE;
+
+NETWORK
+TITLE = Set Device State to Fault if any field signal error
+    //------------------------------------------------------------------------//
+    // FAULT if any input error:                                              //
+    //------------------------------------------------------------------------//
+    AN #DQ;
+    L #STATE_FAULT;
+    T #STATE;
+END_FUNCTION_BLOCK

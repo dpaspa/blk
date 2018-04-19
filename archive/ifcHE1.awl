@@ -1,0 +1,66 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       ifcHE1                                                        //
+// Description: Interface function for CM class HE1.                          //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      24-Jan-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+FUNCTION "ifcHE1" : Void
+TITLE = ifcHE1 : Interface
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : ifcHE1
+VERSION : 2.0
+
+   VAR_INPUT
+      IN_REQ_MODE : Bool;
+      IN_MODE : Int;
+      IN_CMD : Bool;
+   END_VAR
+
+   VAR_OUTPUT
+      OUT_MODE : Int;
+   END_VAR
+
+   VAR_IN_OUT
+      IO_MODE : Int;
+      OUT_CMD : Bool;
+      POS_EDGE1 : Bool;
+      POS_EDGE2 : Bool;
+   END_VAR
+
+   VAR_TEMP
+      RetVal : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Mode change
+      CALL "MODE_REQ"
+      (  IN_REQ_MODE                 := #IN_REQ_MODE ,
+         IN_MODE                     := #IN_MODE ,
+         MODULE                      := 'C' ,
+         Ret_Val                     := #RetVal ,
+         OUT_MODE                    := #OUT_MODE ,
+         IO_MODE                     := #IO_MODE ,
+         POS_EDGE1                   := #POS_EDGE1 ,
+         POS_EDGE2                   := #POS_EDGE2
+      );
+      NOP 0;
+NETWORK
+TITLE = Assign Input Parameters to Output
+      L #IO_MODE;
+      L "dbCONST_VAL".CM.MODE.AUTO;
+      ==I;
+      = %L1.0;
+      A %L1.0;
+      A #IN_CMD;
+      S #OUT_CMD;
+      A %L1.0;
+      AN #IN_CMD;
+      R #OUT_CMD;
+END_FUNCTION

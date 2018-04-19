@@ -51,10 +51,10 @@ NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcMOD1"
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
-         IN_MODE                     := "idbTC1".@@lnk1Tag@@_MODE.REQ ,
-         IN_CMND                     := "idbTC1".@@lnk1Tag@@.OUT_CMD ,
-         INTERLOCK                   := "idbTC1".@@lnk1Tag@@.INTERLOCK ,
-         IN_POSN                     := "idbTC1".@@lnk1Tag@@.LMN ,
+         IN_MODE                     := "idbTC1".@@LNK1TAG@@_MODE.REQ ,
+         IN_CMND                     := "idbTC1".@@LNK1TAG@@.OUT_CMD ,
+         INTERLOCK                   := "idbTC1".@@LNK1TAG@@.INTERLOCK ,
+         IN_POSN                     := "idbTC1".@@LNK1TAG@@.LMN ,
          OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
          IO_MODE                     := "idbMOD1".@@INSTANCE@@.MODE ,
          IO_CMND                     := "idbMOD1".@@INSTANCE@@.CMND ,
@@ -68,10 +68,10 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "alwaysHigh";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
-      O "idbPOS1".@@lnk1Tag@@.VLC_NO;
+      O "idbPOS1".@@LNK1TAG@@.VLC_NO;
 @@ATTR_END|CR_IL@@
       );
       = %L0.0;
@@ -79,7 +79,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|NCR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "alwaysHigh";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
 @@ATTR_END|NCR_IL@@
@@ -96,7 +96,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
          RAW_OUTPUT                  := "P_MOD-@@NUMINSTANCE@@":P ,
          STATE                       := #@@INSTANCE@@.STATE ,
          OUT_Q                       := "@@INSTANCE@@" ,
-         INTERLOCK                   := "idbTC1".@@lnk1Tag@@.INTERLOCK ,
+         INTERLOCK                   := "idbTC1".@@LNK1TAG@@.INTERLOCK ,
          MODE                        := #@@INSTANCE@@.MODE ,
          POSN                        := #@@INSTANCE@@.POSN
       );

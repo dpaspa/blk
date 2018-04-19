@@ -81,7 +81,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
          IN_AGITATOR_CMD             := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
          IN_SETPOINT                 := "idb@@PARENTCLASS@@".@@PARENT@@.OUT_SETPOINT ,
-         AGITATOR_INTURRUPT          := "idb@@lnk2Class@@".@@lnk2Tag@@.AGITATOR_INTERRUPT ,
+         AGITATOR_INTURRUPT          := "idb@@LNK2CLASS@@".@@LNK2TAG@@.AGITATOR_INTERRUPT ,
          OUT_MODE                    := #@@INSTANCE@@.REQ ,
          IO_MODE                     := "idbSIC1".@@INSTANCE@@.MODE ,
          IO_AGITATOR_CMD             := "idbSIC1".@@INSTANCE@@.CMD ,
@@ -95,7 +95,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "alwaysHigh";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
 @@ATTR_END|CR_IL@@
@@ -105,7 +105,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|NCR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "alwaysHigh";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
 @@ATTR_END|NCR_IL@@
@@ -133,14 +133,14 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
          MASS_RUN                    := #@@INSTANCE@@.MASS_RUN ,
          MASS_STOP                   := #@@INSTANCE@@.MASS_STOP ,
          MEASURE_RPM                 := "P_SPM-@@NUMINSTANCE@@":P ,
-         MV_H                        := @@MaxAgit@@ ,
+         MV_H                        := @@MAXAGIT@@ ,
          MV_L                        := 0.0 ,
          MV_POLR                     := #@@INSTANCE@@.MV_POLR ,
          LIMIT_HH                    := #@@INSTANCE@@.LIMIT_HH ,
          LIMIT_H                     := #@@INSTANCE@@.LIMIT_H ,
          LIMIT_L                     := #@@INSTANCE@@.LIMIT_L ,
          LIMIT_LL                    := #@@INSTANCE@@.LIMIT_LL ,
-         MASS_MI1                    := "idb@@lnk1Class@@".@@lnk1Tag@@.MEASURE ,
+         MASS_MI1                    := "idb@@LNK1CLASS@@".@@LNK1TAG@@.MEASURE ,
          FB_TDELAY                   := #@@INSTANCE@@.FB_TDELAY ,
          NON_PID                     := #@@INSTANCE@@.NON_PID ,
          P_SEL                       := #@@INSTANCE@@.P_SEL ,

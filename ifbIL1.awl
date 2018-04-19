@@ -5,11 +5,11 @@
 // Class:       ifbIL1                                                        //
 // Description: Instances of IL1                                              //
 //                                                                            //
-// Interlock with one input.                                                  //
+// Interlock with up to five inputs.                                          //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 1.0 David Paspa      20-Mar-2018 NA        Reboot for S7-1500.             //
+// 1.0 David Paspa      17-Apr-2018 NA        Reboot for S7-1500.             //
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbIL1"
 TITLE = Instances of Interlck Template IL1
@@ -21,11 +21,11 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 // Define the instances of the FB type:                                       //
 //----------------------------------------------------------------------------//
-    VAR
+VAR
 @@TEMPLATE_BEGIN@@
-        @@INSTANCE@@ : "fbIL1";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbIL1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-    END_VAR
+END_VAR
 
 BEGIN
 @@TEMPLATE_BEGIN@@
@@ -36,7 +36,12 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
     (   INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-        IN1                         := "@@SOURCE1@@".@@CLASS1@@.@@STATE1@@
+        IN1                         := "@@SOURCE1@@".@@CLASS1@@.@@STATE1@@ ,
+        IN2                         := "@@SOURCE2@@".@@CLASS2@@.@@STATE2@@ ,
+        IN3                         := "@@SOURCE3@@".@@CLASS3@@.@@STATE2@@ ,
+        IN4                         := "@@SOURCE4@@".@@CLASS4@@.@@STATE2@@ ,
+        IN5                         := "@@SOURCE5@@".@@CLASS5@@.@@STATE2@@ ,
+        OPR1                        := '@@OPR1@@'
     );
     NOP 0;
 @@TEMPLATE_END@@

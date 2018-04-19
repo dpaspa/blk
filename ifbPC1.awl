@@ -69,8 +69,8 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
          SETPOINT                    := "idb@@PARENTCLASS@@".@@PARENT@@.SETPOINT ,
-         P_CTRL                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|PC@@_P_CTRL ,
-         GAS_SELECT                  := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS|PC@@_GASS_SELECT ,
+         P_CTRL                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_P_CTRL ,
+         GAS_SELECT                  := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_GASS_SELECT ,
          OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
          IO_MODE                     := "idbPC1".@@INSTANCE@@.MODE ,
          IO_SETPOINT                 := "idbPC1".@@INSTANCE@@.SETPOINT ,
@@ -85,7 +85,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|CR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "alwaysHigh";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
 @@ATTR_END|CR_IL@@
@@ -95,17 +95,17 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A(;
 @@ATTR_BEGIN|NCR_IL@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "AlwaysHighBit";
+      A "alwaysHigh";
 @@ATTR_DEFAULT_END@@
       @@INTERLOCK@@
-      A "idbPI1".@@lnk1Tag@@.INTERLOCK;
+      A "idbPI1".@@LNK1TAG@@.INTERLOCK;
 @@ATTR_END|NCR_IL@@
       );
       = %L0.1;
       BLD 103;
       CALL #@@INSTANCE@@
       (  SETPOINT                    := #@@INSTANCE@@.SETPOINT ,
-         MEASURE                     := "idbPI1".@@lnk1Tag@@.MEASURE ,
+         MEASURE                     := "idbPI1".@@LNK1TAG@@.MEASURE ,
          P_CTRL                      := #@@INSTANCE@@.P_CTRL ,
          DEADBAND_L                  := #@@INSTANCE@@.DEADBAND_L ,
          DEADBAND_H                  := #@@INSTANCE@@.DEADBAND_H ,

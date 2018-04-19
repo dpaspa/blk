@@ -1,24 +1,26 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fbMI1                                                         //
+// Class:       fbAL1                                                         //
 // Description:                                                               //
 // Load Cell mass indicator.                                                  //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 2.0 David Paspa      19-Apr-2018 NA        Reboot for S7-1500 consolidated //
+//                                            into fbAL1 from all analog      //
+//                                            classes.                        //
 // 0.3 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
 // 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Upper/Lower range hardcoded.    //
 //                                            USER_INPUT added for manual     //
 //                                            mode simulation.                //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "fbMI1"
-TITLE = MI1 : Load Cell mass indicator
+FUNCTION_BLOCK "fbAL1"
+TITLE = AL1 : Generic analog indicator
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
-NAME : fbMI1
+NAME : fbAL1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
@@ -38,6 +40,12 @@ VAR_INPUT
     POLARITY : Bool;         // Input signal is BIPOLAR (1) or UNIPOLAR (0)
     LIMIT_HH : Real;         // High High Alarm Limit
     LIMIT_H : Real;          // High Alarm Limit
+    LIMIT_L : Real;          // Low Alarm Limit
+    LIMIT_LL : Real;         // Low Low Alarm Limit
+    ENABLE_HH : Real;        // High High Alarm Enable
+    ENABLE_H : Real;         // High Alarm Enable
+    ENABLE_L : Real;         // Low Alarm Enable
+    ENABLE_LL : Real;        // Low Low Alarm Enable
     STATE_ENABLED : Int;     // ENABLED state value from dbCONST
     STATE_FAULT : Int;       // FAULT state value from dbCONST
 END_VAR
@@ -45,8 +53,10 @@ END_VAR
 VAR_OUTPUT
     PV : Real;               // Measured Value (after scaling)
     DQ : Bool;               // MV data quality (0=Bad; 1=Good)
-    ALARM_HH : Bool;         // HighHigh Alarm
+    ALARM_HH : Bool;         // High High Alarm
     ALARM_H : Bool;          // High Alarm
+    ALARM_L : Bool;          // Low Alarm
+    ALARM_LL : Bool;         // Low Low Alarm
 END_VAR
 
 VAR_IN_OUT

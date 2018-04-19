@@ -3,42 +3,34 @@
 //                Automatically Generated File - Do Not Edit                  //
 //----------------------------------------------------------------------------//
 // Description:                                                               //
-// This file contains globally addressable event flags and data.              //
+// This file contains globally addressable event flags and data for process   //
+// messages and log events.                                                   //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
 // 1.0 David Paspa      03-Apr-2018 NA        Initial design for S7-1500.     //
 //----------------------------------------------------------------------------//
-DATA_BLOCK "dbEVENT"
-TITLE = Global program event data
+DATA_BLOCK "dbEVENTProcess"
+TITLE = Global process message and log event data
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
-NAME : dbEVENT
+NAME : dbEVENTProcess
 VERSION : 1.0
 
 @@TEMPLATE_BEGIN@@
-STRUCT
-    BATCH : STRUCT
-@@ATTR_BEGIN|INSTANCE_BLK@@
-        @@INSTANCE@@ : udtMsgEvent;
-@@ATTR_END|INSTANCE_BLK@@
-    END_STRUCT ;
-    PROMPT : STRUCT
+    STRUCT
 @@ATTR_BEGIN|INSTANCE_BLK@@
 @@ATTR_BEGIN|PARM_SFC_PROMPT@@
-        @@INSTANCE@@_@@SFC@@@@SFCPARAMETER@@ : udtMsgEvent;
+        @@INSTANCE@@_@@SFC@@@@SFCPARAMETER@@ : udtEventProcess;
 @@ATTR_END|PARM_SFC_PROMPT@@
 @@ATTR_END|INSTANCE_BLK@@
-    END_STRUCT ;
-    LOG : STRUCT
 @@ATTR_BEGIN|INSTANCE_BLK@@
 @@ATTR_BEGIN|PARM_SFC_LOG@@
-        @@INSTANCE@@_@@SFC@@@@SFCPARAMETER@@ : udtLogEvent;
+        @@INSTANCE@@_@@SFC@@@@SFCPARAMETER@@ : udtEventProcess;
 @@ATTR_END|PARM_SFC_LOG@@
 @@ATTR_END|INSTANCE_BLK@@
     END_STRUCT ;
-END_STRUCT ;
 @@TEMPLATE_END@@
 
-BEGIN
+    BEGIN
 END_DATA_BLOCK

@@ -1,0 +1,84 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Name:        ifb@@CLASS@@                                                  //
+// Description: Instances of @@CLASS@@                                        //
+//                                                                            //
+// @@DESCRIPTION@@                                                            //
+// This file inherits from the base template ifbAL.awl.                       //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      08-Jan-2018 NA        Reboot for S7-1500. Created     //
+//                                            base template ifbAL1.           //
+// 0.4 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.3 Khairul Basar    14-Sep-2009 CC-09/016 Ref.OB100,Instance LIMIT_H/HH   //
+//                                            Hardcode deleted.               //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Upper/Lower range hardcoded.    //
+//                                            USER_INPUT added for manual     //
+//                                            mode simulation.                //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifb@@CLASS@@"
+TITLE = AL1 Instance
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : ifb@@CLASS@@
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare the instance objects of the class:                                 //
+//----------------------------------------------------------------------------//
+VAR
+@@TEMPLATE_BEGIN@@
+    @@INSTANCE@@ : "fbAL1";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+END_VAR
+
+//----------------------------------------------------------------------------//
+// Call the class function to process each instance:                          //
+//----------------------------------------------------------------------------//
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    CALL fbAL1
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CR_IL                := #@@INSTANCE@@.CR_IL ,
+        NCR_IL               := #@@INSTANCE@@.CR_IL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        CMD_SAFE             := #@@INSTANCE@@.CMD_SAFE ,
+        RAW                  := "@@INSTANCE@@_RAW":P ,
+        USER_INPUT           := #@@INSTANCE@@.USER_INPUT ,
+        RANGE_UPPER          := #@@INSTANCE@@.RANGE_UPPER ,
+        RANGE_LOWER          := #@@INSTANCE@@.RANGE_LOWER ,
+        POLARITY             := #@@INSTANCE@@.POLARITY ,
+        LIMIT_HH             := #@@INSTANCE@@.LIMIT_HH ,
+        LIMIT_H              := #@@INSTANCE@@.LIMIT_H ,
+        LIMIT_L              := #@@INSTANCE@@.LIMIT_L ,
+        LIMIT_LL             := #@@INSTANCE@@.LIMIT_LL ,
+        ENABLE_HH            := #@@INSTANCE@@.ENABLE_HH ,
+        ENABLE_H             := #@@INSTANCE@@.ENABLE_H ,
+        ENABLE_L             := #@@INSTANCE@@.ENABLE_L ,
+        ENABLE_LL            := #@@INSTANCE@@.ENABLE_LL ,
+        STATE_ENABLED        := "dbCONST".BLK.AL1.STATE.ENABLED ,
+        STATE_FAULT          := "dbCONST".BLK.AL1.STATE.FAULT ,
+        PV                   := #@@INSTANCE@@.PV ,
+        DQ                   := #@@INSTANCE@@.DQ ,
+        ALARM_HH             := #@@INSTANCE@@.ALARM_HH ,
+        ALARM_H              := #@@INSTANCE@@.ALARM_H ,
+        ALARM_L              := #@@INSTANCE@@.ALARM_L ,
+        ALARM_LL             := #@@INSTANCE@@.ALARM_LL ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK ,
+        RANGE_ERROR          := #@@INSTANCE@@.RANGE_ERROR ,
+        BROKEN_WIRE          := #@@INSTANCE@@.BROKEN_WIRE
+    );
+    NOP 0;
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

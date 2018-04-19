@@ -27,69 +27,148 @@ AUTHOR : REO
 NAME : fbHE1
 VERSION : 2.0
 
-    VAR_INPUT
-        CMD : Bool;          // command to switch ON/OFF heating element.
-        INTERLOCK : Bool;    // Manually operated key switch to disable heater
-    END_VAR
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+VAR_INPUT
+    OWNER : Int;             // Value to be set by Parent
+    SERIAL : Int;            // Unique batch or CIPSIP serial number
+    CR_IL : Bool;            // Critical interlock
+    NCR_IL : Bool;           // Non-critical interlock
+    MAN_OVERRIDE : Bool;     // Override non-critical interlocks
+    FAULT : Bool;            // Fault input signal from Field
+END_VAR
 
-    VAR_OUTPUT
-        DO_OUTPUT : Bool;    // Output Signal to Heating Element
-        CUTOUT : Bool;       // Flag indicating if TI alarm is to cutout (0= Alarm Enabled, 1= Alarm Disabled)
-        MON_MISMATCH : Bool;
-        STATE : Int;         // Device State (1= OFF, 2= ON)
-    END_VAR
+VAR_OUTPUT
+    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
+    DO : Bool;               // Output Signal to Heating Element
+    ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
+    CUTOUT : Bool;           // Flag indicating if TI alarm is to cutout (0= Alarm Enabled, 1= Alarm Disabled)
+END_VAR
 
-    VAR_IN_OUT
-        MODE : Int := 1;     // Control Mode, Auto by default
-        OWNER : Int;         // Value to be set or reset by Parent
-    END_VAR
+VAR_IN_OUT
+    MODE : Int := 1;         // Control Mode, Auto by default
+    CMD : Int;               // Device Command from dbCONST
+    STATE : Int;             // Device State from dbCONST
+END_VAR
 
-    VAR_TEMP
-        tempDO : Bool;       // Temporary processed DO signal
-    END_VAR
+VAR_TEMP
+    modeAuto : Bool;
+    modeManual : Bool;
+    modeOOS : Bool;
+    tDO : Bool;              // Temporary processed DO signal
+    tFault : Bool;
+END_VAR
 
 BEGIN
 NETWORK
-TITLE = Process Digital Output Signal
-    A #INTERLOCK;
-    A #CMD;
-    = #tempDO;
-    = #DO_OUTPUT;
-NETWORK
-TITLE = Setting CUTOUT Flag
+TITLE = Call Mode and Command handling block
     //------------------------------------------------------------------------//
+    // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (
+        CR_IL                          := #CR_IL ,
+        NCR_IL                         := #NCR_IL ,
+        MAN_OVERRIDE                   := #MAN_OVERRIDE ,
+        CMD_SAFE                       := "dbCONST".BLK.HE1.SAFE.CMD ,
+        MODE                           := #MODE ,
+        CMD                            := #CMD ,
+        STATE                          := #STATE ,
+        INTERLOCK                      := #INTERLOCK ,
+        modeAuto                       := #modeAuto ,
+        modeManual                     := #modeManual ,
+        modeOOS                        := #modeOOS
+    );
+    NOP 0;
+
+NETWORK
+TITLE = Process Fault Digital Input Signal
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Check if the field indicates there is a fault:                         //
+    //------------------------------------------------------------------------//
+    A #FAULT;
+    = #tFault;
+
+NETWORK
+TITLE = Device command ENABLE
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is ENABLE if no fault or interlock, otherwise DISABLE:             //
+    //------------------------------------------------------------------------//
+    AN #tFault;
+    AN #INTERLOCK;
+    L #CMD;
+    L "dbCONST".BLK.HE1.CMD.ENABLE;
+    ==I;
+    = #tDO;
+
+NETWORK
+TITLE = Device command DISABLE
+    //------------------------------------------------------------------------//
+    // CMD is DISABLE then switch off regardless:                             //
+    //------------------------------------------------------------------------//
+    L #CMD;
+    L "dbCONST".BLK.HE1.CMD.DISABLE;
+    ==I;
+    R #tDO;
+
+NETWORK
+TITLE = Set CUTOUT Flag if output is off
+    //------------------------------------------------------------------------//
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    //                                                                        //
     // Flag indicating if TI alarm is to be cutout (i.e. disabled) whenever   //
     // HE is OFF:                                                             //
-    // 0 = ALARM ENABLED                                                      //
-    // 1 = ALARM DISABLED                                                     //
     //------------------------------------------------------------------------//
-    AN #tempDO;
+    AN #tDO;
     = #CUTOUT;
+
 NETWORK
-TITLE = Setting Device State to OFF
-    AN #tempDO;
-    A #INTERLOCK;
-    L "dbCONST".BLK.HE1.STATE.DISABLED;
-    T #STATE;
+TITLE = Set Digital Output Signal
+    //------------------------------------------------------------------------//
+    // Set the output ON or OFF as required:                                  //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    = #DO;
+
 NETWORK
-TITLE = Setting Device State to ON
-    A #tempDO;
+TITLE = Set Device State to Enabled if output is on
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // ENABLED if output is on:                                               //
+    //------------------------------------------------------------------------//
+    A #tDO;
     L "dbCONST".BLK.HE1.STATE.ENABLED;
     T #STATE;
+
 NETWORK
-TITLE = Setting Device State to 'Interlock'
-    AN #INTERLOCK;
-    L "dbCONST".BLK.STATE.INTERLOCKED;
+TITLE = Set Device State to Disabled if output is off
+    //------------------------------------------------------------------------//
+    // DISABLED if output is off:                                             //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    AN #tFault;
+    L "dbCONST".BLK.HE1.STATE.DISABLED;
     T #STATE;
+
 NETWORK
-TITLE = Setting Device State to 'Failed'
-    AN #INTERLOCK;
-    A #CMD;
+TITLE = Set Device State to Fault if field fault signal is on
+    //------------------------------------------------------------------------//
+    // FAULT if fault signal is on:                                           //
+    //------------------------------------------------------------------------//
+    A #tFault;
     L "dbCONST".BLK.HE1.STATE.FAULT;
     T #STATE;
-NETWORK
-TITLE =
-    AN #INTERLOCK;
-    A #CMD;
-    = #MON_MISMATCH;
 END_FUNCTION_BLOCK

@@ -18,91 +18,61 @@ VAR_IN_OUT
     TRN_AND_JUMP : Bool;
 END_VAR
 
+VAR_TEMP
+    isSelected : Bool;
+END_VAR
+
 BEGIN
 NETWORK
 TITLE = SEQUENCE SCREEN SELECTION
     L #SELECTION;
     L #SEL_CONSTANT;
     ==I;
-    = %L0.0;
-    A(;
-    A(;
-    A %L0.0;
-    JNB Label_0;
+    = #isSelected;
+
+    A #isSelected;
     L #SA;
-    T "dbHMI_SEQ".HMI_SEQ_SA;
-    SET;
-    SAVE;
-    CLR;
-Label_0:      A BR;
-    );
-    JNB Label_1;
+    T "dbHMISFCSelect".HMI_SEQ_SA;
+
+    A #isSelected;
     L #MODE;
-    T "dbHMI_SCNT".HMI_SEQ_MODE;
-    SET;
-    SAVE;
-    CLR;
-Label_1:      A BR;
-    );
-    JNB Label_2;
+    T "dbHMISFCControl".HMI_SEQ_MODE;
+
+    A #isSelected;
     L #SQ_CMD;
-    T "dbHMI_SCNT".HMI_SEQ_SQ_CMD;
-Label_2:      NOP 0;
-    A %L0.0;
+    T "dbHMISFCControl".HMI_SEQ_SQ_CMD;
+
+    A #isSelected;
     A(;
     L #SQ_STATE;
-    L "dbCONST_VAL".SQ_STATE.PAUSED;
+    L "dbCONST".SEQ.STATE.PAUSED;
     ==I;
     );
-    = "dbHMI_SCNT".HMI_SEQ_PAUSED;
-    A(;
-    A %L0.0;
-    JNB Label_3;
-    L "dbHMI_SCNT".HMI_SEQ_SQ_CMD;
-    T #SQ_CMD;
-    SET;
-    SAVE;
-    CLR;
-Label_3:      A BR;
-    );
-    JNB Label_4;
-    L "dbHMI_SCNT".HMI_SEQ_MODE_CMD;
-    T #MODE;
-Label_4:      NOP 0;
-    A
-    = %L0.1;
-    BLD 103;
-    A
-    = %L0.2;
-    BLD 103;
-    A
-    = %L0.3;
-    BLD 103;
-    A(;
-    A %L0.0;
-    A(;
-    L #MODE;
-    L "dbCONST_VAL".SQ_MODE.MANUAL;
-    ==I;
-    );
-    A "dbHMI_SCNT".HMI_SEQ_MAN_JUMP;
-    JNB Label_5;
-    L "dbHMI_SCNT".HMI_SEQ_STEPNO_JUMP;
-    T #STEPNO_JUMP;
-    SET;
-    SAVE;
-    CLR;
-Label_5:      A BR;
-    );
-    JNB Label_6;
+    = "dbHMISFCControl".HMI_SEQ_PAUSED;
 
-    A "dbHMI_SCNT".HMI_SEQ_MAN_JUMP;
+    A #isSelected;
+    L "dbHMISFCControl".HMI_SEQ_SQ_CMD;
+    T #SQ_CMD;
+
+    A #isSelected;
+    L "dbHMISFCControl".HMI_SEQ_MODE_CMD;
+    T #MODE;
+
+    A "dbHMISFCControl".HMI_SEQ_MAN_JUMP;
     = #MAN_JUMP;
 
-    A "dbHMI_SCNT".HMI_SEQ_NO_VERIFIC;
+    A #MAN_JUMP;
+    A(;
+    L #MODE;
+    L "dbCONST".SEQ.MODE.MANUAL;
+    ==I;
+    );
+    L "dbHMISFCControl".HMI_SEQ_STEPNO_JUMP;
+    T #STEPNO_JUMP;
+
+    A "dbHMISFCControl".HMI_SEQ_NO_VERIFIC;
     = #NO_VERIFIC;
 
-    A "dbHMI_SCNT".HMI_SEQ_TRN_AND_JUMP;
+    A "dbHMISFCControl".HMI_SEQ_TRN_AND_JUMP;
     = #TRN_AND_JUMP;
-Label_6:      NOP 0;
 END_FUNCTION
