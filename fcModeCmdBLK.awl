@@ -24,8 +24,8 @@ NAME : fcModeCmdBLK
 VERSION : 2.0
 
 VAR_INPUT
-    CR_IL : Bool;                  // Critical Interlock
-    NCR_IL : Bool;                 // Non critical Interlock
+    CRIL : Bool;                  // Critical Interlock
+    NCRIL : Bool;                 // Non critical Interlock
     MAN_OVERRIDE : Bool;           // Manual override for Non-critical interlocks
     permitStart: Bool;
 END_VAR
@@ -174,9 +174,9 @@ TITLE = Interlock Flag
     //------------------------------------------------------------------------//
     // Set boolean interlock flag if any interlock condition exists:          //
     //------------------------------------------------------------------------//
-    O #CR_IL;
+    O #CRIL;
     O(;
-    A #NCR_IL;
+    A #NCRIL;
     AN #MAN_OVERRIDE;
     );
     = #INTERLOCK;

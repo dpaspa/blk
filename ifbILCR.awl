@@ -1,0 +1,109 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Class:       ifbIL1                                                        //
+// Description: Instances of Critical Interlocks                              //
+//                                                                            //
+// Interlock with up to fifteen inputs.                                       //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      17-Apr-2018 NA        Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbCRIL"
+TITLE = Instances of Interlocks
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : ifbCRIL
+VERSION : 1.0
+
+//----------------------------------------------------------------------------//
+// Define the instances of the FB type:                                       //
+//----------------------------------------------------------------------------//
+VAR
+@@TEMPLATE_BEGIN@@
+    @@TARGET@@-CRIL : "fbIL";   // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+END_VAR
+
+VAR_TEMP
+    INTERLOCK : Bool;        // Overall Interlock flag
+    S1 : Bool;               // Interlock source 1
+    S2 : Bool;               // Interlock source 2
+    S3 : Bool;               // Interlock source 3
+    S4 : Bool;               // Interlock source 4
+    S5 : Bool;               // Interlock source 5
+    S6 : Bool;               // Interlock source 6
+    S7 : Bool;               // Interlock source 7
+    S8 : Bool;               // Interlock source 8
+    S9 : Bool;               // Interlock source 9
+    S10 : Bool;              // Interlock source 10
+    S11 : Bool;              // Interlock source 11
+    S12 : Bool;              // Interlock source 12
+    S13 : Bool;              // Interlock source 13
+    S14 : Bool;              // Interlock source 14
+    S15 : Bool;              // Interlock source 15
+END_VAR
+
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@TARGET@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Initialise the interlock flags:                                        //
+    //------------------------------------------------------------------------//
+    A "alwaysLow";
+    = #S1;
+    = #S2;
+    = #S3;
+    = #S4;
+    = #S5;
+    = #S6;
+    = #S7;
+    = #S8;
+    = #S9;
+    = #S10;
+    = #S11;
+    = #S12;
+    = #S13;
+    = #S14;
+    = #S15;
+
+NETWORK
+TITLE = @@TARGET@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Calculate the interlock conditions:                                    //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CRIL_INSTANCE@@
+    @@INTERLOCK@@
+    = #S@@COUNTER|1@@
+@@ATTR_END|CRIL_INSTANCE@@
+
+NETWORK
+TITLE = @@TARGET@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the instance FB passing in the specific instance parameters:      //
+    //------------------------------------------------------------------------//
+    CALL #@@TARGET@@-CRIL
+    (   IL.INTERLOCK         := #INTERLOCK ,
+        IL.S1                := #S1 ,
+        IL.S2                := #S2 ,
+        IL.S3                := #S3 ,
+        IL.S4                := #S4 ,
+        IL.S5                := #S5 ,
+        IL.S6                := #S6 ,
+        IL.S7                := #S7 ,
+        IL.S8                := #S8 ,
+        IL.S9                := #S9 ,
+        IL.S10               := #S10 ,
+        IL.S11               := #S11 ,
+        IL.S12               := #S12 ,
+        IL.S13               := #S13 ,
+        IL.S14               := #S14 ,
+        IL.S15               := #S15
+    );
+    NOP 0;
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

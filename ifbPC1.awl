@@ -24,12 +24,12 @@
 //                                            CMD_Qx (INT) & are linked to    //
 //                                            POS1valves. Measure variable is //
 //                                            lined with PI1 Measure variable.//
-//                                            CR_IL Interfaced.               //
+//                                            CRIL Interfaced.               //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //                                                                            //
 // Ref1:Manual and Auto mode is programed.For Manual & auto separate Setpoint,//
 // Gas select, & P_CTRL variable created and programmed accordingly.Instance  //
-// parameter calls updated."idbPI1".PI_1010.INTERLOCK is linked with NCR_IL.  //
+// parameter calls updated."idbPI1".PI_1010.INTERLOCK is linked with NCRIL.  //
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbPC1"
 TITLE = Instances of PC1 pressure controller
@@ -45,64 +45,47 @@ VERSION : 2.0
 @@TEMPLATE_BEGIN@@
       @@INSTANCE@@ : "fbPC1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-      @@INSTANCE@@_MODE : Struct
-         PosEdge1 : Bool;
-         PosEdge2 : Bool;
-         REQ : Int;   // Request for Required Mode
-      END_STRUCT;
-@@TEMPLATE_END@@
    END_VAR
 
-   VAR_TEMP
-      SP : Real;
-   END_VAR
+VAR_TEMP
+    CRIL : Bool;
+    NCRIL : Bool;
+    SP : Real;
+END_VAR
 
-//----------------------------------------------------------------------------//
-// Instance interface:                                                        //
-//----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL "ifcPC1"
-      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
-         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         SETPOINT                    := "idb@@PARENTCLASS@@".@@PARENT@@.SETPOINT ,
-         P_CTRL                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_P_CTRL ,
-         GAS_SELECT                  := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_GASS_SELECT ,
-         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
-         IO_MODE                     := "idbPC1".@@INSTANCE@@.MODE ,
-         IO_SETPOINT                 := "idbPC1".@@INSTANCE@@.SETPOINT ,
-         IO_P_CTRL                   := "idbPC1".@@INSTANCE@@.P_CTRL ,
-         IO_GAS_SELECT               := "idbPC1".@@INSTANCE@@.GAS_SELECT ,
-         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
-      );
-      NOP 0;
+    //------------------------------------------------------------------------//
+    // Get the critical interlock if there is one. If not set alwaysLow:      //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+@@ATTR_END|CRIL_EXISTS@@
+    = #CRIL;
+
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A(;
-@@ATTR_BEGIN|CR_IL@@
+    //------------------------------------------------------------------------//
+    // Get the non-critical interlock if there is one. If not set alwaysLow:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|NCRIL_EXISTS@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
+    A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|CR_IL@@
-      );
-      = %L0.0;
-      BLD 103;
-      A(;
-@@ATTR_BEGIN|NCR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-      A "idbPI1".@@LNK1TAG@@.INTERLOCK;
-@@ATTR_END|NCR_IL@@
-      );
-      = %L0.1;
-      BLD 103;
+    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+@@ATTR_END|NCRIL_EXISTS@@
+    = #NCRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
       CALL #@@INSTANCE@@
       (  SETPOINT                    := #@@INSTANCE@@.SETPOINT ,
          MEASURE                     := "idbPI1".@@LNK1TAG@@.MEASURE ,
@@ -110,8 +93,8 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
          DEADBAND_L                  := #@@INSTANCE@@.DEADBAND_L ,
          DEADBAND_H                  := #@@INSTANCE@@.DEADBAND_H ,
          GAS_SELECT                  := #@@INSTANCE@@.GAS_SELECT ,
-         CR_IL                       := %L0.0 ,
-         NCR_IL                      := %L0.1 ,
+         CRIL                       := #CRIL ,
+         NCRIL                      := #NCRIL ,
          MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
          INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
          OUT_SETPOINT                := #@@INSTANCE@@.OUT_SETPOINT ,

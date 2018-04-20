@@ -48,11 +48,42 @@ VERSION : 2.0
 @@TEMPLATE_END@@
    END_VAR
 
+VAR_TEMP
+    CRIL : Bool;
+    NCRIL : Bool;
+END_VAR
+
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Get the critical interlock if there is one. If not set alwaysLow:      //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+@@ATTR_END|CRIL_EXISTS@@
+    = #CRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Get the non-critical interlock if there is one. If not set alwaysLow:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|NCRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+@@ATTR_END|NCRIL_EXISTS@@
+    = #NCRIL;
+
 //----------------------------------------------------------------------------//
 //                                                                            //
 //----------------------------------------------------------------------------//
-BEGIN
-@@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       A "alwaysHigh";
@@ -69,42 +100,20 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
          POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
+
 NETWORK
-TITLE = @@INSTANCE@@:SMS1 Vacuum Pump
-      A(;
-@@ATTR_BEGIN|CR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|CR_IL@@
-      );
-      = %L0.0;
-      BLD 103;
-      A(;
-@@ATTR_BEGIN|NCR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|NCR_IL@@
-      );
-      = %L0.1;
-      BLD 103;
-      A "RNG-@@NUMINSTANCE@@";
-      = %L0.2;
-      BLD 103;
-      A "OVL-@@NUMINSTANCE@@";
-      = %L0.3;
-      BLD 103;
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
       CALL #@@INSTANCE@@
       (  CMD                         := #@@INSTANCE@@.CMD ,
          TMR                         := #@@INSTANCE@@.TMR ,
-         CR_IL                       := %L0.0 ,
-         NCR_IL                      := %L0.1 ,
+         CRIL                       := #CRIL ,
+         NCRIL                      := #NCRIL ,
          MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
-         RUNNING_FB                  := %L0.2 ,
-         MOT_OL_TRIP                 := %L0.3 ,
+         RUNNING_FB                  := "RNG-@@NUMINSTANCE@@" ,
+         MOT_OL_TRIP                 := "OVL-@@NUMINSTANCE@@" ,
          STATE                       := #@@INSTANCE@@.STATE ,
          INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
          OUT_Q                       := "@@INSTANCE@@" ,

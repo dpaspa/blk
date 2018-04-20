@@ -33,28 +33,28 @@ VERSION : 2.0
 VAR_INPUT
     OWNER : Int;             // Value to be set by Parent
     SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CR_IL : Bool;            // Critical interlock
-    NCR_IL : Bool;           // Non-critical interlock
+    CRIL : Bool;            // Critical interlock
+    NCRIL : Bool;           // Non-critical interlock
     MAN_OVERRIDE : Bool;     // Override non-critical interlocks
     FAULT : Bool;            // Fault input signal from Field
 END_VAR
 
 VAR_OUTPUT
-    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
     DO : Bool;               // Output Signal to Heating Element
     ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
     CUTOUT : Bool;           // Flag indicating if TI alarm is to cutout (0= Alarm Enabled, 1= Alarm Disabled)
 END_VAR
 
 VAR_IN_OUT
-    MODE : Int := 1;         // Control Mode, Auto by default
     CMD : Int;               // Device Command from dbCONST
+    MODE : Int := 1;         // Control Mode, Auto by default
     STATE : Int;             // Device State from dbCONST
+    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
 END_VAR
 
 VAR_TEMP
-    modeAuto : Bool;
-    modeManual : Bool;
+    modeAUTO : Bool;
+    modeMANUAL : Bool;
     modeOOS : Bool;
     tDO : Bool;              // Temporary processed DO signal
     tFault : Bool;
@@ -71,16 +71,16 @@ TITLE = Call Mode and Command handling block
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
     (
-        CR_IL                          := #CR_IL ,
-        NCR_IL                         := #NCR_IL ,
+        CRIL                          := #CRIL ,
+        NCRIL                         := #NCRIL ,
         MAN_OVERRIDE                   := #MAN_OVERRIDE ,
         CMD_SAFE                       := "dbCONST".BLK.HE1.SAFE.CMD ,
         MODE                           := #MODE ,
         CMD                            := #CMD ,
         STATE                          := #STATE ,
         INTERLOCK                      := #INTERLOCK ,
-        modeAuto                       := #modeAuto ,
-        modeManual                     := #modeManual ,
+        modeAUTO                       := #modeAUTO ,
+        modeMANUAL                     := #modeMANUAL ,
         modeOOS                        := #modeOOS
     );
     NOP 0;

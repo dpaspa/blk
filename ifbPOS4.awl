@@ -54,16 +54,42 @@ VERSION : 2.0
 @@TEMPLATE_END@@
    END_VAR
 
-   VAR_TEMP
-      cril : Bool;
-      ncril : Bool;
-   END_VAR
+VAR_TEMP
+    CRIL : Bool;
+    NCRIL : Bool;
+END_VAR
+
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Get the critical interlock if there is one. If not set alwaysLow:      //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+@@ATTR_END|CRIL_EXISTS@@
+    = #CRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Get the non-critical interlock if there is one. If not set alwaysLow:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|NCRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+@@ATTR_END|NCRIL_EXISTS@@
+    = #NCRIL;
 
 //----------------------------------------------------------------------------//
 //                                                                            //
 //----------------------------------------------------------------------------//
-BEGIN
-@@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcPOSx"
@@ -78,30 +104,16 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
          POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
+
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A(;
-@@ATTR_BEGIN|CR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|CR_IL@@
-      );
-      = #cril;
-      A(;
-@@ATTR_BEGIN|NCR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|NCR_IL@@
-      );
-      = #ncril;
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
       CALL #@@INSTANCE@@
       (  CMD                         := #@@INSTANCE@@.CMD ,
-         CR_IL                       := #cril ,
-         NCR_IL                      := #ncril ,
+         CRIL                       := #CRIL ,
+         NCRIL                      := #NCRIL ,
          MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
          FB_C                        := "@@INSTANCE@@-ZSC" ,
          FB_O                        := "@@INSTANCE@@-ZSO" ,

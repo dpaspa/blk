@@ -37,74 +37,56 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
    VAR
 @@TEMPLATE_BEGIN@@
-      @@INSTANCE@@ : "fbMOT1";   // @@DESCRIPTION@@
-@@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-      @@INSTANCE@@_MODE : Struct
-         PosEdge1 : Bool;
-         PosEdge2 : Bool;
-         REQ : Int;   // Request for Required Mode
-      END_STRUCT;
+    @@INSTANCE@@ : "fbMOT1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
    END_VAR
 
-//----------------------------------------------------------------------------//
-//                                                                            //
-//----------------------------------------------------------------------------//
+VAR_TEMP
+    CRIL : Bool;
+    NCRIL : Bool;
+END_VAR
+
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A "alwaysHigh";
-      = %L0.0;
-      BLD 103;
-      CALL "ifcMOT1"
-      (  IN_REQ_MODE                 := %L0.0 ,
-         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@.MODE ,
-         IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
-         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
-         IO_MODE                     := "idbMOT1".@@INSTANCE@@.MODE ,
-         IO_CMD                      := "idbMOT1".@@INSTANCE@@.CMD ,
-         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
-      );
-      NOP 0;
+    //------------------------------------------------------------------------//
+    // Get the critical interlock if there is one. If not set alwaysLow:      //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+@@ATTR_END|CRIL_EXISTS@@
+    = #CRIL;
+
 NETWORK
-TITLE = @@INSTANCE@@:SMS1 Vacuum Pump
-      A(;
-@@ATTR_BEGIN|CR_IL@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Get the non-critical interlock if there is one. If not set alwaysLow:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|NCRIL_EXISTS@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
+    A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|CR_IL@@
-      );
-      = %L0.0;
-      BLD 103;
-      A(;
-@@ATTR_BEGIN|NCR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|NCR_IL@@
-      );
-      = %L0.1;
-      BLD 103;
-      A "RNG-@@NUMINSTANCE@@";
-      = %L0.2;
-      BLD 103;
-      A "OVL-@@NUMINSTANCE@@";
-      = %L0.3;
-      BLD 103;
-      CALL #@@INSTANCE@@
+    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+@@ATTR_END|NCRIL_EXISTS@@
+    = #NCRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
+    CALL #@@INSTANCE@@
       (  CMD                         := #@@INSTANCE@@.CMD ,
          TMR                         := #@@INSTANCE@@.TMR ,
-         CR_IL                       := %L0.0 ,
-         NCR_IL                      := %L0.1 ,
+         CRIL                       := #CRIL ,
+         NCRIL                      := #NCRIL ,
          MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
-         RUNNING_FB                  := %L0.2 ,
-         MOT_OL_TRIP                 := %L0.3 ,
+         RUNNING_FB                  := "RNG-@@NUMINSTANCE@@" ,
+         MOT_OL_TRIP                 := "OVL-@@NUMINSTANCE@@" ,
          STATE                       := #@@INSTANCE@@.STATE ,
          INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
          OUT_Q                       := "@@INSTANCE@@" ,

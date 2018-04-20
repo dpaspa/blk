@@ -148,9 +148,9 @@ VERSION : 2.0
 VAR_INPUT
     OWNER : Int;                       // Value to be set or reset by Parent
     SERIALNUM : Int;                   // Unique batch or CIPSIP serial number
-    CR_IL : Bool;                      // Critical Interlock that cannot be bypased.
-    NCR_IL : Bool;                     // Non-Critical Interlock that can be manually bypassed.
-    MAN_OVERRIDE : Bool;               // Manual override to bypass NCR_IL
+    CRIL : Bool;                      // Critical Interlock that cannot be bypased.
+    NCRIL : Bool;                     // Non-Critical Interlock that can be manually bypassed.
+    MAN_OVERRIDE : Bool;               // Manual override to bypass NCRIL
     CHILD_RELEASE : Bool;              // Request to release children when complete
 @@ATTR_BEGIN|TIMER@@
     TIME_H : Int;
@@ -261,8 +261,8 @@ VAR
     events : Struct
         commandStart : Bool;
         commandStop : Bool;
-        modeAuto: Bool;
-        modeManual: Bool;
+        modeAUTO: Bool;
+        modeMANUAL: Bool;
         modeOOS: Bool;
     END_STRUCT;
     flags : Struct
@@ -448,12 +448,12 @@ TITLE = Call Mode and Command handling block
     //------------------------------------------------------------------------//
     CALL "fcModeCmdBLK"
     (
-        CR_IL                       := #CR_IL ,
-        NCR_IL                      := #NCR_IL ,
+        CRIL                       := #CRIL ,
+        NCRIL                      := #NCRIL ,
         MAN_OVERRIDE                := #MAN_OVERRIDE ,
         permitStart                 := #flags.permitStart ,
-        eventModeAuto               := #events.modeAuto ,
-        eventModeManual             := #events.modeManual ,
+        eventModeAuto               := #events.modeAUTO ,
+        eventModeManual             := #events.modeMANUAL ,
         eventModeOOS                := #events.modeOOS ,
         MODE                        := #MODE ,
         CMD                         := #CMD ,
@@ -1067,7 +1067,7 @@ TITLE = All SQ are in Auto mode when EM in Auto
     //                                                                        //
     // Set all SFCs to AUTO mode if the block is in AUTO:                     //
     //------------------------------------------------------------------------//
-    A #events.modeAuto;
+    A #events.modeAUTO;
     JNB nomc;
     L #MODE;
 @@ATTR_BEGIN|SFC@@
@@ -1206,7 +1206,7 @@ TITLE = Cascade Auto or OOS Mode to child @@CHILDALIAS@@
     //                                                                        //
     // Switch child mode to Auto or OOS when parent mode transitions:         //
     //------------------------------------------------------------------------//
-    O #events.modeAuto;
+    O #events.modeAUTO;
     O #events.modeOOS;
     L #MODE;
     T #@@CHILDALIAS@@_MODE;

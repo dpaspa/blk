@@ -40,8 +40,8 @@ VERSION : 2.0
         TI : Time := T#20S;   // Integral Time
         TD : Time := T#10S;   // Derivative Time
         MAN : Real;   // PID controller output signal if disabled (=0%)
-        CR_IL : Bool;   // Critical Interlock
-        NCR_IL : Bool;   // Non-Critical Interlock
+        CRIL : Bool;   // Critical Interlock
+        NCRIL : Bool;   // Non-Critical Interlock
         MAN_OVERRIDE : Bool;   // Bypass of Non-Critical Interlock
         NON_PID : Bool;   // Manual non pid selection
         CYCLE : Time := T#100MS;   // PID Block Sampling Time
@@ -81,9 +81,9 @@ VERSION : 2.0
 BEGIN
 NETWORK
 TITLE = INTERLOCK Logic
-      O #CR_IL;
+      O #CRIL;
       O;
-      A #NCR_IL;
+      A #NCRIL;
       AN #MAN_OVERRIDE;
       = #INTERLOCK;
 NETWORK

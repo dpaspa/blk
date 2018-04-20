@@ -16,7 +16,7 @@
 //                                            Added.                          //
 // 0.6 Khairul Basar    18-Sep-2009 CC-09/016 ifcPOSx interface created.      //
 // 0.5 Khairul Basar    17-Sep-2009 CC-09/016 XV_1242,1222 FB_O changed to NC.//
-// 0.4 Khairul Basar    16-Sep-2009 CC-09/016 DV_1080, CR_IL ZSC-1010 changed //
+// 0.4 Khairul Basar    16-Sep-2009 CC-09/016 DV_1080, CRIL ZSC-1010 changed //
 //                                            from NO to NC.XV_1031,XV_1131 CR//
 //                                            Duplicate Auto/man parameters   //
 //                                            deleted auto/manual both now    //
@@ -43,74 +43,52 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 //                                                                            //
 //----------------------------------------------------------------------------//
-   VAR
+VAR
 @@TEMPLATE_BEGIN@@
-      @@INSTANCE@@ : "fbPOSx";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbPOSx";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-      @@INSTANCE@@_MODE : Struct
-         PosEdge1 : Bool;
-         PosEdge2 : Bool;
-         REQ : Int;   // Request for Required Mode
-      END_STRUCT;
-@@TEMPLATE_END@@
-   END_VAR
+END_VAR
 
-   VAR_TEMP
-      cril : Bool;
-      ncril : Bool;
-      FBC : Bool;
-      FBO : Bool;
-   END_VAR
+VAR_TEMP
+    CRIL : Bool;
+    NCRIL : Bool;
+    FBC : Bool;
+    FBO : Bool;
+END_VAR
 
-//----------------------------------------------------------------------------//
-//                                                                            //
-//----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A(;
-@@ATTR_BEGIN|CR_IL@@
+    //------------------------------------------------------------------------//
+    // Get the critical interlock if there is one. If not set alwaysLow:      //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CRIL_EXISTS@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
+    A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|CR_IL@@
-      );
-      = #cril;
-      CALL "ifcPOSx"
-      (  IN_REQ_MODE                 := "alwaysHigh" ,
-         INTERLOCK                   := #cril ,
-         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
-         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
-         IO_MODE                     := "idbPOS1".@@INSTANCE@@.MODE ,
-         IO_CMD                      := "idbPOS1".@@INSTANCE@@.CMD ,
-         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
-      );
-      NOP 0;
+    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+@@ATTR_END|CRIL_EXISTS@@
+    = #CRIL;
+
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A(;
-@@ATTR_BEGIN|CR_IL@@
+    //------------------------------------------------------------------------//
+    // Get the non-critical interlock if there is one. If not set alwaysLow:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|NCRIL_EXISTS@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
+    A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|CR_IL@@
-      );
-      = #cril;
-      A(;
-@@ATTR_BEGIN|NCR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|NCR_IL@@
-      );
-      = #ncril;
+    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+@@ATTR_END|NCRIL_EXISTS@@
+    = #NCRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
       AN "@@INSTANCE@@";
       = #FBC;
       BLD 103;
@@ -118,8 +96,8 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       = #FBO;
       CALL #@@INSTANCE@@
       (  CMD                         := #@@INSTANCE@@.CMD ,
-         CR_IL                       := #cril ,
-         NCR_IL                      := #ncril ,
+         CRIL                       := #CRIL ,
+         NCRIL                      := #NCRIL ,
          MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
          FB_C                        := #FBC ,
          FB_O                        := #FBO ,

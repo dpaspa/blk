@@ -62,8 +62,8 @@ VERSION : 2.0
         DEADBAND_L : Real := 0.1;   // Deadband LOW differential
         DEADBAND_H : Real := 0.1;   // Deadband HIGH differential
         GAS_SELECT : Int;   // Select Valve to be operated
-        CR_IL : Bool;   // Critical Interlock
-        NCR_IL : Bool;   // Non-Critical Interlock
+        CRIL : Bool;   // Critical Interlock
+        NCRIL : Bool;   // Non-Critical Interlock
         MAN_OVERRIDE : Bool;   // Bypass of Non-Critical Interlock
     END_VAR
 
@@ -103,9 +103,9 @@ TITLE = Interlocking Logic
 //command from Operator Station (HMI).
 //
 //
-      O #CR_IL;
+      O #CRIL;
       O;
-      A #NCR_IL;
+      A #NCRIL;
       AN #MAN_OVERRIDE;
       = #INTERLOCK;
       = #Interlocked;

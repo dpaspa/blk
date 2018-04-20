@@ -29,23 +29,23 @@ VERSION : 2.0
 VAR_INPUT
     OWNER : Int;             // Value to be set or reset by Parent
     SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CR_IL : Bool;            // Critical Interlock in series
-    NCR_IL : Bool;           // Non-critical Interlock in series
+    CRIL : Bool;            // Critical Interlock in series
+    NCRIL : Bool;           // Non-critical Interlock in series
     MAN_OVERRIDE : Bool;     // Critical Interlock in series can be Override by this Input
     CMD_SAFE : Int;          // Safe command for the module
-    RAW : Word;              // Raw input signal from Field (4mA = 0, 20mA = 27648)
+    RAW_INPUT : Word;        // Raw input signal from Field (4mA = 0, 20mA = 27648)
     USER_INPUT : Int;        // Manual mode, equivallent of Analog input, to be entered by Operator
-    UPPER_RANGE : Real;      // Upper Range Limit in engineering units
-    LOWER_RANGE : Real;      // Lower Range Limit in engineering units
+    RANGE_UPPER : Real;      // Upper Range Limit in engineering units
+    RANGE_LOWER : Real;      // Lower Range Limit in engineering units
     POLARITY : Bool;         // Input signal is BIPOLAR (1) or UNIPOLAR (0)
     LIMIT_HH : Real;         // High High Alarm Limit
     LIMIT_H : Real;          // High Alarm Limit
     LIMIT_L : Real;          // Low Alarm Limit
     LIMIT_LL : Real;         // Low Low Alarm Limit
-    ENABLE_HH : Real;        // High High Alarm Enable
-    ENABLE_H : Real;         // High Alarm Enable
-    ENABLE_L : Real;         // Low Alarm Enable
-    ENABLE_LL : Real;        // Low Low Alarm Enable
+    ENABLE_HH : Bool;        // High High Alarm Enable
+    ENABLE_H : Bool;         // High Alarm Enable
+    ENABLE_L : Bool;         // Low Alarm Enable
+    ENABLE_LL : Bool;        // Low Low Alarm Enable
     STATE_ENABLED : Int;     // ENABLED state value from dbCONST
     STATE_FAULT : Int;       // FAULT state value from dbCONST
 END_VAR
@@ -70,8 +70,8 @@ END_VAR
 
 VAR_TEMP
     tPV : Real;              // Temporary measured value
-    modeAuto : Bool;
-    modeManual : Bool;
+    modeAUTO : Bool;
+    modeMANUAL : Bool;
     modeOOS : Bool;
 END_VAR
 
@@ -87,12 +87,12 @@ TITLE = Call Mode and Command handling function
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
     (
-        CR_IL                := #CR_IL ,
-        NCR_IL               := #NCR_IL ,
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
         MAN_OVERRIDE         := #MAN_OVERRIDE ,
         CMD_SAFE             := #CMD_SAFE ,
-        modeAuto             := #modeAuto ,
-        modeManual           := #modeManual ,
+        modeAUTO             := #modeAUTO ,
+        modeMANUAL           := #modeMANUAL ,
         modeOOS              := #modeOOS ,
         MODE                 := #MODE ,
         CMD                  := #CMD ,
@@ -112,8 +112,8 @@ TITLE = Call Analog Input handling function
     CALL "fcAnalog"
     (   RAW_INPUT            := #RAW_INPUT ,
         USER_INPUT           := #USER_INPUT ,
-        UPPER_RANGE          := #UPPER_RANGE ,
-        LOWER_RANGE          := #LOWER_RANGE ,
+        RANGE_UPPER          := #RANGE_UPPER ,
+        RANGE_LOWER          := #RANGE_LOWER ,
         POLARITY             := #POLARITY ,
         LIMIT_HH             := #LIMIT_HH ,
         LIMIT_H              := #LIMIT_H ,
@@ -123,11 +123,10 @@ TITLE = Call Analog Input handling function
         ENABLE_H             := #ENABLE_H ,
         ENABLE_L             := #ENABLE_L ,
         ENABLE_LL            := #ENABLE_LL ,
-        MEASURE              := #MEASURE ,
         STATE_ENABLED        := #STATE_ENABLED ,
         STATE_FAULT          := #STATE_FAULT ,
-        modeAuto             := #modeAuto ,
-        modeManual           := #modeManual ,
+        modeAUTO             := #modeAUTO ,
+        modeMANUAL           := #modeMANUAL ,
         modeOOS              := #modeOOS ,
         PV                   := #PV ,
         DQ                   := #DQ ,
@@ -135,8 +134,8 @@ TITLE = Call Analog Input handling function
         ALARM_H              := #ALARM_H ,
         ALARM_L              := #ALARM_L ,
         ALARM_LL             := #ALARM_LL ,
-        INTERLOCK            := #INTERLOCK ,
         STATE                := #STATE ,
+        INTERLOCK            := #INTERLOCK ,
         RANGE_ERROR          := #RANGE_ERROR ,
         BROKEN_WIRE          := #BROKEN_WIRE
     );

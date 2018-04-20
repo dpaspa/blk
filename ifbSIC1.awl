@@ -31,9 +31,9 @@
 //                                                                            //
 // Ref1:                                                                      //
 // MI1 Measure value assigned to MASS_MI1 parameter, The only DI ES_1000      //
-// Emergency switch is connected to CR_IL, whereas others MOT_OL, MOT_OH &    //
+// Emergency switch is connected to CRIL, whereas others MOT_OL, MOT_OH &    //
 // INVF is connected to corresponding input parameters, these are removed     //
-// from AND logic from CR_IL. MV_RPM analog value range is hardcoded, but     //
+// from AND logic from CRIL. MV_RPM analog value range is hardcoded, but     //
 // Speed set point range not hard coded, it will be done in HMI.              //
 // Now the Minimum mass condition is always overridden in manual mode         //
 // Now Device states are configured for ENABLED, when enabled two sub state   //
@@ -42,7 +42,7 @@
 // vessel(this parameter is not in the FS), parameter for set point of manual //
 // is SETPOINT_MAN, & in auto is SETPOINT_AUTO configured.                    //
 // Set point SETPOINT_MAN and SETPOINT_AUTO initialized to 0.0 and GAIN to 1.0//
-// Emergency stop signal added to CR_IL.                                      //
+// Emergency stop signal added to CRIL.                                      //
 // Now logic state for Interlock is corrected, see 2.                         //
 // ALARM_HH, ALARM_H, ALARM_L, ALARM_LL are added in SIC1 and programmed.     //
 //----------------------------------------------------------------------------//
@@ -69,11 +69,42 @@ VERSION : 2.0
 @@TEMPLATE_END@@
    END_VAR
 
+VAR_TEMP
+    CRIL : Bool;
+    NCRIL : Bool;
+END_VAR
+
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Get the critical interlock if there is one. If not set alwaysLow:      //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+@@ATTR_END|CRIL_EXISTS@@
+    = #CRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Get the non-critical interlock if there is one. If not set alwaysLow:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|NCRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+@@ATTR_END|NCRIL_EXISTS@@
+    = #NCRIL;
+
 //----------------------------------------------------------------------------//
 //                                                                            //
 //----------------------------------------------------------------------------//
-BEGIN
-@@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL "ifcSIC1"
@@ -90,28 +121,12 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
          POS_EDGE2                   := #@@INSTANCE@@.PosEdge2
       );
       NOP 0;
+
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A(;
-@@ATTR_BEGIN|CR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|CR_IL@@
-      );
-      = %L0.0;
-      BLD 103;
-      A(;
-@@ATTR_BEGIN|NCR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|NCR_IL@@
-      );
-      = %L0.1;
-      BLD 103;
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
       AN "THR-@@NUMINSTANCE@@";
       = %L0.2;
       BLD 103;
@@ -124,8 +139,8 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       CALL #@@INSTANCE@@
       (  CMD                         := #@@INSTANCE@@.CMD ,
          SETPOINT                    := #@@INSTANCE@@.SETPOINT ,
-         CR_IL                       := %L0.0 ,
-         NCR_IL                      := %L0.1 ,
+         CRIL                       := %L0.0 ,
+         NCRIL                      := %L0.1 ,
          MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
          THR                         := %L0.2 ,
          TAH                         := %L0.3 ,

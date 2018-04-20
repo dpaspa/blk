@@ -48,8 +48,8 @@ VERSION : 2.0
     VAR_INPUT
         CMD : Int := 1;   // Command to OPEN/CLOSE (AUTO Mode)
         TMR : Time := T#3S;   // Motor Start/Stop transition Time for checking status
-        CR_IL : Bool;
-        NCR_IL : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+        CRIL : Bool;
+        NCRIL : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
         MAN_OVERRIDE : Bool;
         RUNNING_FB : Bool;
         MOT_OL_TRIP : Bool;
@@ -82,8 +82,8 @@ VERSION : 2.0
       En_tmr_Stop : Bool;
       fault: Bool;
       BYPASS_IP : Bool;
-      modeAuto : Bool;
-      modeManual : Bool;
+      modeAUTO : Bool;
+      modeMANUAL : Bool;
       modeOOS : Bool;
    END_VAR
 
@@ -91,9 +91,9 @@ VERSION : 2.0
 BEGIN
 NETWORK
 TITLE = Interlock
-      O #CR_IL;
+      O #CRIL;
       O;
-      A #NCR_IL;
+      A #NCRIL;
       A #MAN_OVERRIDE;
       = #INTERLOCK;
 NETWORK
@@ -101,13 +101,13 @@ TITLE = Auto Mode
       L #MODE;
       L "dbCONST".BLK.MODE.AUTO;
       ==I;
-      = #modeAuto;
+      = #modeAUTO;
 NETWORK
 TITLE = Manual Mode
       L #MODE;
       L "dbCONST".BLK.MODE.MANUAL;
       ==I;
-      = #modeManual;
+      = #modeMANUAL;
 NETWORK
 TITLE = Out of Service Mode
       L #MODE;
@@ -118,8 +118,8 @@ TITLE = Out of Service Mode
 NETWORK
 TITLE = Start command
       A(;
-      O #modeAuto;
-      O #modeManual;
+      O #modeAUTO;
+      O #modeMANUAL;
       );
       A(;
       L #CMD;
@@ -130,14 +130,14 @@ TITLE = Start command
       S #OUT_Q;
 NETWORK
 TITLE = Input Bypass Mode In Manual
-      A #modeManual;
+      A #modeMANUAL;
       A #IN_MAN;
       = #BYPASS_IP;
 NETWORK
 TITLE =
       A(;
-      O #modeAuto;
-      O #modeManual;
+      O #modeAUTO;
+      O #modeMANUAL;
       );
       A(;
       L #CMD;

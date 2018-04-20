@@ -21,44 +21,45 @@ NAME : fcAnalog
 VERSION : 1.0
 
 VAR_INPUT
-    RAW_INPUT : Int;                   // Raw input signal from Field (4mA = 0, 20mA = 27648)
+    RAW_INPUT : Int;         // Raw input signal from Field (4mA = 0, 20mA = 27648)
     USER_INPUT : Int;
-    RANGE_UPPER : Real;                // Upper Range Limit in engineering units
-    RANGE_LOWER : Real;                // Lower Range Limit in engineering units
-    POLARITY : Bool;                   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
-    LIMIT_HH : Real;                   // High High Alarm Limit
-    LIMIT_H : Real;                    // High Alarm Limit
-    LIMIT_L : Real;                    // Low Alarm Limit
-    LIMIT_LL : Real;                   // LowLow Alarm Limit
-    ENABLE_HH : Bool;                  // Flag to Enable/Disable High High Alarm
-    ENABLE_H : Bool;                   // Flag to Enable/Disable High Alarm
-    ENABLE_L : Bool;                   // Flag to Enable/Disable Low Alarm
-    ENABLE_LL : Bool;                  // Flag to Enable/Disable Low Low Alarm
-    STATE_ENABLED : Int;               // ENABLED state value from dbCONST
-    STATE_FAULT : Int;                 // FAULT state value from dbCONST
-    modeAuto : Bool;
-    modeManual : Bool;
+    RANGE_UPPER : Real;      // Upper Range Limit in engineering units
+    RANGE_LOWER : Real;      // Lower Range Limit in engineering units
+    POLARITY : Bool;         // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+    LIMIT_HH : Real;         // High High Alarm Limit
+    LIMIT_H : Real;          // High Alarm Limit
+    LIMIT_L : Real;          // Low Alarm Limit
+    LIMIT_LL : Real;         // LowLow Alarm Limit
+    ENABLE_HH : Bool;        // Flag to Enable/Disable High High Alarm
+    ENABLE_H : Bool;         // Flag to Enable/Disable High Alarm
+    ENABLE_L : Bool;         // Flag to Enable/Disable Low Alarm
+    ENABLE_LL : Bool;        // Flag to Enable/Disable Low Low Alarm
+    STATE_ENABLED : Int;     // ENABLED state value from dbCONST
+    STATE_FAULT : Int;       // FAULT state value from dbCONST
+    modeAUTO : Bool;
+    modeMANUAL : Bool;
     modeOOS : Bool;
 END_VAR
 
 VAR_OUTPUT
-    PV : Real;                         // Measured Value (after scaling)
-    DQ : Bool;                         // MV data quality (0=Bad; 1=Good)
-    ALARM_HH : Bool;                   // HighHigh Alarm
-    ALARM_H : Bool;                    // High Alarm
-    ALARM_L : Bool;                    // Low Alarm
-    ALARM_LL : Bool;                   // LowLow Alarm
-    INTERLOCK : Bool;                  // Interlock Flag
-    STATE : Int;                       // Device State (1= OFF, 2= ON)
+    PV : Real;               // Measured Value (after scaling)
 END_VAR
 
 VAR_IN_OUT
-    RANGE_ERROR : Bool;                // Range Error (<4mA or >20mA)
-    BROKEN_WIRE : Bool;                // Broken Wire detection
+    DQ : Bool;               // MV data quality (0=Bad; 1=Good)
+    ALARM_HH : Bool;         // HighHigh Alarm
+    ALARM_H : Bool;          // High Alarm
+    ALARM_L : Bool;          // Low Alarm
+    ALARM_LL : Bool;         // LowLow Alarm
+    STATE : Int;             // Device State (1= OFF, 2= ON)
+    INTERLOCK : Bool;        // Interlock Flag
+    RANGE_ERROR : Bool;      // Range Error (<4mA or >20mA)
+    BROKEN_WIRE : Bool;      // Broken Wire detection
 END_VAR
 
 VAR_TEMP
-    RET_VAL1 : Word;                   // Returns a value of W#16#0000 if the instruction executes without error.
+    RET_VAL1 : Word;         // Returns a value of W#16#0000 if the instruction executes without error.
+    tPV : Real;
     tRAW : Int;
 END_VAR
 
@@ -71,7 +72,7 @@ TITLE = Raw field input scaling in Auto mode
     //                                                                        //
     // Get the raw field input reading in Auto mode:                          //
     //------------------------------------------------------------------------//
-    A #modeAuto;
+    A #modeAUTO;
     L #RAW_INPUT;
     T #tRAW;
 
@@ -80,7 +81,7 @@ TITLE = User input scaling in Manual mode
     //------------------------------------------------------------------------//
     // Scale the user input in Manual mode:                                   //
     //------------------------------------------------------------------------//
-    A #modeManual;
+    A #modeMANUAL;
     L #USER_INPUT;
     T #tRAW;
 
@@ -146,7 +147,7 @@ TITLE = Set Data Quality
     AN #RANGE_ERROR;
     AN #BROKEN_WIRE;
     AN #modeOOS;
-    O #modeManual;
+    O #modeMANUAL;
     = #DQ;
 
 NETWORK

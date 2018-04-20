@@ -51,13 +51,44 @@ VERSION : 2.0
 @@TEMPLATE_END@@
    END_VAR
 
-//----------------------------------------------------------------------------//
-//                                                                            //
-//----------------------------------------------------------------------------//
+VAR_TEMP
+    CRIL : Bool;
+    NCRIL : Bool;
+END_VAR
+
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Get the critical interlock if there is one. If not set alwaysLow:      //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+@@ATTR_END|CRIL_EXISTS@@
+    = #CRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Get the non-critical interlock if there is one. If not set alwaysLow:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|NCRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+@@ATTR_END|NCRIL_EXISTS@@
+    = #NCRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
       CALL "ifcPOSx"
       (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
          INTERLOCK                   := "idbPOS3".@@INSTANCE@@.INTERLOCK ,
@@ -70,28 +101,12 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
          POS_EDGE2                   := #@@INSTANCE@@.PosEdge2
       );
       NOP 0;
+
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A(;
-@@ATTR_BEGIN|CR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|CR_IL@@
-      );
-      = %L0.0;
-      BLD 103;
-      A(;
-@@ATTR_BEGIN|NCR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|NCR_IL@@
-      );
-      = %L0.1;
-      BLD 103;
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
       AN "@@INSTANCE@@-ZSO";
       = %L0.3;
       BLD 103;
@@ -100,8 +115,8 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
       BLD 103;
       CALL #@@INSTANCE@@
       (  CMD                         := #@@INSTANCE@@.CMD ,
-         CR_IL                       := %L0.0 ,
-         NCR_IL                      := %L0.1 ,
+         CRIL                       := %L0.0 ,
+         NCRIL                      := %L0.1 ,
          MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
          FB_C                        := %L0.3 ,
          FB_O                        := %L0.4 ,

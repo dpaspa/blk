@@ -32,8 +32,8 @@ VERSION : 2.0
         UPPER_RANGE : Real := 100.0;   // Upper Range Limit in engineering units
         LOWER_RANGE : Real;  // Lower Range Limit in engineering units
         POLARITY : Bool;     // Input signal is BIPOLAR (1) or UNIPOLAR (0)
-        CR_IL : Bool;
-        NCR_IL : Bool;
+        CRIL : Bool;
+        NCRIL : Bool;
         MAN_OVERRIDE : Bool;
     END_VAR
 
@@ -59,9 +59,9 @@ VERSION : 2.0
 BEGIN
 NETWORK
 TITLE = INTERLOCK Logic
-      O #CR_IL;
+      O #CRIL;
       O;
-      A #NCR_IL;
+      A #NCRIL;
       AN #MAN_OVERRIDE;
       = #INTERLOCK;
 NETWORK

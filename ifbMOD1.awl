@@ -27,78 +27,65 @@ NAME : ifbMOD1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
-   VAR
+VAR
 @@TEMPLATE_BEGIN@@
-      @@INSTANCE@@ : "fbMOD1";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbMOD1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-      @@INSTANCE@@_MODE : Struct
-         PosEdge1 : Bool;
-         PosEdge2 : Bool;
-         REQ : Int;   // Request for Required Mode
-      END_STRUCT;
-@@TEMPLATE_END@@
-   END_VAR
+END_VAR
 
-//----------------------------------------------------------------------------//
-//                                                                            //
-//----------------------------------------------------------------------------//
+VAR_TEMP
+    CRIL : Bool;
+    NCRIL : Bool;
+END_VAR
+
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL "ifcMOD1"
-      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
-         IN_MODE                     := "idbTC1".@@LNK1TAG@@_MODE.REQ ,
-         IN_CMND                     := "idbTC1".@@LNK1TAG@@.OUT_CMD ,
-         INTERLOCK                   := "idbTC1".@@LNK1TAG@@.INTERLOCK ,
-         IN_POSN                     := "idbTC1".@@LNK1TAG@@.LMN ,
-         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
-         IO_MODE                     := "idbMOD1".@@INSTANCE@@.MODE ,
-         IO_CMND                     := "idbMOD1".@@INSTANCE@@.CMND ,
-         IO_POSN                     := "idbMOD1".@@INSTANCE@@.POSN ,
-         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
-      );
-      NOP 0;
+    //------------------------------------------------------------------------//
+    // Get the critical interlock if there is one. If not set alwaysLow:      //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+@@ATTR_END|CRIL_EXISTS@@
+    = #CRIL;
+
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A(;
-@@ATTR_BEGIN|CR_IL@@
+    //------------------------------------------------------------------------//
+    // Get the non-critical interlock if there is one. If not set alwaysLow:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|NCRIL_EXISTS@@
 @@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
+    A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-      O "idbPOS1".@@LNK1TAG@@.VLC_NO;
-@@ATTR_END|CR_IL@@
-      );
-      = %L0.0;
-      BLD 103;
-      A(;
-@@ATTR_BEGIN|NCR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|NCR_IL@@
-      );
-      = %L0.1;
-      BLD 103;
-      CALL #@@INSTANCE@@
-      (  CMND                        := #@@INSTANCE@@.CMND ,
-         UPPER_RANGE                 := #@@INSTANCE@@.UPPER_RANGE ,
-         LOWER_RANGE                 := #@@INSTANCE@@.LOWER_RANGE ,
-         POLARITY                    := #@@INSTANCE@@.POLARITY ,
-         CR_IL                       := %L0.0 ,
-         NCR_IL                      := %L0.1 ,
-         RAW_OUTPUT                  := "P_MOD-@@NUMINSTANCE@@":P ,
-         STATE                       := #@@INSTANCE@@.STATE ,
-         OUT_Q                       := "@@INSTANCE@@" ,
-         INTERLOCK                   := "idbTC1".@@LNK1TAG@@.INTERLOCK ,
-         MODE                        := #@@INSTANCE@@.MODE ,
-         POSN                        := #@@INSTANCE@@.POSN
+    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+@@ATTR_END|NCRIL_EXISTS@@
+    = #NCRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
+    CALL #@@INSTANCE@@
+    (   CMND                 := #@@INSTANCE@@.CMND ,
+        UPPER_RANGE          := #@@INSTANCE@@.UPPER_RANGE ,
+        LOWER_RANGE          := #@@INSTANCE@@.LOWER_RANGE ,
+        POLARITY             := #@@INSTANCE@@.POLARITY ,
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        RAW_OUTPUT           := "P_MOD-@@NUMINSTANCE@@":P ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        OUT_Q                := "@@INSTANCE@@" ,
+        INTERLOCK            := "idbTC1".@@LNK1TAG@@.INTERLOCK ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        POSN                 := #@@INSTANCE@@.POSN
       );
       NOP 0;
 @@TEMPLATE_END@@

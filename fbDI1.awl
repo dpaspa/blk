@@ -28,8 +28,8 @@ VERSION : 2.0
 VAR_INPUT
     OWNER : Int;             // Value to be set or reset by Parent
     SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CR_IL : Bool;            // Critical Interlock in series
-    NCR_IL : Bool;           // Non-critical Interlock in series
+    CRIL : Bool;            // Critical Interlock in series
+    NCRIL : Bool;           // Non-critical Interlock in series
     MAN_OVERRIDE : Bool;     // Critical Interlock in series can be Override by this Input
     CMD_SAFE : Int;          // Safe command for the module
     DI_Auto : Bool;          // Input signal from Field
@@ -43,14 +43,14 @@ END_VAR
 
 VAR_IN_OUT
     CMD : Int;               // Command
-    MODE : Int := 1;         // Control Mode, Auto by default
+    MODE : Int;              // Control Mode
     STATE : Int;             // Device State from dbCONST
     INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
 END_VAR
 
 VAR_TEMP
-    modeAuto : Bool;
-    modeManual : Bool;
+    modeAUTO : Bool;
+    modeMANUAL : Bool;
     modeOOS : Bool;
     tPV : Bool;              // Temporary processed DI signal
 END_VAR
@@ -67,12 +67,12 @@ TITLE = Call Mode and Command handling function
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
     (
-        CR_IL                := #CR_IL ,
-        NCR_IL               := #NCR_IL ,
+        CRIL                := #CRIL ,
+        NCRIL               := #NCRIL ,
         MAN_OVERRIDE         := #MAN_OVERRIDE ,
         CMD_SAFE             := #CMD_SAFE ,
-        modeAuto             := #modeAuto ,
-        modeManual           := #modeManual ,
+        modeAUTO             := #modeAUTO ,
+        modeMANUAL           := #modeMANUAL ,
         modeOOS              := #modeOOS ,
         MODE                 := #MODE ,
         CMD                  := #CMD ,
@@ -89,38 +89,15 @@ TITLE = Process Digital Input Signal
     // Calculate the process value based on the mode:                         //
     //------------------------------------------------------------------------//
     O(;
-    A #modeAuto;
+    A #modeAUTO;
     A #DI_Auto;
     );
     O(;
-    A #modeManual;
+    A #modeMANUAL;
     A #DI_Manual;
     );
     = #tPV;
     = #PV;
-
-NETWORK
-TITLE = Setting ALARM Flag
-    //------------------------------------------------------------------------//
-    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
-    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
-    //                                                                        //
-    // Set alarms:                                                            //
-    //------------------------------------------------------------------------//
-    AN #tPV;
-    AN #modeOOS;
-    = #ALARM;
-
-NETWORK
-TITLE = Setting INTERLOCK Flag
-    //------------------------------------------------------------------------//
-    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
-    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
-    //                                                                        //
-    // Set interlocks:                                                        //
-    //------------------------------------------------------------------------//
-    A #tPV;
-    = #INTERLOCK;
 
 NETWORK
 TITLE = Set Device command which can only be ENABLE.
@@ -132,6 +109,29 @@ TITLE = Set Device command which can only be ENABLE.
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.DI1.CMD.ENABLE;
     T #CMD;
+
+NETWORK
+TITLE = Set ALARM Flag
+    //------------------------------------------------------------------------//
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    //                                                                        //
+    // Set alarms:                                                            //
+    //------------------------------------------------------------------------//
+    AN #tPV;
+    AN #modeOOS;
+    = #ALARM;
+
+NETWORK
+TITLE = Set INTERLOCK Flag
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Set interlocks:                                                        //
+    //------------------------------------------------------------------------//
+    A #tPV;
+    = #INTERLOCK;
 
 NETWORK
 TITLE = Set Device State to Enabled if switch is on

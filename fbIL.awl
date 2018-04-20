@@ -1,0 +1,42 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbIL                                                          //
+// Description:                                                               //
+// Interlock indicator with up to fifteen inputs.                             //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      20-Apr-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbIL"
+TITLE = IL1 : Interlock calculation with up to 15 inputs
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fbIL
+VERSION : 1.0
+
+VAR_IN_OUT
+    IL : "udtInterlock";     // Interlock source input
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Set the interlock if any source is active
+    O #IL.S1;
+    O #IL.S2;
+    O #IL.S3;
+    O #IL.S4;
+    O #IL.S5;
+    O #IL.S6;
+    O #IL.S7;
+    O #IL.S8;
+    O #IL.S9;
+    O #IL.S10;
+    O #IL.S11;
+    O #IL.S12;
+    O #IL.S13;
+    O #IL.S14;
+    O #IL.S15;
+    = #IL.INTERLOCK;
+END_FUNCTION_BLOCK

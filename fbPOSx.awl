@@ -58,8 +58,8 @@ VERSION : 2.0
 
     VAR_INPUT
         CMD : Int := 1;   // Close command
-        CR_IL : Bool;   // Critical Interlock in series
-        NCR_IL : Bool;   // Non-critical Interlock in series
+        CRIL : Bool;   // Critical Interlock in series
+        NCRIL : Bool;   // Non-critical Interlock in series
         MAN_OVERRIDE : Bool;   // Critical Interlock in series can be Override by this Input
         FB_C : Bool;   // Close feedback signal from field
         FB_O : Bool;   // Open feedback signal from field
@@ -111,9 +111,9 @@ TITLE = Interlocking Logic
 //#STATE=7----Interlocked
 //
 //
-      O #CR_IL;
+      O #CRIL;
       O;
-      A #NCR_IL;
+      A #NCRIL;
       AN #MAN_OVERRIDE;
       = #tInterlock;
       A #tInterlock;

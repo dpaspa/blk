@@ -16,7 +16,7 @@
 //                                            not internal variables.         //
 // 0.6 Gus Abdallah     01-Oct-2009 CC-09/016 Interlock are CM processed      //
 // 0.5 Khairul Basar    18-Sep-2009 CC-09/016 T_CTRL-BOOL->INT, CMD deleted.  //
-// 0.4 Khairul Basar    14-Sep-2009 CC-09/016 NCR_IL TI_1x10.INTERLOCK linked.//
+// 0.4 Khairul Basar    14-Sep-2009 CC-09/016 NCRIL TI_1x10.INTERLOCK linked.//
 // 0.3 Khairul Basar    11-Sep-2009 CC-09/016 Manual setpoint, Non PID        //
 //                                            selection parameters added &    //
 //                                            programmed.                     //
@@ -53,6 +53,39 @@ VERSION : 2.0
 @@TEMPLATE_END@@
    END_VAR
 
+VAR_TEMP
+    CRIL : Bool;
+    NCRIL : Bool;
+END_VAR
+
+BEGIN
+@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Get the critical interlock if there is one. If not set alwaysLow:      //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+@@ATTR_END|CRIL_EXISTS@@
+    = #CRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Get the non-critical interlock if there is one. If not set alwaysLow:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|NCRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+@@ATTR_END|NCRIL_EXISTS@@
+    = #NCRIL;
+
 //----------------------------------------------------------------------------//
 //                                                                            //
 //----------------------------------------------------------------------------//
@@ -79,29 +112,12 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
          POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
       );
       NOP 0;
+
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A(;
-@@ATTR_BEGIN|CR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-@@ATTR_END|CR_IL@@
-      );
-      = %L0.0;
-      BLD 103;
-      A(;
-@@ATTR_BEGIN|NCR_IL@@
-@@ATTR_DEFAULT_BEGIN@@
-      A "alwaysHigh";
-@@ATTR_DEFAULT_END@@
-      @@INTERLOCK@@
-      A "idbTI1".TI_@@NUMINSTANCE@@.INTERLOCK;
-@@ATTR_END|NCR_IL@@
-      );
-      = %L0.1;
-      BLD 103;
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
       CALL #@@INSTANCE@@
       (  T_CTRL                      := "idbTC1".@@INSTANCE@@.T_CTRL ,
          MEASURE                     := "idbTI1".TI_@@NUMINSTANCE@@.MEASURE ,
@@ -110,8 +126,8 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
          TI                          := "idbTC1".@@INSTANCE@@.TI ,
          TD                          := "idbTC1".@@INSTANCE@@.TD ,
          MAN                         := #@@INSTANCE@@.MAN ,
-         CR_IL                       := %L0.0 ,
-         NCR_IL                      := %L0.1 ,
+         CRIL                       := #CRIL ,
+         NCRIL                      := #NCRIL ,
          MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
          NON_PID                     := #@@INSTANCE@@.NON_PID ,
          CYCLE                       := #@@INSTANCE@@.CYCLE ,

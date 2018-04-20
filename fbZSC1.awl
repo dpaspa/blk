@@ -15,12 +15,6 @@
 //                                            renamed as ZSCA.                //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-
-
-// DISABLE ALARM IF OPEN
-
-
-
 FUNCTION_BLOCK "fbZSC1"
 TITLE = ZSC1 : Manway closed Indication and Alarm
 { S7_Optimized_Access := 'FALSE' }
@@ -28,100 +22,164 @@ AUTHOR : REO
 NAME : fbZSC1
 VERSION : 2.0
 
-    VAR_INPUT
-        CMD : Int := -1;     // Safe command
-        DI_INPUT : Bool;     // Input signal from Field (0 = Alarm, 1 = OK)
-        DI_USER : Bool;
-        CUTOUT : Bool;       // Flag indicating if alarm is to be cutout (0= Alarm Enabled, 1= Alarm Disabled)
-    END_VAR
+VAR_INPUT
+    OWNER : Int;             // Value to be set or reset by Parent
+    SERIAL : Int;            // Unique batch or CIPSIP serial number
+    CRIL : Bool;            // Critical Interlock in series
+    NCRIL : Bool;           // Non-critical Interlock in series
+    MAN_OVERRIDE : Bool;     // Critical Interlock in series can be Override by this Input
+    CMD_SAFE : Int;          // Safe command for the module
+    DI_Auto : Bool;          // Input signal from Field
+    DI_Manual : Bool;        // User digital signal for simulating
+    CUTOUT : Bool;           // Flag indicating if alarm is to be cutout (0= Alarm Enabled, 1= Alarm Disabled)
+END_VAR
 
-    VAR_OUTPUT
-        STATE : Int;         // Device State (1= CLOSED, 2= OPENED)
-        INTERLOCK : Bool;    // Interlock Flag (0 = Inactive, 1 = Active)
-        ZSCA : Bool;         // Alarm Flag (0 = OK Cover Closed, 1 = ALARM)
-        DI_PV : Bool;        // Processed DI
-    END_VAR
+VAR_OUTPUT
+    ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
+    PV : Bool;               // Processed DI
+END_VAR
 
-    VAR_IN_OUT
-        MODE : Int := 1;     // Control Mode, Auto by default
-        OWNER : Int;         // Value to be set or reset by Parent
-    END_VAR
+VAR_IN_OUT
+    CMD : Int;               // Command
+    MODE : Int;              // Control Mode
+    STATE : Int;             // Device State from dbCONST
+    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
+END_VAR
 
-    VAR_TEMP
-        DI_ALM_B_1 : Bool;   // Temporary processed DI signal
-        modeAuto : Bool;
-        modeManual : Bool;
-        modeOOS : Bool;
-    END_VAR
+VAR_TEMP
+    cmdCLOSE : Bool;
+    cmdOPEN : Bool;
+    modeAUTO : Bool;
+    modeMANUAL : Bool;
+    modeOOS : Bool;
+    tPV : Bool;              // Temporary processed DI signal
+END_VAR
 
 BEGIN
 NETWORK
-TITLE = Mode auto
-      L #MODE;
-      L "dbCONST".BLK.MODE.AUTO;
-      ==I;
-      = #modeAuto;
-NETWORK
-TITLE = Mode Manual
-      L #MODE;
-      L "dbCONST".BLK.MODE.MANUAL;
-      ==I;
-      = #modeManual;
-NETWORK
-TITLE = Out of Service Mode=3
-//Out of service
-      L #MODE;
-      L "dbCONST".BLK.MODE.OOS;
-      ==I;
-      = #modeOOS;
+TITLE = Call Mode and Command handling function
+    //------------------------------------------------------------------------//
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (
+        CRIL                := #CRIL ,
+        NCRIL               := #NCRIL ,
+        MAN_OVERRIDE         := #MAN_OVERRIDE ,
+        CMD_SAFE             := #CMD_SAFE ,
+        modeAUTO             := #modeAUTO ,
+        modeMANUAL           := #modeMANUAL ,
+        modeOOS              := #modeOOS ,
+        MODE                 := #MODE ,
+        CMD                  := #CMD ,
+        STATE                := #STATE ,
+        INTERLOCK            := #INTERLOCK
+    );
+
 NETWORK
 TITLE = Process Digital Input Signal
-      A(;
-      A #DI_INPUT;
-      A #modeAuto;
-      O;
-      A #DI_USER;
-      A #modeManual;
-      );
-      = #DI_ALM_B_1;
-      A #DI_ALM_B_1;
-      = #DI_PV;
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Calculate the process value based on the mode:                         //
+    //------------------------------------------------------------------------//
+    O(;
+    A #DI_Auto;
+    A #modeAUTO;
+    );
+    O(;
+    A #DI_Manual;
+    A #modeMANUAL;
+    );
+    = #tPV;
+    = #PV;
+
 NETWORK
-TITLE = Setting ALARM Flag
-//When the alarm cutout flag is set the alarm message shall not be raised.
-//
-      AN #DI_ALM_B_1;
-      AN #CUTOUT;
-      AN #modeOOS;
-      = #ZSCA;
+TITLE = Get Device command if CLOSE
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is CLOSE
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ZSC1.CMD.CLOSE
+    L #CMD;
+    ==I;
+    = #cmdCLOSE
+
 NETWORK
-TITLE = Setting INTERLOCK Flag
-      A #DI_ALM_B_1;
-      = #INTERLOCK;
+TITLE = Get Device command if OPEN
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is OPEN:                                                           //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ZSC1.CMD.OPEN;
+    L #CMD;
+    ==I;
+    = #cmdOPEN;
+
 NETWORK
-TITLE = Setting Device State to CLOSED
-      A(;
-      A #DI_INPUT;
-      A #modeAuto;
-      O;
-      A #DI_USER;
-      A #modeManual;
-      );
-      JNB Label_0;
-      L "dbCONST".BLK.ZSC1.STATE.CLOSED;
-      T #STATE;
-Label_0:      NOP 0;
+TITLE = Set Device State to CLOSED if switch is on
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // CLOSED if switch is on:                                                //
+    //------------------------------------------------------------------------//
+    A #tPV;
+    L "dbCONST".BLK.ZSC1.STATE.CLOSED;
+    T #STATE;
+
 NETWORK
-TITLE = Setting Device State to OPENED
-      A(;
-      AN #DI_INPUT;
-      A #modeAuto;
-      O;
-      AN #DI_USER;
-      A #modeManual;
-      );
-      JNB Label_1;
-      L "dbCONST".BLK.ZSC1.STATE.OPENED;
-      T #STATE;
-Label_1:      NOP 0;
+TITLE = Set Device State to MISMATCH if CLOSED state does not follow command
+    //------------------------------------------------------------------------//
+    // If commanded to CLOSE and not closed then its a problem. If commanded  //
+    // to OPEN then actually we don't care if OPENED or CLOSED:               //
+    //------------------------------------------------------------------------//
+    A #cmdCLOSE
+    AN #tPV;
+    L "dbCONST".BLK.ZSC1.STATE.MISMATCH;
+    T #STATE;
+
+NETWORK
+TITLE = Set Device State to OPENED if switch is off and command is OPEN
+    //------------------------------------------------------------------------//
+    // OPENED if switch is on:                                                //
+    //------------------------------------------------------------------------//
+    A #cmdOPEN;
+    AN #tPV;
+    L "dbCONST".BLK.ZSC1.STATE.OPENED;
+    T #STATE;
+
+NETWORK
+TITLE = Set ALARM Flag
+    //------------------------------------------------------------------------//
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    //                                                                        //
+    // When the alarm cutout flag is set the alarm message is not raised:     //
+    //------------------------------------------------------------------------//
+    AN #tPV;
+    AN #CUTOUT;
+    AN #modeOOS;
+    AN #cmdOPEN;
+    = #ALARM;
+
+NETWORK
+TITLE = Set INTERLOCK Flag if OPENED
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Set interlock if manway is opened:                                     //
+    //------------------------------------------------------------------------//
+    AN #tPV;
+    = #INTERLOCK;
 END_FUNCTION_BLOCK

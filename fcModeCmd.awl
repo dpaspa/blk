@@ -24,15 +24,15 @@ NAME : fcModeCmd
 VERSION : 2.0
 
 VAR_INPUT
-    CR_IL : Bool;                      // Critical Interlock
-    NCR_IL : Bool;                     // Non critical Interlock
+    CRIL : Bool;                      // Critical Interlock
+    NCRIL : Bool;                     // Non critical Interlock
     MAN_OVERRIDE : Bool;               // Manual override for Non-critical interlocks
     CMD_SAFE : Int;                    // Safe command for the module
 END_VAR
 
 VAR_OUTPUT
-    modeAuto : Bool;
-    modeManual : Bool;
+    modeAUTO : Bool;
+    modeMANUAL : Bool;
     modeOOS : Bool;
 END_VAR
 
@@ -67,13 +67,13 @@ TITLE = Mode Auto
     L #MODE;
     L "dbCONST".BLK.MODE.AUTO;
     ==I;
-    = #modeAuto;
+    = #modeAUTO;
 NETWORK
 TITLE = Mode Manual
     L #MODE;
     L "dbCONST".BLK.MODE.MANUAL;
     ==I;
-    = #modeManual;
+    = #modeMANUAL;
 NETWORK
 TITLE = Mode Out Of Service
     L #MODE;
@@ -86,9 +86,9 @@ TITLE = Interlock Flag
     //------------------------------------------------------------------------//
     // Set boolean interlock flag if any interlock condition exists:          //
     //------------------------------------------------------------------------//
-    O #CR_IL;
+    O #CRIL;
     O(;
-    A #NCR_IL;
+    A #NCRIL;
     AN #MAN_OVERRIDE;
     );
     = #INTERLOCK;

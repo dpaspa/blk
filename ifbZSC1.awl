@@ -24,48 +24,37 @@ NAME : ifbZSC1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
 @@TEMPLATE_BEGIN@@
-   @@INSTANCE@@ : "fbZSC1";   // @@DESCRIPTION@@
-@@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-   @@INSTANCE@@_MODE : Struct
-      PosEdge1 : Bool;
-      PosEdge2 : Bool;
-      REQ : Int;   // Request for Required Mode
-   END_STRUCT;
+    @@INSTANCE@@ : "fbZSC1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 END_VAR
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Call the class function to process each instance:                          //
 //----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL "ifcZSC1"
-      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
-         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
-         IO_MODE                     := "idbZSC1".@@INSTANCE@@.MODE ,
-         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
-      );
-      NOP 0;
-NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL #@@INSTANCE@@
-      (  MODE                        := #@@INSTANCE@@.MODE ,
-         DI_INPUT                    := "ZSC-@@NUMINSTANCE@@" ,
-         DI_USER                     := #@@INSTANCE@@.DI_USER ,
-         CUTOUT                      := "idb@@PARENTCLASS@@".@@PARENT@@.ENAB_ALM ,
-         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-         ZSCA                        := #@@INSTANCE@@.ZSCA ,
-         DI_PV                       := #@@INSTANCE@@.DI_PV ,
-         STATE                       := #@@INSTANCE@@.STATE
+    CALL #@@INSTANCE@@
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CRIL                := #@@INSTANCE@@.CRIL ,
+        NCRIL               := #@@INSTANCE@@.CRIL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        CMD_SAFE             := #@@INSTANCE@@.CMD_SAFE ,
+        DI_Auto              := "@@INSTANCE@@-DI" ,
+        DI_Manual            := #@@INSTANCE@@.DI_Manual ,
+        CUTOUT               := "idb@@PARENTCLASS@@".@@PARENT@@.ENAB_ALM ,
+        ALARM                := #@@INSTANCE@@.ALARM ,
+        PV                   := #@@INSTANCE@@.PV ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
       );
       NOP 0;
 @@TEMPLATE_END@@
