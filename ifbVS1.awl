@@ -2,125 +2,56 @@
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //                Automatically Generated File - Do Not Edit                  //
 //----------------------------------------------------------------------------//
-// Class:       ifbMOT1                                                       //
-// Description: Instances of MOT1                                             //
+// Class:       ifbVS1                                                        //
+// Description: Instances of VS1                                              //
 //                                                                            //
-// Vacuum Pump control.                                                       //
+// Grouped CM for the two vacuum pumps to comprise one vacuum system which    //
+// starts sucking if any user vacuum valve opens indicating a call for the    //
+// vacuum service.                                                            //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
-// 0.6 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
-//                                            Toggle.                         //
-// 0.5 Gus Abdallah     01-Oct-2009 CC-09/016 Interlock are CM processed.     //
-// 0.4 Khairul Basar    17-Sep-2009 CC-09/016 Instead of Auto/Man dual command//
-//                                            only CMD is configured.         //
-// 0.3 Khairul Basar    09-Sep-2009 CC-09/016 MOT1 updated as per Ref1.       //
-// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Interlocks are assigned.        //
-// 0.1 Khairul Basar    31-Aug-2009           Initial design.                 //
-//                                                                            //
-// Ref1: Instead of using one timer, another timer is created. One timer will //
-// start when there is Start command, another will start when Stop command.   //
-// FAULT_S will be setting so operator acknowledge signal must reset that     //
-// flag to be able restart the MOT1 again. Start and Stop command divided     //
-// into two networks NW2 & 3.                                                 //
+// 1.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "ifbMOT1"
-TITLE = MOT1:Instance
+FUNCTION_BLOCK "ifbVS1"
+TITLE = Instances of VS1 Vacuum System grouped CM
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
-NAME : ifbMOT1
+NAME : ifbVS1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
-   VAR
+VAR
 @@TEMPLATE_BEGIN@@
-      @@INSTANCE@@ : "fbMOT1";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbVS1";  // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-      @@INSTANCE@@_MODE : Struct
-         PosEdge1 : Bool;
-         PosEdge2 : Bool;
-         REQ : Int;   // Request for Required Mode
-      END_STRUCT;
-@@TEMPLATE_END@@
-   END_VAR
-
-VAR_TEMP
-    CRIL : Bool;
-    NCRIL : Bool;
 END_VAR
 
+//----------------------------------------------------------------------------//
+// Call the class function to process each instance:                          //
+//----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-    //------------------------------------------------------------------------//
-    // Get the critical interlock if there is one. If not set alwaysLow:      //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|CRIL_EXISTS@@
-@@ATTR_DEFAULT_BEGIN@@
-    A "alwaysLow";
-@@ATTR_DEFAULT_END@@
-    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
-@@ATTR_END|CRIL_EXISTS@@
-    = #CRIL;
-
-NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-    //------------------------------------------------------------------------//
-    // Get the non-critical interlock if there is one. If not set alwaysLow:  //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|NCRIL_EXISTS@@
-@@ATTR_DEFAULT_BEGIN@@
-    A "alwaysLow";
-@@ATTR_DEFAULT_END@@
-    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
-@@ATTR_END|NCRIL_EXISTS@@
-    = #NCRIL;
-
-//----------------------------------------------------------------------------//
-//                                                                            //
-//----------------------------------------------------------------------------//
-NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      A "alwaysHigh";
-      = %L0.0;
-      BLD 103;
-      CALL "ifcMOT1"
-      (  IN_REQ_MODE                 := %L0.0 ,
-         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@.MODE ,
-         IN_CMD                      := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
-         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
-         IO_MODE                     := "idbMOT1".@@INSTANCE@@.MODE ,
-         IO_CMD                      := "idbMOT1".@@INSTANCE@@.CMD ,
-         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
-      );
-      NOP 0;
-
-NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-    //------------------------------------------------------------------------//
-    // Call the class function to process each instance:                      //
-    //------------------------------------------------------------------------//
-      CALL #@@INSTANCE@@
-      (  CMD                         := #@@INSTANCE@@.CMD ,
-         TMR                         := #@@INSTANCE@@.TMR ,
-         CRIL                       := #CRIL ,
-         NCRIL                      := #NCRIL ,
-         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
-         RUNNING_FB                  := "RNG-@@NUMINSTANCE@@" ,
-         MOT_OL_TRIP                 := "OVL-@@NUMINSTANCE@@" ,
-         STATE                       := #@@INSTANCE@@.STATE ,
-         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-         OUT_Q                       := "@@INSTANCE@@" ,
-         FAULT_S                     := #@@INSTANCE@@.FAULT_S ,
-         FAULT_O                     := #@@INSTANCE@@.FAULT_O ,
-         MODE                        := #@@INSTANCE@@.MODE
-      );
-      NOP 0;
+    CALL #@@INSTANCE@@
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CRIL                := #@@INSTANCE@@.CRIL ,
+        NCRIL               := #@@INSTANCE@@.NCRIL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        CMD_SAFE             := #@@INSTANCE@@.CMD_SAFE ,
+        DI_Auto              := "@@INSTANCE@@-DI" ,
+        DI_Manual            := #@@INSTANCE@@.DI_Manual ,
+        ALARM                := #@@INSTANCE@@.ALARM ,
+        PV                   := #@@INSTANCE@@.PV ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
+    );
+    NOP 0;
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

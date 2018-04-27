@@ -67,8 +67,8 @@ TITLE = Call Mode and Command handling function
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
     (
-        CRIL                := #CRIL ,
-        NCRIL               := #NCRIL ,
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
         MAN_OVERRIDE         := #MAN_OVERRIDE ,
         CMD_SAFE             := #CMD_SAFE ,
         modeAUTO             := #modeAUTO ,
@@ -79,6 +79,17 @@ TITLE = Call Mode and Command handling function
         STATE                := #STATE ,
         INTERLOCK            := #INTERLOCK
     );
+
+NETWORK
+TITLE = Set Device command which can only be ENABLE.
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is always ENABLE:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.DI1.CMD.ENABLE;
+    T #CMD;
 
 NETWORK
 TITLE = Process Digital Input Signal
@@ -98,17 +109,6 @@ TITLE = Process Digital Input Signal
     );
     = #tPV;
     = #PV;
-
-NETWORK
-TITLE = Set Device command which can only be ENABLE.
-    //------------------------------------------------------------------------//
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    //                                                                        //
-    // CMD is always ENABLE:                                                  //
-    //------------------------------------------------------------------------//
-    L "dbCONST".BLK.DI1.CMD.ENABLE;
-    T #CMD;
 
 NETWORK
 TITLE = Set ALARM Flag

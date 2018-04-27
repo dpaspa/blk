@@ -33,8 +33,8 @@ VERSION : 2.0
 VAR_INPUT
     OWNER : Int;             // Value to be set by Parent
     SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;            // Critical interlock
-    NCRIL : Bool;           // Non-critical interlock
+    CRIL : Bool;             // Critical interlock
+    NCRIL : Bool;            // Non-critical interlock
     MAN_OVERRIDE : Bool;     // Override non-critical interlocks
     FAULT : Bool;            // Fault input signal from Field
 END_VAR
@@ -47,7 +47,7 @@ END_VAR
 
 VAR_IN_OUT
     CMD : Int;               // Device Command from dbCONST
-    MODE : Int := 1;         // Control Mode, Auto by default
+    MODE : Int;              // Control Mode
     STATE : Int;             // Device State from dbCONST
     INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
 END_VAR
@@ -71,30 +71,19 @@ TITLE = Call Mode and Command handling block
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
     (
-        CRIL                          := #CRIL ,
-        NCRIL                         := #NCRIL ,
-        MAN_OVERRIDE                   := #MAN_OVERRIDE ,
-        CMD_SAFE                       := "dbCONST".BLK.HE1.SAFE.CMD ,
-        MODE                           := #MODE ,
-        CMD                            := #CMD ,
-        STATE                          := #STATE ,
-        INTERLOCK                      := #INTERLOCK ,
-        modeAUTO                       := #modeAUTO ,
-        modeMANUAL                     := #modeMANUAL ,
-        modeOOS                        := #modeOOS
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        MAN_OVERRIDE         := #MAN_OVERRIDE ,
+        CMD_SAFE             := "dbCONST".BLK.HE1.SAFE.CMD ,
+        MODE                 := #MODE ,
+        CMD                  := #CMD ,
+        STATE                := #STATE ,
+        INTERLOCK            := #INTERLOCK ,
+        modeAUTO             := #modeAUTO ,
+        modeMANUAL           := #modeMANUAL ,
+        modeOOS              := #modeOOS
     );
     NOP 0;
-
-NETWORK
-TITLE = Process Fault Digital Input Signal
-    //------------------------------------------------------------------------//
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    //                                                                        //
-    // Check if the field indicates there is a fault:                         //
-    //------------------------------------------------------------------------//
-    A #FAULT;
-    = #tFault;
 
 NETWORK
 TITLE = Device command ENABLE
@@ -112,9 +101,20 @@ TITLE = Device command ENABLE
     = #tDO;
 
 NETWORK
+TITLE = Process Fault Digital Input Signal
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Check if the field indicates there is a fault:                         //
+    //------------------------------------------------------------------------//
+    A #FAULT;
+    = #tFault;
+
+NETWORK
 TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
-    // CMD is DISABLE then switch off regardless:                             //
+    // CMD is DISABLE then switch off regardless of any fault or interlock:   //
     //------------------------------------------------------------------------//
     L #CMD;
     L "dbCONST".BLK.HE1.CMD.DISABLE;

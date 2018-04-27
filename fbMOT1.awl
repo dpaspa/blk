@@ -45,233 +45,263 @@ AUTHOR : REO
 NAME : fbMOT1
 VERSION : 2.0
 
-    VAR_INPUT
-        CMD : Int := 1;   // Command to OPEN/CLOSE (AUTO Mode)
-        TMR : Time := T#3S;   // Motor Start/Stop transition Time for checking status
-        CRIL : Bool;
-        NCRIL : Bool;   // Input signal is BIPOLAR (1) or UNIPOLAR (0)
-        MAN_OVERRIDE : Bool;
-        RUNNING_FB : Bool;
-        MOT_OL_TRIP : Bool;
-        IN_MAN : Bool;
-    END_VAR
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+VAR_INPUT
+    OWNER : Int;             // Value to be set by Parent
+    SERIAL : Int;            // Unique batch or CIPSIP serial number
+    CRIL : Bool;             // Critical interlock
+    NCRIL : Bool;            // Non-critical interlock
+    MAN_OVERRIDE : Bool;     // Override non-critical interlocks
+    TMR : Time := T#3S;      // Motor Start/Stop transition time for checking status
+    BRK	: Bool;              // Motor breaker fault
+    PHR : Bool;              // Three-phase relay alarm
+    FB_RUN : Bool;
+END_VAR
 
-    VAR_OUTPUT
-        STATE : Int;   // Device State
-        INTERLOCK : Bool;   // Temporary digital output signal
-        OUT_Q : Bool;   // Output to OPEN/CLOSE solenoid valve
-        FAULT_S : Bool;   // Fail to start
-        FAULT_O : Bool;   // Overload fault
-        MTR_NS : Bool;
-        MON_MISMATCH : Bool;
-    END_VAR
+VAR_OUTPUT
+    OUT_Q : Bool;            // Output to OPEN/CLOSE solenoid valve
+    ALM_BRK : Bool;
+    ALM_PHR : Bool;
+    FAIL_START : Bool;       // Fail to start
+END_VAR
 
-    VAR_IN_OUT
-        MODE : Int := 2;   // Mode of control module (1=MANUAL; 2=AUTO; 3=OOS Out of Service)
-        OWNER : Int;         // Value to be set or reset by Parent
-    END_VAR
+VAR_IN_OUT
+    CMD : Int;               // Device Command from dbCONST
+    MODE : Int;              // Control Mode
+    STATE : Int;             // Device State from dbCONST
+    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
+END_VAR
 
-    VAR
-        StartTimer {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Motor Start/Stop Transition timer
-        StopTimer {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-        startEdge : Bool;
-    END_VAR
+VAR
+    startTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Motor Start/Stop Transition timer
+    stopTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+END_VAR
 
-   VAR_TEMP
-      En_tmr_Start : Bool;
-      En_tmr_Stop : Bool;
-      fault: Bool;
-      BYPASS_IP : Bool;
-      modeAUTO : Bool;
-      modeMANUAL : Bool;
-      modeOOS : Bool;
-   END_VAR
-
+VAR_TEMP
+    cmdStart : Bool;
+    cmdStop : Bool;
+    enableStartTimer : Bool;
+    enableStopTimer : Bool;
+    modeAUTO : Bool;
+    modeMANUAL : Bool;
+    modeOOS : Bool;
+    tDO : Bool;              // Flag indicating whether to drive output
+    tFault: Bool;
+END_VAR
 
 BEGIN
 NETWORK
-TITLE = Interlock
-      O #CRIL;
-      O;
-      A #NCRIL;
-      A #MAN_OVERRIDE;
-      = #INTERLOCK;
-NETWORK
-TITLE = Auto Mode
-      L #MODE;
-      L "dbCONST".BLK.MODE.AUTO;
-      ==I;
-      = #modeAUTO;
-NETWORK
-TITLE = Manual Mode
-      L #MODE;
-      L "dbCONST".BLK.MODE.MANUAL;
-      ==I;
-      = #modeMANUAL;
-NETWORK
-TITLE = Out of Service Mode
-      L #MODE;
-      L "dbCONST".BLK.MODE.OOS;
-      ==I;
-      = #modeOOS;
+TITLE = Call Mode and Command handling block
+    //------------------------------------------------------------------------//
+    // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        MAN_OVERRIDE         := #MAN_OVERRIDE ,
+        CMD_SAFE             := "dbCONST".BLK.MOT1.SAFE.CMD ,
+        MODE                 := #MODE ,
+        CMD                  := #CMD ,
+        STATE                := #STATE ,
+        INTERLOCK            := #INTERLOCK ,
+        modeAUTO             := #modeAUTO ,
+        modeMANUAL           := #modeMANUAL ,
+        modeOOS              := #modeOOS
+    );
+    NOP 0;
 
 NETWORK
 TITLE = Start command
-      A(;
-      O #modeAUTO;
-      O #modeMANUAL;
-      );
-      A(;
-      L #CMD;
-      L "dbCONST".BLK.MOT1.CMD.START;
-      ==I;
-      );
-      FP #startEdge;
-      S #OUT_Q;
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is START:                                                          //
+    //------------------------------------------------------------------------//
+    L #CMD;
+    L "dbCONST".BLK.MOT1.CMD.START;
+    ==I;
+    =#cmdStart;
+
 NETWORK
-TITLE = Input Bypass Mode In Manual
-      A #modeMANUAL;
-      A #IN_MAN;
-      = #BYPASS_IP;
+TITLE = Stop command
+    //------------------------------------------------------------------------//
+    // CMD is STOP:                                                           //
+    //------------------------------------------------------------------------//
+    L #CMD;
+    L "dbCONST".BLK.MOT1.CMD.STOP;
+    ==I;
+    = #cmdStop
+
 NETWORK
-TITLE =
-      A(;
-      O #modeAUTO;
-      O #modeMANUAL;
-      );
-      A(;
-      L #CMD;
-      L "dbCONST".BLK.MOT1.CMD.STOP;
-      ==I;
-      );
-      O #INTERLOCK;
-      O #MOT_OL_TRIP;
-      R #OUT_Q;
+TITLE = Motor faults and three phase relay alarm
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // MOTOR FAULTS                                                           //
+    // Raise alarm if any motor control fault condition is active:            //
+    //------------------------------------------------------------------------//
+    A #PHR;
+    = #ALM_PHR;
+
 NETWORK
-TITLE = Start Timer to Monitor motor running/stopped feedback
-      A #OUT_Q;
-      = #En_tmr_Start;
+TITLE = Motor breaker fault
+    A #BRK;
+    = #ALM_BRK;
+
 NETWORK
-TITLE = Stop Timer to Monitor motor running/stopped feedback
-      AN #OUT_Q;
-      = #En_tmr_Stop;
+TITLE = Interlock if any field fault
+    //------------------------------------------------------------------------//
+    // Include motor field faults in the interlock calculation:
+    //------------------------------------------------------------------------//
+    O #INTERLOCK;
+    O #BRK;
+    O #PHR;
+    = #INTERLOCK;
+
+NETWORK
+TITLE = Start comand allowable if no fault conditions or OOS
+    //------------------------------------------------------------------------//
+    // Allow start if no interlock or OOS mode:                               //
+    //------------------------------------------------------------------------//
+    A cmdStart;
+    AN modeOOS;
+    AN #INTERLOCK;
+    = cmdStart;
+
+    //------------------------------------------------------------------------//
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    //                                                                        //
+    // Set the output on if start selected and allowable:                     //
+    //------------------------------------------------------------------------//
+    A cmdStart;
+    = #OUT_Q;
+    = #tDO;
+
+NETWORK
+TITLE = Start Timer to wait for running feedback
+    //------------------------------------------------------------------------//
+    // Start timer to allow time for running feedback to come on:             //
+    //------------------------------------------------------------------------//
+    A #cmdStart;
+    = #enableStartTimer;
+
+NETWORK
+TITLE = Stop Timer to wait for running feedback to go off
+    //------------------------------------------------------------------------//
+    // Stop timer to allow time for running feedback to go off:               //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    = #enableStopTimer;
+
 NETWORK
 TITLE = Start Transition Timer in the event of Start or Stop
-      CALL #StartTimer
-      {time_type := 'Time'}
-      (  IN                          := #En_tmr_Start ,
-         PT                          := #TMR ,
-         Q                           := #StartTimer.Q ,
-         ET                          := #StartTimer.ET
-      );
-      NOP 0;
+    //------------------------------------------------------------------------//
+    // Start the starting timer if START command issued:                      //
+    //------------------------------------------------------------------------//
+    CALL #startTMR
+    {time_type := 'Time'}
+    (   IN                   := #enableStartTimer ,
+        PT                   := #TMR ,
+        Q                    := #startTMR.Q ,
+        ET                   := #startTMR.ET
+    );
+    NOP 0;
+
 NETWORK
 TITLE = Stop Transition Timer in the event of Start or Stop
-      CALL #StopTimer
-      {time_type := 'Time'}
-      (  IN                          := #En_tmr_Stop ,
-         PT                          := #TMR ,
-         Q                           := #StopTimer.Q ,
-         ET                          := #StopTimer.ET
-      );
-      NOP 0;
+    //------------------------------------------------------------------------//
+    // Start the stopping timer if START command issued not issued:           //
+    //------------------------------------------------------------------------//
+    CALL #stopTMR
+    {time_type := 'Time'}
+    (   IN                   := #enableStopTimer ,
+        PT                   := #TMR ,
+        Q                    := #stopTMR.Q ,
+        ET                   := #stopTMR.ET
+    );
+    NOP 0;
+
 NETWORK
-TITLE = Device state
-//Device State:Following are applicabe here in case of OUT_Q is High.
-//1.Running
-//4.Fail to run
-//3.Starting
-      A #OUT_Q;
-      A(;
-      O #RUNNING_FB;
-      O #BYPASS_IP;
-      );
-      JNB Label_0;
-      L "dbCONST".BLK.MOT1.STATE.RUNNING;
-      T #STATE;
-Label_0:      NOP 0;
-      AN #OUT_Q;
-      AN #StopTimer.Q;
-      AN #BYPASS_IP;
-      A #RUNNING_FB;
-      JNB Label_1;
-      L "dbCONST".BLK.MOT1.STATE.STARTING_STOPPING;
-      T #STATE;
-Label_1:      NOP 0;
-      A #OUT_Q;
-      AN #StartTimer.Q;
-      AN #RUNNING_FB;
-      JNB Label_2;
-      L "dbCONST".BLK.MOT1.STATE.STARTING_STOPPING;
-      T #STATE;
-Label_2:      NOP 0;
-      AN #OUT_Q;
-      NOT;
-      A #StopTimer.Q;
-      AN #BYPASS_IP;
-      A #RUNNING_FB;
-      JNB Label_3;
-      L "dbCONST".BLK.MOT1.STATE.FAULT;
-      T #STATE;
-Label_3:      NOP 0;
-      AN #OUT_Q;
-      A #StartTimer.Q;
-      AN #BYPASS_IP;
-      AN #RUNNING_FB;
-      = #fault;
-      A #fault;
-      JNB Label_4;
-      L "dbCONST".BLK.MOT1.STATE.FAULT;
-      T #STATE;
-Label_4:      NOP 0;
-      A #fault;
-      AN #modeOOS;
-      S #FAULT_S;
+TITLE = Device State RUNNING if running feedback on or bypass
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // STOPPED if output off and not running:                                 //
+    //------------------------------------------------------------------------//
+    AN #cmdStart;
+    AN #tDO;
+    AN #FB_RUN;
+    L "dbCONST".BLK.MOT1.STATE.STOPPED;
+    T #STATE;
+
+    //------------------------------------------------------------------------//
+    // RUNNING if output is on with running feedback or bypass:               //
+    //------------------------------------------------------------------------//
+    A #cmdStart;
+    A #tDO;
+    A #FB_RUN;
+    AN #FAIL_START;
+    L "dbCONST".BLK.MOT1.STATE.RUNNING;
+    T #STATE;
+
 NETWORK
-TITLE = Device state
-//Device State:Following are applicabe here in case of OUT_Q is Low.
-//1.Stopped
-//4.Overload fault
-//
-      AN #OUT_Q;
-      A(;
-      ON #RUNNING_FB;
-      O #BYPASS_IP;
-      );
-      AN #FAULT_S;
-      AN #FAULT_O;
-      JNB Label_5;
-      L "dbCONST".BLK.MOT1.STATE.STOPPED;
-      T #STATE;
-Label_5:      NOP 0;
-      AN #OUT_Q;
-      A #MOT_OL_TRIP;
-      JNB Label_6;
-      L "dbCONST".BLK.MOT1.STATE.FAULT;
-      T #STATE;
-Label_6:      NOP 0;
-      AN #OUT_Q;
-      R #FAULT_S;
+TITLE = Device State transition if waiting for running or stopped
+    //------------------------------------------------------------------------//
+    // Transition state if output is on and waiting for running feedback to   //
+    // come on or output is off and waiting for running feedback to go off:   //
+    //------------------------------------------------------------------------//
+    O(;
+    A #tDO;
+    AN #startTMR.Q;
+    AN #FB_RUN;
+    );
+    O(;
+    AN #tDO;
+    AN #stopTMR.Q;
+    A #FB_RUN;
+    );
+    L "dbCONST".BLK.MOT1.STATE.STARTING_STOPPING;
+    T #STATE;
+
 NETWORK
-TITLE = Motor Over load
-      A #MOT_OL_TRIP;
-      AN #BYPASS_IP;
-      AN #modeOOS;
-      = #FAULT_O;
+TITLE = Device State FAULT if timed out waiting for running
+    //------------------------------------------------------------------------//
+    // Fault if starting timer expired and not running:                       //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    A #startTMR.Q;
+    AN #FB_RUN;
+    = #tFault;
+    = #FAIL_START;
+    JC _fault;
+
 NETWORK
-TITLE =
-      A(;
-      O(;
-      L #STATE;
-      L "dbCONST".BLK.MOT1.STATE.FAULT;
-      ==I;
-      );
-      O #INTERLOCK;
-      );
-      A(;
-      L #CMD;
-      L "dbCONST".BLK.MOT1.CMD.START;
-      ==I;
-      );
-      = #MON_MISMATCH;
+TITLE = Device State FAULT if timed out waiting for stopped
+    //------------------------------------------------------------------------//
+    // Fault if stopping timer expired and not stopped:                       //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    A #stopTMR.Q;
+    A #FB_RUN;
+    = #tFault;
+
+_fault:   NOP 0;
+
+NETWORK
+TITLE = Set State FAULT if any fault condition
+    //------------------------------------------------------------------------//
+    // Fault if starting timer expired and not running:                       //
+    //------------------------------------------------------------------------//
+    A #tFault;
+    L "dbCONST".BLK.MOT1.STATE.FAULT;
+    T #STATE;
 END_FUNCTION_BLOCK

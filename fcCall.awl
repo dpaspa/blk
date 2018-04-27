@@ -1,0 +1,29 @@
+@@TEMPLATE_BEGIN@@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Calls all @@LEVEL@@ instances.                                       //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      09-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION "fcCall@@LEVEL@@s" : Void
+TITLE = Call all @@LEVEL@@ Instances
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcCall@@LEVEL@@s
+VERSION : 2.0
+
+BEGIN
+@@ATTR_BEGIN|CALL_LIST@@
+NETWORK
+TITLE = Calling @@LEVEL@@ instances for class @@CLASS@@
+      CALL "ifb@@NAMEINSTANCE@@", "idb@@NAMEINSTANCE@@";
+      NOP 0;
+
+@@ATTR_END|CALL_LIST@@
+@@TEMPLATE_END@@
+END_FUNCTION

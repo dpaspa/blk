@@ -41,7 +41,7 @@ NAME : ifbPOS1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
 @@TEMPLATE_BEGIN@@
@@ -52,8 +52,8 @@ END_VAR
 VAR_TEMP
     CRIL : Bool;
     NCRIL : Bool;
-    FBC : Bool;
-    FBO : Bool;
+    FB_C : Bool;
+    FB_O : Bool;
 END_VAR
 
 BEGIN
@@ -67,7 +67,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+    A "idbCRIL"."@@INSTANCE@@-CRIL".INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
     = #CRIL;
 
@@ -80,7 +80,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+    A "idbNCRIL"."@@INSTANCE@@-NCRIL".INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
     = #NCRIL;
 
@@ -89,27 +89,28 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-      AN "@@INSTANCE@@";
-      = #FBC;
-      BLD 103;
-      A "@@INSTANCE@@";
-      = #FBO;
-      CALL #@@INSTANCE@@
-      (  CMD                         := #@@INSTANCE@@.CMD ,
-         CRIL                       := #CRIL ,
-         NCRIL                      := #NCRIL ,
-         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
-         FB_C                        := #FBC ,
-         FB_O                        := #FBO ,
-         TMR                         := #@@INSTANCE@@.TMR ,
-         INTERLOCKING_TIMER          := "@@INSTANCE@@-TTM" ,
-         STATE                       := #@@INSTANCE@@.STATE ,
-         OUT_Q                       := "@@INSTANCE@@-CMD" ,
-         FAULT_C                     := #@@INSTANCE@@.FAULT_C ,
-         FAULT_O                     := #@@INSTANCE@@.FAULT_O ,
-         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-         MODE                        := #@@INSTANCE@@.MODE
-      );
-      NOP 0;
+    AN "@@INSTANCE@@-CMD";
+    = #FB_C;
+    A "@@INSTANCE@@";
+    = #FB_O;
+    CALL #@@INSTANCE@@
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        TMR                  := #@@INSTANCE@@.TMR ,
+        FB_C                 := #FB_C ,
+        FB_O                 := #FB_O ,
+        NC                   := @@NC@@ ,
+        OUT_Q                := "@@INSTANCE@@-CMD" ,
+        FAULT_C              := #@@INSTANCE@@.FAULT_C ,
+        FAULT_O              := #@@INSTANCE@@.FAULT_O ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
+    );
+    NOP 0;
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

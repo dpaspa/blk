@@ -33,13 +33,13 @@ NAME : ifbMOT1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
-   VAR
+VAR
 @@TEMPLATE_BEGIN@@
     @@INSTANCE@@ : "fbMOT1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-   END_VAR
+END_VAR
 
 VAR_TEMP
     CRIL : Bool;
@@ -57,7 +57,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+    A "idbCRIL"."@@INSTANCE@@-CRIL".INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
     = #CRIL;
 
@@ -70,7 +70,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+    A "idbNCRIL"."@@INSTANCE@@-NCRIL".INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
     = #NCRIL;
 
@@ -80,19 +80,23 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-      (  CMD                         := #@@INSTANCE@@.CMD ,
-         TMR                         := #@@INSTANCE@@.TMR ,
-         CRIL                       := #CRIL ,
-         NCRIL                      := #NCRIL ,
-         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
-         RUNNING_FB                  := "RNG-@@NUMINSTANCE@@" ,
-         MOT_OL_TRIP                 := "OVL-@@NUMINSTANCE@@" ,
-         STATE                       := #@@INSTANCE@@.STATE ,
-         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-         OUT_Q                       := "@@INSTANCE@@" ,
-         FAULT_S                     := #@@INSTANCE@@.FAULT_S ,
-         FAULT_O                     := #@@INSTANCE@@.FAULT_O ,
-         MODE                        := #@@INSTANCE@@.MODE
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        TMR                  := #@@INSTANCE@@.TMR ,
+        BRK                  := "@@INSTANCE@@-BRK" ,
+        PHR                  := "@@LNK1TAG@@-DI" ,
+        FB_RUN               := "@@INSTANCE@@-RUN" ,
+        OUT_Q                := "@@INSTANCE@@-CMD" ,
+        ALM_BRK              := #@@INSTANCE@@.ALM_BRK ,
+        ALM_PHR              := #@@INSTANCE@@.ALM_PHR ,
+        FAIL_START           := #@@INSTANCE@@.FAIL_START ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
       );
       NOP 0;
 @@TEMPLATE_END@@

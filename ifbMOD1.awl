@@ -51,7 +51,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+    A "idbCRIL"."@@INSTANCE@@-CRIL".INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
     = #CRIL;
 
@@ -64,7 +64,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+    A "idbNCRIL"."@@INSTANCE@@-NCRIL".INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
     = #NCRIL;
 
@@ -74,18 +74,19 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   CMND                 := #@@INSTANCE@@.CMND ,
-        UPPER_RANGE          := #@@INSTANCE@@.UPPER_RANGE ,
-        LOWER_RANGE          := #@@INSTANCE@@.LOWER_RANGE ,
-        POLARITY             := #@@INSTANCE@@.POLARITY ,
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
         CRIL                 := #CRIL ,
         NCRIL                := #NCRIL ,
-        RAW_OUTPUT           := "P_MOD-@@NUMINSTANCE@@":P ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        OUT_Q                := "@@INSTANCE@@" ,
-        INTERLOCK            := "idbTC1".@@LNK1TAG@@.INTERLOCK ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        POSN_LOCAL           := #@@INSTANCE@@.POSN_LOCAL ,
+        POSN_REMOTE          := #@@INSTANCE@@.POSN_REMOTE ,
+        POLARITY             := #@@INSTANCE@@.POLARITY ,
+        RAW_OUTPUT           := "@@INSTANCE@@-MOD":P ,
+        CMD                  := #@@INSTANCE@@.CMD ,
         MODE                 := #@@INSTANCE@@.MODE ,
-        POSN                 := #@@INSTANCE@@.POSN
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
       );
       NOP 0;
 @@TEMPLATE_END@@

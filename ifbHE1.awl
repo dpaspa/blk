@@ -49,13 +49,13 @@ BEGIN
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
-    // Get the critical interlock if there is one. If not set alwaysLow:      //
+    // Get the critical interlock if there is one. If none set as alwaysLow:  //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CRIL_EXISTS@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+    A "idbCRIL"."@@INSTANCE@@-CRIL".INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
     = #CRIL;
 
@@ -68,7 +68,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+    A "idbNCRIL"."@@INSTANCE@@-NCRIL".INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
     = #NCRIL;
 
@@ -78,19 +78,19 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   OWNER                          := #@@INSTANCE@@.OWNER ,
-        SERIAL                         := #@@INSTANCE@@.SERIAL ,
-        CRIL                           := #CRIL ,
-        NCRIL                          := #NCRIL ,
-        MAN_OVERRIDE                   := #@@INSTANCE@@.MAN_OVERRIDE ,
-        FAULT                          := "@@INSTANCE@@-FLT" ,
-        DO                             := "@@INSTANCE@@-CMD" ,
-        ALARM                          := #@@INSTANCE@@.ALARM ,
-        CUTOUT                         := #@@INSTANCE@@.CUTOUT ,
-        CMD                            := #@@INSTANCE@@.CMD ,
-        MODE                           := #@@INSTANCE@@.MODE ,
-        STATE                          := #@@INSTANCE@@.STATE ,
-        INTERLOCK                      := #@@INSTANCE@@.INTERLOCK
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        FAULT                := "@@INSTANCE@@-FLT" ,
+        DO                   := "@@INSTANCE@@-CMD" ,
+        ALARM                := #@@INSTANCE@@.ALARM ,
+        CUTOUT               := #@@INSTANCE@@.CUTOUT ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
       );
       NOP 0;
 @@TEMPLATE_END@@

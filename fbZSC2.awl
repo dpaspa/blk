@@ -79,6 +79,32 @@ TITLE = Call Mode and Command handling function
     );
 
 NETWORK
+TITLE = Get Device command if IN
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is IN
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ZSC2.CMD.IN;
+    L #CMD;
+    ==I;
+    = #cmdIN;
+
+NETWORK
+TITLE = Get Device command if OUT
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is OUT:                                                           //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ZSC2.CMD.OUT;
+    L #CMD;
+    ==I;
+    = #cmdOUT;
+
+NETWORK
 TITLE = Process Digital Input Signal
     //------------------------------------------------------------------------//
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
@@ -98,32 +124,6 @@ TITLE = Process Digital Input Signal
     = #PV;
 
 NETWORK
-TITLE = Get Device command if IN
-    //------------------------------------------------------------------------//
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    //                                                                        //
-    // CMD is IN
-    //------------------------------------------------------------------------//
-    L "dbCONST".BLK.ZSC2.CMD.IN
-    L #CMD;
-    ==I;
-    = #cmdIN
-
-NETWORK
-TITLE = Get Device command if OUT
-    //------------------------------------------------------------------------//
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    //                                                                        //
-    // CMD is OUT:                                                           //
-    //------------------------------------------------------------------------//
-    L "dbCONST".BLK.ZSC2.CMD.OUT;
-    L #CMD;
-    ==I;
-    = #cmdOUT;
-
-NETWORK
 TITLE = Set Device State to IN if switch is on and command is IN
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
@@ -132,20 +132,17 @@ TITLE = Set Device State to IN if switch is on and command is IN
     // IN if switch is on and commanded to be IN:                             //
     //------------------------------------------------------------------------//
     A #tPV;
-    A #cmdIN
+    A #cmdIN;
     L "dbCONST".BLK.ZSC2.STATE.IN;
     T #STATE;
 
 NETWORK
 TITLE = Set Device State to OUT if switch is on and command is OUT
     //------------------------------------------------------------------------//
-    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
-    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
-    //                                                                        //
     // OUT if switch is off and commanded to be OUT:                          //
     //------------------------------------------------------------------------//
     AN #tPV;
-    A #cmdOUT
+    A #cmdOUT;
     L "dbCONST".BLK.ZSC2.STATE.OUT;
     T #STATE;
 
@@ -155,11 +152,11 @@ TITLE = Check if MISMATCH if state does not follow command
     // If commanded to IN and switch not on or commanded to OUT and switch on;//
     //------------------------------------------------------------------------//
     O(;
-    A #cmdIN
+    A #cmdIN;
     AN #tPV;
     );
     O(;
-    A #cmdOUT
+    A #cmdOUT;
     A #tPV;
     );
     = tMismatch;
@@ -170,6 +167,8 @@ TITLE = Set Device State to MISMATCH if state does not follow command
     L "dbCONST".BLK.ZSC2.STATE.MISMATCH;
     T #STATE;
 
+NETWORK
+TITLE = Set ALARM Flag
     //------------------------------------------------------------------------//
     // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
     // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //

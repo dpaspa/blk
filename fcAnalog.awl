@@ -13,16 +13,16 @@
 //                                            from existing analog FBs, such  //
 //                                            as MI1, PI1, TI1, etc.          //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "fcAnalog"
+FUNCTION "fcAnalog"
 TITLE = Analog input scaling and error checking
-{ S7_Optimized_Access := 'FALSE' }
+{ S7_Optimized_Access := 'FALSE'}
 AUTHOR : REO
 NAME : fcAnalog
 VERSION : 1.0
 
 VAR_INPUT
-    RAW_INPUT : Int;         // Raw input signal from Field (4mA = 0, 20mA = 27648)
-    USER_INPUT : Int;
+    RAW_INPUT : Word;        // Raw input signal from Field (4mA = 0, 20mA = 27648)
+    USER_INPUT : Word;
     RANGE_UPPER : Real;      // Upper Range Limit in engineering units
     RANGE_LOWER : Real;      // Lower Range Limit in engineering units
     POLARITY : Bool;         // Input signal is BIPOLAR (1) or UNIPOLAR (0)
@@ -77,19 +77,20 @@ TITLE = Raw field input scaling in Auto mode
     T #tRAW;
 
 NETWORK
-TITLE = User input scaling in Manual mode
+TITLE = User input sets process value in Manual mode
     //------------------------------------------------------------------------//
-    // Scale the user input in Manual mode:                                   //
+    // Set the user input value as the PV in Manual mode:                     //
     //------------------------------------------------------------------------//
     A #modeMANUAL;
     L #USER_INPUT;
-    T #tRAW;
+    T #tPV;
 
 NETWORK
-TITLE = Scale the input
+TITLE = Scale the input if not in Manual mode
     //------------------------------------------------------------------------//
     // Scale the raw input reading:                                           //
     //------------------------------------------------------------------------//
+    AN #modeMANUAL;
     CALL SCALE
     (   IN                             := #tRAW ,
         HI_LIM                         := #RANGE_UPPER ,
@@ -249,4 +250,4 @@ TITLE = Set Device State to Fault if any field signal error
     AN #DQ;
     L #STATE_FAULT;
     T #STATE;
-END_FUNCTION_BLOCK
+END_FUNCTION

@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 2.0 David Paspa      24-Apr-2018 NA        Reboot for S7-1500.             //
 // 0.7 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic.             //
 // 0.6 Khairul Basar    06-Oct-2009 CC-09/016 PID HLM,LLM reversed for cool.  //
 // 0.5 Khairul Basar    17-Sep-2009 CC-09/016 OUT_CMD as Command to MOD1 added//
@@ -32,170 +32,207 @@ AUTHOR : REO
 NAME : fbTC1
 VERSION : 2.0
 
-    VAR_INPUT
-        T_CTRL : Int := 1;
-        MEASURE : Real;   // Measured Value received from control module
-        SETPOINT : Real;   // Setpoint
-        GAIN : Real := 1.0;   // Proportional Gain
-        TI : Time := T#20S;   // Integral Time
-        TD : Time := T#10S;   // Derivative Time
-        MAN : Real;   // PID controller output signal if disabled (=0%)
-        CRIL : Bool;   // Critical Interlock
-        NCRIL : Bool;   // Non-Critical Interlock
-        MAN_OVERRIDE : Bool;   // Bypass of Non-Critical Interlock
-        NON_PID : Bool;   // Manual non pid selection
-        CYCLE : Time := T#100MS;   // PID Block Sampling Time
-        P_SEL : Bool := TRUE;   // Proportional Action ON/OFF
-        I_SEL : Bool := TRUE;   // Integral Action ON/OFF
-        D_SEL : Bool := TRUE;   // Derivative Action ON/OFF
-        LMN_HLM : Real := 100.0;   // Manipulated Value High Limit 100%
-        LMN_LLM : Real;   // Manipulated Value Low Limit 0%
-    END_VAR
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+VAR_INPUT
+    OWNER : Int;             // Value to be set by Parent
+    SERIAL : Int;            // Unique batch or CIPSIP serial number
+    CRIL : Bool;             // Critical interlock
+    NCRIL : Bool;            // Non-critical interlock
+    MAN_OVERRIDE : Bool;     // Override non-critical interlocks
+    SETPOINT : Real;         // Setpoint
+    PV : Real;               // Measured Process Value received from control module
+    MAN_PID : Bool;          // Manual non pid selection
+    GAIN : Real := 1.0;      // Proportional Gain
+    TI : Time := T#20S;      // Integral Time
+    TD : Time := T#10S;      // Derivative Time
+    CYCLE : Time := T#100MS; // PID Block Sampling Time
+    P_SEL : Bool := TRUE;    // Proportional Action ON/OFF
+    I_SEL : Bool := TRUE;    // Integral Action ON/OFF
+    D_SEL : Bool := TRUE;    // Derivative Action ON/OFF
+END_VAR
 
-    VAR_OUTPUT
-        STATE : Int;
-        LMN : Real;   // PID controller output (0-100%)
-        OUT_CMD : Bool;   // Open/Close command to MOD1
-        INTERLOCK : Bool;
-        MAN_NON_PID : Bool;
-        MON_MISMATCH : Bool;
-    END_VAR
+VAR_OUTPUT
+    LMN : Real;              // PID controller output (0-100%)
+END_VAR
 
-    VAR_IN_OUT
-        MODE : Int := 1;     // Control Mode, Auto by default
-        OWNER : Int;         // Value to be set or reset by Parent
-    END_VAR
+VAR_IN_OUT
+    CMD : Int;               // Device Command from dbCONST
+    MODE : Int;              // Control Mode
+    STATE : Int;             // Device State from dbCONST
+    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
+END_VAR
 
-    VAR
-        PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
-    END_VAR
+VAR
+    PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
+END_VAR
 
-    VAR_TEMP
-        cmdEnable : Bool;
-        cmdDisable : Bool;
-        notOOS : Bool;
-        tSetpoint : Real;
-        tmpman_non_pid : Bool;
-    END_VAR
+VAR_TEMP
+    cmdEnable : Bool;
+    cmdDisable : Bool;
+    modeAUTO : Bool;
+    modeMANUAL : Bool;
+    modeOOS : Bool;
+    tSetpoint : Real;
+    tManual_Not_PID : Bool;
+END_VAR
 
 BEGIN
 NETWORK
-TITLE = INTERLOCK Logic
-      O #CRIL;
-      O;
-      A #NCRIL;
-      AN #MAN_OVERRIDE;
-      = #INTERLOCK;
+TITLE = Call Mode and Command handling block
+    //------------------------------------------------------------------------//
+    // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        MAN_OVERRIDE         := #MAN_OVERRIDE ,
+        CMD_SAFE             := "dbCONST".BLK.TC1.SAFE.CMD ,
+        MODE                 := #MODE ,
+        CMD                  := #CMD ,
+        STATE                := #STATE ,
+        INTERLOCK            := #INTERLOCK ,
+        modeAUTO             := #modeAUTO ,
+        modeMANUAL           := #modeMANUAL ,
+        modeOOS              := #modeOOS
+    );
+    NOP 0;
+
 NETWORK
-TITLE = Disable Temperature Control
-      A(;
-      L #MODE;
-      L "dbCONST".BLK.MODE.MANUAL;
-      ==I;
-      );
-      A #NON_PID;
-      = #MAN_NON_PID;
-      = #tmpman_non_pid;
+TITLE = Device command ENABLE
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is ENABLE:                                                         //
+    //------------------------------------------------------------------------//
+    AN #modeOOS;
+    AN #INTERLOCK;
+    L #CMD;
+    L "dbCONST".BLK.TC1.CMD.ENABLE;
+    ==I;
+    = #cmdEnable;
+
 NETWORK
-TITLE = Enable or Disable
-      O(;
-      L #MODE;
-      L "dbCONST".BLK.MODE.AUTO;
-      ==I;
-      );
-      O(;
-      L #MODE;
-      L "dbCONST".BLK.MODE.MANUAL;
-      ==I;
-      );
-      = #notOOS;
-      A #notOOS;
-      A(;
-      L #T_CTRL;
-      L "dbCONST".BLK.TC1.CMD.ENABLE;
-      ==I;
-      );
-      = #cmdEnable;
-      A #cmdEnable;
-      JNB _001;
-      L #SETPOINT;
-      T #tSetpoint;
-      SET;
-      SAVE;
-      CLR;
-_001:      A BR;
-      S #OUT_CMD;
-      A #cmdEnable;
-      JNB _002;
-      L "dbCONST".BLK.TC1.STATE.ENABLED;
-      T #STATE;
-_002:      NOP 0;
-      A #notOOS;
-      A(;
-      O(;
-      L #T_CTRL;
-      L "dbCONST".BLK.TC1.CMD.DISABLE;
-      ==I;
-      );
-      O #INTERLOCK;
-      );
-      = #cmdDisable;
-      A #cmdDisable;
-      JNB _003;
-      L 0;
-      T #tSetpoint;
-      SET;
-      SAVE;
-      CLR;
-_003:      A BR;
-      R #OUT_CMD;
-      A #cmdDisable;
-      JNB _004;
-      L "dbCONST".BLK.TC1.STATE.DISABLED;
-      T #STATE;
-_004:      NOP 0;
+TITLE = Device command DISABLE
+    //------------------------------------------------------------------------//
+    // CMD is DISABLE:                                                        //
+    //------------------------------------------------------------------------//
+    ON #cmdEnable;
+    O(;
+    L #CMD;
+    L "dbCONST".BLK.TC1.CMD.DISABLE;
+    ==I;
+    );
+    = #cmdDisable;
+
+NETWORK
+TITLE = Command should be DISABLE if not ENABLE
+    //------------------------------------------------------------------------//
+    // CMD to DISABLE:                                                        //
+    //------------------------------------------------------------------------//
+    A #cmdDisable;
+    L "dbCONST".BLK.TC1.CMD.DISABLE;
+    T #CMD;
+
+NETWORK
+TITLE = Setpoint if Enabled
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Setpoint if ENABLE:                                                    //
+    //------------------------------------------------------------------------//
+    A #cmdEnable;
+    L #SETPOINT;
+    T #tSetpoint;
+
+NETWORK
+TITLE = Setpoint if Disabled
+    //------------------------------------------------------------------------//
+    // Setpoint should be 0 if disabled:                                      //
+    //------------------------------------------------------------------------//
+    A #cmdDisable;
+    L 0;
+    T #tSetpoint;
+
+NETWORK
+TITLE = PID in manual if disabled or manual flag set
+    //------------------------------------------------------------------------//
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    //                                                                        //
+    // PID in manual mode if requested:                                       //
+    //------------------------------------------------------------------------//
+    O #cmdDisable;
+    O(;
+    A #cmdEnable;
+    A #modeMANUAL;
+    A #MAN_PID;
+    );
+    = #tManual_Not_PID;
+
 NETWORK
 TITLE = PID Controller
-      A(;
-      CALL #PID1
-      (  COM_RST                     := "flagFirstScanRestart" ,
-         MAN_ON                      := #tmpman_non_pid ,
-         P_SEL                       := #P_SEL ,
-         I_SEL                       := #I_SEL ,
-         D_SEL                       := #D_SEL ,
-         CYCLE                       := #CYCLE ,
-         SP_INT                      := #tSetpoint ,
-         PV_IN                       := #MEASURE ,
-         MAN                         := #tSetpoint ,
-         GAIN                        := #GAIN ,
-         TI                          := #TI ,
-         TD                          := #TD ,
-         LMN_HLM                     := #LMN_HLM ,
-         LMN_LLM                     := #LMN_LLM ,
-         LMN                         := #LMN
-      );
-      A BR;
-      );
-      JNB Label_0;
-      L 100.0;
-      L #LMN;
-      -R;
-      T #LMN;
-Label_0:      NOP 0;
+    //------------------------------------------------------------------------//
+    // PID algorithm if enabled in AUTO mode:                                 //
+    //------------------------------------------------------------------------//
+    CALL #PID1
+    (   COM_RST              := "flagFirstScanRestart" ,
+        MAN_ON               := #tManual_Not_PID ,
+        P_SEL                := #P_SEL ,
+        I_SEL                := #I_SEL ,
+        D_SEL                := #D_SEL ,
+        CYCLE                := #CYCLE ,
+        SP_INT               := #tSetpoint ,
+        PV_IN                := #PV ,
+        MAN                  := #tSetpoint ,
+        GAIN                 := #GAIN ,
+        TI                   := #TI ,
+        TD                   := #TD ,
+        LMN_HLM              := 100.0 ,
+        LMN_LLM              := 0.0 ,
+        LMN                  := #LMN
+    );
+
 NETWORK
-TITLE = If interlocked, 0% valve openning
-      A #INTERLOCK;
-      JNB Label_1;
-      L 0.0;
-      T #LMN;
-Label_1:      NOP 0;
+TITLE = Output should be reverse acting
+    //------------------------------------------------------------------------//
+    // Change the output to be reverse acting:                                //
+    //------------------------------------------------------------------------//
+    L 100.0;
+    L #LMN;
+    -R;
+    T #LMN;
+
 NETWORK
-TITLE =
-      A(;
-      L #T_CTRL;
-      L "dbCONST".BLK.TC1.CMD.ENABLE;
-      ==I;
-      );
-      A #INTERLOCK;
-      = #MON_MISMATCH;
+TITLE = Output if Disabled
+    //------------------------------------------------------------------------//
+    // Output should be 0 if disabled:                                        //
+    //------------------------------------------------------------------------//
+    A #cmdDisable;
+    L 0.0;
+    T #LMN;
+
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // DISABLED if commanded or any problem or OOS:                           //
+    //------------------------------------------------------------------------//
+    A #cmdDisable;
+    L "dbCONST".BLK.TC1.STATE.DISABLED;
+    T #STATE;
+
+    //------------------------------------------------------------------------//
+    // ENABLED if commanded and no problem:                                   //
+    //------------------------------------------------------------------------//
+    A #cmdEnable;
+    L "dbCONST".BLK.TC1.STATE.ENABLED;
+    T #STATE;
 END_FUNCTION_BLOCK

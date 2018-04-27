@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 2.0 David Paspa      24-Apr-2018 NA        Reboot for S7-1500.             //
 // 0.4 Khairul Basar    17-Sep-2009 CC-09/016 RAW_OUTPUT only when Valve      //
 //                                            Opened.                         //
 // 0.3 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Input Parameters      //
@@ -27,88 +27,180 @@ AUTHOR : REO
 NAME : fbMOD1
 VERSION : 2.0
 
-    VAR_INPUT
-        CMND : Bool;         // Command to OPEN/CLOSE (AUTO Mode)
-        UPPER_RANGE : Real := 100.0;   // Upper Range Limit in engineering units
-        LOWER_RANGE : Real;  // Lower Range Limit in engineering units
-        POLARITY : Bool;     // Input signal is BIPOLAR (1) or UNIPOLAR (0)
-        CRIL : Bool;
-        NCRIL : Bool;
-        MAN_OVERRIDE : Bool;
-    END_VAR
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+VAR_INPUT
+    OWNER : Int;             // Value to be set by Parent
+    SERIAL : Int;            // Unique batch or CIPSIP serial number
+    CRIL : Bool;             // Critical interlock
+    NCRIL : Bool;            // Non-critical interlock
+    MAN_OVERRIDE : Bool;     // Override non-critical interlocks
+    POSN_LOCAL : Real;       // Local valve position setpoint
+    POSN_REMOTE : Real;      // Remote valve position setpoint
+    POLARITY : Bool;         // Input signal is BIPOLAR (1) or UNIPOLAR (0)
+END_VAR
 
-    VAR_OUTPUT
-        RAW_OUTPUT : Int;    // Raw output signal to Field (4mA = 0, 20mA = 27648)
-        STATE : Int;         // Device State
-        OUT_Q : Bool;        // Output to OPEN/CLOSE solenoid valve
-        INTERLOCK : Bool;
-        MON_MISMATCH : Bool;
-    END_VAR
+VAR_OUTPUT
+    RAW_OUTPUT : Int;        // Raw output signal to Field (4mA = 0, 20mA = 27648)
+END_VAR
 
-   VAR_IN_OUT
-        MODE : Int := 2;     // Mode of control module (1=MANUAL; 2=AUTO; 3=OOS Out of Service)
-        OWNER : Int;         // Value to be set or reset by Parent
-        POSN : Real;         // Valve position to set.
-    END_VAR
+VAR_IN_OUT
+    CMD : Int;               // Device Command from dbCONST
+    MODE : Int;              // Control Mode
+    STATE : Int;             // Device State from dbCONST
+    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
+END_VAR
 
-    VAR_TEMP
-        RET_VAL1 : Word;    // Returns a value of W#16#0000 if the instruction executes without error.
-        OUT_Q_B_1 : Bool;   // Temporary digital output signal
-    END_VAR
+VAR_TEMP
+    cmdLocal : Bool;
+    cmdRemote : Bool;
+    modeAUTO : Bool;
+    modeMANUAL : Bool;
+    modeOOS : Bool;
+    tRetVal : Word;          // Returns a value of W#16#0000 if the instruction executes without error.
+    tDO : Bool;              // Flag indicating whether to drive output
+    tPOSN : Real;            // Output position of the valve
+END_VAR
 
 BEGIN
 NETWORK
-TITLE = INTERLOCK Logic
-      O #CRIL;
-      O;
-      A #NCRIL;
-      AN #MAN_OVERRIDE;
-      = #INTERLOCK;
+TITLE = Call Mode and Command handling block
+    //------------------------------------------------------------------------//
+    // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        MAN_OVERRIDE         := #MAN_OVERRIDE ,
+        CMD_SAFE             := "dbCONST".BLK.MOD1.SAFE.CMD ,
+        MODE                 := #MODE ,
+        CMD                  := #CMD ,
+        STATE                := #STATE ,
+        INTERLOCK            := #INTERLOCK ,
+        modeAUTO             := #modeAUTO ,
+        modeMANUAL           := #modeMANUAL ,
+        modeOOS              := #modeOOS
+    );
+    NOP 0;
+
 NETWORK
-TITLE = ON/OFF valve
-      A #CMND;
-      AN #INTERLOCK;
-      = #OUT_Q_B_1;
-      A #OUT_Q_B_1;
-      = #OUT_Q;
+TITLE = Device command LOCAL
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is LOCAL:                                                          //
+    //------------------------------------------------------------------------//
+    AN #INTERLOCK;
+    L #CMD;
+    L "dbCONST".BLK.MOD1.CMD.LOCAL;
+    ==I;
+    = #cmdLocal;
+    = #tDO;
+
 NETWORK
-TITLE = Unscaling Control Valve Position
-      A #OUT_Q_B_1;
-      JNB Label_0;
-      CALL UNSCALE
-      (  IN                          := #POSN ,
-         HI_LIM                      := #UPPER_RANGE ,
-         LO_LIM                      := #LOWER_RANGE ,
-         BIPOLAR                     := #POLARITY ,
-         RET_VAL                     := #RET_VAL1 ,
-         OUT                         := #RAW_OUTPUT
-      );
-Label_0:      NOP 0;
+TITLE = Device command REMOTE
+    //------------------------------------------------------------------------//
+    // CMD is REMOTE:                                                         //
+    //------------------------------------------------------------------------//
+    AN #INTERLOCK;
+    L #CMD;
+    L "dbCONST".BLK.MOD1.CMD.REMOTE;
+    ==I;
+    = #cmdRemote;
+    = #tDO;
+
 NETWORK
-TITLE = Devicestate DISABLED
-//Reset output setpoint to zero.
-      ON #OUT_Q_B_1;
-      O #INTERLOCK;
-      JNB Label_1;
-      L "dbCONST".BLK.MOD1.STATE.DISABLED;
-      T #STATE;
-Label_1:      NOP 0;
-      ON #OUT_Q_B_1;
-      O #INTERLOCK;
-      JNB Label_2;
-      L 0;
-      T #RAW_OUTPUT;
-Label_2:      NOP 0;
+TITLE = Device command DISABLE
+    //------------------------------------------------------------------------//
+    // CMD is DISABLE then close regardless of any interlock:                 //
+    //------------------------------------------------------------------------//
+    L #CMD;
+    L "dbCONST".BLK.HE1.CMD.DISABLE;
+    ==I;
+    R #tDO;
+
 NETWORK
-TITLE = Devicestate OPENED
-      A #OUT_Q_B_1;
-      JNB Label_3;
-      L "dbCONST".BLK.MOD1.STATE.REMOTE;
-      T #STATE;
-Label_3:      NOP 0;
+TITLE = LOCAL valve position setpoint
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Set valve position if LOCAL:                                           //
+    //------------------------------------------------------------------------//
+    A #cmdLocal;
+    L #POSN_LOCAL;
+    T #tPOSN;
+
 NETWORK
-TITLE = ON/OFF valve
-      A #CMND;
-      A #INTERLOCK;
-      = #MON_MISMATCH;
+TITLE = REMOTE valve position setpoint
+    //------------------------------------------------------------------------//
+    // Set valve position if REMOTE:                                          //
+    //------------------------------------------------------------------------//
+    A #cmdRemote;
+    L #POSN_REMOTE;
+    T #tPOSN;
+
+NETWORK
+TITLE = Unscaling of Control Valve Position
+    //------------------------------------------------------------------------//
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    //                                                                        //
+    // Unscale the control valve position to derive the raw counts output     //
+    // value:                                                                 //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    CALL UNSCALE
+    (   IN                   := #tPOSN ,
+        HI_LIM               := 100.0 ,
+        LO_LIM               := 0.0 ,
+        BIPOLAR              := #POLARITY ,
+        RET_VAL              := #tRetVal ,
+        OUT                  := #RAW_OUTPUT
+    );
+
+NETWORK
+TITLE = Device State DISABLED if valve not operating
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // DISABLED if valve output is to be off:                                 //
+    //------------------------------------------------------------------------//
+    ON #tDO;
+    O #INTERLOCK;
+    L "dbCONST".BLK.MOD1.STATE.DISABLED;
+    T #STATE;
+
+NETWORK
+TITLE = Valve close if Device State DISABLED
+    //------------------------------------------------------------------------//
+    // If valve DISABLED then analog output setpoint value should be 0:       //
+    //------------------------------------------------------------------------//
+    ON #tDO;
+    O #INTERLOCK;
+    L 0;
+    T #RAW_OUTPUT;
+
+    //------------------------------------------------------------------------//
+    // LOCAL if valve enabled in Local:                                       //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    A #cmdLocal;
+    L "dbCONST".BLK.MOD1.STATE.LOCAL;
+    T #STATE;
+
+    //------------------------------------------------------------------------//
+    // REMOTE if valve enabled in Remote:                                     //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    A #cmdRemote;
+    L "dbCONST".BLK.MOD1.STATE.REMOTE;
+    T #STATE;
 END_FUNCTION_BLOCK

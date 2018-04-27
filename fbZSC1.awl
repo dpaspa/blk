@@ -81,6 +81,29 @@ TITLE = Call Mode and Command handling function
     );
 
 NETWORK
+TITLE = Get Device command if CLOSE
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is CLOSE
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ZSC1.CMD.CLOSE;
+    L #CMD;
+    ==I;
+    = #cmdCLOSE;
+
+NETWORK
+TITLE = Get Device command if OPEN
+    //------------------------------------------------------------------------//
+    // CMD is OPEN:                                                           //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ZSC1.CMD.OPEN;
+    L #CMD;
+    ==I;
+    = #cmdOPEN;
+
+NETWORK
 TITLE = Process Digital Input Signal
     //------------------------------------------------------------------------//
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
@@ -98,65 +121,6 @@ TITLE = Process Digital Input Signal
     );
     = #tPV;
     = #PV;
-
-NETWORK
-TITLE = Get Device command if CLOSE
-    //------------------------------------------------------------------------//
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    //                                                                        //
-    // CMD is CLOSE
-    //------------------------------------------------------------------------//
-    L "dbCONST".BLK.ZSC1.CMD.CLOSE
-    L #CMD;
-    ==I;
-    = #cmdCLOSE
-
-NETWORK
-TITLE = Get Device command if OPEN
-    //------------------------------------------------------------------------//
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    //                                                                        //
-    // CMD is OPEN:                                                           //
-    //------------------------------------------------------------------------//
-    L "dbCONST".BLK.ZSC1.CMD.OPEN;
-    L #CMD;
-    ==I;
-    = #cmdOPEN;
-
-NETWORK
-TITLE = Set Device State to CLOSED if switch is on
-    //------------------------------------------------------------------------//
-    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
-    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
-    //                                                                        //
-    // CLOSED if switch is on:                                                //
-    //------------------------------------------------------------------------//
-    A #tPV;
-    L "dbCONST".BLK.ZSC1.STATE.CLOSED;
-    T #STATE;
-
-NETWORK
-TITLE = Set Device State to MISMATCH if CLOSED state does not follow command
-    //------------------------------------------------------------------------//
-    // If commanded to CLOSE and not closed then its a problem. If commanded  //
-    // to OPEN then actually we don't care if OPENED or CLOSED:               //
-    //------------------------------------------------------------------------//
-    A #cmdCLOSE
-    AN #tPV;
-    L "dbCONST".BLK.ZSC1.STATE.MISMATCH;
-    T #STATE;
-
-NETWORK
-TITLE = Set Device State to OPENED if switch is off and command is OPEN
-    //------------------------------------------------------------------------//
-    // OPENED if switch is on:                                                //
-    //------------------------------------------------------------------------//
-    A #cmdOPEN;
-    AN #tPV;
-    L "dbCONST".BLK.ZSC1.STATE.OPENED;
-    T #STATE;
 
 NETWORK
 TITLE = Set ALARM Flag
@@ -182,4 +146,37 @@ TITLE = Set INTERLOCK Flag if OPENED
     //------------------------------------------------------------------------//
     AN #tPV;
     = #INTERLOCK;
+
+NETWORK
+TITLE = Set Device State to CLOSED if switch is on
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // CLOSED if switch is on:                                                //
+    //------------------------------------------------------------------------//
+    A #tPV;
+    L "dbCONST".BLK.ZSC1.STATE.CLOSED;
+    T #STATE;
+
+NETWORK
+TITLE = Set Device State to MISMATCH if CLOSED state does not follow command
+    //------------------------------------------------------------------------//
+    // If commanded to CLOSE and not closed then its a problem. If commanded  //
+    // to OPEN then actually we don't care if OPENED or CLOSED:               //
+    //------------------------------------------------------------------------//
+    A #cmdCLOSE;
+    AN #tPV;
+    L "dbCONST".BLK.ZSC1.STATE.MISMATCH;
+    T #STATE;
+
+NETWORK
+TITLE = Set Device State to OPENED if switch is off and command is OPEN
+    //------------------------------------------------------------------------//
+    // OPENED if switch is on:                                                //
+    //------------------------------------------------------------------------//
+    A #cmdOPEN;
+    AN #tPV;
+    L "dbCONST".BLK.ZSC1.STATE.OPENED;
+    T #STATE;
 END_FUNCTION_BLOCK

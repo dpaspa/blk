@@ -12,7 +12,7 @@
 // 1.0 David Paspa      17-Apr-2018 NA        Initial design.                 //
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbCRIL"
-TITLE = Instances of Interlocks
+TITLE = Instances of Critical Interlocks
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
 NAME : ifbCRIL
@@ -23,7 +23,7 @@ VERSION : 1.0
 //----------------------------------------------------------------------------//
 VAR
 @@TEMPLATE_BEGIN@@
-    @@TARGET@@-CRIL : "fbIL";   // @@DESCRIPTION@@
+    @@INSTANCE@@-CRIL : "fbIL";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 END_VAR
 
@@ -48,10 +48,14 @@ END_VAR
 
 BEGIN
 @@TEMPLATE_BEGIN@@
+@@ATTR_BEGIN|CRIL_EXISTS@@
 NETWORK
-TITLE = @@TARGET@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
-    // Initialise the interlock flags:                                        //
+    // CRITICAL INTERLOCK   CRITICAL INTERLOCK   CRITICAL INTERLOCK   CRITICA //
+    // CRITICAL INTERLOCK   CRITICAL INTERLOCK   CRITICAL INTERLOCK   CRITICA //
+    //                                                                        //
+    // Clear all interlock values to initialise them to off:                  //
     //------------------------------------------------------------------------//
     A "alwaysLow";
     = #S1;
@@ -69,23 +73,25 @@ TITLE = @@TARGET@@ : @@DESCRIPTION@@
     = #S13;
     = #S14;
     = #S15;
+@@ATTR_END|CRIL_EXISTS@@
 
-NETWORK
-TITLE = @@TARGET@@ : @@DESCRIPTION@@
-    //------------------------------------------------------------------------//
-    // Calculate the interlock conditions:                                    //
-    //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CRIL_INSTANCE@@
-    @@INTERLOCK@@
-    = #S@@COUNTER|1@@
-@@ATTR_END|CRIL_INSTANCE@@
-
 NETWORK
-TITLE = @@TARGET@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTIONIL@@
+    //------------------------------------------------------------------------//
+    // Calculate the interlock condition:                                     //
+    //------------------------------------------------------------------------//
+@@INTERLOCK@@
+    = #S@@COUNTER|0@@
+
+@@ATTR_END|CRIL_INSTANCE@@
+@@ATTR_BEGIN|CRIL_EXISTS@@
+NETWORK
+TITLE = @@INSTANCE@@ : Aggregate individual interlocks into overall INTERLOCK flag
     //------------------------------------------------------------------------//
     // Call the instance FB passing in the specific instance parameters:      //
     //------------------------------------------------------------------------//
-    CALL #@@TARGET@@-CRIL
+    CALL #@@INSTANCE@@-CRIL
     (   IL.INTERLOCK         := #INTERLOCK ,
         IL.S1                := #S1 ,
         IL.S2                := #S2 ,
@@ -105,5 +111,6 @@ TITLE = @@TARGET@@ : @@DESCRIPTION@@
     );
     NOP 0;
 
+@@ATTR_END|CRIL_EXISTS@@
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

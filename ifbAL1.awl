@@ -5,7 +5,7 @@
 // Name:        ifb@@CLASS@@                                                  //
 // Description: Instances of @@CLASS@@                                        //
 //                                                                            //
-// @@DESCRIPTION@@                                                            //
+// @@CLASSDESCRIPTION@@                                                       //
 // This file inherits from the base template ifbAL.awl.                       //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
@@ -22,7 +22,7 @@
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifb@@CLASS@@"
-TITLE = AL1 Instance
+TITLE = @@CLASS@@ Instances
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
 NAME : ifb@@CLASS@@
@@ -37,48 +37,51 @@ VAR
 @@TEMPLATE_END@@
 END_VAR
 
-//----------------------------------------------------------------------------//
-// Call the class function to process each instance:                          //
-//----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
+@@ATTR_BEGIN|ANALOG@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-    CALL fbAL1
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
+    CALL #@@INSTANCE@@
     (   OWNER                := #@@INSTANCE@@.OWNER ,
         SERIAL               := #@@INSTANCE@@.SERIAL ,
         CRIL                 := #@@INSTANCE@@.CRIL ,
         NCRIL                := #@@INSTANCE@@.NCRIL ,
         MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
         CMD_SAFE             := #@@INSTANCE@@.CMD_SAFE ,
-        RAW_INPUT            := "@@INSTANCE@@_RAW":P ,
+        RAW_INPUT            := "@@INSTANCE@@-RAW":P ,
         USER_INPUT           := #@@INSTANCE@@.USER_INPUT ,
-        RANGE_UPPER          := #@@INSTANCE@@.RANGE_UPPER ,
-        RANGE_LOWER          := #@@INSTANCE@@.RANGE_LOWER ,
+        RANGE_UPPER          := @@RANGELOW@@ ,
+        RANGE_LOWER          := @@RANGEHIGH@@ ,
         POLARITY             := #@@INSTANCE@@.POLARITY ,
-        LIMIT_HH             := #@@INSTANCE@@.LIMIT_HH ,
-        LIMIT_H              := #@@INSTANCE@@.LIMIT_H ,
-        LIMIT_L              := #@@INSTANCE@@.LIMIT_L ,
-        LIMIT_LL             := #@@INSTANCE@@.LIMIT_LL ,
-        ENABLE_HH            := #@@INSTANCE@@.ENABLE_HH ,
-        ENABLE_H             := #@@INSTANCE@@.ENABLE_H ,
-        ENABLE_L             := #@@INSTANCE@@.ENABLE_L ,
-        ENABLE_LL            := #@@INSTANCE@@.ENABLE_LL ,
+        LIMIT_HH             := @@LIMITHH@@ ,
+        LIMIT_H              := @@LIMITH@@ ,
+        LIMIT_L              := @@LIMITL@@ ,
+        LIMIT_LL             := @@LIMITLL@@ ,
+        ENABLE_HH            := @@ENABLEHH@@ ,
+        ENABLE_H             := @@ENABLEH@@ ,
+        ENABLE_L             := @@ENABLEL@@ ,
+        ENABLE_LL            := @@ENABLELL@@ ,
         STATE_ENABLED        := "dbCONST".BLK.@@CLASS@@.STATE.ENABLED ,
         STATE_FAULT          := "dbCONST".BLK.@@CLASS@@.STATE.FAULT ,
         PV                   := #@@INSTANCE@@.PV ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK ,
         DQ                   := #@@INSTANCE@@.DQ ,
         ALARM_HH             := #@@INSTANCE@@.ALARM_HH ,
         ALARM_H              := #@@INSTANCE@@.ALARM_H ,
         ALARM_L              := #@@INSTANCE@@.ALARM_L ,
         ALARM_LL             := #@@INSTANCE@@.ALARM_LL ,
-        CMD                  := #@@INSTANCE@@.CMD ,
-        MODE                 := #@@INSTANCE@@.MODE ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        INTERLOCK            := #@@INSTANCE@@.INTERLOCK ,
         RANGE_ERROR          := #@@INSTANCE@@.RANGE_ERROR ,
         BROKEN_WIRE          := #@@INSTANCE@@.BROKEN_WIRE
     );
     NOP 0;
+
+@@ATTR_END|ANALOG@@
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

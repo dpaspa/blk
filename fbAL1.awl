@@ -29,12 +29,12 @@ VERSION : 2.0
 VAR_INPUT
     OWNER : Int;             // Value to be set or reset by Parent
     SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;            // Critical Interlock in series
-    NCRIL : Bool;           // Non-critical Interlock in series
+    CRIL : Bool;             // Critical Interlock in series
+    NCRIL : Bool;            // Non-critical Interlock in series
     MAN_OVERRIDE : Bool;     // Critical Interlock in series can be Override by this Input
     CMD_SAFE : Int;          // Safe command for the module
     RAW_INPUT : Word;        // Raw input signal from Field (4mA = 0, 20mA = 27648)
-    USER_INPUT : Int;        // Manual mode, equivallent of Analog input, to be entered by Operator
+    USER_INPUT : Word;       // Manual mode, equivallent of Analog input, to be entered by Operator
     RANGE_UPPER : Real;      // Upper Range Limit in engineering units
     RANGE_LOWER : Real;      // Lower Range Limit in engineering units
     POLARITY : Bool;         // Input signal is BIPOLAR (1) or UNIPOLAR (0)
@@ -52,11 +52,6 @@ END_VAR
 
 VAR_OUTPUT
     PV : Real;               // Measured Value (after scaling)
-    DQ : Bool;               // MV data quality (0=Bad; 1=Good)
-    ALARM_HH : Bool;         // High High Alarm
-    ALARM_H : Bool;          // High Alarm
-    ALARM_L : Bool;          // Low Alarm
-    ALARM_LL : Bool;         // Low Low Alarm
 END_VAR
 
 VAR_IN_OUT
@@ -64,6 +59,11 @@ VAR_IN_OUT
     MODE : Int;              // Control Mode
     STATE : Int;             // Device State (1= OFF, 2= ON)
     INTERLOCK : Bool;        // Interlock Flag
+    DQ : Bool;               // MV data quality (0=Bad; 1=Good)
+    ALARM_HH : Bool;         // High High Alarm
+    ALARM_H : Bool;          // High Alarm
+    ALARM_L : Bool;          // Low Alarm
+    ALARM_LL : Bool;         // Low Low Alarm
     RANGE_ERROR : Bool;      // Range Error (<4mA or >20mA)
     BROKEN_WIRE : Bool;      // Broken Wire detection
 END_VAR

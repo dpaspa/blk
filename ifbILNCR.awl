@@ -2,7 +2,7 @@
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //                Automatically Generated File - Do Not Edit                  //
 //----------------------------------------------------------------------------//
-// Class:       ifbILNCR                                                      //
+// Class:       ifbIL1                                                        //
 // Description: Instances of Non-Critical Interlocks                          //
 //                                                                            //
 // Interlock with up to fifteen inputs.                                       //
@@ -12,7 +12,7 @@
 // 1.0 David Paspa      17-Apr-2018 NA        Initial design.                 //
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbNCRIL"
-TITLE = Instances of Interlocks
+TITLE = Instances of Non-Critical Interlocks
 { S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
 NAME : ifbNCRIL
@@ -23,7 +23,7 @@ VERSION : 1.0
 //----------------------------------------------------------------------------//
 VAR
 @@TEMPLATE_BEGIN@@
-    @@TARGET@@-NCRIL : "fbIL";   // @@DESCRIPTION@@
+    @@INSTANCE@@-NCRIL : "fbIL";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 END_VAR
 
@@ -48,10 +48,14 @@ END_VAR
 
 BEGIN
 @@TEMPLATE_BEGIN@@
+@@ATTR_BEGIN|NCRIL_EXISTS@@
 NETWORK
-TITLE = @@TARGET@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
-    // Initialise the interlock flags:                                        //
+    // NON-CRITICAL INTERLOCK   NON-CRITICAL INTERLOCK   NON-CRITICAL INTERLO //
+    // NON-CRITICAL INTERLOCK   NON-CRITICAL INTERLOCK   NON-CRITICAL INTERLO //
+    //                                                                        //
+    // Clear all interlock values to initialise them to off:                  //
     //------------------------------------------------------------------------//
     A "alwaysLow";
     = #S1;
@@ -69,23 +73,25 @@ TITLE = @@TARGET@@ : @@DESCRIPTION@@
     = #S13;
     = #S14;
     = #S15;
+@@ATTR_END|NCRIL_EXISTS@@
 
-NETWORK
-TITLE = @@TARGET@@ : @@DESCRIPTION@@
-    //------------------------------------------------------------------------//
-    // Calculate the interlock conditions:                                    //
-    //------------------------------------------------------------------------//
 @@ATTR_BEGIN|NCRIL_INSTANCE@@
-    @@INTERLOCK@@
-    = #S@@COUNTER|1@@
-@@ATTR_END|NCRIL_INSTANCE@@
-
 NETWORK
-TITLE = @@TARGET@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : @@DESCRIPTIONIL@@
+    //------------------------------------------------------------------------//
+    // Calculate the interlock condition:                                     //
+    //------------------------------------------------------------------------//
+@@INTERLOCK@@
+    = #S@@COUNTER|0@@
+
+@@ATTR_END|NCRIL_INSTANCE@@
+@@ATTR_BEGIN|NCRIL_EXISTS@@
+NETWORK
+TITLE = @@INSTANCE@@ : Aggregate individual interlocks into overall INTERLOCK flag
     //------------------------------------------------------------------------//
     // Call the instance FB passing in the specific instance parameters:      //
     //------------------------------------------------------------------------//
-    CALL #@@TARGET@@-NCRIL
+    CALL #@@INSTANCE@@-NCRIL
     (   IL.INTERLOCK         := #INTERLOCK ,
         IL.S1                := #S1 ,
         IL.S2                := #S2 ,
@@ -105,5 +111,6 @@ TITLE = @@TARGET@@ : @@DESCRIPTION@@
     );
     NOP 0;
 
+@@ATTR_END|NCRIL_EXISTS@@
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

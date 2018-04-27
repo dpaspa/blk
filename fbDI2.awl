@@ -60,8 +60,8 @@ TITLE = Call Mode and Command handling function
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
     (
-        CRIL                := #CRIL ,
-        NCRIL               := #NCRIL ,
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
         MAN_OVERRIDE         := #MAN_OVERRIDE ,
         CMD_SAFE             := #CMD_SAFE ,
         modeAUTO             := #modeAUTO ,
@@ -75,6 +75,17 @@ TITLE = Call Mode and Command handling function
     NOP 0;
 
 NETWORK
+TITLE = Set Device command which can only be ENABLE.
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is always ENABLE:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.DI2.CMD.ENABLE;
+    T #CMD;
+
+NETWORK
 TITLE = Process user input signal
     //------------------------------------------------------------------------//
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
@@ -86,17 +97,6 @@ TITLE = Process user input signal
     A #DI_Manual;
     = #tPV;
     = #PV;
-
-NETWORK
-TITLE = Set Device command which can only be ENABLE.
-    //------------------------------------------------------------------------//
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    //                                                                        //
-    // CMD is always ENABLE:                                                  //
-    //------------------------------------------------------------------------//
-    L "dbCONST".BLK.DI2.CMD.ENABLE;
-    T #CMD;
 
 NETWORK
 TITLE = Set ALARM Flag

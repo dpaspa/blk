@@ -54,20 +54,13 @@ NAME : ifbSIC1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
-   VAR
+VAR
 @@TEMPLATE_BEGIN@@
-      @@INSTANCE@@ : "fbDI1";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbDI1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-      @@INSTANCE@@_MODE : Struct
-         PosEdge1 : Bool;
-         PosEdge2 : Bool;
-         REQ : Int;   // Request for Required Mode
-      END_STRUCT;
-@@TEMPLATE_END@@
-   END_VAR
+END_VAR
 
 VAR_TEMP
     CRIL : Bool;
@@ -85,7 +78,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+    A "idbCRIL"."@@INSTANCE@@-CRIL".INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
     = #CRIL;
 
@@ -98,97 +91,70 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+    A "idbNCRIL"."@@INSTANCE@@-NCRIL".INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
     = #NCRIL;
-
-//----------------------------------------------------------------------------//
-//                                                                            //
-//----------------------------------------------------------------------------//
-NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL "ifcSIC1"
-      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
-         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         IN_AGITATOR_CMD             := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CMD ,
-         IN_SETPOINT                 := "idb@@PARENTCLASS@@".@@PARENT@@.OUT_SETPOINT ,
-         AGITATOR_INTURRUPT          := "idb@@LNK2CLASS@@".@@LNK2TAG@@.AGITATOR_INTERRUPT ,
-         OUT_MODE                    := #@@INSTANCE@@.REQ ,
-         IO_MODE                     := "idbSIC1".@@INSTANCE@@.MODE ,
-         IO_AGITATOR_CMD             := "idbSIC1".@@INSTANCE@@.CMD ,
-         IO_SETPOINT                 := "idbSIC1".@@INSTANCE@@.SETPOINT ,
-         POS_EDGE1                   := #@@INSTANCE@@.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@.PosEdge2
-      );
-      NOP 0;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-      AN "THR-@@NUMINSTANCE@@";
-      = %L0.2;
-      BLD 103;
-      AN "TAH-@@NUMINSTANCE@@";
-      = %L0.3;
-      BLD 103;
-      AN "FLT-@@NUMINSTANCE@@";
-      = %L0.4;
-      BLD 103;
-      CALL #@@INSTANCE@@
-      (  CMD                         := #@@INSTANCE@@.CMD ,
-         SETPOINT                    := #@@INSTANCE@@.SETPOINT ,
-         CRIL                       := %L0.0 ,
-         NCRIL                      := %L0.1 ,
-         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
-         THR                         := %L0.2 ,
-         TAH                         := %L0.3 ,
-         FLT                         := %L0.4 ,
-         MASS_RUN                    := #@@INSTANCE@@.MASS_RUN ,
-         MASS_STOP                   := #@@INSTANCE@@.MASS_STOP ,
-         MEASURE_RPM                 := "P_SPM-@@NUMINSTANCE@@":P ,
-         MV_H                        := @@MAXAGIT@@ ,
-         MV_L                        := 0.0 ,
-         MV_POLR                     := #@@INSTANCE@@.MV_POLR ,
-         LIMIT_HH                    := #@@INSTANCE@@.LIMIT_HH ,
-         LIMIT_H                     := #@@INSTANCE@@.LIMIT_H ,
-         LIMIT_L                     := #@@INSTANCE@@.LIMIT_L ,
-         LIMIT_LL                    := #@@INSTANCE@@.LIMIT_LL ,
-         MASS_MI1                    := "idb@@LNK1CLASS@@".@@LNK1TAG@@.MEASURE ,
-         FB_TDELAY                   := #@@INSTANCE@@.FB_TDELAY ,
-         NON_PID                     := #@@INSTANCE@@.NON_PID ,
-         P_SEL                       := #@@INSTANCE@@.P_SEL ,
-         I_SEL                       := #@@INSTANCE@@.I_SEL ,
-         D_SEL                       := #@@INSTANCE@@.D_SEL ,
-         GAIN                        := #@@INSTANCE@@.GAIN ,
-         TI                          := #@@INSTANCE@@.TI ,
-         TD                          := #@@INSTANCE@@.TD ,
-         CYCLE                       := #@@INSTANCE@@.CYCLE ,
-         STATE                       := #@@INSTANCE@@.STATE ,
-         OUT_Q                       := #@@INSTANCE@@.OUT_Q ,
-         MAN_NONPID                  := #@@INSTANCE@@.MAN_NONPID ,
-         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-         ALM_THR                     := #@@INSTANCE@@.ALM_THR ,
-         ALM_TAH                     := #@@INSTANCE@@.ALM_TAH ,
-         ALM_FLT                     := #@@INSTANCE@@.ALM_FLT ,
-         ALARM_HH                    := #@@INSTANCE@@.ALARM_HH ,
-         ALARM_H                     := #@@INSTANCE@@.ALARM_H ,
-         ALARM_L                     := #@@INSTANCE@@.ALARM_L ,
-         ALARM_LL                    := #@@INSTANCE@@.ALARM_LL ,
-         OUT_Q_F                     := "@@INSTANCE@@_F" ,
-         OUT_Q_R                     := "@@INSTANCE@@_R" ,
-         OUT_FR                      := #@@INSTANCE@@.OUT_FR ,
-         MASS_PV_R                   := #@@INSTANCE@@.MASS_PV_R ,
-         MV_RPM_R                    := #@@INSTANCE@@.MV_RPM_R ,
-         DATA_QUALITY                := #@@INSTANCE@@.DATA_QUALITY ,
-         RUNNING                     := #@@INSTANCE@@.RUNNING ,
-         MON_MISMATCH                := #@@INSTANCE@@.MON_MISMATCH ,
-         RUN_FAULT                   := #@@INSTANCE@@.RUN_FAULT ,
-         OUT_SETPOINT                := #@@INSTANCE@@.OUT_SETPOINT ,
-         OUT_LMN_PER                 := "P_SPS-@@NUMINSTANCE@@":P ,
-         OUT_LMN                     := #@@INSTANCE@@.OUT_LMN ,
-         MODE                        := #@@INSTANCE@@.MODE
+    CALL #@@INSTANCE@@
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        SETPOINT             := #@@INSTANCE@@.SETPOINT ,
+        RAW_INPUT            := "@@INSTANCE@@-RAW":P ,
+        MAN_PID              := #@@INSTANCE@@.MAN_PID ,
+        BRK                  := "@@INSTANCE@@-BRK" ,
+        PHR                  := "@@LNK1TAG@@-DI" ,
+        FLP                  := "@@INSTANCE@@-FLP" ,
+        FLT                  := "@@INSTANCE@@-FLT" ,
+        THM                  := "@@INSTANCE@@-THM" ,
+        MASS_RUN             := @@MXMASSAGITRUN@@ ,
+        MASS_STOP            := @@MXMASSAGITSTOP@@ ,
+@@ATTR_BEGIN|ANALOG_EMBED@@
+        RANGE_UPPER          := @@RANGELOW@@ ,
+        RANGE_LOWER          := @@RANGEHIGH@@ ,
+        POLARITY             := #@@INSTANCE@@.POLARITY ,
+        LIMIT_HH             := @@LIMITHH@@ ,
+        LIMIT_H              := @@LIMITH@@ ,
+@@ATTR_END|ANALOG_EMBED@@
+        MI1_MASS             := "idb@@LNK2CLASS@@".@@LNK2TAG@@.PV ,
+        MI1_DQ               := "idb@@LNK2CLASS@@".@@LNK2TAG@@.DQ ,
+        FB_TDELAY            := #@@INSTANCE@@.FB_TDELAY ,
+        P_SEL                := #@@INSTANCE@@.P_SEL ,
+        I_SEL                := #@@INSTANCE@@.I_SEL ,
+        D_SEL                := #@@INSTANCE@@.D_SEL ,
+        GAIN                 := #@@INSTANCE@@.GAIN ,
+        TI                   := #@@INSTANCE@@.TI ,
+        TD                   := #@@INSTANCE@@.TD ,
+        CYCLE                := #@@INSTANCE@@.CYCLE ,
+        PV                   := #@@INSTANCE@@.PV ,
+        DQ                   := #@@INSTANCE@@.DQ ,
+        OUT_Q                := "@@INSTANCE@@-CMD" ,
+        OUT_Q_F              := "@@INSTANCE@@-OUT_F" ,
+        OUT_Q_R              := "@@INSTANCE@@-OUT_R" ,
+        ALM_BRK              := #@@INSTANCE@@.ALM_BRK ,
+        ALM_PHR              := #@@INSTANCE@@.ALM_PHR ,
+        ALM_FLP              := #@@INSTANCE@@.ALM_FLP ,
+        ALM_FLT              := #@@INSTANCE@@.ALM_FLT ,
+        ALM_THM              := #@@INSTANCE@@.ALM_THM ,
+        ALARM_HH             := #@@INSTANCE@@.ALARM_HH ,
+        ALARM_H              := #@@INSTANCE@@.ALARM_H ,
+        RUNNING              := #@@INSTANCE@@.RUNNING ,
+        RUN_FAULT            := #@@INSTANCE@@.RUN_FAULT ,
+        OUT_SETPOINT         := #@@INSTANCE@@.OUT_SETPOINT ,
+        LMN                  := "@@INSTANCE@@-OUT":P ,
+        OUT_LMN_PER          := #@@INSTANCE@@.OUT_LMN_PER ,
+        OUT_LMN              := #@@INSTANCE@@.OUT_LMN ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
       );
       NOP 0;
 @@TEMPLATE_END@@

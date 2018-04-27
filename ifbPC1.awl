@@ -39,13 +39,13 @@ NAME : ifbPC1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-// Instance declaration:                                                      //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
-   VAR
+VAR
 @@TEMPLATE_BEGIN@@
-      @@INSTANCE@@ : "fbPC1";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbPC1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-   END_VAR
+END_VAR
 
 VAR_TEMP
     CRIL : Bool;
@@ -64,7 +64,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+    A "idbCRIL"."@@INSTANCE@@-CRIL".INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
     = #CRIL;
 
@@ -77,7 +77,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+    A "idbNCRIL"."@@INSTANCE@@-NCRIL".INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
     = #NCRIL;
 
@@ -86,25 +86,29 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-      CALL #@@INSTANCE@@
-      (  SETPOINT                    := #@@INSTANCE@@.SETPOINT ,
-         MEASURE                     := "idbPI1".@@LNK1TAG@@.MEASURE ,
-         P_CTRL                      := #@@INSTANCE@@.P_CTRL ,
-         DEADBAND_L                  := #@@INSTANCE@@.DEADBAND_L ,
-         DEADBAND_H                  := #@@INSTANCE@@.DEADBAND_H ,
-         GAS_SELECT                  := #@@INSTANCE@@.GAS_SELECT ,
-         CRIL                       := #CRIL ,
-         NCRIL                      := #NCRIL ,
-         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
-         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-         OUT_SETPOINT                := #@@INSTANCE@@.OUT_SETPOINT ,
-         STATE                       := #@@INSTANCE@@.STATE ,
-         CMD_Q1                      := #@@INSTANCE@@.CMD_Q1 ,
-         CMD_Q2                      := #@@INSTANCE@@.CMD_Q2 ,
-         CMD_Q3                      := #@@INSTANCE@@.CMD_Q3 ,
-         MODE                        := #@@INSTANCE@@.MODE ,
-         OUT_Q                       := #@@INSTANCE@@.OUT_Q
-      );
-      NOP 0;
+    CALL #@@INSTANCE@@
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        PI1_PV               := "idbPI1".@@LNK1TAG@@.PV ,
+        PI1_INTERLOCK        := "idbPI1".@@LNK1TAG@@.INTERLOCK ,
+        DB_L                 := 0.1 ,
+        DB_H                 := 0.1 ,
+        SELECT_GAS           := #@@INSTANCE@@.GAS_SELECT ,
+        VLV_DRAIN            := #@@INSTANCE@@.VLV_DRAIN ,
+        VLV_HPCA             := #@@INSTANCE@@.VLV_HPCA ,
+        VLV_LPCA             := #@@INSTANCE@@.VLV_LPCA ,
+        VLV_VACUUM           := #@@INSTANCE@@.VLV_VACUUM ,
+        VLV_VENT             := #@@INSTANCE@@.VLV_VENT ,
+        OUT_Q                := #@@INSTANCE@@.OUT_Q
+        SETPOINT             := #@@INSTANCE@@.SETPOINT ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
+    );
+    NOP 0;
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

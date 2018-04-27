@@ -38,20 +38,13 @@ NAME : ifbTC1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare variables:                                                         //
 //----------------------------------------------------------------------------//
-   VAR
+VAR
 @@TEMPLATE_BEGIN@@
-      @@INSTANCE@@ : "fbTC1";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbTC1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
-@@TEMPLATE_BEGIN@@
-      @@INSTANCE@@_MODE : Struct
-         PosEdge1 : Bool;
-         PosEdge2 : Bool;
-         REQ : Int;   // Request for Required Mode
-      END_STRUCT;
-@@TEMPLATE_END@@
-   END_VAR
+END_VAR
 
 VAR_TEMP
     CRIL : Bool;
@@ -69,7 +62,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILCR".@@TARGET@@-CRIL.INTERLOCK;
+    A "idbCRIL"."@@INSTANCE@@-CRIL".INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
     = #CRIL;
 
@@ -82,67 +75,38 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    "idbILNCR".@@TARGET@@-NCRIL.INTERLOCK;
+    A "idbNCRIL"."@@INSTANCE@@-NCRIL".INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
     = #NCRIL;
 
-//----------------------------------------------------------------------------//
-//                                                                            //
-//----------------------------------------------------------------------------//
-BEGIN
 @@TEMPLATE_BEGIN@@
-NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-      CALL "ifcTC1"
-      (  IN_REQ_MODE                 := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.Toggle ,
-         IN_MODE                     := "idb@@PARENTCLASS@@".@@PARENT@@_MODE.REQ ,
-         IN_T_CTRL                   := "idb@@PARENTCLASS@@".@@PARENT@@.@@CHILDALIAS@@_CTRL ,
-         IN_SETPOINT                 := "idb@@PARENTCLASS@@".@@PARENT@@.OUT_SETPOINT ,
-         IN_GAIN                     := "idb@@PARENTCLASS@@".@@PARENT@@.GAIN ,
-         IN_TI                       := "idb@@PARENTCLASS@@".@@PARENT@@.TI ,
-         IN_TD                       := "idb@@PARENTCLASS@@".@@PARENT@@.TD ,
-         OUT_MODE                    := #@@INSTANCE@@_MODE.REQ ,
-         IO_MODE                     := "idbTC1".@@INSTANCE@@.MODE ,
-         IO_T_CTRL                   := "idbTC1".@@INSTANCE@@.T_CTRL ,
-         IO_SETPOINT                 := "idbTC1".@@INSTANCE@@.SETPOINT ,
-         IO_GAIN                     := "idbTC1".@@INSTANCE@@.GAIN ,
-         IO_TI                       := "idbTC1".@@INSTANCE@@.TI ,
-         IO_TD                       := "idbTC1".@@INSTANCE@@.TD ,
-         POS_EDGE1                   := #@@INSTANCE@@_MODE.PosEdge1 ,
-         POS_EDGE2                   := #@@INSTANCE@@_MODE.PosEdge2
-      );
-      NOP 0;
-
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-      CALL #@@INSTANCE@@
-      (  T_CTRL                      := "idbTC1".@@INSTANCE@@.T_CTRL ,
-         MEASURE                     := "idbTI1".TI_@@NUMINSTANCE@@.MEASURE ,
-         SETPOINT                    := "idbTC1".@@INSTANCE@@.SETPOINT ,
-         GAIN                        := "idbTC1".@@INSTANCE@@.GAIN ,
-         TI                          := "idbTC1".@@INSTANCE@@.TI ,
-         TD                          := "idbTC1".@@INSTANCE@@.TD ,
-         MAN                         := #@@INSTANCE@@.MAN ,
-         CRIL                       := #CRIL ,
-         NCRIL                      := #NCRIL ,
-         MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
-         NON_PID                     := #@@INSTANCE@@.NON_PID ,
-         CYCLE                       := #@@INSTANCE@@.CYCLE ,
-         P_SEL                       := #@@INSTANCE@@.P_SEL ,
-         I_SEL                       := #@@INSTANCE@@.I_SEL ,
-         D_SEL                       := #@@INSTANCE@@.D_SEL ,
-         LMN_HLM                     := #@@INSTANCE@@.LMN_HLM ,
-         LMN_LLM                     := #@@INSTANCE@@.LMN_LLM ,
-         STATE                       := #@@INSTANCE@@.STATE ,
-         LMN                         := #@@INSTANCE@@.LMN ,
-         OUT_CMD                     := #@@INSTANCE@@.OUT_CMD ,
-         INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-         MAN_NON_PID                 := #@@INSTANCE@@.MAN_NON_PID ,
-         MODE                        := #@@INSTANCE@@.MODE
-      );
-      NOP 0;
+    CALL #@@INSTANCE@@
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
+        SETPOINT             := #@@INSTANCE@@.SETPOINT ,
+        PV                   := #@@INSTANCE@@.PV ,
+        MAN_PID              := #@@INSTANCE@@.MAN_PID ,
+        GAIN                 := #@@INSTANCE@@.GAIN ,
+        TI                   := #@@INSTANCE@@.TI ,
+        TD                   := #@@INSTANCE@@.TD ,
+        CYCLE                := #@@INSTANCE@@.CYCLE ,
+        P_SEL                := #@@INSTANCE@@.P_SEL ,
+        I_SEL                := #@@INSTANCE@@.I_SEL ,
+        D_SEL                := #@@INSTANCE@@.D_SEL ,
+        LMN                  := #@@INSTANCE@@.LMN ,
+        CMD                  := #@@INSTANCE@@.CMD ,
+        MODE                 := #@@INSTANCE@@.MODE ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
+    );
+    NOP 0;
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK
