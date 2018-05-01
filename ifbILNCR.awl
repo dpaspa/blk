@@ -23,7 +23,7 @@ VERSION : 1.0
 //----------------------------------------------------------------------------//
 VAR
 @@TEMPLATE_BEGIN@@
-    @@INSTANCE@@ncril : "fbIL";     // @@DESCRIPTION@@
+    @@INSTANCE@@ncril : "udtInterlock";     // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 END_VAR
 
@@ -74,12 +74,62 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTIONIL@@
 NETWORK
 TITLE = @@INSTANCE@@ : Aggregate individual interlocks into overall INTERLOCK flag
     //------------------------------------------------------------------------//
-    // Call the instance FB passing in the specific instance parameters:      //
+    // Determine if an interlock is raised:                                   //
     //------------------------------------------------------------------------//
-    CALL #@@INSTANCE@@ncril
-    (   IL                   := #tIL
-    );
-    NOP 0;
+    O #tIL.S1;
+    O #tIL.S2;
+    O #tIL.S3;
+    O #tIL.S4;
+    O #tIL.S5;
+    O #tIL.S6;
+    O #tIL.S7;
+    O #tIL.S8;
+    O #tIL.S9;
+    O #tIL.S10;
+    O #tIL.S11;
+    O #tIL.S12;
+    O #tIL.S13;
+    O #tIL.S14;
+    O #tIL.S15;
+    = #tIL.INTERLOCK;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Update the instance data
+    //------------------------------------------------------------------------//
+    // Update the instance DB with the calculated interlock flags:            //
+    //------------------------------------------------------------------------//
+    A #tIL.S1;
+    = #@@INSTANCE@@ncril.S1;
+    A #tIL.S2;
+    = #@@INSTANCE@@ncril.S2;
+    A #tIL.S3;
+    = #@@INSTANCE@@ncril.S3;
+    A #tIL.S4;
+    = #@@INSTANCE@@ncril.S4;
+    A #tIL.S5;
+    = #@@INSTANCE@@ncril.S5;
+    A #tIL.S6;
+    = #@@INSTANCE@@ncril.S6;
+    A #tIL.S7;
+    = #@@INSTANCE@@ncril.S7;
+    A #tIL.S8;
+    = #@@INSTANCE@@ncril.S8;
+    A #tIL.S9;
+    = #@@INSTANCE@@ncril.S9;
+    A #tIL.S10;
+    = #@@INSTANCE@@ncril.S10;
+    A #tIL.S11;
+    = #@@INSTANCE@@ncril.S11;
+    A #tIL.S12;
+    = #@@INSTANCE@@ncril.S12;
+    A #tIL.S13;
+    = #@@INSTANCE@@ncril.S13;
+    A #tIL.S14;
+    = #@@INSTANCE@@ncril.S14;
+    A #tIL.S15;
+    = #@@INSTANCE@@ncril.S15;
+    A #tIL.INTERLOCK;
+    = #@@INSTANCE@@ncril.INTERLOCK;
 
 @@ATTR_END|NCRIL_EXISTS@@
 @@TEMPLATE_END@@
