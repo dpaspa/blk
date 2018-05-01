@@ -39,19 +39,24 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     CALL #@@INSTANCE@@
     (   OWNER                := #@@INSTANCE@@.OWNER ,
         SERIAL               := #@@INSTANCE@@.SERIAL ,
-        CRIL                := #@@INSTANCE@@.CRIL ,
-        NCRIL               := #@@INSTANCE@@.NCRIL ,
+        CRIL                 := #@@INSTANCE@@.CRIL ,
+        NCRIL                := #@@INSTANCE@@.NCRIL ,
         MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
-        CMD_SAFE             := #@@INSTANCE@@.CMD_SAFE ,
-        DI_Auto              := "@@INSTANCE@@-DI" ,
-        DI_Manual            := #@@INSTANCE@@.DI_Manual ,
-        ALARM                := #@@INSTANCE@@.ALARM ,
-        PV                   := #@@INSTANCE@@.PV ,
+@@ATTR_BEGIN|LINK@@
+        VLV1_STATE           := "idb@@V1STATELINKCLASS@@".@@V1STATELINKINSTANCE@@.STATE ,
+        VLV2_STATE           := "idb@@V2STATELINKCLASS@@".@@V2STATELINKINSTANCE@@.STATE ,
+        PUMP1_INTERLOCK      := "idb@@P1ILLINKCLASS@@".@@P1ILLINKINSTANCE@@.INTERLOCK ,
+        PUMP2_INTERLOCK      := "idb@@P2ILLINKCLASS@@".@@P2ILLINKINSTANCE@@.INTERLOCK ,
+        PUMP1_CMD            := "idb@@P1CMDLINKCLASS@@".@@P1CMDLINKINSTANCE@@.CMD ,
+        PUMP2_CMD            := "idb@@P2CMDLINKCLASS@@".@@P2CMDLINKINSTANCE@@.CMD ,
+@@ATTR_END|LINK@@
+        FAULT                := #@@INSTANCE@@.FAULT ,
         CMD                  := #@@INSTANCE@@.CMD ,
         MODE                 := #@@INSTANCE@@.MODE ,
         STATE                := #@@INSTANCE@@.STATE ,
         INTERLOCK            := #@@INSTANCE@@.INTERLOCK
     );
     NOP 0;
+
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

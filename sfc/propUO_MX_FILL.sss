@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:22:36 AM by David Paspa
+generated on 1/05/2018 9:45:09 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -29,13 +29,68 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- log_time_filtration_end
+Type:- BOOL
+Description:- Flags the HMI to log filtration operation end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- log_time_filtration_start
+Type:- BOOL
+Description:- Flags the HMI to log Filtration start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- time_filtration_start
+Type:- TIME
+Description:- Filtration start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- log_time_fill_begin
+Type:- BOOL
+Description:- Flags the HMI that Mx filtration to FLz started
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- time_fill_begin
+Type:- TOD
+Description:- Logging that Mx filtration to FLz operation start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- log_time_fill_end
+Type:- BOOL
+Description:- Flags the HMI that that Mx filtration to FLz ended
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- time_fill_end
+Type:- TOD
+Description:- Logging that Mx filtration to FLz operation end time
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
 Name:- mi_vessel_setpoint
 Type:- REAL
 Description:- mi_vessel_setpoint
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::9
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -43,7 +98,7 @@ Description:- Substate selection of emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::10
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -51,7 +106,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::11
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -59,7 +114,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::12
 --------------------------------------------------
 Name:- emt_hex_subs
 Type:- INT
@@ -67,7 +122,7 @@ Description:- Substate selection of emt_hex
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::13
 --------------------------------------------------
 Name:- emt_hex_state
 Type:- INT
@@ -75,7 +130,7 @@ Description:- Device State of emt_hex
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::14
 --------------------------------------------------
 Name:- emt_hex_cmd
 Type:- INT
@@ -83,7 +138,7 @@ Description:- Command to emt_hex
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::15
 --------------------------------------------------
 Name:- prompt_filtration
 Type:- BOOL
@@ -91,15 +146,15 @@ Description:- Prompt operator to start filtration
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::16
 --------------------------------------------------
-Name:- confirm_filtration
+Name:- prompt_filtration_confirm_yes
 Type:- BOOL
 Description:- operator confirms to start filtration
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::17
 --------------------------------------------------
 Name:- tc_hex_setpoint
 Type:- REAL
@@ -108,7 +163,7 @@ Description:- Heat exchanger temperature setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::18
 --------------------------------------------------
 Name:- temp_filt
 Type:- REAL
@@ -116,7 +171,7 @@ Description:- Filter temperature setpoint
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::19
 --------------------------------------------------
 Name:- tc_hex_cmd
 Type:- INT
@@ -124,7 +179,7 @@ Description:- Heat exchanger temperature controller cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::20
 --------------------------------------------------
 Name:- emx_smfl_state
 Type:- INT
@@ -132,7 +187,7 @@ Description:- Device State of emx_smfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::21
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -140,7 +195,7 @@ Description:- Device State of emx_transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::22
 --------------------------------------------------
 Name:- emx_smfl_cmd
 Type:- INT
@@ -148,7 +203,7 @@ Description:- Command to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::23
 --------------------------------------------------
 Name:- emx_smfl_subs
 Type:- INT
@@ -156,7 +211,7 @@ Description:- Substate selection of emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::24
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -164,7 +219,7 @@ Description:- Command to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::25
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -172,15 +227,15 @@ Description:- Substate selection of emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::26
 --------------------------------------------------
-Name:- log_confirmation
-Type:- TOD
+Name:- log_msg_filtration_complete
+Type:- BOOL
 Description:- Logging operator confirmation transfer complete 
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::27
 --------------------------------------------------
 Name:- confirm_complete
 Type:- BOOL
@@ -188,7 +243,7 @@ Description:- Operator confirms filtration is complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::28
 --------------------------------------------------
 Name:- mass_throttle
 Type:- REAL
@@ -196,7 +251,7 @@ Description:- Mass nearing the end of transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::29
 --------------------------------------------------
 Name:- pres_hpca_filt2
 Type:- REAL
@@ -204,23 +259,15 @@ Description:- HCPA Pressure control setpoint 2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::30
 --------------------------------------------------
-Name:- start_HPCA
-Type:- BOOL
-Description:- Synchronisation flag to start HPN2 supply
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::24
---------------------------------------------------
-Name:- log_FiltrationEnd
+Name:- time_filtration_end
 Type:- TOD
 Description:- Logging filtration operation end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::31
 --------------------------------------------------
 Name:- emx_mfl_cmd
 Type:- INT
@@ -228,7 +275,7 @@ Description:- Command to EVn004
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::32
 --------------------------------------------------
 Name:- emx_mfl_subs
 Type:- INT
@@ -236,7 +283,7 @@ Description:- Substate selection of emx_mfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::33
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -244,7 +291,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::34
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -252,7 +299,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::29
+PARAMETER::35
 --------------------------------------------------
 Name:- emc_water_state
 Type:- INT
@@ -260,7 +307,7 @@ Description:- Device state of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::36
 --------------------------------------------------
 Name:- emc_water_subs
 Type:- INT
@@ -268,7 +315,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::31
+PARAMETER::37
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -276,7 +323,7 @@ Description:- emc_gas_setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::38
 --------------------------------------------------
 Name:- emx_mfl_state
 Type:- INT
@@ -284,7 +331,7 @@ Description:- Device State of emx_mfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::39
 --------------------------------------------------
 Name:- emc_water_cmd
 Type:- INT
@@ -292,7 +339,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::40
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -300,7 +347,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::41
 --------------------------------------------------
 Name:- emc_gas_medium
 Type:- INT
@@ -308,7 +355,7 @@ Description:- emc_gas_medium
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::42
 --------------------------------------------------
 Name:- ema_vessel_state
 Type:- INT
@@ -316,7 +363,7 @@ Description:- Device State of ema_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::43
 --------------------------------------------------
 Name:- ema_vessel_subs
 Type:- INT
@@ -324,7 +371,7 @@ Description:- Substate selection to ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::44
 --------------------------------------------------
 Name:- ema_vessel_cmd
 Type:- INT
@@ -332,31 +379,7 @@ Description:- ema_vessel_cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::39
---------------------------------------------------
-Name:- ready_HPCA
-Type:- BOOL
-Description:- Synchronisation flag ready to start HPN2 supply
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::40
---------------------------------------------------
-Name:- filtration_complete
-Type:- BOOL
-Description:- Synchronisation flag to start transfer
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::41
---------------------------------------------------
-Name:- NormalCompletion
-Type:- BOOL
-Description:- Normal completion flag
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::42
+PARAMETER::45
 --------------------------------------------------
 Name:- pres_hpca_filt
 Type:- REAL
@@ -368,17 +391,27 @@ ParameterInOut:- IN
 STEP::01
 --------------------------------------------------
 StepNo:- 01
-Title:- UO_MX_FILTER : Filtration Unit Operation Commenced
-Description:- Set all Mx equipment to safe state with Mx LCPA control enabled and vent valve closed.
+Title:- UO_MX_FILL : Mx Filtration to FLz Unit Operation Commenced
+Description:- Log Mx Fill operation begin time.
+Set all Mx equipment to safe state with Mx LCPA control enabled and vent valve closed.
 
 Prompt operator to start filtration.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Set all Mx equipment to safe state with Mx LCPA control enabled and vent valve closed.
+Description:- Log Mx Fill operation begin time.
+Set all Mx equipment to safe state with Mx LCPA control enabled and vent valve closed.
 
-Action:- // Enable Mx LPCA pressure control.
+Action:- //Log Mx Fill operation begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_fill_begin;
+
+SET;
+S #_log_time_fill_begin;
+
+
+// Enable Mx LPCA pressure control.
 L "dbCONST".SEL.GAS.LPCA;
 T #_emc_gas_medium;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
@@ -436,18 +469,26 @@ Description:- Prompt operator to start filtration and reset flags.
 Action:- SET;
 S #_prompt_filtration;
 R #_confirm_filtration;
-R #_ready_HPCA;
-R #_filtration_complete;
-R #_NormalCompletion;
 Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Operator confirmation
+EmptyTransition:- False
+Description:- Wait for operator confirmation to start filtration
+Condition:- A #_prompt_filtration_confirm_yes;
 
 
 --------------------------------------------------
 STEP::02
 --------------------------------------------------
 StepNo:- 02
-Title:- UO_MX_FILTER : Filtration Unit Operation Commenced
-Description:- Enable HEX Temperature control with TEMP_FILT setpoint.
+Title:- UO_MX_FILL : Enable HEX Temperature control 
+Description:- Log filtration start time.
+Enable HEX Temperature control with TEMP_FILT setpoint.
 
 Set Mx LPCA valve fully open.
 Set Mx Outlet valve open (DISCHARGE).
@@ -456,11 +497,20 @@ Open MMFLx transfer path to FLz.
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Enable HEX Temperature control with TEMP_FILT setpoint.
-Action:- L  "dbCONST".BLK.TC1.CMD.ENABLE;
+Description:- Log filtration start time.
+Enable HEX Temperature control with TEMP_FILT setpoint.
+Action:- //Log filtration start time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_filtration_start;
+
+SET;
+S #_log_time_filtration_start;
+R #_prompt_filtration_confirm_yes;
+
+L  "dbCONST".BLK.TC1.CMD.ENABLE;
 T  #_tc_hex_cmd;
 
-L  #_TEMP_FILT;
+L  #_temp_filt;
 T  #_tc_hex_setpoint;
 
 //Start EMT_PREEMPT.
@@ -554,17 +604,15 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 STEP::03
 --------------------------------------------------
 StepNo:- 03
-Title:- UO_MX_FILTER : Open filter outlet valve.
+Title:- UO_MX_FILL : Open filter outlet valve.
 Description:- Open filter outlet valve.
-Log operator confirmation sterile filter bled.??
 
-Set flag ready_HPCA indicating ready to start HPCA supply.
+Close Mx LPCA valve.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Open filter outlet valve, DVx137.
-Log operator confirmation sterile filter bled.????
 Action:- //Set emx_smfl to substate FILTER.
 L  "dbCONST".BLK.EMX6.SUBS.FILTER;
 T  #_emx_smfl_subs;
@@ -592,9 +640,11 @@ L  "dbCONST".BLK.EMT1.SUBS.COOL;
 --------------------------------------------------
 ACTION::02
 --------------------------------------------------
-Description:- Set flag ready_HPCA
-Action:- SET;
-S #_ready_HPCA;
+Description:- Close Mx LPCA valve.
+Action:- L "dbCONST".BLK.SAFE.CMD;
+T  #_emc_gas_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emc_gas_cmd;
 Verification:- A M1.1;
 
 
@@ -602,17 +652,21 @@ Verification:- A M1.1;
 TRANSITION::03
 --------------------------------------------------
 TRNNo:- 03
-Title:- Parent set start flag?
+Title:- Mx LPCA valve closed?
 EmptyTransition:- False
-Description:- Wait for parent to indicate ready for HPCA.
-Condition:- A #_start_HPCA;
+Description:- Wait for Mx LPCA valve closed.
+Condition:- A(;
+L #_emc_gas_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
 
 
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
 StepNo:- 04
-Title:- UO_MX_FILTER : Enable HPCA pressure control and wait for complete
+Title:- UO_MX_FILL : Enable HPCA pressure control.
 Description:- Set Mx HPCA pressure control at setpoint PRES_HPCA_FILT.
 
 --------------------------------------------------
@@ -639,7 +693,7 @@ L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 STEP::05
 --------------------------------------------------
 StepNo:- 05
-Title:- UO_MX_FILTER : Enable HPCA pressure control for new set point.
+Title:- UO_MX_FILL : Enable HPCA pressure control for new set point.
 Description:- Set Mx HPCA pressure control at setpoint PRES_HPCA_FILT set point 2.
 
 --------------------------------------------------
@@ -649,10 +703,6 @@ Description:- HPCA pressure control at setpoint 2, PRES_HPCA_FILT2.
 Action:- // Set HPCA valve pressure control at setpoint 2
 L #_pres_hpca_filt2;
 T #_emc_gas_setpoint;
-
-
-SET;
-R #_ready_HPCA;
 Verification:- A M1.1;
 
 
@@ -670,7 +720,7 @@ Condition:- A #_confirm_complete;
 STEP::06
 --------------------------------------------------
 StepNo:- 06
-Title:- UO_MX_FILTER : Filtration completed.
+Title:- UO_MX_FILL : Filtration completed.
 Description:- Log operator confirmation transfer complete and filtration operation end time.
 
 --------------------------------------------------
@@ -678,12 +728,15 @@ ACTION::01
 --------------------------------------------------
 Description:- Log operator confirmation transfer complete and filtration operation end time.
 Action:- //Log operator confirmation transfer complete 
-L "dbCONST_VAL".CPU_TIME;
-T #_log_confirmation;
+SET;
+S #_log_msg_filtration_complete;
 
 //Log FILTRATION operation end time
-L "dbCONST_VAL".CPU_TIME;
-T #_log_FiltrationEnd;
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_filtration_end;
+
+SET;
+S #_log_time_filtration_end;
 
 Verification:- A M1.1;
 
@@ -692,22 +745,20 @@ Verification:- A M1.1;
 TRANSITION::06
 --------------------------------------------------
 TRNNo:- 06
-Title:- Transfer is complete?
+Title:- Empty Transition
 EmptyTransition:- False
-Description:- Wait for parent to indicate transfer is complete when flag filtration_complete is set by the parent.
-Condition:- A #_filtration_complete;
+Description:- Jump
+Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
 STEP::07
 --------------------------------------------------
 StepNo:- 07
-Title:- UO_MX_FILTER : Disable HPCA control
+Title:- UO_MX_FILL : Disable HPCA control
 Description:- Disable HEX Temperature control and Mx HPCA control.
 
 Close sterile filter outlet valve and path sequentially up to including Sy outlet valve.
-
-Flag normal completion.
 
 --------------------------------------------------
 ACTION::01
@@ -743,10 +794,6 @@ L "dbCONST".BLK.SAFE.CMD;
 T #_emx_smfl_subs;
 L "dbCONST".BLK.CMD.STOP;
 T #_emx_smfl_cmd;
-
-// Flag normal completion
-SET;
-S #_NormalCompletion;
 Verification:- A(;
 L #_emt_hex_state;
 L "dbCONST".BLK.STATE.STOPPED;
@@ -768,13 +815,10 @@ L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 A(;
-L #_emx_smfl__state;
+L #_emx_smfl_state;
 L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
-
-A #_NormalCompletion;
-
 
 
 --------------------------------------------------
@@ -791,20 +835,27 @@ Condition:- A M1.1; //Always High flag
 STEP::08
 --------------------------------------------------
 StepNo:- 08
-Title:- UO_MX_FILTER : Filtration Unit Operation Completed
+Title:- UO_MX_FILL : Filling Unit Operation Completed
 Description:- Disable Mx manway alarm and low pressure alarm.
-
-End
+Log Mx Fill operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Disable Mx manway alarm and low pressure alarm.
+Log Mx Fill operation end time.
 Action:- //Set emv_vessel to substate MANWAY and start it to disable Manway alarm.
 L "dbCONST".BLK.EMV1.SUBS.MANWAY;
 T #_emv_vessel_subs;
-L "dbCONST_VAL".EM.CMD.START;
+L "dbCONST".BLK.CMD.START;
 T #_emv_vessel_cmd;
+
+//Log Mx Fill operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_fill_end;
+
+SET;
+S #_log_time_fill_end;
 Verification:- A(;
 L #_emv_vessel_state;
 L "dbCONST".BLK.EMV1.SUBS.MANWAY;

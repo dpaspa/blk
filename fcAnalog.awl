@@ -13,13 +13,16 @@
 //                                            from existing analog FBs, such  //
 //                                            as MI1, PI1, TI1, etc.          //
 //----------------------------------------------------------------------------//
-FUNCTION "fcAnalog"
+FUNCTION "fcAnalog" : Void
 TITLE = Analog input scaling and error checking
-{ S7_Optimized_Access := 'FALSE'}
+{ S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
 NAME : fcAnalog
 VERSION : 1.0
 
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
 VAR_INPUT
     RAW_INPUT : Word;        // Raw input signal from Field (4mA = 0, 20mA = 27648)
     USER_INPUT : Word;

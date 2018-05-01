@@ -1,0 +1,1295 @@
+﻿DATA_BLOCK "dbCONST"
+TITLE = Global program constants
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : dbCONST
+VERSION : 2.0
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable program constants and structures.  //
+// The safe command must match the safe state index number.                   //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      20-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+   STRUCT 
+      CHRONO : Struct   // Chronological functions
+         OB1_prev_cycle : Int;
+         s5T_BAS0_01S : Word;   // S5 timer Base 0.01 sec= 2#0000 0000 0000 0000
+         s5T_BAS0_10s : Word;   // S5 timer Base 0.10 sec= 2#0001 0000 0000 0000
+         s5T_BAS1_00s : Word;   // S5 timer Base 1.00 sec= 2#0010 0000 0000 0000
+         s5T_BAS10_s : Word;   // S5 timer Base 10.0 sec= 2#0011 0000 0000 0000
+         CPU_TIME : Time_Of_Day;
+         CPU_DATE : Date;
+         NEW_TIME : Time_Of_Day;
+         NEW_DATE : Date;
+         DATE_TIME_SYNCH : Struct
+            DATE_TIME : Date_And_Time;
+            RESERVE : Array[0..3] of Byte;
+         END_STRUCT;
+         DATE_TIME : Date_And_Time;
+         WEEKDAY : Int;   // 1=SUNDAY, 7=SATURDAY
+      END_STRUCT;
+      SEL : Struct   // Selection structures
+         FLZ : Struct
+            FL1 : Int;
+            FL2 : Int;
+         END_STRUCT;
+         GAS : Struct
+            HPCA : Int;
+            LPCA : Int;
+            VENT : Int;
+            VACUUM : Int;
+            DRAIN : Int;
+         END_STRUCT;
+         LIQUID : Struct
+            WFI : Int;
+            PW : Int;
+            PSWFI : Int;
+            PSPW : Int;
+         END_STRUCT;
+         MX : Struct
+            M1 : Int;
+            M2 : Int;
+         END_STRUCT;
+         SMFLX : Struct
+            SMFL1 : Int;
+            SMFL2 : Int;
+         END_STRUCT;
+         SY : Struct
+            S1 : Int;
+            S2 : Int;
+         END_STRUCT;
+      END_STRUCT;
+      SEQ : Struct   // Generic SFC structure
+         CMD : Struct   // Sequencer command common to all
+            STOP : Int;
+            START : Int;
+            PAUSE : Int;
+            RESUME : Int;
+            ABORT : Int;   // Or Go to Last Step
+            ACKNOWLEDGE_ERR : Int;
+         END_STRUCT;
+         MODE : Struct
+            AUTO : Int;
+            MANUAL : Int;
+            OOS : Int;
+         END_STRUCT;
+         SAFE : Struct
+            CMD : Int;   // Substate for safe state
+         END_STRUCT;
+         STATE : Struct   // Sequencer command common to all
+            OFF_IDLE : Int;
+            STARTED : Int;
+            PAUSED : Int;
+            RESUMED : Int;
+            WRMODE : Int;   // Wrong Mode selected
+            WRCMD : Int;   // Wrong Command selected
+            ABORTED : Int;   // Or Go to Last Step
+            ACKNOWLEDGED : Int;
+            COMPLETED : Int;
+         END_STRUCT;
+         STEP_TIME : Time;   // Step finishing time delay
+      END_STRUCT;
+      BLK : Struct   // Generic block structure
+         CMD : Struct
+            STOP : Int;
+            START : Int;
+         END_STRUCT;
+         MODE : Struct
+            AUTO : Int;
+            MANUAL : Int;
+            OOS : Int;
+         END_STRUCT;
+         SAFE : Struct
+            CMD : Int;   // Substate for safe state
+         END_STRUCT;
+         STATE : Struct
+            STOPPED : Int;   // Block stopped
+            PAUSED : Int;   // Block paused
+            INTERLOCKED : Int;   // Block interlocked
+            COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+         END_STRUCT;
+         HYGIENE : Struct   // Hygiene Status
+            USED : Int;
+            CIP : Int;
+            CLEAN : Int;
+            CLEAN_TIMEOUT : Int;
+            SIP : Int;
+            STERILE : Int;
+            STERILE_TIMEOUT : Int;
+            BATCH : Int;
+         END_STRUCT;
+         AL1 : Struct   // Generic analog input
+            CMD : Struct
+               ENABLE : Int;   // Always Enabled
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               ENABLED : Int;   // Always Enabled
+               FAULT : Int;
+            END_STRUCT;
+         END_STRUCT;
+         DI1 : Struct   // General Alarm Signal digital input
+            CMD : Struct
+               ENABLE : Int;   // Always Enabled
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               ENABLED : Int;
+               ALARM : Int;
+            END_STRUCT;
+         END_STRUCT;
+         DI2 : Struct   // General Alarm Signal software input
+            CMD : Struct
+               ENABLE : Int;   // Always Enabled
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               ENABLED : Int;
+               ALARM : Int;
+            END_STRUCT;
+         END_STRUCT;
+         HE1 : Struct   // Electric heating element
+            CMD : Struct
+               DISABLE : Int;
+               ENABLE : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               DISABLED : Int;
+               ENABLED : Int;
+               FAULT : Int;
+            END_STRUCT;
+         END_STRUCT;
+         MI1 : Struct   // Load Cell Mass Indicator
+            CMD : Struct
+               ENABLE : Int;   // Always Enabled
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               ENABLED : Int;   // Always Enabled
+               FAULT : Int;
+            END_STRUCT;
+         END_STRUCT;
+         MOD1 : Struct   // Modulating control valve
+            CMD : Struct
+               DISABLE : Int;
+               LOCAL : Int;   // Enable in local setpoint mode
+               REMOTE : Int;   // Enable in remote setpoint mode
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               DISABLED : Int;
+               LOCAL : Int;   // Enabled in local setpoint mode
+               REMOTE : Int;   // Enabled in remote setpoint mode
+            END_STRUCT;
+         END_STRUCT;
+         MOT1 : Struct   // Vacuum pump control
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;
+               RUNNING : Int;
+               STARTING_STOPPING : Int;
+               FAULT : Int;
+            END_STRUCT;
+         END_STRUCT;
+         PC1 : Struct   // Vessel ON-OFF Pressure control loop wth output valve selection
+            CMD : Struct
+               DISABLE : Int;
+               PRESSURE : Int;   // Enable in pressure control mode
+               VALVE : Int;   // Enable in valve opened mode
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               DISABLED : Int;
+               PRESSURE : Int;   // Enabled in pressure control mode
+               VALVE : Int;   // Enabled in valve opened mode
+            END_STRUCT;
+         END_STRUCT;
+         PI1 : Struct   // Vessel pressure Indicator with alarms and Interlocks
+            CMD : Struct
+               ENABLE : Int;   // Always Enabled
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               ENABLED : Int;   // Always Enabled
+               FAULT : Int;
+            END_STRUCT;
+         END_STRUCT;
+         PI2 : Struct   // Line mounted pressure Indicator
+            CMD : Struct
+               ENABLE : Int;   // Always Enabled
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               ENABLED : Int;   // Always Enabled
+               FAULT : Int;
+            END_STRUCT;
+         END_STRUCT;
+         POSx : Struct   // Generic On-Off Valve
+            CMD : Struct
+               CLOSE : Int;
+               OPEN : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               CLOSED : Int;
+               OPENED : Int;
+               TRAVEL : Int;   // Opening or Closing
+               FAULT : Int;   // Failed to Open or Failed to Close
+            END_STRUCT;
+         END_STRUCT;
+         POS1 : Struct   // On-Off Valve with single output without feedback
+            CMD : Struct
+               CLOSE : Int;
+               OPEN : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               CLOSED : Int;
+               OPENED : Int;
+               TRAVEL : Int;   // Opening or Closing
+               FAULT : Int;   // Failed to Open or Failed to Close
+            END_STRUCT;
+         END_STRUCT;
+         POS2 : Struct   // On-Off Valve with single output with Closed feedback
+            CMD : Struct
+               CLOSE : Int;
+               OPEN : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               CLOSED : Int;
+               OPENED : Int;
+               TRAVEL : Int;   // Opening or Closing
+               FAULT : Int;   // Failed to Open or Failed to Close
+            END_STRUCT;
+         END_STRUCT;
+         POS3 : Struct   // On-Off Valve with single output with Opened feedback
+            CMD : Struct
+               CLOSE : Int;
+               OPEN : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               CLOSED : Int;
+               OPENED : Int;
+               TRAVEL : Int;   // Opening or Closing
+               FAULT : Int;   // Failed to Open or Failed to Close
+            END_STRUCT;
+         END_STRUCT;
+         POS4 : Struct   // On-Off Valve with single output with both Closed and Opened feedback
+            CMD : Struct
+               CLOSE : Int;
+               OPEN : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               CLOSED : Int;
+               OPENED : Int;
+               TRAVEL : Int;   // Opening or Closing
+               FAULT : Int;   // Failed to Open or Failed to Close
+            END_STRUCT;
+         END_STRUCT;
+         SIC1 : Struct   // Agitator speed control
+            CMD : Struct
+               DISABLE : Int;
+               ENABLE : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               DISABLED : Int;
+               ENABLED : Int;
+               STOPPED : Int;
+               RUNNING : Int;
+               FAULT : Int;   // Fault state
+            END_STRUCT;
+         END_STRUCT;
+         TC1 : Struct   // Cooling only temperature control
+            CMD : Struct
+               DISABLE : Int;
+               ENABLE : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               DISABLED : Int;
+               ENABLED : Int;
+            END_STRUCT;
+         END_STRUCT;
+         TI1 : Struct   // Vessel temperature Indicator with alarms & Interlocks
+            CMD : Struct
+               ENABLE : Int;   // Always Enabled
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               ENABLED : Int;   // Always Enabled
+               FAULT : Int;   // Fault state
+            END_STRUCT;
+         END_STRUCT;
+         TI2 : Struct   // Line temperature Indicator
+            CMD : Struct
+               ENABLE : Int;   // Always Enabled
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               ENABLED : Int;   // Always Enabled
+               FAULT : Int;   // Fault state
+            END_STRUCT;
+         END_STRUCT;
+         VS1 : Struct   // Vacuum system control
+            CMD : Struct
+               DISABLE : Int;
+               ENABLE : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command
+            END_STRUCT;
+            STATE : Struct
+               DISABLED : Int;
+               ENABLED : Int;
+               FAULT : Int;
+            END_STRUCT;
+         END_STRUCT;
+         ZSC1 : Struct   // Manway closed indication and alarm
+            CMD : Struct
+               CLOSE : Int;
+               OPEN : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command is no change
+            END_STRUCT;
+            STATE : Struct
+               CLOSED : Int;
+               OPENED : Int;
+               MISMATCH : Int;
+            END_STRUCT;
+         END_STRUCT;
+         ZSC2 : Struct   // Flow path connection indication
+            CMD : Struct
+               IN : Int;
+               OUT : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Class safe command is no change
+            END_STRUCT;
+            STATE : Struct
+               IN : Int;
+               OUT : Int;
+               MISMATCH : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMA1 : Struct   // Manufacturing vessel agitator
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               MIX : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMC1 : Struct   // Vessel LP CA and HP CA supply, Vacuum and Vent
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               PRESSURE : Int;
+               VALVE : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMC2 : Struct   // WFI, PS(WFI) supply and PW, PS(PW) supply to manufacturing vessel
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               CHARGE : Int;
+               FLUSH : Int;
+               ISOLATE : Int;
+               SETUP : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMC3 : Struct   // WFI, PS(WFI) supply and PW, PS(PW) supply to storage vessel
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               FLUSH : Int;
+               ISOLATE : Int;
+               SETUP : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMG1 : Struct   // Vessel gas filter heating element and temperature indicator, drain valve and filter outlet line temperature indicator
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               FILTER : Int;
+               SIP : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMM1 : Struct   // Manufacturing vessel load cell
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               MEASURE : Int;
+               TARE : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMS1 : Struct   // Main Unit ESTOP and Air pressure low switch
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               ENABLED : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMS2 : Struct   // Auxiliary Unit ESTOP
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               ENABLED : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMT1 : Struct   // Manufacturing filtration line heat exchanger cooling control
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               COOL : Int;
+               DRAIN : Int;
+               PREEMPT : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMV1 : Struct   // Vessels manway, bursting disc, bottom outlet valve and temperature alarms and interlocks
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               DISCHARGE : Int;
+               ISOLATE : Int;
+               MANWAY : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMV2 : Struct   // Vessel Inlet Sprayball Valves
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               CHARGE : Int;
+               PULSE : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMX1 : Struct   // Manufacturing vessel filtration line MMFLx
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               CIP_MMFLX : Int;
+               CIP_MX : Int;
+               FILTER : Int;
+               SETUP_CIPSIP : Int;
+               SETUP_FILTER : Int;
+               SIP : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMX2 : Struct   // Shared Vessels Transfer Lines
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               CIP_SY : Int;
+               FILL_MX : Int;
+               FILL_SY : Int;
+               FILTER : Int;
+               ISOLATE : Int;
+               SETUP : Int;
+               SIP : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMX4 : Struct   // CIP & SIP Drain
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               CIP : Int;
+               SIP : Int;
+               SIP_PULSE : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMX5 : Struct   // BFS Inlet Filling Line
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               FILL : Int;
+            END_STRUCT;
+         END_STRUCT;
+         EMX6 : Struct   // Shared Filtration line SMFLx to Vessels Transfer Lines
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               CIP : Int;
+               FILTER : Int;
+               FILTER_BLEED : Int;
+               SETUP_CIP : Int;
+               SETUP_SIP : Int;
+               SIP : Int;
+            END_STRUCT;
+         END_STRUCT;
+         PCMX : Struct   // Mixing Vessel System Process Cell
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               CIPSIP : Int;
+               FILL : Int;
+               FILTER : Int;
+               MAKE : Int;
+            END_STRUCT;
+         END_STRUCT;
+         PCSY : Struct   // Storage Vessel System Process Cell
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               CIPSIP : Int;
+               FILL : Int;
+            END_STRUCT;
+         END_STRUCT;
+         MX : Struct   // Manufacturing Vessel and associated equipment
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               CIP : Int;
+               FILL : Int;
+               FILTER : Int;
+               MAKE : Int;
+               SETUP : Int;
+               SIP : Int;
+            END_STRUCT;
+         END_STRUCT;
+         SY : Struct   // Storage Vessel and associated equipment
+            CMD : Struct
+               STOP : Int;
+               START : Int;
+            END_STRUCT;
+            SAFE : Struct
+               CMD : Int;   // Substate for safe state
+            END_STRUCT;
+            STATE : Struct
+               STOPPED : Int;   // Block stopped. Running substates below
+               INTERLOCKED : Int;   // Block Interlocked
+               PAUSED : Int;   // Block Paused
+               COMPLETED : Int;   // Block substate finished, Finished after SFC (if any) is complete.
+            END_STRUCT;
+            SUBS : Struct
+               CIP : Int;
+               FILL : Int;
+               FILTER : Int;
+               SETUP : Int;
+               SIP : Int;
+            END_STRUCT;
+         END_STRUCT;
+         OWNER : Struct   // Resource arbitration
+            AVAILABLE : Int;   // Block is available for parent acquisition
+            EA1010 : Int;
+            EC1001 : Int;
+            EC1002 : Int;
+            EC3001 : Int;
+            EC3002 : Int;
+            EE1013 : Int;
+            EE1023 : Int;
+            EE1033 : Int;
+            EE1043 : Int;
+            EE3013 : Int;
+            EE3023 : Int;
+            EG1005 : Int;
+            EG3005 : Int;
+            EM1009 : Int;
+            ET1003 : Int;
+            EV1004 : Int;
+            EV1008 : Int;
+            EV3004 : Int;
+            EV3008 : Int;
+            EX1006 : Int;
+            EX1011 : Int;
+            EX1014 : Int;
+            EX1015 : Int;
+            EX3006 : Int;
+            EX3007 : Int;
+            EX7402 : Int;
+            VS1100 : Int;
+            VS3100 : Int;
+            PCM1 : Int;
+            PCS1 : Int;
+            M1 : Int;
+            S1 : Int;
+         END_STRUCT;
+      END_STRUCT;
+   END_STRUCT;
+
+
+BEGIN
+   CHRONO.s5T_BAS0_10s := WORD#16#1000;
+   CHRONO.s5T_BAS1_00s := WORD#16#2000;
+   CHRONO.s5T_BAS10_s := WORD#16#3000;
+   CHRONO.NEW_TIME := TOD#17:55:00;
+   CHRONO.NEW_DATE := D#2009-10-15;
+   SEL.FLZ.FL1 := 1;
+   SEL.FLZ.FL2 := 2;
+   SEL.GAS.HPCA := 1;
+   SEL.GAS.LPCA := 2;
+   SEL.GAS.VENT := 3;
+   SEL.GAS.VACUUM := 4;
+   SEL.GAS.DRAIN := 5;
+   SEL.LIQUID.WFI := 1;
+   SEL.LIQUID.PW := 2;
+   SEL.LIQUID.PSWFI := 3;
+   SEL.LIQUID.PSPW := 4;
+   SEL.MX.M1 := 1;
+   SEL.MX.M2 := 2;
+   SEL.SMFLX.SMFL1 := 1;
+   SEL.SMFLX.SMFL2 := 2;
+   SEL.SY.S1 := 1;
+   SEL.SY.S2 := 2;
+   SEQ.CMD.STOP := 0;
+   SEQ.CMD.START := 1;
+   SEQ.CMD.PAUSE := 2;
+   SEQ.CMD.RESUME := 3;
+   SEQ.CMD.ABORT := 6;
+   SEQ.CMD.ACKNOWLEDGE_ERR := 7;
+   SEQ.MODE.AUTO := 1;
+   SEQ.MODE.MANUAL := 2;
+   SEQ.MODE.OOS := 3;
+   SEQ.SAFE.CMD := 0;
+   SEQ.STATE.STARTED := 1;
+   SEQ.STATE.PAUSED := 2;
+   SEQ.STATE.RESUMED := 3;
+   SEQ.STATE.WRMODE := 4;
+   SEQ.STATE.WRCMD := 5;
+   SEQ.STATE.ABORTED := 6;
+   SEQ.STATE.ACKNOWLEDGED := 7;
+   SEQ.STATE.COMPLETED := 8;
+   SEQ.STEP_TIME := T#1M;
+   BLK.CMD.STOP := 1;
+   BLK.CMD.START := 2;
+   BLK.MODE.AUTO := 1;
+   BLK.MODE.MANUAL := 2;
+   BLK.MODE.OOS := 3;
+   BLK.SAFE.CMD := 1;
+   BLK.STATE.STOPPED := 1;
+   BLK.STATE.PAUSED := 50;
+   BLK.STATE.INTERLOCKED := 51;
+   BLK.STATE.COMPLETED := 99;
+   BLK.HYGIENE.USED := 1;
+   BLK.HYGIENE.CIP := 2;
+   BLK.HYGIENE.CLEAN := 3;
+   BLK.HYGIENE.CLEAN_TIMEOUT := 4;
+   BLK.HYGIENE.SIP := 5;
+   BLK.HYGIENE.STERILE := 6;
+   BLK.HYGIENE.STERILE_TIMEOUT := 7;
+   BLK.HYGIENE.BATCH := 8;
+   BLK.AL1.CMD.ENABLE := 1;
+   BLK.AL1.SAFE.CMD := 1;
+   BLK.AL1.STATE.ENABLED := 1;
+   BLK.AL1.STATE.FAULT := 2;
+   BLK.DI1.CMD.ENABLE := 1;
+   BLK.DI1.SAFE.CMD := 1;
+   BLK.DI1.STATE.ENABLED := 1;
+   BLK.DI1.STATE.ALARM := 2;
+   BLK.DI2.CMD.ENABLE := 1;
+   BLK.DI2.SAFE.CMD := 1;
+   BLK.DI2.STATE.ENABLED := 1;
+   BLK.DI2.STATE.ALARM := 2;
+   BLK.HE1.CMD.DISABLE := 1;
+   BLK.HE1.CMD.ENABLE := 2;
+   BLK.HE1.SAFE.CMD := 1;
+   BLK.HE1.STATE.DISABLED := 1;
+   BLK.HE1.STATE.ENABLED := 2;
+   BLK.HE1.STATE.FAULT := 3;
+   BLK.MI1.CMD.ENABLE := 1;
+   BLK.MI1.SAFE.CMD := 1;
+   BLK.MI1.STATE.ENABLED := 1;
+   BLK.MI1.STATE.FAULT := 2;
+   BLK.MOD1.CMD.DISABLE := 1;
+   BLK.MOD1.CMD.LOCAL := 2;
+   BLK.MOD1.CMD.REMOTE := 3;
+   BLK.MOD1.SAFE.CMD := 1;
+   BLK.MOD1.STATE.DISABLED := 1;
+   BLK.MOD1.STATE.LOCAL := 2;
+   BLK.MOD1.STATE.REMOTE := 3;
+   BLK.MOT1.CMD.STOP := 1;
+   BLK.MOT1.CMD.START := 2;
+   BLK.MOT1.SAFE.CMD := 1;
+   BLK.MOT1.STATE.STOPPED := 1;
+   BLK.MOT1.STATE.RUNNING := 2;
+   BLK.MOT1.STATE.STARTING_STOPPING := 3;
+   BLK.MOT1.STATE.FAULT := 4;
+   BLK.PC1.CMD.DISABLE := 1;
+   BLK.PC1.CMD.PRESSURE := 2;
+   BLK.PC1.CMD.VALVE := 3;
+   BLK.PC1.SAFE.CMD := 1;
+   BLK.PC1.STATE.DISABLED := 1;
+   BLK.PC1.STATE.PRESSURE := 2;
+   BLK.PC1.STATE.VALVE := 3;
+   BLK.PI1.CMD.ENABLE := 1;
+   BLK.PI1.SAFE.CMD := 1;
+   BLK.PI1.STATE.ENABLED := 1;
+   BLK.PI1.STATE.FAULT := 2;
+   BLK.PI2.CMD.ENABLE := 1;
+   BLK.PI2.SAFE.CMD := 1;
+   BLK.PI2.STATE.ENABLED := 1;
+   BLK.PI2.STATE.FAULT := 2;
+   BLK.POSx.CMD.CLOSE := 1;
+   BLK.POSx.CMD.OPEN := 2;
+   BLK.POSx.SAFE.CMD := 1;
+   BLK.POSx.STATE.CLOSED := 1;
+   BLK.POSx.STATE.OPENED := 2;
+   BLK.POSx.STATE.TRAVEL := 3;
+   BLK.POSx.STATE.FAULT := 4;
+   BLK.POS1.CMD.CLOSE := 1;
+   BLK.POS1.CMD.OPEN := 2;
+   BLK.POS1.SAFE.CMD := 1;
+   BLK.POS1.STATE.CLOSED := 1;
+   BLK.POS1.STATE.OPENED := 2;
+   BLK.POS1.STATE.TRAVEL := 3;
+   BLK.POS1.STATE.FAULT := 4;
+   BLK.POS2.CMD.CLOSE := 1;
+   BLK.POS2.CMD.OPEN := 2;
+   BLK.POS2.SAFE.CMD := 1;
+   BLK.POS2.STATE.CLOSED := 1;
+   BLK.POS2.STATE.OPENED := 2;
+   BLK.POS2.STATE.TRAVEL := 3;
+   BLK.POS2.STATE.FAULT := 4;
+   BLK.POS3.CMD.CLOSE := 1;
+   BLK.POS3.CMD.OPEN := 2;
+   BLK.POS3.SAFE.CMD := 1;
+   BLK.POS3.STATE.CLOSED := 1;
+   BLK.POS3.STATE.OPENED := 2;
+   BLK.POS3.STATE.TRAVEL := 3;
+   BLK.POS3.STATE.FAULT := 4;
+   BLK.POS4.CMD.CLOSE := 1;
+   BLK.POS4.CMD.OPEN := 2;
+   BLK.POS4.SAFE.CMD := 1;
+   BLK.POS4.STATE.CLOSED := 1;
+   BLK.POS4.STATE.OPENED := 2;
+   BLK.POS4.STATE.TRAVEL := 3;
+   BLK.POS4.STATE.FAULT := 4;
+   BLK.SIC1.CMD.DISABLE := 1;
+   BLK.SIC1.CMD.ENABLE := 2;
+   BLK.SIC1.SAFE.CMD := 1;
+   BLK.SIC1.STATE.DISABLED := 1;
+   BLK.SIC1.STATE.ENABLED := 2;
+   BLK.SIC1.STATE.STOPPED := 3;
+   BLK.SIC1.STATE.RUNNING := 4;
+   BLK.SIC1.STATE.FAULT := 5;
+   BLK.TC1.CMD.DISABLE := 1;
+   BLK.TC1.CMD.ENABLE := 2;
+   BLK.TC1.SAFE.CMD := 1;
+   BLK.TC1.STATE.DISABLED := 1;
+   BLK.TC1.STATE.ENABLED := 2;
+   BLK.TI1.CMD.ENABLE := 1;
+   BLK.TI1.SAFE.CMD := 1;
+   BLK.TI1.STATE.ENABLED := 1;
+   BLK.TI1.STATE.FAULT := 2;
+   BLK.TI2.CMD.ENABLE := 1;
+   BLK.TI2.SAFE.CMD := 1;
+   BLK.TI2.STATE.ENABLED := 1;
+   BLK.TI2.STATE.FAULT := 2;
+   BLK.VS1.CMD.DISABLE := 1;
+   BLK.VS1.CMD.ENABLE := 2;
+   BLK.VS1.SAFE.CMD := 1;
+   BLK.VS1.STATE.DISABLED := 1;
+   BLK.VS1.STATE.ENABLED := 2;
+   BLK.VS1.STATE.FAULT := 3;
+   BLK.ZSC1.CMD.CLOSE := 1;
+   BLK.ZSC1.CMD.OPEN := 2;
+   BLK.ZSC1.SAFE.CMD := -1;
+   BLK.ZSC1.STATE.CLOSED := 1;
+   BLK.ZSC1.STATE.OPENED := 2;
+   BLK.ZSC1.STATE.MISMATCH := 3;
+   BLK.ZSC2.CMD.IN := 1;
+   BLK.ZSC2.CMD.OUT := 2;
+   BLK.ZSC2.SAFE.CMD := -1;
+   BLK.ZSC2.STATE.IN := 1;
+   BLK.ZSC2.STATE.OUT := 2;
+   BLK.ZSC2.STATE.MISMATCH := 3;
+   BLK.EMA1.CMD.STOP := 1;
+   BLK.EMA1.CMD.START := 2;
+   BLK.EMA1.SAFE.CMD := 0;
+   BLK.EMA1.STATE.STOPPED := 0;
+   BLK.EMA1.STATE.INTERLOCKED := 51;
+   BLK.EMA1.STATE.PAUSED := 52;
+   BLK.EMA1.STATE.COMPLETED := 99;
+   BLK.EMA1.SUBS.MIX := 1;
+   BLK.EMC1.CMD.STOP := 1;
+   BLK.EMC1.CMD.START := 2;
+   BLK.EMC1.SAFE.CMD := 0;
+   BLK.EMC1.STATE.STOPPED := 0;
+   BLK.EMC1.STATE.INTERLOCKED := 51;
+   BLK.EMC1.STATE.PAUSED := 52;
+   BLK.EMC1.STATE.COMPLETED := 99;
+   BLK.EMC1.SUBS.PRESSURE := 1;
+   BLK.EMC1.SUBS.VALVE := 2;
+   BLK.EMC2.CMD.STOP := 1;
+   BLK.EMC2.CMD.START := 2;
+   BLK.EMC2.SAFE.CMD := 0;
+   BLK.EMC2.STATE.STOPPED := 0;
+   BLK.EMC2.STATE.INTERLOCKED := 51;
+   BLK.EMC2.STATE.PAUSED := 52;
+   BLK.EMC2.STATE.COMPLETED := 99;
+   BLK.EMC2.SUBS.CHARGE := 1;
+   BLK.EMC2.SUBS.FLUSH := 2;
+   BLK.EMC2.SUBS.ISOLATE := 3;
+   BLK.EMC2.SUBS.SETUP := 4;
+   BLK.EMC3.CMD.STOP := 1;
+   BLK.EMC3.CMD.START := 2;
+   BLK.EMC3.SAFE.CMD := 0;
+   BLK.EMC3.STATE.STOPPED := 0;
+   BLK.EMC3.STATE.INTERLOCKED := 51;
+   BLK.EMC3.STATE.PAUSED := 52;
+   BLK.EMC3.STATE.COMPLETED := 99;
+   BLK.EMC3.SUBS.FLUSH := 1;
+   BLK.EMC3.SUBS.ISOLATE := 2;
+   BLK.EMC3.SUBS.SETUP := 3;
+   BLK.EMG1.CMD.STOP := 1;
+   BLK.EMG1.CMD.START := 2;
+   BLK.EMG1.SAFE.CMD := 0;
+   BLK.EMG1.STATE.STOPPED := 0;
+   BLK.EMG1.STATE.INTERLOCKED := 51;
+   BLK.EMG1.STATE.PAUSED := 52;
+   BLK.EMG1.STATE.COMPLETED := 99;
+   BLK.EMG1.SUBS.FILTER := 1;
+   BLK.EMG1.SUBS.SIP := 2;
+   BLK.EMM1.CMD.STOP := 1;
+   BLK.EMM1.CMD.START := 2;
+   BLK.EMM1.SAFE.CMD := 0;
+   BLK.EMM1.STATE.STOPPED := 0;
+   BLK.EMM1.STATE.INTERLOCKED := 51;
+   BLK.EMM1.STATE.PAUSED := 52;
+   BLK.EMM1.STATE.COMPLETED := 99;
+   BLK.EMM1.SUBS.MEASURE := 1;
+   BLK.EMM1.SUBS.TARE := 2;
+   BLK.EMS1.CMD.STOP := 1;
+   BLK.EMS1.CMD.START := 2;
+   BLK.EMS1.SAFE.CMD := 0;
+   BLK.EMS1.STATE.STOPPED := 0;
+   BLK.EMS1.STATE.INTERLOCKED := 51;
+   BLK.EMS1.STATE.PAUSED := 52;
+   BLK.EMS1.STATE.COMPLETED := 99;
+   BLK.EMS1.SUBS.ENABLED := 1;
+   BLK.EMS2.CMD.STOP := 1;
+   BLK.EMS2.CMD.START := 2;
+   BLK.EMS2.SAFE.CMD := 0;
+   BLK.EMS2.STATE.STOPPED := 0;
+   BLK.EMS2.STATE.INTERLOCKED := 51;
+   BLK.EMS2.STATE.PAUSED := 52;
+   BLK.EMS2.STATE.COMPLETED := 99;
+   BLK.EMS2.SUBS.ENABLED := 1;
+   BLK.EMT1.CMD.STOP := 1;
+   BLK.EMT1.CMD.START := 2;
+   BLK.EMT1.SAFE.CMD := 0;
+   BLK.EMT1.STATE.STOPPED := 0;
+   BLK.EMT1.STATE.INTERLOCKED := 51;
+   BLK.EMT1.STATE.PAUSED := 52;
+   BLK.EMT1.STATE.COMPLETED := 99;
+   BLK.EMT1.SUBS.COOL := 1;
+   BLK.EMT1.SUBS.DRAIN := 2;
+   BLK.EMT1.SUBS.PREEMPT := 3;
+   BLK.EMV1.CMD.STOP := 1;
+   BLK.EMV1.CMD.START := 2;
+   BLK.EMV1.SAFE.CMD := 0;
+   BLK.EMV1.STATE.STOPPED := 0;
+   BLK.EMV1.STATE.INTERLOCKED := 51;
+   BLK.EMV1.STATE.PAUSED := 52;
+   BLK.EMV1.STATE.COMPLETED := 99;
+   BLK.EMV1.SUBS.DISCHARGE := 1;
+   BLK.EMV1.SUBS.ISOLATE := 2;
+   BLK.EMV1.SUBS.MANWAY := 3;
+   BLK.EMV2.CMD.STOP := 1;
+   BLK.EMV2.CMD.START := 2;
+   BLK.EMV2.SAFE.CMD := 0;
+   BLK.EMV2.STATE.STOPPED := 0;
+   BLK.EMV2.STATE.INTERLOCKED := 51;
+   BLK.EMV2.STATE.PAUSED := 52;
+   BLK.EMV2.STATE.COMPLETED := 99;
+   BLK.EMV2.SUBS.CHARGE := 1;
+   BLK.EMV2.SUBS.PULSE := 2;
+   BLK.EMX1.CMD.STOP := 1;
+   BLK.EMX1.CMD.START := 2;
+   BLK.EMX1.SAFE.CMD := 0;
+   BLK.EMX1.STATE.STOPPED := 0;
+   BLK.EMX1.STATE.INTERLOCKED := 51;
+   BLK.EMX1.STATE.PAUSED := 52;
+   BLK.EMX1.STATE.COMPLETED := 99;
+   BLK.EMX1.SUBS.CIP_MMFLX := 1;
+   BLK.EMX1.SUBS.CIP_MX := 2;
+   BLK.EMX1.SUBS.FILTER := 3;
+   BLK.EMX1.SUBS.SETUP_CIPSIP := 4;
+   BLK.EMX1.SUBS.SETUP_FILTER := 5;
+   BLK.EMX1.SUBS.SIP := 6;
+   BLK.EMX2.CMD.STOP := 1;
+   BLK.EMX2.CMD.START := 2;
+   BLK.EMX2.SAFE.CMD := 0;
+   BLK.EMX2.STATE.STOPPED := 0;
+   BLK.EMX2.STATE.INTERLOCKED := 51;
+   BLK.EMX2.STATE.PAUSED := 52;
+   BLK.EMX2.STATE.COMPLETED := 99;
+   BLK.EMX2.SUBS.CIP_SY := 1;
+   BLK.EMX2.SUBS.FILL_MX := 2;
+   BLK.EMX2.SUBS.FILL_SY := 3;
+   BLK.EMX2.SUBS.FILTER := 4;
+   BLK.EMX2.SUBS.ISOLATE := 5;
+   BLK.EMX2.SUBS.SETUP := 6;
+   BLK.EMX2.SUBS.SIP := 7;
+   BLK.EMX4.CMD.STOP := 1;
+   BLK.EMX4.CMD.START := 2;
+   BLK.EMX4.SAFE.CMD := 0;
+   BLK.EMX4.STATE.STOPPED := 0;
+   BLK.EMX4.STATE.INTERLOCKED := 51;
+   BLK.EMX4.STATE.PAUSED := 52;
+   BLK.EMX4.STATE.COMPLETED := 99;
+   BLK.EMX4.SUBS.CIP := 1;
+   BLK.EMX4.SUBS.SIP := 2;
+   BLK.EMX4.SUBS.SIP_PULSE := 3;
+   BLK.EMX5.CMD.STOP := 1;
+   BLK.EMX5.CMD.START := 2;
+   BLK.EMX5.SAFE.CMD := 0;
+   BLK.EMX5.STATE.STOPPED := 0;
+   BLK.EMX5.STATE.INTERLOCKED := 51;
+   BLK.EMX5.STATE.PAUSED := 52;
+   BLK.EMX5.STATE.COMPLETED := 99;
+   BLK.EMX5.SUBS.FILL := 1;
+   BLK.EMX6.CMD.STOP := 1;
+   BLK.EMX6.CMD.START := 2;
+   BLK.EMX6.SAFE.CMD := 0;
+   BLK.EMX6.STATE.STOPPED := 0;
+   BLK.EMX6.STATE.INTERLOCKED := 51;
+   BLK.EMX6.STATE.PAUSED := 52;
+   BLK.EMX6.STATE.COMPLETED := 99;
+   BLK.EMX6.SUBS.CIP := 1;
+   BLK.EMX6.SUBS.FILTER := 2;
+   BLK.EMX6.SUBS.FILTER_BLEED := 3;
+   BLK.EMX6.SUBS.SETUP_CIP := 4;
+   BLK.EMX6.SUBS.SETUP_SIP := 5;
+   BLK.EMX6.SUBS.SIP := 6;
+   BLK.PCMX.CMD.STOP := 1;
+   BLK.PCMX.CMD.START := 2;
+   BLK.PCMX.SAFE.CMD := 0;
+   BLK.PCMX.STATE.STOPPED := 0;
+   BLK.PCMX.STATE.INTERLOCKED := 51;
+   BLK.PCMX.STATE.PAUSED := 52;
+   BLK.PCMX.STATE.COMPLETED := 99;
+   BLK.PCMX.SUBS.CIPSIP := 1;
+   BLK.PCMX.SUBS.FILL := 2;
+   BLK.PCMX.SUBS.FILTER := 3;
+   BLK.PCMX.SUBS.MAKE := 4;
+   BLK.PCSY.CMD.STOP := 1;
+   BLK.PCSY.CMD.START := 2;
+   BLK.PCSY.SAFE.CMD := 0;
+   BLK.PCSY.STATE.STOPPED := 0;
+   BLK.PCSY.STATE.INTERLOCKED := 51;
+   BLK.PCSY.STATE.PAUSED := 52;
+   BLK.PCSY.STATE.COMPLETED := 99;
+   BLK.PCSY.SUBS.CIPSIP := 1;
+   BLK.PCSY.SUBS.FILL := 2;
+   BLK.MX.CMD.STOP := 1;
+   BLK.MX.CMD.START := 2;
+   BLK.MX.SAFE.CMD := 0;
+   BLK.MX.STATE.STOPPED := 0;
+   BLK.MX.STATE.INTERLOCKED := 51;
+   BLK.MX.STATE.PAUSED := 52;
+   BLK.MX.STATE.COMPLETED := 99;
+   BLK.MX.SUBS.CIP := 1;
+   BLK.MX.SUBS.FILL := 2;
+   BLK.MX.SUBS.FILTER := 3;
+   BLK.MX.SUBS.MAKE := 4;
+   BLK.MX.SUBS.SETUP := 5;
+   BLK.MX.SUBS.SIP := 6;
+   BLK.SY.CMD.STOP := 1;
+   BLK.SY.CMD.START := 2;
+   BLK.SY.SAFE.CMD := 0;
+   BLK.SY.STATE.STOPPED := 0;
+   BLK.SY.STATE.INTERLOCKED := 51;
+   BLK.SY.STATE.PAUSED := 52;
+   BLK.SY.STATE.COMPLETED := 99;
+   BLK.SY.SUBS.CIP := 1;
+   BLK.SY.SUBS.FILL := 2;
+   BLK.SY.SUBS.FILTER := 3;
+   BLK.SY.SUBS.SETUP := 4;
+   BLK.SY.SUBS.SIP := 5;
+   BLK.OWNER.EA1010 := 134;
+   BLK.OWNER.EC1001 := 135;
+   BLK.OWNER.EC1002 := 136;
+   BLK.OWNER.EC3001 := 145;
+   BLK.OWNER.EC3002 := 146;
+   BLK.OWNER.EE1013 := 330;
+   BLK.OWNER.EE1023 := 332;
+   BLK.OWNER.EE1033 := 333;
+   BLK.OWNER.EE1043 := 334;
+   BLK.OWNER.EE3013 := 331;
+   BLK.OWNER.EE3023 := 335;
+   BLK.OWNER.EG1005 := 138;
+   BLK.OWNER.EG3005 := 148;
+   BLK.OWNER.EM1009 := 139;
+   BLK.OWNER.ET1003 := 143;
+   BLK.OWNER.EV1004 := 140;
+   BLK.OWNER.EV1008 := 141;
+   BLK.OWNER.EV3004 := 149;
+   BLK.OWNER.EV3008 := 150;
+   BLK.OWNER.EX1006 := 142;
+   BLK.OWNER.EX1011 := 154;
+   BLK.OWNER.EX1014 := 144;
+   BLK.OWNER.EX1015 := 153;
+   BLK.OWNER.EX3006 := 151;
+   BLK.OWNER.EX3007 := 152;
+   BLK.OWNER.EX7402 := 133;
+   BLK.OWNER.VS1100 := 137;
+   BLK.OWNER.VS3100 := 147;
+   BLK.OWNER.PCM1 := 155;
+   BLK.OWNER.PCS1 := 157;
+   BLK.OWNER.M1 := 161;
+   BLK.OWNER.S1 := 163;
+
+END_DATA_BLOCK
+

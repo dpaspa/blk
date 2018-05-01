@@ -1,0 +1,291 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 1/05/2018 9:42:16 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+Name:- SIP_PULSE
+Title:- PH_EMX4_SIP_PULSE
+Description:- Open and close valve for specified duration.
+Class:- EMX4
+Level:- PH
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- X4SPUL
+Version:- 0.5
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.1 David Paspa      13-Jul-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- time_pulse_begin
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- log_time_pulse_begin
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- time_pulse_end
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- log_time_pulse_end
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- time_closed
+Type:- TIME
+Description:- Valve close time setpoint
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- pos_sip_state
+Type:- INT
+Description:- SIP Drain valve state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- pos_sip_cmd
+Type:- INT
+Description:- SIP Drain valve command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- time_opened
+Type:- TIME
+Description:- Valve open time setpoint
+ParameterInOut:- IN
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- PH_EMX4_SIP_PULSE : PULSE begin
+Description:- Log PULSE begin time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log PULSE begin time.
+Action:- //Log PULSE begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_pulse_begin;
+
+SET;
+S #_log_time_pulse_begin;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- PH_EMX4_SIP_PULSE : Open valve
+Description:- Open SIP valve 1 for a specified time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open valve 1 for a specified time.
+Action:- //Load setpoint for valve open duration.
+L #_time_opened;
+T #SQ_TIMER.PT;
+
+//Open valve 01
+L "dbCONST".BLK.POSx.CMD.OPEN;
+T  #_pos_sip_cmd;
+
+//Start timer
+SET;
+S #SQ_TIMER.IN;
+Verification:- //Valve 01 opened.
+A(;
+L "dbCONST".BLK.POSx.STATE.OPENED;
+L  #_pos_sip_state;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- Wait until timer expired
+EmptyTransition:- False
+Description:- Wait until delay time expired
+Condition:- //Continue the sequence after the time delay expired.
+A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- PH_EMX4_SIP_PULSE : Close valve
+Description:- Close SIP drain valve.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close valve 1.
+Action:- SET;
+R #SQ_TIMER.IN;
+
+//Close valve 01
+L "dbCONST".BLK.POSx.CMD.CLOSE;
+T  #_pos_sip_cmd;
+
+//Load setpoint for valve open duration.
+L #_time_closed;
+T #SQ_TIMER.PT;
+
+Verification:- //Valve 01 closed.
+A(;
+L "dbCONST".BLK.POSx.STATE.CLOSED; 
+L #_pos_sip_state;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Unconditional Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- PH_EMX4_SIP_PULSE : Start timer
+Description:- Start timer
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Start timer
+Action:- //Start timer
+SET;
+S #SQ_TIMER.IN;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
+Title:- Last Step
+EmptyTransition:- False
+Description:- Last Step
+Condition:- AN M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 05
+Title:- Wait until timer expired
+EmptyTransition:- False
+Description:- Wait until delay time expired
+Condition:- A #SQ_TIMER.Q; 
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
+Title:- PH_EMX4_SIP_PULSE : Reset timer
+Description:- Reset timer
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Last Step
+Action:- SET;
+R #SQ_TIMER.IN;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::06
+--------------------------------------------------
+TRNNo:- 06
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Unconditional Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 06
+Title:- PH_EMX4_SIP_PULSE : Last Step
+Description:- Log PULSE operation end time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log PULSE operation end time.
+Action:- SET;
+R #SQ_TIMER.IN;
+
+//Log PULSE operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_pulse_end;
+
+SET;
+S #_log_time_pulse_end;
+Verification:- A M1.1;
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

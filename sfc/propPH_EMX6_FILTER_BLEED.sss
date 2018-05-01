@@ -1,0 +1,146 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 1/05/2018 9:42:25 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+Name:- FILTER_BLEED
+Title:- PH_EMX6_FILTER_BLEED
+Description:- Filter bleed operation of SMFLx
+Class:- EMX6
+Level:- PH
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- X1PFILB
+Version:- 0.1
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.1 David Paspa      26-Apr-2018            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- log_msg_filter_bled
+Type:- BOOL
+Description:- HMI message: Operator confirmed sterile filter has been bled.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- time_filter_bleed_begin
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_time_filter_bleed_begin
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- time_filter_bleed_end
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- log_time_filter_bleed_end
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- prompt_filter_confirm_yes
+Type:- BOOL
+Description:- Operator confirms sterile filter has been bled.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- prompt_filter
+Type:- BOOL
+Description:- Prompt operator to confirm sterile filter has been bled.
+ParameterInOut:- VAR
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- PH_EMX6_FILTER_BLEED : FILTER_BLEED begin.
+Description:- Log FILTER_BLEED begin time.
+Prompt Operator to confirm sterile filter has been bled.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log FILTER_BLEED begin time.
+Prompt Operator to confirm sterile filter has been bled.
+Action:- //Log FILTER_BLEED begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_filter_bleed_begin;
+
+SET;
+S #_log_time_filter_bleed_begin;
+S #_prompt_filter;
+R #_prompt_filter_confirm_yes;
+
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 1.0000
+Title:- Operator confirmation
+EmptyTransition:- False
+Description:- Wait for operator to confirm connections has been made.
+Condition:- A #_prompt_filter_confirm_yes;
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 2.0000
+Title:- PH_EMX6_FILTER_BLEED : Last step
+Description:- Log operator confirmation and FILTER_BLEED operation end time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator confirmation and continue to check connection.
+Action:- SET;
+S #_log_msg_filter_bled;
+R  #_prompt_filter_confirm_yes;
+
+
+//Log FILTER_BLEED operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_filter_bleed_end;
+
+SET;
+S #_log_time_filter_bleed_end;
+Verification:- A M1.1; //Always High flag
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

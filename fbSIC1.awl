@@ -65,6 +65,7 @@ VAR_INPUT
     MAN_OVERRIDE : Bool;     // Override non-critical interlocks
     SETPOINT : Real;
     RAW_INPUT : Word;        // Measured Process Value received from control module
+    USER_INPUT : Word;       // Manual mode, equivallent of Analog input, to be entered by Operator
     MAN_PID : Bool;          // Manual non pid selection
     BRK	: Bool;              // Motor breaker fault
     PHR : Bool;              // Three-phase relay alarm
@@ -91,27 +92,27 @@ VAR_INPUT
 END_VAR
 
 VAR_OUTPUT
-    PV : Real;               // Measured Value (after scaling)
-    DQ : Bool;
     OUT_Q : Bool;            // Inverter Motor Run/Stop Command
-    OUT_Q_F : Bool;
-    OUT_Q_R : Bool;
     ALM_BRK : Bool;
     ALM_PHR : Bool;
     ALM_FLP : Bool;
     ALM_FLT : Bool;
     ALM_THM : Bool;
-    ALARM_HH : Bool;         // Alamr HH
-    ALARM_H : Bool;          // Alarm_H
-    RUNNING : Bool;
     RUN_FAULT : Bool;
     OUT_SETPOINT : Real;     // Setpoint readvalue
-    LMN : Real;              // PID controller output (0-100%)
     OUT_LMN_PER : Word;      // Inverter speed reference input
     OUT_LMN : Real;          // Inverter Speed reference from PID
 END_VAR
 
 VAR_IN_OUT
+    RUNNING : Bool;
+    OUT_Q_F : Bool;
+    OUT_Q_R : Bool;
+    PV : Real;               // Measured Value (after scaling)
+    DQ : Bool;
+    ALARM_HH : Bool;         // Alamr HH
+    ALARM_H : Bool;          // Alarm_H
+    LMN : DWord;             // PID controller output (0-100%)
     CMD : Int;               // Device Command from dbCONST
     MODE : Int;              // Control Mode
     STATE : Int;             // Device State from dbCONST
@@ -121,6 +122,8 @@ END_VAR
 VAR
     startTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
     dirTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+    startTMRElapsed : Time;
+    dirTMRElapsed : Time;
     PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
     permitMass : Bool;
     enable : Bool;
@@ -149,6 +152,8 @@ VAR_TEMP
     modeMANUAL : Bool;
     modeOOS : Bool;
     dirTMRStart : Bool;
+    startTMRExpired : Bool;
+    dirTMRExpired : Bool;
     tManual_Not_PID : Bool;
 END_VAR
 
@@ -216,14 +221,14 @@ TITLE = Call Analog Input handling function
         POLARITY             := #POLARITY ,
         LIMIT_HH             := #LIMIT_HH ,
         LIMIT_H              := #LIMIT_H ,
-        LIMIT_L              := 0 ,
-        LIMIT_LL             := 0 ,
+        LIMIT_L              := -1.0 ,
+        LIMIT_LL             := -2.0 ,
         ENABLE_HH            := 1 ,
         ENABLE_H             := 1 ,
-        ENABLE_L             := -1 ,
-        ENABLE_LL            := -2 ,
-        STATE_ENABLED        := #STATE_ENABLED ,
-        STATE_FAULT          := #STATE_FAULT ,
+        ENABLE_L             := 0 ,
+        ENABLE_LL            := 0 ,
+        STATE_ENABLED        := "dbCONST".BLK.SIC1.STATE.ENABLED ,
+        STATE_FAULT          := "dbCONST".BLK.SIC1.STATE.FAULT ,
         modeAUTO             := #modeAUTO ,
         modeMANUAL           := #modeMANUAL ,
         modeOOS              := #modeOOS ,
@@ -402,6 +407,14 @@ TITLE = Transfer the setpoint to the inverter reference value
     T #OUT_LMN;
 
 NETWORK
+TITLE = Transfer the setpoint to the output setpoint
+    //------------------------------------------------------------------------//
+    // Transfer setpoint to output setpoint:                                  //
+    //------------------------------------------------------------------------//
+    L #tSetpoint;
+    T #OUT_SETPOINT;
+
+NETWORK
 TITLE = Unscale Setpoint
     //------------------------------------------------------------------------//
     // Unscale the setpoint to set the inverter percent reference value:      //
@@ -476,8 +489,8 @@ TITLE = Start timer to check if fail to start or run at low speed
     {time_type := 'Time'}
     (   IN                   := #tDO ,
         PT                   := #FB_TDELAY ,
-        Q                    := #startTMR.Q ,
-        ET                   := #startTMR.ET
+        Q                    := #startTMRExpired ,
+        ET                   := #startTMRElapsed
     );
 
 NETWORK
@@ -495,9 +508,9 @@ TITLE = Calculate speed as a fraction of the setpoint
     //------------------------------------------------------------------------//
     // Calculate actual speed as a fraction of setpoint:                      //
     //------------------------------------------------------------------------//
-    A #OUT_Q;
+    A #tDO;
     L #tPV;
-    L #OUT_SETPOINT;
+    L #tSetpoint;
     /R;
     T #percentSpeed;
 
@@ -506,7 +519,7 @@ TITLE = Calculate speed as a percent of the setpoint
     //------------------------------------------------------------------------//
     // Calculate actual speed as a percent of setpoint:                       //
     //------------------------------------------------------------------------//
-    A #OUT_Q;
+    A #tDO;
     L #percentSpeed;
     L 100.0;
     *R;
@@ -517,7 +530,7 @@ TITLE = Flag RUNNING if speed above 25% of setponit
     //------------------------------------------------------------------------//
     // Flag RUNNING if actual speed is above 25% of setpoint:                 //
     //------------------------------------------------------------------------//
-    A #OUT_Q;
+    A #tDO;
     L #percentSpeed;
     L 25.0;
     >R;
@@ -549,8 +562,8 @@ TITLE = Start Forward Reverse Direction Timer
     {time_type := 'Time'}
     (   IN                   := #dirTMRStart ,
         PT                   := T#5M ,
-        Q                    := #dirTMR.Q ,
-        ET                   := #dirTMR.ET
+        Q                    := #dirTMRExpired ,
+        ET                   := #dirTMRElapsed
     );
     NOP 0;
 

@@ -73,11 +73,11 @@ END_VAR
 
 VAR_OUTPUT
     OUT_Q : Bool;            // Valve open/close command
-    FAULT_C : Bool;          // Valve fail to close
-    FAULT_O : Bool;          // Valve fail to Open
 END_VAR
 
 VAR_IN_OUT
+    FAULT_C : Bool;          // Valve fail to close
+    FAULT_O : Bool;          // Valve fail to Open
     CMD : Int;               // Device Command from dbCONST
     MODE : Int;              // Control Mode
     STATE : Int;             // Device State from dbCONST
@@ -87,6 +87,8 @@ END_VAR
 VAR
     openTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
     closeTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+    openTMRElapsed : Time;
+    closeTMRElapsed : Time;
 END_VAR
 
 VAR_TEMP
@@ -102,6 +104,8 @@ VAR_TEMP
     feedbackFAULT : Bool;
     OUT_Q_Close : Bool;
     OUT_Q_Open : Bool;
+    openTMRExpired : Bool;
+    closeTMRExpired : Bool;
 END_VAR
 
 BEGIN
@@ -271,8 +275,8 @@ TITLE = Start opening travel timer
     {time_type := 'Time'}
     (   IN                   := #cmdOPEN ,
         PT                   := #TMR ,
-        Q                    := #openTMR.Q ,
-        ET                   := #openTMR.ET
+        Q                    := #openTMRExpired ,
+        ET                   := #openTMRElapsed
     );
     NOP 0;
 
@@ -285,8 +289,8 @@ TITLE = Start closing travel timer
     {time_type := 'Time'}
     (   IN                   := #cmdCLOSE ,
         PT                   := #TMR ,
-        Q                    := #closeTMR.Q ,
-        ET                   := #closeTMR.ET
+        Q                    := #closeTMRExpired ,
+        ET                   := #closeTMRElapsed
     );
     NOP 0;
 

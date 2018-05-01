@@ -1,0 +1,251 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 1/05/2018 9:42:19 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+Name:- SETUP_CIP
+Title:- PH_EMX6_SETUP_CIP
+Description:- Setup M1 Manufacturing Filtration line flowpath for CIP
+Class:- EMX6
+Level:- PH
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- X1PCSET
+Version:- 0.4
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.4 Khairul Basar    07-Sep-2009 CC-09/023  confirm_CIPinout flag is reset in Step1.
+// 0.3 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific,& TRN code OR to AND
+//                                             Change in the Last step.
+// 0.2 Khairul Basar    18-Aug-2009            Added logic code
+// 0.1 David Paspa      13-Jul-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- log_msg_confirm_connect
+Type:- BOOL
+Description:- Operator confirms connections have been made.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- time_setup_cip_begin
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_time_setup_cip_begin
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- time_setup_cip_end
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- log_time_setup_cip_end
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- SIP_Interlock_Armed
+Type:- BOOL
+Description:- Filter interlock armed flag
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- CIP_Interlock_Armed
+Type:- BOOL
+Description:- CIP interlock armed flag
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- zsc_smfl1_state
+Type:- INT
+Description:- CIP connection sensor switch.
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- prompt_connect_confirm_yes
+Type:- BOOL
+Description:- Confirm CIP path connection
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- prompt_connect
+Type:- BOOL
+Description:- Prompt to connect CIP path
+ParameterInOut:- VAR
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- PH_EMX6_SETUP_CIP : SETUP CIP begin.
+Description:- Log SETUP CIP begin time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log SETUP CIP begin time.
+Action:- //Log SETUP CIP begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_setup_cip_begin;
+
+SET;
+S #_log_time_setup_cip_begin;
+
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- PH_EMX6_SETUP_CIP : Prompt to connect SMFLx CIP flowpath 
+Description:- Prompt Operator to connect CIP flowpath jumpers
+MMFLx to CIP Drain: ZSCx111
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt operator to connect CIP flowpath ZSCx111
+Action:- //Prompt to connect CIP.
+SET;
+S #_prompt_connect;
+R #_prompt_connect_confirm_yes;
+
+//Reset SIP and CIP interlock flag
+R #_CIP_Interlock_Armed;
+R #_SIP_Interlock_Armed;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- Operator confirmation
+EmptyTransition:- False
+Description:- Wait for operator to confirm connections has been made.
+Condition:- A #_prompt_connect_confirm_yes;
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
+Title:- Operator not setup correctly
+EmptyTransition:- False
+Description:- Jump unconditionally, the connections are not made correctly
+Condition:- A M1.1; // Always High Bit
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- PH_EMX6_SETUP_CIP : Check connection
+Description:- Log operator confirmation and continue to check connection.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator confirmation and continue to check connection.
+Action:- SET;
+S #_log_msg_confirm_connect;
+R  #_prompt_connect_confirm_yes;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- PH_EMX6_SETUP_CIP : Setup Completed
+Description:- Enable flowpath interlock armed flag.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set the CIP interlock armed flag 
+Action:- SET;
+S #_CIP_Interlock_Armed;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 05
+Title:- Phase Finish Normal
+EmptyTransition:- False
+Description:- Phase Finish Normal
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
+Title:- PH_EMX6_SETUP_CIP : Last Step
+Description:- Log SETUP CIP operation end time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log SETUP CIP operation end time.
+Action:- //Log SETUP CIP operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_setup_cip_end;
+
+SET;
+S #_log_time_setup_cip_end;
+Verification:- A M1.1; //Always High flag
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

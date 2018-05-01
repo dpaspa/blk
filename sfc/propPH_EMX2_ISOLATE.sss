@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:32:56 AM by David Paspa
+generated on 1/05/2018 9:42:08 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -33,37 +33,77 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- zsc_cipsip
+Name:- log_msg_isolate_confirm
+Type:- BOOL
+Description:- Operator confirmed that filling machine is disconnected.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- time_isolate_begin
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_time_isolate_begin
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- time_isolate_end
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- log_time_isolate_end
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- zsc_cipsip_state
 Type:- INT
 Description:- S1 to F1P1 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::7
 --------------------------------------------------
-Name:- zsc_filter
+Name:- zsc_filter_state
 Type:- INT
 Description:- VTL1 to M2 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::8
 --------------------------------------------------
-Name:- zsc_bfs2
+Name:- zsc_bfs2_state
 Type:- INT
 Description:- S1 to F2P1 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::9
 --------------------------------------------------
-Name:- zsc_smfl1
+Name:- zsc_smfl1_state
 Type:- INT
 Description:- VTL1 to M1 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::10
 --------------------------------------------------
 Name:- flowpath_isolated
 Type:- BOOL
@@ -71,15 +111,15 @@ Description:- Flow path of filling machine line is isolated and no more integral
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::11
 --------------------------------------------------
-Name:- confirm_isolate
+Name:- prompt_isolate_confirm_yes
 Type:- BOOL
 Description:- Operator confirmed that filling machine is disconnected.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::12
 --------------------------------------------------
 Name:- prompt_isolate
 Type:- BOOL
@@ -91,6 +131,37 @@ ParameterInOut:- VAR
 STEP::01
 --------------------------------------------------
 StepNo:- 01
+Title:- PH_EMX2_ISOLATE : Isolate begin.
+Description:- Log Isolate begin time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log ISOLATE operation begin time.
+Action:- //Log ISOLATE operation begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_isolate_begin;
+
+SET;
+S #_log_time_isolate_begin;
+
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
 Title:- PH_EMX2_ISOLATE : Prompt to remove filling machine flowpath
 Description:- Prompt operator to remove filling machine flowpath
 
@@ -102,35 +173,6 @@ Action:- SET;
 S #_prompt_isolate; //Prompt to isolate the PW & WFI line
 //Reset used bit
 R #_flowpath_isolated;
-R #_prompt_isolate;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::01
---------------------------------------------------
-TRNNo:- 01
-Title:- Operator confirmation
-EmptyTransition:- False
-Description:- Wait for operator to confirm connections has been removed.
-Condition:- A #_confirm_isolate;
-
-
---------------------------------------------------
-STEP::02
---------------------------------------------------
-StepNo:- 02
-Title:- PH_EMX2_ISOLATE : Check connection
-Description:- Check connection status.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Reset old bits
-Action:- //Reset old bits
-SET;
-R #_prompt_isolate;
-R #_confirm_isolate;
 Verification:- A M1.1; //Always High flag
 
 
@@ -138,36 +180,64 @@ Verification:- A M1.1; //Always High flag
 TRANSITION::02
 --------------------------------------------------
 TRNNo:- 02
-Title:- Connections removed
+Title:- Operator confirmation
 EmptyTransition:- False
-Description:- Jump if the connections is removed
-Condition:- A(    ;
-   L #_zsc_cipsip; 
-   L "dbCONST".CM.ZSC2_DEV_STATE.OUT;
-      ==I ;  
-    )     ;
-A(    ;
-   L #_zsc_bfs2;
-   L "dbCONST".CM.ZSC2_DEV_STATE.OUT;
-      ==I ;  
-    )     ;
-A(    ;
-   L #_zsc_filter; 
-   L "dbCONST".CM.ZSC2_DEV_STATE.OUT;
-      ==I ;  
-    )     ;
-A(    ;
-   L #_zsc_smfl1;
-   L "dbCONST".CM.ZSC2_DEV_STATE.OUT;
-      ==I ;  
-    )     ;
+Description:- Wait for operator to confirm connections has been removed.
+Condition:- A #_prompt_isolate_confirm_yes;
 
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- PH_EMX2_ISOLATE : Check connection
+Description:- Log operator confirmation and continue to check connection.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator confirmation.
+
+Action:- SET;
+S #_log_msg_isolate_confirm;
+R #_prompt_isolate_confirm_yes;
+Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
 TRANSITION::03
 --------------------------------------------------
 TRNNo:- 03
+Title:- Connections removed
+EmptyTransition:- False
+Description:- Jump if the connections is removed
+Condition:- A(    ;
+   L #_zsc_cipsip_state; 
+   L "dbCONST".BLK.ZSC2.STATE.OUT;
+      ==I ;  
+    )     ;
+A(    ;
+   L #_zsc_bfs2_state;
+   L "dbCONST".BLK.ZSC2.STATE.OUT;
+      ==I ;  
+    )     ;
+A(    ;
+   L #_zsc_filter_state; 
+   L "dbCONST".BLK.ZSC2.STATE.OUT;
+      ==I ;  
+    )     ;
+A(    ;
+   L #_zsc_smfl1_state;
+   L "dbCONST".BLK.ZSC2.STATE.OUT;
+      ==I ;  
+    )     ;
+
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
 Title:- Operator not removed correctly
 EmptyTransition:- False
 Description:- Jump unconditionally, the connections have not been removed correctly
@@ -175,9 +245,9 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::03
+STEP::04
 --------------------------------------------------
-StepNo:- 03
+StepNo:- 04
 Title:- PH_EMX2_ISOLATE : Setup completed
 Description:- Flowpath isolated interlock armed flag
 
@@ -191,9 +261,9 @@ Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::04
+TRANSITION::05
 --------------------------------------------------
-TRNNo:- 04
+TRNNo:- 5.0000
 Title:- Phase Finish Normal
 EmptyTransition:- False
 Description:- Phase Finish Normal
@@ -201,19 +271,22 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::04
+STEP::05
 --------------------------------------------------
-StepNo:- 04
+StepNo:- 05
 Title:- PH_EMX2_ISOLATE : Last Step
-Description:- Last Step
+Description:- Log ISOLATE operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Last Step
-Action:- //Reset used bit
+Description:- Log ISOLATE operation end time.
+Action:- //Log ISOLATE operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_isolate_end;
+
 SET;
-R #_prompt_isolate;
+S #_log_time_isolate_end;
 Verification:- A M1.1; //Always High flag
 
 ****************************************************************************************************

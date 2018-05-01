@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:32:38 AM by David Paspa
+generated on 1/05/2018 9:41:52 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -36,13 +36,37 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- DataQuality
-Type:- BOOL
-Description:- Data Quality of analog input
-ParameterInOut:- IN
+Name:- time_tare_begin
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::2
+--------------------------------------------------
+Name:- log_time_tare_begin
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- time_tare_end
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- log_time_tare_end
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
 --------------------------------------------------
 Name:- mass_tare
 Type:- REAL
@@ -50,15 +74,15 @@ Description:- Tare mass
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::6
 --------------------------------------------------
-Name:- mass_current
+Name:- mi_vessel_pv
 Type:- REAL
 Description:- mass field value
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::7
 --------------------------------------------------
 Name:- time_settle
 Type:- TIME
@@ -71,13 +95,22 @@ STEP::01
 --------------------------------------------------
 StepNo:- 01
 Title:- PH_EMM1_TARE : Wait settle time
-Description:- Wait to allow the contents to settle. 
+Description:- Log TARE operation begin time.
+Wait to allow the contents to settle. 
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- The settling time is loaded to allow the contents to settle. 
-Action:- //Load the settling time
+Description:- Log TARE operation begin time.
+The settling time is loaded to allow the contents to settle. 
+Action:- //Log TARE operation begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_tare_begin;
+
+SET;
+S #_log_time_tare_begin;
+
+//Load the settling time
 L #_time_settle;
 T #SQ_TIMER.PT;
 
@@ -109,7 +142,7 @@ Description:- Save Current mass field value into Tare mass parameter for users r
 ACTION::01
 --------------------------------------------------
 Description:- Save Current mass field value into Tare mass parameter for users reference.
-Action:- L #_mass_current;
+Action:- L #_mi_vessel_pv;
 T #_mass_tare;
 Verification:- A M1.1;
 
@@ -129,13 +162,20 @@ STEP::03
 --------------------------------------------------
 StepNo:- 03
 Title:- PH_EMM1_TARE : Last Step
-Description:- Last Step
+Description:- Log TARE operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Last Step
-Action:- SET;
+Description:- Log TARE operation end time.
+Action:- //Log TARE operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_tare_end;
+
+SET;
+S #_log_time_tare_end;
+
+SET;
 R #SQ_TIMER.IN;
 Verification:- A M1.1;
 

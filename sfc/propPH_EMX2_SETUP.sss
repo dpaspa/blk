@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:32:59 AM by David Paspa
+generated on 1/05/2018 9:42:11 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -33,61 +33,93 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- fillz
-Type:- INT
-Description:- Filling line
-ParameterInOut:- IN
+Name:- log_msg_confirm_connect
+Type:- BOOL
+Description:- Operator confirms connections have been made.
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::2
 --------------------------------------------------
-Name:- mx
-Type:- INT
-Description:- Manufacturing vessel (M1/M2)
-ParameterInOut:- IN
+Name:- time_setup_begin
+Type:- TOD
+Description:- Logging SETUP operation start time
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::3
 --------------------------------------------------
-Name:- zsc_bfs2
-Type:- INT
-Description:- S1 to F2P1 flowpath indicator
-ParameterInOut:- IN
+Name:- log_time_setup_begin
+Type:- BOOL
+Description:- Flags the HMI that SETUP started
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- zsc_filter
-Type:- INT
-Description:- VTL1 to M2 flowpath indicator
-ParameterInOut:- IN
+Name:- time_setup_end
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- zsc_cipsip
-Type:- INT
-Description:- S1 to F1P1 flowpath indicator
-ParameterInOut:- IN
+Name:- log_time_setup_end
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- zsc_smfl1
+Name:- flz
 Type:- INT
-Description:- VTL1 to M1 flowpath indicator
+Description:- Filling line selection
 ParameterInOut:- IN
 
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- Confirm_Sel
+Name:- mx
 Type:- INT
-Description:- Confirmation Of Route Selection
-ParameterInOut:- IN_OUT
+Description:- Manufacturing vessel (M1/M2) selection
+ParameterInOut:- IN
 
 --------------------------------------------------
 PARAMETER::8
+--------------------------------------------------
+Name:- zsc_bfs2_state
+Type:- INT
+Description:- S1 to F2P1 flowpath indicator
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- zsc_filter_state
+Type:- INT
+Description:- VTL1 to M2 flowpath indicator
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- zsc_cipsip_state
+Type:- INT
+Description:- S1 to F1P1 flowpath indicator
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- zsc_smfl1_state
+Type:- INT
+Description:- VTL1 to M1 flowpath indicator
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::12
 --------------------------------------------------
 Name:- flowpath_fillmc
 Type:- BOOL
@@ -95,17 +127,17 @@ Description:- Enable flow path to filling machine
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::13
 --------------------------------------------------
-Name:- confirm_fillmc
+Name:- prompt_connect_confirm_yes
 Type:- BOOL
 Description:- confirm that filling machine line connected
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::14
 --------------------------------------------------
-Name:- prompt_fillmc
+Name:- prompt_connect
 Type:- BOOL
 Description:- Prompt to connect filling machine line
 ParameterInOut:- VAR
@@ -115,20 +147,19 @@ ParameterInOut:- VAR
 STEP::01
 --------------------------------------------------
 StepNo:- 01
-Title:- EMX3_PH_SETUP : Prompt to connect filling machine
-Description:- Prompt operator to connect filling machine flowpath
+Title:- PH_EMC2_SETUP : SETUP begin.
+Description:- Log SETUP begin time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Prompt operator to connect filling machine flowpath 
-Action:- SET;
-S #_prompt_fillmc;
-R #_confirm_fillmc;
-R #_flowpath_fillmc;
-L 0;
-L #_Confirm_Sel; // Force Confirm Of Connections
+Description:- Log SETUP begin time.
+Action:- //Log SETUP begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_setup_begin;
 
+SET;
+S #_log_time_setup_begin;
 Verification:- A M1.1; //Always High flag
 
 
@@ -136,43 +167,66 @@ Verification:- A M1.1; //Always High flag
 TRANSITION::01
 --------------------------------------------------
 TRNNo:- 01
-Title:- Operator confirmation
+Title:- Unconditional Jump
 EmptyTransition:- False
-Description:- Wait for operator to confirm connections has been made.
-Condition:- A #_confirm_fillmc;
+Description:- Jump
+Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
 STEP::02
 --------------------------------------------------
-StepNo:- 02
-Title:- PH_EMX2_SETUP : Check connection
-Description:- Check connection
+StepNo:- 2.0000
+Title:- PH_EMX2_SETUP : Prompt to connect filling machine
+Description:- Prompt operator to connect filling machine flowpath
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
+Description:- Prompt operator to connect filling machine flowpath 
 Action:- SET;
-R #_prompt_fillmc;
-R #_confirm_fillmc;
+S #_prompt_connect;
+R #_prompt_connect_confirm_yes;
+R #_flowpath_fillmc;
 Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
 TRANSITION::02
 --------------------------------------------------
-TRNNo:- 02
+TRNNo:- 2.0000
+Title:- Operator confirmation
+EmptyTransition:- False
+Description:- Wait for operator to confirm connections has been made.
+Condition:- A #_prompt_connect_confirm_yes;
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 3.0000
+Title:- PH_EMX2_SETUP : Check connection
+Description:- Log operator confirmation and continue to check connection.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator confirmation 
+Action:- SET;
+S #_log_msg_confirm_connect;
+R #_prompt_connect_confirm_yes;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 3.0000
 Title:- Connection correctly inserted
 EmptyTransition:- False
 Description:- Jump if correct switch conection has been made.
-Condition:- //Check if Selected connection confirmed and switch status OK.
-A(;
-  L #_Confirm_Sel;
-  L 1;
-  ==I ;  
-);
+Condition:- //Check switch status for respective connection.
 
-//.........................................................................................................................
 A(;
 	A(;
 	//If M1 selected, then check the resp. flowpath status.
@@ -182,8 +236,8 @@ A(;
 		==I ;  
 	);
 		A(;
-		L #_zsc_smfl1;
-		L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+		L #_zsc_smfl1_state;
+		L "dbCONST".BLK.ZSC2.STATE.IN;
 		==I ;  
 		);
 	);
@@ -195,8 +249,8 @@ A(;
 		==I ;  
 		);
 		A(;
-		L #_zsc_filter;
-		L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+		L #_zsc_filter_state;
+		L "dbCONST".BLK.ZSC2.STATE.IN;
 		==I ;  
 		);
 	);
@@ -206,26 +260,26 @@ A(;
 	A(;
 	//If F1P1 selected, then check the resp. flowpath status.
 		A(;
-		L #_fillz;
-		L "dbCONST". SEL.FILLZ.FILL1;
+		L #_flz;
+		L "dbCONST".SEL.FLZ.FL1;
 		==I ;  
 		);
 		A(;
-		L #_zsc_cipsip;
-		L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+		L #_zsc_cipsip_state;
+		L "dbCONST".BLK.ZSC2.STATE.IN;
 		==I ;  
 		);
 	);
 	O(;
 	//If F2P1 selected, then check the resp. flowpath status.
 		A(;
-		L #_fillz;
-		L "dbCONST". SEL.FILLZ.FILL2;
+		L #_flz;
+		L "dbCONST".SEL.FLZ.FL2;
 		==I ;  
 		);
 		A(;
-		L #_zsc_bfs2;
-		L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+		L #_zsc_bfs2_state;
+		L "dbCONST".BLK.ZSC2.STATE.IN; 
 		==I ;  
 		);
 	);
@@ -233,9 +287,9 @@ A(;
 
 
 --------------------------------------------------
-TRANSITION::03
+TRANSITION::04
 --------------------------------------------------
-TRNNo:- 03
+TRNNo:- 4.0000
 Title:- Operator not setup correctly
 EmptyTransition:- 0.0000
 Description:- Jump unconditionally, the connections are not made correctly
@@ -243,9 +297,9 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::03
+STEP::04
 --------------------------------------------------
-StepNo:- 03
+StepNo:- 4.0000
 Title:- PH_EMX2_SETUP : Setup completed
 Description:- Set the flowpath flag.
 
@@ -259,9 +313,9 @@ Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::04
+TRANSITION::05
 --------------------------------------------------
-TRNNo:- 04
+TRNNo:- 5.0000
 Title:- Phase Finish Normal
 EmptyTransition:- False
 Description:- Phase Finish Normal
@@ -269,19 +323,22 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::04
+STEP::05
 --------------------------------------------------
-StepNo:- 04
+StepNo:- 5.0000
 Title:- PH_EMX2_SETUP : Last Step
-Description:- Last Step
+Description:- Log SETUP operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Last Step
-Action:- SET;
-R #_prompt_fillmc;
-R #_confirm_fillmc;
+Description:- Log SETUP operation end time.
+Action:- //Log SETUP operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_setup_end;
+
+SET;
+S #_log_time_setup_end;
 Verification:- A M1.1; //Always High flag
 
 ****************************************************************************************************

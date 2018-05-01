@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:32:23 AM by David Paspa
+generated on 1/05/2018 9:41:32 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -39,41 +39,41 @@ SFCCommCode:- //comm from Visio
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- Flush_timeS
-Type:- INT
-Description:- Flush_timeS
-ParameterInOut:- IN
+Name:- time_flush_begin
+Type:- TOD
+Description:- Logging FLUSH operation start time
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::2
 --------------------------------------------------
-Name:- Flush_timeM
-Type:- INT
-Description:- Flush_timeM
-ParameterInOut:- IN
+Name:- log_time_flush_begin
+Type:- BOOL
+Description:- Flags the HMI that FLUSH started
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::3
 --------------------------------------------------
-Name:- Flush_timeH
-Type:- INT
-Description:- flushing time
-ParameterInOut:- IN
+Name:- time_flush_end
+Type:- TOD
+Description:- Logging FLUSH operation end time
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- EM_stop_cmd
+Name:- log_time_flush_end
 Type:- BOOL
-Description:- EM_stop_cmd
-ParameterInOut:- OUT
+Description:- Flags the HMI that FLUSH ended
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- flush_to_time
-Type:- BOOL
-Description:- flush_to_time
+Name:- runtime
+Type:- TIME
+Description:- Flushing run time
 ParameterInOut:- IN
 
 --------------------------------------------------
@@ -153,175 +153,218 @@ ParameterInOut:- IN
 STEP::01
 --------------------------------------------------
 StepNo:- 01
-Title:- PH_EMC2_FLUSH : Open selected duty supply valve
-Description:- Open either WFI, PW, PS(WFI), PS(PW) supply valve.
+Title:- PH_EMC2_FLUSH : FLUSH begin.
+Description:- Log FLUSH operation begin time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Open the selected medium supply valve, either WFI, PW, PS(WFI), PS(PW).
-Action:- // If medium is PW, then open PW valve. Else, bypass the valve open command to check the WFI medium.
-L "dbCONST".SEL.LIQUID.PW;
-L  #_medium;
-==I;
+Description:- Log FLUSH operation begin time.
+Action:- //Log FLUSH operation begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_flush_begin;
 
-JCN S201;
+SET;
+S #_log_time_flush_begin;
 
-L   "dbCONST".CM.CMD_VALVE.OPEN;
-T  #_pos_pw_cmd;
+//Start timer
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
 
-S201: NOP 0;
-
-// If medium is WFI, then open WFI valve. Else, bypass the valve open command to check the PS_PW medium.
-L "dbCONST".SEL.LIQUID.WFI;
-L  #_medium;
-==I;
-
-JCN S202;
-
-L   "dbCONST".CM.CMD_VALVE.OPEN;
-T  #_pos_wfi_cmd;
-
-S202:NOP 0;
-
-// If medium is PS_PW, then open PS_PW valve. Else, bypass the valve open command to check the PS_WFI medium.
-L "dbCONST".SEL.LIQUID.PSPW;
-L  #_medium;
-==I;
-
-JCN S203;
-
-L   "dbCONST".CM.CMD_VALVE.OPEN;
-T  #_pos_pspw_cmd;
-
-S203: NOP 0;
-
-// If medium is PS_WFI, then open PS_WFI valve. Else, bypass the valve open command to load the flush time.
-L "dbCONST".SEL.LIQUID.PSWFI;
-L  #_medium;
-==I;
-
-JCN S204;
-
-L   "dbCONST".CM.CMD_VALVE.OPEN;
-T  #_pos_pswfi_cmd;
-
-S204: NOP 0;
-	
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
 
 //Load flush time
-L #_Flush_timeH;
-T #sqRunTimer.TIME_H;
-
-L #_Flush_timeM;
-T #sqRunTimer.TIME_M;
-
-L #_Flush_timeS;
-T #sqRunTimer.TIME_S;
-
-A  #_flush_to_time;
-S #sqRunTimer.ENABLE;
-R #sqRunTimer.NON_RET;
-R #sqRunTimer.RESET;
-
-AN  #_flush_to_time;
-R #sqRunTimer.ENABLE;
-S #sqRunTimer.RESET;	
-Verification:- // Open PW supply valve
-A(;
-L "dbCONST".SEL.LIQUID.PW;
-L  #_medium;
-==I;
-);
-A(;
-L   "dbCONST".CM.POS_DEV_STATE.OPENED;
-L  #_pos_pw_state;
-==I;
-);
-O;
-// Open WFI supply valve
-A(;
-L "dbCONST".SEL.LIQUID.WFI;
-L  #_medium;
-==I;
-);
-A(;
-L   "dbCONST".CM.POS_DEV_STATE.OPENED;
-L  #_pos_wfi_state;
-==I;
-);
-O;
-// Open PW_PS supply valve
-A(;
-L "dbCONST".SEL.LIQUID.PSPW;
-L  #_medium;
-==I;
-);
-A(;
-L   "dbCONST".CM.POS_DEV_STATE.OPENED;
-L  #_pos_pspw_state
-==I;
-);
-O;
-// Open WFI_PS supply valve
-A(;
-L "dbCONST".SEL.LIQUID.PSWFI;
-L  #_medium;
-==I;
-);
-A(;
-L   "dbCONST".CM.POS_DEV_STATE.OPENED;
-L  #_pos_pswfi_state;
-==I;
-);
+L #_runtime;
+T #SQ_TIMER.PT;
+Verification:- A M1.1;
 
 
 --------------------------------------------------
 TRANSITION::01
 --------------------------------------------------
 TRNNo:- 01
-Title:- Wait for flush time
+Title:- PW medium selected.
 EmptyTransition:- False
-Description:- Jump if flushing to time and flush time has expired. Wait in this transition indefinitely for continuous flushing as STOP command of EM will close all the valves in the STOPPED state.
-Condition:- // Flushing time expired.
-A  #sqRunTimer.TIME_EXPIRED; 
-A  #_flush_to_time;
+Description:- Check if PW medium selected.
+Condition:- A(;
+L "dbCONST".SEL.LIQUID.PW;
+L  #_medium;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- WFI medium selected.
+EmptyTransition:- False
+Description:- Check if WFI medium selected.
+Condition:- A(;
+L "dbCONST".SEL.LIQUID.WFI;
+L  #_medium;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- PSPW medium selected.
+EmptyTransition:- False
+Description:- Check if PSPW medium selected.
+Condition:- A(;
+L "dbCONST".SEL.LIQUID.PSPW;
+L  #_medium;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
+Title:- PSWFI medium selected.
+EmptyTransition:- False
+Description:- Check if PSWFI medium selected.
+Condition:- A(;
+L "dbCONST".SEL.LIQUID.PSWFI;
+L  #_medium;
+==I;
+);
 
 
 --------------------------------------------------
 STEP::02
 --------------------------------------------------
 StepNo:- 02
-Title:- PH_EMC2_FLUSH : Close supply valve
-Description:- Stop the EM
+Title:- PH_EMC2_FLUSH : Open PW supply valve
+Description:- Open PW supply valve
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Stop the EM if flushing to time and flush time has expired
-Action:- //Reset the timer
-SET;       
-S #sqRunTimer.RESET;
-//Stop the EM if flush to time
-A  #_flush_to_time;
-S #_EM_stop_cmd;
-Verification:- A M1.1; //Always High flag
+Description:- Open PW supply valve
+Action:- //Open PW supply valve.
+L  "dbCONST".BLK.POSx.CMD.OPEN;
+T  #_pos_pw_cmd;
 
+Verification:- // Verify selected medium and valve state.
+A(;
+L "dbCONST".SEL.LIQUID.PW;
+L  #_medium;
+==I;
+);
+A(;
+L "dbCONST".BLK.POSx.STATE.OPENED;
+L  #_pos_pw_state;
+==I;
+);
 
---------------------------------------------------
-TRANSITION::02
---------------------------------------------------
-TRNNo:- 2.0000
-Title:- Phase Finish Normal
-EmptyTransition:- False
-Description:- Phase Finish Normal
-Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
 STEP::03
 --------------------------------------------------
 StepNo:- 03
+Title:- PH_EMC2_FLUSH : Open WFI supply valve
+Description:- Open WFI supply valve
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open WFI supply valve
+Action:- //Open WFI supply valve.
+L  "dbCONST".BLK.POSx.CMD.OPEN;
+T  #_pos_wfi_cmd;
+
+Verification:- // Verify selected medium and valve state.
+A(;
+L "dbCONST".SEL.LIQUID.WFI;
+L  #_medium;
+==I;
+);
+A(;
+L "dbCONST".BLK.POSx.STATE.OPENED;
+L  #_pos_wfi_state;
+==I;
+);
+
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- PH_EMC2_FLUSH : Open PS(PW) supply valve
+Description:- Open PS(PW) supply valve
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open PS(PW) supply valve
+Action:- //Open PS(PW) supply valve.
+L  "dbCONST".BLK.POSx.CMD.OPEN;
+T  #_pos_pspw_cmd;
+
+Verification:- // Verify selected medium and valve state.
+A(;
+L "dbCONST".SEL.LIQUID.PSPW;
+L  #_medium;
+==I;
+);
+A(;
+L "dbCONST".BLK.POSx.STATE.OPENED;
+L  #_pos_pspw_state
+==I;
+);
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
+Title:- PH_EMC2_FLUSH : Open PS(WFI) supply valve
+Description:- Open PS(WFI) supply valve
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open PS(WFI) supply valve
+Action:- //Open PS(WFI) supply valve.
+L  "dbCONST".BLK.POSx.CMD.OPEN;
+T  #_pos_pswfi_cmd;
+
+Verification:- // Verify selected medium and valve state.
+A(;
+L "dbCONST".SEL.LIQUID.PSWFI;
+L  #_medium;
+==I;
+);
+A(;
+L "dbCONST".BLK.POSx.STATE.OPENED;
+L  #_pos_pswfi_state;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 05
+Title:- Wait for flush time
+EmptyTransition:- False
+Description:- Jump if flush time has expired.
+Condition:- // Flushing time expired.
+A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 06
 Title:- PH_EMC2_FLUSH : Last Step
 Description:- Last Step
 
@@ -329,21 +372,20 @@ Description:- Last Step
 ACTION::01
 --------------------------------------------------
 Description:- Reset the timer and close PW, WFI, PS_PW and PS_WFI valves.
-Action:- SET;       
-R #sqRunTimer.ENABLE;
-S #sqRunTimer.RESET;
-R #sqRunTimer.PAUSE;
-
-//Last step action
-// Close PW, WFI, PS_PW, PS_WFI valves
-L   "dbCONST".CM.CMD_VALVE.CLOSE;
+Action:- // Close PW, WFI, PS_PW, PS_WFI valves.
+L "dbCONST".BLK.POSx.CMD.CLOSE;
 T  #_pos_pw_cmd;
 T  #_pos_wfi_cmd;
 T  #_pos_pspw_cmd;
 T  #_pos_pswfi_cmd;
 
-AN  #_flush_to_time;
-R #_EM_stop_cmd;
+//Log FLUSH end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_flush_end;
+
+SET;
+S #_log_time_flush_end
+
 Verification:- A M1.1; //Always High flag
 
 ****************************************************************************************************

@@ -58,7 +58,7 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 VAR
 @@TEMPLATE_BEGIN@@
-    @@INSTANCE@@ : "fbDI1";   // @@DESCRIPTION@@
+    @@INSTANCE@@ : "fbSIC1";   // @@DESCRIPTION@@
 @@TEMPLATE_END@@
 END_VAR
 
@@ -78,7 +78,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbCRIL"."@@INSTANCE@@-CRIL".INTERLOCK;
+    A "idbCRIL".@@INSTANCE@@cril.IL.INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
     = #CRIL;
 
@@ -91,7 +91,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbNCRIL"."@@INSTANCE@@-NCRIL".INTERLOCK;
+    A "idbNCRIL".@@INSTANCE@@ncril.IL.INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
     = #NCRIL;
 
@@ -108,9 +108,12 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
         MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
         SETPOINT             := #@@INSTANCE@@.SETPOINT ,
         RAW_INPUT            := "@@INSTANCE@@-RAW":P ,
+        USER_INPUT           := #@@INSTANCE@@.USER_INPUT ,
         MAN_PID              := #@@INSTANCE@@.MAN_PID ,
         BRK                  := "@@INSTANCE@@-BRK" ,
-        PHR                  := "@@LNK1TAG@@-DI" ,
+@@ATTR_BEGIN|LINK@@
+        PHR                  := "@@PHRLINKINSTANCE@@-DI" ,
+@@ATTR_END|LINK@@
         FLP                  := "@@INSTANCE@@-FLP" ,
         FLT                  := "@@INSTANCE@@-FLT" ,
         THM                  := "@@INSTANCE@@-THM" ,
@@ -123,8 +126,10 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
         LIMIT_HH             := @@LIMITHH@@ ,
         LIMIT_H              := @@LIMITH@@ ,
 @@ATTR_END|ANALOG_EMBED@@
-        MI1_MASS             := "idb@@LNK2CLASS@@".@@LNK2TAG@@.PV ,
-        MI1_DQ               := "idb@@LNK2CLASS@@".@@LNK2TAG@@.DQ ,
+@@ATTR_BEGIN|LINK@@
+        MI1_MASS             := "idb@@MASSLINKCLASS@@".@@MASSLINKINSTANCE@@.PV ,
+        MI1_DQ               := "idb@@MASSLINKCLASS@@".@@MASSLINKINSTANCE@@.DQ ,
+@@ATTR_END|LINK@@
         FB_TDELAY            := #@@INSTANCE@@.FB_TDELAY ,
         P_SEL                := #@@INSTANCE@@.P_SEL ,
         I_SEL                := #@@INSTANCE@@.I_SEL ,
@@ -133,29 +138,30 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
         TI                   := #@@INSTANCE@@.TI ,
         TD                   := #@@INSTANCE@@.TD ,
         CYCLE                := #@@INSTANCE@@.CYCLE ,
-        PV                   := #@@INSTANCE@@.PV ,
-        DQ                   := #@@INSTANCE@@.DQ ,
         OUT_Q                := "@@INSTANCE@@-CMD" ,
-        OUT_Q_F              := "@@INSTANCE@@-OUT_F" ,
-        OUT_Q_R              := "@@INSTANCE@@-OUT_R" ,
         ALM_BRK              := #@@INSTANCE@@.ALM_BRK ,
         ALM_PHR              := #@@INSTANCE@@.ALM_PHR ,
         ALM_FLP              := #@@INSTANCE@@.ALM_FLP ,
         ALM_FLT              := #@@INSTANCE@@.ALM_FLT ,
         ALM_THM              := #@@INSTANCE@@.ALM_THM ,
-        ALARM_HH             := #@@INSTANCE@@.ALARM_HH ,
-        ALARM_H              := #@@INSTANCE@@.ALARM_H ,
-        RUNNING              := #@@INSTANCE@@.RUNNING ,
         RUN_FAULT            := #@@INSTANCE@@.RUN_FAULT ,
         OUT_SETPOINT         := #@@INSTANCE@@.OUT_SETPOINT ,
-        LMN                  := "@@INSTANCE@@-OUT":P ,
         OUT_LMN_PER          := #@@INSTANCE@@.OUT_LMN_PER ,
         OUT_LMN              := #@@INSTANCE@@.OUT_LMN ,
+        RUNNING              := #@@INSTANCE@@.RUNNING ,
+        OUT_Q_F              := "@@INSTANCE@@-OUT_F" ,
+        OUT_Q_R              := "@@INSTANCE@@-OUT_R" ,
+        PV                   := #@@INSTANCE@@.PV ,
+        DQ                   := #@@INSTANCE@@.DQ ,
+        ALARM_HH             := #@@INSTANCE@@.ALARM_HH ,
+        ALARM_H              := #@@INSTANCE@@.ALARM_H ,
+        LMN                  := "@@INSTANCE@@-OUT":P ,
         CMD                  := #@@INSTANCE@@.CMD ,
         MODE                 := #@@INSTANCE@@.MODE ,
         STATE                := #@@INSTANCE@@.STATE ,
         INTERLOCK            := #@@INSTANCE@@.INTERLOCK
       );
       NOP 0;
+
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

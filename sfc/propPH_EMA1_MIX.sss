@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:32:17 AM by David Paspa
+generated on 1/05/2018 9:41:23 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -42,13 +42,53 @@ SFCCommCode:-
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- sic_agit_cmd
+Type:- BOOL
+Description:- Description
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- time_mix_begin
+Type:- TOD
+Description:- Logging MIX start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_time_mix_begin
+Type:- BOOL
+Description:- Flags the HMI that MIX started
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- time_mix_end
+Type:- TOD
+Description:- Logging MIX end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- log_time_mix_end
+Type:- BOOL
+Description:- Flags the HMI that MIX ended
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
 Name:- Report_Evnt_End
 Type:- BOOL
 Description:- Make Mix End for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::7
 --------------------------------------------------
 Name:- Report_Evnt_Start
 Type:- BOOL
@@ -56,7 +96,7 @@ Description:- Make Mix Start for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::8
 --------------------------------------------------
 Name:- sic_agit_running
 Type:- BOOL
@@ -64,7 +104,7 @@ Description:- Agitator running
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::9
 --------------------------------------------------
 Name:- ResetRunTimer
 Type:- BOOL
@@ -72,31 +112,31 @@ Description:- Reset Run timer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::10
 --------------------------------------------------
-Name:- RunTimeS
+Name:- runtime_s
 Type:- INT
 Description:- RunTimeS
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::11
 --------------------------------------------------
-Name:- RunTimeM
+Name:- runtime_m
 Type:- INT
 Description:- RunTimeM
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::12
 --------------------------------------------------
-Name:- RunTimeH
+Name:- runtime_h
 Type:- INT
 Description:- RunTimeH
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::13
 --------------------------------------------------
 Name:- AcumTimeS
 Type:- INT
@@ -104,7 +144,7 @@ Description:- AcumTimeS
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::14
 --------------------------------------------------
 Name:- AcumTimeM
 Type:- INT
@@ -112,7 +152,7 @@ Description:- AcumTimeM
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::15
 --------------------------------------------------
 Name:- AcumTimeH
 Type:- INT
@@ -120,15 +160,7 @@ Description:- Total acumulated running time
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
---------------------------------------------------
-Name:- FP_SicState
-Type:- Bool
-Description:- Positive pulse to store state change
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::12
+PARAMETER::16
 --------------------------------------------------
 Name:- sic_agit_hist
 Type:- INT
@@ -136,15 +168,7 @@ Description:- Previous state of SIC
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
---------------------------------------------------
-Name:- Running_time
-Type:- TIME
-Description:- Total accumulative running time
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::14
+PARAMETER::17
 --------------------------------------------------
 Name:- sic_agit_stopped
 Type:- BOOL
@@ -152,36 +176,12 @@ Description:- Agitator stopped message to be logged
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::18
 --------------------------------------------------
 Name:- sic_agit_state
 Type:- INT
 Description:- Agitator state 
 ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::16
---------------------------------------------------
-Name:- disableSIC_StopEM
-Type:- BOOL
-Description:- Disable SIC and Stop EM
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::17
---------------------------------------------------
-Name:- SIC_start_date
-Type:- DATE
-Description:- SIC start time will be logged into Batch Report.
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::18
---------------------------------------------------
-Name:- SIC_start_time
-Type:- TOD
-Description:- SIC start time will be logged into Batch Report.
-ParameterInOut:- OUT
 
 
 --------------------------------------------------
@@ -189,31 +189,44 @@ STEP::01
 --------------------------------------------------
 StepNo:- 01
 Title:- PH_EMA1_MIX : SIC Running
-Description:- Log SIC running start time to the batch report.
+Description:- Log EMA1_MIX begin time.
+Initialise the run timer.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log SIC running start time to the batch report.
-Action:- // Initialise the run timer
+Description:- Log EMA1_MIX begin time.
+Initialise the run timer.
+Action:- //Log EMA1_MIX begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_mix_begin;
+
+SET;
+S #_log_time_mix_begin;
+
+
+// Initialise the run timer
 S #sqRunTimer.RESET;
 R #sqRunTimer.NON_RET;
 
 //Assign the run time setpoint
-L #_RunTimeH;
+L #_runtime_h;
 T #sqRunTimer.TIME_H;
 
-L #_RunTimeM;
+L #_runtime_m;
 T #sqRunTimer.TIME_M;
 
-L #_RunTimeS;
+L #_runtime_s;
 T #sqRunTimer.TIME_S;
 
 // Mixer is running so start accumulating the run time.
 S #sqRunTimer.ENABLE;
 
+L "dbCONST".BLK.SIC1.CMD.ENABLE;
+T #_sic_agit_cmd;
+
 //The  mixer is now be running. 
-L "dbCONST".CM.SIC1_DEV_STATE.RUNNING;
+L "dbCONST".BLK.SIC1.STATE.RUNNING;
 T #_sic_agit_hist;
 
 //Report Event Set
@@ -293,13 +306,12 @@ ACTION::01
 Description:- Log SIC RUnning/Stopped to the batch report. Store Running time if now Stopped.
 Action:- //If mixer is not running for some reason then don't start the timer
 A(;
-L "dbCONST".CM.SIC1_DEV_STATE.RUNNING;
+L "dbCONST".BLK.SIC1.STATE.RUNNING;
 L #_sic_agit_state;
 <>I;
 );
 JC S011 ;
 
-// RUNNING RUNNING RUNNING RUNNING RUNNING
 // Mixer is running again so start the run timer.
 S #sqRunTimer.ENABLE;
 
@@ -312,7 +324,6 @@ JU S022 ;
 
 S011:NOP 0;
 
-// STOPPED STOPPED STOPPED STOPPED STOPPED
 // Mixer is currently not running
 // Stop the timer
 R #sqRunTimer.ENABLE;
@@ -352,17 +363,14 @@ STEP::04
 --------------------------------------------------
 StepNo:- 04
 Title:- PH_EMA1_MIX : Disable SIC
-Description:- Disable SIC, Log accumulated Running time to the batch report. Send EM STOP command.
+Description:- Disable SIC.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Disable SIC, Log accumulated Running time to the batch report. Send EM STOP command.
-Action:- SET;
-R #_FP_SicState;
-S #_disableSIC_StopEM;
-//S  #sqRunTimer.RESET;
-//Report acumulative total running time
+Description:- Disable SIC.
+Action:- L "dbCONST".BLK.SIC1.CMD.DISABLE;
+T #_sic_agit_cmd;
 Verification:- A M1.1; //Always High flag
 
 
@@ -371,13 +379,13 @@ Verification:- A M1.1; //Always High flag
 TRANSITION::05
 --------------------------------------------------
 TRNNo:- 05
-Title:- Unconditional Jump
+Title:- SIC Disabled
 EmptyTransition:- False
 Description:- Jump
 Condition:- //Proceed to next step if SIC has been disabled
 A(;
-L "dbCONST".CM.SIC1_DEV_STATE.DISABLED;
-L #_SIC_AGIT_state;
+L "dbCONST".BLK.SIC1.STATE.DISABLED;
+L #_sic_agit_hist;
 ==I;
 );
 
@@ -388,11 +396,13 @@ STEP::05
 StepNo:- 05
 Title:- PH_EMA1_MIX : Last Step
 Description:- Reset the timer, store current SIC state and report the event.
+Log EMA1_MIX end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Reset the timer, store current SIC state and report the event.
+Log EMA1_MIX end time.
 Action:- A #_ResetRunTimer;
 =#sqRunTimer.RESET;
 //Store current SIC state.
@@ -417,6 +427,13 @@ S #_Report_Evnt_End;
 //Report Event Reset.
 SET;
 R #_Report_Evnt_Start;
+
+//Log EMA1_MIX end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_mix_end;
+
+SET;
+S #_log_time_mix_end;
 Verification:- A M1.1; //Always High flag
 
 

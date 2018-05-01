@@ -1,0 +1,23 @@
+      //============================= TRAN FOOTER ============================//
+      // Transition jump control:                                             //
+      //----------------------------------------------------------------------//
+      A     #sqSequencer.STEP.JumpCtrl;
+      S     #sqSequencer.STEP.Jump;
+
+NETWORK
+//----------------------------------------------------------------------------//
+// Check the jump flag and jump to the next step if the transition condition  //
+// is true and has set the jump flag:                                         //
+//----------------------------------------------------------------------------//
+TITLE =S0@@STEP_NUM@@:t0@@TRAN_NUM@@::TRANS-v: EXIT TRANSITION AND READY THE NEXT STEP
+      A     #sqSequencer.STEP.Jump;
+      JCN   x0@@TRAN_NUM@@;
+
+      R     #sqSequencer.STEP.Jump;
+      R     #sqSequencer.STEP.Finished;
+
+      L     @@NEXT_STEP@@; // Load next STEPNO to jump to if transition satisfied
+      T     #sqSequencer.STEP.NumberNext; //Next Step@@NEXT_STEP@@.
+
+      JU    COMM; // Transition satisfied, Exit, go to next step
+x0@@TRAN_NUM@@: NOP   0;

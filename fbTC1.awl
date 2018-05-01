@@ -54,10 +54,11 @@ VAR_INPUT
 END_VAR
 
 VAR_OUTPUT
-    LMN : Real;              // PID controller output (0-100%)
+    TCVPOSN : Real;          // Output (0-100%) to TCV remote setpoint
 END_VAR
 
 VAR_IN_OUT
+    LMN : Real;              // PID controller output (0-100%)
     CMD : Int;               // Device Command from dbCONST
     MODE : Int;              // Control Mode
     STATE : Int;             // Device State from dbCONST
@@ -218,6 +219,15 @@ TITLE = Output if Disabled
     A #cmdDisable;
     L 0.0;
     T #LMN;
+
+NETWORK
+TITLE = Transfer PID output to TCV
+    //------------------------------------------------------------------------//
+    // Write the PID controller output to the temperature control valve (TCV) //
+    // remote position setpoint:                                              //
+    //------------------------------------------------------------------------//
+    L #LMN;
+    T #TCVPOSN;
 
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //

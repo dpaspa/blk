@@ -64,10 +64,10 @@ VAR_OUTPUT
     OUT_Q : Bool;            // Output to OPEN/CLOSE solenoid valve
     ALM_BRK : Bool;
     ALM_PHR : Bool;
-    FAIL_START : Bool;       // Fail to start
 END_VAR
 
 VAR_IN_OUT
+    FAIL_START : Bool;       // Fail to start
     CMD : Int;               // Device Command from dbCONST
     MODE : Int;              // Control Mode
     STATE : Int;             // Device State from dbCONST
@@ -77,6 +77,8 @@ END_VAR
 VAR
     startTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Motor Start/Stop Transition timer
     stopTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+    startTMRElapsed : Time;
+    stopTMRElapsed : Time;
 END_VAR
 
 VAR_TEMP
@@ -87,6 +89,8 @@ VAR_TEMP
     modeAUTO : Bool;
     modeMANUAL : Bool;
     modeOOS : Bool;
+    startTMRExpired : Bool;
+    stopTMRExpired : Bool;
     tDO : Bool;              // Flag indicating whether to drive output
     tFault: Bool;
 END_VAR
@@ -210,8 +214,8 @@ TITLE = Start Transition Timer in the event of Start or Stop
     {time_type := 'Time'}
     (   IN                   := #enableStartTimer ,
         PT                   := #TMR ,
-        Q                    := #startTMR.Q ,
-        ET                   := #startTMR.ET
+        Q                    := #startTMRExpired ,
+        ET                   := #startTMRElapsed
     );
     NOP 0;
 
@@ -224,8 +228,8 @@ TITLE = Stop Transition Timer in the event of Start or Stop
     {time_type := 'Time'}
     (   IN                   := #enableStopTimer ,
         PT                   := #TMR ,
-        Q                    := #stopTMR.Q ,
-        ET                   := #stopTMR.ET
+        Q                    := #stopTMRExpired ,
+        ET                   := #stopTMRElapsed
     );
     NOP 0;
 

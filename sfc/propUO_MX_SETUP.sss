@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:22:56 AM by David Paspa
+generated on 1/05/2018 9:45:45 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -11,7 +11,7 @@ generated on 7/04/2018 11:22:56 AM by David Paspa
 SEQUENCE
 --------------------------------------------------
 
-SFCNo:- 001
+SFCNo:- 2
 Title:- UO_MX_SETUP
 Description:- Unit Operation for setup of equipment for manufacturing operations.
 Name:- SETUP
@@ -23,51 +23,283 @@ HeaderName:- MUSET
 Version:- 0.1
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
-// 0.1 Gerald Kontriner 07-Sep-2009            SFC structural design
+// 0.1 Gerald Kontriner 14-Sep-2009            SFC structural design
 HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- emx_mfl_state
-Type:- INT
-Description:- Device State of emx_mfl
-ParameterInOut:- IN
+Name:- log_msg_not_held
+Type:- BOOL
+Description:- HMI msg: Vacuum hold pressure failed
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::2
 --------------------------------------------------
-Name:- emx_mfl_subs
-Type:- INT
-Description:- Substate selection to emx_mfl
-ParameterInOut:- OUT
+Name:- vacuum_held_begin_time
+Type:- TOD
+Description:- vacuum hold begin time
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::3
 --------------------------------------------------
-Name:- emx_mfl_cmd
-Type:- INT
-Description:- Command to emx_mfl
-ParameterInOut:- OUT
+Name:- vacuum_held_end_time
+Type:- TOD
+Description:- vacuum hold end time
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- emc_water_state
-Type:- INT
-Description:- Device State of emc_water
-ParameterInOut:- IN
+Name:- time_act_vacuum_held
+Type:- TIME
+Description:- Logging actual vacuum held time.
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- emc_water_subs
-Type:- INT
-Description:- Substate selection to emc_water
-ParameterInOut:- OUT
+Name:- log_time_act_vacuum_held
+Type:- BOOL
+Description:- Flags the HMI to log actual vacuum held time.
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::6
+--------------------------------------------------
+Name:- prompt_not_held
+Type:- BOOL
+Description:- Prompt operator to try again when vacuum pressure not held
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- prompt_not_held_confirm_yes
+Type:- BOOL
+Description:- Operator confirms to try again when vacuum pressure not held
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- prompt_not_held_confirm_no
+Type:- BOOL
+Description:- Operator confirms abort when vacuum pressure not held
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- log_msg_not_held_repeat
+Type:- BOOL
+Description:- HMI msg:Operator confirms to try again when vacuum pressure not held
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- log_msg_not_held_abort
+Type:- BOOL
+Description:- HMI msg:Operator abort to try again when vacuum pressure not held
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- prompt_not_reach
+Type:- BOOL
+Description:- Prompt operator to try again when vacuum pressure not reached setpoint
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- prompt_not_reach_confirm_yes
+Type:- BOOL
+Description:- Operator confirms to try again when vacuum pressure not reached setpoint
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- prompt_not_reach_confirm_no
+Type:- BOOL
+Description:- Operator confirms abort when vacuum pressure not reached setpoint
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- log_msg_not_reach_repeat
+Type:- BOOL
+Description:- HMI msg:Operator confirms to try again when vacuum pressure not reached setpoint
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- log_msg_not_reach_abort
+Type:- BOOL
+Description:- HMI msg:Operator abort to try again when vacuum pressure not reached setpoint
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- log_msg_vacuum_fail
+Type:- BOOL
+Description:- Flag raising vacuum failed message
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::17
+--------------------------------------------------
+Name:- log_time_vacuum_fail
+Type:- BOOL
+Description:- Flags the HMI to log vacuum failed time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::18
+--------------------------------------------------
+Name:- log_time_vacuum_begin
+Type:- BOOL
+Description:- Flags the HMI to log Vacuum begin time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::19
+--------------------------------------------------
+Name:- time_setup_begin
+Type:- TIME
+Description:- Logging SETUP operation start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::20
+--------------------------------------------------
+Name:- log_time_setup_end
+Type:- BOOL
+Description:- Flags the HMI that SETUP ended
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::21
+--------------------------------------------------
+Name:- time_setup_end
+Type:- BOOL
+Description:- Logging SETUP operation end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::22
+--------------------------------------------------
+Name:- time_vacuum_fail
+Type:- TOD
+Description:- Logging vacuum failed time 
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::23
+--------------------------------------------------
+Name:- time_vacuum_begin
+Type:- TOD
+Description:- Vacuum begin time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::24
+--------------------------------------------------
+Name:- log_time_setup_begin
+Type:- BOOL
+Description:- Flags the HMI that SETUP started
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::25
+--------------------------------------------------
+Name:- pres_vac_fail
+Type:- REAL
+Description:- Vacuum hold fail pressure
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::26
+--------------------------------------------------
+Name:- pres_stm_pos
+Type:- REAL
+Description:- Positive steam pressure threshold setpoint
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::27
+--------------------------------------------------
+Name:- pres_vac
+Type:- REAL
+Description:- Setpoint for vacuum pressure
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::28
+--------------------------------------------------
+Name:- time_vac_hold
+Type:- TIME
+Description:- Vacuum Hold Timer
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::29
+--------------------------------------------------
+Name:- time_eject
+Type:- TIME
+Description:- Vacuum time
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::30
+--------------------------------------------------
+Name:- emc_gas_medium
+Type:- INT
+Description:- Medium selection for emc_gas
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::31
+--------------------------------------------------
+Name:- vacuum_hold_test
+Type:- BOOL
+Description:- Vacuum hold test enquiry
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::32
+--------------------------------------------------
+Name:- emm_vessel_cmd
+Type:- INT
+Description:- Command to emm_vessel
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::33
+--------------------------------------------------
+Name:- emm_vessel_subs
+Type:- INT
+Description:- Substate selection to emm_vessel
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::34
+--------------------------------------------------
+Name:- emm_vessel_state
+Type:- INT
+Description:- Device State of emm_vessel
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::35
 --------------------------------------------------
 Name:- emc_water_cmd
 Type:- INT
@@ -75,15 +307,39 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::36
 --------------------------------------------------
-Name:- emc_water_medium
+Name:- emc_water_subs
 Type:- INT
-Description:- Medium selection for emc_water
+Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::37
+--------------------------------------------------
+Name:- emc_water_state
+Type:- INT
+Description:- Device State of emc_water
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::38
+--------------------------------------------------
+Name:- log_confirmation
+Type:- TOD
+Description:- Logging operator confirmation
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::39
+--------------------------------------------------
+Name:- prompt_connect_ok_confirm_yes
+Type:- BOOL
+Description:- Confirmation that all vessel connections are properly made.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::40
 --------------------------------------------------
 Name:- prompt_connect_ok
 Type:- BOOL
@@ -91,12 +347,132 @@ Description:- Prompt operator to confirm all vessel connections are properly mad
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::41
 --------------------------------------------------
-Name:- confirm_connect_ok
-Type:- BOOL
-Description:- Confirmation that all vessel connections are properly made.
-ParameterInOut:- VAR
+Name:- emc_water_medium
+Type:- INT
+Description:- Medium selection for emc_water
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::42
+--------------------------------------------------
+Name:- emx_mmfl_cmd
+Type:- INT
+Description:- Command to emx_mmfl
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::43
+--------------------------------------------------
+Name:- emx_mmfl_state
+Type:- INT
+Description:- Device State of emx_mmfl
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::44
+--------------------------------------------------
+Name:- emv_vessel_subs
+Type:- INT
+Description:- Substate selection to emv_vessel
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::45
+--------------------------------------------------
+Name:- emv_vessel_state
+Type:- INT
+Description:- Device State of EVxy04
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::46
+--------------------------------------------------
+Name:- emx_mmfl_subs
+Type:- INT
+Description:- Substate selection to emx_mmfl
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::47
+--------------------------------------------------
+Name:- emv_vessel_cmd
+Type:- INT
+Description:- Command to emv_vessel
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::48
+--------------------------------------------------
+Name:- emg_filter_state
+Type:- INT
+Description:- Device State of emg_filter
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::49
+--------------------------------------------------
+Name:- emx_transfer_cmd
+Type:- INT
+Description:- Command to emx_transfer
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::50
+--------------------------------------------------
+Name:- emg_filter_cmd
+Type:- INT
+Description:- Command to emg_filter
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::51
+--------------------------------------------------
+Name:- emx_transfer_subs
+Type:- INT
+Description:- Substate selection to EXxy07
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::52
+--------------------------------------------------
+Name:- emx_transfer_state
+Type:- INT
+Description:- Device State of emx_transfer
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::53
+--------------------------------------------------
+Name:- emg_filter_subs
+Type:- INT
+Description:- Substate selection to emg_filter
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::54
+--------------------------------------------------
+Name:- emc_gas_state
+Type:- INT
+Description:- Device State of emc_gas
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::55
+--------------------------------------------------
+Name:- emc_gas_cmd
+Type:- INT
+Description:- Command to emc_gas
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::56
+--------------------------------------------------
+Name:- emc_gas_subs
+Type:- INT
+Description:- Substate selection to emc_gas
+ParameterInOut:- OUT
 
 
 --------------------------------------------------
@@ -104,25 +480,34 @@ STEP::01
 --------------------------------------------------
 StepNo:- 01
 Title:- UO_MX_SETUP : Setup Unit Operation Commenced
-Description:- Prompt operator to confirm that all vessel connections, including the permanent flexible connections are properly made.
+Description:- Log Mx SETUP operation begin time.
+Prompt operator to confirm that all vessel connections, including the permanent flexible connections are properly made.
 
 Start EMX1_CIPSIP_SETUP to connect MMFLx to Drain.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Prompt operator to confirm correct vessel connections.
+Description:- Log Mx SETUP operation begin time.
+Prompt operator to confirm correct vessel connections.
 Start EMX1_CIPSIP_SETUP.
-Action:- SET;
+Action:- //Log CIPSIP operation begin
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_setup_begin;
+
+SET;
+S #_log_time_setup_begin;
+
+SET;
 S #_prompt_connect_ok;
 
 //Start EMX1_CIPSIP_SETUP.
 L "dbCONST".BLK.EMX1.SUBS.CIPSIP_SETUP;
-T #_emx_mfl_subs;
+T #_emx_mmfl_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emx_mfl_cmd;
+T #_emx_mmfl_cmd;
 Verification:- A(;
-L #_emx_mfl_state;
+L #_emx_mmfl_state;
 L "dbCONST".BLK.EMX1.SUBS.CIPSIP_SETUP;
 ==I;
 );
@@ -135,9 +520,9 @@ TRNNo:- 01
 Title:- Confirmation received.
 EmptyTransition:- False
 Description:- Confirmation from operator received and CIPSIP_SETUP finished.
-Condition:- A #_confirm_connect_ok;
+Condition:- A #_prompt_connect_ok_confirm_yes;
 A(;
-L #_emx_mfl_state;
+L #_emx_mmfl_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
@@ -148,15 +533,12 @@ STEP::02
 --------------------------------------------------
 StepNo:- 02
 Title:- UO_MX_SETUP : Setup for PW
-Description:- Set state of selected Manufacturing Vessel Mx and start it.
-
-Set emc_water to substate SETUP with MEDIUM PW.
+Description:- Set emc_water to substate SETUP with MEDIUM PW.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Set emc_water to substate SETUP (Medium PW).
-Set EVn004, EVn008 to substate CHARGE.
 
 Action:- //Clear used flags
 SET;
@@ -166,14 +548,14 @@ R #_confirm_connect_ok;
 //Set to Medium PW and start EMC2_SETUP.
 L    "dbCONST".SEL.LIQUID.PW;
 T    #_emc_water_medium;
-L    "dbCONST".   BLK.EMC2.SUBS.SETUP;
+L    "dbCONST".BLK.EMC2.SUBS.SETUP;
 T    #_emc_water_subs;
 L    "dbCONST".BLK.CMD.START;
 T    #_emc_water_cmd;
-Verification:- //Verify if current substate changed to SETUP & CHARGE.
+Verification:- //Verify if current substate changed to SETUP.
 A(;
-L #_DEV_STATE_ECn002;
-L "dbCONST_VAL".EM.EMC2.SUBS.SETUP;
+L #_emc_water_state;
+L    "dbCONST".BLK.EMC2.SUBS.SETUP;
 ==I;
 );
 
@@ -182,9 +564,9 @@ L "dbCONST_VAL".EM.EMC2.SUBS.SETUP;
 TRANSITION::02
 --------------------------------------------------
 TRNNo:- 02
-Title:- ECn002 substate SETUP complete.
+Title:- emc_water substate SETUP complete.
 EmptyTransition:- False
-Description:- ECn002 substate SETUP is complete.
+Description:- emc_water substate SETUP is complete.
 Condition:- A(;
 L   #_emc_water_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
@@ -196,17 +578,460 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 STEP::03
 --------------------------------------------------
 StepNo:- 03
+Title:- UO_MX_SETUP : Open valves on Mx to drain flow path.
+Description:- Open Mx outlet and MMFL transfer line valves.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open valves on Mx to drain flow path.
+Clear used flags.
+Action:- //Open Mx outlet valve.
+L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
+T #_emv_vessel_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emv_vessel_cmd;
+
+//Open MMFL valves.
+L "dbCONST".BLK.EMX1.SUBS.CIP_MX;
+T #_emx_mmfl_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_mmfl_cmd;
+Verification:- A(;
+L #_emv_vessel_state;
+L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
+==I;
+);
+A(;
+L #_emx_mmfl_state;
+L "dbCONST".BLK.EMX1.SUBS.CIP_MX;
+==I;
+);
+
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- Emx_mmfl valves opened
+EmptyTransition:- False
+Description:- emx_mmfl substate CIP_MX is complete.
+Condition:- A(;
+L   #_emx_mmfl_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- UO_MX_SETUP : Start Vacuum
+Description:- Enable vacuum. 
+Start vacuum timer(TIME_EJECT). 
+Log Vacuum begin time
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Enable vacuum.
+Start vacuum timer. Log Vacuum begin time
+Action:- //Enable vacuum.
+L "dbCONST".SEL.GAS.VACUUM;
+T #_emc_gas_medium;
+L "dbCONST".BLK.EMC1.SUBS.VALVE;
+T #_emc_gas_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
+
+// Start vacuum timer
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_time_eject;
+T #SQ_TIMER.PT;
+
+//Log vacuum begin time
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_vacuum_begin;
+SET;
+S #_log_time_vacuum_begin;
+
+// Reset flags
+SET;
+R #_prompt_try_again;
+R #_confirm_try_again;
+R #_confirm_no_try;
+R #_msg_VacuumFail;
+
+//Report Event Set
+SET;
+S #_Report_Evnt_017;
+
+//Report Event reset
+SET;
+R #_Report_Evnt_018;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 4.0000
+Title:- Timer expired?
+EmptyTransition:- False
+Description:- Vacuum timer expired.
+Condition:- A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
+Title:- UO_MX_SETUP : Vacuum hold evacuation failed 
+Description:- Raise vacuum failed message.
+Log vacuum ejector time failed.
+Prompt operator to confirm to try again.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Raise vacuum failed message.
+Log vacuum time failed.
+Prompt operator to confirm to try again.
+Action:- //Set flag to raise vacuum failed message
+SET;
+S #_log_msg_vacuum_fail;
+
+//Log time vacuum failed.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_vacuum_fail;
+
+SET;
+S #_log_time_vacuum_fail;
+S #_prompt_not_reach;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::06
+--------------------------------------------------
+TRNNo:- 6.0000
+Title:- Try again?
+EmptyTransition:- False
+Description:- Operator want to try again.
+Condition:- A #_prompt_not_reach_confirm_yes;
+
+
+--------------------------------------------------
+TRANSITION::07
+--------------------------------------------------
+TRNNo:- 7.0000
+Title:- No try?
+EmptyTransition:- False
+Description:- Operator don't want to try again.
+Condition:- A #_prompt_not_reach_confirm_no;
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 6.0000
+Title:- UO_MX_SETUP : Start Vacuum Hold Timer
+Description:- Close Mx vent line vacuum valves.
+Start Vacuum  Hold Timer.
+Store Vacuum Hold test begin time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Close Mx vacuum valves.
+Start Vacuum Hold Timer.
+Store Vacuum Hold test begin time.
+Action:- //Close Mx vacuum valves.
+L "dbCONST".BLK.CMD.STOP;
+T #_emc_gas_cmd;
+L "dbCONST".BLK.SAFE.CMD;
+T #_emc_gas_subs;
+
+// Start vacuum hold timer
+SET;
+A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
+S #SQ_TIMER.IN;
+L #_time_vac_hold;
+T #SQ_TIMER.PT;
+
+
+//Store Vacuum Hold test begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_vacuum_held_begin_time;
+Verification:- A #SQ_TIMER.IN;
+
+
+--------------------------------------------------
+TRANSITION::08
+--------------------------------------------------
+TRNNo:- 8.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::07
+--------------------------------------------------
+StepNo:- 7.0000
+Title:- UO_MX_SETUP : Log operator repeat
+Description:- Log operator repeat.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator repeat.
+Action:- //Log operator repeat.
+SET;
+S #_log_msg_not_reach_repeat;
+R #SQ_TIMER.IN;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::08
+--------------------------------------------------
+StepNo:- 8.0000
+Title:- UO_MX_SETUP : Log operator ABORT
+Description:- Log operator ABORT.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator ABORT.
+Action:- //Log operator abort.
+SET;
+S #_log_msg_not_reach_abort;
+R #SQ_TIMER.IN;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::09
+--------------------------------------------------
+StepNo:- 09
+Title:- UO_MX_SETUP : Vacuum Hold Test
+Description:- Set flag to log vessel pressure at 30 second intervals. Logging of values done in HMI.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set flags to log Sy vessel pressure.
+Action:- //Log Mx and Sy vessel pressure
+SET;
+S #_log_PressureSy;
+
+//Report Event Set
+SET;
+S #_Report_Evnt_001;
+
+//Report Evnt Reset
+SET;
+R #_Report_Evnt_002; 
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::10
+--------------------------------------------------
+TRNNo:- 10
+Title:- Timer Expired
+EmptyTransition:- False
+Description:- TIME_VAC_HOLD expired
+Condition:- A #SQ_TIMER.Q;
+
+
+--------------------------------------------------
+TRANSITION::11
+--------------------------------------------------
+TRNNo:- 11
+Title:- Pressure above setpoint
+EmptyTransition:- False
+Description:- Pressure increased above PRES_VAC_FAIL
+Condition:- O(;
+L #_pi_vessel;
+L #_pres_vac_fail;
+>R;
+);
+
+
+--------------------------------------------------
+STEP::10
+--------------------------------------------------
+StepNo:- 10
+Title:- UO_MX_SETUP : Log actual time vacuum held.
+Description:- Log actual time vacuum held.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log actual time vacuum held.
+Action:- //Store Vacuum Hold test end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_vacuum_held_end_time;
+
+//Log actual time vacuum held.
+CALL T_DIFF
+{date_type := 'Time_Of_Day', time_type := 'Time'}
+(  IN1                         := #_vacuum_held_begin_time ,
+   IN2                         := #_vacuum_held_end_time ,
+  OUT                         := #_time_act_vacuum_held
+);
+SET;
+S #_log_time_act_vacuum_held;
+
+
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::12
+--------------------------------------------------
+TRNNo:- 12
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::11
+--------------------------------------------------
+StepNo:- 11
+Title:- UO_MX_SETUP : Vacuum Hold failed
+Description:- Set flag to raise vacuum failed message and prompt operator.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set flag to raise vacuum failed message and prompt operator.
+Action:- //Stop logging Sy vessel pressure
+SET;
+R #_log_PressureSy;
+
+//Set flag to raise vacuum failed message and prompt operator.
+SET;
+S #_log_msg_not_held;
+S #_prompt_not_held;
+
+
+// Stop timer
+SET;
+R #SQ_TIMER.IN;
+
+//Report Evnt Reset
+SET;
+R #_Report_Evnt_001; 
+
+//Report Event Set
+SET;
+S #_Report_Evnt_002;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::13
+--------------------------------------------------
+TRNNo:- 13
+Title:- No try?
+EmptyTransition:- False
+Description:- Operator don't want to try again.
+Condition:- A #_confirm_no_try;
+
+
+--------------------------------------------------
+TRANSITION::14
+--------------------------------------------------
+TRNNo:- 14
+Title:- Try again?
+EmptyTransition:- False
+Description:- Operator want to try again.
+Condition:- A #_confirm_try_again;
+
+
+--------------------------------------------------
+STEP::12
+--------------------------------------------------
+StepNo:- 12
+Title:- UO_MX_SETUP : Log operator abort
+Description:- Log operator abort.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator abort.
+Action:- //Log operator abort.
+SET;
+S #_log_msg_not_held_abort;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::13
+--------------------------------------------------
+StepNo:- 13
+Title:- UO_MX_SETUP : Log operator repeat
+Description:- Log operator repeat
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator repeat
+Action:- //Log operator repeat.
+SET;
+S #_log_msg_not_held_repeat;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::16
+--------------------------------------------------
+TRNNo:- 16
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::14
+--------------------------------------------------
+StepNo:- 14.0000
 Title:- UO_MX_SETUP : Setup Unit Operation Completed
 Description:- Clear used flags.
+Log Mx SETUP operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Clear used flags.
+Log Mx SETUP operation end time.
 Action:- //Clear used flags
 SET;
 R #_prompt_connect_ok;
 R #_confirm_connect_ok;
+
+//Log SETUP operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_setup_end;
+
+SET;
+S #_log_time_setup_end;
 Verification:- A M1.1; //Always High flag
 
 ****************************************************************************************************

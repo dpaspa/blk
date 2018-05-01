@@ -57,7 +57,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbCRIL"."@@INSTANCE@@-CRIL".INTERLOCK;
+    A "idbCRIL".@@INSTANCE@@cril.IL.INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
     = #CRIL;
 
@@ -70,7 +70,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbNCRIL"."@@INSTANCE@@-NCRIL".INTERLOCK;
+    A "idbNCRIL".@@INSTANCE@@ncril.IL.INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
     = #NCRIL;
 
@@ -87,7 +87,9 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
         MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
         TMR                  := #@@INSTANCE@@.TMR ,
         BRK                  := "@@INSTANCE@@-BRK" ,
-        PHR                  := "@@LNK1TAG@@-DI" ,
+@@ATTR_BEGIN|LINK@@
+        PHR                  := "@@PHRLINKINSTANCE@@-DI" ,
+@@ATTR_END|LINK@@
         FB_RUN               := "@@INSTANCE@@-RUN" ,
         OUT_Q                := "@@INSTANCE@@-CMD" ,
         ALM_BRK              := #@@INSTANCE@@.ALM_BRK ,
@@ -99,5 +101,6 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
         INTERLOCK            := #@@INSTANCE@@.INTERLOCK
       );
       NOP 0;
+
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

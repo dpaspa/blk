@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:27:30 AM by David Paspa
+generated on 1/05/2018 9:50:38 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -33,61 +33,29 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- Abort_messg
+Name:- log_time_wrong_hygiene
 Type:- BOOL
-Description:- Recipe aborted message to operator
+Description:- Flags the HMI that wrong hygiene status detected
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::2
 --------------------------------------------------
-Name:- Vial_temp_log_low
+Name:- log_time_cipsip_end
 Type:- BOOL
-Description:- Record temp low for Vial Line
+Description:- Flags the HMI that CIPSIP ended
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::3
 --------------------------------------------------
-Name:- Amp_temp_log_low
+Name:- log_time_cipsip_begin
 Type:- BOOL
-Description:- Record temp low for ampoule line
+Description:- Flags the HMI that CIPSIP started
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::4
---------------------------------------------------
-Name:- Owner_Water_System_Mx
-Type:- INT
-Description:- WATER SYSTEM FOR MX VESSEL
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::5
---------------------------------------------------
-Name:- Owner_Water_System_Sy
-Type:- INT
-Description:- WATER SYSTEM FOR SY VESSEL
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::6
---------------------------------------------------
-Name:- Release_Water_System_Sy
-Type:- BOOL
-Description:- Release Water System Acquired By the Unit Sy
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::7
---------------------------------------------------
-Name:- TIME_WAIT_BETPULSE
-Type:- TIME
-Description:- Time delay between the sets of pulses in SIP of Mx,Sy draining
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::8
 --------------------------------------------------
 Name:- Report_Evnt_025
 Type:- BOOL
@@ -95,7 +63,7 @@ Description:- SIP end SY for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::5
 --------------------------------------------------
 Name:- Report_Evnt_024
 Type:- BOOL
@@ -103,7 +71,7 @@ Description:- SIP Start SY for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::6
 --------------------------------------------------
 Name:- Report_Evnt_023
 Type:- BOOL
@@ -111,7 +79,7 @@ Description:- Vacuum end SY for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::7
 --------------------------------------------------
 Name:- Report_Evnt_022
 Type:- BOOL
@@ -119,7 +87,7 @@ Description:- Vacuum Start Sy for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::8
 --------------------------------------------------
 Name:- Report_Evnt_020
 Type:- BOOL
@@ -127,7 +95,7 @@ Description:- SIP end Mx for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::9
 --------------------------------------------------
 Name:- Report_Evnt_019
 Type:- BOOL
@@ -135,7 +103,7 @@ Description:- SIP Start MX for batch Report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::10
 --------------------------------------------------
 Name:- Report_Evnt_018
 Type:- BOOL
@@ -143,7 +111,7 @@ Description:- Vacuum end Mx for Sip for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::11
 --------------------------------------------------
 Name:- Report_Evnt_017
 Type:- BOOL
@@ -151,7 +119,7 @@ Description:- Vacuum Start Mx Sip for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::12
 --------------------------------------------------
 Name:- Report_Evnt_002
 Type:- BOOL
@@ -159,7 +127,7 @@ Description:- Vacuum Hold Test End for the batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::13
 --------------------------------------------------
 Name:- Report_Evnt_001
 Type:- BOOL
@@ -167,663 +135,31 @@ Description:- Vacuum Hold Test Start for Batch Report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
---------------------------------------------------
-Name:- Ampoule_Temp
-Type:- REAL
-Description:- Description
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::19
---------------------------------------------------
-Name:- Vial_Temperature
-Type:- REAL
-Description:- Description
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::20
---------------------------------------------------
-Name:- FCZ
-Type:- INT
-Description:- Selection Of Ampoule Or Vial
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::21
---------------------------------------------------
-Name:- SIP_timer_complete_Mx
-Type:- BOOL
-Description:- Description
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::22
---------------------------------------------------
-Name:- SIP_timer_complete_Sy
-Type:- BOOL
-Description:- Description
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::23
---------------------------------------------------
-Name:- SecondPath
-Type:- BOOL
-Description:- Description
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::24
---------------------------------------------------
-Name:- ParallelPaths
-Type:- BOOL
-Description:- Sy SIP path in parallel
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::25
---------------------------------------------------
-Name:- EXx007_COND
-Type:- BOOL
-Description:- Description
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::26
---------------------------------------------------
-Name:- wash_drain_done_MFL
-Type:- BOOL
-Description:- Synchronisation flag indicating wash drain CIP is done
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::27
---------------------------------------------------
-Name:- pulse_drain_Sy
-Type:- BOOL
-Description:- Flag to indicate unit Sy to pulse drain valves
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::28
---------------------------------------------------
-Name:- pulse_dr_compl_MFL_Sy
-Type:-  BOOL
-Description:- Flag to indicate unit MFL to pulse drain valves complete
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::29
---------------------------------------------------
-Name:- cip_complete_MFL_Mx
-Type:- BOOL
-Description:- Synchronisation flag for MFL when MX CIP complete
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::30
---------------------------------------------------
-Name:- pulse_drain_MFL_Mx
-Type:- BOOL
-Description:- Flag to indicate unit MFL to pulse drain valves
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::31
---------------------------------------------------
-Name:- pulse_dr_compl_Sy
-Type:- BOOL
-Description:- Flag to indicate unit Sy to pulse drain valves complete
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::32
---------------------------------------------------
-Name:- pulse_dr_compl_MFL_Mx
-Type:- BOOL
-Description:- Flag to indicate unit MFL to pulse drain valves complete
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::33
---------------------------------------------------
-Name:- pulse_dr_compl_Mx
-Type:- BOOL
-Description:- Flag to indicate unit Mx to pulse drain valves complete
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::34
---------------------------------------------------
-Name:- steam_compl_MFL_Sy
-Type:- BOOL
-Description:- SIP of MFL for SY is complete
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::35
---------------------------------------------------
-Name:- steam_compl_MFL_Mx
-Type:- BOOL
-Description:- SIP of MFL for MX is complete
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::36
---------------------------------------------------
-Name:- n2_blow_complete_Sy
-Type:- BOOL
-Description:- N2 blowing of SY is complete
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::37
---------------------------------------------------
-Name:- n2_blow_complete_Mx
-Type:- BOOL
-Description:- N2 blowing of MX is complete
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::38
---------------------------------------------------
-Name:- ready_steam_trap_MFL_Sy
-Type:- BOOL
-Description:- Flag ndicating MFL has opened the steam trap valve
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::39
---------------------------------------------------
-Name:- ready_steam_trap_MFL_Mx
-Type:- BOOL
-Description:- Flag ndicating MFL has opened the steam trap valve
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::40
---------------------------------------------------
-Name:- ready_sip_MFL_Mx
-Type:- BOOL
-Description:- Flag MFL to indicate MX vent valve is opened
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::41
---------------------------------------------------
-Name:- press_proceed_Sy
-Type:- BOOL
-Description:- Flag indicating SY to proceed after positive pressure reached
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::42
---------------------------------------------------
-Name:- press_proceed_Mx
-Type:- BOOL
-Description:- Flag indicating MX to proceed after positive pressure reached
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::43
---------------------------------------------------
-Name:- cip_complete_MFL_Sy
-Type:- BOOL
-Description:- Synchronisation flag for MFL when SY CIP complete
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::44
---------------------------------------------------
-Name:- steaming_proceed_Sy
-Type:- BOOL
-Description:- Synchronisation flag indicating proceed with steaming
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::45
---------------------------------------------------
-Name:- cip_fill_ready_Sy
-Type:- BOOL
-Description:- Synchronisation flag indicating path set for filling line CIP
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::46
---------------------------------------------------
-Name:- wash_drain_done_SY
-Type:- BOOL
-Description:- Description
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::47
---------------------------------------------------
-Name:- cip_ready_MFL_Sy
-Type:- BOOL
-Description:- CIP path is set
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::48
---------------------------------------------------
-Name:- proceed_vacuum_Mx
-Type:- BOOL
-Description:- Description
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::49
---------------------------------------------------
-Name:- proceed_vacuum_Sy
-Type:- BOOL
-Description:- Start Vacuum
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::50
+PARAMETER::14
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
+Description:- Prompt operator to abort Due to Invalid Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- confirm_abort_yes
+Type:- BOOL
 Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::16
 --------------------------------------------------
-Name:- confirm_abort
-Type:- BOOL
-Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::52
---------------------------------------------------
-Name:- cip_fill_ready_MFL
-Type:- BOOL
-Description:- Synchronisation flag indicating path set for filling line CIP
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::53
---------------------------------------------------
-Name:- steaming_ready_Sy
-Type:- BOOL
-Description:- Synchronisation flag indicating ready for steaming
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::54
---------------------------------------------------
-Name:- steaming_required
-Type:- BOOL
-Description:- Flag indicating if steaming is required
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::55
---------------------------------------------------
-Name:- cip_complete_MFL
-Type:- BOOL
-Description:- Mx CIP operation is completed
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::56
---------------------------------------------------
-Name:- cip_ready_MFL_Mx
-Type:- BOOL
-Description:- CIP path is set
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::57
---------------------------------------------------
-Name:- msg_WrongHyg_Mx
-Type:- BOOL
-Description:- HMI message: wrong hygiene status of unit Mx
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::58
---------------------------------------------------
-Name:- msg_WrongHyg_Sy
+Name:- log_msg_wrong_hygiene
 Type:- BOOL
 Description:- HMI message: wrong hygiene status of unit Sy
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::59
---------------------------------------------------
-Name:- msg_WrongHyg_MFL
-Type:- BOOL
-Description:- HMI message: wrong hygiene status of unit MFL
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::60
---------------------------------------------------
-Name:- msg_WrongHyg_FCZ
-Type:- BOOL
-Description:- HMI message: wrong hygiene status of unit FCZ
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::61
---------------------------------------------------
-Name:- sip_timer_started
-Type:- BOOL
-Description:- Flag set when SIP timer is started
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::62
---------------------------------------------------
-Name:- log_Temp_TI_xy10
-Type:- BOOL
-Description:- Flag to indicate HMI to start logging TI_xy10 temperature SY
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::63
---------------------------------------------------
-Name:- log_Temp_TI_xy12
-Type:- BOOL
-Description:- Flag to indicate HMI to start logging TI_xy12 temperature SY
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::64
---------------------------------------------------
-Name:- log_Temp_TI_n062
-Type:- BOOL
-Description:- Flag to indicate HMI to start logging TI_n062 temperature
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::65
---------------------------------------------------
-Name:- log_Temp_TI_x012
-Type:- BOOL
-Description:- Flag to indicate HMI to start logging TI_x012 temperature MX
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::66
---------------------------------------------------
-Name:- log_Temp_TI_x010
-Type:- BOOL
-Description:- Flag to indicate HMI to start logging TI_x010 temperature Mx
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::67
---------------------------------------------------
-Name:- MX_OWNED_BY
-Type:- INT
-Description:- MX Shared Water Supply Arbitration variable
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::68
---------------------------------------------------
-Name:- close_outletSy
-Type:- BOOL
-Description:- Flag to indicate Sy to close outlet valve
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::69
---------------------------------------------------
-Name:- n2_blow_Sy
-Type:- Bool
-Description:- HPN2 blowing underway - Unit Sy
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::70
---------------------------------------------------
-Name:- log_TIxy12low
-Type:- BOOL
-Description:- Logging low temperature TIxy12
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::71
---------------------------------------------------
-Name:- log_TIxy10low
-Type:- BOOL
-Description:- Logging low temperature TIxy10
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::72
---------------------------------------------------
-Name:- TIxy12_MV
-Type:- REAL
-Description:- Sy gas vent drain temperature
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::73
---------------------------------------------------
-Name:- TIxy10_MV
-Type:- REAL
-Description:- Sy Vessel temperature
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::74
---------------------------------------------------
-Name:- positive_pressSy
-Type:- BOOL
-Description:- Flag indicating positive pressure reached in vessel Sy
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::75
---------------------------------------------------
-Name:- close_outletMx
-Type:- BOOL
-Description:- Flag to indicate Mx to close outlet valve
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::76
---------------------------------------------------
-Name:- TIME_PULSE
-Type:- TIME
-Description:- Pulse time for drain valves
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::77
---------------------------------------------------
-Name:- CTR_PULSE_VLV
-Type:- INT
-Description:- Counter how often pulsed drain valves
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::78
---------------------------------------------------
-Name:- NUM_PULSE_VLV
-Type:- INT
-Description:- How often to pulse drain valves
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::79
---------------------------------------------------
-Name:- pulse_drain_MFL_Sy
-Type:- BOOL
-Description:- Flag to indicate unit MFL to pulse drain valves
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::80
---------------------------------------------------
-Name:- pulse_drain_Mx
-Type:- BOOL
-Description:- Flag to indicate unit Mx to pulse drain valves
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::81
---------------------------------------------------
-Name:- n2_blow_Mx
-Type:- Bool
-Description:- HPN2 blowing underway - Unit Mx
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::82
---------------------------------------------------
-Name:- CTR_SIP_ABORT
-Type:- INT
-Description:- Count SIP aborts
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::83
---------------------------------------------------
-Name:- log_SIPTimerReset
-Type:- TOD
-Description:- Logging SIP timer reset
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::84
---------------------------------------------------
-Name:- log_TIx062low
-Type:- BOOL
-Description:- Logging low temperature TIx062
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::85
---------------------------------------------------
-Name:- log_TIx012low
-Type:- BOOL
-Description:- Logging low temperature TIx012
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::86
---------------------------------------------------
-Name:- log_TIx010low
-Type:- BOOL
-Description:- Logging low temperature TIx010
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::87
---------------------------------------------------
-Name:- TIME_SIP_ABORT
-Type:- TIME
-Description:- SIP Abort Time 
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::88
---------------------------------------------------
-Name:- NUM_SIP_ABORT
-Type:- INT
-Description:- How often until SIP aborting.
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::89
---------------------------------------------------
-Name:- log_SIPAbort
-Type:- TOD
-Description:- Logging SIP abortion time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::90
---------------------------------------------------
-Name:- log_SIPEnd
-Type:- TOD
-Description:- Logging SIP operation end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::91
---------------------------------------------------
-Name:- log_SIPBegin
-Type:- TOD
-Description:- Logging SIP operation start time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::92
---------------------------------------------------
-Name:- TIx012_MV
-Type:- REAL
-Description:- Mx gas vent drain temperature
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::93
---------------------------------------------------
-Name:- TIx062_MV
-Type:- REAL
-Description:- Wash Drain temperature
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::94
---------------------------------------------------
-Name:- TIx010_MV
-Type:- REAL
-Description:- Mx Vessel temperature
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::95
---------------------------------------------------
-Name:- TEMP_SIP_VENT
-Type:- REAL
-Description:- VENT valve SIP temperature
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::96
---------------------------------------------------
-Name:- TEMP_SIP
-Type:- REAL
-Description:- SIP temperature
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::97
---------------------------------------------------
-Name:- TIME_SIP
-Type:- TIME
-Description:- VENT SIP Timer
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::98
---------------------------------------------------
-Name:- ready_sip_MFL_Sy
-Type:- BOOL
-Description:- Flag MFL to indicate SY vent valve is opened
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::99
---------------------------------------------------
-Name:- positive_pressMx
-Type:- BOOL
-Description:- Flag indicating positive pressure reached in vessel Mx
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::100
+PARAMETER::17
 --------------------------------------------------
 Name:- toggle_mode
 Type:- BOOL
@@ -831,31 +167,15 @@ Description:- Toggle mode of all used units
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::101
+PARAMETER::18
 --------------------------------------------------
-Name:- SY_OWNED_BY
-Type:- INT
-Description:- SY Shared Water Supply Arbitration variable
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::102
---------------------------------------------------
-Name:- log_BatchID
+Name:- log_BatchID???
 Type:- STRING
 Description:- Logging previously used Batch ID
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::103
---------------------------------------------------
-Name:- BatchID_MX
-Type:- STRING[6]
-Description:- Batch ID of manufacturing Vessel Mx
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::104
+PARAMETER::19
 --------------------------------------------------
 Name:- BatchID
 Type:- STRING[6]
@@ -863,387 +183,59 @@ Description:- Batch ID or CIPSIP Cycle
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::105
+PARAMETER::20
 --------------------------------------------------
-Name:- log_VacuumFail2
-Type:- TOD
-Description:- Description
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::106
---------------------------------------------------
-Name:- log_VacuumBegin2
-Type:- TOD
-Description:- Logging vacuum begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::107
---------------------------------------------------
-Name:- log_VacHeldTime
-Type:- Time
-Description:- Logging Vacuum Hold time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::108
---------------------------------------------------
-Name:- msg_VacHoldFail
-Type:- BOOL
-Description:- Flag raising vacuum hold failed message
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::109
---------------------------------------------------
-Name:- log_VacHoldFail
-Type:- TOD
-Description:- Logging vacuum hold time failed
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::110
---------------------------------------------------
-Name:- log_PressureSy
-Type:- BOOL
-Description:- Flag to indicate HMI to start logging Sy pressure
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::111
---------------------------------------------------
-Name:- log_PressureMx
-Type:- BOOL
-Description:- Flag to indicate HMI to start logging Mx pressure
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::112
---------------------------------------------------
-Name:- TIME_VACUUM
-Type:- TIME
-Description:- Vacuum Timer
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::113
---------------------------------------------------
-Name:- msg_VacuumFail
-Type:- BOOL
-Description:- Flag raising vacuum failed message
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::114
---------------------------------------------------
-Name:- confirm_no_try
-Type:- BOOL
-Description:- Operator confirms not to try again
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::115
---------------------------------------------------
-Name:- confirm_try_again
-Type:- BOOL
-Description:- Operator confirms to try again
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::116
---------------------------------------------------
-Name:- prompt_try_again
-Type:- BOOL
-Description:- Prompt operator to try again
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::117
---------------------------------------------------
-Name:- vacuum_finish_Sy
-Type:- BOOL
-Description:- Synchronisation flag indicating that evacuation has finished
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::118
---------------------------------------------------
-Name:- vacuum_finish_Mx
-Type:- BOOL
-Description:- Synchronisation flag indicating that evacuation has finished
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::119
---------------------------------------------------
-Name:- TIME_VAC_HOLD
-Type:- TIME
-Description:- Vacuum Hold Timer
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::120
---------------------------------------------------
-Name:- PRES_VAC_FAIL
-Type:- REAL
-Description:- SETPOINT for vacuum pressure
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::121
---------------------------------------------------
-Name:- PRES_VAC
-Type:- REAL
-Description:- Setpoint for vacuum pressure
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::122
---------------------------------------------------
-Name:- MEASURE_ECn001_Sy
-Type:- REAL
-Description:- Pressure Measurement Sy
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::123
---------------------------------------------------
-Name:- MEASURE_ECn001_Mx
-Type:- REAL
-Description:- Pressure Measurement Mx
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::124
---------------------------------------------------
-Name:- log_VacuumFail1
-Type:- TOD
-Description:- Logging vacuum time failed
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::125
---------------------------------------------------
-Name:- log_VacuumBegin1
-Type:- TOD
-Description:- Logging vacuum begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::126
---------------------------------------------------
-Name:- ready_vacuum_Sy
-Type:- BOOL
-Description:- Synchronisation flag indicating readiness to start evacuation
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::127
---------------------------------------------------
-Name:- ready_vacuum_Mx
-Type:- BOOL
-Description:- Synchronisation flag indicating readiness to start evacuation
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::128
---------------------------------------------------
-Name:- log_WrongHyg_MFL
-Type:- BOOL
-Description:- Logging wrong hygiene status of unit MFL
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::129
---------------------------------------------------
-Name:- log_WrongHyg_FCZ
-Type:- BOOL
-Description:- Logging wrong hygiene status of unit FCZ
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::130
---------------------------------------------------
-Name:- log_WrongHyg_Sy
-Type:- BOOL
-Description:- Logging wrong hygiene status of unit Sy
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::131
---------------------------------------------------
-Name:- log_WrongHyg_Mx
-Type:- BOOL
-Description:- Logging wrong hygiene status of unit Mx
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::132
---------------------------------------------------
-Name:- log_WrongHygiene
+Name:- time_wrong_hygiene
 Type:- TOD
 Description:- Logging time wrong hygiene status detected
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::133
+PARAMETER::21
 --------------------------------------------------
-Name:- log_CIPSIPEnd
+Name:- time_cipsip_end
 Type:- TOD
-Description:- Logging CIP/SIP operation end time
+Description:- Logging CIPSIP operation end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::134
+PARAMETER::22
 --------------------------------------------------
-Name:- log_CIPSIPBegin
+Name:- time_cipsip_begin
 Type:- TOD
-Description:- Logging CIP/SIP operation start time
+Description:- Logging CIPSIP operation start time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::135
+PARAMETER::23
 --------------------------------------------------
-Name:- HYG_STATE_FCZ
-Type:- INT
-Description:- Hygiene Status of unit FCZ
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::136
---------------------------------------------------
-Name:- DEV_STATE_FCZ
-Type:- INT
-Description:- Device State of unit FCZ
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::137
---------------------------------------------------
-Name:- SUB_FCZ
-Type:- INT
-Description:- Substate selection to unit FCZ
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::138
---------------------------------------------------
-Name:- CMD_FCZ
-Type:- INT
-Description:- Command to unit FCZ
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::139
---------------------------------------------------
-Name:- HYG_STATE_MFL
-Type:- INT
-Description:- Hygiene Status of unit MFL
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::140
---------------------------------------------------
-Name:- DEV_STATE_MFL
-Type:- INT
-Description:- Device State of unit MFL
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::141
---------------------------------------------------
-Name:- SUB_MFL
-Type:- INT
-Description:- Substate selection to unit MFL
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::142
---------------------------------------------------
-Name:- CMD_MFL
-Type:- INT
-Description:- Command to unit MFL
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::143
---------------------------------------------------
-Name:- HYG_STATE_Sy
+Name:- sy_vessel_hygiene
 Type:- INT
 Description:- Hygiene Status of unit Sy
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::144
+PARAMETER::24
 --------------------------------------------------
-Name:- DEV_STATE_Sy
+Name:- sy_vessel_state
 Type:- INT
 Description:- Device State of unit Sy
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::145
+PARAMETER::25
 --------------------------------------------------
-Name:- SUB_Sy
+Name:- sy_vessel_subs
 Type:- INT
 Description:- Substate selection to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::146
+PARAMETER::26
 --------------------------------------------------
-Name:- CMD_Sy
+Name:- sy_vessel_cmd
 Type:- INT
 Description:- Command to unit Sy
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::147
---------------------------------------------------
-Name:- HYG_STATE_Mx
-Type:- INT
-Description:- Hygiene Status of unit Mx
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::148
---------------------------------------------------
-Name:- DEV_STATE_Mx
-Type:- INT
-Description:- Device State of unit Mx
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::149
---------------------------------------------------
-Name:- SUB_Mx
-Type:- INT
-Description:- Substate selection to unit Mx
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::150
---------------------------------------------------
-Name:- CMD_Mx
-Type:- INT
-Description:- Command to unit Mx
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::151
---------------------------------------------------
-Name:- sip_sy_complete
-Type:- BOOL
-Description:- UO synchronisation flag for Sy SIP Complete
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::152
---------------------------------------------------
-Name:- sip_mx_complete
-Type:- BOOL
-Description:- UO synchronisation flag for Mx SIP Complete
 ParameterInOut:- OUT
 
 
@@ -1259,20 +251,13 @@ ACTION::01
 --------------------------------------------------
 Description:- Log product manufacture operation begin time.
 Action:- //Log CIPSIP operation begin
-L "dbCONST_VAL".CPU_TIME;
-T #_log_CIPSIPBegin;
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_cipsip_begin;
 
-// Reset used flags
 SET;
-R #_toggle_mode;
-R #_log_WrongHyg_Mx;
-R #_log_WrongHyg_Sy;
-R #_log_WrongHyg_MFL;
-R #_log_WrongHyg_FCZ;
-R #_prompt_abort;
-R #_confirm_abort;
+S #_log_time_cipsip_begin;
 
-//Repor Event Reset
+//Report Event Reset
 SET;
 R #_Report_Evnt_001;
 R #_Report_Evnt_002;
@@ -1293,40 +278,12 @@ TRANSITION::01
 TRNNo:- 01
 Title:- Check Hygiene Status
 EmptyTransition:- False
-Description:- SMS1 and selected Sy, SMFLx, FPz and FLz are in Hygiene status USED?
+Description:- SMS1 and selected Sy is in Hygiene status USED?
 Condition:- A(;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.USED;
-L #_HYG_STATE_Mx;
+L  "dbCONST".BLK.HYGIENE.USED;
+L #_sy_vessel_hygiene;
 ==I;
 );
-A(;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.USED;
-L #_HYG_STATE_Sy;
-==I;
-);
-A(;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.USED;
-L #_HYG_STATE_MFL;
-==I;
-);
-A(;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.USED;
-L #_HYG_STATE_FCZ;
-==I;
-);
-A(;
-O(;
-L "dbCONST_VAL".UNIT.OWNER.S1;
-L #_SY_OWNED_BY;
-==I;
-);
-O(;
-L "dbCONST_VAL".UNIT.OWNER.S2;
-L #_SY_OWNED_BY;
-==I;
-);
-);
-	
 
 
 --------------------------------------------------
@@ -1342,55 +299,23 @@ Condition:- A M1.1; //Always High flag
 --------------------------------------------------
 STEP::02
 --------------------------------------------------
-StepNo:- 2.0000
+StepNo:- 02
 Title:- RP_CIPSIP : Incorrect Hygiene Status
-Description:- Log which equipment is not in Hygiene status USED.
+Description:- Log equipment is not in Hygiene status USED.
+Prompt operator to confirm abort.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log which equipment is not in Hygiene status USED.
+Description:- Log equipment is not in Hygiene status USED.
 Send message to HMI
 Action:- //Log time if one or more units not in correct Hygiene status USED
-L "dbCONST_VAL".CPU_TIME;
-T #_log_WrongHygiene;
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_wrong_hygiene;
 
-//Log which equipment is not in Hygiene status USED
-AN(;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.USED;
-L #_HYG_STATE_Mx;
-==I;
-);
 SET;
-S #_log_WrongHyg_Mx;
-S #_msg_WrongHyg_Mx;
-
-AN(;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.USED;
-L #_HYG_STATE_Sy;
-==I;
-);
-SET;
-S #_log_WrongHyg_Sy;
-S #_msg_WrongHyg_Sy;
-
-AN(;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.USED;
-L #_HYG_STATE_MFL;
-==I;
-);
-SET;
-S #_log_WrongHyg_MFL;
-S #_msg_WrongHyg_MFL;
-
-AN(;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.USED;
-L #_HYG_STATE_FCZ;
-==I;
-);
-SET;
-S #_log_WrongHyg_FCZ;
-S #_msg_WrongHyg_FCZ;
+S #_log_time_wrong_hygiene;
+S #_log_msg_wrong_hygiene;
 S #_prompt_abort;
 Verification:- A M1.1; //Always High flag
 
@@ -1398,109 +323,42 @@ Verification:- A M1.1; //Always High flag
 --------------------------------------------------
 TRANSITION::03
 --------------------------------------------------
-TRNNo:- 3.0000
+TRNNo:- 03
 Title:- Confirm Abort (Incorrect Hygiene Status)
 EmptyTransition:- False
 Description:- Confirm Abort (Incorrect Hygiene Status)
-Condition:- A #_confirm_abort;
+Condition:- A #_confirm_abort_yes;
 
 
 --------------------------------------------------
 STEP::03
 --------------------------------------------------
-StepNo:- 3.0000
+StepNo:- 03
 Title:- RP_CIPSIP : Initiate SETUP operations
-Description:- Log previous operation BatchID Number.
-Set Sy, SMFLx, FPz and FLz equipment to Hygiene Status to CIP
-Set CIPSIP Cycle Number.
-
-Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
 
 Initiate Unit Operations
 Sy STATE=SETUP
-SMFLx STATE=SIP_SETUP 
-FPz STATE = SIP_SETUP
-FLz STATE = SIP_SETUP
-
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log previous operation BatchID Number.
-Set Mx, Sy and FCz equipment to Hygiene Status to CIP
-Set CIPSIP Cycle Number.
-
-Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
 
 Initiate Unit Operations
-MX STATE=SETUP
-MFL STATE=CIP_SETUP
 SY STATE=SETUP
-FCZ STATE=SETUP
-Action:- //Log previous operation BatchID Number.
-// L #_BatchID_MX;
-// T #_log_BatchID;
-
-//Set Mx, Sy and FCz equipment to Hygiene Status to CIP
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.CIP;
-T #_HYG_STATE_Mx;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.CIP;
-T #_HYG_STATE_Sy;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.CIP;
-T #_HYG_STATE_MFL;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.CIP;
-T #_HYG_STATE_FCZ;
-
-//Set CIPSIP Cycle Number.
-// L ???
-//T #_BatchID_MX; ??
-
-//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+Action:- //Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
 SET;
 S #_toggle_mode;
 
-//Initiate Unit Operation for unit Mx
-L "dbCONST_VAL".UNIT.MX.SUBS.SETUP;
-T #_SUB_Mx;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_Mx;
-
 //Initiate Unit Operation for unit Sy
-L "dbCONST_VAL".UNIT.SY.SUBS.SETUP;
-T #_SUB_Sy;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_Sy;
-
-//Initiate Unit Operation for unit MFL
-L "dbCONST_VAL".UNIT.MFL.SUBS.CIP_SETUP;
-T #_SUB_MFL;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_MFL;
-
-//Initiate Unit Operation for unit FCZ (other PLC)
-L "dbCONST_VAL".UNIT.FCZ.SUBS.SETUP;
-T #_SUB_FCZ;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_FCZ;
-
+L "dbCONST".BLK.SY.SUBS.SETUP;
+T #_sy_vessel_subs;
+L "dbCONST".BLK.CMD.START;
+T #_sy_vessel_cmd;
 Verification:- A(;
-L #_DEV_STATE_Mx;
-L "dbCONST_VAL".UNIT.MX.SUBS.SETUP;
-==I;
-);
-A(;
-L #_DEV_STATE_Sy;
-L "dbCONST_VAL".UNIT.SY.SUBS.SETUP;
-==I;
-);
-A(;
-L #_DEV_STATE_MFL;
-L "dbCONST_VAL".UNIT.MFL.SUBS.CIP_SETUP;
-==I;
-);
-A(;
-L #_DEV_STATE_FCZ;
-L "dbCONST_VAL".UNIT.FCZ.SUBS.SETUP;
+L #_sy_vessel_state;
+L "dbCONST".BLK.SY.SUBS.SETUP;
 ==I;
 );
 
@@ -1508,36 +366,13 @@ L "dbCONST_VAL".UNIT.FCZ.SUBS.SETUP;
 --------------------------------------------------
 TRANSITION::04
 --------------------------------------------------
-TRNNo:- 4.0000
+TRNNo:- 04
 Title:- SETUP operations complete?
 EmptyTransition:- False
-Description:- All setup operations are complete. 
-
-Sy STATE=SETUP
-SMFLx STATE=SIP_SETUP 
-FPz STATE = SIP_SETUP
-FLz STATE = SIP_SETUP
-
+Description:- Sy SETUP operations are complete. 
 Condition:- A(;
-L 	#_DEV_STATE_Mx;
-L 	"dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
-==I;
-);
-A(;
-L 	#_DEV_STATE_Sy;
-L 	"dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
-==I;
-);
-
-// MFL and FCZ Substate have no Unit Operation UO
-A(;
-L #_DEV_STATE_MFL;
-L 	"dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
-==I;
-);
-A(;
-L #_DEV_STATE_FCZ;
-L 	"dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
+L 	#_sy_vessel_state;
+L 	"dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
 
@@ -1546,52 +381,27 @@ L 	"dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
 STEP::04
 --------------------------------------------------
 StepNo:- 4.0000
-Title:- RP_CIPSIP : Vacuum Test
-Description:- Initiate Unit Operations for vacuum hold test
-Sy STATE=VACUUM
-SMFLx STATE=SIP
-FPz STATE=SIP
-FLz STATE=SIP
+Title:- RP_CIPSIP : Initiate Sy CIP Unit Operations
+Description:- Set Sy equipment to Hygiene Status to CIP.
+Initiate Unit Operation for Sy CIP.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Initiate Unit Operations for vacuum hold test.
-Action:- //Initiate Unit Operation for vacuum hold test Mx
-L "dbCONST_VAL".UNIT.MX.SUBS.VACUUM;
-T #_SUB_Mx;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_Mx;
+Description:- Set Sy equipment to Hygiene Status to CIP.
+Initiate Unit Operation for Sy CIP.
+Action:- //Set Sy equipment to Hygiene Status to CIP.
+L "dbCONST".BLK.HYGIENE.CIP;
+T #_sy_vessel_hygiene;
 
-//Initiate Unit Operation for vacuum hold test Sy
-L "dbCONST_VAL".UNIT.SY.SUBS.VACUUM;
-T #_SUB_Sy;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_Sy;
-
-//Initiate Unit Operation for vacuum hold test MFL
-L "dbCONST_VAL".UNIT.MFL.SUBS.VACUUM;
-T #_SUB_MFL;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_MFL;
-
-//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-SET;
-R #_toggle_mode;
-R #_prompt_try_again;
+//Initiate Unit Operation for Sy CIP.
+L "dbCONST".BLK.SY.SUBS.CIP;
+T #_sy_vessel_subs;
+L "dbCONST".BLK.CMD.START;
+T #_sy_vessel_cmd;
 Verification:- A(;
-L #_DEV_STATE_Mx;
-L "dbCONST_VAL".UNIT.MX.SUBS.VACUUM;
-==I;
-);
-A(;
-L #_DEV_STATE_Sy;
-L "dbCONST_VAL".UNIT.SY.SUBS.VACUUM;
-==I;
-);
-A(;
-L #_DEV_STATE_MFL;
-L "dbCONST_VAL".UNIT.MFL.SUBS.VACUUM;
+L #_sy_vessel_state;
+L "dbCONST".BLK.SY.SUBS.CIP;
 ==I;
 );
 
@@ -1600,753 +410,38 @@ L "dbCONST_VAL".UNIT.MFL.SUBS.VACUUM;
 TRANSITION::05
 --------------------------------------------------
 TRNNo:- 5.0000
-Title:- Vacuum ready?
+Title:- Sy CIP operations complete
 EmptyTransition:- False
-Description:- Wait for Sy to be ready to start evacuation and SMFLx, FPz and FLz setup for VACUUM. 
-Sy: ready_vacuum flag is set 
-SMFLx STATE=SIP 
-FPz STATE=SIP: ready_vacuum flag is set 
-FLz STATE=SIP: ready_vacuum flag is set 
+Description:- Sy CIP operations complete 
 Condition:- A(;
-L #_DEV_STATE_MFL;
-L "dbCONST_VAL".UNIT.MFL.SUBS.VACUUM;
+L #_sy_vessel_state;
+L "dbCONST".BLK.STATE.COMPLETED;;
 ==I;
 );
-A #_ready_vacuum_Sy;
-A #_ready_vacuum_Mx;
 
 
 --------------------------------------------------
 STEP::05
 --------------------------------------------------
 StepNo:- 5.0000
-Title:- RP_CIPSIP : Start vacuum hold evacuation timer
-Description:- Set child flags to indicate proceed with evacuation:
-Sy: set proceed_vacuum flag
-SMFLx: set proceed_vacuum flag
-FPz: set proceed_vacuum flag
-FLz: set proceed_vacuum flag
-
-Start vacuum timer.
-
-Log Vacuum begin time
+Title:- RP_CIPSIP : Set Sy Hygiene Status to CLEAN
+Description:- Set Sy Hygiene status to CLEAN.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Clear child flags to indicate proceed with evacuation:
-MX: set proceed_vacuum flag
-SY: set proceed_vacuum flag
+Description:- Set Sy Hygiene status to CLEAN.
 
-Start vacuum timer.
-
-Log Vacuum begin time
-Action:- //Clear child flags to indicate proceed with evacuation:
-SET;
-S #_proceed_vacuum_Mx;
-S #_proceed_vacuum_Sy;
-
-// Start vacuum timer
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L #_TIME_VACUUM;
-T #SQ_TIMER.PT;
-
-//Log vacuum begin time
-L "dbCONST_VAL".CPU_TIME;
-T #_log_VacuumBegin1;
-
-// Reset flags
-SET;
-R #_prompt_try_again;
-R #_confirm_try_again;
-R #_confirm_no_try;
-R #_msg_VacuumFail;
-Verification:- A #SQ_TIMER.IN;
+Action:- //Set Sy hygiene status to CLEAN
+L "dbCONST".BLK.HYGIENE.CLEAN;
+T #_sy_vessel_hygiene;
+Verification:- A M1.1;
 
 
 --------------------------------------------------
 TRANSITION::06
 --------------------------------------------------
 TRNNo:- 6.0000
-Title:- Pressure below setpoint?
-EmptyTransition:- False
-Description:- Pressure reduced below PRES_VAC.
-Condition:- A(;
-L #_MEASURE_ECn001_Mx;
-L #_PRES_VAC;
-<R;
-);
-A(;
-L #_MEASURE_ECn001_Sy;
-L #_PRES_VAC;
-<R;
-);
-
-
---------------------------------------------------
-TRANSITION::07
---------------------------------------------------
-TRNNo:- 7.0000
-Title:- Timer expired?
-EmptyTransition:- False
-Description:- Vacuum timer expired.
-Condition:- A #SQ_TIMER.Q;
-
-
---------------------------------------------------
-STEP::06
---------------------------------------------------
-StepNo:- 6.0000
-Title:- RP_CIPSIP : Vacuum hold evacuation failed 
-Description:- Raise vacuum failed message.
-
-Log vacuum time failed.
-
-Prompt operator to confirm to try again.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Raise vacuum failed message.
-
-Log vacuum time failed.
-
-Prompt operator to confirm to try again.
-Action:- //Set flag to raise vacuum failed message
-SET;
-S #_msg_VacuumFail;
-
-//Log time vacuum failed
-L "dbCONST_VAL".CPU_TIME;
-T #_log_VacuumFail1;
-
-SET;
-S #_prompt_try_again;
-
-//Stop Mx Unit Operation
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_Mx;
-L "dbCONST_VAL".UNIT.SUBSTATE.ZERO;
-T #_SUB_Mx;
-
-
-//Stop Sy Unit Operation
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_Sy;
-L "dbCONST_VAL".UNIT.SUBSTATE.ZERO;
-T #_SUB_Sy;
-
-SET;
-R #_proceed_vacuum_Mx;
-R #_proceed_vacuum_Sy;
-
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::09
---------------------------------------------------
-TRNNo:- 9.0000
-Title:- Try again?
-EmptyTransition:- False
-Description:- Operator want to try again.
-Condition:- A #_confirm_try_again;
-
-
---------------------------------------------------
-TRANSITION::10
---------------------------------------------------
-TRNNo:- 10.0000
-Title:- No try?
-EmptyTransition:- False
-Description:- Operator don't want to try again.
-Condition:- A #_confirm_no_try;
-
-
---------------------------------------------------
-STEP::07
---------------------------------------------------
-StepNo:- 7.0000
-Title:- RP_CIPSIP : Vacuum hold evacuation finished
-Description:- Set child flags to indicate evacuation has finished and ready for vacuum hold test.
-Sy: vacuum_finish flag
-SMFLx: vacuum_finish flag
-FPz: vacuum_finish flag
-FLz: vacuum_finish flag
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set child flags to indicate evacuation has finished and ready for vacuum hold test.
-MX: vacuum_finish flag
-SY: vacuum_finish flag
-Action:- //Set child flags to indicate evacuation has finished and ready for vacuum hold test.
-SET;
-S #_vacuum_finish_Mx;
-S #_vacuum_finish_Sy;
-
-R #_proceed_vacuum_Mx;
-R #_proceed_vacuum_Sy;
-Verification:- A M1.1; //Always High flag
-
---------------------------------------------------
-ACTION::02
---------------------------------------------------
-Description:- Action Description
-Action:- // Start vacuum hold timer
-SET;
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L T#5S;
-T #SQ_TIMER.PT;
-
-Verification:- A #SQ_TIMER.IN;
-
-
---------------------------------------------------
-TRANSITION::08
---------------------------------------------------
-TRNNo:- 8.0000
-Title:- All Vacuum operations complete
-EmptyTransition:- False
-Description:- All vacuum operations complete 
-Sy: VACUUM
-SMFLx: SIP
-FPz: SIP
-FLz: SIP
-Condition:- A(;
-L 	#_DEV_STATE_Mx;
-L 	"dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
-==I;
-);
-A(;
-L 	#_DEV_STATE_Sy;
-L 	"dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
-==I;
-);
-A #SQ_TIMER.Q;
-
-
---------------------------------------------------
-STEP::08
---------------------------------------------------
-StepNo:- 8.0000
-Title:- RP_CIPSIP : Start Vacuum Hold Timer
-Description:- Start Vacuum  Hold Timer.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Start Vacuum Hold Timer.
-Action:- // Start vacuum hold timer
-SET;
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L #_TIME_VAC_HOLD;
-T #SQ_TIMER.PT;
-
-SET;
-R #_vacuum_finish_Mx;
-R #_vacuum_finish_Sy;
-Verification:- A #SQ_TIMER.IN;
-
-
---------------------------------------------------
-STEP::09
---------------------------------------------------
-StepNo:- 9.0000
-Title:- RP_CIPSIP : Vacuum Hold Test
-Description:- Set flags to log Mx pressure. Logging of values done in HMI.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set flags to log Mx and Sy vessel pressure.
-Use Mx vessel pressure flag for start and Sy for end.
-Action:- //Log Mx and Sy vessel pressure
-SET;
-S #_log_PressureMx;
-
-//Report Event Set
-SET;
-S #_Report_Evnt_001;
-
-//Report Evnt Reset
-SET;
-R #_Report_Evnt_002; 
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::13
---------------------------------------------------
-TRNNo:- 13.0000
-Title:- Pressure above setpoint
-EmptyTransition:- False
-Description:- Pressure increased above PRES_VAC_FAIL
-Condition:- O(;
-L #_MEASURE_ECn001_Mx;
-L #_PRES_VAC_FAIL;
->R;
-);
-O(;
-L #_MEASURE_ECn001_Sy;
-L #_PRES_VAC_FAIL;
->R;
-);
-
-
---------------------------------------------------
-STEP::10
---------------------------------------------------
-StepNo:- 10.0000
-Title:- RP_CIPSIP : Initiate Mx and MMFLx CIP Unit Operations
-Description:- Initiate Sy CIP Unit Operation
-Initiate SMFLx CIP Unit Operation
-Initiate FPz CIP Unit Operation
-Initiate FLz CIP Unit Operation
-
-Set Units Sy, SMFLx, FPz and FLz Hygiene Satus to CIP
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- MFL unit ready for flushing
-Action:- //Initiate Unit Operation for Mx CIP
-L "dbCONST_VAL".UNIT.MX.SUBS.CIP;
-T #_SUB_Mx;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_Mx;
-Verification:- A(;
-L #_DEV_STATE_Mx;
-L "dbCONST_VAL".UNIT.MX.SUBS.CIP;
-==I;
-);
-
-
---------------------------------------------------
-TRANSITION::14
---------------------------------------------------
-TRNNo:- 14.0000
-Title:- Sy, SMFLx, FPz and FLz CIP operations complete
-EmptyTransition:- False
-Description:- Sy, SMFLx, FPz and FLz CIP operations complete 
-Condition:- A(;
-L #_DEV_STATE_Mx;
-L "dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
-==I;
-);
-
-
---------------------------------------------------
-STEP::11
---------------------------------------------------
-StepNo:- 11
-Title:- RP_CIPSIP : Vacuum Hold failed
-Description:- Log vacuum hold pressure failed.
-
-Raise Vacuum Hold Failed message.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Log vacuum hold pressure failed.
-
-Raise Vacuum Hold Failed message.
-Action:- //Stop logging Mx and Sy vessel pressure
-SET;
-R #_log_PressureMx;
-R #_log_PressureSy;
-
-//Set flag to raise vacuum failed message
-SET;
-S #_msg_VacHoldFail;
-
-//Log time vacuum failed
-L "dbCONST_VAL".CPU_TIME;
-T #_log_VacHoldFail;
-
-SET;
-S #_prompt_try_again;
-
-//Stop Mx Unit Operation
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_Mx;
-L "dbCONST_VAL".UNIT.SUBSTATE.ZERO;
-T #_SUB_Mx;
-
-
-//Stop Sy Unit Operation
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_Sy;
-L "dbCONST_VAL".UNIT.SUBSTATE.ZERO;
-T #_SUB_Sy;
-
-SET;
-R #_proceed_vacuum_Mx;
-R #_proceed_vacuum_Sy;
-
-// Stop timer
-SET;
-R #SQ_TIMER.IN;
-
-//Report Evnt Reset
-SET;
-R #_Report_Evnt_001; 
-
-//Report Event Set
-SET;
-S #_Report_Evnt_002;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::15
---------------------------------------------------
-TRNNo:- 15.0000
-Title:- No try?
-EmptyTransition:- False
-Description:- Operator don't want to try again.
-Condition:- A #_confirm_no_try;
-
-
---------------------------------------------------
-TRANSITION::16
---------------------------------------------------
-TRNNo:- 16
-Title:- Try again?
-EmptyTransition:- False
-Description:- Operator want to try again.
-Condition:- A #_confirm_try_again;
-
-
---------------------------------------------------
-STEP::12
---------------------------------------------------
-StepNo:- 12.0000
-Title:- RP_CIPSIP : Set Sy, SMFLx, FPz and FLz Hygiene Status to CLEAN
-Description:- Set Sy, SMFLx, FPz and FLz Hygiene status to CLEAN.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set Sy, MFL and FCz Hygiene status to CLEAN.
-
-Initiate Unit Operation to setup the manufacturing transfer line for SIP
-MFL STATE=SIP_SETUP
-Action:- //Set Sy, MFL and FCZ hygiene status to CLEAN
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.CLEAN;
-T #_HYG_STATE_Sy;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.CLEAN;
-T #_HYG_STATE_MFL;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.CLEAN;
-T #_HYG_STATE_FCZ;
-
-
-//Initiate Unit Operation for MFL SIP_SETUP
-L "dbCONST_VAL".UNIT.MFL.SUBS.SIP_SETUP;
-T #_SUB_MFL;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_MFL;
-
-SET;
-R #_cip_complete_MFL_SY;
-Verification:- A(;
-L #_DEV_STATE_MFL;
-L "dbCONST_VAL".UNIT.MFL.SUBS.SIP_SETUP;
-==I;
-);
-
-
---------------------------------------------------
-STEP::13
---------------------------------------------------
-StepNo:- 13.0000
-Title:- RP_CIPSIP : Initiate Unit Operations for evacuation
-Description:- Initiate Unit Operations for evacuation prior to SIP
-Sy STATE=VACUUM
-SMFLx STATE=SIP
-FPz STATE=SIP
-FLz STATE=SIP
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Initiate Unit Operations for evacuation prior to SIP
-MX STATE=VACUUM
-MFL STATE=SIP_MX
-
-Action:- SET;
-R #_proceed_vacuum_Sy;
-R #_proceed_vacuum_Mx;
-R #_vacuum_finish_Sy;
-R #_vacuum_finish_Mx;
-
-//Initiate Unit Operations for evacuation prior to SIP
-L "dbCONST_VAL".UNIT.MX.SUBS.VACUUM;
-T #_SUB_Mx;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_Mx;
-
-SET;
-R #_EXx007_COND;
-
-L "dbCONST_VAL".UNIT.MFL.SUBS.SIP_MX;
-T #_SUB_MFL;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_MFL;
-
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_FCZ;
-Verification:- A(;
-L #_DEV_STATE_MX;
-L "dbCONST_VAL".UNIT.MX.SUBS.VACUUM;
-==I;
-);
-
-
---------------------------------------------------
-STEP::14
---------------------------------------------------
-StepNo:- 14.0000
-Title:- RP_CIPSIP : Start Sy evacuation timer
-Description:- Clear child flags to indicate proceed with evacuation. Start vacuum timer. Log Vacuum begin time
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set child flags to indicate proceed with evacuation. Start vacuum timer. Log Vacuum begin time
-Action:- //Set child flags to indicate proceed with evacuation:
-SET;
-S #_proceed_vacuum_Mx;
-
-// Start vacuum timer
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L #_TIME_VACUUM;
-T #SQ_TIMER.PT;
-
-//Log vacuum begin time
-L "dbCONST_VAL".CPU_TIME;
-T #_log_VacuumBegin2;
-
-// Reset flags
-SET;
-R #_prompt_try_again;
-R #_confirm_try_again;
-R #_confirm_no_try;
-R #_msg_VacuumFail;
-
-//Report Event Set
-SET;
-S #_Report_Evnt_017;
-
-//Report Event reset
-SET;
-R #_Report_Evnt_018;
-Verification:- A #SQ_TIMER.IN;
-
-
---------------------------------------------------
-TRANSITION::19
---------------------------------------------------
-TRNNo:- 19.0000
-Title:- Pressure below setpoint?
-EmptyTransition:- False
-Description:- Pressure reduced below PRES_VAC.
-Condition:- A(;
-L #_MEASURE_ECn001_Mx;
-L #_PRES_VAC;
-<R;
-);
-
-
---------------------------------------------------
-TRANSITION::20
---------------------------------------------------
-TRNNo:- 20.0000
-Title:- Timer expired?
-EmptyTransition:- False
-Description:- Vacuum timer expired.
-
-
-Condition:- A #SQ_TIMER.Q;
-
-
---------------------------------------------------
-STEP::15
---------------------------------------------------
-StepNo:- 15.0000
-Title:- RP_CIPSIP : Evacuation failed
-Description:- Raise vacuum failed message.
-
-Log vacuum time failed.
-
-Prompt operator to confirm to try again.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Raise vacuum failed message.
-
-Log vacuum time failed.
-
-Prompt operator to confirm to try again.
-Action:- //Set flag to raise vacuum failed message
-SET;
-S #_msg_VacuumFail;
-
-//Log time vacuum failed
-L "dbCONST_VAL".CPU_TIME;
-T #_log_VacuumFail1;
-
-SET;
-S #_prompt_try_again;
-
-//Stop Mx Unit Operation
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_Mx;
-L "dbCONST_VAL".UNIT.SUBSTATE.ZERO;
-T #_SUB_Mx;
-
-SET;
-R #_proceed_vacuum_Mx;
-R #_proceed_vacuum_Sy;
-
-//Report Event reset
-SET;
-R #_Report_Evnt_017;
-
-//Report Event Set
-SET;
-S #_Report_Evnt_018;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::21
---------------------------------------------------
-TRNNo:- 21.0000
-Title:- Try again?
-EmptyTransition:- False
-Description:- Operator want to try again.
-Condition:- A #_confirm_try_again;
-
-
---------------------------------------------------
-STEP::16
---------------------------------------------------
-StepNo:- 16.0000
-Title:- RP_CIPSIP : Sy evacuation finished
-Description:- Set child flags to indicate evacuation has finished.
-
-SY: vacuum_finish flag
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set child flags to indicate evacuation has finished.
-MX: vacuum_finish flag
-
-Action:- //Set child flags to indicate evacuation has finished and ready for vacuum hold test.
-SET;
-S #_vacuum_finish_Mx;
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_MFL;
-// Stop timer
-SET;
-R #SQ_TIMER.IN;
-
-//Report Event Set
-SET;
-S #_Report_Evnt_018;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::17
---------------------------------------------------
-StepNo:- 17.0000
-Title:- RP_CIPSIP : Initiate Sy and SMFLx, FPZ and FLz SIP Operations
-Description:- Initiate Sy SIP Operations.
-Sy STATE=SIP
-SMFLx STATE=SIP_Sy
-FPz STATE=SIP_Sy
-FLz STATE=SIP_Sy
-
-Set Sy, SMFLx, FPz and FLz Hygiene Status to SIP.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Initiate MX SIP Operations.
-MX STATE=SIP
-MFL STATE=SIP_MX
-
-Set MX and MFL Hygiene Status to SIP.
-Action:- //Initiate MX SIP Operations.
-L "dbCONST_VAL".UNIT.MX.SUBS.SIP;
-T #_SUB_Mx;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_Mx;
-
-SET;
-S #_EXx007_COND;
-
-L "dbCONST_VAL".UNIT.MFL.SUBS.SIP_MX;
-T #_SUB_MFL;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_MFL;
-
-//Set Mx and MFL hygiene status to SIP
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.SIP;
-T #_HYG_STATE_Mx;
-T #_HYG_STATE_MFL;
-Verification:- A(;
-L #_DEV_STATE_MX;
-L "dbCONST_VAL".UNIT.MX.SUBS.SIP;
-==I;
-);
-A(;
-L #_DEV_STATE_MFL;
-L "dbCONST_VAL".UNIT.MFL.SUBS.SIP_MX;
-==I;
-);
-
-
---------------------------------------------------
-STEP::18
---------------------------------------------------
-StepNo:- 18.0000
-Title:- RP_CIPSIP : Sy, SMFLx, FPz and FLz to open steam trap valve for unit operation SIP
-Description:- Flag Sy, SMFLx, FPz and FLz to open the steam trap valve by setting the ready_sip flag.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Flag MFL to open the steam trap valve by setting the ready_sip flag.
-Action:- SET;
-S #_ready_sip_MFL_Mx;
-Verification:- A #_ready_sip_MFL_Mx;
-
-
---------------------------------------------------
-TRANSITION::25
---------------------------------------------------
-TRNNo:- 25.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -2354,705 +449,125 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::19
+STEP::06
 --------------------------------------------------
-StepNo:- 19.0000
-Title:- RP_CIPSIP : Monitor Sy, SMFLx and FLz SIP Temperatures
-Description:- Set flags to log all Sy vessel temperature and SMFLx, FLz drain temperatures  every 30sec. Logging of values done in HMI.
+StepNo:- 6.0000
+Title:- RP_CIPSIP : Initiate Sy SIP Operations
+Description:- Initiate Sy SIP Operations.
+Sy STATE=SIP
+
+Set Sy Hygiene Status to SIP.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Set flags to log all Mx vessel temperatures  every 30sec. Logging of values done in HMI.
-Action:- A #_sip_timer_started;
-JC tsi1;
+Description:- Initiate Sy SIP Operations.
 
-// Start ABORT timer
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+Set Sy Hygiene Status to SIP.
+Action:- //Initiate Sy SIP Operations.
+L "dbCONST".BLK.SY.SUBS.SIP;
+T #_sy_vessel_subs;
+L "dbCONST".BLK.SY.CMD.START;
+T #_sy_vessel_cmd;.
 
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L #_TIME_SIP_ABORT;
-T #SQ_TIMER.PT;
+//Set Sy equipment to Hygiene Status to SIP. 
+L "dbCONST".BLK.HYGIENE.SIP;
+T #_sy_vessel_hygiene;
 
-
-tsi1: NOP 0;
-
-//Log all temperatures
-SET;
-S #_log_Temp_TI_x010;
-S #_log_Temp_TI_x012;
-S #_log_Temp_TI_n062;
-
-
-// Clear log flag for low temperature
-SET;
-R #_log_TIx062low;
-R #_log_TIx012low;
-R #_log_TIx010low;
-R M5.2; //Message deactivate
-
-
-SET;
-R #_prompt_try_again;
-R #_confirm_try_again;
-
-//Report Event Set
-SET;
-S #_Report_Evnt_019;
-
-//Report Event Reset
-SET;
-R #_Report_Evnt_020;
-Verification:- A M1.1; //Always High flag
+Verification:- A(;
+L #_sy_vessel_state;
+L "dbCONST".BLK.SY.SUBS.SIP;
+==I;
+);
 
 
 --------------------------------------------------
-TRANSITION::26
+TRANSITION::07
 --------------------------------------------------
-TRNNo:- 26.0000
-Title:- SIP Timer Expired
+TRNNo:- 7.0000
+Title:- Sy state SIP complete?
 EmptyTransition:- False
-Description:- Timer TIME_SIP expired.
-Condition:- A #SQ_TIMER.Q;
-A #_sip_timer_started;
-
-
---------------------------------------------------
-TRANSITION::27
---------------------------------------------------
-TRNNo:- 27.0000
-Title:- Temperature below setpoint
-EmptyTransition:- False
-Description:- SIP timer running and any temperature below TEMP_SIP or the vent filter inlet tempeture below TEMP_SIP_VENT?
-Condition:- A #_sip_timer_started;
-A(;
-O(;
-L 	#_TIx062_MV;
-L 	#_TEMP_SIP;
-<R;
-);
-O(;
-L              #_TIx010_MV;
-L 	#_TEMP_SIP;
-<R;
-);
-O(;
-L              #_TIx012_MV;
-L 	#_TEMP_SIP;
-<R;
-);
-);
-
-
-
-
---------------------------------------------------
-TRANSITION::28
---------------------------------------------------
-TRNNo:- 28.0000
-Title:- All temperatures above setpoint.
-EmptyTransition:- False
-Description:- All SIP temperatures above TEMP_SIP °C and the vent filter inlet temperature above TEMP_SIP_VENT and SIP timer not running? 
-Sy Vessel TI_y105; 
-Sy gas vent drain TI_y103; 
-Sy Wash drain TI_y107;
-FLz Wash drain TI_zz107;
-SMFLx Wash drain TI_x111
+Description:- Wait for Sy to complete.
 Condition:- A(;
-L 	#_TIx062_MV;
-L 	#_TEMP_SIP;
->R;
-);
-A(;
-L              #_TIx010_MV;
-L 	#_TEMP_SIP;
->R;
-);
-A(;
-L              #_TIx012_MV;
-L 	#_TEMP_SIP;
->R;
-);
-AN #_sip_timer_started;
-
-
---------------------------------------------------
-TRANSITION::29
---------------------------------------------------
-TRNNo:- 29.0000
-Title:- Abort timer expired
-EmptyTransition:- False
-Description:- Timer TIME_SIP_ABORT is expired.
-Condition:- A #SQ_TIMER.Q;
-AN #_sip_timer_started;
-
-
---------------------------------------------------
-STEP::20
---------------------------------------------------
-StepNo:- 20.0000
-Title:- RP_CIPSIP : Reset SIP timeout timer 
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Action Description
-Action:- SET;
-R #SQ_TIMER.IN;
-
-//Report Event Reset
-SET;
-R #_Report_Evnt_019;
-Verification:- AN #SQ_TIMER.IN;
-AN #SQ_TIMER.Q;
-
-
---------------------------------------------------
-TRANSITION::30
---------------------------------------------------
-TRNNo:- 30.0000
-Title:- Empty Transition
-EmptyTransition:- False
-Description:- Timer Reset
-Condition:- AN #SQ_TIMER.Q;
-
-
---------------------------------------------------
-STEP::21
---------------------------------------------------
-StepNo:- 21.0000
-Title:- RP_CIPSIP : Start Sy SIP timer 
-Description:- Start SIP timer TIME_SIP.
-
-Log SIP start time.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Start SIP timer TIME_SIP.
-Action:- SET;
-S #SQ_TIMER.IN;
-L #_TIME_SIP;
-T #SQ_TIMER.PT;
-
-//Log SIP begin time
-L "dbCONST_VAL".CPU_TIME;
-T #_log_SIPBegin;
-
-//SIP timer started
-SET;
-S #_sip_timer_started;
-Verification:- A #SQ_TIMER.IN;
-
-
---------------------------------------------------
-TRANSITION::31
---------------------------------------------------
-TRNNo:- 31.0000
-Title:- Timer Reset
-EmptyTransition:- False
-Description:- Jump
-Condition:- AN #SQ_TIMER.Q;
-
-
---------------------------------------------------
-STEP::22
---------------------------------------------------
-StepNo:- 22.0000
-Title:- RP_CIPSIP : Low Sy temperature during SIP
-Description:- Log which temperature is too low.
-Reset SIP timer.
-Log timer RESET.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Action Description
-Action:- A(;
-L 	#_TIx062_MV;
-L 	#_TEMP_SIP;
-<R;
-);
-JCN S341;
-SET;
-S #_log_TIx062low;
-
-
-S341: NOP 0;
-A(;
-L              #_TIx010_MV;
-L 	#_TEMP_SIP;
-<R;
-);
-JCN S342;
-SET;
-S #_log_TIx010low;
-
-S342: NOP 0;
-A(;
-L              #_TIx012_MV;
-L 	#_TEMP_SIP;
-<R;
-);
-JCN S343;
-SET;
-S #_log_TIx012low;
-
-S343: NOP 0;
-SET;
-R #_sip_timer_started;
-
-//Logging SIP timer reset
-L "dbCONST_VAL".CPU_TIME;
-T #_log_SIPTimerReset;
-
-//Counter
-L #_CTR_SIP_ABORT;
-INC 1;
-T #_CTR_SIP_ABORT;
-
-//Report Event Reset
-SET;
-R #_Report_Evnt_019;
-
-//Report Event Set
-SET;
-S #_Report_Evnt_020;
-Verification:- A M1.1; //Always High flag
-
---------------------------------------------------
-ACTION::02
---------------------------------------------------
-Description:- Action Description
-Action:- //    Check no of repeats
- A(;
-L 	#_CTR_SIP_ABORT;
-L 	#_NUM_SIP_ABORT;
->=I;
-);
-JC NOTS;
-SET;
-S #_prompt_try_again;
-// Start ABORT timer
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L #_TIME_SIP_ABORT;
-T #SQ_TIMER.PT;
-JU NOER;
-
-NOTS: NOP 0;
-SET;
-S #_Abort_messg; //Generate message abort
-// Start ABORT timer
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L T#1M;
-T #SQ_TIMER.PT;
-
-NOER:NOP 0;
-Verification:- A M1.1;
-
-
---------------------------------------------------
-TRANSITION::32
---------------------------------------------------
-TRNNo:- 32.0000
-Title:- Retry SIP again
-EmptyTransition:- False
-Description:- Temperature has dropped less than NUM_SIP_ABORT times
-Condition:- A(;
-L 	#_CTR_SIP_ABORT;
-L 	#_NUM_SIP_ABORT;
-<I;
-);
-A #_confirm_try_again;
-
-
---------------------------------------------------
-TRANSITION::33
---------------------------------------------------
-TRNNo:- 33.0000
-Title:- Abort SIP
-EmptyTransition:- False
-Description:- Temperature has dropped NUM_SIP_ABORT
-
-Condition:- O(;
-A(;
-L 	#_CTR_SIP_ABORT;
-L 	#_NUM_SIP_ABORT;
->=I;
-);
-A #SQ_TIMER.Q;
-);
-O(;
-AN(;
-L 	#_CTR_SIP_ABORT;
-L 	#_NUM_SIP_ABORT;
->=I;
-);
-A #SQ_TIMER.Q;
+L   #_sy_vessel_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
 );
 
 
-
 --------------------------------------------------
-STEP::23
+STEP::07
 --------------------------------------------------
-StepNo:- 23.0000
-Title:- RP_CIPSIP : Sy, SMFLx, FPz and FLz SIP complete
-Description:- Log SIP completion time.
+StepNo:- 7.0000
+Title:- RP_CIPSIP : Sy SIP complete
+Description:- Set Sy sip_complete flag
 
-Set Sy sip_complete flag
-Set SMFLx sip_complete flag
-Set FPz sip_complete flag
-Set FLz sip_complete flag
+Set Sy Hygiene Status = STERILE
 
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Action Description
-Action:- //Stop logging all temperatures
-SET;
-R #_log_Temp_TI_x010;
-R #_log_Temp_TI_x012;
-R #_log_Temp_TI_n062;
-R #_sip_timer_started;
-
-SET;
-S #_sip_mx_complete;
-S#_SIP_timer_complete_Mx;
-
-//Clear counter
-L 0;
-T #_CTR_PULSE_VLV;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::24
---------------------------------------------------
-StepNo:- 24.0000
-Title:- RP_CIPSIP : Automatic Sy SIP ABORT
-Description:- Log automatic ABORT.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Log automatic ABORT.
-Action:- //Log automatic ABORT
-L "dbCONST_VAL".CPU_TIME;
-T #_log_SIPAbort;
-
-//Report Event Reset
-SET;
-R #_Report_Evnt_019;
-
-//Report Event Set
-SET;
-S #_Report_Evnt_020;
-
-SET;
-R #SQ_TIMER.IN;
-R #_Abort_messg; 
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::35
---------------------------------------------------
-TRNNo:- 35.0000
-Title:- Always High
-EmptyTransition:- False
-Description:- Always High
-Condition:- A M1.1;
-
-
---------------------------------------------------
-STEP::25
---------------------------------------------------
-StepNo:- 25.0000
-Title:- RP_CIPSIP : Sy SIP complete Log
-Description:- Set End of the sip completion for batch report
+Set End of the sip completion for batch report
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Setting the event for the batch report
-Action:- //Report Event Set
+Action:- SET;
+S #_sip_mx_complete;
+
+//Set Sy hygiene status to STERILE.
+L "dbCONST".BLK.HYGIENE.STERILE;
+T #_sy_vessel_hygiene;
+
+//Report Event Set
 SET;
 S #_Report_Evnt_020;
-Verification:- A M1.1;
-
-
---------------------------------------------------
-STEP::26
---------------------------------------------------
-StepNo:- 26.0000
-Title:- RP_CIPSIP : Start Sy, SMFLx and FLz Drain valve pulse timer
-Description:- Start timer
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Start timer
-Action:- // Start vacuum timer
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L #_TIME_PULSE;
-T #SQ_TIMER.PT;
-
-SET;
-R #_pulse_drain_MX;
-R #_pulse_drain_MFL_MX;
-Verification:- A #SQ_TIMER.IN;
-
-
---------------------------------------------------
-TRANSITION::38
---------------------------------------------------
-TRNNo:- 38.0000
-Title:- Pulse drain valve
-EmptyTransition:- False
-Description:- Drain valve pulse increment time expired
-Condition:- A #SQ_TIMER.Q;
-
-
---------------------------------------------------
-TRANSITION::40
---------------------------------------------------
-TRNNo:- 40.0000
-Title:- Finished pulsing drain valves after repeats.
-EmptyTransition:- False
-Description:- Drain valves pulsed NUM_PULSE_VLV times after delay OR pulse wait time expired
-Condition:- A(;
-O(;
-L 	#_CTR_PULSE_VLV;
-L 	#_NUM_PULSE_VLV;
->=I;
-);
-O #SQ_TIMER.Q;
-);
-
-
---------------------------------------------------
-STEP::27
---------------------------------------------------
-StepNo:- 27.0000
-Title:- RP_CIPSIP : Pulse Sy, SMFLx and FLz drain valve
-Description:- Flag Sy to pulse drain valves.
-Flag SMFLx pulse drain valve
-Flag FLz drain valve
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Flag MX to pulse drain valves.
-Action:- SET;
-S #_pulse_drain_Mx;
-
-//Counter
-L #_CTR_PULSE_VLV;
-INC 1;
-T #_CTR_PULSE_VLV;
 Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::39
+TRANSITION::08
 --------------------------------------------------
-TRNNo:- 39.0000
-Title:- Sy pulsing complete
+TRNNo:- 8.0000
+Title:- Empty Transition
 EmptyTransition:- False
-Description:- Wait for Sy pulsing complete when pulse drain complete flag is set.
-Condition:- A #_pulse_dr_compl_Mx;
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::28
+STEP::08
 --------------------------------------------------
-StepNo:- 28.0000
-Title:- RP_CIPSIP : Pulse time wait between sets of pulses
-Description:- Time wait after completion of the pulses for the delay set by operator.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Action Description
-Action:- // Start vacuum timer
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L #_TIME_WAIT_BETPULSE;
-T #SQ_TIMER.PT;
-
-SET;
-R #_pulse_drain_MX;
-R #_pulse_drain_MFL_MX;
-Verification:- A #SQ_TIMER.IN;
-
-
---------------------------------------------------
-STEP::29
---------------------------------------------------
-StepNo:- 29.0000
-Title:- RP_CIPSIP : Sy HPCA blowing and steaming complete
-Description:- Flag Sy that HPCA blowing is now complete by setting the HPCA_blow_complete flag.
-
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Flag MX that N2 blowing is now complete by setting the n2_blow_complete flag.
-
-Flag MFL that steaming is now complete by setting the steaming_complete flag.
-Action:- SET;
-R #_pulse_drain_Mx;
-S #_n2_blow_complete_Mx;
-S #_steam_compl_MFL_Mx;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::30
---------------------------------------------------
-StepNo:- 30.0000
-Title:- RP_CIPSIP : Wait for Sy SIP Unit Operation to complete
-Description:- Flag Sy to close vessel outlet valve by setting flag close_outlet.
-
-Set Sy Hygiene Status = STERILE
-Set SMFLx Hygiene Status = STERILE
-Set FPz Hygiene Status = STERILE
-Set FLz Hygiene Status = STERILE
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Flag MX to close vessel outlet valve by setting flag close_outlet.
-Action:- SET;
-S #_close_outletMx;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::31
---------------------------------------------------
-StepNo:- 31.0000
+StepNo:- 8.0000
 Title:- RP_CIPSIP : Recipe Procedure Completed
-Description:- Sequence END; Reset all used flags
+Description:- Sequence END.
+Log product manufacture operation end time.
+Reset all used flags
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Reset all used flags
-Action:- A(;
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.STERILE; 
-L #_HYG_STATE_Sy;
-==I;
-);
-JC NORM;
+Action:- //Stop Sy Unit Operation
+L "dbCONST".BLK.CMD.STOP;
+T #_sy_vessel_cmd;
+L "dbCONST".BLK.SAFE.CMD;
+T #_sy_vessel_subs;
 
-//Stop MX Unit Operation
-L "dbCONST_VAL".UNIT.CMD.STOP; 
-T #_CMD_Mx;
-L "dbCONST_VAL".UNIT.SUBSTATE.ZERO; 
-T #_SUB_Mx;
+//Log CIPSIP operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_cipsip_end;
 
-//Stop Sy Unit Operation
-L "dbCONST_VAL".UNIT.CMD.STOP; 
-T #_CMD_Sy;
-L "dbCONST_VAL".UNIT.SUBSTATE.ZERO; 
-T #_SUB_Sy;
+SET;
+S #_log_time_cipsip_end;
 
-NORM: NOP 0;
-
-//Stop MFL Unit Operation
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_MFL;
-L "dbCONST_VAL".UNIT.SUBSTATE.ZERO;
-T #_SUB_MFL;
-
-//Stop FCZ Unit Operation
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_FCZ;
-L "dbCONST_VAL".UNIT.SUBSTATE.ZERO;
-T #_SUB_FCZ;
 
 
 //Clear used flags
 SET;
-R #_proceed_vacuum_Sy;
-R #_proceed_vacuum_Mx;
-R #_vacuum_finish_Sy;
-R #_vacuum_finish_Mx;
-R #_wash_drain_done_MFL;
-R #_steaming_proceed_Sy;
-R #_cip_complete_MFL_Mx;
-R #_cip_complete_MFL_Sy;
-R #_cip_fill_ready_Sy;
-R #_press_proceed_Mx;
-R #_press_proceed_Sy;
-R #_ready_sip_MFL_Mx;
-R #_ready_sip_MFL_Sy;
-R #_pulse_drain_Mx;
-R #_pulse_drain_Sy;
-R #_pulse_drain_MFL_Mx;
-R #_pulse_drain_MFL_Sy;
-R #_pulse_dr_compl_Mx;
-R #_pulse_dr_compl_Sy;
-R #_n2_blow_complete_Mx;
-R #_steam_compl_MFL_Mx;
-R #_steam_compl_MFL_Sy;
-R #_close_outletSY;
-R #_close_outletMX;
-R #_log_TIxy12low;
-R #_log_TIxy10low;
-R #_log_PressureMx;
-R #_log_PressureSy;
-R #_log_TIx062low;
-R #_log_TIx012low;
-R #_log_TIx010low;
 R #_toggle_mode;
-R #_msg_VacuumFail;
-R #_msg_VacHoldFail;
-R #_confirm_no_try;
-R #_confirm_try_again;
-R #_prompt_try_again;
-R #_log_WrongHyg_MFL;
-R #_log_WrongHyg_FCZ;
-R #_log_WrongHyg_Sy;
-R #_log_WrongHyg_Mx;
-R #_msg_WrongHyg_MFL;
-R #_msg_WrongHyg_FCZ;
-R #_msg_WrongHyg_Sy;
-R #_msg_WrongHyg_Mx;
-R #_sip_sy_complete;
-R #_sip_mx_complete;
 R #_prompt_abort;
 R #_confirm_abort;
-R #_prompt_try_again;
-R #_confirm_try_again;
-R #_confirm_no_try;
-R #_SIP_timer_complete_Mx;
-R #_SIP_timer_complete_Sy;
-R #_n2_blow_complete_Sy;
-R #_sip_timer_started;
-R #_Amp_temp_log_low;
-R #_Vial_temp_log_low;
 
-//Repor Event Reset
+//Report Event Reset
 SET;
 R #_Report_Evnt_001;
 R #_Report_Evnt_002;

@@ -24,20 +24,22 @@ VERSION : 2.0
 VAR_INPUT
     OWNER : Int;             // Value to be set or reset by Parent
     SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;            // Critical Interlock in series
-    NCRIL : Bool;           // Non-critical Interlock in series
+    CRIL : Bool;             // Critical Interlock in series
+    NCRIL : Bool;            // Non-critical Interlock in series
     MAN_OVERRIDE : Bool;     // Critical Interlock in series can be Override by this Input
-    CMD_SAFE : Int;          // Safe command for the module
-    DI_Auto : Bool;          // Input signal from Field
-    DI_Manual : Bool;        // User digital signal for simulating
+    VLV1_STATE : Int;        // State of the user 1 valve
+    VLV2_STATE : Int;        // State of the user 2 valve
+    PUMP1_INTERLOCK : Bool;  // Vacuum Pump 1 interlock
+    PUMP2_INTERLOCK : Bool;  // Vacuum Pump 2 interlock
 END_VAR
 
 VAR_OUTPUT
-    ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
-    PV : Bool;               // Processed DI
+    PUMP1_CMD : Int;         // Vacuum Pump 1 command
+    PUMP2_CMD : Int;         // Vacuum Pump 2 command
 END_VAR
 
 VAR_IN_OUT
+    FAULT : Bool;
     CMD : Int;               // Command
     MODE : Int;              // Control Mode
     STATE : Int;             // Device State from dbCONST
@@ -45,10 +47,12 @@ VAR_IN_OUT
 END_VAR
 
 VAR_TEMP
+    cmdDISABLE : Bool;
+    cmdENABLE : Bool;
     modeAUTO : Bool;
     modeMANUAL : Bool;
     modeOOS : Bool;
-    tPV : Bool;              // Temporary processed DI signal
+    tDO : Bool;              // Temporary processed output signal
 END_VAR
 
 BEGIN
@@ -66,7 +70,7 @@ TITLE = Call Mode and Command handling function
         CRIL                 := #CRIL ,
         NCRIL                := #NCRIL ,
         MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := #CMD_SAFE ,
+        CMD_SAFE             := "dbCONST".BLK.VS1.SAFE.CMD ,
         modeAUTO             := #modeAUTO ,
         modeMANUAL           := #modeMANUAL ,
         modeOOS              := #modeOOS ,
@@ -77,76 +81,123 @@ TITLE = Call Mode and Command handling function
     );
 
 NETWORK
-TITLE = Set Device command which can only be ENABLE.
+TITLE = DISABLE command
     //------------------------------------------------------------------------//
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     //                                                                        //
-    // CMD is always ENABLE:                                                  //
+    // CMD is DISABLE:                                                        //
     //------------------------------------------------------------------------//
-    L "dbCONST".BLK.VS1.CMD.STOPPED;
-    T #CMD;
+    L #CMD;
+    L "dbCONST".BLK.VS1.CMD.DISABLE;
+    ==I;
+    = #cmdDISABLE;
 
-NETWORK
-TITLE = Process Digital Input Signal
     //------------------------------------------------------------------------//
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    //                                                                        //
-    // Calculate the process value based on the mode:                         //
+    // CMD is ENABLE:                                                         //
     //------------------------------------------------------------------------//
-    O(;
-    A #modeAUTO;
-    A #DI_Auto;
-    );
-    O(;
-    A #modeMANUAL;
-    A #DI_Manual;
-    );
-    = #tPV;
-    = #PV;
-
-NETWORK
-TITLE = Set ALARM Flag
-    //------------------------------------------------------------------------//
-    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
-    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
-    //                                                                        //
-    // Set alarms:                                                            //
-    //------------------------------------------------------------------------//
-    AN #tPV;
     AN #modeOOS;
-    = #ALARM;
+    AN #INTERLOCK;
+    L #CMD;
+    L "dbCONST".BLK.VS1.CMD.ENABLE;
+    ==I;
+    = #cmdENABLE;
 
 NETWORK
-TITLE = Set INTERLOCK Flag
+TITLE = Check vacuum pumps are available
     //------------------------------------------------------------------------//
-    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
-    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
     //                                                                        //
-    // Set interlocks:                                                        //
+    // Check vacuum pumps are not interlocked:                                //
     //------------------------------------------------------------------------//
-    A #tPV;
-    = #INTERLOCK;
+    AN #modeOOS;
+    A(;
+    O #PUMP1_INTERLOCK;
+    O #PUMP2_INTERLOCK;
+    );
+    = #FAULT;
+
+    //------------------------------------------------------------------------//
+    // Check if any user valve is open which is a call for vacuum:            //
+    //------------------------------------------------------------------------//
+    A #cmdENABLE;
+    AN #FAULT;
+    A(;
+    O(;
+    L #VLV1_STATE;
+    L "dbCONST".BLK.POSx.STATE.OPENED;
+    ==I;
+    );
+    O(;
+    L #VLV2_STATE;
+    L "dbCONST".BLK.POSx.STATE.OPENED;
+    ==I;
+    );
+    );
+    = #tDO;
 
 NETWORK
-TITLE = Set Device State to Enabled if switch is on
+TITLE = Check vacuum pumps are available
+    //------------------------------------------------------------------------//
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    //                                                                        //
+    // Start vacuum pump 1 if a call for vacuum and all okay:                 //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    L "dbCONST".BLK.MOT1.CMD.START;
+    T #PUMP1_CMD;
+
+    //------------------------------------------------------------------------//
+    // Start vacuum pump 2 if a call for vacuum and all okay:                 //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    L "dbCONST".BLK.MOT1.CMD.START;
+    T #PUMP2_CMD;
+
+    //------------------------------------------------------------------------//
+    // Stop vacuum pump 1 if not required to run:                             //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    L "dbCONST".BLK.MOT1.CMD.STOP;
+    T #PUMP1_CMD;
+
+    //------------------------------------------------------------------------//
+    // Stop vacuum pump 2 if not required to run:                             //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    L "dbCONST".BLK.MOT1.CMD.STOP;
+    T #PUMP2_CMD;
+
+NETWORK
+TITLE = Set Device State to DISABLED if commanded or cannot ENABLE
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     //                                                                        //
-    // ENABLED if switch is on:                                               //
+    // DISABLED if commanded or any ENABLE problem:                           //
     //------------------------------------------------------------------------//
-    A #tPV;
-    L "dbCONST".BLK.VS1.STATE.VACUUM;
+    O #cmdDISABLE;
+    ON #cmdENABLE;
+    L "dbCONST".BLK.VS1.STATE.DISABLED;
     T #STATE;
 
 NETWORK
-TITLE = Setting Device State to ALARM
+TITLE = Set Device State to ENABLED if commanded
     //------------------------------------------------------------------------//
-    // ALARM if switch is off and not OOS:                                    //
+    // ENABLED if commanded:                                                  //
     //------------------------------------------------------------------------//
-    A #ALARM;
+    A #cmdENABLE;
+    L "dbCONST".BLK.VS1.STATE.ENABLED;
+    T #STATE;
+
+NETWORK
+TITLE = Setting Device State to FAULT
+    //------------------------------------------------------------------------//
+    // FAULT if problem with either vacuum pump:                              //
+    //------------------------------------------------------------------------//
+    A #FAULT;
     L "dbCONST".BLK.VS1.STATE.FAULT;
     T #STATE;
 END_FUNCTION_BLOCK

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:32:47 AM by David Paspa
+generated on 1/05/2018 9:41:57 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -28,13 +28,45 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- time_pulse_begin
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- log_time_pulse_begin
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- time_pulse_end
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- log_time_pulse_end
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
 Name:- pos_sprayball2_state
 Type:- INT
 Description:- Spray Ball Valve 02 state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::6
 --------------------------------------------------
 Name:- pos_sprayball1_state
 Type:- INT
@@ -42,7 +74,7 @@ Description:- Spray Ball Valve 01 state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::7
 --------------------------------------------------
 Name:- pos_sprayball1_cmd
 Type:- INT
@@ -50,7 +82,7 @@ Description:- Spray Ball Valve 01 command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::8
 --------------------------------------------------
 Name:- pos_sprayball2_cmd
 Type:- INT
@@ -58,7 +90,7 @@ Description:- Spray Ball Valve 02 command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::9
 --------------------------------------------------
 Name:- time_opened
 Type:- TIME
@@ -70,7 +102,37 @@ ParameterInOut:- IN
 STEP::01
 --------------------------------------------------
 StepNo:- 01
-Title:- PH_EMV2_PULSE: Open & Close valves
+Title:- PH_EMV2_PULSE : PULSE begin
+Description:- Log PULSE begin time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log PULSE begin time.
+Action:- //Log PULSE begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_pulse_begin;
+
+SET;
+S #_log_time_pulse_begin;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- PH_EMV2_PULSE : Open & Close valves
 Description:- Open sprayball inlet valve 1 and close valve 2.
 
 --------------------------------------------------
@@ -82,10 +144,10 @@ L #_time_opened;
 T #SQ_TIMER.PT;
 
 //Open valve 01
-L   "dbCONST".CM.CMD_VALVE.OPEN;
+L "dbCONST".BLK.POSx.CMD.OPEN;
 T  #_pos_sprayball1_cmd;
 //Close valve 02
-L   "dbCONST".CM.CMD_VALVE.CLOSE;
+L "dbCONST".BLK.POSx.CMD.CLOSE;
 T  #_pos_sprayball2_cmd;
 
 //Start timer
@@ -93,21 +155,21 @@ SET;
 S #SQ_TIMER.IN;
 Verification:- //Valve 01 opened.
 A(;
-L   "dbCONST".CM.POS_DEV_STATE.OPENED;
+L "dbCONST".BLK.POSx.STATE.OPENED;
 L  #_pos_sprayball1_state;
 ==I;
 );
 //Valve 02 closed.
 A(;
-L   "dbCONST".CM.POS_DEV_STATE.CLOSED;
+L "dbCONST".BLK.POSx.STATE.CLOSED; 
 L #_pos_sprayball2_state;
 ==I;
 
 
 --------------------------------------------------
-TRANSITION::01
+TRANSITION::02
 --------------------------------------------------
-TRNNo:- 01
+TRNNo:- 02
 Title:- Wait until timer expired
 EmptyTransition:- False
 Description:- Wait until delay time expired
@@ -116,9 +178,9 @@ A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::02
+STEP::03
 --------------------------------------------------
-StepNo:- 02
+StepNo:- 03
 Title:- PH_EMV2_PULSE : Open & Close valves
 Description:- Open sprayball inlet valve 2 and close valve 1.
 
@@ -130,29 +192,29 @@ Action:- SET;
 R #SQ_TIMER.IN;
 
 //Open valve 02
-L   "dbCONST".CM.CMD_VALVE.OPEN;
+L "dbCONST".BLK.POSx.CMD.OPEN;
 T  #_pos_sprayball2_cmd;
 //Close valve 01
-L   "dbCONST".CM.CMD_VALVE.CLOSE;
+L "dbCONST".BLK.POSx.CMD.CLOSE;
 T  #_pos_sprayball1_cmd;
 Verification:- //Valve 02 opened.
 A(;
-L   "dbCONST".CM.POS_DEV_STATE.OPENED;
+L  "dbCONST".BLK.POSx.STATE.OPENED;
 L  #_Vlv_02_State;
 ==I;
 );
 //Valve 01 closed.
 A(;
-L   "dbCONST".CM.POS_DEV_STATE.CLOSED;
+L  "dbCONST".BLK.POSx.STATE.CLOSED;
 L #_Vlv_01_State;
 ==I;
 );
 
 
 --------------------------------------------------
-TRANSITION::02
+TRANSITION::03
 --------------------------------------------------
-TRNNo:- 02
+TRNNo:- 03
 Title:- Unconditional Jump
 EmptyTransition:- False
 Description:- Unconditional Jump
@@ -160,9 +222,9 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::03
+STEP::04
 --------------------------------------------------
-StepNo:- 03
+StepNo:- 04
 Title:- PH_EMV2_PULSE : Start timer
 Description:- Start timer
 
@@ -177,9 +239,9 @@ Verification:- A M1.1;
 
 
 --------------------------------------------------
-TRANSITION::03
+TRANSITION::04
 --------------------------------------------------
-TRNNo:- 03
+TRNNo:- 04
 Title:- Last Step
 EmptyTransition:- False
 Description:- Last Step
@@ -187,9 +249,9 @@ Condition:- AN M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::04
+TRANSITION::05
 --------------------------------------------------
-TRNNo:- 04
+TRNNo:- 05
 Title:- Wait until timer expired
 EmptyTransition:- False
 Description:- Wait until delay time expired
@@ -197,9 +259,9 @@ Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::04
+STEP::05
 --------------------------------------------------
-StepNo:- 04
+StepNo:- 05
 Title:- PH_EMV2_PULSE : Reset timer
 Description:- Reset timer
 
@@ -213,9 +275,9 @@ Verification:- A M1.1;
 
 
 --------------------------------------------------
-TRANSITION::05
+TRANSITION::06
 --------------------------------------------------
-TRNNo:- 05
+TRNNo:- 06
 Title:- Unconditional Jump
 EmptyTransition:- False
 Description:- Unconditional Jump
@@ -223,18 +285,25 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::05
+STEP::06
 --------------------------------------------------
-StepNo:- 05
+StepNo:- 06
 Title:- PH_EMV2_PULSE : Last Step
-Description:- Last Step
+Description:- Log PULSE operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Last Step
+Description:- Log PULSE operation end time.
 Action:- SET;
 R #SQ_TIMER.IN;
+
+//Log PULSE operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_pulse_end;
+
+SET;
+S #_log_time_pulse_end;
 Verification:- A M1.1;
 
 ****************************************************************************************************

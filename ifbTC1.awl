@@ -62,7 +62,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbCRIL"."@@INSTANCE@@-CRIL".INTERLOCK;
+    A "idbCRIL".@@INSTANCE@@cril.IL.INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
     = #CRIL;
 
@@ -75,7 +75,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbNCRIL"."@@INSTANCE@@-NCRIL".INTERLOCK;
+    A "idbNCRIL".@@INSTANCE@@ncril.IL.INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
     = #NCRIL;
 
@@ -101,6 +101,9 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
         P_SEL                := #@@INSTANCE@@.P_SEL ,
         I_SEL                := #@@INSTANCE@@.I_SEL ,
         D_SEL                := #@@INSTANCE@@.D_SEL ,
+@@ATTR_BEGIN|LINK@@
+        TCVPOSN              := "idb@@TCVLINKCLASS@@".@@TCVLINKINSTANCE@@.POSN_REMOTE ,
+@@ATTR_END|LINK@@
         LMN                  := #@@INSTANCE@@.LMN ,
         CMD                  := #@@INSTANCE@@.CMD ,
         MODE                 := #@@INSTANCE@@.MODE ,
@@ -108,5 +111,6 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
         INTERLOCK            := #@@INSTANCE@@.INTERLOCK
     );
     NOP 0;
+
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

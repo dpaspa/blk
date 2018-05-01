@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:23:17 AM by David Paspa
+generated on 1/05/2018 9:46:07 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -12,7 +12,7 @@ SEQUENCE
 --------------------------------------------------
 
 SFCNo:- 0
-Title:- UO_SIP
+Title:- UO_MX_SIP
 Description:- Sequence for Mx sterilise in place operation
 Name:- SIP
 Class:- MX
@@ -31,93 +31,476 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- log_OperatorAbort
-Type:- TOD
-Description:- Logging operator abortion time
+Name:- ABORT_TIMER
+Type:- TON
+Description:- Timer for TIME_SIP_ABORT
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::2
 --------------------------------------------------
-Name:- TEMP_SIP
+Name:- log_real_emg_ti_vent_pv
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_real_emg_ti_drain_pv
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- log_real_emv_ti_vessel_pv
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- log_real_emx_ti_drain_pv
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- real_emg_ti_vent_pv
+Type:- REAL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- real_emg_ti_drain_pv
+Type:- REAL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- real_emv_ti_vessel_pv
+Type:- REAL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- real_emx_ti_drain_pv
+Type:- REAL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- TEMP_TIMER
+Type:- TON
+Description:- Temperature Timer for interval logging
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- log_msg_pres_blow_reached
+Type:- BOOL
+Description:- Flags the HMI to log time when HPCA BLOW pressure reached
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- log_msg_pres_leave_reached
+Type:- BOOL
+Description:- Flags the HMI to log time when HPCA LEAVE pressure reached
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- log_msg_sip_timer_reset
+Type:- Type
+Description:- Flags the HMI to log SIP timer reset
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- log_time_sip_start
+Type:- BOOL
+Description:- Flags the HMI that SIP started
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- time_sip_start
+Type:- TOD
+Description:- SIP start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- log_msg_sip_abort
+Type:- BOOL
+Description:- Flags the HMI to log automatic SIP abort
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::17
+--------------------------------------------------
+Name:- log_msg_vacuum_fail_abort
+Type:- BOOL
+Description:- HMI msg:Operator abort to try again when vacuum ejector time failed
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::18
+--------------------------------------------------
+Name:- log_msg_vacuum_fail_repeat
+Type:- BOOL
+Description:- HMI msg:Operator confirms to try again when vacuum ejector time failed
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::19
+--------------------------------------------------
+Name:- time_vacuum_fail
+Type:- TOD
+Description:- Logging vacuum ejector failed time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::20
+--------------------------------------------------
+Name:- log_time_vacuum_fail
+Type:- BOOL
+Description:- Flags the HMI that vacuum ejector failed detected
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::21
+--------------------------------------------------
+Name:- log_msg_vacuum_fail
+Type:- BOOL
+Description:- Flag raising vacuum failed message
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::22
+--------------------------------------------------
+Name:- log_time_steam_closed
+Type:- BOOL
+Description:- Flags the HMI to log Steam Closed Time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::23
+--------------------------------------------------
+Name:- log_real_positive_pressure
+Type:- BOOL
+Description:- Flag positive pressure
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::24
+--------------------------------------------------
+Name:- log_time_steam_open
+Type:- BOOL
+Description:- Flags the HMI to log Steam Opened Time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::25
+--------------------------------------------------
+Name:- time_vacuum_begin
+Type:- TOD
+Description:- Vacuum begin time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::26
+--------------------------------------------------
+Name:- log_time_vacuum_begin
+Type:- BOOL
+Description:- Flags the HMI to log Vacuum begin time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::27
+--------------------------------------------------
+Name:- log_time_sip_begin
+Type:- BOOL
+Description:- Flags the HMI that Mx SIP started
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::28
+--------------------------------------------------
+Name:- time_sip_begin
+Type:- TOD
+Description:- Logging Mx SIP operation start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::29
+--------------------------------------------------
+Name:- log_time_sip_end
+Type:- BOOL
+Description:- Flags the HMI that Mx SIP ended
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::30
+--------------------------------------------------
+Name:- time_sip_end
+Type:- TOD
+Description:- Logging Mx SIP operation end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::31
+--------------------------------------------------
+Name:- log_time_sip_complete
+Type:- BOOL
+Description:- Flags the HMI that SIP completed
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::32
+--------------------------------------------------
+Name:- time_sip_complete
+Type:- TOD
+Description:- SIP completion time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::33
+--------------------------------------------------
+Name:- release_mx
+Type:- BOOL
+Description:- Release Mx
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::34
+--------------------------------------------------
+Name:- pi_vessel
+Type:- REAL
+Description:- Vessel pressure
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::35
+--------------------------------------------------
+Name:- pulse_number
+Type:- INT
+Description:- Number of valve pulsing times
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::36
+--------------------------------------------------
+Name:- pulse_counter
+Type:- INT
+Description:- counter pulse_vlv
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::37
+--------------------------------------------------
+Name:- num_sip_abort
+Type:- INT
+Description:- number of SIP abort times
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::38
+--------------------------------------------------
+Name:- ctr_sip_abort
+Type:- INT
+Description:- counter of SIP abort times
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::39
+--------------------------------------------------
+Name:- time_sip
+Type:- TIME
+Description:- Description
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::40
+--------------------------------------------------
+Name:- sip_timer_started
+Type:- BOOL
+Description:- sip_timer_started
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::41
+--------------------------------------------------
+Name:- time_sip_abort
+Type:- TIME
+Description:- time_sip_abort
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::42
+--------------------------------------------------
+Name:- time_stm_drain_mx
+Type:- TIME
+Description:- time_stm_drain_mx
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::43
+--------------------------------------------------
+Name:- emx_drain_cmd
+Type:- INT
+Description:- Command to emx_drain
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::44
+--------------------------------------------------
+Name:- emx_drain_subs
+Type:- INT
+Description:- Substate selection to emx_drain
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::45
+--------------------------------------------------
+Name:- emx_drain_state
+Type:- INT
+Description:- Device state of emx_drain
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::46
+--------------------------------------------------
+Name:- time_eject
+Type:- TIME
+Description:- Vacuum eject time
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::47
+--------------------------------------------------
+Name:- pres_vac
+Type:- REAL
+Description:- vacuum pressure
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::48
+--------------------------------------------------
+Name:- ema_vessel_cmd
+Type:- INT
+Description:- Command to ema_vessel
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::49
+--------------------------------------------------
+Name:- ema_vessel_subs
+Type:- INT
+Description:- Substate selection to ema_vessel
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::50
+--------------------------------------------------
+Name:- ema_vessel_state
+Type:- INT
+Description:- Device State of ema_vessel
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::51
+--------------------------------------------------
+Name:- emx_mmfl_cmd
+Type:- INT
+Description:- Command to emx_mmfl
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::52
+--------------------------------------------------
+Name:- emx_mmfl_subs
+Type:- INT
+Description:- Substate selection to emx_mmfl
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::53
+--------------------------------------------------
+Name:- emx_mmfl_state
+Type:- INT
+Description:- Device state of emx_mmfl
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::54
+--------------------------------------------------
+Name:- temp_sip
 Type:- REAL
 Description:- SIP temperature
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::55
 --------------------------------------------------
-Name:- TEMP_SIP_VENT
+Name:- temp_sip_vent
 Type:- REAL
 Description:- VENT valve SIP temperature
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::56
 --------------------------------------------------
-Name:- ti_vessel
+Name:- emv_ti_vessel_pv
 Type:- REAL
 Description:- TIn105 Vessel Temperature
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::57
 --------------------------------------------------
-Name:- ti_drain
+Name:- emg_ti_drain_pv
 Type:- REAL
 Description:- TIn103 Vent Filter Top Outlet Temperature
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::58
 --------------------------------------------------
-Name:- ti_vent
+Name:- emg_ti_vent_pv
 Type:- REAL
 Description:- TIn101 Vent Filter Temperature
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::59
 --------------------------------------------------
-Name:- ti_drain2
+Name:- emx_ti_drain_pv
 Type:- REAL
 Description:- TIn107 Drain Temperature
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::8
---------------------------------------------------
-Name:- ti_hex
-Type:- REAL
-Description:- TIn109 MFL Heat Exchanger Temperature
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::9
---------------------------------------------------
-Name:- pulse_drain_complete
-Type:- BOOL
-Description:- Pulsing of the drains has completed
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::10
---------------------------------------------------
-Name:- HPCA_blow_complete
-Type:- BOOL
-Description:- Parent synchronisation flag indicating HPCA blowing is complete
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::11
---------------------------------------------------
-Name:- pressure_proceed
-Type:- BOOL
-Description:- Proceed after reaching positive pressure
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::12
+PARAMETER::60
 --------------------------------------------------
 Name:- log_disconnect
 Type:- BOOL
@@ -125,323 +508,187 @@ Description:- Logging operator confirmed all vessel utility at pipe entry are di
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::61
 --------------------------------------------------
-Name:- log_LowPres_reached
-Type:- TOD
-Description:- Logging time when low pressure reached.
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::14
---------------------------------------------------
-Name:- close_outlet
-Type:- BOOL
-Description:- Parent synchronisation flag to close the vessel outlet valve
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::15
---------------------------------------------------
-Name:- pulse_drain
-Type:- BOOL
-Description:- Parent synchronisation flag indicating to pulse steam trap drain valves.
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::16
---------------------------------------------------
-Name:- log_pressure_reached
-Type:- TOD
-Description:- Logging time when pressure reached.
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::17
---------------------------------------------------
-Name:- log_ClosedSystem
+Name:- time_steam_closed
 Type:- TOD
 Description:- Logging closed system start time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::62
 --------------------------------------------------
-Name:- log_PositivePressure
+Name:- real_positive_pressure
 Type:- REAL
 Description:- Logging positive pressure measurment.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::63
 --------------------------------------------------
-Name:- log_MxSIPEnd
-Type:- TOD
-Description:- Logging Mx SIP Operation End Time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::20
---------------------------------------------------
-Name:- log_MxSteamOpen
+Name:- time_steam_open
 Type:- TOD
 Description:- Logging Steam Opened Time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::64
 --------------------------------------------------
-Name:- AUXDRAIN_ECn001
-Type:- BOOL
-Description:- AUXDRAIN selection in ECn001
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::22
---------------------------------------------------
-Name:- CMD_ECn002
+Name:- emc_water_cmd
 Type:- INT
-Description:- Command to ECn002
+Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::65
 --------------------------------------------------
-Name:- SUB_ECn002
+Name:- emc_water_subs
 Type:- INT
-Description:- Substate selection to ECn002
+Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::66
 --------------------------------------------------
-Name:- MEASURE_ECn001
+Name:- emc_water_medium
+Type:- INT
+Description:- Medium selection to emc_water
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::67
+--------------------------------------------------
+Name:- emc_gas_setpoint
 Type:- REAL
-Description:- Measured Pressure from PI1
+Description:- emc_gas pressure setpoint
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::68
+--------------------------------------------------
+Name:- emg_filter_state
+Type:- INT
+Description:- Device State of emg_filter
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::69
 --------------------------------------------------
-Name:- MEDIUM_ECn002
+Name:- emc_water_state
 Type:- INT
-Description:- Medium selection to ECn002
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::26
---------------------------------------------------
-Name:- SETPOINT_ECn001
-Type:- REAL
-Description:- PID Pressure Setpoint
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::27
---------------------------------------------------
-Name:- DEV_STATE_EGn005
-Type:- INT
-Description:- Device State of EGn005
+Description:- Device State of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::70
 --------------------------------------------------
-Name:- DEV_STATE_ECn002
+Name:- emg_filter_subs
 Type:- INT
-Description:- Device State of ECn002
+Description:- Substate selection to emg_filter
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::71
+--------------------------------------------------
+Name:- emg_filter_cmd
+Type:- INT
+Description:- Command to emg_filter
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::72
+--------------------------------------------------
+Name:- emc_gas_medium
+Type:- INT
+Description:- emc_gas_medium
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::73
+--------------------------------------------------
+Name:- emc_gas_subs
+Type:- INT
+Description:- Substate selection to emc_gas
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::74
+--------------------------------------------------
+Name:- emv_vessel_subs
+Type:- INT
+Description:- Substate selection to emv_vessel
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::75
+--------------------------------------------------
+Name:- emv_vessel_cmd
+Type:- INT
+Description:- Command to emv_vessel
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::76
+--------------------------------------------------
+Name:- emc_gas_state
+Type:- INT
+Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::29
+PARAMETER::77
 --------------------------------------------------
-Name:- SUB_EJn003
+Name:- emc_gas_cmd
 Type:- INT
-Description:- Substate selection to EJn003
+Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::78
 --------------------------------------------------
-Name:- SUB_EGn005
-Type:- INT
-Description:- Substate selection to EGn005
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::31
---------------------------------------------------
-Name:- AUXVENT_ECn001
-Type:- BOOL
-Description:- AUXVENT selection in ECn001
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::32
---------------------------------------------------
-Name:- DEV_STATE_EJn003
-Type:- INT
-Description:- Device state of EJn003
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::33
---------------------------------------------------
-Name:- CMD_EGn005
-Type:- INT
-Description:- Command to EGn005
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::34
---------------------------------------------------
-Name:- SETPOINT_EJn003
-Type:- REAL
-Description:- PID Temperature Setpoint
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::35
---------------------------------------------------
-Name:- CMD_EJn003
-Type:- INT
-Description:- Command to EJn003
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::36
---------------------------------------------------
-Name:- VALVE_ECn001
-Type:- INT
-Description:- Valve Selection ECn001
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::37
---------------------------------------------------
-Name:- SUB_ECn001
-Type:- INT
-Description:- Substate selection to ECn001
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::38
---------------------------------------------------
-Name:- SUB_EVn004
-Type:- INT
-Description:- Substate selection to EVn004
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::39
---------------------------------------------------
-Name:- CMD_EVn004
-Type:- INT
-Description:- COmmand to EVn004
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::40
---------------------------------------------------
-Name:- DEV_STATE_ECn001
-Type:- INT
-Description:- Device State of ECn001
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::41
---------------------------------------------------
-Name:- CMD_ECn001
-Type:- INT
-Description:- Command to ECn001
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::42
---------------------------------------------------
-Name:- TIME_DRAIN_PULSE
+Name:- time_drain_pulse
 Type:- TIME
 Description:- Time for drain pulsing.
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::43
+PARAMETER::79
 --------------------------------------------------
-Name:- HPCA_blow
-Type:- BOOL
-Description:- Parent synchronisation flag indicating HPCA blowing is underway
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::44
---------------------------------------------------
-Name:- positive_pressure
-Type:- BOOL
-Description:- Parent synchronisation flag indicating positive steam pressure has been reached.
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::45
---------------------------------------------------
-Name:- PRES_HPCA_LEAVE
+Name:- pres_hpca_leave
 Type:- REAL
 Description:- HPCA pressure to leave 
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::80
 --------------------------------------------------
-Name:- sip_complete
-Type:- BOOL
-Description:- Set by parent to indicate steaming is complete.
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::47
---------------------------------------------------
-Name:- TIME_STM_VENT
-Type:- TIME
-Description:- Time to steam the vent line
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::48
---------------------------------------------------
-Name:- PRES_HCPA_BLOW
+Name:- pres_hpca_blow
 Type:- REAL
 Description:- Pressure
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::81
 --------------------------------------------------
-Name:- PRES_LPCA_BLANK
+Name:- pres_lpca_blank
 Type:- REAL
 Description:- LPCA blanket pressure
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::82
 --------------------------------------------------
-Name:- TEMP_COOL_SIP
-Type:- REAL
-Description:- Temperature to cool MX after SIP
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::51
---------------------------------------------------
-Name:- PRES_STM_POS
+Name:- pres_stm_pos
 Type:- REAL
 Description:- Positive steam pressure threshold
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::83
 --------------------------------------------------
-Name:- DEV_STATE_EVn004
+Name:- emv_vessel_state
 Type:- INT
-Description:- Device state of EVn004
+Description:- Device state of emv_vessel
 ParameterInOut:- IN
 
 
@@ -450,228 +697,170 @@ STEP::01
 --------------------------------------------------
 StepNo:- 01
 Title:- UO_MX_SIP : Unit operation started
-Description:- Unit operation started
+Description:- Log SIP operation begin time.
+Open valves on Mx to Drain flow path.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Action:- //Open Discharge
-      L     "dbCONST_VAL".EM.EMV1.SUBS.DISCHARGE
-      T     #_SUB_EVn004
-      L     "dbCONST_VAL".EM.CMD.START
-      T     #_CMD_EVn004
+Description:- Log SIP operation begin time.
+Open Mx outlet valve.
+Start emx_mmfl SIP.
+Action:- //Log SIP operation begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_sip_begin;
 
- //Command MFL drain line open
-SET   
-S     #_ready_drain
+SET;
+S #_log_time_sip_begin;
+
+//Open Mx outlet valve.
+L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
+T #_emv_vessel_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emv_vessel_cmd;
+
+//Start emx_mmfl SIP.
+L "dbCONST".BLK.EMX1.SUBS.SIP;
+T #_emx_mmfl_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_mmfl_cmd;
+
+// Reset used flags
+SET;
+R #_release_mx;
+
+Verification:- A(;
+L #_emv_vessel_state;
+L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
+==I;
+);
 
 
 --------------------------------------------------
 STEP::02
 --------------------------------------------------
-StepNo:- 2.0000
-Title:- MX_UO_VACUUM : Vacuum Unit Operation Commenced
-Description:- Open Mx outlet valve.
-EVx004 STATE=DISCHARGE.
-Set all other Mx equipment to SAFE state.
+StepNo:- 02
+Title:- UO_MX_SIP : Vacuum Operation Commenced
+Description:- Set other Mx equipments to SAFE state.
+
+Enable vacuum and start vacuum timer(time_eject). Log vacuum start time
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Set EVn004 to substate DISCHARGE and other Mx equipment to SAFE state.
-Action:- L "dbCONST_VAL".EM.EMV1.SUBS.DISCHARGE; 
-T #_SUB_EVn004;
-L "dbCONST_VAL".EM.CMD.START; 
-T #_CMD_EVn004;
+Description:- Set other Mx equipment to SAFE state.
+Action:- L "dbCONST".BLK.SAFE.CMD;
+T  #_ema_vessel_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_ema_vessel_cmd;
 
-L "dbCONST_VAL".EM.CMD.STOP; 
-T #_CMD_EAn010;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_EAn010;
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emc_gas_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emc_gas_cmd;
 
-L "dbCONST_VAL".EM.CMD.STOP; 
-T #_CMD_ECn001;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_ECn001;
-
-L "dbCONST_VAL".EM.CMD.STOP; 
-T #_CMD_ECn002;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_ECn002;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::02
---------------------------------------------------
-TRNNo:- 2.0000
-Title:- Equipment safe state & DISCHARGE confirmed.
-EmptyTransition:- False
-Description:- Check if all Mx equipment are in safe state: EAn010, ECn001, ECn002. 
-Mx outlet valve open: EVn004 substate DISCHARGE confirmed.
-Condition:- A(;
-L 	#_DEV_STATE_EAn010;
-L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emc_water_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emc_water_cmd;
+Verification:- A(;
+L #_ema_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
-
 A(;
-L 	#_DEV_STATE_ECn001;
-L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+L #_emc_gas_state;
+L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
-
 A(;
-L 	#_DEV_STATE_ECn002;
-L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
-==I;
-);
-//EVn004 changed to substate DISCHARGE.
-A(;
-L 	#_DEV_STATE_EVn004;
-L 	"dbCONST_VAL".EM.EMV1.SUBS.DISCHARGE; 
+L #_emc_water_state;
+L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Enable vacuum and start vacuum timer. Log Vacuum begin time
+Action:- //Enable vacuum.
+L "dbCONST".SEL.GAS.VACUUM;
+T #_emc_gas_medium;
+L "dbCONST".BLK.EMC1.SUBS.VALVE;
+T #_emc_gas_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
 
---------------------------------------------------
-STEP::03
---------------------------------------------------
-StepNo:- 3.0000
-Title:- RP_CIPSIP : Start MX evacuation timer
-Description:- Start vacuum timer. Log Vacuum begin time
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Start vacuum timer. Log Vacuum begin time
-Action:- // Start vacuum timer
+// Start vacuum timer
 A #SQ_TIMER.Q;
 R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_TIME_VACUUM;
+L #_time_eject;
 T #SQ_TIMER.PT;
 
-//Log vacuum begin time
-L "dbCONST_VAL".CPU_TIME;
-T #_log_VacuumBegin2;
+//Log vacuum begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_vacuum_begin;
 
-// Reset flags
 SET;
-R #_prompt_try_again;
-R #_confirm_try_again;
-R #_confirm_no_try;
-R #_msg_VacuumFail;
+S #_log_time_vacuum_begin
 
-//Report Event Set
+//Report Event 
 SET;
 S #_Report_Evnt_017;
-
-//Report Event reset
-SET;
 R #_Report_Evnt_018;
 Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-STEP::04
+TRANSITION::02
 --------------------------------------------------
-StepNo:- 4.0000
-Title:- MX_UO_VACUUM : Wait for vacuum to complete
-Description:- Open Mx gas vent line vacuum.
-ECx001 STATE=VALVE_OPENED VALVE=VACUUM;
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set VALVE to VACUUM. Set ECn001 to substate VALVE_OPENED.
-Action:- SET;
-R #_RUNtoTIME_ECn001;
-R #_AUXDRAIN_ECn001;
-R #_AUXVENT_ECn001;
-R #_ready_vacuum;
-
-L "dbCONST_VAL".EM.EMC1.VALVE.VACUUM; 
-T #_VALVE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
-T #_SUB_ECn001;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn001;
-
-Verification:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
-==I;
-);
-
-
---------------------------------------------------
-TRANSITION::04
---------------------------------------------------
-TRNNo:- 4.0000
+TRNNo:- 02
 Title:- Pressure below setpoint?
 EmptyTransition:- False
 Description:- Pressure reduced below PRES_VAC.
 Condition:- A(;
-L #_MEASURE_ECn001_Mx;
-L #_PRES_VAC;
+L #_pi_vessel;
+L #_pres_vac;
 <R;
 );
 
 
 --------------------------------------------------
-TRANSITION::05
+TRANSITION::03
 --------------------------------------------------
-TRNNo:- 5.0000
+TRNNo:- 03
 Title:- Timer expired?
 EmptyTransition:- False
 Description:- Vacuum timer expired.
-
-
 Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::05
+STEP::03
 --------------------------------------------------
-StepNo:- 5.0000
-Title:- RP_CIPSIP : Evacuation failed
+StepNo:- 03
+Title:- UO_MX_SIP : Evacuation failed
 Description:- Raise vacuum failed message.
-
 Log vacuum time failed.
-
 Prompt operator to confirm to try again.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Raise vacuum failed message.
-
 Log vacuum time failed.
-
 Prompt operator to confirm to try again.
-Action:- //Set flag to raise vacuum failed message
-SET;
-S #_msg_VacuumFail;
-
-//Log time vacuum failed
-L "dbCONST_VAL".CPU_TIME;
-T #_log_VacuumFail1;
+Action:- //Log time vacuum failed
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_vacuum_fail;
 
 SET;
+S #_log_time_vacuum_fail;
+S #_log_msg_vacuum_fail;
 S #_prompt_try_again;
-
-//Stop Mx Unit Operation
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_Mx;
-L "dbCONST_VAL".UNIT.SUBSTATE.ZERO;
-T #_SUB_Mx;
-
-SET;
-R #_proceed_vacuum_Mx;
-R #_proceed_vacuum_Sy;
 
 //Report Event reset
 SET;
@@ -684,9 +873,9 @@ Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::06
+TRANSITION::04
 --------------------------------------------------
-TRNNo:- 6.0000
+TRNNo:- 04
 Title:- Try again?
 EmptyTransition:- False
 Description:- Operator want to try again.
@@ -694,34 +883,32 @@ Condition:- A #_confirm_try_again;
 
 
 --------------------------------------------------
-STEP::06
+TRANSITION::05
 --------------------------------------------------
-StepNo:- 6.0000
-Title:- RP_CIPSIP : MX evacuation finished
-Description:- Vacuum operation finished.
+TRNNo:- 05
+Title:- No try?
+EmptyTransition:- False
+Description:- Operator don't want to try again.
+Condition:- A #_confirm_no_try;
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 4.0000
+Title:- UO_MX_SIP : Vacuum operation finished.
+Description:- Close Mx vacuum valves.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Close Mx Vacuum Valve.
-Action:- L "dbCONST_VAL".EM.CMD.STOP; 
-T #_CMD_EAn010;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_EAn010;
+Action:- //Disable vacuum.
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emc_gas_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emc_gas_cmd;
 
-L "dbCONST_VAL".EM.CMD.STOP; 
-T #_CMD_ECn001;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_ECn001;
-
-L "dbCONST_VAL".EM.CMD.STOP; 
-T #_CMD_ECn002;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_ECn002;
-
-
-//L "dbCONST_VAL".UNIT.CMD.STOP;
-//T #_CMD_MFL;
 // Stop timer
 SET;
 R #SQ_TIMER.IN;
@@ -733,25 +920,41 @@ Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::08
+TRANSITION::06
 --------------------------------------------------
-TRNNo:- 8.0000
+TRNNo:- 6.0000
 Title:- All Vacuum operations complete
 EmptyTransition:- False
-Description:- All vacuum operations complete 
-MX STATE=VACUUM; MMFLx STATE=VACUUM
+Description:- Vacuum valve closed.
 Condition:- A(;
-L 	#_DEV_STATE_Mx;
-L 	"dbCONST_VAL".UNIT.DEV_STATE.COMPLETE;
+L 	#_emc_gas_state;
+L 	"dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 
 
 --------------------------------------------------
-STEP::07
+STEP::05
 --------------------------------------------------
-StepNo:- 7.0000
-Title:- RP_CIPSIP : Log Operator Abort
+StepNo:- 5.0000
+Title:- UO_MX_SIP : Log Operator Repeat
+Description:- Log operator repeat.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator repeat.
+Action:- //Log operator repeat.
+SET;
+S #_log_msg_vacuum_fail_repeat;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 6.0000
+Title:- UO_MX_SIP : Log Operator Abort
 Description:- Log operator abort.
 
 --------------------------------------------------
@@ -759,15 +962,15 @@ ACTION::01
 --------------------------------------------------
 Description:- Log operator abort.
 Action:- //Log operator abort.
-L "dbCONST_VAL".CPU_TIME;
-T #_log_OperatorAbort;
+SET;
+S #_log_msg_vacuum_fail_abort;
 Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::09
+TRANSITION::07
 --------------------------------------------------
-TRNNo:- 9.0000
+TRNNo:- 7.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -775,53 +978,106 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::08
+STEP::07
 --------------------------------------------------
-StepNo:- 8.0000
-Title:- RP_CIPSIP : Initiate MX and MMFLx SIP Operations
-Description:- Initiate MX SIP Operations.
-MX STATE=SIP
-MMFLx STATE=SIP_MX
+StepNo:- 07
+Title:- UO_MX_SIP : Initiate MX and MMFLx SIP Operations
+Description:- Open Mx steam supply on WFI/PS lines.
 
-Set MX and MFL Hygiene Status to SIP.
+Log steam opened time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Initiate MX SIP Operations.
-MX STATE=SIP
-MFL STATE=SIP_MX
+Description:- Open Mx steam supply on WFI/PS lines.
 
-Set MX and MFL Hygiene Status to SIP.
-Action:- 
+Log steam opened time.
+Action:- //Set emc_water to substate FLUSH and open WFI/PS supply valve.
+L "dbCONST".SEL.LIQUID.PSWFI;
+T #_emc_water_medium;
+L "dbCONST".BLK.EMC2.SUBS.FLUSH;
+T #_emc_water_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emc_water_cmd;
+
+
+//Log steam opened time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_steam_open;
+
 SET;
-S #_EXx007_COND;
+S #_log_time_steam_open;
+Verification:- //Verify if emc_water changed to substate FLUSH.
+A(;
+L   #_emc_water_state;
+L   "dbCONST".BLK.EMC2.SUBS.FLUSH;
+==I;
+);
 
-L "dbCONST_VAL".UNIT.MFL.SUBS.SIP_MX;
-T #_SUB_MFL;
-L "dbCONST_VAL".UNIT.CMD.START;
-T #_CMD_MFL;
 
-//Set Mx and MFL hygiene status to SIP
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.SIP;
-T #_HYG_STATE_Mx;
-T #_HYG_STATE_MFL;
+--------------------------------------------------
+TRANSITION::08
+--------------------------------------------------
+TRNNo:- 08
+Title:- Pressure check
+EmptyTransition:- False
+Description:- Pressure increased above PRES_STM_POS. PCx013> PRES_STM_POS
+Condition:- A(;
+L 	#_pi_vessel;
+L 	#_pres_stm_pos;
+>R;
+);
+
+
+--------------------------------------------------
+STEP::08
+--------------------------------------------------
+StepNo:- 08
+Title:- UO_MX_SIP : Positive pressure. 
+Description:- Positive pressure has been achieved.
+Log actual positive pressure.
+
+Open Mx SIP condensate drain valve and vent filter drain valve.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log actual positive pressure.
+Open Mx SIP condensate drain valve and vent filter drain valve.
+Action:- //Log actual positive pressure.
+L #_pi_vessel;
+T #_real_positive_pressure;
+
+SET;
+S #_log_real_positive_pressure;
+
+//Start EMX4_SIP.
+L "dbCONST".BLK.EMX4.SUBS.SIP;
+T #_emx_drain_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_drain_cmd;
+
+// Set vessel VENT filter EM to substate SIP
+L "dbCONST".BLK.EMG1.SUBS.SIP;
+T #_emg_filter_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emg_filter_cmd;
 Verification:- A(;
-L #_DEV_STATE_MX;
-L "dbCONST_VAL".UNIT.MX.SUBS.SIP;
+L #_emx_drain_state;
+L "dbCONST".BLK.EMX4.SUBS.SIP;
 ==I;
 );
 A(;
-L #_DEV_STATE_MFL;
-L "dbCONST_VAL".UNIT.MFL.SUBS.SIP_MX;
+L #_emg_filter_state;
+L "dbCONST".BLK.EMG1.SUBS.SIP;
 ==I;
 );
 
 
 --------------------------------------------------
-TRANSITION::10
+TRANSITION::09
 --------------------------------------------------
-TRNNo:- 10.0000
+TRNNo:- 09
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -831,125 +1087,8 @@ Condition:- A M1.1; //Always High flag
 --------------------------------------------------
 STEP::09
 --------------------------------------------------
-StepNo:- 9.0000
-Title:- MX_UO_SIP : Open Mx steam supply on WFI/CS lines.
-Description:- Open Mx steam supply on WFI/CS lines.
-ECn002 STATE=FLUSH MEDIUM=CS(WFI)
-
-Log steam opened time.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Open Mx steam supply on WFI/CS(FLUSH) lines.
-Action:- // Open CS steam supply valve
-L "dbCONST_VAL".EM.EMC1.VALVE.CS;
-T #_VALVE_ECn001;
-SET;
-R #_AUXDRAIN_ECn001;
-R #_AUXVENT_ECn001;
-
-L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
-T #_SUB_ECn001;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn001;
-
-//Open WFI line CS supply valve
-L "dbCONST_VAL".EM.EMC2.MEDIUM.CS_WFI;
-T #_MEDIUM_ECn002;
-L "dbCONST_VAL".EM.EMC2.SUBS.FLUSH;
-T #_SUB_ECn002;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn002;
-
-//Log steam opened time
-L "dbCONST_VAL".CPU_TIME;
-T #_log_MxSteamOpen;
-Verification:- //Verify if CS steam supply valve opened.
-A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
-==I;
-);
-//Verify if ECn002 changed to substate FLUSH.
-A(;
-L #_DEV_STATE_ECn002;
-L "dbCONST_VAL".EM.EMC2.SUBS.FLUSH;
-==I;
-);
-
-
---------------------------------------------------
-TRANSITION::11
---------------------------------------------------
-TRNNo:- 11.0000
-Title:- Pressure check
-EmptyTransition:- False
-Description:- Pressure increased above PRES_STM_POS. PCx013> PRES_STM_POS
-Condition:- A(;
-L 	#_MEASURE_ECn001;
-L 	#_PRES_STM_POS;
->R;
-);
-
-
---------------------------------------------------
-STEP::10
---------------------------------------------------
-StepNo:- 10.0000
-Title:- MX_UO_SIP : Positive pressure. 
-Description:- Positive pressure has been achieved.
-Log actual positive pressure.
-
-Open Mx stean trap valve????
-Open vent filter drain valve and vacuum drain line valve.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Log actual positive pressure.
-Open Mx stean trap valve????
-Open vent filter drain valve and vacuum drain line valve.
-
-Action:- //Log actual positive pressure.
-L #_MEASURE_ECn001;
-T #_log_PositivePressure;
-
-//Open vent filter drain valve.
-L "dbCONST_VAL".EM.EMG1.SUBS.SIP; 
-T #_SUB_EGn005;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_EGn005;
-
-//Open vacuum drain line valve.
-L "dbCONST_VAL".EM.EMC1.VALVE.VACUUM; 
-T #_VALVE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
-T #_SUB_ECn001;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn001;
-Verification:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
-==I;
-);
-
-
---------------------------------------------------
-TRANSITION::12
---------------------------------------------------
-TRNNo:- 12.0000
-Title:- Empty Transition
-EmptyTransition:- False
-Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::11
---------------------------------------------------
-StepNo:- 11.0000
-Title:- MX_UO_SIP : Wait for free steaming timer
+StepNo:- 09
+Title:- UO_MX_SIP : Wait for free steaming timer
 Description:- Start timer TIME_STM_DRAIN_Mx
 
 --------------------------------------------------
@@ -962,15 +1101,15 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_TIME_STM_DRAIN_Mx;
+L #_time_stm_drain_mx;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::13
+TRANSITION::10
 --------------------------------------------------
-TRNNo:- 13.0000
+TRNNo:- 10
 Title:- Timer expired
 EmptyTransition:- False
 Description:- Timer TIME_STM_DRAIN_Mx expired?
@@ -978,105 +1117,92 @@ Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::12
+STEP::10
 --------------------------------------------------
-StepNo:- 12.0000
-Title:- MX_UO_SIP : Free steam complete. Wait for SIP to be complete
-Description:- ECn001 STATE=VALVE_OPENED VALVE=CS AUX_VENT=False AUX_DRAIN=False
-
-SET EGn005 (STATE=FILTER)
-Log closed system steaming start time
+StepNo:- 10
+Title:- UO_MX_SIP : Free steam complete. 
+Description:- Log closed system steaming start time
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Set EGn005 to substate FILTER.
-Close Mx VENT valve
-Open Discharge
-Log closed system start time
+Description:- Log closed system start time
 
-Action:- // Close Mx VENT valve
-L "dbCONST_VAL".EM.EMC1.VALVE.CS;
-T #_VALVE_ECn001;
+Action:- //Log closed system start time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_steam_closed;
+
 SET;
-S #_AUXDRAIN_ECn001;
-R #_AUXVENT_ECn001;
-
-L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
-T #_SUB_ECn001;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn001;
-
-//Set EGn005 to FILTER
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_EGn005;
-L "dbCONST_VAL".EM.EMG1.SUBS.SIP;
-T #_SUB_EGn005;
-
-//Open Discharge
-L "dbCONST_VAL".EM.EMV1.SUBS.DISCHARGE;
-T #_SUB_EVn004;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_EVn004;
-
-//Log closed system start time
-L "dbCONST_VAL".CPU_TIME;
-T #_log_ClosedSystem;
-Verification:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
-==I;
-);
+S #_log_time_steam_closed;
+Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::13
+TRANSITION::11
 --------------------------------------------------
-StepNo:- 13.0000
-Title:- RP_CIPSIP : Monitor MX SIP Temperatures
-Description:- Set flags to log all Mx vessel temperatures every 30sec once SIP started first time. Logging of values done in HMI.
+TRNNo:- 11
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::11
+--------------------------------------------------
+StepNo:- 11
+Title:- UO_MX_SIP : Monitor MX SIP Temperatures
+Description:- Log all Mx vessel temperatures every 30sec once SIP started first time.
 Start TIME_SIP_ABORT timer.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Skip timer for SIP_ABORT if sip_timer_started=FALSE.
-Set flags to log all Mx vessel temperatures  every 30sec. Logging of values done in HMI.
+Set flags to log all Mx vessel temperatures  every 30sec. 
 Reset flags.
 Action:- //Skip timer for SIP_ABORT if sip_timer_started=FALSE.
 A #_sip_timer_started;
 JC tsi1;
 
 // Start SIP ABORT timer
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+A #ABORT_TIMER.Q;
+R #ABORT_TIMER.IN;
 
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L #_TIME_SIP_ABORT;
-T #SQ_TIMER.PT;
+AN #ABORT_TIMER.Q;
+S #ABORT_TIMER.IN;
+L #_time_sip_abort;
+T #ABORT_TIMER.PT;
 
 
 tsi1: NOP 0;
 //SIP started.
 //Log all temperatures
+A #TEMP_TIMER.Q;
+JCN NEXT
 SET;
-S #_log_Temp_TI_x010;
-S #_log_Temp_TI_x012;
-S #_log_Temp_TI_n062;
-
-
-// Clear log flag for low temperature
-SET;
-R #_log_TIx062low;
-R #_log_TIx012low;
-R #_log_TIx010low;
-R M5.2; //Message deactivate
-
+R #TEMP_TIMER.IN;
+L #_emg_ti_vent_pv;
+T #_real_emg_ti_vent_pv;
+L #_emg_ti_vent_pv;
+T #_real_emg_ti_drain_pv;
+L #_emg_ti_vent_pv;
+T #_real_emv_ti_vessel_pv;
+L #_emg_ti_vent_pv;
+T #_real_emx_ti_drain_pv;
 
 SET;
-R #_prompt_try_again;
-R #_confirm_try_again;
+S #_log_real_emg_ti_vent_pv;
+S #_log_real_emg_ti_drain_pv;
+S #_log_real_emv_ti_vessel_pv;
+S #_log_real_emx_ti_drain_pv;
+
+NEXT: NOP 0;
+AN #TEMP_TIMER.Q;
+S #TEMP_TIMER.IN;
+L T#30S;
+T #TEMP_TIMER.PT;
+
 
 //Report Event Set
 SET;
@@ -1089,49 +1215,45 @@ Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::15
+TRANSITION::12
 --------------------------------------------------
-TRNNo:- 15.0000
+TRNNo:- 12
 Title:- Temperature below setpoint
 EmptyTransition:- False
 Description:- SIP timer running and any temperature below TEMP_SIP or the vent filter inlet temperature below TEMP_SIP_VENT?
 Condition:- A #_sip_timer_started;
 A(;
-L 	#_ti_vent;
-L 	#_TEMP_SIP_VENT;
+//TIn101
+O(;
+L 	#_emg_ti_vent_pv;
+L 	#_temp_sip_vent;
 <R;
 );
-
-A(;
-L              #_ti_drain;
-L 	#_TEMP_SIP_VENT;
+//TIn103
+O(;
+L              #_emg_ti_drain_pv;
+L 	#_temp_sip_vent;
 <R;
 );
-
-A(;
-L              #_ti_vessel;
-L 	#_TEMP_SIP;
+//TIn105
+O(;
+L              #_emv_ti_vessel_pv;
+L 	#_temp_sip;
 <R;
 );
-
-A(;
-L              #_ti_drain2;
-L 	#_TEMP_SIP;
+//TIn107.
+O(;
+L              #_emx_ti_drain_pv;
+L 	#_temp_sip;
 <R;
 );
-
-A(;
-L              #_ti_hex;
-L 	#_TEMP_SIP;
-<R;
 );
-
 
 
 --------------------------------------------------
-TRANSITION::16
+TRANSITION::13
 --------------------------------------------------
-TRNNo:- 16.0000
+TRNNo:- 13
 Title:- All temperatures above setpoint.
 EmptyTransition:- False
 Description:- All SIP temperatures above TEMP_SIP °C and the vent filter inlet temperature above TEMP_SIP_VENT?
@@ -1140,41 +1262,36 @@ Mx Gas Filter TI_x101, Mx vent line TI_x103, Mx Vessel TI_x105, MFLx Filtration 
 Condition:- AN #_sip_timer_started;
 AN #SQ_TIMER.Q;
 
+//TIn101
 A(;
-L 	#_ti_vent;
-L 	#_TEMP_SIP_VENT;
+L 	#_emg_ti_vent_pv;
+L 	#_temp_sip_vent;
 >R;
 );
-
+//TIn103
 A(;
-L              #_ti_drain;
-L 	#_TEMP_SIP_VENT;
+L              #_emg_ti_drain_pv;
+L 	#_temp_sip_vent;
 >R;
 );
-
+//TIn105
 A(;
-L              #_ti_vessel;
-L 	#_TEMP_SIP;
+L              #_emv_ti_vessel_pv;
+L 	#_temp_sip;
 >R;
 );
-
+//TIn107.
 A(;
-L              #_ti_drain2;
-L 	#_TEMP_SIP;
->R;
-);
-
-A(;
-L              #_ti_hex;
-L 	#_TEMP_SIP;
+L              #_emx_ti_drain_pv;
+L 	#_temp_sip;
 >R;
 );
 
 
 --------------------------------------------------
-TRANSITION::17
+TRANSITION::14
 --------------------------------------------------
-TRNNo:- 17.0000
+TRNNo:- 14
 Title:- SIP Timer Expired
 EmptyTransition:- False
 Description:- Timer TIME_SIP expired.
@@ -1183,51 +1300,21 @@ A #_sip_timer_started;
 
 
 --------------------------------------------------
-TRANSITION::18
+TRANSITION::15
 --------------------------------------------------
-TRNNo:- 18.0000
+TRNNo:- 15
 Title:- Abort timer expired
 EmptyTransition:- False
 Description:- Timer TIME_SIP_ABORT is expired.
-Condition:- A #SQ_TIMER.Q;
+Condition:- A #ABORT_TIMER.Q;
 AN #_sip_timer_started;
 
 
 --------------------------------------------------
-STEP::14
+STEP::12
 --------------------------------------------------
-StepNo:- 14.0000
-Title:- RP_CIPSIP : Reset SIP timeout timer 
-Description:- Reset timer.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Action Description
-Action:- SET;
-R #SQ_TIMER.IN;
-
-//Report Event Reset
-SET;
-R #_Report_Evnt_019;
-Verification:- AN #SQ_TIMER.IN;
-
-
---------------------------------------------------
-TRANSITION::19
---------------------------------------------------
-TRNNo:- 19.0000
-Title:- Empty Transition
-EmptyTransition:- False
-Description:- Timer Reset
-Condition:- AN #SQ_TIMER.Q;
-
-
---------------------------------------------------
-STEP::15
---------------------------------------------------
-StepNo:- 15.0000
-Title:- RP_CIPSIP : Start MX SIP timer 
+StepNo:- 12
+Title:- UO_MX_SIP : Start MX SIP timer 
 Description:- Start SIP timer TIME_SIP.
 Set sip_timer_started.
 Log SIP start time.
@@ -1236,26 +1323,57 @@ Log SIP start time.
 ACTION::01
 --------------------------------------------------
 Description:- Start SIP timer TIME_SIP.
-Log SIP begin time and Set sip_timer_started.
-Action:- SET;
+Log SIP start time and Set sip_timer_started.
+Action:- A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
+
+AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_TIME_SIP;
+L #_time_sip;
 T #SQ_TIMER.PT;
 
-//Log SIP begin time
-L "dbCONST_VAL".CPU_TIME;
-T #_log_SIPBegin;
+//Log SIP start time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_sip_start;
 
 //SIP timer started
 SET;
+S #_log_time_sip_start;
 S #_sip_timer_started;
+
+
+//Log all temperatures if 30 seconds passed.
+A #TEMP_TIMER.Q;
+JCN NEXT1
+SET;
+R #TEMP_TIMER.IN;
+L #_emg_ti_vent_pv;
+T #_real_emg_ti_vent_pv;
+L #_emg_ti_vent_pv;
+T #_real_emg_ti_drain_pv;
+L #_emg_ti_vent_pv;
+T #_real_emv_ti_vessel_pv;
+L #_emg_ti_vent_pv;
+T #_real_emx_ti_drain_pv;
+
+SET;
+S #_log_real_emg_ti_vent_pv;
+S #_log_real_emg_ti_drain_pv;
+S #_log_real_emv_ti_vessel_pv;
+S #_log_real_emx_ti_drain_pv;
+
+NEXT1: NOP 0;
+AN #TEMP_TIMER.Q;
+S #TEMP_TIMER.IN;
+L T#30S;
+T #TEMP_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::20
+TRANSITION::16
 --------------------------------------------------
-TRNNo:- 20.0000
+TRNNo:- 16
 Title:- SIP Timer Expired
 EmptyTransition:- False
 Description:- Timer TIME_SIP not yet expired.
@@ -1263,89 +1381,32 @@ Condition:- AN #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::16
+STEP::13
 --------------------------------------------------
-StepNo:- 16.0000
-Title:- RP_CIPSIP : Low MX temperature during SIP
-Description:- Log temperature that lower than TEMP_SIP. Reset sip_timer_started and log timer RESET. Increase counter.
+StepNo:- 13
+Title:- UO_MX_SIP : Low MX temperature during SIP
+Description:- Reset sip_timer_started and log timer RESET.
+Increase counter.
 
-If CTR less than NUM, then prompt to try again and start ABORT Timer. Else, generate abort message and start timer for 1 minute.
+Log all temperatures if 30 seconds passed.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log temperature that lower than TEMP_SIP.
-Reset sip_timer_started and log timer RESET.
+Description:- Reset sip_timer_started and log timer RESET.
 Increase counter.
-Action:- //If TI_VENT less than TEMP_SIP_VENT, log the temperature. Else, check other temperature value.
-A(;
-L 	#_ti_vent
-L 	#_TEMP_SIP_VENT;
-<R;
-);
-JCN S341;
-SET;
-S #_log_TIx062low;
+Action:- A #SQ_TIMER.Q;
+R #SQ_TIMER.IN;
 
-S341: NOP 0;
-//If TI_DRAIN less than TEMP_SIP_VENT, log the temperature. Else, check other temperature value.
-A(;
-L              #_ti_drain;
-L 	#_TEMP_SIP_VENT;
-<R;
-);
-JCN S342;
-SET;
-S #_log_TIx010low;
-
-S342: NOP 0;
-//If TI_VESSEL less than TEMP_SIP, log the temperature.
-A(;
-L              #_ti_vessel;
-L 	#_TEMP_SIP;
-<R;
-);
-JCN S343;
-SET;
-S #_log_TIx012low;
-
-S343: NOP 0;
-//If TI_DRAIN2 less than TEMP_SIP, log the temperature.
-A(;
-L              #_ti_drain2;
-L 	#_TEMP_SIP;
-<R;
-);
-JCN S344;
-SET;
-S #_log_TIx012low;
-
-S344: NOP 0;
-//If TI_HEX less than TEMP_SIP, log the temperature.
-A(;
-L              #_ti_hex;
-L 	#_TEMP_SIP;
-<R;
-);
-JCN S345;
-SET;
-S #_log_TIx012low;
-
-
-
-S345: NOP 0;
 //Reset flag.
 SET;
 R #_sip_timer_started;
-
-//Log SIP timer reset.
-L "dbCONST_VAL".CPU_TIME;
-T #_log_SIPTimerReset;
+S #_log_msg_sip_timer_reset;
 
 //Increase counter.
-L #_CTR_SIP_ABORT;
+L #_ctr_sip_abort;
 INC 1;
-T #_CTR_SIP_ABORT;
+T #_ctr_sip_abort;
 
 //Report Event Reset
 SET;
@@ -1359,146 +1420,171 @@ Verification:- A M1.1; //Always High flag
 --------------------------------------------------
 ACTION::02
 --------------------------------------------------
-Description:- If CTR less than NUM, then prompt to try again and start ABORT Timer. Else, generate abort message and start timer for 1 minute.
-Action:- //  Check no of repetition.
- A(;
-L 	#_CTR_SIP_ABORT;
-L 	#_NUM_SIP_ABORT;
->=I;
-);
-JC NOTS;
-
-//If CTR<NUM, then prompt to try again and start ABORT Timer.
+Description:- Log all temperatures if 30 seconds passed.
+Action:- //Log all temperatures if 30 seconds passed.
+A #TEMP_TIMER.Q;
+JCN NEXT2
 SET;
-S #_prompt_try_again;
+R #TEMP_TIMER.IN;
+L #_emg_ti_vent_pv;
+T #_real_emg_ti_vent_pv;
+L #_emg_ti_vent_pv;
+T #_real_emg_ti_drain_pv;
+L #_emg_ti_vent_pv;
+T #_real_emv_ti_vessel_pv;
+L #_emg_ti_vent_pv;
+T #_real_emx_ti_drain_pv;
 
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L #_TIME_SIP_ABORT;
-T #SQ_TIMER.PT;
-JU NOER;
-
-//If CTR greater or equal to NUM, then generate abort message and start timer for 1 minute.
-NOTS: NOP 0;
 SET;
-S #_Abort_messg;
+S #_log_real_emg_ti_vent_pv;
+S #_log_real_emg_ti_drain_pv;
+S #_log_real_emv_ti_vessel_pv;
+S #_log_real_emx_ti_drain_pv;
 
-// Start timer for 1 minute.
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L T#1M;
-T #SQ_TIMER.PT;
-
-NOER:NOP 0;
+NEXT2: NOP 0;
+AN #TEMP_TIMER.Q;
+S #TEMP_TIMER.IN;
+L T#30S;
+T #TEMP_TIMER.PT;
 Verification:- A M1.1;
 
 
 --------------------------------------------------
-TRANSITION::21
+TRANSITION::17
 --------------------------------------------------
-TRNNo:- 21.0000
+TRNNo:- 17
 Title:- Retry SIP again
 EmptyTransition:- False
 Description:- Temperature has dropped less than 'NUM_SIP_ABORT' times
 Condition:- A(;
-L 	#_CTR_SIP_ABORT;
-L 	#_NUM_SIP_ABORT;
+L 	#_ctr_sip_abort;
+L 	#_num_sip_abort;
 <I;
 );
-A #_confirm_try_again;
 
 
 --------------------------------------------------
-TRANSITION::22
+TRANSITION::18
 --------------------------------------------------
-TRNNo:- 22.0000
+TRNNo:- 18
 Title:- Abort SIP
 EmptyTransition:- False
 Description:- Temperature has dropped 'NUM_SIP_ABORT' times.
-Condition:- //ABORT timer or 1 minute delay expired.
-A #SQ_TIMER.Q;
+Condition:- //ABORT timer expired.
+O #ABORT_TIMER.Q;
+//Temperature has dropped NUM_SIP_ABORT times.
+O(;
+L 	#_ctr_sip_abort;
+L 	#_num_sip_abort;
+>=I;
+);
+
+
 
 
 --------------------------------------------------
-STEP::17
+STEP::14
 --------------------------------------------------
-StepNo:- 17.0000
-Title:- RP_CIPSIP : MX and MMFLx SIP complete
+StepNo:- 14
+Title:- UO_MX_SIP : MX complete
 Description:- Log SIP completion time.
-Set MX sip_complete flag
-Set MMFLx sip_complete flag
-Clear counter CTR_PULSE_VLV.
+Clear pulse_counter.
+Close Mx steam supply on WFI/PS.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Action Description
-Action:- //Stop logging all temperatures
-SET;
-R #_log_Temp_TI_x010;
-R #_log_Temp_TI_x012;
-R #_log_Temp_TI_n062;
-R #_sip_timer_started;
+Description:- Log SIP completion time.
+Clear counter CTR_PULSE_VLV.
+Close Mx steam supply on WFI/PS.
+Action:- //Log SIP completion time
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_sip_complete;
 
 SET;
-S #_sip_mx_complete;
-S#_SIP_timer_complete_Mx;
+S #_log_time_sip_complete;
 
 //Clear counter
 L 0;
-T #_CTR_PULSE_VLV;
-Verification:- A M1.1; //Always High flag
+T #_pulse_counter; 
+
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emc_water_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emc_water_cmd;
+
+//Log all temperatures if 30 seconds passed.
+A #TEMP_TIMER.Q;
+JCN NEXT3
+SET;
+R #TEMP_TIMER.IN;
+L #_emg_ti_vent_pv;
+T #_real_emg_ti_vent_pv;
+L #_emg_ti_vent_pv;
+T #_real_emg_ti_drain_pv;
+L #_emg_ti_vent_pv;
+T #_real_emv_ti_vessel_pv;
+L #_emg_ti_vent_pv;
+T #_real_emx_ti_drain_pv;
+
+SET;
+S #_log_real_emg_ti_vent_pv;
+S #_log_real_emg_ti_drain_pv;
+S #_log_real_emv_ti_vessel_pv;
+S #_log_real_emx_ti_drain_pv;
+
+NEXT3: NOP 0;
+AN #TEMP_TIMER.Q;
+S #TEMP_TIMER.IN;
+L T#30S;
+T #TEMP_TIMER.PT;
+Verification:- A(;
+L #_emc_water_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
 
 
 --------------------------------------------------
-TRANSITION::24
+TRANSITION::20
 --------------------------------------------------
-TRNNo:- 24.0000
-Title:- SIP complete?
+TRNNo:- 20
+Title:- Pressure dopped below PRES_HPCA_BLOW.
 EmptyTransition:- False
-Description:- Wait for parent to indicate SIP is complete when it sets the sip_complete flag.
-Condition:- A #_sip_complete;
+Description:- Pressure dropped to PRES_HPCA_BLOW. PIC-x103 <= PRES_HPCA_BLOW
+Condition:- A(;
+L 	#_pi_vessel;
+L 	#_pres_hpca_blow;
+<=R;
+);
 
 
 --------------------------------------------------
-STEP::18
+STEP::15
 --------------------------------------------------
-StepNo:- 18.0000
-Title:- RP_CIPSIP : Automatic MX SIP ABORT
+StepNo:- 15
+Title:- UO_MX_SIP : Automatic MX SIP ABORT
 Description:- Log automatic ABORT.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Log automatic ABORT.
-Action:- //Log automatic ABORT
-L "dbCONST_VAL".CPU_TIME;
-T #_log_SIPAbort;
-
-//Report Event Reset
-SET;
+Action:- SET;
+S #_log_msg_sip_abort;
 R #_Report_Evnt_019;
 
 //Report Event Set
 SET;
 S #_Report_Evnt_020;
 
-SET;
-R #SQ_TIMER.IN;
-R #_Abort_messg; 
 Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::23
+TRANSITION::19
 --------------------------------------------------
-TRNNo:- 23.0000
+TRNNo:- 19
 Title:- Always High
 EmptyTransition:- False
 Description:- Always High
@@ -1506,114 +1592,43 @@ Condition:- A M1.1;
 
 
 --------------------------------------------------
-STEP::19
+STEP::16
 --------------------------------------------------
-StepNo:- 19.0000
-Title:- MX_UO_SIP : Close steam supply.
-Description:- Close Mx steam supply on WFI/CS.
-ECn001, ECn002 STATE=STOPPED
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Close steam supply WFI/CS, LPCA/CS.
-Action:- //Close MX steam supply on WFI/CS
-L "dbCONST_VAL".EM.CMD.STOP;
-T #_CMD_ECn001;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_ECn001;
-
-//Close MX steam supply on LPCA/CS
-L "dbCONST_VAL".EM.CMD.STOP;
-T #_CMD_ECn002;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_ECn002;
-Verification:- A(;
-L 	#_DEV_STATE_ECn001;
-L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
-==I;
-);
-A(;
-L 	#_DEV_STATE_ECn002;
-L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
-==I;
-);
-
-
---------------------------------------------------
-TRANSITION::25
---------------------------------------------------
-TRNNo:- 25.0000
-Title:- Pressure dopped below PRES_HPCA_BLOW.
-EmptyTransition:- False
-Description:- Pressure dropped to PRES_HPCA_BLOW. PIC-x103 <= PRES_HPCA_BLOW
-Condition:- A(;
-L 	#_MEASURE_ECn001;
-L 	#_PRES_HCPA_BLOW;
-<=R;
-);
-
-
---------------------------------------------------
-STEP::20
---------------------------------------------------
-StepNo:- 20.0000
-Title:- MX_UO_SIP : Start HPCA pressure control
+StepNo:- 16
+Title:- UO_MX_SIP : Start HPCA pressure control
 Description:- Log time when pressure reached.
 Enable Mx HPCA pressure control at setpoint PRES_HPCA_BLOW.
-Set HPCA_blow flag to indicate HPCA blowing now under way.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Log time when pressure reached
-Start HPCA pressure control. 
-(ECn001 STATE=PRESSURE_CONTROL, VALVE= HPCA, SETPOINT= PRES_HPCA_BLOW AUXVENT=TRUE AUXDRAIN=FALSE)
-Set EGn005 to FILTER
+Start HPCA pressure control at setpoint pres_hpca_blow.
 
 Action:- //Log time when pressure reached
-L "dbCONST_VAL".CPU_TIME;
-T #_log_pressure_reached;
-
-// Enable Mx HPCA pressure control
-L "dbCONST_VAL".EM.EMC1.VALVE.HPCA;
-T #_VALVE_ECn001;
-L #_PRES_HPCA_BLOW;
-T #_SETPOINT_ECn001;
 SET;
-R #_AUXDRAIN_ECn001;
-R #_AUXVENT_ECn001;
+S #_log_msg_pres_blow_reached;
 
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
-T #_SUB_ECn001;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn001;
-
-//Set EGn005 to FILTER
-L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
-T #_SUB_EGn005;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_EGn005;
-
+// Enable Mx HPCA pressure control at setpoint PRES_HPCA_BLOW.
+L #_pres_hpca_blow;
+T #_emc_gas_setpoint;
+L "dbCONST".SEL.GAS.HPCA;
+T #_emc_gas_medium;
+L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
+T #_emc_gas_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
 Verification:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+L #_emc_gas_state;
+L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ==I;
 );
 
---------------------------------------------------
-ACTION::02
---------------------------------------------------
-Description:- Set HPCA_blow flag to indicate HCPA blowing now under way.
-Action:- SET;
-S #_HPCA_blow;
-Verification:- A M1.1;
-
 
 --------------------------------------------------
-TRANSITION::26
+TRANSITION::21
 --------------------------------------------------
-TRNNo:- 26.0000
+TRNNo:- 21
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Empty transition.
@@ -1621,28 +1636,23 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::21
+STEP::17
 --------------------------------------------------
-StepNo:- 21.0000
-Title:- MX_UO_SIP : Wait for HPCA blow complete or to pulse drain
-Description:- Start MX Drain valve pulse timer (TIME_PULSE)
+StepNo:- 17
+Title:- UO_MX_SIP : Wait for HPCA blow complete or to pulse drain
+Description:- Start MX Drain valve pulse timer (time_drain_pulse)
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Reset flag.
-Start MX Drain valve pulse timer.
-Action:- SET;
-R #_pulse_drain_complete;
-R #_pulse_drain_MX;
-
-// Start vacuum timer
+Description:- Start MX Drain valve pulse timer.
+Action:- // Start vacuum timer
 A #SQ_TIMER.Q;
 R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_TIME_PULSE;
+L #_time_drain_pulse;
 T #SQ_TIMER.PT;
 Verification:- A M1.1; //Always High flag
 
@@ -1650,298 +1660,81 @@ A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::28
+TRANSITION::22
 --------------------------------------------------
-TRNNo:- 28.0000
+TRNNo:- 22
 Title:- Finished pulsing drain valves?
 EmptyTransition:- False
-Description:- Drain valves pulsed NUM_PULSE_VLV times
+Description:- Drain valves pulsed pulse_number times
 Condition:- A(;
-L 	#_CTR_PULSE_VLV;
-L 	#_NUM_PULSE_VLV;
+L 	#_pulse_counter;
+L 	#_pulse_number;
 >=I;
 );
 
 
 
 --------------------------------------------------
-TRANSITION::29
+STEP::18
 --------------------------------------------------
-TRNNo:- 29.0000
-Title:- Empty transition
-EmptyTransition:- False
-Description:- Empty transition.
-Condition:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::22
---------------------------------------------------
-StepNo:- 22.0000
-Title:- RP_CIPSIP : Start Pulse MX drain valve
-Description:- CTR_PULSE_VLV + 1.
+StepNo:- 18
+Title:- UO_MX_SIP : Pulse SIP drain valve opened
+Description:- Close valves on Sy, SMFLx and FLz path to Drain flow path, SIP condensate drain valve and vent filter drain valve.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Increase Counter
-Action:- //Counter
-L #_CTR_PULSE_VLV;
-INC 1;
-T #_CTR_PULSE_VLV;
-Verification:- A M1.1; //Always High flag
+Description:- Close valves on Sy, SMFLx and FLz path to Drain flow path, SIP condensate drain valve and vent filter drain valve.
+Action:- L "dbCONST".BLK.SAFE.CMD;
+T  #_emx_drain_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emx_drain_cmd;
 
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emg_filter_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emg_filter_cmd;
 
---------------------------------------------------
-STEP::23
---------------------------------------------------
-StepNo:- 23.0000
-Title:- RP_CIPSIP : MX HPCA blowing and steaming complete
-Description:- Flag MX that HPCA blowing is now complete by setting the Mx_HPCA_blow_complete flag.
-
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Flag MX that N2 blowing is now complete by setting the n2_blow_complete flag.
-
-Flag MFL that steaming is now complete by setting the steaming_complete flag.
-Action:- SET;
-R #_pulse_drain_Mx;
-S #_n2_blow_complete_Mx;
-S #_steam_compl_MFL_Mx;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::30
---------------------------------------------------
-TRNNo:- 30.0000
-Title:- HPCA blowing confimed.
-EmptyTransition:- False
-Description:- Wait for parent to confirm HPCA blowing is complete when parent sets the HPCA_blow_complete flag.
-Condition:- A #_HPCA_blow_complete;
-
-
---------------------------------------------------
-STEP::24
---------------------------------------------------
-StepNo:- 24.0000
-Title:- MX_UO_SIP : Wait for time to pulse drain valve
-Description:- Enable Mx HPCA pressure control at setpoint PRES_HPCA_BLOW.
-Start timer for drain pulsing (TIME_DRAIN_PULSE).
-AUXVENT=TRUE, AUXDRAIN=FALSE
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Stop ECn001 to be able to apply start same substate with different settings
-Action:- L "dbCONST_VAL".EM.CMD.STOP;
-T #_CMD_ECn001;
-Verification:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
-==I;
-);
-
---------------------------------------------------
-ACTION::02
---------------------------------------------------
-Description:- High Pressure CA valve and VENT valve open, DRAIN valve closed.
-ECn001 STATE=PRESSURE_CONTROL, VALVE= HPCA, SETPOINT= PRES_HPCA_BLOW, AUXVENT=TRUE, AUXDRAIN=FALSE
-Action:- // Enable Mx HPCA pressure control
-L "dbCONST_VAL".EM.EMC1.VALVE.HPCA;
-T #_VALVE_ECn001;
-L #_PRES_HPCA_BLOW;
-T #_SETPOINT_ECn001;
-SET;
-R #_AUXDRAIN_ECn001;
-S #_AUXVENT_ECn001;
-
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
-T #_SUB_ECn001;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn001;
-Verification:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
-==I;
-);
-
---------------------------------------------------
-ACTION::03
---------------------------------------------------
-Description:- Start timer for drain pulsing (TIME_DRAIN_PULSE).
-Action:- //Start Timer
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L #_TIME_DRAIN_PULSE;
-T #SQ_TIMER.PT;
-Verification:- S #SQ_TIMER.IN;
-
-
---------------------------------------------------
-TRANSITION::31
---------------------------------------------------
-TRNNo:- 31.0000
-Title:- Timer expired?
-EmptyTransition:- False
-Description:- Time for drain pulsing TIME_DRAIN_PULSE expired.
-Condition:- A #SQ_TIMER.Q;
-
-
---------------------------------------------------
-STEP::25
---------------------------------------------------
-StepNo:- 25.0000
-Title:- MX_UO_SIP : Pulse SIP drain valve opened
-Description:- Enable Mx HPCA pressure control at setpoint PRES_HPCA_BLOW.
-Start timer for drain pulsing (TIME_DRAIN_PULSE).
-AUXVENT=FALSE AUXDRAIN=TRUE
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Stop ECn001 to be able to apply start same substate with different settings
-Action:- L "dbCONST_VAL".EM.CMD.STOP;
-T #_CMD_ECn001;
-Verification:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
-==I;
-);
-
---------------------------------------------------
-ACTION::02
---------------------------------------------------
-Description:- High Pressure CA valve and DRAIN valve open, VENT valve closed.
-ECn001 STATE=PRESSURE_CONTROL, VALVE= HPCA, SETPOINT= PRES_HPCA_BLOW AUXVENT=FALSE AUXDRAIN=TRUE
-Action:- // Enable Mx HPCA pressure control
-L "dbCONST_VAL".EM.EMC1.VALVE.HPCA;
-T #_VALVE_ECn001;
-L #_PRES_HPCA_BLOW;
-T #_SETPOINT_ECn001;
-SET;
-S #_AUXDRAIN_ECn001;
-R #_AUXVENT_ECn001;
-
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
-T #_SUB_ECn001;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn001;
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emx_mmfl_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emx_mmfl_cmd;
 
 Verification:- A(;
-L 	#_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
-==I;
-);
-
---------------------------------------------------
-ACTION::03
---------------------------------------------------
-Description:- Start timer for drain pulsing (TIME_DRAIN_PULSE).
-Action:- //Start Timer
-A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
-
-AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
-L #_TIME_DRAIN_PULSE;
-T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
-
-
---------------------------------------------------
-TRANSITION::32
---------------------------------------------------
-TRNNo:- 32.0000
-Title:- Timer expired?
-EmptyTransition:- False
-Description:- Time for drain pulsing TIME_DRAIN_PULSE expired.
-Condition:- A #SQ_TIMER.Q;
-
-
---------------------------------------------------
-STEP::26
---------------------------------------------------
-StepNo:- 26.0000
-Title:- MX_UO_SIP : Finish drain pulsing and open VENT valve
-Description:- Enable Mx HPCA pressure control at setpoint PRES_HPCA_BLOW.
-SET EGn005 (STATE = SIP)
-Start timer for drain pulsing (TIME_DRAIN_PULSE).
-AUXVENT=FALSE AUXDRAIN=FALSE
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Stop ECn001 to be able to apply start same substate with different settings
-Action:- L "dbCONST_VAL".EM.CMD.STOP;
-T #_CMD_ECn001;
-Verification:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.DEV_STATE.STOPPED;
-==I;
-);
-
---------------------------------------------------
-ACTION::02
---------------------------------------------------
-Description:- High Pressure CA valve open and VENT & DRAIN valve closed.
-ECn001 STATE=PRESSURE_CONTROL, VALVE= HPCA, SETPOINT= PRES_HPCA_BLOW AUXVENT=FALSE AUXDRAIN=FALSE
-SET EGn005 to substate SIP to open vent filter drain valve.
-Action:- // Enable Mx HPCA pressure control
-L "dbCONST_VAL".EM.EMC1.VALVE.HPCA;
-T #_VALVE_ECn001;
-L #_PRES_HPCA_BLOW;
-T #_SETPOINT_ECn001;
-SET;
-R #_AUXDRAIN_ECn001;
-R #_AUXVENT_ECn001;
-
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
-T #_SUB_ECn001;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn001;
-
-// Set vessel VENT filter EM to substate SIP.
-L "dbCONST_VAL".EM.EMG1.SUBS.SIP; 
-T #_SUB_EGn005;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_EGn005;
-Verification:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
+L #_emx_drain_state;
+L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 A(;
-L #_DEV_STATE_EGn005;
-L "dbCONST_VAL".EM.EMG1.SUBS.SIP; 
+L #_emg_filter_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L #_emx_mmfl_state;
+L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 
 --------------------------------------------------
-ACTION::03
+ACTION::02
 --------------------------------------------------
-Description:- Start timer for drain pulsing (TIME_DRAIN_PULSE).
+Description:- Timer
 Action:- //Start Timer
 A #SQ_TIMER.Q;
 R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_TIME_DRAIN_PULSE;
+L #_time_drain_pulse;
 T #SQ_TIMER.PT;
-
 Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::33
+TRANSITION::24
 --------------------------------------------------
-TRNNo:- 33.0000
+TRNNo:- 24
 Title:- Timer expired?
 EmptyTransition:- False
 Description:- Time for drain pulsing TIME_DRAIN_PULSE expired.
@@ -1949,56 +1742,100 @@ Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::27
+STEP::19
 --------------------------------------------------
-StepNo:- 27.0000
-Title:- MX_UO_SIP : Pulse drain completed.
-Description:- Close VENT filter line SIP drain valve. (EGn005 STATE = FILTER)
+StepNo:- 19
+Title:- UO_MX_SIP : Wait for time to pulse drain valve
+Description:- Increment pulse_counter.
+Open valves on Sy, SMFLx and FLz path to Drain flow path, SIP condensate drain valve and vent filter drain valve.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Close vent filter drain valve. (Set EGn005 to FILTER)
-Action:- //Set EGn005 to FILTER
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_EGn005;
-L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
-T #_SUB_EGn005;
-Verification:- A(;
-L #_DEV_STATE_EGn005;
-L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
-==I;
-);
+Description:- Increment pulse_counter
+Stop EM to be able to apply start same substate with different settings
+Action:- //Counter
+L #_pulse_counter;
+INC 1;
+T #_pulse_counter;
+Verification:- A M1.1
 
 --------------------------------------------------
 ACTION::02
 --------------------------------------------------
-Description:- Start timer for drain pulsing (TIME_DRAIN_PULSE).
-Action:- // Start vacuum timer
+Description:- Open valves on Sy, SMFLx and FLz path to Drain flow path.
+Start EMX6_SIP, EMX2_SIP, EMX4_SIP.
+Open SIP condensate drain valve and vent filter drain valve.
+Action:- //Start emx_mmfl SIP.
+L "dbCONST".BLK.EMX1.SUBS.SIP;
+T #_emx_mmfl_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_mmfl_cmd;
+
+//Start EMX4_SIP.
+L "dbCONST".BLK.EMX4.SUBS.SIP;
+T #_emx_drain_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_drain_cmd;
+
+// Set vessel VENT filter EM to substate SIP
+L "dbCONST".BLK.EMG1.SUBS.SIP;
+T #_emg_filter_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emg_filter_cmd;
+
+Verification:- A(;
+L #_emv_vessel_state;
+L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
+==I;
+);
+A(;
+L #_emx_smfl_state;
+L "dbCONST".BLK.EMX6.SUBS.SIP;
+==I;
+);
+A(;
+L #_emx_transfer_state;
+L "dbCONST".BLK.EMX2.SUBS.SIP;
+==I;
+);
+A(;
+L #_emx_drain_state;
+L "dbCONST".BLK.EMX4.SUBS.SIP;
+==I;
+);
+A(;
+L #_emg_filter_state;
+L "dbCONST".BLK.EMG1.SUBS.SIP;
+==I;
+);
+
+--------------------------------------------------
+ACTION::03
+--------------------------------------------------
+Description:- Timer
+Action:- //Start Timer
 A #SQ_TIMER.Q;
 R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_TIME_DRAIN_PULSE
+L #_time_drain_pulse;
 T #SQ_TIMER.PT;
-
-SET;
-R #_pulse_drain_MX;
 Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::34
+TRANSITION::25
 --------------------------------------------------
-TRNNo:- 34.0000
+TRNNo:- 25
 Title:- Finished pulsing drain valves after repeats.
 EmptyTransition:- False
-Description:- Drain valves pulsed NUM_PULSE_VLV times after delay OR pulse wait time expired
+Description:- Drain valves pulsed pulse_number times after delay OR pulse wait time expired
 Condition:- A(;
 O(;
-L 	#_CTR_PULSE_VLV;
-L 	#_NUM_PULSE_VLV;
+L 	#_pulse_counter;
+L 	#_pulse_number;
 >=I;
 );
 O #SQ_TIMER.Q;
@@ -2006,10 +1843,10 @@ O #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::28
+STEP::20
 --------------------------------------------------
-StepNo:- 28.0000
-Title:- MX_UO_SIP : Disable HPCA and wait for reduced pressure
+StepNo:- 20
+Title:- UO_MX_SIP : Disable HPCA and wait for reduced pressure
 Description:- Disable Mx HPCA pressure control.
 
 --------------------------------------------------
@@ -2017,259 +1854,93 @@ ACTION::01
 --------------------------------------------------
 Description:- Stop Mx HPCA pressure control.
 Action:- //Stop Mx HPCA pressure control
-L "dbCONST_VAL".EM.CMD.STOP;
-T #_CMD_ECn001;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_ECn001;
-
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emc_gas_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emc_gas_cmd;
 Verification:- A(;
-L 	#_DEV_STATE_ECn001;
-L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
+L 	#_emc_gas_state;
+L 	"dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 
 
 --------------------------------------------------
-TRANSITION::35
+TRANSITION::26
 --------------------------------------------------
-TRNNo:- 35.0000
+TRNNo:- 26
 Title:- HPCA pressure below PRES_HPCA_LEAVE.
 EmptyTransition:- False
 Description:- Pressure below PRES_HPCA_LEAVE. PIC_x103 <= PRES_HPCA_LEAVE
 Condition:- A(;
-L 	#_MEASURE_ECn001;
-L 	#_PRES_HPCA_LEAVE;
+L 	#_pi_vessel;
+L 	#_pres_hpca_leave;
 <=R;
 );
 
 
 --------------------------------------------------
-STEP::29
+STEP::21
 --------------------------------------------------
-StepNo:- 29.0000
-Title:- MX_UO_SIP : Disable HPCA and wait for reduced pressure
-Description:- Disable Mx HPCA pressure control.
-Open Vent valve.??
+StepNo:- 21
+Title:- UO_MX_SIP : Pressure reduced. Wait to close vessel outlet valve
+Description:- Log time when pressure reached.
+Close Mx vent filter drain valve and valves on Mx to Drain flow path sequentially backwards until Mx vessel outlet valve.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Stop Mx HPCA pressure control.
-Action:- //Stop Mx HPCA pressure control
-L "dbCONST_VAL".EM.CMD.STOP;
-T #_CMD_ECn001;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_ECn001;
+Description:- Log time when pressure reached.
 
-Verification:- A(;
-L 	#_DEV_STATE_ECn001;
-L 	"dbCONST_VAL".EM.DEV_STATE.STOPPED;
-==I;
-);
-
---------------------------------------------------
-ACTION::02
---------------------------------------------------
-Description:- Open Vent valve.
-Action:- L "dbCONST_VAL".EM.EMC1.VALVE.VENT;
-T #_VALVE_ECn001;
+Action:- //Log time when pressure reached.
 SET;
-R #_AUXDRAIN_ECn001;
-R #_AUXVENT_ECn001;
+S #_log_msg_pres_leave_reached;
 
-L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
-T #_SUB_ECn001;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn001;
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emx_drain_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emx_drain_cmd;
+
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emg_filter_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emg_filter_cmd;
+
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emx_mmfl_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emx_mmfl_cmd;
+
+L "dbCONST".BLK.SAFE.CMD;
+T  #_emv_vessel_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emv_vessel_cmd;
 Verification:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_OPENED;
-==I;
-);
-
-
---------------------------------------------------
-STEP::30
---------------------------------------------------
-StepNo:- 30.0000
-Title:- MX_UO_SIP : Pressure reduced. Wait to close vessel outlet valve
-Description:- Log time when pressure reached.
-Close Mx vent filter drain valve and vacuum drain line valve.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Log time when pressure reached.
-Set EGn005 to FILTER substate to close vent filter drain valve.
-Close vacuum drain line valve.
-Action:- //Log time when pressure reached
-L "dbCONST_VAL".CPU_TIME;
-T #_log_LowPres_reached;
-
-//Set EGn005 to FILTER substate.
-L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
-T #_SUB_EGn005;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_EGn005;
-
-//Close vacuum drain line valve.
-L "dbCONST_VAL".EM.EMC1.VALVE.VACUUM; 
-T #_VALVE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL
-T #_SUB_ECn001;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn001;
-Verification:- A(;
-L #_DEV_STATE_EGn005;
-L "dbCONST_VAL".EM.EMG1.SUBS.FILTER;
+L #_emx_drain_state;
+L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.VALVE_CLOSED;
+L #_emg_filter_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L #_emx_mmfl_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L #_emv_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 
 
 --------------------------------------------------
-TRANSITION::36
+TRANSITION::27
 --------------------------------------------------
-TRNNo:- 36.0000
-Title:- Empty transition.
-EmptyTransition:- False
-Description:- Continue to close the MX tank outlet valve.
-Condition:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::31
---------------------------------------------------
-StepNo:- 31.0000
-Title:- MX_UO_SIP : Start LPCA blanketing and open vent valve
-Description:- Enable Mx LPCA pressure control at setpoint PRES_LPCA_BLANK.
-Open vent valve.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Start low pressure CA blanketing.
-EVn004 STATE=STOPPED
-ECx001 STATE=PRESSURE_CONTROL, VALVE=LPCA, SP=PRES_LPCA_BLANK, AUXVENT=true
-Action:- // Enable Mx LPCA pressure control and open Vent valve.
-L "dbCONST_VAL".EM.EMC1.VALVE.LPCA;
-T #_VALVE_ECn001;
-L #_PRES_LPCA_BLANK;
-T #_SETPOINT_ECn001;
-SET;
-R #_AUXDRAIN_ECn001;
-S #_AUXVENT_ECn001;
-
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
-T #_SUB_ECn001;
-L "dbCONST_VAL".EM.CMD.START;
-T #_CMD_ECn001;
-Verification:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
-==I;
-);
-
-
-
---------------------------------------------------
-TRANSITION::37
---------------------------------------------------
-TRNNo:- 37.0000
-Title:- Verify LPCA blanketing started.
-EmptyTransition:- False
-Description:- Verify LCPA pressure control enabled.
-Condition:- A(;
-L #_DEV_STATE_ECn001;
-L "dbCONST_VAL".EM.EMC1.SUBS.PRESSURE_CONTROL;
-==I;
-);
-
-
---------------------------------------------------
-STEP::32
---------------------------------------------------
-StepNo:- 32.0000
-Title:- RP_CIPSIP : Set SY Sterile. Isolate SY.
-Description:- Release Sy water charge system.
-
-Set SY, MFL and FCZ Hygiene Status to STERILE.
-Log Sy SIP operation end time.
-
-Set MFL STATE=SIP_BLK
-Set FCZ STATE=STOPPED
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Release Sy water charge system.
-
-Set SY, MFL and FCZ Hygiene Status to STERILE.
-Log Sy SIP operation end time.
-
-Set MFL STATE=STOPPED
-Set FCZ STATE=STOPPED
-Action:- //Set SY, MFL and FCZ unit to Hygiene Status to STERILE
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.STERILE; 
-T #_HYG_STATE_Sy;
-T #_HYG_STATE_MFL;
-T #_HYG_STATE_FCZ;
-
-//Log SIP end time
-L "dbCONST_VAL".CPU_TIME;
-T #_log_SIPEnd;
-
-
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_MFL;
-
-L "dbCONST_VAL".UNIT.CMD.STOP;
-T #_CMD_FCZ;
-
-//Release Water System Acquired by the SY Unit
-SET;
-S #_Release_Water_System_Sy;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::33
---------------------------------------------------
-StepNo:- 33.0000
-Title:- MX_UO_SIP : Log completion time
-Description:- Set Mx and MMFLx Hygiene status to STERILE.
-Log Mx SIP operation end time.
-Release Mx and MMFLx????
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set Mx and MMFLx Hygiene Status to STERILE.
-Log SIP end time.
-Action:- //Set SY, MFL and FCZ unit to Hygiene Status to STERILE
-L "dbCONST_VAL".UNIT.HYGIENE_STATE.STERILE; 
-T #_HYG_STATE_Mx;
-T #_HYG_STATE_MMFLx;
-
-// Log Mx SIP operation end time.
-L "dbCONST_VAL".CPU_TIME;
-T #_log_MxSIPEnd;
-
-........................................................................................
-//Release Water System Acquired by the SY Unit
-SET;
-S #_Release_Water_System_Sy; RP_CIPSIP
-Verification:- A M1.1;
-
-
---------------------------------------------------
-TRANSITION::38
---------------------------------------------------
-TRNNo:- 38.0000
+TRNNo:- 27
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Unconditional jump
@@ -2277,63 +1948,99 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::34
+STEP::22
 --------------------------------------------------
-StepNo:- 34.0000
-Title:- MX_UO_SIP : Connect Pre Filter to to Flow Plate FPx1.
+StepNo:- 22
+Title:- UO_MX_SIP : Start LPCA blanketing and open vent valve
+Description:- Enable Mx LPCA pressure control at setpoint PRES_LPCA_BLANK.
+Open vent valve.
+Release Mx.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Enable Mx LPCA pressure control at setpoint PRES_LPCA_BLANK.
+Open vent valve.
+Action:- // Enable Mx LPCA pressure control and open Vent valve.
+L #_pres_lpca_blank;
+T #_emc_gas_setpoint;
+L "dbCONST".SEL.GAS.LPCA;
+T #_emc_gas_medium;
+L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
+T #_emc_gas_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
+
+//Release Mx
+SET;
+S #_release_mx;
+Verification:- //Verify LCPA pressure control enabled.
+A(;
+L #_emc_gas_state;
+L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::28
+--------------------------------------------------
+TRNNo:- 28
+Title:- Empty transition.
+EmptyTransition:- False
+Description:- Unconditional jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::23
+--------------------------------------------------
+StepNo:- 23.0000
+Title:- UO_MX_SIP : Connect Pre Filter to to Flow Plate FPx1.
 Description:- Prompt Operator to connect Flowplate FPx1 ZSCx113. 
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- PH_EMX1_FILTER_SETUP
-Action:- //Start EMX1_FILTER_SETUP
-L 	"dbCONST_VAL".EM.EMV1.SUBS.FILTER_SETUP;
-T 	#_SUB_EXn014;
-L 	"dbCONST_VAL".EM.CMD.START; 
-T 	#_CMD_EXn014;
-
-Verification:- A M1.1;
+Action:- //Start EMX1_SETUP_FILTER.
+L "dbCONST".BLK.EMX1.SUBS.SETUP_FILTER;
+T #_emx_mmfl_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_mmfl_cmd;
+Verification:- A(;
+L #_emx_mmfl_state;
+L "dbCONST".BLK.EMX1.SUBS.SETUP_FILTER;
+==I;
+);
 
 
 --------------------------------------------------
-STEP::35
+STEP::24
 --------------------------------------------------
-StepNo:- 35.0000
-Title:- MX_UO_SIP : Unit Operation Completed
+StepNo:- 24.0000
+Title:- UO_MX_SIP : Unit Operation Completed
 Description:- Set equipment to SAFE state.
 Log operator confirmation.
+Log SIP operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Set equipment to SAFE state.
-Action:- L "dbCONST_VAL".EM.CMD.STOP;
-T #_CMD_ECn002;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_ECn002;
+Log SIP operation end time.
+Action:- L "dbCONST".BLK.SAFE.CMD;
+T  #_emc_water_subs;
+L "dbCONST".BLK.CMD.STOP;
+T  #_emc_water_cmd;
 
-L "dbCONST_VAL".EM.CMD.STOP;
-T #_CMD_EJn003;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_EJn003;
+//Log SIP operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_sip_end;
 
-L "dbCONST_VAL".EM.CMD.STOP;
-T #_CMD_EVn004;
-L "dbCONST_VAL".EM.SUBSTATE.ZERO;
-T #_SUB_EVn004;
-
-
-//Clear used flags
 SET;
-R #_positive_pressure;
-R #_HPCA_blow;
-R #_pulse_drain_complete;
-R #_HPCA_blow_complete;
+S #_log_time_sip_end;
 
-//Log operator confirmation
-L "dbCONST_VAL".CPU_TIME;
-T #_log_confirmation;
 Verification:- A M1.1;
 
 ****************************************************************************************************

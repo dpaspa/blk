@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:32:34 AM by David Paspa
+generated on 1/05/2018 9:41:48 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -12,42 +12,81 @@ SEQUENCE
 --------------------------------------------------
 
 Name:- SETUP
-Title:- PH_SETUP
+Title:- PH_EMC2_SETUP
 Description:- Setup Sy WFI and PW inlet line connection
-HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 Class:- EMC3
 Level:- PH
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
 HeaderName:- C3PSET
 Version:- 0.4
-RevisionHistory:- 
-// SFC Revision History:
+RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
-// 0.4 Khairul Basar    23-Sep-2009 CC-09/023  Regenerated for SQ Snippet file update.
+// 0.4 Khairul Basar    20-Sep-2009 CC-09/023  Regenerated to add SQ_FINISH flag.
 // 0.3 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific,& TRN code OR to AND
 //                                             Change in the Last step.
 // 0.2 Khairul Basar    18-Aug-2009            Added logic code
 // 0.1 David Paspa      13-Jul-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- flowpath_PW
+Name:- log_msg_confirm_connect
+Type:- BOOL
+Description:- Operator confirms connections have been made.
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- time_setup_begin
+Type:- TOD
+Description:- Logging SETUP operation start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_time_setup_begin
+Type:- BOOL
+Description:- Flags the HMI that SETUP started
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- log_time_setup_end
+Type:- TOD
+Description:- Logging SETUP operation end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- log_time_setup_end
+Type:- BOOL
+Description:- Flags the HMI that SETUP ended
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- flowpath_pw
 Type:- BOOL
 Description:- Flow path of PW line is integral & ready for operation
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::7
 --------------------------------------------------
-Name:- flowpath_WFI
+Name:- flowpath_wfi
 Type:- BOOL
 Description:- Flow path of WFI line is integral & ready for operation
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::8
 --------------------------------------------------
 Name:- zsc_fpwfi_state
 Type:- INT
@@ -55,47 +94,47 @@ Description:- WFI line connection sensor switch
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::9
 --------------------------------------------------
 Name:- zsc_fppw_state
 Type:- INT
-Description:- PW line connection sensor switch
+Description:- PW line connection sensor switch state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::10
 --------------------------------------------------
-Name:- confirm_PW
+Name:- prompt_pw_confirm_yes
 Type:- BOOL
 Description:- operator confirmed the PW Connection
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::11
 --------------------------------------------------
-Name:- confirm_WFI
+Name:- prompt_wfi_confirm_yes
 Type:- BOOL
 Description:- operator confirmed the WFI Connection
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::12
 --------------------------------------------------
-Name:- prompt_PW
+Name:- prompt_pw
 Type:- BOOL
 Description:- Prompt operator to connect PW line
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::13
 --------------------------------------------------
-Name:- prompt_WFI
+Name:- prompt_wfi
 Type:- BOOL
 Description:- Prompt operator to connect WFI line
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::14
 --------------------------------------------------
 Name:- medium
 Type:- INT
@@ -107,6 +146,37 @@ ParameterInOut:- IN
 STEP::01
 --------------------------------------------------
 StepNo:- 01
+Title:- PH_EMC2_SETUP : SETUP begin.
+Description:- Log SETUP begin time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log SETUP begin time.
+Action:- //Log SETUP begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_setup_begin;
+
+SET;
+S #_log_time_setup_begin;
+
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
 Title:- PH_EMC3_SETUP : Prompt to connect WFI or PW supply
 Description:- Prompt operator to connect WFI or PW supply to the vessel Sy inlet line, based on selected medium
 
@@ -116,10 +186,8 @@ ACTION::01
 Description:- Prompt operator to connect WFI or PW supply to the vessel Sy inlet line, based on selected medium.
 Action:- //Reset Old Bits
 SET;
-R #_confirm_WFI;
-R #_confirm_PW;
-R #_flowpath_PW;
-R #_flowpath_WFI;
+R #_flowpath_pw;
+R #_flowpath_wfi;
 
 //Check if WFI or PS_WFI medium selected, then prompt to connect WFI.
 O(     ;
@@ -132,7 +200,7 @@ L #_medium;
 L "dbCONST".SEL.LIQUID.PSWFI;
 ==I;
 );
-S #_prompt_WFI;
+S #_prompt_wfi;
 CLR;
 
 // Check if PW or PS_PW selected, then prompt to connect PW
@@ -146,37 +214,7 @@ L #_medium;
 L "dbCONST".SEL.LIQUID.PSPW;
 ==I;
 );
-S #_prompt_PW;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::01
---------------------------------------------------
-TRNNo:- 01
-Title:- Operator confirmation
-EmptyTransition:- False
-Description:- Wait for operator to confirm connections have been made.
-Condition:- A(;
-O #_confirm_WFI;
-O #_confirm_PW;
-);
-
-
---------------------------------------------------
-STEP::02
---------------------------------------------------
-StepNo:- 02
-Title:- EMC3_PH_SETUP : Check connection
-Description:- Check connection
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Reset flags.
-Action:- SET;
-R #_prompt_PW;
-R #_prompt_WFI;
+S #_prompt_pw;
 Verification:- A M1.1; //Always High flag
 
 
@@ -184,6 +222,38 @@ Verification:- A M1.1; //Always High flag
 TRANSITION::02
 --------------------------------------------------
 TRNNo:- 02
+Title:- Operator confirmation
+EmptyTransition:- False
+Description:- Wait for operator to confirm connections have been made.
+Condition:- A(;
+O #_prompt_pw_confirm_yes;
+O #_prompt_wfi_confirm_yes;
+);
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- PH_EMC3_SETUP : Check connection
+Description:- Log operator confirmation and continue to check connection.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator confirmation and reset flag.
+Action:- SET;
+S #_log_msg_confirm_connect;
+R #_prompt_wfi_confirm_yes;
+R #_prompt_pw_confirm_yes;
+
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
 Title:- WFI/PW/PS connections made
 EmptyTransition:- False
 Description:- Jump if correct switch ZSCxy103 or ZSCxy105 are made
@@ -203,7 +273,7 @@ L "dbCONST".SEL.LIQUID.PSPW;
 );
 A(    ;
     L #_zsc_fppw_state; //PW or PW PS line is selected.
-    L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+    L "dbCONST".BLK.ZSC2.STATE.IN;
       ==I ;  
    )     ;
 
@@ -224,15 +294,15 @@ L "dbCONST".SEL.LIQUID.PSWFI;
 );
 A(;
    L #_zsc_fpwfi_state;  //WFI or WFI PS line is selcted.
-   L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+   L "dbCONST".BLK.ZSC2.STATE.IN;
    ==I ;  
   );
 
 
 --------------------------------------------------
-TRANSITION::03
+TRANSITION::04
 --------------------------------------------------
-TRNNo:- 03
+TRNNo:- 04
 Title:- Operator not setup correctly
 EmptyTransition:- False
 Description:- Jump unconditionally, the connections are not made correctly
@@ -241,9 +311,9 @@ A  M1.1 ;// Always High Bit
 
 
 --------------------------------------------------
-STEP::03
+STEP::04
 --------------------------------------------------
-StepNo:- 03
+StepNo:- 04
 Title:- PH_EMC3_SETUP : Setup Completed
 Description:- Enable flowpath interlock
 
@@ -254,26 +324,26 @@ Description:- Set the flowpath flag according to the selected medium.
 Action:- //If PW or PW PS line is selected, then set flowpath_PW flag. 
 A(    ;
 L #_zsc_fppw_state;
-L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+L "dbCONST".BLK.ZSC2.STATE.IN;
       ==I;   
       ) ;
- S #_flowpath_PW;
+ S #_flowpath_pw;
 
 //If WFI or WFI PS line is selected, then set flowpath_WFI flag.    
 A(  ;
 L #_zsc_fpwfi_state;
-L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+L "dbCONST".BLK.ZSC2.STATE.IN;
  ==I ;  
  ) ;
-S #_flowpath_WFI;
+S #_flowpath_wfi;
 
 Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::04
+TRANSITION::05
 --------------------------------------------------
-TRNNo:- 04
+TRNNo:- 05
 Title:- Phase Finish Normal
 EmptyTransition:- False
 Description:- Phase Finish Normal
@@ -281,21 +351,22 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::04
+STEP::05
 --------------------------------------------------
-StepNo:- 04
+StepNo:- 05
 Title:- PH_EMC3_SETUP : Last Step
-Description:- Last Step
+Description:- Log SETUP operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Last Step
-Action:- SET;
-R #_prompt_PW;
-R #_prompt_WFI;
-R #_confirm_WFI;
-R #_confirm_PW;
+Description:- Log SETUP operation end time.
+Action:- //Log SETUP operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_setup_end;
+
+SET;
+S #_log_time_setup_end;
 Verification:- A M1.1; //Always High flag
 
 ****************************************************************************************************

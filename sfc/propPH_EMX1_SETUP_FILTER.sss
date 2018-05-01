@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/04/2018 11:32:53 AM by David Paspa
+generated on 1/05/2018 9:42:04 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -32,13 +32,53 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- log_msg_confirm_connect
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- time_setup_filter_begin
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_time_setup_filter_begin
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- time_setup_filter_end
+Type:- TOD
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- log_time_setup_filter_end
+Type:- BOOL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
 Name:- CIPSIP_Interlock_Armed
 Type:- BOOL
 Description:- CIPSIP interlock armed flag
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::7
 --------------------------------------------------
 Name:- MMFLx_Interlock_Armed
 Type:- BOOL
@@ -46,7 +86,7 @@ Description:- Filter interlock armed flag
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::8
 --------------------------------------------------
 Name:- zsc_filter_state
 Type:- INT
@@ -54,19 +94,19 @@ Description:- MMFLx Filter connection sensor switch.
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::9
 --------------------------------------------------
-Name:- confirm_filter
+Name:- prompt_connect_confirm_yes
 Type:- BOOL
 Description:- Confirmation on filter connection
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::10
 --------------------------------------------------
-Name:- prompt_filter
+Name:- prompt_connect
 Type:- BOOL
-Description:- Prompt operator
+Description:- Prompt operator to conect filter
 ParameterInOut:- VAR
 
 
@@ -74,6 +114,36 @@ ParameterInOut:- VAR
 STEP::01
 --------------------------------------------------
 StepNo:- 01
+Title:- PH_EMX1_SETUP_FILTER : SETUP CIPSIP begin.
+Description:- Log SETUP FILTER begin time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log SETUP FILTER begin time.
+Action:- //Log SETUP FILTER begin time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_setup_filter_begin;
+
+SET;
+S #_log_time_setup_filter_begin;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
 Title:- PH_EMX1_SETUP_FILTER : Prompt operator to connect jumpers
 Description:- Prompt operator to connect jumpers on FP11:
 M1 to Pre-Filter: ZSCx113
@@ -84,8 +154,8 @@ ACTION::01
 Description:- Prompt operator to connect the filter
 Action:- //Prompt to connect filter.
 SET;
-S #_prompt_filter;
-R #_confirm_filter;
+S #_prompt_connect;
+R #_prompt_connect_confirm_yes;
 
 //Reset filter and CIPSIP interlock armed flag
 R #_CIPSIP_Interlock_Armed;
@@ -94,19 +164,19 @@ Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::01
+TRANSITION::02
 --------------------------------------------------
-TRNNo:- 01
+TRNNo:- 02
 Title:- Operator confirmation
 EmptyTransition:- False
-Description:- Wait for operator to confirm jumper connected.
-Condition:-  A #_confirm_filter ;
+Description:- Wait for operator to confirm connections has been made.
+Condition:- A #_prompt_connect_confirm_yes;
 
 
 --------------------------------------------------
-TRANSITION::03
+TRANSITION::04
 --------------------------------------------------
-TRNNo:- 03
+TRNNo:- 04
 Title:- Operator not setup correctly
 EmptyTransition:- False
 Description:- Jump unconditionally, the connections are not made correctly
@@ -114,40 +184,41 @@ Condition:- A M1.1 ;// Always High Bit
 
 
 --------------------------------------------------
-STEP::02
+STEP::03
 --------------------------------------------------
-StepNo:- 02
+StepNo:- 03
 Title:- PH_EMX1_SETUP_FILTER : Check connection
-Description:- Check connection
+Description:- Log operator confirmation and continue to check connection.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Reset prompt filter.
+Description:- Log operator confirmation and continue to check connection.
 Action:- SET;
-R  #prompt_filter;
+S #_log_msg_confirm_connect;
+R  #_prompt_connect_confirm_yes;
 Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::02
+TRANSITION::03
 --------------------------------------------------
-TRNNo:- 02
+TRNNo:- 03
 Title:- Connection correctly inserted
 EmptyTransition:- False
 Description:- Jump if correct switch ZSCx113 connected
 Condition:- //Verify the correct switch connected.
 A(    ;
 L #_zsc_filter_state;
-L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+L "dbCONST".BLK.ZSC2.STATE.IN;
       ==I ;  
   )     ;
 
 
 --------------------------------------------------
-STEP::03
+STEP::04
 --------------------------------------------------
-StepNo:- 03
+StepNo:- 04
 Title:- PH_EMX1_SETUP_FILTER : Setup Completed
 Description:- Enable flowpath interlock armed flag.
 
@@ -162,9 +233,9 @@ Verification:- A M1.1;
 
 
 --------------------------------------------------
-TRANSITION::04
+TRANSITION::05
 --------------------------------------------------
-TRNNo:- 4.0000
+TRNNo:- 5.0000
 Title:- Phase Finish Normal
 EmptyTransition:- False
 Description:- Phase Finish Normal
@@ -172,20 +243,23 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::04
+STEP::05
 --------------------------------------------------
-StepNo:- 04
+StepNo:- 05
 Title:- PH_EMX1_SETUP_FILTER : Last Step
-Description:- Last Step
+Description:- Log SETUP FILTER operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Action:- SET;
-R  #_confirm_filter ;
-R #_prompt_filter;
-Verification:- A M1.1;
+Description:- Log SETUP FILTER operation end time.
+Action:- //Log SETUP FILTER operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_setup_filter_end;
 
+SET;
+S #_log_time_setup_filter_end;
+Verification:- A M1.1; //Always High flag
 
 ****************************************************************************************************
 END SSS REPORT

@@ -1,0 +1,568 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 1/05/2018 9:50:46 AM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+SFCNo:- 4
+Title:- RP_PCMX_FILTER
+Description:- Recipe procedure sequence for Filtration from Manufacturing Vessel Mx to Storage Vessel Sy.
+Name:- FILTER
+Class:- PCMX
+Level:- RP
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- PCFILT
+Version:- 0.1
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 0.1 Gerald Kontriner 18-Sep-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- log_time_wrong_hygiene
+Type:- BOOL
+Description:- Flags the HMI that wrong hygiene status detected
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- log_time_filter_end
+Type:- BOOL
+Description:- Flags the HMI that FILTRATION operation ended
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_time_filter_begin
+Type:- BOOL
+Description:- Flags the HMI that FILTRATION operation started
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- Report_End
+Type:- BOOL
+Description:- Reort end event flag
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- RELEASE_FCZ
+Type:- BOOL
+Description:- Description
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- start_hpca_mx
+Type:- BOOL
+Description:- Mx start to supply HPN2
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- confirm_abort_yes
+Type:- BOOL
+Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- prompt_abort
+Type:- BOOL
+Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- log_msg_wrong_hygiene
+Type:- BOOL
+Description:- HMI message: Mx, MFL and/orSy have incorrect Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- log_BatchID
+Type:- STRING
+Description:- Logging previous Batch ID of vessel Mx
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- BatchID_Mx
+Type:- STRING[6]
+Description:- Batch ID of Mx Vessel
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- BatchID
+Type:- STRING[6]
+Description:- Batch ID
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
+Name:- filtration_complete_sy
+Type:- BOOL
+Description:- Sy Filtration complete
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::14
+--------------------------------------------------
+Name:- filtration_complete_mx
+Type:- BOOL
+Description:- Mx Filtration complete
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::15
+--------------------------------------------------
+Name:- ready_hpca_mx
+Type:- BOOL
+Description:- Mx is ready to supply HPCA
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::16
+--------------------------------------------------
+Name:- path_ready_sy
+Type:- BOOL
+Description:- Sy path is ready
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::17
+--------------------------------------------------
+Name:- time_wrong_hygiene
+Type:- TOD
+Description:- Logging that Mx, MFL and/orSy have incorrect Hygiene Status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::18
+--------------------------------------------------
+Name:- sy_vessel_hygiene
+Type:- INT
+Description:- Hygiene Status of unit Sy
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::19
+--------------------------------------------------
+Name:- mx_vessel_hygiene
+Type:- INT
+Description:- Hygiene Status of unit Mx
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::20
+--------------------------------------------------
+Name:- time_filter_end
+Type:- TOD
+Description:- Logging FILTRATION operation end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::21
+--------------------------------------------------
+Name:- time_filter_begin
+Type:- TOD
+Description:- Logging FILTRATION operation start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::22
+--------------------------------------------------
+Name:- toggle_mode
+Type:- BOOL
+Description:- Toggle mode of all used units
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::23
+--------------------------------------------------
+Name:- sy_vessel_cmd
+Type:- INT
+Description:- Command to unit Sy
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::24
+--------------------------------------------------
+Name:- sy_vessel_subs
+Type:- INT
+Description:- Substate selection to unit Sy
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::25
+--------------------------------------------------
+Name:- mx_vessel_state
+Type:- INT
+Description:- Device State of unit Mx
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::26
+--------------------------------------------------
+Name:- sy_vessel_state
+Type:- INT
+Description:- Device state of unit Sy
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::27
+--------------------------------------------------
+Name:- mx_vessel_cmd
+Type:- INT
+Description:- Command to unit Mx
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::28
+--------------------------------------------------
+Name:- mx_vessel_subs
+Type:- INT
+Description:- Substate selection to unit Mx
+ParameterInOut:- OUT
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- RP_PCMX_FILTER : Recipe Procedure Commenced
+Description:- Log Mx Filtration to Sy operation begin time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log Mx Filtration to Sy operation begin time.
+Action:- //Log Mx filtration to Sy operation begin
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_filter_begin;
+
+SET;
+S #_log_time_filter_begin;
+R #_filtration_complete_sy;
+R #_filtration_complete_mx;
+R #_prompt_abort;
+R #_Report_End; //REPORT END FLAG
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Check Hygiene Status
+EmptyTransition:- False
+Description:- Selected Sy is  in Hygiene status STERILE? Selected Mx is in Hygiene status BATCH?
+Condition:- A(;
+L "dbCONST".BLK.HYGIENE.STERILE;
+L #_sy_vessel_hygiene;
+==I;
+);
+A(;
+L "dbCONST".BLK.HYGIENE.BATCH;
+L #_mx_vessel_hygiene;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 2.0000
+Title:- Incorrect Hygiene Status
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- RP_PCMX_FILTER : Incorrect Hygiene Status
+Description:- Log that either Sy is not in Hygiene status STERILE or Mx is not in Hygiene status BATCH?
+Prompt operator to confirm abort.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log that either MFL or Sy are not in Hygiene status STERILE or Mx is not in Hygiene status BATCH?
+Action:- //Log time if either Mx or Sy are not in correct Hygiene status
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_wrong_hygiene;
+
+SET;
+S #_log_time_wrong_hygiene;
+S #_log_msg_wrong_hyg;
+S #_prompt_abort;
+
+
+
+SET;
+S #_log_time_wrong_hygiene;
+S #_log_msg_wrong_hygiene;
+S #_prompt_abort;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- Confirm Abort (Incorrect Hygiene Status)
+EmptyTransition:- False
+Description:- Confirm Abort (Incorrect Hygiene Status)
+Condition:- A #_confirm_abort_yes;
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- RP_PCMX_FILTER : Initiate Sy FILTRATION Unit Operation
+Description:- Set Sy Hygiene Status to BATCH.
+
+Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+
+Set Unit Sy to state FILTER.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set Sy Hygiene Status to BATCH.
+
+Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+
+Set Unit SY to state FILTER
+Action:- //Set Sy Hygiene Status to BATCH.
+L "dbCONST".BLK.HYGIENE.BATCH;
+T #_sy_vessel_hygiene;
+
+//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+SET;
+S #_toggle_mode;
+
+//Set Unit SY to state FILTER
+L "dbCONST".BLK.SY.SUBS.FILTER;
+T #_sy_vessel_subs;
+L "dbCONST".BLK.CMD.START;
+T #_sy_vessel_cmd;
+Verification:- A(;
+L 	#_sy_vessel_state;
+L 	"dbCONST".BLK.SY.SUBS.FILTER;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
+Title:- Sy and FLz path ready?
+EmptyTransition:- False
+Description:- Check if Sy and FLz path is ready. 
+If all path_ready flags have been set.
+Condition:- A #_path_ready_sy;
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- RP_PCMX_FILTER : Initiate MX FILTRATION Unit Operation
+Description:- Set Unit MX to state FILTER
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set Unit MX to state FILTER
+Action:- //Set Unit Mx to state FILTER
+L "dbCONST".BLK.MX.SUBS.FILTER;
+T #_mx_vessel_subs;
+L "dbCONST".BLK.MX.CMD.START;
+T #_mx_vessel_cmd;
+
+//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+SET;
+R #_toggle_mode;
+Verification:- A(;
+L 	#_mx_vessel_state;
+L 	"dbCONST".BLK.MX.SUBS.FILTER;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 05
+Title:- HPCA ready?
+EmptyTransition:- False
+Description:- Check if SMFLx and MMFLx has flagged it is ready for HPCA
+Condition:- A #_ready_hpca_mx;
+
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
+Title:- RP_PCMX_FILTER : Wait for filtration to complete
+Description:- Set MX ready_hpCA flag.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set MX ready_hpn2 flag.
+Action:- SET;
+S #_start_hpca_mx;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::06
+--------------------------------------------------
+TRNNo:- 06
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 06
+Title:- RP_PCMX_FILTER : Wait for MX and Sy Filtration operations to complete
+Description:- Set SY flag filtration_complete
+Set MX flag filtration_complete
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set SY flag filtration_complete
+Set MX flag filtration_complete
+Action:- SET;
+S #_filtration_complete_mx;
+S #_filtration_complete_sy;
+R #_start_hpca_mx;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::07
+--------------------------------------------------
+TRNNo:- 07
+Title:- Unit Mx and Sy filtration complete?
+EmptyTransition:- False
+Description:- Wait for Mx and SY state FILTER complete.
+Condition:- A(;
+L 	#_mx_vessel_state;
+L 	"dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+A(;
+L 	#_sy_vessel_state;
+L 	"dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::07
+--------------------------------------------------
+StepNo:- 07
+Title:- RP_PCMX_FILTER : Recipe Procedure Completed
+Description:- Set Mx Hygiene Status to USED.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set Mx Hygiene Status to USED.
+Action:- A #_filt_comp_Mx;
+//Set Mx hygiene status to USED
+L "dbCONST".BLK.HYGIENE.USED;
+T #_mx_vessel_hygiene;
+
+//SET REPORT END FLAG
+S #_Report_End; 
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+TRANSITION::08
+--------------------------------------------------
+TRNNo:- 8.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+STEP::08
+--------------------------------------------------
+StepNo:- 08
+Title:- RP_PCMX_FILTER : Recipe Procedure End Step
+Description:- Procedure End Step
+Log product filtration operation end time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set Mx Hygiene Status to USED.
+Log FILTRATION operation end time.
+Action:- //Stop Mx Unit Operation
+L "dbCONST".BLK.CMD.STOP;
+T #_mx_vessel_cmd;
+L "dbCONST".BLK.SAFE.CMD;
+T #_mx_vessel_subs;
+
+
+//Log Filteration operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_filter_end;
+
+SET;
+S #_log_time_filter_end;
+
+//Clear used flags
+R #_toggle_mode;
+R #_start_hpca_mx;
+R #_filtration_complete_mx;
+R #_filtration_complete_sy;
+R #_Report_End; 
+Verification:- A M1.1;
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************
