@@ -10,7 +10,7 @@
 //----------------------------------------------------------------------------//
 FUNCTION "fcHygiene" : Void
 TITLE = Generic block Hygiene Status monitoring function
-{ S7_Optimized_Access := 'FALSE' }
+{ S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
 NAME : fcHygiene
 VERSION : 2.0
@@ -18,30 +18,30 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 // Calling parameters should be retentive in nature:                          //
 //----------------------------------------------------------------------------//
-   VAR_INPUT
-      CLEAN_TIME : Time;   // 604800000
-      STERILE_TIME : Time;   // 604800000
-   END_VAR
+VAR_INPUT
+    CLEAN_TIME : Time;   // 604800000
+    STERILE_TIME : Time;   // 604800000
+END_VAR
 
-   VAR_OUTPUT
-      CLEAN_TOUT : Bool;   // LAST STATUS
-      STERILE_TOUT : Bool;   // LAST STATUS
-   END_VAR
+VAR_OUTPUT
+    CLEAN_TOUT : Bool;   // LAST STATUS
+    STERILE_TOUT : Bool;   // LAST STATUS
+END_VAR
 
-   VAR_IN_OUT
-      HYGIENE_STATE : Int;
-      CLEAN_ELAPSED_TIME : Time;
-      STERILE_ELAPSED_TIME : Time;
-   END_VAR
+VAR_IN_OUT
+    HYGIENE_STATE : Int;
+    CLEAN_ELAPSED_TIME : Time;
+    STERILE_ELAPSED_TIME : Time;
+END_VAR
 
-   VAR_TEMP
-      clean_timeout : Bool;
-      sterile_timeout : Bool;
-      start_sterile_tmr : Bool;
-      start_clean_tmr : Bool;
-      reset_clean_tmr : Bool;
-      reset_sterile_tmr : Bool;
-   END_VAR
+VAR_TEMP
+    clean_timeout : Bool;
+    sterile_timeout : Bool;
+    start_sterile_tmr : Bool;
+    start_clean_tmr : Bool;
+    reset_clean_tmr : Bool;
+    reset_sterile_tmr : Bool;
+END_VAR
 
 BEGIN
 NETWORK

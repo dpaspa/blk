@@ -136,7 +136,7 @@
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fb@@CLASS@@"
 TITLE = @@CLASSDESCRIPTION@@
-{ S7_Optimized_Access := 'FALSE' }
+{ S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
 NAME : fb@@CLASS@@
 VERSION : 2.0
@@ -163,7 +163,6 @@ VAR_INPUT
 @@ATTR_BEGIN|CHILD@@
     @@CHILDALIAS@@_STATE : Int;    // @@CHILDALIASDESCRIPTION@@
 @@ATTR_END|CHILD@@
-PARM_CHILD_STATE_VAR_INPUT
 @@ATTR_BEGIN|PARM_INSTANCE_VAR_INPUT@@
     @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
 @@ATTR_END|PARM_INSTANCE_VAR_INPUT@@
@@ -178,17 +177,8 @@ END_VAR
 VAR_OUTPUT
     STATE : Int;
     RUNNING : Bool;
-    AVAILABLE : Bool;
-    TIME_EXPIRED : Bool;
-    ALARM_TIMEOUT : Bool;
-    INTERLOCK : Bool;
-    STATE_MISMATCH : Bool;
-    BLK_PROCESSED : Bool;
     SQ_ERROR : Bool;
     CURSTEP : Int;
-    RUNNING_SUBS : Int;
-    ARM_FLAG : Bool;
-    MON_MISMATCH : Bool;
     CHILD_FAIL : Bool;
     BAD_PARAM : Bool;
 @@ATTR_BEGIN|TIMER@@
@@ -216,6 +206,7 @@ END_VAR
 VAR_IN_OUT
     CMD : Int := 1;                    // Start/Stop command
     MODE : Int := 1;                   // Select auto mode by default
+    INTERLOCK : Bool;
     SUBSelected : Int := 0;            // Currently selected running substate
     isBatch : Bool;
     ME : Int;                          // Block unique ID
@@ -651,12 +642,12 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
         NXT_STEP                    := #@@SFC@@.NXT_STEP ,
         S_ACTIVE                    := #@@SFC@@.S_ACTIVE ,
         ERR_FAULT                   := #@@SFC@@.ERR_FAULT ,
-        PAUSED                      := #@@SFC@@.PAUSED ,
-        OFF_IDLE                    := #@@SFC@@.OFF_IDLE ,
-        SQ_FINISHED                 := #@@SFC@@.SQ_FINISHED ,
 @@ATTR_BEGIN|PARM_SFC_VAR_OUTPUT@@
         _@@SFCPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
 @@ATTR_END|PARM_SFC_VAR_OUTPUT@@
+        SQ_FINISHED                 := #@@SFC@@.SQ_FINISHED ,
+        OFF_IDLE                    := #@@SFC@@.OFF_IDLE ,
+        PAUSED                      := #@@SFC@@.PAUSED ,
         STEPNO_JUMP                 := #@@SFC@@.STEPNO_JUMP ,
         MAN_JUMP                    := #@@SFC@@.MAN_JUMP ,
         NO_VERIFIC                  := #@@SFC@@.NO_VERIFIC ,

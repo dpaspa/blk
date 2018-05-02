@@ -21,13 +21,13 @@
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifb@@CLASS@@"
 TITLE = @@CLASS@@ : @@CLASSDESCRIPTION@@
-{ S7_Optimized_Access := 'FALSE' }
+{ S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
 NAME : ifb@@CLASS@@
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
 @@TEMPLATE_BEGIN@@
@@ -38,7 +38,6 @@ END_VAR
 VAR_TEMP
     CRIL;
     NCRIL;
-    RetVal : Int;
 END_VAR
 
 BEGIN
@@ -75,35 +74,57 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   CRIL                        := #CRIL ,
-        NCRIL                       := #NCRIL ,
-        MAN_OVERRIDE                := #@@INSTANCE@@.MAN_OVERRIDE ,
+    (   OWNER                := #@@INSTANCE@@.OWNER ,
+        SERIAL               := #@@INSTANCE@@.SERIAL ,
+        CRIL                 := #CRIL ,
+        NCRIL                := #NCRIL ,
+        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
         CHILD_RELEASE               := #@@INSTANCE@@.CHILD_RELEASE ,
+@@ATTR_BEGIN|TIMER@@
+        TIME_H               := #@@INSTANCE@@.TIME_H ,
+        TIME_M               := #@@INSTANCE@@.TIME_M ,
+        TIME_S               := #@@INSTANCE@@.TIME_S ,
+@@ATTR_END|TIMER@@
+@@ATTR_BEGIN|CHILD@@
+        @@CHILDALIAS@@_INTERLOCK            := "idb@@CHILDALIASCLASS@@".@@CHILDALIAS@@.INTERLOCK
+@@ATTR_END|CHILD@@
 @@ATTR_BEGIN|CHILD@@
         @@CHILDALIAS@@_STATE                := "idb@@CHILDALIASCLASS@@".@@CHILDALIAS@@.STATE ,
 @@ATTR_END|CHILD@@
+@@ATTR_BEGIN|PARM_INSTANCE_VAR_INPUT@@
+        @@PARAMETER@@               := #@@INSTANCE@@.@@PARAMETER@@ ,
+@@ATTR_END|PARM_INSTANCE_VAR_INPUT@@
+@@ATTR_BEGIN|PARM_SFC_DATA_VAR_INPUT@@
+        @@BLOCKPARAMETER@@               := #@@INSTANCE@@.@@PARAMETER@@ ,
+@@ATTR_END|PARM_SFC_DATA_VAR_INPUT@@
+@@ATTR_BEGIN|PARM_SFC_CONFIRM@@
+        blk_@@SFCPARAMETER@@        := #@@INSTANCE@@.blk_@@SFCPARAMETER@@ ,
+@@ATTR_END|PARM_SFC_CONFIRM@@
 @@ATTR_BEGIN|PARM_VAR_INPUT@@
         @@PARAMETER@@               := #@@INSTANCE@@.@@PARAMETER@@ ,
 @@ATTR_END|PARM_VAR_INPUT@@
         STATE                       := #@@INSTANCE@@.STATE ,
         RUNNING                     := #@@INSTANCE@@.RUNNING ,
-        RUNNING_SUBS                := #@@INSTANCE@@.RUNNING_SUBS ,
-        INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-        FLOWPATH                    := #@@INSTANCE@@.FLOWPATH ,
-        STATE_VER                   := #@@INSTANCE@@.STATE_VER ,
-        OUT_SETPOINT                := #@@INSTANCE@@.OUT_SETPOINT ,
-        EM_PROCESSED                := #@@INSTANCE@@.EM_PROCESSED ,
         SQ_ERROR                    := #@@INSTANCE@@.SQ_ERROR ,
         CURSTEP                     := #@@INSTANCE@@.CURSTEP ,
-        SQ_STATE                    := #@@INSTANCE@@.SQ_STATE ,
+        CHILD_FAIL                  := #@@INSTANCE@@.CHILD_FAIL ,
+        BAD_PARAM                   := #@@INSTANCE@@.BAD_PARAM ,
+@@ATTR_BEGIN|TIMER@@
+        REM_TIME_H                  := #@@INSTANCE@@.REM_TIME_H ,
+        REM_TIME_M                  := #@@INSTANCE@@.REM_TIME_M ,
+        REM_TIME_S                  := #@@INSTANCE@@.REM_TIME_S ,
+@@ATTR_END|TIMER@@
         HYGIENE                     := #@@INSTANCE@@.HYGIENE ,
         CMD                         := #@@INSTANCE@@.CMD ,
         MODE                        := #@@INSTANCE@@.MODE
+        INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
         SUBSelected                 := #@@INSTANCE@@.SUBSelected ,
+        isBatch                     := #@@INSTANCE@@.isBatch ,
         ME                          := @@ID@@ ,
-        OWNER                       := @@PARENTID@@ ,
+        SQ_STATE                    := #@@INSTANCE@@.SQ_STATE ,
         SQ_ACK                      := #@@INSTANCE@@.SQ_ACK ,
         SQ_RESUME                   := #@@INSTANCE@@.SQ_RESUME
+        SUBLast                     := #@@INSTANCE@@.SUBLast ,
 @@ATTR_BEGIN|CHILD@@
         @@CHILDALIAS@@_CMD                  := "idb@@CHILDALIASCLASS@@".@@CHILDALIAS@@.CMD ,
 @@ATTR_END|CHILD@@

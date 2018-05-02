@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 1/05/2018 6:31:42 PM by David Paspa
+generated on 2/05/2018 5:04:13 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -12,11 +12,11 @@ SEQUENCE
 --------------------------------------------------
 
 SFCNo:- 3
-Title:- PC_PCMX_CIPSIP
+Title:- RP_PCMX_CIPSIP
 Description:- Recipe Procedure for Equipment CIP and SIP
 Name:- CIPSIP
 Class:- PCMX
-Level:- PC
+Level:- RP
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
 HeaderName:- PCMCIP
@@ -33,13 +33,21 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- release_mx
+Type:- BOOL
+Description:- Release Mx
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
 Name:- log_time_cipsip_begin
 Type:- BOOL
 Description:- Flags the HMI that CIPSIP started
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::3
 --------------------------------------------------
 Name:- log_time_cipsip_end
 Type:- BOOL
@@ -47,7 +55,7 @@ Description:- Flags the HMI that CIPSIP ended
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::4
 --------------------------------------------------
 Name:- Report_Evnt_025
 Type:- BOOL
@@ -55,7 +63,7 @@ Description:- SIP end SY for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::5
 --------------------------------------------------
 Name:- Report_Evnt_024
 Type:- BOOL
@@ -63,7 +71,7 @@ Description:- SIP Start SY for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::6
 --------------------------------------------------
 Name:- Report_Evnt_023
 Type:- BOOL
@@ -71,7 +79,7 @@ Description:- Vacuum end SY for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::7
 --------------------------------------------------
 Name:- Report_Evnt_022
 Type:- BOOL
@@ -79,7 +87,7 @@ Description:- Vacuum Start Sy for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::8
 --------------------------------------------------
 Name:- Report_Evnt_020
 Type:- BOOL
@@ -87,7 +95,7 @@ Description:- SIP end Mx for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::9
 --------------------------------------------------
 Name:- Report_Evnt_019
 Type:- BOOL
@@ -95,7 +103,7 @@ Description:- SIP Start MX for batch Report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::10
 --------------------------------------------------
 Name:- Report_Evnt_018
 Type:- BOOL
@@ -103,7 +111,7 @@ Description:- Vacuum end Mx for Sip for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::11
 --------------------------------------------------
 Name:- Report_Evnt_017
 Type:- BOOL
@@ -111,7 +119,7 @@ Description:- Vacuum Start Mx Sip for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::12
 --------------------------------------------------
 Name:- Report_Evnt_002
 Type:- BOOL
@@ -119,7 +127,7 @@ Description:- Vacuum Hold Test End for the batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::13
 --------------------------------------------------
 Name:- Report_Evnt_001
 Type:- BOOL
@@ -127,7 +135,7 @@ Description:- Vacuum Hold Test Start for Batch Report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::14
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
@@ -135,15 +143,15 @@ Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::15
 --------------------------------------------------
-Name:- confirm_abort_yes
+Name:- prompt_abort_confirm_yes
 Type:- BOOL
 Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::16
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
@@ -151,7 +159,7 @@ Description:- HMI message: wrong hygiene status of unit Mx
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::17
 --------------------------------------------------
 Name:- toggle_mode
 Type:- BOOL
@@ -159,31 +167,7 @@ Description:- Toggle mode of all used units
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::17
---------------------------------------------------
-Name:- log_BatchID???
-Type:- STRING
-Description:- Logging previously used Batch ID
-ParameterInOut:- VAR
-
---------------------------------------------------
 PARAMETER::18
---------------------------------------------------
-Name:- BatchID_MX
-Type:- STRING[6]
-Description:- Batch ID of manufacturing Vessel Mx
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::19
---------------------------------------------------
-Name:- BatchID
-Type:- STRING[6]
-Description:- Batch ID or CIPSIP Cycle 
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::20
 --------------------------------------------------
 Name:- log_time_wrong_hygiene
 Type:- BOOL
@@ -191,7 +175,7 @@ Description:- Logging wrong hygiene status of unit Mx
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::19
 --------------------------------------------------
 Name:- time_wrong_hygiene
 Type:- TOD
@@ -199,7 +183,7 @@ Description:- Logging time wrong hygiene status detected
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::20
 --------------------------------------------------
 Name:- time_cipsip_end
 Type:- TOD
@@ -207,7 +191,7 @@ Description:- Logging CIP/SIP operation end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::21
 --------------------------------------------------
 Name:- time_cipsip_begin
 Type:- TOD
@@ -215,7 +199,7 @@ Description:- Logging CIP/SIP operation start time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::22
 --------------------------------------------------
 Name:- mx_vessel_hygiene
 Type:- INT
@@ -223,7 +207,7 @@ Description:- Hygiene Status of unit Mx
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::23
 --------------------------------------------------
 Name:- mx_vessel_state
 Type:- INT
@@ -231,7 +215,7 @@ Description:- Device State of unit Mx
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::24
 --------------------------------------------------
 Name:- mx_vessel_subs
 Type:- INT
@@ -239,7 +223,7 @@ Description:- Substate selection to unit Mx
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::25
 --------------------------------------------------
 Name:- mx_vessel_cmd
 Type:- INT
@@ -251,7 +235,7 @@ ParameterInOut:- OUT
 STEP::01
 --------------------------------------------------
 StepNo:- 01
-Title:- PC_PCMX_CIPSIP_MX : Recipe Procedure Commenced
+Title:- RP_PCMX_CIPSIP : Recipe Procedure Commenced
 Description:- Log product manufacture operation begin time.
 
 --------------------------------------------------
@@ -308,7 +292,7 @@ Condition:- A M1.1; //Always High flag
 STEP::02
 --------------------------------------------------
 StepNo:- 02
-Title:- RP_CIPSIP : Incorrect Hygiene Status
+Title:- RP_PCMX_CIPSIP : Incorrect Hygiene Status
 Description:- Log equipment is not in Hygiene status USED.
 Prompt operator to confirm abort.
 
@@ -332,7 +316,7 @@ Verification:- A M1.1; //Always High flag
 STEP::03
 --------------------------------------------------
 StepNo:- 03
-Title:- RP_CIPSIP : Initiate SETUP operations
+Title:- RP_PCMX_CIPSIP : Initiate SETUP operations
 Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
 
 Initiate Unit Operations;
@@ -383,8 +367,8 @@ L 	"dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
-StepNo:- 4.0000
-Title:- RP_CIPSIP : Initiate Mx CIP Unit Operations
+StepNo:- 04
+Title:- RP_PCMX_CIPSIP : Initiate Mx CIP Unit Operations
 Description:- Set Units Mx Hygiene Satus to CIP.
 Initiate Mx CIP Unit Operation.
 
@@ -411,7 +395,7 @@ L "dbCONST".BLK.MX.SUBS.CIP;
 --------------------------------------------------
 TRANSITION::05
 --------------------------------------------------
-TRNNo:- 5.0000
+TRNNo:- 05
 Title:- Mx CIP operations complete
 EmptyTransition:- False
 Description:- MX CIP operations complete 
@@ -425,8 +409,8 @@ L "dbCONST".BLK.STATE.COMPLETED;;
 --------------------------------------------------
 STEP::05
 --------------------------------------------------
-StepNo:- 5.0000
-Title:- RP_CIPSIP : Set Mx Hygiene Status to CLEAN
+StepNo:- 05
+Title:- RP_PCMX_CIPSIP : Set Mx Hygiene Status to CLEAN
 Description:- Set Mx Hygiene status to CLEAN.
 
 --------------------------------------------------
@@ -442,7 +426,7 @@ Verification:- A M1.1;
 --------------------------------------------------
 TRANSITION::06
 --------------------------------------------------
-TRNNo:- 6.0000
+TRNNo:- 06
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -452,8 +436,8 @@ Condition:- A M1.1; //Always High flag
 --------------------------------------------------
 STEP::06
 --------------------------------------------------
-StepNo:- 6.0000
-Title:- RP_CIPSIP : Initiate MX SIP Operations
+StepNo:- 06
+Title:- RP_PCMX_CIPSIP : Initiate MX SIP Operations
 Description:- Initiate MX SIP Operations.
 MX STATE=SIP
 
@@ -487,7 +471,7 @@ L "dbCONST".BLK.MX.SUBS.SIP;
 --------------------------------------------------
 TRANSITION::07
 --------------------------------------------------
-TRNNo:- 7.0000
+TRNNo:- 07
 Title:- Mx state SIP complete?
 EmptyTransition:- False
 Description:- Wait for Mx_UO_SIP complete.
@@ -501,23 +485,28 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::07
 --------------------------------------------------
-StepNo:- 7.0000
-Title:- RP_CIPSIP : MX SIP complete
+StepNo:- 07
+Title:- RP_PCMX_CIPSIP : MX SIP complete
 Description:- Set Mx Hygiene Status = STERILE
+Release Mx.
 
 Set End of the sip completion for batch report
-
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Set Mx Hygiene Status = STERILE
+Release Mx.
 
 Set End of the sip completion for batch report
 Setting the event for the batch report
 Action:- //Set Mx hygiene status to STERILE.
 L "dbCONST".BLK.HYGIENE.STERILE;
 T #_mx_vessel_hygiene;
+
+//Release Mx.
+SET;
+S #_release_mx;
 
 //Report Event Set
 SET;
@@ -528,7 +517,7 @@ Verification:- A M1.1; //Always High flag
 --------------------------------------------------
 TRANSITION::08
 --------------------------------------------------
-TRNNo:- 8.0000
+TRNNo:- 08
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -538,8 +527,8 @@ Condition:- A M1.1; //Always High flag
 --------------------------------------------------
 STEP::08
 --------------------------------------------------
-StepNo:- 8.0000
-Title:- RP_CIPSIP : Recipe Procedure Completed
+StepNo:- 08
+Title:- RP_PCMX_CIPSIP : Recipe Procedure Completed
 Description:- Sequence END.
 Log product manufacture operation end time.
 Reset all used flags
@@ -564,16 +553,9 @@ S #_log_time_cipsip_end;
 
 //Clear used flags
 SET;
-R #_log_TIxy12low;
-R #_log_TIxy10low;
-R #_log_PressureMx;
-R #_log_PressureSy;
-R #_log_TIx062low;
-R #_log_TIx012low;
-R #_log_TIx010low;
 R #_toggle_mode;
 R #_prompt_abort;
-R #_confirm_no_try;
+R #_prompt_abort_confirm_yes;
 
 //Repor Event Reset
 SET;

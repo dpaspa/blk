@@ -1,0 +1,104 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Convert Time value to hour, minute and second integers.                    //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      02-May-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION "fcTime2HMS" : Void
+TITLE = Convert Time variable to hour, minute, second integers
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fcHMS2Time
+VERSION : 2.0
+
+VAR_INPUT
+    TIM_VAL : Time;
+END_VAR
+
+VAR_OUTPUT
+    H : Int;
+    M : Int;
+    S : Int;
+END_VAR
+
+VAR_TEMP
+    time_dint : DInt;
+    dint_s : DInt;
+    dint_m : DInt;
+    dint_h : DInt;
+    remainder : DInt;
+    intermedBCD : DWord;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Dint---> Sec
+    L #TIM_VAL;
+    L DINT#1000;
+    /D;
+    T #time_dint;
+    NOP 0;
+
+NETWORK
+TITLE = Extract Hours
+    A(;
+    L #time_dint;
+    L DINT#3600;
+    /D;
+    T #dint_h;
+    AN OV;
+    SAVE;
+    CLR;
+    A BR;
+    );
+    JNB Label_0;
+    L #time_dint;
+    L DINT#3600;
+    MOD;
+    T #time_dint;
+Label_0:      NOP 0;
+
+NETWORK
+TITLE = extract Min
+    A(;
+    L #time_dint;
+    L DINT#60;
+    /D;
+    T #dint_m;
+    AN OV;
+    SAVE;
+    CLR;
+    A BR;
+    );
+    JNB Label_1;
+    L #time_dint;
+    L DINT#60;
+    MOD;
+    T #time_dint;
+Label_1:      NOP 0;
+
+NETWORK
+TITLE = finally extract seconds
+    L #time_dint;
+    T #dint_s;
+    NOP 0;
+NETWORK
+TITLE = Conv sec: Dint to Int
+    L #dint_s;
+    T #S;
+    NOP 0;
+NETWORK
+TITLE = Conv min: Dint to Int
+    L #dint_m;
+    T #M;
+    NOP 0;
+NETWORK
+TITLE = Conv Hour: Dint to Int
+    L #dint_h;
+    T #H;
+    NOP 0;
+END_FUNCTION

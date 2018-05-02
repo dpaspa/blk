@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 1/05/2018 6:32:07 PM by David Paspa
+generated on 2/05/2018 5:04:29 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -12,40 +12,22 @@ SEQUENCE
 --------------------------------------------------
 
 SFCNo:- 3
-Title:- PC_PCSY_FILL
-Description:- Recipe Procedure for Transfer from Storage Vessel Sy to Filling (Vial or Ampoule)
-Name:- FILL
-Class:- PCSY
-Level:- PC
+Title:- RP_PCMX_MAKE
+Description:- Recipe Procedure for Product Manufacture
+Name:- MAKE
+Class:- PCMX
+Level:- RP
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
-HeaderName:- PCSFIL
-Version:- 0.2
+HeaderName:- PCMAKE
+Version:- 0.1
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
-// 0.2 Khairul Bhasar   02-Nov-2009 09/058     Added Ampoule and Vial Filling switches
 // 0.1 Gerald Kontriner 18-Sep-2009            SFC structural design
 HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 
 --------------------------------------------------
 PARAMETER::1
---------------------------------------------------
-Name:- log_time_fill_end
-Type:- BOOL
-Description:- Flags the HMI that FILL operation ended
-
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::2
---------------------------------------------------
-Name:- log_time_fill_begin
-Type:- BOOL
-Description:- Flags the HMI that FILL operation started
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::3
 --------------------------------------------------
 Name:- log_time_wrong_hygiene
 Type:- BOOL
@@ -53,17 +35,33 @@ Description:- Flags the HMI that wrong hygiene status detected
 ParameterInOut:- VAR
 
 --------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- log_time_make_end
+Type:- BOOL
+Description:- Flags the HMI that Mx recipe MAKE ended
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_time_make_begin
+Type:- BOOL
+Description:- Flags the HMI that Mx recipe MAKE operation started
+ParameterInOut:- VAR
+
+--------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- RELEASE_FLZ
+Name:- Release_Water_System_Mx
 Type:- BOOL
-Description:- Description
-ParameterInOut:- OUT
+Description:- Release the water sytem of Mx
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- confirm_abort_yes
+Name:- prompt_abort_confirm_yes
 Type:- BOOL
 Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
 ParameterInOut:- VAR
@@ -73,7 +71,7 @@ PARAMETER::6
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
-Description:- Prompt operator abort due to Invalid Hygiene Status
+Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -81,35 +79,11 @@ PARAMETER::7
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
-Description:- HMI message: Sy has incorrect Hygiene Status
+Description:- HMI message: Mx is in the wrong Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::8
---------------------------------------------------
-Name:- log_BatchID
-Type:- STRING
-Description:- Logging Batch ID of storage vessel SY
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::9
---------------------------------------------------
-Name:- BatchID_SY
-Type:- STRING[6]
-Description:- Batch ID of storage vessel Sy
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::10
---------------------------------------------------
-Name:- sy_vessel_hygiene
-Type:- INT
-Description:- Hygiene Status of unit Sy
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::11
 --------------------------------------------------
 Name:- toggle_mode
 Type:- BOOL
@@ -117,51 +91,59 @@ Description:- Toggle mode of all used units
 ParameterInOut:- OUT
 
 --------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- mx_vessel_hygiene
+Type:- INT
+Description:- Hygiene Status of unit Mx
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- time_make_end
+Type:- TOD
+Description:- Logging Mx recipe MAKE operation end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- time_make_begin
+Type:- TOD
+Description:- Logging Mx recipe MAKE operation start time
+ParameterInOut:- VAR
+
+--------------------------------------------------
 PARAMETER::12
 --------------------------------------------------
 Name:- time_wrong_hygiene
 Type:- TOD
-Description:- Logging that Sy has incorrect Hygiene Status
+Description:- Logging that Mx is in the wrong Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::13
 --------------------------------------------------
-Name:- time_fill_end
-Type:- TOD
-Description:- Logging FILL operation end time
-ParameterInOut:- VAR
+Name:- mx_vessel_cmd
+Type:- INT
+Description:- Command to unit Mx
+ParameterInOut:- OUT
 
 --------------------------------------------------
 PARAMETER::14
 --------------------------------------------------
-Name:- time_fill_begin
-Type:- TOD
-Description:- Logging FILL operation start time
-ParameterInOut:- VAR
+Name:- mx_vessel_state
+Type:- INT
+Description:- Device State of unit Mx
+ParameterInOut:- IN
 
 --------------------------------------------------
 PARAMETER::15
 --------------------------------------------------
-Name:- sy_vessel_state
+Name:- mx_vessel_subs
 Type:- INT
-Description:- Device State of unit Sy
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::16
---------------------------------------------------
-Name:- sy_vessel_subs
-Type:- INT
-Description:- Substate selection to unit Sy
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::17
---------------------------------------------------
-Name:- sy_vessel_cmd
-Type:- INT
-Description:- Command to unit Sy
+Description:- Substate selection to unit Mx
 ParameterInOut:- OUT
 
 
@@ -169,19 +151,22 @@ ParameterInOut:- OUT
 STEP::01
 --------------------------------------------------
 StepNo:- 01
-Title:- RP_FILL : Recipe Procedure Commenced
-Description:- Log transfer from storage to filling operation begin time.
+Title:- RP_PCMX_MAKE : Recipe Procedure Commenced
+Description:- Log product manufacture operation begin time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log transfer from storage to filling operation begin time.
-Action:- //Log Sy FILL operation begin
+Description:- Log product manufacture operation begin time.
+Action:- //Log product manufacture operation begin
 L "dbCONST".CHRONO.CPU_TIME;
-T #_time_fill_begin;
+T #_time_make_begin;
 
 SET;
-S #_log_time_fill_begin;
+S #_log_time_make_begin;
+
+// Reset used flags
+SET;
 R #_toggle_mode;
 R #_prompt_abort;
 Verification:- A M1.1; //Always High flag
@@ -190,30 +175,40 @@ Verification:- A M1.1; //Always High flag
 --------------------------------------------------
 TRANSITION::01
 --------------------------------------------------
-TRNNo:- 1.0000
+TRNNo:- 01
 Title:- Check Hygiene Status
 EmptyTransition:- False
-Description:- Selected Sy is in Hygiene status BATCH?
+Description:- Selected Mx is in Hygiene status STERILE?
 Condition:- A(;
-L "dbCONST".BLK.HYGIENE.BATCH;
-L #_sy_vessel_hygiene;
+L "dbCONST".BLK.HYGIENE.STERILE;
+L #_mx_vessel_hygiene;
 ==I;
 );
 
 
 --------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 2.0000
+Title:- Incorrect Hygiene Status
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
 STEP::02
 --------------------------------------------------
-StepNo:- 2.0000
-Title:- RP_FILL : Incorrect Hygiene Status
-Description:- Log that Sy is not in Hygiene status BATCH.
+StepNo:- 02
+Title:- RP_PCMX_MAKE : Incorrect Hygiene Status
+Description:- Log that Mx is not in Hygiene status STERILE.
 Prompt operator to confirm abort.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log that Sy is not in Hygiene status BATCH.
-Action:- //Log time if Sy not in correct Hygiene status BATCH
+Description:- Log that Mx is not in Hygiene status STERILE.
+Action:- //Log time if Mx not in correct Hygiene status STERILE
 L "dbCONST".CHRONO.CPU_TIME;
 T #_time_wrong_hygiene;
 
@@ -227,41 +222,48 @@ Verification:- A M1.1; //Always High flag
 --------------------------------------------------
 TRANSITION::03
 --------------------------------------------------
-TRNNo:- 3.0000
+TRNNo:- 03
 Title:- Confirm Abort (Incorrect Hygiene Status)
 EmptyTransition:- False
 Description:- Confirm Abort (Incorrect Hygiene Status)
-Condition:- A #_confirm_abort;
+Condition:- A #_prompt_abort_confirm_yes;
 
 
 --------------------------------------------------
 STEP::03
 --------------------------------------------------
-StepNo:- 3.0000
-Title:- RP_FILL : Start Sy FILL Unit Operations
-Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+StepNo:- 03
+Title:- RP_PCMX_MAKE : Initiate MAKE Unit Operation
+Description:- Set Mx Hygiene Status to BATCH.
 
-Initiate Unit Operations
-SY STATE=FILL
+Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+
+Initiate MX STATE=MAKE Unit Operation
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+Description:- Set Mx Hygiene Status to BATCH.
 
-Initiate SY STATE=FILL Unit Operation
-Action:- //Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+
+Initiate MX STATE=MAKE Unit Operation
+Action:- //Set Mx Hygiene Status to BATCH.
+L "dbCONST".BLK.HYGIENE.BATCH;
+T #_mx_vessel_hygiene;
+
+//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
 SET;
 S #_toggle_mode;
 
-//Initiate SY STATE=FILL Unit Operation
-L "dbCONST".BLK.SY.SUBS.FILL;
-T #_sy_vessel_subs;
-L "dbCONST".BLK.CMD.START;
-T #_sy_vessel_cmd;
+//Initiate MX STATE=MAKE Unit Operation
+L "dbCONST".BLK.MX.SUBS.MAKE;
+T #_mx_vessel_subs; 
+L "dbCONST".BLK.MX.CMD.START;
+T #_mx_vessel_cmd;
 Verification:- A(;
-L #_sy_vessel_state;
-L "dbCONST".BLK.SY.SUBS.FILL;
+L #_mx_vessel_state;
+L "dbCONST".BLK.MX.SUBS.MAKE;
 ==I;
 );
 
@@ -269,13 +271,13 @@ L "dbCONST".BLK.SY.SUBS.FILL;
 --------------------------------------------------
 TRANSITION::04
 --------------------------------------------------
-TRNNo:- 4.0000
-Title:- FILL operations complete?
+TRNNo:- 04
+Title:- MAKE operation complete?
 EmptyTransition:- False
-Description:- SY FILL operation completed
+Description:- MX MAKE operation is complete
 Condition:- A(;
-L #_sy_vessel_state;
-L "dbCONST".BLK.STATE.COMPLETED;
+L 	#_mx_vessel_state;
+L 	"dbCONST".BLK.MX.STATE.COMPLETED;
 ==I;
 );
 
@@ -283,59 +285,70 @@ L "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
-StepNo:- 4.0000
-Title:- RP_FILL : Sy Filling Unit Operation Finished
-Description:- Now finished with Sy. 
-Set Sy Hygiene Status to USED.
-
-Release FLZ unit from the CRP
+StepNo:- 04
+Title:- RP_PCMX_MAKE : Release the water system
+Description:- Toggle all Units From Manual to Auto.
+Release the water system
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Set Sy Hygiene Status to USED.
-Action:- //Set Sy Hygiene Status to USED.
-L "dbCONST".BLK.HYGIENE.USED;
-T #_sy_vessel_hygiene;
-
-//Release FLZ
+Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+Release Water System of Mx
+Action:- //Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
 SET;
-S #_RELEASE_FLZ;
-Verification:- A M1.1;
+R #_toggle_mode;
+
+//Release the water system
+S #_Release_Water_System_Mx;
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 5.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
 STEP::05
 --------------------------------------------------
-StepNo:- 5.0000
-Title:- RP_FILL : Recipe Procedure Completed
-Description:- Set equipment to SAFE state.
-Log filling operation complete.
+StepNo:- 05
+Title:- RP_PCMX_MAKE : Recipe Procedure Completed
+Description:- Stop Mx unit operation
+Log product manufacture operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Set equipment to SAFE state.
+Description:- Stop Mx unit operation.
+Log product manufacture operation end time.
 Action:- A(;
-L "dbCONST".BLK.HYGIENE.USED;
-L #_sy_vessel_hygiene;
+L "dbCONST".BLK.HYGIENE.BATCH;
+L #_mx_vessel_hygiene;
 ==I;
 );
+JC NORM;
 
-//put substate to none of sy
+//Stop MX Unit Operation
+L "dbCONST".BLK.CMD.STOP;
+T #_mx_vessel_cmd;
 L "dbCONST".BLK.SAFE.CMD;
-T #_sy_vessel_subs;
+T #_mx_vessel_subs;
 
-//Log product manufacture operation end
+NORM: NOP 0;
+
+//Log Make operation end time.
 L "dbCONST".CHRONO.CPU_TIME;
-T #_time_fill_end;
+T #_time_make_end;
 
 SET;
-S #_log_time_fill_end;
-
-//Clear used flags
-R #_toggle_mode;
-R #_prompt_abort;
+S #_log_time_make_end;
+R #_prompt_abort_confirm_yes;
 Verification:- A M1.1;
 
 ****************************************************************************************************

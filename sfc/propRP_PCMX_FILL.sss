@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 1/05/2018 6:31:51 PM by David Paspa
+generated on 2/05/2018 5:04:20 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -53,21 +53,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- RELEASE_FCZ
-Type:- BOOL
-Description:- Description
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::5
---------------------------------------------------
-Name:- confirm_abort_yes
+Name:- prompt_abort_confirm_yes
 Type:- BOOL
 Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::5
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
@@ -75,7 +67,7 @@ Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::6
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
@@ -83,31 +75,7 @@ Description:- HMI message: Mx has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
---------------------------------------------------
-Name:- log_BatchID
-Type:- STRING
-Description:- Logging previous Batch ID of vessel Mx
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::9
---------------------------------------------------
-Name:- BatchID_Mx
-Type:- STRING[6]
-Description:- Batch ID of Mx Vessel
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::10
---------------------------------------------------
-Name:- BatchID
-Type:- STRING[6]
-Description:- Batch ID
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::11
+PARAMETER::7
 --------------------------------------------------
 Name:- time_wrong_hygiene
 Type:- TOD
@@ -115,7 +83,7 @@ Description:- Logging that Mx, MFL and/orSy have incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::8
 --------------------------------------------------
 Name:- mx_vessel_hygiene
 Type:- INT
@@ -123,7 +91,7 @@ Description:- Hygiene Status of unit Mx
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::9
 --------------------------------------------------
 Name:- time_fill_end
 Type:- TOD
@@ -131,7 +99,7 @@ Description:- Logging FILL operation end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::10
 --------------------------------------------------
 Name:- time_fill_begin
 Type:- TOD
@@ -139,7 +107,7 @@ Description:- Logging FILL operation start time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::11
 --------------------------------------------------
 Name:- toggle_mode
 Type:- BOOL
@@ -147,7 +115,7 @@ Description:- Toggle mode of all used units
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::12
 --------------------------------------------------
 Name:- mx_vessel_state
 Type:- INT
@@ -155,7 +123,7 @@ Description:- Device State of unit Mx
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::13
 --------------------------------------------------
 Name:- mx_vessel_cmd
 Type:- INT
@@ -163,7 +131,7 @@ Description:- Command to unit Mx
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::14
 --------------------------------------------------
 Name:- mx_vessel_subs
 Type:- INT
@@ -239,7 +207,7 @@ TRNNo:- 03
 Title:- Confirm Abort (Incorrect Hygiene Status)
 EmptyTransition:- False
 Description:- Confirm Abort (Incorrect Hygiene Status)
-Condition:- A #_confirm_abort_yes;
+Condition:- A #_prompt_abort_confirm_yes;
 
 
 --------------------------------------------------
@@ -340,7 +308,7 @@ T #_time_fill_end;
 
 SET;
 S #_log_time_fill_end;
-R #_prompt_abort;
+R #_prompt_abort_confirm_yes;
 Verification:- A M1.1;
 
 ****************************************************************************************************

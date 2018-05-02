@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 1/05/2018 6:27:47 PM by David Paspa
+generated on 2/05/2018 5:58:43 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -351,25 +351,25 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::41
 --------------------------------------------------
-Name:- emx_mfl_subs
+Name:- emx_mmfl_subs
 Type:- INT
-Description:- Substate selection to emx_mfl
+Description:- Substate selection to emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
 PARAMETER::42
 --------------------------------------------------
-Name:- emx_mfl_cmd
+Name:- emx_mmfl_cmd
 Type:- INT
-Description:- Command to emx_mfl
+Description:- Command to emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
 PARAMETER::43
 --------------------------------------------------
-Name:- emx_mfl_state
+Name:- emx_mmfl_state
 Type:- INT
-Description:- Device State of emx_mfl
+Description:- Device State of emx_mmfl
 ParameterInOut:- IN
 
 --------------------------------------------------
@@ -759,11 +759,11 @@ T #_emv_vessel_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emv_vessel_cmd;
 
-// Set emx_mfl to substate CIP_MX and start it.
+// Set emx_mmfl to substate CIP_MX and start it.
 L "dbCONST".BLK.EMX1.SUBS.CIP_MX;
-T #_emx_mfl_subs;
+T #_emx_mmfl_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emx_mfl_cmd;
+T #_emx_mmfl_cmd;
 
 //Reset Batch Report Event
 SET;
@@ -782,9 +782,9 @@ L    #_emv_vessel_state;
 L    "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
 ==I;
 );
-//Verify if emx_mfl changed to substate CIP_MX.
+//Verify if emx_mmfl changed to substate CIP_MX.
 A(;
-L   #_emx_mfl_state;
+L   #_emx_mmfl_state;
 L   "dbCONST".BLK.EMX1.SUBS.CIP_MX;
 ==I;
 );
@@ -999,7 +999,7 @@ Verification:- A #SQ_TIMER.IN;
 --------------------------------------------------
 TRANSITION::05
 --------------------------------------------------
-TRNNo:- 5.0000
+TRNNo:- 05
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Jump
@@ -1058,7 +1058,7 @@ A #SQ_TIMER.Q;
 --------------------------------------------------
 STEP::07
 --------------------------------------------------
-StepNo:- 7.0000
+StepNo:- 07
 Title:- UO_MX_CIP : Disable Agitator
 Description:- Disable Agitator and open Mx outlet valve.
 Log actual tank PW flood mixing time.
@@ -1110,7 +1110,7 @@ L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
 --------------------------------------------------
 TRANSITION::07
 --------------------------------------------------
-TRNNo:- 7.0000
+TRNNo:- 07
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Jump
@@ -1120,7 +1120,7 @@ Condition:- A M1.1; //Always High flag
 --------------------------------------------------
 STEP::08
 --------------------------------------------------
-StepNo:- 8.0000
+StepNo:- 08
 Title:- UO_MX_CIP : Wait to empty vessel
 Description:- Open HPCA supply valve.
 Start timer for PW Empty.
@@ -1160,7 +1160,7 @@ Verification:- A #SQ_TIMER.IN;
 --------------------------------------------------
 TRANSITION::08
 --------------------------------------------------
-TRNNo:- 8.0000
+TRNNo:- 08
 Title:- Timer expired.
 EmptyTransition:- False
 Description:- TIME_PW_EMPTY1 expired?
@@ -1170,7 +1170,7 @@ Condition:- A #SQ_TIMER.Q;
 --------------------------------------------------
 STEP::09
 --------------------------------------------------
-StepNo:- 9.0000
+StepNo:- 09
 Title:- UO_MX_CIP : Commence vessel washing with PW
 Description:- Open PW supply to wash vessel and start FLUSH.
 Store PW wash begin time.
@@ -1214,7 +1214,7 @@ L   "dbCONST".BLK.EMC2.SUBS.FLUSH;
 --------------------------------------------------
 TRANSITION::09
 --------------------------------------------------
-TRNNo:- 9.0000
+TRNNo:- 09
 Title:- Timer expired.
 EmptyTransition:- False
 Description:- TIME_PW_WASH_Mx expired?
@@ -1228,7 +1228,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::10
 --------------------------------------------------
-StepNo:- 10.0000
+StepNo:- 10
 Title:- UO_MX_CIP : PW washing completed
 Description:- Log actual tank PW wash time.
 
@@ -1260,7 +1260,7 @@ Verification:- A M1.1; //Always High flag
 --------------------------------------------------
 TRANSITION::10
 --------------------------------------------------
-TRNNo:- 10.0000
+TRNNo:- 10
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -1270,7 +1270,7 @@ Condition:- A M1.1; //Always High flag
 --------------------------------------------------
 STEP::11
 --------------------------------------------------
-StepNo:- 11.0000
+StepNo:- 11
 Title:- UO_MX_CIP : Divert Wash to MMFLx
 Description:- Divert Wash to MMFLx.
 Start TIME_PW_WASH_MMFLx.
@@ -1280,14 +1280,14 @@ Store PW filtration wash begin time.
 ACTION::01
 --------------------------------------------------
 Description:- Divert to MMFLx Filtration Line.
-Action:- // Set emx_mfl to substate CIP_MMFLX and start it.
+Action:- // Set emx_mmfl to substate CIP_MMFLX and start it.
 L "dbCONST".BLK.EMX1.SUBS.CIP_MMFLX;
-T #_emx_mfl_subs;
+T #_emx_mmfl_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emx_mfl_cmd;
-Verification:- //Verify if emx_mfl changed to substate CIP_MMFLX.
+T #_emx_mmfl_cmd;
+Verification:- //Verify if emx_mmfl changed to substate CIP_MMFLX.
 A(;
-L   #_emx_mfl_state;
+L   #_emx_mmfl_state;
 L   "dbCONST".BLK.EMX1.SUBS.CIP_MMFLX;
 ==I;
 );
@@ -1323,7 +1323,7 @@ L   "dbCONST".BLK.EMC2.SUBS.FLUSH;
 --------------------------------------------------
 TRANSITION::11
 --------------------------------------------------
-TRNNo:- 11.0000
+TRNNo:- 11
 Title:- Timer expired.
 EmptyTransition:- False
 Description:- TIME_PW_WASH_MMFLx expired?
@@ -1337,7 +1337,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::12
 --------------------------------------------------
-StepNo:- 12.0000
+StepNo:- 12
 Title:- UO_MX_CIP : Filtration line PW wash completed
 Description:- Log actual Filtration line PW wash time and close PW supply valve.
 Start TIME_PW_EMPTY2.
@@ -1394,7 +1394,7 @@ Verification:- A #SQ_TIMER.IN;
 --------------------------------------------------
 TRANSITION::12
 --------------------------------------------------
-TRNNo:- 12.0000
+TRNNo:- 12
 Title:- Timer expired
 EmptyTransition:- False
 Description:- #TIME_PW_EMPTY2 expired?
@@ -1404,7 +1404,7 @@ Condition:- A #SQ_TIMER.Q;
 --------------------------------------------------
 STEP::13
 --------------------------------------------------
-StepNo:- 13.0000
+StepNo:- 13
 Title:- MX_UO_CIP : Steaming PW inlet line
 Description:- Close HPCA supply valve(vent opened) and open PW line PS supply valve with Timer TIME_PW_STEAM.
 Store PW steaming begin time.
@@ -1456,7 +1456,7 @@ L   "dbCONST".BLK.EMC2.SUBS.FLUSH;
 --------------------------------------------------
 TRANSITION::13
 --------------------------------------------------
-TRNNo:- 13.0000
+TRNNo:- 13
 Title:- Timer Expired?
 EmptyTransition:- False
 Description:- TIME_PW_STEAM expired?
@@ -1471,7 +1471,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::14
 --------------------------------------------------
-StepNo:- 14.0000
+StepNo:- 14
 Title:- UO_MX_CIP : Stop Steaming PW inlet line
 Description:- Log actual PW line steaming time.
 Close PW line PS supply valve.
@@ -1525,7 +1525,7 @@ Verification:- A #SQ_TIMER.IN;
 --------------------------------------------------
 TRANSITION::14
 --------------------------------------------------
-TRNNo:- 14.0000
+TRNNo:- 14
 Title:- Timer
 EmptyTransition:- False
 Description:- Timer 10s
@@ -1535,7 +1535,7 @@ Condition:- A #SQ_TIMER.Q;
 --------------------------------------------------
 STEP::15
 --------------------------------------------------
-StepNo:- 15.0000
+StepNo:- 15
 Title:- MX_UO_CIP : Wait for OPER to setup for WFI
 Description:- Setup for WFI addition to vessel. Start EMC2_SETUP with MEDIUM WFI.
 Open outlet valve.
@@ -1578,7 +1578,7 @@ L 	"dbCONST".BLK.EMV1.SUBS.DISCHARGE;
 --------------------------------------------------
 TRANSITION::15
 --------------------------------------------------
-TRNNo:- 15.0000
+TRNNo:- 15
 Title:- Setup ready for WFI addition.
 EmptyTransition:- False
 Description:- WFI addition SETUP completed.
@@ -1592,7 +1592,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::16
 --------------------------------------------------
-StepNo:- 16.0000
+StepNo:- 16
 Title:- UO_MX_CIP : Commence WFI Rinse
 Description:- Divert to tank outlet drain line.
 Open WFI supply valve to rinse vessel and open HPCA supply valve.
@@ -1602,14 +1602,14 @@ Store WFI rinse begin time.
 ACTION::01
 --------------------------------------------------
 Description:- Divert to tank outlet drain line. (CIP_MX)
-Action:- // Set emx_mfl to substate CIP_MX and start it.
+Action:- // Set emx_mmfl to substate CIP_MX and start it.
 L "dbCONST".BLK.EMX1.SUBS.CIP_MX;
-T #_emx_mfl_subs;
+T #_emx_mmfl_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emx_mfl_cmd;
-Verification:- //Verify if emx_mfl changed to substate CIP_MX.
+T #_emx_mmfl_cmd;
+Verification:- //Verify if emx_mmfl changed to substate CIP_MX.
 A(;
-L   #_emx_mfl_state;
+L   #_emx_mmfl_state;
 L   "dbCONST".BLK.EMX1.SUBS.CIP_MX;
 ==I;
 );
@@ -1666,7 +1666,7 @@ L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 --------------------------------------------------
 TRANSITION::16
 --------------------------------------------------
-TRNNo:- 16.0000
+TRNNo:- 16
 Title:- Timer Expired?
 EmptyTransition:- False
 Description:- TIME_WFI_RINSE_Mx expired?
@@ -1681,7 +1681,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::17
 --------------------------------------------------
-StepNo:- 17.0000
+StepNo:- 17
 Title:- UO_MX_CIP : Mx_WFI_Rinse Completed
 Description:- Log actual WFI rinse time. 
 Divert Wash to MMFLx.
@@ -1708,14 +1708,14 @@ CALL T_DIFF
 SET;
 S #_log_time_act_wfi_rinse;
 
-// Set emx_mfl to substate CIP_MMFLX and start it.
+// Set emx_mmfl to substate CIP_MMFLX and start it.
 L "dbCONST".BLK.EMX1.SUBS.CIP_MMFLX;
-T #_emx_mfl_subs;
+T #_emx_mmfl_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emx_mfl_cmd;
-Verification:- //Verify if emx_mfl changed to substate CIP_MMFLX.
+T #_emx_mmfl_cmd;
+Verification:- //Verify if emx_mmfl changed to substate CIP_MMFLX.
 A(;
-L   #_emx_mfl_state;
+L   #_emx_mmfl_state;
 L   "dbCONST".BLK.EMX1.SUBS.CIP_MMFLX;
 ==I;
 );
@@ -1750,7 +1750,7 @@ L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 --------------------------------------------------
 TRANSITION::17
 --------------------------------------------------
-TRNNo:- 17.0000
+TRNNo:- 17
 Title:- MMFLx WFI Rinse Completed
 EmptyTransition:- False
 Description:- MMFLx WFI Rinse Completed
@@ -1760,7 +1760,7 @@ Condition:- A #SQ_TIMER.Q;
 --------------------------------------------------
 STEP::18
 --------------------------------------------------
-StepNo:- 18.0000
+StepNo:- 18
 Title:- UO_MX_CIP : WFI Rinse complete. Wait to empty vessel.
 Description:- Log actual MMFLx WFI rinse time.
 Close WFI supply valve.
@@ -1820,7 +1820,7 @@ Verification:- A #SQ_TIMER.IN;
 --------------------------------------------------
 TRANSITION::18
 --------------------------------------------------
-TRNNo:- 18.0000
+TRNNo:- 18
 Title:- Timer Expired?
 EmptyTransition:- False
 Description:- TIME_WFI_EMPTY expired?
@@ -1830,7 +1830,7 @@ Condition:- A #SQ_TIMER.Q;
 --------------------------------------------------
 STEP::19
 --------------------------------------------------
-StepNo:- 19.0000
+StepNo:- 19
 Title:- UO_MX_CIP : Close HPCA supply valve
 Description:- Close compressed air HPCA supply valve.
 
@@ -1854,7 +1854,7 @@ L 	"dbCONST".BLK.STATE.STOPPED;
 --------------------------------------------------
 TRANSITION::19
 --------------------------------------------------
-TRNNo:- 19.0000
+TRNNo:- 19
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Jump
@@ -1864,7 +1864,7 @@ Condition:- A M1.1; //Always High flag
 --------------------------------------------------
 STEP::20
 --------------------------------------------------
-StepNo:- 20.0000
+StepNo:- 20
 Title:- UO_MX_CIP : Unit Operation Completed
 Description:- Set all used equipment modules to safe state.
 Log Mx CIP operation end time.
@@ -1896,20 +1896,13 @@ L "dbCONST".BLK.CMD.STOP;
 T  #_emc_water_cmd;
 
 L "dbCONST".BLK.SAFE.CMD;
-T  #_emx_mfl_subs;
+T  #_emx_mmfl_subs;
 L "dbCONST".BLK.CMD.STOP;
-T  #_emx_mfl_cmd;
+T  #_emx_mmfl_cmd;
 
 A #_prompt_no_pw_confirm_no;
 SET;
 S #_log_msg_no_pw_confirm_no;
-
-
-// Reset used flags
-SET;
-R #_confirm_no_try;
-R #_confirm_try_again;
-R #_prompt_no_PW;
 
 
 //Reset Batch Report Event

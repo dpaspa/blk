@@ -1,0 +1,128 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Convert hour, minute and second integer values to Time value.              //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      02-May-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION "fcHMS2Time" : Void
+TITLE = Convert hour, minute, second integers to Time variable
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fcHMS2Time
+VERSION : 2.0
+
+VAR_INPUT
+    H : Int;
+    M : Int;
+    S : Int;
+END_VAR
+
+VAR_OUTPUT
+    TTIM_VAL : Time;
+    dTIM_VAL : DInt;
+END_VAR
+
+VAR_TEMP
+    h_1 : DInt;
+    m_1 : DInt;
+    s_1 : DInt;
+    s_ms : DInt;
+    m_ms : DInt;
+    h_ms : DInt;
+    tot_ms : DInt;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Hour Int to Dint
+    L #H;
+    ITD;
+    T #h_1;
+
+NETWORK
+TITLE = Min Int to Dint
+    L #M;
+    ITD;
+    T #m_1;
+
+NETWORK
+TITLE = Sec Int to Dint
+    L #S;
+    ITD;
+    T #s_1;
+
+NETWORK
+TITLE =  Sec to ms
+    L #s_1;
+    L DINT#1000;
+    *D;
+    T #s_ms;
+    NOP 0;
+
+NETWORK
+TITLE = Min---> ms
+    L #m_1;
+    L DINT#60;
+    *D;
+    T #m_ms;
+    AN OV;
+
+NETWORK
+TITLE = Min---> ms
+    L #m_ms;
+    L DINT#1000;
+    *D;
+    T #m_ms;
+
+NETWORK
+TITLE = Hour---> ms
+    L #h_1;
+    L DINT#60;
+    *D;
+    T #h_ms;
+    AN OV;
+
+NETWORK
+TITLE = Hour---> ms
+    L #h_ms;
+    L DINT#60;
+    *D;
+    T #h_ms;
+    AN OV;
+
+NETWORK
+TITLE = Hour---> ms
+    L #h_ms;
+    L DINT#1000;
+    *D;
+    T #h_ms;
+
+NETWORK
+TITLE = h_ms+ m_ms+ s_ms= total mili seconds
+    L #h_ms;
+    L #m_ms;
+    +D;
+    T #tot_ms;
+    AN OV;
+
+NETWORK
+TITLE = h_ms+ m_ms+ s_ms= total mili seconds
+    L #tot_ms;
+    L #s_ms;
+    +D;
+    T #tot_ms;
+
+NETWORK
+TITLE = Output Time variable
+    L #tot_ms;
+    T #TTIM_VAL;
+
+NETWORK
+TITLE = Output Time variable as an Integer
+    L #tot_ms;
+    T #dTIM_VAL;
+END_FUNCTION

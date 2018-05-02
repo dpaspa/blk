@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 1/05/2018 6:24:27 PM by David Paspa
+generated on 2/05/2018 4:52:14 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -43,7 +43,7 @@ SFCCommCode:-
 PARAMETER::1
 --------------------------------------------------
 Name:- sic_agit_cmd
-Type:- BOOL
+Type:- INT
 Description:- Description
 ParameterInOut:- OUT
 
@@ -332,7 +332,7 @@ R #_sic_agit_running;
 S #_sic_agit_stopped;
 
 //Report accumulative total running time
-   CALL  Dint_hms(
+   CALL  fcTime2HMS(
        TIM_VAL:=#sqRunTimer.RetElapsedTime,
        H      :=#_AcumTimeH,
        M      :=#_AcumTimeM,
@@ -413,7 +413,7 @@ S #sqRunTimer.RESET;
 //Set timer ON delay.
 R #sqRunTimer.ENABLE;
 
-   CALL  Dint_hms(
+   CALL  fcTime2HMS(
        TIM_VAL:=#sqRunTimer.RetElapsedTime,
        H      :=#_AcumTimeH,
        M      :=#_AcumTimeM,

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 1/05/2018 6:29:14 PM by David Paspa
+generated on 2/05/2018 5:59:39 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -817,7 +817,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::03
 --------------------------------------------------
-StepNo:- 3.0000
+StepNo:- 03
 Title:- Sy_UO_CIP : Set Flag for Sy_PW_Wash_Complete
 Description:- Log actual Sy PW wash time.
 Divert path to Filling Machine FLz and Drain Line.
@@ -911,7 +911,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
-StepNo:- 4.0000
+StepNo:- 04
 Title:- Sy_UO_CIP : Set Flag for FLz_PW_Wash_Complete
 Description:- Log actual FLz PW rinse time.
 
@@ -994,7 +994,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::05
 --------------------------------------------------
-StepNo:- 5.0000
+StepNo:- 05
 Title:- Sy_UO_CIP : Set Flag for FLz_PW_Wash_Complete
 Description:- Log actual PW SMFLx rinse time.
 Close PW supply valve.
@@ -1059,7 +1059,7 @@ Condition:- A #SQ_TIMER.Q;
 --------------------------------------------------
 STEP::06
 --------------------------------------------------
-StepNo:- 6.0000
+StepNo:- 06
 Title:- SY_UO_CIP : Steaming PW inlet line
 Description:- Close HPCA supply valve.
 Open PW line PS supply valve.
@@ -1125,7 +1125,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::07
 --------------------------------------------------
-StepNo:- 7.0000
+StepNo:- 07
 Title:- SY_UO_CIP : Stop Steaming PW inlet line
 Description:- Log actual PW line steaming time.
 Close PW line PS supply valve.
@@ -1184,7 +1184,7 @@ L "dbCONST".BLK.EMC3.SUBS.SETUP;
 --------------------------------------------------
 TRANSITION::07
 --------------------------------------------------
-TRNNo:- 7.0000
+TRNNo:- 07
 Title:- Setup complete?
 EmptyTransition:- False
 Description:- emc_water SETUP complete
@@ -1198,7 +1198,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::08
 --------------------------------------------------
-StepNo:- 8.0000
+StepNo:- 08
 Title:- SY_UO_CIP : Commence WFI Rinse of vessel
 Description:- Open Sy path to Wash Drain.
 
@@ -1281,7 +1281,7 @@ L "dbCONST".BLK.EMC1.SUBS.VALVE;
 --------------------------------------------------
 TRANSITION::08
 --------------------------------------------------
-TRNNo:- 8.0000
+TRNNo:- 08
 Title:- Timer expired?
 EmptyTransition:- False
 Description:- Timer TIME_WFI_TANK expired.
@@ -1295,7 +1295,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::09
 --------------------------------------------------
-StepNo:- 9.0000
+StepNo:- 09
 Title:- Sy_UO_CIP : Set Flag for Sy_WFI_Wash_Complete
 Description:- Log actual Sy WFI wash time.
 
@@ -1374,7 +1374,7 @@ L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 --------------------------------------------------
 STEP::10
 --------------------------------------------------
-StepNo:- 10.0000
+StepNo:- 10
 Title:- Sy_UO_CIP : Set Flag for FLz_WFI_Wash_Complete
 Description:- Log actual FLz WFI wash time.
 
@@ -1447,7 +1447,7 @@ Verification:- A(;
 --------------------------------------------------
 STEP::11
 --------------------------------------------------
-StepNo:- 11.0000
+StepNo:- 11
 Title:- Sy_UO_CIP : WFI SMFLx Rinse Completed
 Description:- Log actual WFI SMFLx rinse time.
 Close WFI supply valve
@@ -1506,7 +1506,7 @@ Verification:- A #SQ_TIMER.IN;
 --------------------------------------------------
 STEP::12
 --------------------------------------------------
-StepNo:- 12.0000
+StepNo:- 12
 Title:- SY_UO_CIP : Close CA supply valve
 Description:- Close HPCA supply valve.
 Prompt operator to continue steaming.
@@ -1535,7 +1535,7 @@ L 	"dbCONST".BLK.STATE.STOPPED;
 --------------------------------------------------
 TRANSITION::12
 --------------------------------------------------
-TRNNo:- 12.0000
+TRNNo:- 12
 Title:- Is Steaming required?
 EmptyTransition:- False
 Description:- Operator confirms steaming is required
@@ -1545,7 +1545,7 @@ Condition:- A #_prompt_steam_confirm_yes;
 --------------------------------------------------
 TRANSITION::13
 --------------------------------------------------
-TRNNo:- 13.0000
+TRNNo:- 13
 Title:- Steaming not required
 EmptyTransition:- False
 Description:- Operator confirms steaming is not required
@@ -1555,7 +1555,7 @@ Condition:- A #_prompt_steam_confirm_no;
 --------------------------------------------------
 STEP::13
 --------------------------------------------------
-StepNo:- 13.0000
+StepNo:- 13
 Title:- SY_UO_CIP : Wait for Steaming to be ready
 Description:- Flag parent ready for steaming by setting steaming_ready flag.
 
@@ -1572,7 +1572,7 @@ Verification:- A M1.1; //Always High flag
 --------------------------------------------------
 TRANSITION::14
 --------------------------------------------------
-TRNNo:- 14.0000
+TRNNo:- 14
 Title:- Waiting for steaming to proceed
 EmptyTransition:- False
 Description:- Parent indicates to proceed with steaming by setting the steaming_proceed flag.
@@ -1582,7 +1582,7 @@ Condition:- A #_steaming_proceed;
 --------------------------------------------------
 STEP::14
 --------------------------------------------------
-StepNo:- 14.0000
+StepNo:- 14
 Title:- Sy_UO_CIP : WFI SMFLx Rinse Completed
 Description:- Open Sy steam drain valve and close Sy CIP drain valve.
 
@@ -1638,7 +1638,7 @@ Verification:- A(;
 --------------------------------------------------
 TRANSITION::15
 --------------------------------------------------
-TRNNo:- 15.0000
+TRNNo:- 15
 Title:- Timer expired?
 EmptyTransition:- False
 Description:- TIME_WFI_STEAM_Sy expired?
@@ -1652,7 +1652,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::15
 --------------------------------------------------
-StepNo:- 15.0000
+StepNo:- 15
 Title:- SY_UO_CIP : Filling Line steaming complete
 Description:- Close PS supply valve.
 Log actual post CIP CS steaming time.
@@ -1692,7 +1692,7 @@ L "dbCONST".BLK.STATE.STOPPED;
 --------------------------------------------------
 TRANSITION::16
 --------------------------------------------------
-TRNNo:- 16.0000
+TRNNo:- 16
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Jump
@@ -1702,7 +1702,7 @@ Condition:- A M1.1; //Always High flag
 --------------------------------------------------
 STEP::16
 --------------------------------------------------
-StepNo:- 16.0000
+StepNo:- 16
 Title:- SY_UO_CIP : Unit Operation Completed
 Description:- Log Sy CIP operation end time.
 

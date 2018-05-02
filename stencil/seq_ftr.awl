@@ -1,97 +1,97 @@
 NETWORK
-//================================ SEQ FOOTER ================================//
-// Common code to execute each scan:                                          //
-//----------------------------------------------------------------------------//
 TITLE =Sequencer Common Code, Execute in Each Scan
-
-COMM: NOP   0;
+    //============================ SEQ FOOTER ================================//
+    // AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTO //
+    // Common code to execute each scan:                                      //
+    //------------------------------------------------------------------------//
+    COMM: NOP   0;
 
 NETWORK
 TITLE =Retentive/Non Retentive Selectable Run timer
-
-      CALL #sqRunTimer (
-           TIME_H                   := #sqRunTimer.TIME_H,
-           TIME_M                   := #sqRunTimer.TIME_M,
-           TIME_S                   := #sqRunTimer.TIME_S,
-           ENABLE                   := #sqRunTimer.ENABLE,
-           RESET                    := #sqRunTimer.RESET,
-           PAUSE                    := #sqRunTimer.PAUSE,
-           NON_RET                  := #sqRunTimer.NON_RET,
-           RMNG_H                   := #sqRunTimer.RMNG_H,
-           RMNG_M                   := #sqRunTimer.RMNG_M,
-           RMNG_S                   := #sqRunTimer.RMNG_S,
-           TIME_EXPIRED             := #sqRunTimer.TIME_EXPIRED,
-           TMR_RUNNG                := #sqRunTimer.TMR_RUNNG);
+    CALL #sqRunTimer (
+        TIME_H               := #sqRunTimer.TIME_H,
+        TIME_M               := #sqRunTimer.TIME_M,
+        TIME_S               := #sqRunTimer.TIME_S,
+        ENABLE               := #sqRunTimer.ENABLE,
+        RESET                := #sqRunTimer.RESET,
+        PAUSE                := #sqRunTimer.PAUSE,
+        NON_RET              := #sqRunTimer.NON_RET,
+        RMNG_H               := #sqRunTimer.RMNG_H,
+        RMNG_M               := #sqRunTimer.RMNG_M,
+        RMNG_S               := #sqRunTimer.RMNG_S,
+        TIME_EXPIRED         := #sqRunTimer.TIME_EXPIRED,
+        TMR_RUNNG            := #sqRunTimer.TMR_RUNNG
+    );
 
 NETWORK
 TITLE =Sequencer Step Timer
-
-      CALL #sqStepTimer (
-           IN                       := #sqStepTimer.IN,
-           PT                       := "dbCONST".SEQ.STEP_TIME,
-           Q                        := #sqStepTimer.Q,
-           ET                       := #sqStepTimer.ET);
+    CALL #sqStepTimer (
+        IN                   := #sqStepTimer.IN,
+        PT                   := "dbCONST".SEQ.STEP_TIME,
+        Q                    := #sqStepTimerExpired,
+        ET                   := #sqStepTimerElapsed
+    );
 
 NETWORK
 TITLE =Sequencer Timer
-
- CALL #SQ_TIMER (
-           IN                       := #SQ_TIMER.IN,
-           PT                       := #SQ_TIMER.PT,
-           Q                        := #SQ_TIMER.Q,
-           ET                       := #SQ_TIMER.ET);
+    CALL #SQ_TIMER (
+        IN                   := #SQ_TIMER.IN,
+        PT                   := #SQ_TIMER.PT,
+        Q                    := #sqSeqTimerExpired,
+        ET                   := #sqSeqTimerElapsed
+    );
 
 NETWORK
 TITLE =General Assignments
 
-      L     #sqSequencer.STEP.NumberNext;
-      T     #NXT_STEP;
-      T     #sqSequencer.STEP.NumberCurrent;
-      T     #CURSTEP;
+    L     #sqSequencer.STEP.NumberNext;
+    T     #NXT_STEP;
+    T     #sqSequencer.STEP.NumberCurrent;
+    T     #CURSTEP;
 
-      A     #sqSequencer.STEP.Active;
-      =     #S_ACTIVE;
+    A     #sqSequencer.STEP.Active;
+    =     #S_ACTIVE;
 
-      A     #sqSequencer.Error_Fault;
-      =     #ERR_FAULT;
+    A     #sqSequencer.Error_Fault;
+    =     #ERR_FAULT;
 
 NETWORK
 TITLE =Sequencer Finished
 
-      AN    #OFF_IDLE;
-      AN    #PAUSED;
-      A     #sqSequencer.STEP.Done[@@LAST_STEP_NUM@@];
-      =     #sqSequencer.Finished;
-      =     #SQ_FINISHED;
-      JCN   fnsd;
-      L     "dbCONST".SEQ.STATE.COMPLETED;
-      T     #SQ_STATE;
-      R     #PAUSED;
-      R     #sqSequencer.STEP.Error_Fault;
-      R     #sqSequencer.Error_Fault;
+    AN    #OFF_IDLE;
+    AN    #PAUSED;
+    A     #sqSequencer.STEP.Done[@@LAST_STEP_NUM@@];
+    =     #sqSequencer.Finished;
+    =     #SQ_FINISHED;
+    JCN   fnsd;
+    L     "dbCONST".SEQ.STATE.COMPLETED;
+    T     #SQ_STATE;
+    R     #PAUSED;
+    R     #sqSequencer.STEP.Error_Fault;
+    R     #sqSequencer.Error_Fault;
 fnsd: NOP   0;
 
-      //----------------------------------------------------------------------//
-      // Reset Finished flag if SQ OFF for Last step to scan:                 //
-      //----------------------------------------------------------------------//
-      A     #OFF_IDLE;
-      AN    #sqSequencer.STEP.Done[@@LAST_STEP_NUM@@];
-      AN    #sqSequencer.STEP.WithError[@@LAST_STEP_NUM@@];
-      JCN   abrt;
-      R     #sqSequencer.STEP.Finished;
-      L     "dbCONST".SEQ.STATE.ABORTED;
-      T     #SQ_STATE;
-      S     #OFF_IDLE;
-      R     #PAUSED;
-      R     #sqSequencer.STEP.Error_Fault;
-      R     #sqSequencer.Error_Fault;
-      R     #PAUSED;
-abrt: NOP   0;
+    //------------------------------------------------------------------------//
+    // Reset Finished flag if SQ OFF for Last step to scan:                   //
+    //------------------------------------------------------------------------//
+    A     #OFF_IDLE;
+    AN    #sqSequencer.STEP.Done[@@LAST_STEP_NUM@@];
+    AN    #sqSequencer.STEP.WithError[@@LAST_STEP_NUM@@];
+    JCN   _abrt_end;
+    R     #sqSequencer.STEP.Finished;
+    L     "dbCONST".SEQ.STATE.ABORTED;
+    T     #SQ_STATE;
+    S     #OFF_IDLE;
+    R     #PAUSED;
+    R     #sqSequencer.STEP.Error_Fault;
+    R     #sqSequencer.Error_Fault;
+    R     #PAUSED;
+_abrt_end: NOP   0;
 
-//----------------------------------------------------------------------------//
-// Visio Common Code Begin:                                                   //
-//----------------------------------------------------------------------------//
-@@SEQ_COMM_CODE@@
+    //------------------------------------------------------------------------//
+    // Visio Common Code Begin:                                               //
+    //------------------------------------------------------------------------//
+    @@SEQ_COMM_CODE@@
 
 //----------------------------------------------------------------------------//
 // End of Sequencer:                                                          //

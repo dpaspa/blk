@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 1/05/2018 6:31:55 PM by David Paspa
+generated on 2/05/2018 5:04:24 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -61,29 +61,21 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- RELEASE_FCZ
-Type:- BOOL
-Description:- Description
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::6
---------------------------------------------------
 Name:- start_hpca_mx
 Type:- BOOL
 Description:- Mx start to supply HPN2
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::6
 --------------------------------------------------
-Name:- confirm_abort_yes
+Name:- prompt_abort_confirm_yes
 Type:- BOOL
 Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::7
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
@@ -91,7 +83,7 @@ Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::8
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
@@ -99,31 +91,7 @@ Description:- HMI message: Mx, MFL and/orSy have incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
---------------------------------------------------
-Name:- log_BatchID
-Type:- STRING
-Description:- Logging previous Batch ID of vessel Mx
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::11
---------------------------------------------------
-Name:- BatchID_Mx
-Type:- STRING[6]
-Description:- Batch ID of Mx Vessel
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::12
---------------------------------------------------
-Name:- BatchID
-Type:- STRING[6]
-Description:- Batch ID
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::13
+PARAMETER::9
 --------------------------------------------------
 Name:- filtration_complete_sy
 Type:- BOOL
@@ -131,7 +99,7 @@ Description:- Sy Filtration complete
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::10
 --------------------------------------------------
 Name:- filtration_complete_mx
 Type:- BOOL
@@ -139,7 +107,7 @@ Description:- Mx Filtration complete
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::11
 --------------------------------------------------
 Name:- ready_hpca_mx
 Type:- BOOL
@@ -147,7 +115,7 @@ Description:- Mx is ready to supply HPCA
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::12
 --------------------------------------------------
 Name:- path_ready_sy
 Type:- BOOL
@@ -155,7 +123,7 @@ Description:- Sy path is ready
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::13
 --------------------------------------------------
 Name:- time_wrong_hygiene
 Type:- TOD
@@ -163,7 +131,7 @@ Description:- Logging that Mx, MFL and/orSy have incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::14
 --------------------------------------------------
 Name:- sy_vessel_hygiene
 Type:- INT
@@ -171,7 +139,7 @@ Description:- Hygiene Status of unit Sy
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::15
 --------------------------------------------------
 Name:- mx_vessel_hygiene
 Type:- INT
@@ -179,7 +147,7 @@ Description:- Hygiene Status of unit Mx
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::16
 --------------------------------------------------
 Name:- time_filter_end
 Type:- TOD
@@ -187,7 +155,7 @@ Description:- Logging FILTRATION operation end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::17
 --------------------------------------------------
 Name:- time_filter_begin
 Type:- TOD
@@ -195,7 +163,7 @@ Description:- Logging FILTRATION operation start time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::18
 --------------------------------------------------
 Name:- toggle_mode
 Type:- BOOL
@@ -203,7 +171,7 @@ Description:- Toggle mode of all used units
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::19
 --------------------------------------------------
 Name:- sy_vessel_cmd
 Type:- INT
@@ -211,7 +179,7 @@ Description:- Command to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::20
 --------------------------------------------------
 Name:- sy_vessel_subs
 Type:- INT
@@ -219,7 +187,7 @@ Description:- Substate selection to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::21
 --------------------------------------------------
 Name:- mx_vessel_state
 Type:- INT
@@ -227,7 +195,7 @@ Description:- Device State of unit Mx
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::22
 --------------------------------------------------
 Name:- sy_vessel_state
 Type:- INT
@@ -235,7 +203,7 @@ Description:- Device state of unit Sy
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::23
 --------------------------------------------------
 Name:- mx_vessel_cmd
 Type:- INT
@@ -243,7 +211,7 @@ Description:- Command to unit Mx
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::24
 --------------------------------------------------
 Name:- mx_vessel_subs
 Type:- INT
@@ -341,7 +309,7 @@ TRNNo:- 03
 Title:- Confirm Abort (Incorrect Hygiene Status)
 EmptyTransition:- False
 Description:- Confirm Abort (Incorrect Hygiene Status)
-Condition:- A #_confirm_abort_yes;
+Condition:- A #_prompt_abort_confirm_yes;
 
 
 --------------------------------------------------
@@ -560,6 +528,7 @@ R #_toggle_mode;
 R #_start_hpca_mx;
 R #_filtration_complete_mx;
 R #_filtration_complete_sy;
+R #_prompt_abort_confirm_yes;
 R #_Report_End; 
 Verification:- A M1.1;
 

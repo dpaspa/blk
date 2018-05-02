@@ -13,7 +13,7 @@
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbCRIL"
 TITLE = Instances of Critical Interlocks
-{ S7_Optimized_Access := 'FALSE' }
+{ S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
 NAME : ifbCRIL
 VERSION : 1.0
@@ -28,9 +28,7 @@ VAR
 END_VAR
 
 VAR_TEMP
-    b0 : Bool := 0;
     tIL : "udtInterlock";    // Interlock source input
-    retVal : Int;
 END_VAR
 
 BEGIN
@@ -44,29 +42,23 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //                                                                        //
     // Clear all interlock values to initialise them to off:                  //
     //------------------------------------------------------------------------//
-    CALL FILL
-    (   BVAL                 := #b0 ,
-        BLK                  := #tIL ,
-        RET_VAL              := #retVal
-    );
-//    #retVal := FILL(BVAL := #b0, BLK => #tIL);
-
-//    A "alwaysLow";
-//    = #tIL.S1;
-//    = #tIL.S2;
-//    = #tIL.S3;
-//    = #tIL.S4;
-//    = #tIL.S5;
-//    = #tIL.S6;
-//    = #tIL.S7;
-//    = #tIL.S8;
-//    = #tIL.S9;
-//    = #tIL.S10;
-//    = #tIL.S11;
-//    = #tIL.S12;
-//    = #tIL.S13;
-//    = #tIL.S14;
-//    = #tIL.S15;
+    A "alwaysLow";
+    = tIL.INTERLOCK;
+    = tIL.Source[1];
+    = tIL.Source[2];
+    = tIL.Source[3];
+    = tIL.Source[4];
+    = tIL.Source[5];
+    = tIL.Source[6];
+    = tIL.Source[7];
+    = tIL.Source[8];
+    = tIL.Source[9];
+    = tIL.Source[10];
+    = tIL.Source[11];
+    = tIL.Source[12];
+    = tIL.Source[13];
+    = tIL.Source[14];
+    = tIL.Source[15];
 @@ATTR_END|CRIL_EXISTS@@
 
 @@ATTR_BEGIN|CRIL_INSTANCE@@
@@ -76,7 +68,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTIONIL@@
     // Calculate the interlock condition:                                     //
     //------------------------------------------------------------------------//
     @@INTERLOCK@@
-    = #tIL.S@@COUNTER|0@@;
+    = #tIL.Source[@@COUNTER|0@@];
 
 @@ATTR_END|CRIL_INSTANCE@@
 @@ATTR_BEGIN|CRIL_EXISTS@@
@@ -85,21 +77,21 @@ TITLE = @@INSTANCE@@ : Aggregate individual interlocks into overall INTERLOCK fl
     //------------------------------------------------------------------------//
     // Determine if an interlock is raised:                                   //
     //------------------------------------------------------------------------//
-    O #tIL.S1;
-    O #tIL.S2;
-    O #tIL.S3;
-    O #tIL.S4;
-    O #tIL.S5;
-    O #tIL.S6;
-    O #tIL.S7;
-    O #tIL.S8;
-    O #tIL.S9;
-    O #tIL.S10;
-    O #tIL.S11;
-    O #tIL.S12;
-    O #tIL.S13;
-    O #tIL.S14;
-    O #tIL.S15;
+    O #tIL.Source[1];
+    O #tIL.Source[2];
+    O #tIL.Source[3];
+    O #tIL.Source[4];
+    O #tIL.Source[5];
+    O #tIL.Source[6];
+    O #tIL.Source[7];
+    O #tIL.Source[8];
+    O #tIL.Source[9];
+    O #tIL.Source[10];
+    O #tIL.Source[11];
+    O #tIL.Source[12];
+    O #tIL.Source[13];
+    O #tIL.Source[14];
+    O #tIL.Source[15];
     = #tIL.INTERLOCK;
 
 NETWORK
@@ -107,44 +99,11 @@ TITLE = @@INSTANCE@@ : Update the instance data
     //------------------------------------------------------------------------//
     // Update the instance DB with the calculated interlock flags:            //
     //------------------------------------------------------------------------//
-    CALL BLKMOV
-    {blk_type := 'Any'}
-    (   SRCBLK               := #tIL ,
-        DSTBLK               := #@@INSTANCE@@cril ,
-        RET_VAL              := #retVal
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := #tIL ,
+        OUT                  := #@@INSTANCE@@cril
     );
-//    A #tIL.S1;
-//    = #@@INSTANCE@@cril.S1;
-//    A #tIL.S2;
-//    = #@@INSTANCE@@cril.S2;
-//    A #tIL.S3;
-//    = #@@INSTANCE@@cril.S3;
-//    A #tIL.S4;
-//    = #@@INSTANCE@@cril.S4;
-//    A #tIL.S5;
-//    = #@@INSTANCE@@cril.S5;
-//    A #tIL.S6;
-//    = #@@INSTANCE@@cril.S6;
-//    A #tIL.S7;
-//    = #@@INSTANCE@@cril.S7;
-//    A #tIL.S8;
-//    = #@@INSTANCE@@cril.S8;
-//    A #tIL.S9;
-//    = #@@INSTANCE@@cril.S9;
-//    A #tIL.S10;
-//    = #@@INSTANCE@@cril.S10;
-//    A #tIL.S11;
-//    = #@@INSTANCE@@cril.S11;
-//    A #tIL.S12;
-//    = #@@INSTANCE@@cril.S12;
-//    A #tIL.S13;
-//    = #@@INSTANCE@@cril.S13;
-//    A #tIL.S14;
-//    = #@@INSTANCE@@cril.S14;
-//    A #tIL.S15;
-//    = #@@INSTANCE@@cril.S15;
-//    A #tIL.INTERLOCK;
-//    = #@@INSTANCE@@cril.INTERLOCK;
 
 @@ATTR_END|CRIL_EXISTS@@
 @@TEMPLATE_END@@

@@ -136,40 +136,52 @@
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fb@@SFC_LEVEL@@_@@SFC_CLASS@@_@@SFC_NAME@@"
 TITLE = @@SFC_LEVEL@@ : @@SFC_CLASS@@_@@SFC_NAME@@
+{ S7_Optimized_Access := 'TRUE' }
 NAME : @@HEADER_NAME@@
 AUTHOR : REO
 VERSION : @@VERSION@@
 
 VAR_INPUT
-  MODE : INT :=2;
-  SQ_CMD : INT :=0;
-@@PARAMETER_LIST_IN@@
+    MODE : INT :=2;
+    SQ_CMD : INT :=0;
+    @@PARAMETER_LIST_IN@@
 END_VAR
+
 VAR_OUTPUT
-  SQ_STATE : INT ;
-  CURSTEP : INT ;
-  NXT_STEP : INT ;
-  S_ACTIVE : BOOL ;
-  ERR_FAULT : BOOL ;
-  PAUSED : BOOL ;
-  OFF_IDLE : BOOL ;
-  SQ_FINISHED : BOOL ;
-@@PARAMETER_LIST_OUT@@
+    SQ_STATE : INT ;
+    CURSTEP : INT ;
+    NXT_STEP : INT ;
+    S_ACTIVE : BOOL ;
+    ERR_FAULT : BOOL ;
+    @@PARAMETER_LIST_OUT@@
 END_VAR
+
 VAR_IN_OUT
-  STEPNO_JUMP : INT ;
-  MAN_JUMP : BOOL ;
-  NO_VERIFIC : BOOL ;
-  TRN_AND_JUMP : BOOL ;
-@@PARAMETER_LIST_IN_OUT@@
+    SQ_FINISHED : BOOL ;
+    OFF_IDLE : BOOL ;
+    PAUSED : BOOL ;
+    STEPNO_JUMP : INT ;
+    MAN_JUMP : BOOL ;
+    NO_VERIFIC : BOOL ;
+    @@PARAMETER_LIST_IN_OUT@@
+    TRN_AND_JUMP : BOOL ;
 END_VAR
+
 VAR
-  sqStepTimer : "TON";
-  sqRunTimer : "fbRunTimer";
-  sqSequencer : "udtSFCSequence";
-  SQ_TIMER: "TON";
-@@PARAMETER_LIST_VAR@@
+    sqStepTimer : "TON";
+    sqRunTimer : "fbRunTimer";
+    sqSequencer : "udtSFCSequence@@PARAMETER_UPPER_ARRAY@@";
+    SQ_TIMER: "TON";
+    @@PARAMETER_LIST_VAR@@
 END_VAR
+
+VAR_TEMP
+    sqSeqTimerExpired : Bool;
+    sqStepTimerExpired : Bool;
+    sqSeqTimerElapsed : Time;
+    sqStepTimerElapsed : Time;
+END_VAR
+
 BEGIN
 NETWORK
 TITLE =Call Mode checking function
@@ -204,11 +216,11 @@ TITLE =Sequencer Mode function
       JU    EMOD;
 
 NETWORK
+TITLE =Mode change function
 //----------------------------------------------------------------------------//
 // On positive edge of mode change , this will execute once, only one cycle   //
 // before going to execute the selected mode function below:                  //
 //----------------------------------------------------------------------------//
-TITLE =Mode change function
 MDCH: NOP   0;
       SET   ;
       R     #sqStepTimer.IN;
@@ -217,12 +229,12 @@ MDCH: NOP   0;
       JU    EMOD;
 
 NETWORK
+TITLE =Manual Mode function
 //----------------------------------------------------------------------------//
 // #TRN_AND_JUMP=can set/reset                                                //
 // #sqSequencer.STEP.JumpCtrl=Can set/reset by #MAN_JUMP                      //
 // #NO_VERIFIC=Can set/ Reset                                                 //
 //----------------------------------------------------------------------------//
-TITLE =Manual Mode function
 MANU: NOP   0; //Manual mode selected
 
 @@SEQ_MAN_CODE@@
@@ -240,12 +252,12 @@ MANU: NOP   0; //Manual mode selected
       JU    EMOD;
 
 NETWORK
+TITLE =Auto Mode function
 //----------------------------------------------------------------------------//
 // #TRN_AND_JUMP=always set                                                   //
 // #sqSequencer.STEP.JumpCtrl=Always set                                      //
 // #NO_VERIFIC=Alwasy Reset                                                   //
 //----------------------------------------------------------------------------//
-TITLE =Auto Mode function
 AUTO: NOP   0; //Auto mode selected
 
 @@SEQ_AUTO_CODE@@
@@ -294,13 +306,11 @@ TITLE =Command Action function
       JCN   CNCH; // if Command not changed,jump to end function
       R     #sqStepTimer.IN;
 
-
       A     #sqSequencer.CMD.Start;
       JC    STRT;
 
       A     #sqSequencer.CMD.Stop;
       JC    STOP;
-
 
       A     #sqSequencer.CMD.Pause;
       JC    PAUS;
@@ -309,7 +319,7 @@ TITLE =Command Action function
       JC    RESM;
 
       A     #sqSequencer.CMD.Abort;
-      JC    ABRT;
+      JC    _abrt_begin;
 
       A     #sqSequencer.CMD.Ack;
       JC    ACKN;
@@ -346,28 +356,56 @@ STRT: NOP   0;
       T     #sqSequencer.STEP.NumberCurrent;
       T     #sqSequencer.STEP.NumberNext;
 
-
-
-
       L     "dbCONST".SEQ.STATE.STARTED;
       T     #SQ_STATE;
 
-//----------------------------------------------------------------------------//
-// Reset Step done without error bits:                                        //
-//----------------------------------------------------------------------------//
-      CALL "RSET" (
-           S_BIT                    := #sqSequencer.STEP.Done[1],
-           N                        := @@LAST_STEP_NUM@@);//Upto final step
+NETWORK
+TITLE = Reset sequence Done bits
+    //------------------------------------------------------------------------//
+    // Reset Step done bits:                                                  //
+    //------------------------------------------------------------------------//
+    A "alwaysLow";
+    = #sqSequencer.STEP.Done[1];
+    = #sqSequencer.STEP.Done[2];
+    = #sqSequencer.STEP.Done[3];
+    = #sqSequencer.STEP.Done[4];
+    = #sqSequencer.STEP.Done[5];
+    = #sqSequencer.STEP.Done[6];
+    = #sqSequencer.STEP.Done[7];
+    = #sqSequencer.STEP.Done[8];
+    = #sqSequencer.STEP.Done[9];
+    = #sqSequencer.STEP.Done[10];
+    = #sqSequencer.STEP.Done[11];
+    = #sqSequencer.STEP.Done[12];
+    = #sqSequencer.STEP.Done[13];
+    = #sqSequencer.STEP.Done[14];
+    = #sqSequencer.STEP.Done[15];
+    = #sqSequencer.STEP.Done[16];
 
+NETWORK
+TITLE = Reset sequence Error bits
+    //------------------------------------------------------------------------//
+    // Reset Step error bits:                                                 //
+    //------------------------------------------------------------------------//
+    A "alwaysLow";
+    = #sqSequencer.STEP.WithError[1];
+    = #sqSequencer.STEP.WithError[2];
+    = #sqSequencer.STEP.WithError[3];
+    = #sqSequencer.STEP.WithError[4];
+    = #sqSequencer.STEP.WithError[5];
+    = #sqSequencer.STEP.WithError[6];
+    = #sqSequencer.STEP.WithError[7];
+    = #sqSequencer.STEP.WithError[8];
+    = #sqSequencer.STEP.WithError[9];
+    = #sqSequencer.STEP.WithError[10];
+    = #sqSequencer.STEP.WithError[11];
+    = #sqSequencer.STEP.WithError[12];
+    = #sqSequencer.STEP.WithError[13];
+    = #sqSequencer.STEP.WithError[14];
+    = #sqSequencer.STEP.WithError[15];
+    = #sqSequencer.STEP.WithError[16];
 
-//----------------------------------------------------------------------------//
-// Reset Step done with error bits:                                           //
-//----------------------------------------------------------------------------//
-      CALL "RSET" (
-           S_BIT                    := #sqSequencer.STEP.WithError[1],
-           N                        := @@LAST_STEP_NUM@@);//Upto final step
-
-      JU    ECMD; //End Function
+    JU    ECMD; //End Function
 
 NETWORK
 TITLE =Comand -Stop action function
@@ -433,7 +471,7 @@ RESM: NOP   0;
 NETWORK
 TITLE =Comand -Abort action function
 
-ABRT: NOP   0;
+_abrt_begin: NOP   0;
       L     "dbCONST".SEQ.STATE.ABORTED;
       T     #SQ_STATE;
 
@@ -472,33 +510,33 @@ TITLE =End command Function
 ECMD: NOP   0;
 
 NETWORK
-//----------------------------------------------------------------------------//
-// Sequencer step jump list. Load the step number to execute the step:        //
-//----------------------------------------------------------------------------//
 TITLE =Sequencer Step Jump distrubution list
-      L     #sqSequencer.STEP.NumberCurrent;
-      JL    SQER; // If Sequencer Step number invalid or greater than available number of step
-      JU    S000; // Exceptional Error Handling
-      @@STEP_LIST@@
+    //------------------------------------------------------------------------//
+    // Sequencer step jump list. Load the step number to execute the step:    //
+    //------------------------------------------------------------------------//
+    L     #sqSequencer.STEP.NumberCurrent;
+    JL    SQER; // If Sequencer Step number invalid or greater than available number of step
+    JU    S000; // Exceptional Error Handling
+    @@STEP_LIST@@
 
-//----------------------------------------------------------------------------//
-// If Step number is Invalid or Out of Range:                                 //
-//----------------------------------------------------------------------------//
+    //------------------------------------------------------------------------//
+    // If Step number is Invalid or Out of Range:                             //
+    //------------------------------------------------------------------------//
 SQER: NOP   0;
-      S     #sqSequencer.Error_Fault;
-      JU    COMM; // Jump to Common Sequencer code handling function
+    A     "alwaysLow";
+    S     #sqSequencer.Error_Fault;
+    JU    COMM; // Jump to Common Sequencer code handling function
 
 NETWORK
-//----------------------------------------------------------------------------//
-// STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 ST //
-// STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 ST //
-// STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 ST //
-//----------------------------------------------------------------------------//
 TITLE =STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP
+    //------------------------------------------------------------------------//
+    // STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP //
+    // AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTO //
+    // STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP0 STEP //
+    //------------------------------------------------------------------------//
 
 NETWORK
 TITLE =S000: STEP0::If Paused exit
 
 S000: NOP   0;
-
       JU    COMM;

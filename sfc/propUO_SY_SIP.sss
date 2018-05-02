@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 1/05/2018 6:30:38 PM by David Paspa
+generated on 2/05/2018 7:09:26 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -1696,6 +1696,16 @@ Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
+TRANSITION::26
+--------------------------------------------------
+TRNNo:- 26
+Title:- Concurrent SIP required
+EmptyTransition:- False
+Description:- Continue if concurrent SIP required.
+Condition:- A #_concurrent_path_sip;
+
+
+--------------------------------------------------
 TRANSITION::27
 --------------------------------------------------
 TRNNo:- 27.0000
@@ -1730,6 +1740,16 @@ Action:- L #_sip_path;
 INC 1;
 T #_sip_path;
 Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::28
+--------------------------------------------------
+TRNNo:- 28.0000
+Title:- Always High
+EmptyTransition:- False
+Description:- Always High
+Condition:- A M1.1;
 
 
 --------------------------------------------------
@@ -1779,9 +1799,9 @@ Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::29
+TRANSITION::30
 --------------------------------------------------
-TRNNo:- 29.0000
+TRNNo:- 30.0000
 Title:- Always High
 EmptyTransition:- False
 Description:- Always High
@@ -1837,9 +1857,9 @@ L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 
 
 --------------------------------------------------
-TRANSITION::30
+TRANSITION::31
 --------------------------------------------------
-TRNNo:- 30.0000
+TRNNo:- 31.0000
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Empty transition.
@@ -1869,9 +1889,9 @@ Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::32
+TRANSITION::33
 --------------------------------------------------
-TRNNo:- 32.0000
+TRNNo:- 33.0000
 Title:- Pulse drain valve
 EmptyTransition:- False
 Description:- Drain valve pulse increment time expired
@@ -1935,9 +1955,9 @@ Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::33
+TRANSITION::34
 --------------------------------------------------
-TRNNo:- 33.0000
+TRNNo:- 34.0000
 Title:- Timer expired?
 EmptyTransition:- False
 Description:- Time for drain pulsing TIME_DRAIN_PULSE expired.
@@ -2041,9 +2061,9 @@ Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::34
+TRANSITION::35
 --------------------------------------------------
-TRNNo:- 34.0000
+TRNNo:- 35.0000
 Title:- Finished pulsing drain valves after repeats.
 EmptyTransition:- False
 Description:- Drain valves pulsed PULSE_NUMBER times after delay OR TIME_DRAIN_PULSE expired
@@ -2081,9 +2101,9 @@ L "dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::35
+TRANSITION::36
 --------------------------------------------------
-TRNNo:- 35.0000
+TRNNo:- 36.0000
 Title:- Pressure below PRES_HPCA_LEAVE
 EmptyTransition:- False
 Description:- Pressure below PRES_HPCA_LEAVE. PI_xy10 <= PRES_HPCA_LEAVE
@@ -2149,9 +2169,9 @@ L "dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::36
+TRANSITION::37
 --------------------------------------------------
-TRNNo:- 36.0000
+TRNNo:- 37.0000
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Empty transition.
@@ -2186,9 +2206,9 @@ L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 
 
 --------------------------------------------------
-TRANSITION::37
+TRANSITION::38
 --------------------------------------------------
-TRNNo:- 37.0000
+TRNNo:- 38.0000
 Title:- Empty transition
 EmptyTransition:- False
 Description:- Unconditional jump
@@ -2230,9 +2250,9 @@ L "dbCONST".BLK.EMC3.SUBS.ISOLATE;
 
 
 --------------------------------------------------
-TRANSITION::38
+TRANSITION::39
 --------------------------------------------------
-TRNNo:- 38.0000
+TRNNo:- 39.0000
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Unconditional jump

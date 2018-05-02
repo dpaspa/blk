@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 1/05/2018 6:28:06 PM by David Paspa
+generated on 2/05/2018 5:58:53 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -366,17 +366,17 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::43
 --------------------------------------------------
-Name:- emx_mfl_cmd
+Name:- emx_mmfl_cmd
 Type:- INT
-Description:- Command to EVn004
+Description:- Command emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
 PARAMETER::44
 --------------------------------------------------
-Name:- emx_mfl_subs
+Name:- emx_mmfl_subs
 Type:- INT
-Description:- Substate selection of emx_mfl
+Description:- Substate selection of emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
@@ -422,9 +422,9 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::50
 --------------------------------------------------
-Name:- emx_mfl_state
+Name:- emx_mmfl_state
 Type:- INT
-Description:- Device State of emx_mfl
+Description:- Device State of emx_mmfl
 ParameterInOut:- IN
 
 --------------------------------------------------
@@ -504,19 +504,15 @@ ParameterInOut:- IN
 STEP::01
 --------------------------------------------------
 StepNo:- 01
-Title:- UO_MX_FILTER : Filtration Unit Operation Commenced
+Title:- UO_MX_SIP : Filtration Unit Operation Commenced
 Description:- Log Mx Filter operation begin time.
-Set all Mx equipment to safe state with Mx LPCA control enabled and vent valve closed.
-
-Store current vessel mass.
-Prompt operator to start filtration.
+Connect Pre Filter to to Flow Plate FPx1.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Log Mx Filter operation begin time.
-Set all Mx equipment to safe state with Mx LCPA control enabled and vent valve closed.
-
+Propt operator to cinfirm Pre-Filter is connected to FPn1 ZSCn113 by starting EMX1_SETUP_FILTER.
 Action:- //Log Mx Filter operation begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_time_filter_begin;
@@ -524,7 +520,49 @@ T #_time_filter_begin;
 SET;
 S #_log_time_filter_begin;
 
-// Enable Mx LPCA pressure control.
+//Start EMX1_SETUP_FILTER.
+L "dbCONST".BLK.EMX1.SUBS.SETUP_FILTER;
+T #_emx_mmfl_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_mmfl_cmd;
+Verification:- A(;
+L #_emx_mmfl_state;
+L "dbCONST".BLK.EMX1.SUBS.SETUP_FILTER;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Confirmation Received
+EmptyTransition:- False
+Description:- Confirmation from the Operator Received
+Condition:- //EMX1 Filter Setup completed.
+A(;
+L  #_emx_mmfl_state;
+L  "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- UO_MX_FILTER : Start filtration.
+Description:- Set all Mx equipment to safe state with Mx LPCA control enabled and vent valve closed.
+
+Store current vessel mass.
+Prompt operator to start filtration.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set all Mx equipment to safe state with Mx LCPA control enabled and vent valve closed.
+
+Action:- // Enable Mx LPCA pressure control.
 L "dbCONST".SEL.GAS.LPCA;
 T #_emc_gas_medium;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
@@ -597,9 +635,9 @@ Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::02
+STEP::03
 --------------------------------------------------
-StepNo:- 02
+StepNo:- 03
 Title:- UO_MX_FILTER : Filtration Unit Operation Commenced
 Description:- Enable HEX Temperature control with TEMP_FILT setpoint.
 
@@ -653,9 +691,9 @@ T #_emc_gas_cmd;
 
 //Start FILTER.
 L "dbCONST".BLK.EMX1.SUBS.FILTER; 
-T #_emx_mfl_subs;
+T #_emx_mmfl_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emx_mfl_cmd;
+T #_emx_mmfl_cmd;
 
 L "dbCONST".BLK.EMX2.SUBS.FILTER; 
 T #_emx_transfer_subs;
@@ -677,7 +715,7 @@ L "dbCONST".BLK.EMC1.SUBS.VALVE;
 ==I;
 );
 A(;
-L #_emx_mfl_state;
+L #_emx_mmfl_state;
 L  "dbCONST".BLK.EMX1.SUBS.FILTER;
 ==I;
 );
@@ -694,9 +732,9 @@ L  "dbCONST".BLK.EMX6.SUBS.FILTER_BLEED;
 
 
 --------------------------------------------------
-TRANSITION::02
+TRANSITION::03
 --------------------------------------------------
-TRNNo:- 02
+TRNNo:- 03
 Title:- Emx_smfl completed.
 EmptyTransition:- False
 Description:- Emx_smfl completed.
@@ -708,9 +746,9 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 
 
 --------------------------------------------------
-STEP::03
+STEP::04
 --------------------------------------------------
-StepNo:- 03
+StepNo:- 04
 Title:- UO_MX_FILTER : Open filter outlet valve.
 Description:- Open filter outlet valve.
 
@@ -754,9 +792,9 @@ Verification:- A M1.1;
 
 
 --------------------------------------------------
-TRANSITION::03
+TRANSITION::04
 --------------------------------------------------
-TRNNo:- 03
+TRNNo:- 04
 Title:- Parent set start flag?
 EmptyTransition:- False
 Description:- Wait for parent to indicate ready for HPCA.
@@ -764,9 +802,9 @@ Condition:- A #_start_hpca;
 
 
 --------------------------------------------------
-STEP::04
+STEP::05
 --------------------------------------------------
-StepNo:- 04
+StepNo:- 05
 Title:- UO_MX_FILTER : Enable HPCA pressure control and wait for complete
 Description:- Set Mx HPCA pressure control at setpoint PRES_HPCA_FILT.
 
@@ -791,9 +829,9 @@ L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 
 
 --------------------------------------------------
-TRANSITION::04
+TRANSITION::05
 --------------------------------------------------
-TRNNo:- 04
+TRNNo:- 05
 Title:- Mx temperature exceeds HiHi limit setpoint
 EmptyTransition:- False
 Description:- Mx temperature exceeds HiHi limit setpoint
@@ -805,9 +843,9 @@ L #_temp_limit_hh;
 
 
 --------------------------------------------------
-TRANSITION::05
+TRANSITION::06
 --------------------------------------------------
-TRNNo:- 05
+TRNNo:- 06
 Title:- Mass of Vessel has reach throttled mass
 EmptyTransition:- False
 Description:- Jump if Mass_Throttle_Mx has reach set point.
@@ -819,9 +857,9 @@ L #_mass_throttle_mx;
 
 
 --------------------------------------------------
-TRANSITION::06
+TRANSITION::07
 --------------------------------------------------
-TRNNo:- 06
+TRNNo:- 07
 Title:- Wait for mass endpoint
 EmptyTransition:- False
 Description:- Jump if mass difference is less than mass setpoint after TIME_MASS_REDUCE timer expired
@@ -837,9 +875,9 @@ L #_mass_expect_reduced;
 
 
 --------------------------------------------------
-TRANSITION::07
+TRANSITION::08
 --------------------------------------------------
-TRNNo:- 07
+TRNNo:- 08
 Title:- Mx temperature exceeds Hi limit setpoint
 EmptyTransition:- False
 Description:- Mx temperature exceeds Hi limit setpoint
@@ -852,9 +890,9 @@ L #_temp_limit_h;
 
 
 --------------------------------------------------
-STEP::05
+STEP::06
 --------------------------------------------------
-StepNo:- 05
+StepNo:- 06
 Title:- UO_MX_FILTER : Automatic abort
 Description:- Raise High High temperature alarm message.
 Log automatic ABORT.
@@ -871,9 +909,9 @@ Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-TRANSITION::10
+TRANSITION::11
 --------------------------------------------------
-TRNNo:- 10.0000
+TRNNo:- 11.0000
 Title:- Always High
 EmptyTransition:- False
 Description:- Always High
@@ -881,9 +919,9 @@ Condition:- A M1.1;
 
 
 --------------------------------------------------
-STEP::06
+STEP::07
 --------------------------------------------------
-StepNo:- 06
+StepNo:- 07
 Title:- UO_MX_FILTER : Mass reduced slow
 Description:- Raise vessel mass alarm message.
 
@@ -895,35 +933,6 @@ Action:- //Raise vessel mass alarm message.
 SET;
 S #_log_msg_vessel_mass;
 S #_vessel_mass_alarm;
-
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::08
---------------------------------------------------
-TRNNo:- 8.0000
-Title:- Always High
-EmptyTransition:- False
-Description:- Always High
-Condition:- A M1.1;
-
-
---------------------------------------------------
-STEP::07
---------------------------------------------------
-StepNo:- 07
-Title:- UO_MX_FILTER : High temperature
-Description:- Raise High temperature alarm message.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Raise High temperature alarm message.
-Action:- // Raise High temperature alarm message.
-SET;
-S #_log_msg_hi_temperature;
-S #_hi_temperature_alarm;
 
 Verification:- A M1.1; //Always High flag
 
@@ -942,6 +951,35 @@ Condition:- A M1.1;
 STEP::08
 --------------------------------------------------
 StepNo:- 08
+Title:- UO_MX_FILTER : High temperature
+Description:- Raise High temperature alarm message.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Raise High temperature alarm message.
+Action:- // Raise High temperature alarm message.
+SET;
+S #_log_msg_hi_temperature;
+S #_hi_temperature_alarm;
+
+Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::10
+--------------------------------------------------
+TRNNo:- 10.0000
+Title:- Always High
+EmptyTransition:- False
+Description:- Always High
+Condition:- A M1.1;
+
+
+--------------------------------------------------
+STEP::09
+--------------------------------------------------
+StepNo:- 09
 Title:- UO_MX_FILTER : Enable HPCA pressure control for new set point.
 Description:- Set Mx HPCA pressure control at setpoint PRES_HPCA_FILT set point 2.
 
@@ -960,9 +998,9 @@ Verification:- A M1.1;
 
 
 --------------------------------------------------
-TRANSITION::11
+TRANSITION::12
 --------------------------------------------------
-TRNNo:- 11
+TRNNo:- 12
 Title:- Filtration complete?
 EmptyTransition:- False
 Description:- Wait for operator to confirm filtration is complete.
@@ -970,9 +1008,9 @@ Condition:- A #_confirm_complete;
 
 
 --------------------------------------------------
-STEP::09
+STEP::10
 --------------------------------------------------
-StepNo:- 09
+StepNo:- 10
 Title:- UO_MX_FILTER : Filtration completed.
 Description:- Log operator confirmation transfer complete and filtration operation end time.
 
@@ -994,9 +1032,9 @@ Verification:- A M1.1;
 
 
 --------------------------------------------------
-TRANSITION::12
+TRANSITION::13
 --------------------------------------------------
-TRNNo:- 12
+TRNNo:- 13
 Title:- Transfer is complete?
 EmptyTransition:- False
 Description:- Wait for parent to indicate transfer is complete when flag filtration_complete is set by the parent.
@@ -1004,9 +1042,9 @@ Condition:- A #_filtration_complete;
 
 
 --------------------------------------------------
-STEP::10
+STEP::11
 --------------------------------------------------
-StepNo:- 10
+StepNo:- 11
 Title:- UO_MX_FILTER : Disable HPCA control
 Description:- Disable HEX Temperature control and Mx HPCA control.
 
@@ -1033,9 +1071,9 @@ T  #_emc_gas_cmd;
 
 //Stop FILTER.
 L "dbCONST".BLK.SAFE.CMD;
-T #_emx_mfl_subs;
+T #_emx_mmfl_subs;
 L "dbCONST".BLK.CMD.STOP;
-T #_emx_mfl_cmd;
+T #_emx_mmfl_cmd;
 
 L "dbCONST".BLK.SAFE.CMD;
 T #_emx_transfer_subs;
@@ -1057,7 +1095,7 @@ L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 A(;
-L #_emx_mfl_state;
+L #_emx_mmfl_state;
 L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
@@ -1077,9 +1115,9 @@ A #_NormalCompletion;
 
 
 --------------------------------------------------
-TRANSITION::13
+TRANSITION::14
 --------------------------------------------------
-TRNNo:- 13
+TRNNo:- 14
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Unconditional jump
@@ -1087,9 +1125,9 @@ Condition:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
-STEP::11
+STEP::12
 --------------------------------------------------
-StepNo:- 11
+StepNo:- 12
 Title:- UO_MX_FILTER : Filtration Unit Operation Completed
 Description:- Disable Mx manway alarm and low pressure alarm.
 Log Mx Filter operation end time.
