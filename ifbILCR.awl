@@ -40,25 +40,21 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // CRITICAL INTERLOCK   CRITICAL INTERLOCK   CRITICAL INTERLOCK   CRITICA //
     // CRITICAL INTERLOCK   CRITICAL INTERLOCK   CRITICAL INTERLOCK   CRITICA //
     //                                                                        //
-    // Clear all interlock values to initialise them to off:                  //
+    // Clear the interlock flag:                                              //
     //------------------------------------------------------------------------//
     A "alwaysLow";
-    = tIL.INTERLOCK;
-    = tIL.Source[1];
-    = tIL.Source[2];
-    = tIL.Source[3];
-    = tIL.Source[4];
-    = tIL.Source[5];
-    = tIL.Source[6];
-    = tIL.Source[7];
-    = tIL.Source[8];
-    = tIL.Source[9];
-    = tIL.Source[10];
-    = tIL.Source[11];
-    = tIL.Source[12];
-    = tIL.Source[13];
-    = tIL.Source[14];
-    = tIL.Source[15];
+    = #tIL.INTERLOCK;
+
+    //------------------------------------------------------------------------//
+    // Clear all interlock values to initialise them to off:                  //
+    //------------------------------------------------------------------------//
+    CALL FILL_BLK
+    {value_type := 'Bool', count_type := 'UInt'}
+    (   IN                   := 0 ,
+        COUNT                := 15 ,
+        OUT                  := #tIL.Source[0]
+    );
+
 @@ATTR_END|CRIL_EXISTS@@
 
 @@ATTR_BEGIN|CRIL_INSTANCE@@
@@ -77,6 +73,7 @@ TITLE = @@INSTANCE@@ : Aggregate individual interlocks into overall INTERLOCK fl
     //------------------------------------------------------------------------//
     // Determine if an interlock is raised:                                   //
     //------------------------------------------------------------------------//
+    O #tIL.Source[0];
     O #tIL.Source[1];
     O #tIL.Source[2];
     O #tIL.Source[3];
@@ -91,7 +88,6 @@ TITLE = @@INSTANCE@@ : Aggregate individual interlocks into overall INTERLOCK fl
     O #tIL.Source[12];
     O #tIL.Source[13];
     O #tIL.Source[14];
-    O #tIL.Source[15];
     = #tIL.INTERLOCK;
 
 NETWORK

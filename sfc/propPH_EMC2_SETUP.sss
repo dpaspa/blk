@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/05/2018 4:52:25 PM by David Paspa
+generated on 3/05/2018 5:31:38 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -56,7 +56,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- log_time_setup_end
+Name:- time_setup_end
 Type:- TOD
 Description:- Logging SETUP operation end time
 ParameterInOut:- VAR
@@ -262,7 +262,7 @@ Title:- WFI/PW/PS connections made
 EmptyTransition:- False
 Description:- Jump if correct switch ZSCx103 or ZSCx105 are made to ZSCx107
 Condition:- //Check PW connection confirmation, PW or PS_PW medium selected and the line connection status.
-A #_confirm_PW;
+A #_prompt_pw_confirm_yes;
 A(;
 O(     ;
 L #_medium;
@@ -283,7 +283,7 @@ A(    ;
 
 //Or Check WFI connection confirmation, WFI or PS_WFI medium selected and the line connection status.
 O;
-A #_confirm_WFI;
+A #_prompt_wfi_confirm_yes;
 A(;
 O(     ;
 L #_medium;
@@ -327,7 +327,7 @@ Description:- Set the flowpath flag according to the selected medium.
 Action:- //If PW or PW PS line is selected, then set flowpath_PW flag. 
 A(    ;
 L #_zsc_fppw_state;
-L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+L "dbCONST".BLK.ZSC2.STATE.IN;
       ==I;   
   ) ;
  S #_flowpath_pw;
@@ -335,7 +335,7 @@ L "dbCONST".CM.ZSC2_DEV_STATE.IN;
 //If WFI or WFI PS line is selected, then set flowpath_WFI flag. 
 A(  ;
 L #_zsc_fpwfi_state;
-L "dbCONST".CM.ZSC2_DEV_STATE.IN;
+L "dbCONST".BLK.ZSC2.STATE.IN;
  ==I ;  
  ) ;
 S #_flowpath_wfi;

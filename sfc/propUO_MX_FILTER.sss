@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/05/2018 5:58:53 PM by David Paspa
+generated on 3/05/2018 5:37:44 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -94,7 +94,7 @@ ParameterInOut:- VAR
 PARAMETER::9
 --------------------------------------------------
 Name:- FL_TIMER
-Type:- TON
+Type:- "TON"
 Description:- Timer for TIME_FILTER
 ParameterInOut:- VAR
 
@@ -615,7 +615,6 @@ T     #_mass_initial;
 SET;
 S #_prompt_filtration;
 R #_ready_hpca;
-R #_filtration_complete;
 R #_vessel_mass_alarm;
 R #_hi_temperature_alarm;
 
@@ -624,13 +623,13 @@ L     #_mi_vessel_pv;
 T     #_mass_initial; 
 
 //Start Timer for TIME_MASS_REDUCE .
-A #FL_TIMER.Q;
-R #FL_TIMER.IN;
+A #_FL_TIMER.Q;
+R #_FL_TIMER.IN;
 
-AN #FL_TIMER.Q;
-S #FL_TIMER.IN;
+AN #_FL_TIMER.Q;
+S #_FL_TIMER.IN;
 L #_time_mass_reduce;
-T #FL_TIMER.PT;
+T #_FL_TIMER.PT;
 Verification:- A M1.1; //Always High flag
 
 
@@ -863,7 +862,7 @@ TRNNo:- 07
 Title:- Wait for mass endpoint
 EmptyTransition:- False
 Description:- Jump if mass difference is less than mass setpoint after TIME_MASS_REDUCE timer expired
-Condition:- A #FL_TIMER.Q;
+Condition:- A #_FL_TIMER.Q;
 AN #_vessel_mass_alarm;
 A(;
 L #_mass_initial;
@@ -1105,13 +1104,10 @@ L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 A(;
-L #_emx_smfl__state;
+L #_emx_smfl_state;
 L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
-
-A #_NormalCompletion;
-
 
 
 --------------------------------------------------

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/05/2018 4:53:09 PM by David Paspa
+generated on 3/05/2018 5:32:26 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -175,16 +175,6 @@ Condition:- A #_prompt_connect_confirm_yes;
 
 
 --------------------------------------------------
-TRANSITION::04
---------------------------------------------------
-TRNNo:- 04
-Title:- Operator not setup correctly
-EmptyTransition:- False
-Description:- Jump unconditionally, the connections are not made correctly
-Condition:- A M1.1; // Always High Bit
-
-
---------------------------------------------------
 STEP::03
 --------------------------------------------------
 StepNo:- 03
@@ -199,6 +189,16 @@ Action:- SET;
 S #_log_msg_confirm_connect;
 R  #_prompt_connect_confirm_yes;
 Verification:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
+Title:- Operator not setup correctly
+EmptyTransition:- False
+Description:- Jump unconditionally, the connections are not made correctly
+Condition:- A M1.1; // Always High Bit
 
 
 --------------------------------------------------

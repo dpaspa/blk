@@ -138,8 +138,10 @@ TITLE = Command should be DISABLE if not ENABLE
     // CMD to DISABLE:                                                        //
     //------------------------------------------------------------------------//
     A #cmdDisable;
+    JCN _a;
     L "dbCONST".BLK.TC1.CMD.DISABLE;
     T #CMD;
+_a:   NOP 0;
 
 NETWORK
 TITLE = Setpoint if Enabled
@@ -150,8 +152,10 @@ TITLE = Setpoint if Enabled
     // Setpoint if ENABLE:                                                    //
     //------------------------------------------------------------------------//
     A #cmdEnable;
+    JCN _b;
     L #SETPOINT;
     T #tSetpoint;
+_b:   NOP 0;
 
 NETWORK
 TITLE = Setpoint if Disabled
@@ -159,8 +163,10 @@ TITLE = Setpoint if Disabled
     // Setpoint should be 0 if disabled:                                      //
     //------------------------------------------------------------------------//
     A #cmdDisable;
+    JCN _c;
     L 0;
     T #tSetpoint;
+_c:   NOP 0;
 
 NETWORK
 TITLE = PID in manual if disabled or manual flag set
@@ -217,8 +223,10 @@ TITLE = Output if Disabled
     // Output should be 0 if disabled:                                        //
     //------------------------------------------------------------------------//
     A #cmdDisable;
+    JCN _d;
     L 0.0;
     T #LMN;
+_d:   NOP 0;
 
 NETWORK
 TITLE = Transfer PID output to TCV
@@ -236,13 +244,17 @@ TITLE = Transfer PID output to TCV
     // DISABLED if commanded or any problem or OOS:                           //
     //------------------------------------------------------------------------//
     A #cmdDisable;
+    JCN _e;
     L "dbCONST".BLK.TC1.STATE.DISABLED;
     T #STATE;
+_e:   NOP 0;
 
     //------------------------------------------------------------------------//
     // ENABLED if commanded and no problem:                                   //
     //------------------------------------------------------------------------//
     A #cmdEnable;
+    JCN _f;
     L "dbCONST".BLK.TC1.STATE.ENABLED;
     T #STATE;
+_f:   NOP 0;
 END_FUNCTION_BLOCK

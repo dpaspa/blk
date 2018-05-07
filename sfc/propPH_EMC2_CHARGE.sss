@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/05/2018 4:52:18 PM by David Paspa
+generated on 3/05/2018 5:31:30 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -94,7 +94,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::8
 --------------------------------------------------
-Name:- log_time_charge_end
+Name:- time_charge_end
 Type:- TOD
 Description:- Logging CHARGE operation end time
 ParameterInOut:- VAR
@@ -370,7 +370,7 @@ ACTION::01
 Description:- Mass calculation fail try again.
 Action:- SET;
 S #_log_msg_invalid_mass;
-S #_prompt_invalid_mass
+S #_prompt_invalid_mass;
 Verification:- A M1.1;
 
 
@@ -774,6 +774,16 @@ Verification:- A M1.1; //Always High flag
 
 
 --------------------------------------------------
+TRANSITION::12
+--------------------------------------------------
+TRNNo:- 12
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A M1.1; //Always High flag
+
+
+--------------------------------------------------
 STEP::09
 --------------------------------------------------
 StepNo:- 9.0000
@@ -917,10 +927,6 @@ T #_time_charge_end;
 
 SET;
 S #_log_time_charge_end;
-R #_confirm_abort;
-R #_timeout_alarm;
-R #_confirm_tryagain;
-R #_Mass_calculation_fail;
 R #SQ_TIMER.IN;
 
 //Log Report End for WFI Charge

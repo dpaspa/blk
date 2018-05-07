@@ -146,36 +146,31 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 @@TEMPLATE_BEGIN@@
 VAR_INPUT
-    OWNER : Int;                       // Value to be set or reset by Parent
-    SERIALNUM : Int;                   // Unique batch or CIPSIP serial number
-    CRIL : Bool;                      // Critical Interlock that cannot be bypased.
-    NCRIL : Bool;                     // Non-Critical Interlock that can be manually bypassed.
-    MAN_OVERRIDE : Bool;               // Manual override to bypass NCRIL
     CHILD_RELEASE : Bool;              // Request to release children when complete
 @@ATTR_BEGIN|TIMER@@
     TIME_H : Int;
     TIME_M : Int;
     TIME_S : Int;
 @@ATTR_END|TIMER@@
+    childINTERLOCK : Array[*] of Bool;
 @@ATTR_BEGIN|CHILD@@
     @@CHILDALIAS@@_INTERLOCK : Bool;     // @@CHILDALIASDESCRIPTION@@
 @@ATTR_END|CHILD@@
 @@ATTR_BEGIN|CHILD@@
     @@CHILDALIAS@@_STATE : Int;    // @@CHILDALIASDESCRIPTION@@
 @@ATTR_END|CHILD@@
-@@ATTR_BEGIN|PARM_INSTANCE_VAR_INPUT@@
+@@ATTR_BEGIN|pBLKCallingIN@@
     @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARM_INSTANCE_VAR_INPUT@@
-@@ATTR_BEGIN|PARM_SFC_DATA_VAR_INPUT@@
+@@ATTR_END|pBLKCallingIN@@
+@@ATTR_BEGIN|pSFCCallingIN@@
     @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARM_SFC_DATA_VAR_INPUT@@
-@@ATTR_BEGIN|PARM_SFC_CONFIRM@@
-    blk_@@SFCPARAMETER@@ : Bool;
-@@ATTR_END|PARM_SFC_CONFIRM@@
+@@ATTR_END|pSFCCallingIN@@
+@@ATTR_BEGIN|pSFCConfirm@@
+    blkConfirm@@CHILDPARAMETER@@ : Bool;
+@@ATTR_END|pSFCConfirm@@
 END_VAR
 
 VAR_OUTPUT
-    STATE : Int;
     RUNNING : Bool;
     SQ_ERROR : Bool;
     CURSTEP : Int;
@@ -186,27 +181,25 @@ VAR_OUTPUT
     REM_TIME_M : Int;
     REM_TIME_S : Int;
 @@ATTR_END|TIMER@@
-@@ATTR_BEGIN|PARM_VAR_OUTPUT@@
+@@ATTR_BEGIN|pBLKCallingOUT@@
     @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARM_VAR_OUTPUT@@
-@@ATTR_BEGIN|PARM_CHILD_VAR_INPUT@@
-    @@PARAMETER@@_@@CHILDALIAS@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARM_CHILD_VAR_INPUT@@
+@@ATTR_END|pBLKCallingOUT@@
+@@ATTR_BEGIN|pChildIN@@
+    @@CHILDPARAMETER@@_@@CLASS@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pChildIN@@
 @@ATTR_BEGIN|CHILD@@
     @@CHILDALIAS@@_SERIALNUM : Int;     // @@CHILDALIASDESCRIPTION@@
 @@ATTR_END|CHILD@@
 @@ATTR_BEGIN|CHILD@@
     @@CHILDALIAS@@_isBatch : Bool;      // @@CHILDALIASDESCRIPTION@@
 @@ATTR_END|CHILD@@
-@@ATTR_BEGIN|PARM_SFC_DATA_VAR_OUTPUT@@
+@@ATTR_BEGIN|pSFCCallingOUT@@
     @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARM_SFC_DATA_VAR_OUTPUT@@
+@@ATTR_END|pSFCCallingOUT@@
 END_VAR
 
 VAR_IN_OUT
-    CMD : Int := 1;                    // Start/Stop command
-    MODE : Int := 1;                   // Select auto mode by default
-    INTERLOCK : Bool;
+    mc : "udtModeCommand";             // Block mode and command
     SUBSelected : Int := 0;            // Currently selected running substate
     isBatch : Bool;
     ME : Int;                          // Block unique ID
@@ -214,9 +207,9 @@ VAR_IN_OUT
     SQ_ACK : Bool;
     SQ_RESUME : Bool;
     SUBLast : Int;
-@@ATTR_BEGIN|PARM_VAR_IN_OUT@@
+@@ATTR_BEGIN|pBLKCallingIN_OUT@@
     @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARM_VAR_IN_OUT@@
+@@ATTR_END|pBLKCallingIN_OUT@@
 @@ATTR_BEGIN|HYGIENE@@
     HYGIENE : Int;   // Hygiene status of the unit
 @@ATTR_END|HYGIENE@@
@@ -229,15 +222,15 @@ VAR_IN_OUT
 @@ATTR_BEGIN|CHILD@@
     @@CHILDALIAS@@_OWNER : Int;     // @@CHILDALIASDESCRIPTION@@
 @@ATTR_END|CHILD@@
-@@ATTR_BEGIN|PARM_SFC_DATA_VAR_IN_OUT@@
+@@ATTR_BEGIN|pSFCCallingIN_OUT@@
     @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|PARM_SFC_DATA_VAR_IN_OUT@@
-@@ATTR_BEGIN|PARM_SFC_PROMPT@@
-    blk_@@SFCPARAMETER@@ : Bool;
-@@ATTR_END|PARM_SFC_PROMPT@@
-@@ATTR_BEGIN|PARM_SFC_LOG@@
-    blk_@@SFCPARAMETER@@ : Real;
-@@ATTR_END|PARM_SFC_LOG@@
+@@ATTR_END|pSFCCallingIN_OUT@@
+@@ATTR_BEGIN|pSFCPrompt@@
+    blkPrompt@@CHILDPARAMETER@@ : Bool;
+@@ATTR_END|pSFCPrompt@@
+@@ATTR_BEGIN|pSFCLog@@
+    blkLog@@CHILDPARAMETER@@ : Real;
+@@ATTR_END|pSFCLog@@
 END_VAR
 
 VAR
@@ -273,7 +266,7 @@ VAR
 @@ATTR_END|CHILD@@
     END_STRUCT;
 @@ATTR_BEGIN|SELECT@@
-    select_@@PARAMETER@@_@@SELECTION@@ : Struct
+    select@@PARAMETER@@_@@SELECTION@@ : Struct
 @@ATTR_BEGIN|SELVALUE@@
         @@SELECTIONVALUE@@ : Bool;
 @@ATTR_END|SELVALUE@@
@@ -563,7 +556,7 @@ TITLE = Cascade Batch Serial Number to children
 @@ATTR_END|STATE@@
 
 @@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|PARM_CHILD_VAR_INPUT@@
+@@ATTR_BEGIN|pChildIN@@
 NETWORK
 TITLE = Download calling parameter @@PARAMETER@@ value to child device @@CHILDALIAS@@ for state @@STATE@@
     //------------------------------------------------------------------------//
@@ -576,7 +569,7 @@ TITLE = Download calling parameter @@PARAMETER@@ value to child device @@CHILDAL
     L #@@PARAMETER@@;
     T #@@PARAMETER@@_@@CHILDALIAS@@;
 
-@@ATTR_END|PARM_CHILD_VAR_INPUT@@
+@@ATTR_END|pChildIN@@
 @@ATTR_END|STATE@@
 
 @@ATTR_BEGIN|STATE@@
@@ -634,26 +627,26 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
     (
         MODE                        := #@@SFC@@.MODE ,
         SQ_CMD                      := #@@SFC@@.SQ_CMD ,
-@@ATTR_BEGIN|PARM_SFC_VAR_INPUT@@
-        _@@SFCPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
-@@ATTR_END|PARM_SFC_VAR_INPUT@@
+@@ATTR_BEGIN|pSFCCallingIN@@
+        @@CHILDPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
+@@ATTR_END|pSFCCallingIN@@
         SQ_STATE                    := #@@SFC@@.SQ_STATE ,
         CURSTEP                     := #@@SFC@@.CURSTEP ,
         NXT_STEP                    := #@@SFC@@.NXT_STEP ,
         S_ACTIVE                    := #@@SFC@@.S_ACTIVE ,
         ERR_FAULT                   := #@@SFC@@.ERR_FAULT ,
-@@ATTR_BEGIN|PARM_SFC_VAR_OUTPUT@@
-        _@@SFCPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
-@@ATTR_END|PARM_SFC_VAR_OUTPUT@@
+@@ATTR_BEGIN|pSFCCallingOUT@@
+        @@CHILDPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
+@@ATTR_END|pSFCCallingOUT@@
         SQ_FINISHED                 := #@@SFC@@.SQ_FINISHED ,
         OFF_IDLE                    := #@@SFC@@.OFF_IDLE ,
         PAUSED                      := #@@SFC@@.PAUSED ,
         STEPNO_JUMP                 := #@@SFC@@.STEPNO_JUMP ,
         MAN_JUMP                    := #@@SFC@@.MAN_JUMP ,
         NO_VERIFIC                  := #@@SFC@@.NO_VERIFIC ,
-@@ATTR_BEGIN|PARM_SFC_VAR_IN_OUT@@
-        _@@SFCPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
-@@ATTR_END|PARM_SFC_VAR_IN_OUT@@
+@@ATTR_BEGIN|pSFCCallingIN_OUT@@
+        @@CHILDPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
+@@ATTR_END|pSFCCallingIN_OUT@@
         TRN_AND_JUMP                := #@@SFC@@.TRN_AND_JUMP
     );
 
@@ -676,7 +669,7 @@ TITLE = Make sure any non-active SFCs are stopped
 
 @@ATTR_END|SFC@@
 
-@@ATTR_BEGIN|PARM_SFC_PROMPT@@
+@@ATTR_BEGIN|pSFCPrompt@@
 NETWORK
 TITLE = Clear the operator prompt flag
     //------------------------------------------------------------------------//
@@ -685,16 +678,16 @@ TITLE = Clear the operator prompt flag
     // Clear the SFC prompt bit:                                              //
     //------------------------------------------------------------------------//
     A #events.commandStart;
-    R #@@SFC@@._@@SFCPARAMETER@@;
+    R #@@SFC@@.@@CHILDPARAMETER@@;
 
 NETWORK
 TITLE = Clear the global event DB operator prompt flag
     AN #events.commandStart;
-    = #blk_@@SFCPARAMETER@@;
+    = #blkPrompt@@CHILDPARAMETER@@;
 
-@@ATTR_END|PARM_SFC_PROMPT@@
+@@ATTR_END|pSFCPrompt@@
 
-@@ATTR_BEGIN|PARM_SFC_CONFIRM@@
+@@ATTR_BEGIN|pSFCConfirm@@
 NETWORK
 TITLE = Clear the operator confirm flag
     //------------------------------------------------------------------------//
@@ -703,19 +696,19 @@ TITLE = Clear the operator confirm flag
     // Clear the SFC confirm bit:                                             //
     //------------------------------------------------------------------------//
     A #events.commandStart;
-    R #@@SFC@@._@@SFCPARAMETER@@;
+    R #@@SFC@@.@@CHILDPARAMETER@@;
 
 NETWORK
 TITLE = Clear the global event DB operator confirm flag
     AN #events.commandStart;
-    = #blk_@@SFCPARAMETER@@;
+    = #blkConfirm@@CHILDPARAMETER@@;
 
-@@ATTR_END|PARM_SFC_CONFIRM@@
+@@ATTR_END|pSFCConfirm@@
 
 @@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|PARM_SFC_CHILD_VAR_INPUT@@
+@@ATTR_BEGIN|pSFCChildIN@@
 NETWORK
-TITLE = Synchronise SFC @@SFC@@ child state for child @@SFCPARAMETER@@
+TITLE = Synchronise SFC @@SFC@@ child state for child @@CHILDPARAMETER@@
     //------------------------------------------------------------------------//
     // SYNC SFC CHILD STATE    SYNC SFC CHILD STATE    SYNC SFC CHILD STATE   //
     //                                                                        //
@@ -728,15 +721,15 @@ TITLE = Synchronise SFC @@SFC@@ child state for child @@SFCPARAMETER@@
     );
     A #subs.@@STATE@@;
     L #@@BLOCKPARAMETER@@;
-    T #@@SFC@@._@@SFCPARAMETER@@;
+    T #@@SFC@@.@@CHILDPARAMETER@@;
 
-@@ATTR_END|PARM_SFC_CHILD_VAR_INPUT@@
+@@ATTR_END|pSFCChildIN@@
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|PARM_SFC_CHILD_VAR_OUTPUT@@
+@@ATTR_BEGIN|pSFCChildOUT@@
 NETWORK
-TITLE = Synchronise SFC @@SFC@@ child command for child @@SFCPARAMETER@@
+TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
     //------------------------------------------------------------------------//
     // SYNC SFC CHILD COMMANDS    SYNC SFC CHILD COMMANDS    SYNC SFC CHILD   //
     //                                                                        //
@@ -746,9 +739,9 @@ TITLE = Synchronise SFC @@SFC@@ child command for child @@SFCPARAMETER@@
     A #events.commandStart;
     A #subs.@@STATE@@;
     L #@@BLOCKPARAMETER@@;
-    T #@@SFC@@._@@SFCPARAMETER@@;
+    T #@@SFC@@.@@CHILDPARAMETER@@;
 
-@@ATTR_END|PARM_SFC_CHILD_VAR_OUTPUT@@
+@@ATTR_END|pSFCChildOUT@@
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
@@ -790,13 +783,13 @@ TITLE = Check if any new Child command if SFC @@SFC@@ is running
     AN #@@SFC@@.ERR_FAULT;
     JCN _notSFCRunning_1_@@STATE@@;
 
-@@ATTR_BEGIN|PARM_SFC_CHILD_VAR_OUTPUT@@
+@@ATTR_BEGIN|pSFCChildOUT@@
 NETWORK
 TITLE = Check if the SFC Child command has changed
     //------------------------------------------------------------------------//
     // Check if the running SFC requests to change this child command:        //
     //------------------------------------------------------------------------//
-    L #@@SFC@@._@@SFCPARAMETER@@;
+    L #@@SFC@@.@@CHILDPARAMETER@@;
     L #@@BLOCKPARAMETER@@;
     <>I;
     JCN _noCommandChange_@@COUNTER|1@@_@@STATE@@;
@@ -806,13 +799,13 @@ TITLE = Send the updated SFC Child command to the child
     //------------------------------------------------------------------------//
     // Send the udpated SFC child command to the child:                       //
     //------------------------------------------------------------------------//
-    L #@@SFC@@._@@SFCPARAMETER@@;
+    L #@@SFC@@.@@CHILDPARAMETER@@;
     T #@@BLOCKPARAMETER@@;
     S #flags.childCommandChange;
 
 _noCommandChange_@@COUNTER@@_@@STATE@@:      NOP 0;
 
-@@ATTR_END|PARM_SFC_CHILD_VAR_OUTPUT@@
+@@ATTR_END|pSFCChildOUT@@
 
 _notSFCRunning_1_@@STATE@@:      NOP 0;
 
@@ -863,7 +856,7 @@ TITLE = Reset the new child command flag if a mismatch
     A #timeCheckChildState.Q;
     R #flags.childCommandChange;
 
-@@ATTR_BEGIN|PARM_SFC_PROMPT@@
+@@ATTR_BEGIN|pSFCPrompt@@
 NETWORK
 TITLE = Raise operator prompt if required
     //------------------------------------------------------------------------//
@@ -871,12 +864,12 @@ TITLE = Raise operator prompt if required
     //                                                                        //
     // Transfer the SFC prompt bit to the global event datablock:             //
     //------------------------------------------------------------------------//
-    A #@@SFC@@._@@SFCPARAMETER@@;
-    = #blk_@@SFCPARAMETER@@;
+    A #@@SFC@@.@@CHILDPARAMETER@@;
+    = #blkPrompt@@CHILDPARAMETER@@;
 
-@@ATTR_END|PARM_SFC_PROMPT@@
+@@ATTR_END|pSFCPrompt@@
 
-@@ATTR_BEGIN|PARM_SFC_CONFIRM@@
+@@ATTR_BEGIN|pSFCConfirm@@
 NETWORK
 TITLE = Return operator bit if made
     //------------------------------------------------------------------------//
@@ -884,12 +877,12 @@ TITLE = Return operator bit if made
     //                                                                        //
     // Receive the SFC confirm bit from the global event datablock:           //
     //------------------------------------------------------------------------//
-    A #blk_@@SFCPARAMETER@@;
-    = #@@SFC@@._@@SFCPARAMETER@@;
+    A #blkConfirm@@CHILDPARAMETER@@;
+    = #@@SFC@@.@@CHILDPARAMETER@@;
 
-@@ATTR_END|PARM_SFC_CONFIRM@@
+@@ATTR_END|pSFCConfirm@@
 
-@@ATTR_BEGIN|PARM_SFC_LOG@@
+@@ATTR_BEGIN|pSFCLog@@
 NETWORK
 TITLE = Log data if required
     //------------------------------------------------------------------------//
@@ -897,10 +890,10 @@ TITLE = Log data if required
     //                                                                        //
     // Transfer the SFC log data to the global event datablock:               //
     //------------------------------------------------------------------------//
-    A #@@SFC@@._@@SFCPARAMETER@@;
-    = #blk_@@SFCPARAMETER@@;
+    A #@@SFC@@.@@CHILDPARAMETER@@;
+    = #blkLog@@CHILDPARAMETER@@;
 
-@@ATTR_END|PARM_SFC_LOG@@
+@@ATTR_END|pSFCLog@@
 
 @@ATTR_BEGIN|SFC@@
 NETWORK
@@ -1234,7 +1227,7 @@ TITLE = Hour Min & Sec to Time variable
     // Convert calling timer value to Time variable:                          //
     //------------------------------------------------------------------------//
     A #flags.permitStart;
-    CALL "fcTimeHMS"
+    CALL "fcHMS2Time"
     (
         H                           := #TIME_H ,
         M                           := #TIME_M ,

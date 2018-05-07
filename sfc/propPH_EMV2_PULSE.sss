@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/05/2018 4:52:43 PM by David Paspa
+generated on 3/05/2018 5:31:57 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -164,6 +164,7 @@ A(;
 L "dbCONST".BLK.POSx.STATE.CLOSED; 
 L #_pos_sprayball2_state;
 ==I;
+);
 
 
 --------------------------------------------------
@@ -200,13 +201,13 @@ T  #_pos_sprayball1_cmd;
 Verification:- //Valve 02 opened.
 A(;
 L  "dbCONST".BLK.POSx.STATE.OPENED;
-L  #_Vlv_02_State;
+L  #_pos_sprayball2_state;
 ==I;
 );
 //Valve 01 closed.
 A(;
 L  "dbCONST".BLK.POSx.STATE.CLOSED;
-L #_Vlv_01_State;
+L #_pos_sprayball1_state;
 ==I;
 );
 
@@ -261,7 +262,30 @@ Condition:- A #SQ_TIMER.Q;
 --------------------------------------------------
 STEP::05
 --------------------------------------------------
-StepNo:- 05
+StepNo:- 5.0000
+Title:- PH_EMV2_PULSE : Last Step
+Description:- Log PULSE operation end time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log PULSE operation end time.
+Action:- SET;
+R #SQ_TIMER.IN;
+
+//Log PULSE operation end time.
+L "dbCONST".CHRONO.CPU_TIME;
+T #_time_pulse_end;
+
+SET;
+S #_log_time_pulse_end;
+Verification:- A M1.1;
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 6.0000
 Title:- PH_EMV2_PULSE : Reset timer
 Description:- Reset timer
 
@@ -282,29 +306,6 @@ Title:- Unconditional Jump
 EmptyTransition:- False
 Description:- Unconditional Jump
 Condition:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::06
---------------------------------------------------
-StepNo:- 06
-Title:- PH_EMV2_PULSE : Last Step
-Description:- Log PULSE operation end time.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Log PULSE operation end time.
-Action:- SET;
-R #SQ_TIMER.IN;
-
-//Log PULSE operation end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_pulse_end;
-
-SET;
-S #_log_time_pulse_end;
-Verification:- A M1.1;
 
 ****************************************************************************************************
 END SSS REPORT

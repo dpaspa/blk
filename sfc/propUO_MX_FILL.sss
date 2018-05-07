@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/05/2018 5:58:48 PM by David Paspa
+generated on 3/05/2018 5:37:38 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -80,6 +80,7 @@ PARAMETER::7
 Name:- time_fill_end
 Type:- TOD
 Description:- Logging that Mx filtration to FLz operation end time
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::8
@@ -479,7 +480,7 @@ T  #_emx_transfer_subs;
 
 Verification:- A(;
 L #_emc_gas_state;
-L "dbCONST".EM.EMC1.SUBS.PRESSURE; 
+L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ==I;
 );
 A(;
@@ -505,7 +506,6 @@ ACTION::02
 Description:- Prompt operator to start filtration and reset flags.
 Action:- SET;
 S #_prompt_filtration;
-R #_confirm_filtration;
 Verification:- A M1.1; //Always High flag
 
 
@@ -576,7 +576,7 @@ T #_emv_vessel_cmd;
 //Fully open LPCA valve 
 L "dbCONST".SEL.GAS.LPCA;
 T #_emc_gas_medium;
-L "dbCONST".EM.EMC1.SUBS.VALVE; 
+L "dbCONST".BLK.EMC1.SUBS.VALVE;
 T #_emc_gas_subs;
 L  "dbCONST".BLK.CMD.START;
 T #_emc_gas_cmd;
@@ -603,7 +603,7 @@ L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
 );
 A(;
 L #_emc_gas_state;
-L "dbCONST".EM.EMC1.SUBS.VALVE; 
+L "dbCONST".BLK.EMC1.SUBS.VALVE;
 ==I;
 );
 A(;

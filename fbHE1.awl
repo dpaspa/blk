@@ -119,7 +119,9 @@ TITLE = Device command DISABLE
     L #CMD;
     L "dbCONST".BLK.HE1.CMD.DISABLE;
     ==I;
+    JCN _a;
     R #tDO;
+_a:   NOP 0;
 
 NETWORK
 TITLE = Set CUTOUT Flag if output is off
@@ -150,8 +152,10 @@ TITLE = Set Device State to Enabled if output is on
     // ENABLED if output is on:                                               //
     //------------------------------------------------------------------------//
     A #tDO;
+    JCN _b;
     L "dbCONST".BLK.HE1.STATE.ENABLED;
     T #STATE;
+_b:   NOP 0;
 
 NETWORK
 TITLE = Set Device State to Disabled if output is off
@@ -160,8 +164,10 @@ TITLE = Set Device State to Disabled if output is off
     //------------------------------------------------------------------------//
     AN #tDO;
     AN #tFault;
+    JCN _c;
     L "dbCONST".BLK.HE1.STATE.DISABLED;
     T #STATE;
+_c:   NOP 0;
 
 NETWORK
 TITLE = Set Device State to Fault if field fault signal is on
@@ -169,6 +175,8 @@ TITLE = Set Device State to Fault if field fault signal is on
     // FAULT if fault signal is on:                                           //
     //------------------------------------------------------------------------//
     A #tFault;
+    JCN _d;
     L "dbCONST".BLK.HE1.STATE.FAULT;
     T #STATE;
+_d:   NOP 0;
 END_FUNCTION_BLOCK

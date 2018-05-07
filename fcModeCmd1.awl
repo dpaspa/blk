@@ -16,31 +16,15 @@
 // Substate changed for not to generate #tEdgeAutoStart pulse when mode is    //
 // changed.                                                                   //
 //----------------------------------------------------------------------------//
-FUNCTION "fcModeCmd" : Void
+FUNCTION "fcMC" : Void
 TITLE = General Mode, Command & Interlock handling block
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
-NAME : fcModeCmd
+NAME : fcMC
 VERSION : 2.0
 
-VAR_INPUT
-    CRIL : Bool;                      // Critical Interlock
-    NCRIL : Bool;                     // Non critical Interlock
-    MAN_OVERRIDE : Bool;               // Manual override for Non-critical interlocks
-    CMD_SAFE : Int;                    // Safe command for the module
-END_VAR
-
-VAR_OUTPUT
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
-END_VAR
-
 VAR_IN_OUT
-    MODE : Int;                        // Block Mode
-    CMD : Int;                         // Block Command for auto mode
-    STATE : Int;                       // Device state
-    INTERLOCK : Bool;                  // if there is any interlock
+    mc : "udtModeCommand";   // Block mode and command
 END_VAR
 
 BEGIN
@@ -55,7 +39,7 @@ TITLE = Auto Mode on CPU startup
     A "flagFirstScanRestart";
     JCN _a;
     L "dbCONST".BLK.MODE.AUTO;
-    T #MODE;
+    T #mc.MODE;
 _a:   NOP 0;
 
 NETWORK
@@ -66,24 +50,24 @@ TITLE = Mode Auto
     //                                                                        //
     // Get the mode of the module:                                            //
     //------------------------------------------------------------------------//
-    L #MODE;
+    L #mc.MODE;
     L "dbCONST".BLK.MODE.AUTO;
     ==I;
-    = #modeAUTO;
+    = #mc.modeAUTO;
 
 NETWORK
 TITLE = Mode Manual
-    L #MODE;
+    L #mc.MODE;
     L "dbCONST".BLK.MODE.MANUAL;
     ==I;
-    = #modeMANUAL;
+    = #mc.modeMANUAL;
 
 NETWORK
 TITLE = Mode Out Of Service
-    L #MODE;
+    L #mc.MODE;
     L "dbCONST".BLK.MODE.OOS;
     ==I;
-    = #modeOOS;
+    = #mc.modeOOS;
 
 NETWORK
 TITLE = Interlock Flag
@@ -92,22 +76,22 @@ TITLE = Interlock Flag
     // Instance Specific Non-Critical Interlocks can be bypassed by Manual    //
     // Override command from Operator Station (HMI):                          //
     //------------------------------------------------------------------------//
-    O #CRIL;
+    O #mc.CRIL;
     O(;
-    A #NCRIL;
-    AN #MAN_OVERRIDE;
+    A #mc.NCRIL;
+    AN #mc.MAN_OVERRIDE;
     );
-    = #INTERLOCK;
+    = #mc.INTERLOCK;
 
 NETWORK
 TITLE = Send safe command in case of any interlock or failure
     //------------------------------------------------------------------------//
     // Send safe command if any interlock:                                    //
     //------------------------------------------------------------------------//
-    A #INTERLOCK;
+    A #mc.INTERLOCK;
     JCN _b;
-    L #CMD_SAFE;
-    T #CMD;
+    L #mc.CMD_SAFE;
+    T #mc.CMD;
 _b:   NOP 0;
 
 NETWORK
@@ -116,9 +100,9 @@ TITLE = Set the safe state in case of any interlock or failure
     // Set safe state to match command if any interlock. The safe command     //
     // must match the safe state index number in dbCONST.                     //
     //------------------------------------------------------------------------//
-    A #INTERLOCK;
+    A #mc.INTERLOCK;
     JCN _c;
-    L #CMD_SAFE;
-    T #STATE;
+    L #mc.CMD_SAFE;
+    T #mc.STATE;
 _c:   NOP 0;
 END_FUNCTION

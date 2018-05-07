@@ -118,15 +118,19 @@ TITLE = Call Mode and Command handling function
     // Set the safe command to CLOSE if normally closed valve:                //
     //------------------------------------------------------------------------//
     A #NC;
+    JCN _a;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
     T CMD_SAFE;
+_a:   NOP 0;
 
     //------------------------------------------------------------------------//
     // Set the safe command to OPEN if normally opened valve:                 //
     //------------------------------------------------------------------------//
     AN #NC;
+    JCN _b;
     L "dbCONST".BLK.POSx.CMD.OPEN;
     T CMD_SAFE;
+_b:   NOP 0;
 
     //------------------------------------------------------------------------//
     // Process the standard block functions for command, mode, interlock and  //
@@ -304,8 +308,10 @@ TITLE = Valve CLOSED if command and feedback CLOSED
     //------------------------------------------------------------------------//
     A #cmdCLOSE;
     A #feedbackCLOSED;
+    JCN _c;
     L "dbCONST".BLK.POSx.STATE.CLOSED;
     T #STATE;
+_c:   NOP 0;
 
 NETWORK
 TITLE = Valve OPENED if command and feedback OPENED
@@ -314,8 +320,10 @@ TITLE = Valve OPENED if command and feedback OPENED
     //------------------------------------------------------------------------//
     A #cmdOPEN;
     A #feedbackOPENED;
+    JCN _d;
     L "dbCONST".BLK.POSx.STATE.OPENED;
     T #STATE;
+_d:   NOP 0;
 
 NETWORK
 TITLE = Valve TRAVEL if command issued and travel timer not expired
@@ -333,8 +341,10 @@ TITLE = Valve TRAVEL if command issued and travel timer not expired
     AN #feedbackOPENED;
     AN #openTMR.Q;
     );
+    JCN _e;
     L "dbCONST".BLK.POSx.STATE.TRAVEL;
     T #STATE;
+_e:   NOP 0;
 
 NETWORK
 TITLE = Valve failed to CLOSE
@@ -374,6 +384,8 @@ TITLE = Valve FAULT if both feedbacks on or travel timer expired
     );
     O FAULT_C;
     O FAULT_O;
+    JCN _f;
     L "dbCONST".BLK.POSx.STATE.FAULT;
     T #STATE;
+_f:   NOP 0;
 END_FUNCTION_BLOCK

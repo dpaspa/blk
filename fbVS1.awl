@@ -146,29 +146,37 @@ TITLE = Check vacuum pumps are available
     // Start vacuum pump 1 if a call for vacuum and all okay:                 //
     //------------------------------------------------------------------------//
     A #tDO;
+    JCN _a;
     L "dbCONST".BLK.MOT1.CMD.START;
     T #PUMP1_CMD;
+_a:   NOP 0;
 
     //------------------------------------------------------------------------//
     // Start vacuum pump 2 if a call for vacuum and all okay:                 //
     //------------------------------------------------------------------------//
     A #tDO;
+    JCN _b;
     L "dbCONST".BLK.MOT1.CMD.START;
     T #PUMP2_CMD;
+_b:   NOP 0;
 
     //------------------------------------------------------------------------//
     // Stop vacuum pump 1 if not required to run:                             //
     //------------------------------------------------------------------------//
     AN #tDO;
+    JCN _c;
     L "dbCONST".BLK.MOT1.CMD.STOP;
     T #PUMP1_CMD;
+_c:   NOP 0;
 
     //------------------------------------------------------------------------//
     // Stop vacuum pump 2 if not required to run:                             //
     //------------------------------------------------------------------------//
     AN #tDO;
+    JCN _d;
     L "dbCONST".BLK.MOT1.CMD.STOP;
     T #PUMP2_CMD;
+_d:   NOP 0;
 
 NETWORK
 TITLE = Set Device State to DISABLED if commanded or cannot ENABLE
@@ -180,8 +188,10 @@ TITLE = Set Device State to DISABLED if commanded or cannot ENABLE
     //------------------------------------------------------------------------//
     O #cmdDISABLE;
     ON #cmdENABLE;
+    JCN _e;
     L "dbCONST".BLK.VS1.STATE.DISABLED;
     T #STATE;
+_e:   NOP 0;
 
 NETWORK
 TITLE = Set Device State to ENABLED if commanded
@@ -189,8 +199,10 @@ TITLE = Set Device State to ENABLED if commanded
     // ENABLED if commanded:                                                  //
     //------------------------------------------------------------------------//
     A #cmdENABLE;
+    JCN _f;
     L "dbCONST".BLK.VS1.STATE.ENABLED;
     T #STATE;
+_f:   NOP 0;
 
 NETWORK
 TITLE = Setting Device State to FAULT
@@ -198,6 +210,8 @@ TITLE = Setting Device State to FAULT
     // FAULT if problem with either vacuum pump:                              //
     //------------------------------------------------------------------------//
     A #FAULT;
+    JCN _g;
     L "dbCONST".BLK.VS1.STATE.FAULT;
     T #STATE;
+_g:   NOP 0;
 END_FUNCTION_BLOCK

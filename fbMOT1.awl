@@ -244,8 +244,10 @@ TITLE = Device State RUNNING if running feedback on or bypass
     AN #cmdStart;
     AN #tDO;
     AN #FB_RUN;
+    JCN _a;
     L "dbCONST".BLK.MOT1.STATE.STOPPED;
     T #STATE;
+_a:   NOP 0;
 
     //------------------------------------------------------------------------//
     // RUNNING if output is on with running feedback or bypass:               //
@@ -254,8 +256,10 @@ TITLE = Device State RUNNING if running feedback on or bypass
     A #tDO;
     A #FB_RUN;
     AN #FAIL_START;
+    JCN _b;
     L "dbCONST".BLK.MOT1.STATE.RUNNING;
     T #STATE;
+_b:   NOP 0;
 
 NETWORK
 TITLE = Device State transition if waiting for running or stopped
@@ -273,8 +277,10 @@ TITLE = Device State transition if waiting for running or stopped
     AN #stopTMR.Q;
     A #FB_RUN;
     );
+    JCN _c;
     L "dbCONST".BLK.MOT1.STATE.STARTING_STOPPING;
     T #STATE;
+_c:   NOP 0;
 
 NETWORK
 TITLE = Device State FAULT if timed out waiting for running
@@ -306,6 +312,8 @@ TITLE = Set State FAULT if any fault condition
     // Fault if starting timer expired and not running:                       //
     //------------------------------------------------------------------------//
     A #tFault;
+    JCN _d;
     L "dbCONST".BLK.MOT1.STATE.FAULT;
     T #STATE;
+_d:   NOP 0;
 END_FUNCTION_BLOCK

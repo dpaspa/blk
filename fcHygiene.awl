@@ -50,7 +50,9 @@ TITLE = Start cleanliness monitoring timer if Hygiene Status is CLEAN
       L "dbCONST".BLK.HYGIENE.CLEAN;
       ==I;
       = #start_clean_tmr;
+    JCN _a;
       R #CLEAN_TOUT;
+_a:   NOP 0;
 
 NETWORK
 TITLE = Start sterile monitoring timer if Hygiene Status is STERILE
@@ -58,7 +60,9 @@ TITLE = Start sterile monitoring timer if Hygiene Status is STERILE
       L "dbCONST".BLK.HYGIENE.STERILE;
       ==I;
       = #start_sterile_tmr;
+    JCN _b;
       R #STERILE_TOUT;
+_b:   NOP 0;
 
 NETWORK
 TITLE = Reset cleanliness timer if Hygiene Status is not CLEAN
@@ -99,8 +103,10 @@ TITLE = Retentive timer for STERILE
 NETWORK
 TITLE = Set the Hygiene Status to USED if cleanliness timer expired
       A #clean_timeout;
+    JCN _c;
       L "dbCONST".BLK.HYGIENE.USED;
       T #HYGIENE_STATE;
+_c:   NOP 0;
 
 NETWORK
 TITLE = Set the Hygiene Status to USED if cleanliness timer expired
@@ -110,8 +116,10 @@ TITLE = Set the Hygiene Status to USED if cleanliness timer expired
 NETWORK
 TITLE = Set the Hygiene Status to CLEAN if sterile timer expired
       A #sterile_timeout;
+    JCN _d;
       L "dbCONST".BLK.HYGIENE.CLEAN;
       T #HYGIENE_STATE;
+_d:   NOP 0;
 
 NETWORK
 TITLE = Set the Hygiene Status to CLEAN if sterile timer expired

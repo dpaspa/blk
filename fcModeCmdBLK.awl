@@ -65,8 +65,10 @@ TITLE = Auto Mode on CPU startup
     // Set the mode to Auto if CPU has restarted:                             //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
+    JCN _a;
     L "dbCONST".BLK.MODE.AUTO;
     T #MODE;
+_a:   NOP 0;
 
 NETWORK
 TITLE = Flag if block Mode just changed to Auto
@@ -144,8 +146,10 @@ TITLE = Save last running substate if starting
     // changed:                                                               //
     //------------------------------------------------------------------------//
     A #eventCmdStart;
+    JCN _b;
     L #SUBSelected;
     T #SUBLast;
+_b:   NOP 0;
 
 NETWORK
 TITLE = Flag if block stop command issued
@@ -167,7 +171,9 @@ TITLE = Stop command takes precedence over Start command
     // If commanded to Stop then reset any Start command:                     //
     //------------------------------------------------------------------------//
     A #eventCmdStop;
+    JCN _c;
     R #eventCmdStart;
+_c:   NOP 0;
 
 NETWORK
 TITLE = Interlock Flag
@@ -198,8 +204,10 @@ TITLE = Interlocked State if Stopped
     O #INTERLOCK;
     ON #permitStart;
     );
+    JCN _d;
     L "dbCONST".BLK.STATE.INTERLOCKED;
     T #STATE;
+_d:   NOP 0;
 
 NETWORK
 TITLE = Paused State if Running
@@ -226,8 +234,10 @@ TITLE = Paused State if Running
     O #INTERLOCK;
     ON #permitStart;
     );
+    JCN _e;
     L "dbCONST".BLK.STATE.PAUSED;
     T #STATE;
+_e:   NOP 0;
 
     //------------------------------------------------------------------------//
     // Set the substate safe if any interlock:                                //
@@ -235,8 +245,10 @@ TITLE = Paused State if Running
     L #STATE;
     L "dbCONST".BLK.STATE.INTERLOCKED;
     ==I;
+    JCN _f;
     L "dbCONST".BLK.SAFE.CMD;
     T #SUBSelected;
+_f:   NOP 0;
 
 NETWORK
 TITLE = Send safe command in case of any interlock or failure
@@ -245,8 +257,10 @@ TITLE = Send safe command in case of any interlock or failure
     //------------------------------------------------------------------------//
     O #INTERLOCK;
     ON #permitStart;
+    JCN _g;
     L "dbCONST".BLK.SAFE.CMD;
     T #CMD;
+_g:   NOP 0;
 
 NETWORK
 TITLE = Set the safe state in case of any interlock or failure
@@ -256,6 +270,8 @@ TITLE = Set the safe state in case of any interlock or failure
     //------------------------------------------------------------------------//
     O #INTERLOCK;
     ON #permitStart;
+    JCN _h;
     L "dbCONST".BLK.SAFE.CMD;
     T #STATE;
+_h:   NOP 0;
 END_FUNCTION

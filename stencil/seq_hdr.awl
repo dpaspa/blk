@@ -144,7 +144,7 @@ VERSION : @@VERSION@@
 VAR_INPUT
     MODE : INT :=2;
     SQ_CMD : INT :=0;
-    @@PARAMETER_LIST_IN@@
+@@PARAMETER_LIST_IN@@
 END_VAR
 
 VAR_OUTPUT
@@ -153,7 +153,7 @@ VAR_OUTPUT
     NXT_STEP : INT ;
     S_ACTIVE : BOOL ;
     ERR_FAULT : BOOL ;
-    @@PARAMETER_LIST_OUT@@
+@@PARAMETER_LIST_OUT@@
 END_VAR
 
 VAR_IN_OUT
@@ -163,7 +163,7 @@ VAR_IN_OUT
     STEPNO_JUMP : INT ;
     MAN_JUMP : BOOL ;
     NO_VERIFIC : BOOL ;
-    @@PARAMETER_LIST_IN_OUT@@
+@@PARAMETER_LIST_IN_OUT@@
     TRN_AND_JUMP : BOOL ;
 END_VAR
 
@@ -172,7 +172,7 @@ VAR
     sqRunTimer : "fbRunTimer";
     sqSequencer : "udtSFCSequence@@PARAMETER_UPPER_ARRAY@@";
     SQ_TIMER: "TON";
-    @@PARAMETER_LIST_VAR@@
+@@PARAMETER_LIST_VAR@@
 END_VAR
 
 VAR_TEMP
@@ -364,46 +364,24 @@ TITLE = Reset sequence Done bits
     //------------------------------------------------------------------------//
     // Reset Step done bits:                                                  //
     //------------------------------------------------------------------------//
-    A "alwaysLow";
-    = #sqSequencer.STEP.Done[1];
-    = #sqSequencer.STEP.Done[2];
-    = #sqSequencer.STEP.Done[3];
-    = #sqSequencer.STEP.Done[4];
-    = #sqSequencer.STEP.Done[5];
-    = #sqSequencer.STEP.Done[6];
-    = #sqSequencer.STEP.Done[7];
-    = #sqSequencer.STEP.Done[8];
-    = #sqSequencer.STEP.Done[9];
-    = #sqSequencer.STEP.Done[10];
-    = #sqSequencer.STEP.Done[11];
-    = #sqSequencer.STEP.Done[12];
-    = #sqSequencer.STEP.Done[13];
-    = #sqSequencer.STEP.Done[14];
-    = #sqSequencer.STEP.Done[15];
-    = #sqSequencer.STEP.Done[16];
+    CALL FILL_BLK
+    {value_type := 'Bool', count_type := 'UInt'}
+    (   IN                   := 0 ,
+        COUNT                := @@PARAMETER_UPPER_ARRAY@@ ,
+        OUT                  := #sqSequencer.STEP.Done[1]
+    );
 
 NETWORK
 TITLE = Reset sequence Error bits
     //------------------------------------------------------------------------//
     // Reset Step error bits:                                                 //
     //------------------------------------------------------------------------//
-    A "alwaysLow";
-    = #sqSequencer.STEP.WithError[1];
-    = #sqSequencer.STEP.WithError[2];
-    = #sqSequencer.STEP.WithError[3];
-    = #sqSequencer.STEP.WithError[4];
-    = #sqSequencer.STEP.WithError[5];
-    = #sqSequencer.STEP.WithError[6];
-    = #sqSequencer.STEP.WithError[7];
-    = #sqSequencer.STEP.WithError[8];
-    = #sqSequencer.STEP.WithError[9];
-    = #sqSequencer.STEP.WithError[10];
-    = #sqSequencer.STEP.WithError[11];
-    = #sqSequencer.STEP.WithError[12];
-    = #sqSequencer.STEP.WithError[13];
-    = #sqSequencer.STEP.WithError[14];
-    = #sqSequencer.STEP.WithError[15];
-    = #sqSequencer.STEP.WithError[16];
+    CALL FILL_BLK
+    {value_type := 'Bool', count_type := 'UInt'}
+    (   IN                   := 0 ,
+        COUNT                := @@PARAMETER_UPPER_ARRAY@@ ,
+        OUT                  := #sqSequencer.STEP.WithError[1]
+    );
 
     JU    ECMD; //End Function
 

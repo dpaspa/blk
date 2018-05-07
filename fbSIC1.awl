@@ -63,7 +63,7 @@ VAR_INPUT
     CRIL : Bool;             // Critical interlock
     NCRIL : Bool;            // Non-critical interlock
     MAN_OVERRIDE : Bool;     // Override non-critical interlocks
-    SETPOINT : Real;
+    _SETPOINT : Real;        // Agitator speed setpoint
     RAW_INPUT : Word;        // Measured Process Value received from control module
     USER_INPUT : Word;       // Manual mode, equivallent of Analog input, to be entered by Operator
     MAN_PID : Bool;          // Manual non pid selection
@@ -72,13 +72,13 @@ VAR_INPUT
     FLP : Bool;              // Pulse counter fault
     FLT : Bool;              // Inverter fault
     THM : Bool;              // Thermistor module alarm
-    MASS_RUN : Real := 250.0;// M1=250.0 , M2=100.0, M3=40.0
-    MASS_STOP : Real := 200.0;// M1=200,M2=70,M3=20.0
-    RANGE_UPPER : Real := 60.0;// M1=1500,M2=500,M3=100.0
-    RANGE_LOWER : Real;
+    MASS_RUN : Real;         // Low mass threshold at which the agitator may run
+    MASS_STOP : Real;        // Low low mass threshold at which the agitator must stop
+    RANGE_UPPER : Real;      // Upper mass range limit
+    RANGE_LOWER : Real;      // Lower mass range limit
     POLARITY : Bool;         // 0- no polarity(0 to z), 1= dual polarity(-x to +y)
-    LIMIT_HH : Real := 252.0;// High High speed alarm limit
-    LIMIT_H : Real := 251.0; // High speed alarm limit
+    LIMIT_HH : Real;         // High High speed alarm limit
+    LIMIT_H : Real;          // High speed alarm limit
     MI1_MASS : Real;         // Measured Mass
     MI1_DQ : Bool;           // Measured Mass Data Quality
     FB_TDELAY : Time := T#20S;
@@ -319,9 +319,11 @@ TITLE = Permitted to run agitator if mass above minimum value
     // Permit the agitator to run if mass above minimum start level:          //
     //------------------------------------------------------------------------//
     L #tPV_MASS;
-    L #MASS_RUN;
+    L #_MASS_RUN;
     >=R;
+    JCN _a;
     S #permitMass;
+_a:   NOP 0;
 
 NETWORK
 TITLE = Low mass condition must stop the agitator from running
@@ -329,9 +331,11 @@ TITLE = Low mass condition must stop the agitator from running
     // Inhibit the agitator from running if mass below minimum stop level:    //
     //------------------------------------------------------------------------//
     L #tPV_MASS;
-    L #MASS_STOP;
+    L #_MASS_STOP;
     <R;
+    JCN _b;
     R #permitMass;
+_b:   NOP 0;
 
 NETWORK
 TITLE = Setpoint if Enabled
@@ -339,8 +343,10 @@ TITLE = Setpoint if Enabled
     // Setpoint if ENABLE:                                                    //
     //------------------------------------------------------------------------//
     A #cmdEnable;
-    L #SETPOINT;
+    JCN _c;
+    L #_SETPOINT;
     T #tSetpoint;
+_c:   NOP 0;
 
 NETWORK
 TITLE = Setpoint if Disabled
@@ -348,8 +354,10 @@ TITLE = Setpoint if Disabled
     // Setpoint should be 0 if disabled:                                      //
     //------------------------------------------------------------------------//
     A #cmdDisable;
+    JCN _d;
     L 0;
     T #tSetpoint;
+_d:   NOP 0;
 
 NETWORK
 TITLE = PID in manual if disabled or manual flag set
@@ -373,8 +381,10 @@ TITLE = Disable command
     // DISABLE command if not enabled or any interlock:                       //
     //------------------------------------------------------------------------//
     A #cmdDisable;
+    JCN _e;
     L "dbCONST".BLK.SIC1.CMD.DISABLE;
     T #CMD;
+_e:   NOP 0;
 
 NETWORK
 TITLE = Flag output should be on if command is ENABLE and mass is enough
@@ -403,8 +413,10 @@ TITLE = Transfer the setpoint to the inverter reference value
     // are no interlocks and mass in the vessel is sufficient:                //
     //------------------------------------------------------------------------//
     A #tDO;
+    JCN _f;
     L #tSetpoint;
     T #OUT_LMN;
+_f:   NOP 0;
 
 NETWORK
 TITLE = Transfer the setpoint to the output setpoint
@@ -420,6 +432,7 @@ TITLE = Unscale Setpoint
     // Unscale the setpoint to set the inverter percent reference value:      //
     //------------------------------------------------------------------------//
     A #tDO;
+    JCN _g;
     CALL UNSCALE
     (   IN                   := #tSetpoint ,
         HI_LIM               := #RANGE_UPPER ,
@@ -428,6 +441,7 @@ TITLE = Unscale Setpoint
         RET_VAL              := #RET_VAL1 ,
         OUT                  := #unscaledOUT
     );
+_g:   NOP 0;
 
 NETWORK
 TITLE = Setpoint reference to inverter in percent
@@ -435,8 +449,10 @@ TITLE = Setpoint reference to inverter in percent
     // Set the inverter percent reference value if running:                   //
     //------------------------------------------------------------------------//
     A #tDO;
+    JCN _h;
     L #unscaledOUT;
     T #OUT_LMN_PER;
+_h:   NOP 0;
 
 NETWORK
 TITLE = PID Controller
@@ -467,8 +483,10 @@ TITLE = Output if Disabled
     // Output should be 0 if disabled:                                        //
     //------------------------------------------------------------------------//
     A #cmdDisable;
+    JCN _i;
     L 0.0;
     T #LMN;
+_i:   NOP 0;
 
 NETWORK
 TITLE = Start event if commanded to start
@@ -485,6 +503,7 @@ TITLE = Start timer to check if fail to start or run at low speed
     // Start timer if commanded to run:                                       //
     //------------------------------------------------------------------------//
     A #eventStart;
+    JCN _j;
     CALL #startTMR
     {time_type := 'Time'}
     (   IN                   := #tDO ,
@@ -492,6 +511,7 @@ TITLE = Start timer to check if fail to start or run at low speed
         Q                    := #startTMRExpired ,
         ET                   := #startTMRElapsed
     );
+_j:   NOP 0;
 
 NETWORK
 TITLE = Fault if start timer expired and not running
@@ -509,10 +529,12 @@ TITLE = Calculate speed as a fraction of the setpoint
     // Calculate actual speed as a fraction of setpoint:                      //
     //------------------------------------------------------------------------//
     A #tDO;
+    JCN _k;
     L #tPV;
     L #tSetpoint;
     /R;
     T #percentSpeed;
+_k:   NOP 0;
 
 NETWORK
 TITLE = Calculate speed as a percent of the setpoint
@@ -520,10 +542,12 @@ TITLE = Calculate speed as a percent of the setpoint
     // Calculate actual speed as a percent of setpoint:                       //
     //------------------------------------------------------------------------//
     A #tDO;
+    JCN _l;
     L #percentSpeed;
     L 100.0;
     *R;
     T #percentSpeed;
+_l:   NOP 0;
 
 NETWORK
 TITLE = Flag RUNNING if speed above 25% of setponit
@@ -577,20 +601,28 @@ TITLE = Reverse direction if timer expired
     = #eventTMRRev;
 
     A #eventTMRRev;
+    JCN _m;
     R #OUT_Q_F;
+_m:   NOP 0;
 
     A #eventTMRRev;
+    JCN _n;
     S #OUT_Q_R;
+_n:   NOP 0;
 
     A #dirTMR.Q;
     A #OUT_Q_R;
     = #eventTMRFwd;
 
     A #eventTMRFwd;
+    JCN _o;
     S #OUT_Q_F;
+_o:   NOP 0;
 
     A #eventTMRFwd;
+    JCN _p;
     R #OUT_Q_R;
+_p:   NOP 0;
 NETWORK
 
 TITLE = Disable state
@@ -605,8 +637,10 @@ TITLE = Disable state
     AN #FLP;
     AN #FLT;
     A #cmdDisable;
+    JCN _q;
     L "dbCONST".BLK.SIC1.STATE.DISABLED;
     T #STATE;
+_q:   NOP 0;
 
 NETWORK
 TITLE = FAULT if any fault condition active
@@ -617,8 +651,10 @@ TITLE = FAULT if any fault condition active
     O #THM;
     O #FLP;
     O #FLT;
+    JCN _r;
     L "dbCONST".BLK.SIC1.STATE.FAULT;
     T #STATE;
+_r:   NOP 0;
 
 NETWORK
 TITLE = Stopped if command is ENABLE and mass not enough
@@ -627,8 +663,10 @@ TITLE = Stopped if command is ENABLE and mass not enough
     //------------------------------------------------------------------------//
     A #cmdEnable;
     AN #permitMass;
+    JCN _s;
     L "dbCONST".BLK.SIC1.STATE.STOPPED;
     T #STATE;
+_s:   NOP 0;
 
 NETWORK
 TITLE = Running if output should be on
@@ -636,6 +674,8 @@ TITLE = Running if output should be on
     // RUNNING if command is enable and no interlock and mass permits:        //
     //------------------------------------------------------------------------//
     A #tDO;
+    JCN _t;
     L "dbCONST".BLK.SIC1.STATE.RUNNING;
     T #STATE;
+_t:   NOP 0;
 END_FUNCTION_BLOCK

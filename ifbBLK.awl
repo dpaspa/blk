@@ -79,7 +79,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
         CRIL                 := #CRIL ,
         NCRIL                := #NCRIL ,
         MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
-        CHILD_RELEASE               := #@@INSTANCE@@.CHILD_RELEASE ,
+        CHILD_RELEASE        := #@@INSTANCE@@.CHILD_RELEASE ,
 @@ATTR_BEGIN|TIMER@@
         TIME_H               := #@@INSTANCE@@.TIME_H ,
         TIME_M               := #@@INSTANCE@@.TIME_M ,
@@ -91,18 +91,15 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_BEGIN|CHILD@@
         @@CHILDALIAS@@_STATE                := "idb@@CHILDALIASCLASS@@".@@CHILDALIAS@@.STATE ,
 @@ATTR_END|CHILD@@
-@@ATTR_BEGIN|PARM_INSTANCE_VAR_INPUT@@
+@@ATTR_BEGIN|pBLKCallingIN@@
         @@PARAMETER@@               := #@@INSTANCE@@.@@PARAMETER@@ ,
-@@ATTR_END|PARM_INSTANCE_VAR_INPUT@@
-@@ATTR_BEGIN|PARM_SFC_DATA_VAR_INPUT@@
+@@ATTR_END|pBLKCallingIN@@
+@@ATTR_BEGIN|pSFCCallingIN@@
         @@BLOCKPARAMETER@@               := #@@INSTANCE@@.@@PARAMETER@@ ,
-@@ATTR_END|PARM_SFC_DATA_VAR_INPUT@@
-@@ATTR_BEGIN|PARM_SFC_CONFIRM@@
-        blk_@@SFCPARAMETER@@        := #@@INSTANCE@@.blk_@@SFCPARAMETER@@ ,
-@@ATTR_END|PARM_SFC_CONFIRM@@
-@@ATTR_BEGIN|PARM_VAR_INPUT@@
-        @@PARAMETER@@               := #@@INSTANCE@@.@@PARAMETER@@ ,
-@@ATTR_END|PARM_VAR_INPUT@@
+@@ATTR_END|pSFCCallingIN@@
+@@ATTR_BEGIN|pSFCConfirm@@
+        blkConfirm@@CHILDPARAMETER@@        := #@@INSTANCE@@.blkConfirm@@CHILDPARAMETER@@ ,
+@@ATTR_END|pSFCConfirm@@
         STATE                       := #@@INSTANCE@@.STATE ,
         RUNNING                     := #@@INSTANCE@@.RUNNING ,
         SQ_ERROR                    := #@@INSTANCE@@.SQ_ERROR ,
@@ -128,21 +125,21 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_BEGIN|CHILD@@
         @@CHILDALIAS@@_CMD                  := "idb@@CHILDALIASCLASS@@".@@CHILDALIAS@@.CMD ,
 @@ATTR_END|CHILD@@
-@@ATTR_BEGIN|PARM_VAR_OUTPUT@@
+@@ATTR_BEGIN|pBLKCallingOUT@@
         @@PARAMETER@@               := #@@INSTANCE@@.@@PARAMETER@@ ,
-@@ATTR_END|PARM_VAR_OUTPUT@@
-@@ATTR_BEGIN|PARM_VAR_IN_OUT@@
+@@ATTR_END|pBLKCallingOUT@@
+@@ATTR_BEGIN|pBLKCallingIN_OUT@@
         @@PARAMETER@@               := #@@INSTANCE@@.@@PARAMETER@@ ,
-@@ATTR_END|PARM_VAR_IN_OUT@@
-@@ATTR_BEGIN|PARM_SFC_PROMPT@@
-        blk_@@SFCPARAMETER@@      := "dbEVENT".PROMPT.@@INSTANCE@@_@@SFC@@_@@SFCPARAMETER@@.prompt ,
-@@ATTR_END|PARM_SFC_PROMPT@@
-@@ATTR_BEGIN|PARM_SFC_CONFIRM@@
-        blk_@@SFCPARAMETER@@     := "dbEVENT".PROMPT.@@INSTANCE@@_@@SFC@@_@@dbEventParameter@@ ,
-@@ATTR_END|PARM_SFC_CONFIRM@@
-@@ATTR_BEGIN|PARM_SFC_LOG@@
-        blk_@@SFCPARAMETER@@         := "dbEVENT".LOG.@@INSTANCE@@_@@SFC@@_@@SFCPARAMETER@@.realValue;
-@@ATTR_END|PARM_SFC_LOG@@
+@@ATTR_END|pBLKCallingIN_OUT@@
+@@ATTR_BEGIN|pSFCPrompt@@
+        blkPrompt@@CHILDPARAMETER@@                := "dbEVENT".PROMPT.@@INSTANCE@@_@@SFC@@@@CHILDPARAMETER@@.prompt ,
+@@ATTR_END|pSFCPrompt@@
+@@ATTR_BEGIN|pSFCConfirm@@
+        blkConfirm@@CHILDPARAMETER@@                := "dbEVENT".PROMPT.@@INSTANCE@@_@@SFC@@_@@dbEventParameter@@ ,
+@@ATTR_END|pSFCConfirm@@
+@@ATTR_BEGIN|pSFCLog@@
+        blkLog@@CHILDPARAMETER@@                := "dbEVENT".LOG.@@INSTANCE@@_@@SFC@@@@CHILDPARAMETER@@.realValue;
+@@ATTR_END|pSFCLog@@
         ME                          := #@@INSTANCE@@.ME
     );
     NOP 0;

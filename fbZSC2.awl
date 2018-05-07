@@ -133,8 +133,10 @@ TITLE = Set Device State to IN if switch is on and command is IN
     //------------------------------------------------------------------------//
     A #tPV;
     A #cmdIN;
+    JCN _a;
     L "dbCONST".BLK.ZSC2.STATE.IN;
     T #STATE;
+_a:   NOP 0;
 
 NETWORK
 TITLE = Set Device State to OUT if switch is on and command is OUT
@@ -143,8 +145,10 @@ TITLE = Set Device State to OUT if switch is on and command is OUT
     //------------------------------------------------------------------------//
     AN #tPV;
     A #cmdOUT;
+    JCN _b;
     L "dbCONST".BLK.ZSC2.STATE.OUT;
     T #STATE;
+_b:   NOP 0;
 
 NETWORK
 TITLE = Check if MISMATCH if state does not follow command
@@ -164,8 +168,10 @@ TITLE = Check if MISMATCH if state does not follow command
 NETWORK
 TITLE = Set Device State to MISMATCH if state does not follow command
     A tMismatch;
+    JCN _c;
     L "dbCONST".BLK.ZSC2.STATE.MISMATCH;
     T #STATE;
+_c:   NOP 0;
 
 NETWORK
 TITLE = Set ALARM Flag

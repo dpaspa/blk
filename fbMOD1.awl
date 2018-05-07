@@ -123,7 +123,9 @@ TITLE = Device command DISABLE
     L #CMD;
     L "dbCONST".BLK.HE1.CMD.DISABLE;
     ==I;
+    JCN _a;
     R #tDO;
+_a:   NOP 0;
 
 NETWORK
 TITLE = LOCAL valve position setpoint
@@ -134,8 +136,10 @@ TITLE = LOCAL valve position setpoint
     // Set valve position if LOCAL:                                           //
     //------------------------------------------------------------------------//
     A #cmdLocal;
+    JCN _b;
     L #POSN_LOCAL;
     T #tPOSN;
+_b:   NOP 0;
 
 NETWORK
 TITLE = REMOTE valve position setpoint
@@ -143,8 +147,10 @@ TITLE = REMOTE valve position setpoint
     // Set valve position if REMOTE:                                          //
     //------------------------------------------------------------------------//
     A #cmdRemote;
+    JCN _c;
     L #POSN_REMOTE;
     T #tPOSN;
+_c:   NOP 0;
 
 NETWORK
 TITLE = Unscaling of Control Valve Position
@@ -156,6 +162,7 @@ TITLE = Unscaling of Control Valve Position
     // value:                                                                 //
     //------------------------------------------------------------------------//
     A #tDO;
+    JCN _d;
     CALL UNSCALE
     (   IN                   := #tPOSN ,
         HI_LIM               := 100.0 ,
@@ -164,6 +171,7 @@ TITLE = Unscaling of Control Valve Position
         RET_VAL              := #tRetVal ,
         OUT                  := #RAW_OUTPUT
     );
+_d:   NOP 0;
 
 NETWORK
 TITLE = Device State DISABLED if valve not operating
@@ -175,8 +183,10 @@ TITLE = Device State DISABLED if valve not operating
     //------------------------------------------------------------------------//
     ON #tDO;
     O #INTERLOCK;
+    JCN _e;
     L "dbCONST".BLK.MOD1.STATE.DISABLED;
     T #STATE;
+_e:   NOP 0;
 
 NETWORK
 TITLE = Valve close if Device State DISABLED
@@ -185,22 +195,28 @@ TITLE = Valve close if Device State DISABLED
     //------------------------------------------------------------------------//
     ON #tDO;
     O #INTERLOCK;
+    JCN _f;
     L 0;
     T #RAW_OUTPUT;
+_f:   NOP 0;
 
     //------------------------------------------------------------------------//
     // LOCAL if valve enabled in Local:                                       //
     //------------------------------------------------------------------------//
     A #tDO;
     A #cmdLocal;
+    JCN _g;
     L "dbCONST".BLK.MOD1.STATE.LOCAL;
     T #STATE;
+_g:   NOP 0;
 
     //------------------------------------------------------------------------//
     // REMOTE if valve enabled in Remote:                                     //
     //------------------------------------------------------------------------//
     A #tDO;
     A #cmdRemote;
+    JCN _h;
     L "dbCONST".BLK.MOD1.STATE.REMOTE;
     T #STATE;
+_h:   NOP 0;
 END_FUNCTION_BLOCK

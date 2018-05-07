@@ -76,8 +76,10 @@ TITLE = Raw field input scaling in Auto mode
     // Get the raw field input reading in Auto mode:                          //
     //------------------------------------------------------------------------//
     A #modeAUTO;
+    JCN _a;
     L #RAW_INPUT;
     T #tRAW;
+_a:   NOP 0;
 
 NETWORK
 TITLE = User input sets process value in Manual mode
@@ -85,8 +87,10 @@ TITLE = User input sets process value in Manual mode
     // Set the user input value as the PV in Manual mode:                     //
     //------------------------------------------------------------------------//
     A #modeMANUAL;
+    JCN _b;
     L #USER_INPUT;
     T #tPV;
+_b:   NOP 0;
 
 NETWORK
 TITLE = Scale the input if not in Manual mode
@@ -94,6 +98,7 @@ TITLE = Scale the input if not in Manual mode
     // Scale the raw input reading:                                           //
     //------------------------------------------------------------------------//
     AN #modeMANUAL;
+    JCN _c;
     CALL SCALE
     (   IN                             := #tRAW ,
         HI_LIM                         := #RANGE_UPPER ,
@@ -102,6 +107,7 @@ TITLE = Scale the input if not in Manual mode
         RET_VAL                        := #RET_VAL1 ,
         OUT                            := #tPV
     );
+_c:   NOP 0;
 
 NETWORK
 TITLE = Check for out of range error
@@ -242,8 +248,10 @@ TITLE = Set Device State to Enabled if healthy
     // ENABLED if input signal is healthy:                                    //
     //------------------------------------------------------------------------//
     A #DQ;
+    JCN _d;
     L #STATE_ENABLED;
     T #STATE;
+_d:   NOP 0;
 
 NETWORK
 TITLE = Set Device State to Fault if any field signal error
@@ -251,6 +259,8 @@ TITLE = Set Device State to Fault if any field signal error
     // FAULT if any input error:                                              //
     //------------------------------------------------------------------------//
     AN #DQ;
+    JCN _e;
     L #STATE_FAULT;
     T #STATE;
+_e:   NOP 0;
 END_FUNCTION
