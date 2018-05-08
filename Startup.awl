@@ -1,0 +1,35 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description: The entry point for the entire program called by the system.  //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      08-May-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+ORGANIZATION_BLOCK "Startup"
+TITLE = "Complete Restart"
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : Startup
+VERSION : 0.1
+
+BEGIN
+NETWORK
+TITLE = First scan restart flag
+    SET;
+    S "flagFirstScanRestart";
+
+NETWORK
+TITLE = Always Low bit
+    R "alwaysLow";
+
+NETWORK
+TITLE = Always High bit
+    S "alwaysHigh";
+
+NETWORK
+TITLE = SFC Unconditional Jump
+    S "uncondJump";
+
+END_ORGANIZATION_BLOCK

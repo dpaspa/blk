@@ -41,46 +41,59 @@ BEGIN
 @@TEMPLATE_BEGIN@@
 @@ATTR_BEGIN|ANALOG@@
 NETWORK
+TITLE = @@INSTANCE@@ : Owner
+    //------------------------------------------------------------------------//
+    // Set the instance owner:                                                //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.OWNER.@@PARENT@@;
+    T #@@INSTANCE@@.mc.OWNER;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command
+    //------------------------------------------------------------------------//
+    // Set the safe command:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.AL1.SAFE.CMD;
+    T #@@INSTANCE@@.mc.CMD_SAFE;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Analog input attributes
+    //------------------------------------------------------------------------//
+    // Set the analog input attributes:                                       //
+    //------------------------------------------------------------------------//
+    L @@RANGELOW@@;
+    T #@@INSTANCE@@.ai.RANGE_LOWER;
+    L @@RANGEHIGH@@;
+    T #@@INSTANCE@@.ai.RANGE_UPPER;
+    L @@LIMITHH@@;
+    T #@@INSTANCE@@.ai.LIMIT_HH;
+    L @@LIMITH@@;
+    T #@@INSTANCE@@.ai.LIMIT_H;
+    L @@LIMITL@@;
+    T #@@INSTANCE@@.ai.LIMIT_L;
+    L @@LIMITLL@@;
+    T #@@INSTANCE@@.ai.LIMIT_LL;
+    A @@ENABLEHH@@;
+    = #@@INSTANCE@@.ai.ENABLE_HH;
+    A @@ENABLEH@@;
+    = #@@INSTANCE@@.ai.ENABLE_H;
+    A @@ENABLEL@@;
+    = #@@INSTANCE@@.ai.ENABLE_L;
+    A @@ENABLELL@@;
+    = #@@INSTANCE@@.ai.ENABLE_LL;
+    L "dbCONST".BLK.@@CLASS@@.STATE.ENABLED;
+    T #@@INSTANCE@@.ai.STATE_ENABLED;
+    L "dbCONST".BLK.@@CLASS@@.STATE.FAULT;
+    T #@@INSTANCE@@.ai.STATE_FAULT;
+    L "@@INSTANCE@@-RAW";
+    T #@@INSTANCE@@.ai.RAW_INPUT;
+
+NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #@@INSTANCE@@
-    (   OWNER                := #@@INSTANCE@@.OWNER ,
-        SERIAL               := #@@INSTANCE@@.SERIAL ,
-        CRIL                 := #@@INSTANCE@@.CRIL ,
-        NCRIL                := #@@INSTANCE@@.NCRIL ,
-        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
-        CMD_SAFE             := #@@INSTANCE@@.CMD_SAFE ,
-        RAW_INPUT            := "@@INSTANCE@@-RAW":P ,
-        USER_INPUT           := #@@INSTANCE@@.USER_INPUT ,
-        RANGE_UPPER          := @@RANGELOW@@ ,
-        RANGE_LOWER          := @@RANGEHIGH@@ ,
-        POLARITY             := #@@INSTANCE@@.POLARITY ,
-        LIMIT_HH             := @@LIMITHH@@ ,
-        LIMIT_H              := @@LIMITH@@ ,
-        LIMIT_L              := @@LIMITL@@ ,
-        LIMIT_LL             := @@LIMITLL@@ ,
-        ENABLE_HH            := @@ENABLEHH@@ ,
-        ENABLE_H             := @@ENABLEH@@ ,
-        ENABLE_L             := @@ENABLEL@@ ,
-        ENABLE_LL            := @@ENABLELL@@ ,
-        STATE_ENABLED        := "dbCONST".BLK.@@CLASS@@.STATE.ENABLED ,
-        STATE_FAULT          := "dbCONST".BLK.@@CLASS@@.STATE.FAULT ,
-        PV                   := #@@INSTANCE@@.PV ,
-        CMD                  := #@@INSTANCE@@.CMD ,
-        MODE                 := #@@INSTANCE@@.MODE ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        INTERLOCK            := #@@INSTANCE@@.INTERLOCK ,
-        DQ                   := #@@INSTANCE@@.DQ ,
-        ALARM_HH             := #@@INSTANCE@@.ALARM_HH ,
-        ALARM_H              := #@@INSTANCE@@.ALARM_H ,
-        ALARM_L              := #@@INSTANCE@@.ALARM_L ,
-        ALARM_LL             := #@@INSTANCE@@.ALARM_LL ,
-        RANGE_ERROR          := #@@INSTANCE@@.RANGE_ERROR ,
-        BROKEN_WIRE          := #@@INSTANCE@@.BROKEN_WIRE
-    );
-    NOP 0;
+    CALL #@@INSTANCE@@;
 
 @@ATTR_END|ANALOG@@
 @@TEMPLATE_END@@

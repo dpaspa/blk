@@ -36,12 +36,20 @@ VERSION : 2.0
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
 VAR_INPUT
-    OWNER : Int;             // Value to be set by Parent
-    SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;             // Critical interlock
-    NCRIL : Bool;            // Non-critical interlock
-    MAN_OVERRIDE : Bool;     // Override non-critical interlocks
-    SETPOINT : Real;         // Setpoint
+    _SETPOINT : Real;        // Setpoint
+END_VAR
+
+VAR_OUTPUT
+    TCVPOS : Real;           // Output (0-100%) to TCV remote setpoint
+END_VAR
+
+VAR_IN_OUT
+    LMN : Real;              // PID controller output (0-100%)
+END_VAR
+
+VAR
+    mc : "udtModeCommand";   // Block mode and command
+    PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
     PV : Real;               // Measured Process Value received from control module
     MAN_PID : Bool;          // Manual non pid selection
     GAIN : Real := 1.0;      // Proportional Gain
@@ -53,28 +61,9 @@ VAR_INPUT
     D_SEL : Bool := TRUE;    // Derivative Action ON/OFF
 END_VAR
 
-VAR_OUTPUT
-    TCVPOSN : Real;          // Output (0-100%) to TCV remote setpoint
-END_VAR
-
-VAR_IN_OUT
-    LMN : Real;              // PID controller output (0-100%)
-    CMD : Int;               // Device Command from dbCONST
-    MODE : Int;              // Control Mode
-    STATE : Int;             // Device State from dbCONST
-    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
-END_VAR
-
-VAR
-    PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
-END_VAR
-
 VAR_TEMP
     cmdEnable : Bool;
     cmdDisable : Bool;
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
     tSetpoint : Real;
     tManual_Not_PID : Bool;
 END_VAR
@@ -89,20 +78,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := "dbCONST".BLK.TC1.SAFE.CMD ,
-        MODE                 := #MODE ,
-        CMD                  := #CMD ,
-        STATE                := #STATE ,
-        INTERLOCK            := #INTERLOCK ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS
+    (   mc                   := #mc
     );
-    NOP 0;
 
 NETWORK
 TITLE = Device command ENABLE
@@ -112,9 +89,9 @@ TITLE = Device command ENABLE
     //                                                                        //
     // CMD is ENABLE:                                                         //
     //------------------------------------------------------------------------//
-    AN #modeOOS;
-    AN #INTERLOCK;
-    L #CMD;
+    AN #mc.modeOOS;
+    AN #mc.INTERLOCK;
+    L #mc.CMD;
     L "dbCONST".BLK.TC1.CMD.ENABLE;
     ==I;
     = #cmdEnable;
@@ -126,7 +103,7 @@ TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
     ON #cmdEnable;
     O(;
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.TC1.CMD.DISABLE;
     ==I;
     );
@@ -140,7 +117,7 @@ TITLE = Command should be DISABLE if not ENABLE
     A #cmdDisable;
     JCN _a;
     L "dbCONST".BLK.TC1.CMD.DISABLE;
-    T #CMD;
+    T #mc.CMD;
 _a:   NOP 0;
 
 NETWORK
@@ -153,7 +130,7 @@ TITLE = Setpoint if Enabled
     //------------------------------------------------------------------------//
     A #cmdEnable;
     JCN _b;
-    L #SETPOINT;
+    L #_SETPOINT;
     T #tSetpoint;
 _b:   NOP 0;
 
@@ -179,7 +156,7 @@ TITLE = PID in manual if disabled or manual flag set
     O #cmdDisable;
     O(;
     A #cmdEnable;
-    A #modeMANUAL;
+    A #mc.modeMANUAL;
     A #MAN_PID;
     );
     = #tManual_Not_PID;
@@ -235,7 +212,7 @@ TITLE = Transfer PID output to TCV
     // remote position setpoint:                                              //
     //------------------------------------------------------------------------//
     L #LMN;
-    T #TCVPOSN;
+    T #TCVPOS;
 
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
@@ -246,7 +223,7 @@ TITLE = Transfer PID output to TCV
     A #cmdDisable;
     JCN _e;
     L "dbCONST".BLK.TC1.STATE.DISABLED;
-    T #STATE;
+    T #mc.STATE;
 _e:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -255,6 +232,6 @@ _e:   NOP 0;
     A #cmdEnable;
     JCN _f;
     L "dbCONST".BLK.TC1.STATE.ENABLED;
-    T #STATE;
+    T #mc.STATE;
 _f:   NOP 0;
 END_FUNCTION_BLOCK

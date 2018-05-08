@@ -41,11 +41,6 @@ VAR
 @@TEMPLATE_END@@
 END_VAR
 
-VAR_TEMP
-    CRIL : Bool;
-    NCRIL : Bool;
-END_VAR
-
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
@@ -59,7 +54,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbCRIL".@@INSTANCE@@cril.INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
-    = #CRIL;
+    = #@@INSTANCE@@.mc.CRIL;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -72,7 +67,23 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbNCRIL".@@INSTANCE@@ncril.INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
-    = #NCRIL;
+    = #@@INSTANCE@@.mc.NCRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Owner
+    //------------------------------------------------------------------------//
+    // Set the instance owner:                                                //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.OWNER.@@PARENT@@;
+    T #@@INSTANCE@@.mc.OWNER;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command
+    //------------------------------------------------------------------------//
+    // Set the safe command:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.MOT1.SAFE.CMD;
+    T #@@INSTANCE@@.mc.CMD_SAFE;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -80,27 +91,13 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   OWNER                := #@@INSTANCE@@.OWNER ,
-        SERIAL               := #@@INSTANCE@@.SERIAL ,
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
-        TMR                  := #@@INSTANCE@@.TMR ,
-        BRK                  := "@@INSTANCE@@-BRK" ,
+    (   BRK                  := "@@INSTANCE@@-BRK" ,
 @@ATTR_BEGIN|LINK@@
         PHR                  := "@@PHRLINKINSTANCE@@-DI" ,
 @@ATTR_END|LINK@@
         FB_RUN               := "@@INSTANCE@@-RUN" ,
-        OUT_Q                := "@@INSTANCE@@-CMD" ,
-        ALM_BRK              := #@@INSTANCE@@.ALM_BRK ,
-        ALM_PHR              := #@@INSTANCE@@.ALM_PHR ,
-        FAIL_START           := #@@INSTANCE@@.FAIL_START ,
-        CMD                  := #@@INSTANCE@@.CMD ,
-        MODE                 := #@@INSTANCE@@.MODE ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
+        OUT_Q                := "@@INSTANCE@@-CMD"
       );
-      NOP 0;
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

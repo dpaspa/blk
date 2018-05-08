@@ -23,45 +23,12 @@ VERSION : 1.0
 //----------------------------------------------------------------------------//
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
-VAR_INPUT
-    RAW_INPUT : Word;        // Raw input signal from Field (4mA = 0, 20mA = 27648)
-    USER_INPUT : Word;
-    RANGE_UPPER : Real;      // Upper Range Limit in engineering units
-    RANGE_LOWER : Real;      // Lower Range Limit in engineering units
-    POLARITY : Bool;         // Input signal is BIPOLAR (1) or UNIPOLAR (0)
-    LIMIT_HH : Real;         // High High Alarm Limit
-    LIMIT_H : Real;          // High Alarm Limit
-    LIMIT_L : Real;          // Low Alarm Limit
-    LIMIT_LL : Real;         // LowLow Alarm Limit
-    ENABLE_HH : Bool;        // Flag to Enable/Disable High High Alarm
-    ENABLE_H : Bool;         // Flag to Enable/Disable High Alarm
-    ENABLE_L : Bool;         // Flag to Enable/Disable Low Alarm
-    ENABLE_LL : Bool;        // Flag to Enable/Disable Low Low Alarm
-    STATE_ENABLED : Int;     // ENABLED state value from dbCONST
-    STATE_FAULT : Int;       // FAULT state value from dbCONST
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
-END_VAR
-
-VAR_OUTPUT
-    PV : Real;               // Measured Value (after scaling)
-END_VAR
-
 VAR_IN_OUT
-    DQ : Bool;               // MV data quality (0=Bad; 1=Good)
-    ALARM_HH : Bool;         // HighHigh Alarm
-    ALARM_H : Bool;          // High Alarm
-    ALARM_L : Bool;          // Low Alarm
-    ALARM_LL : Bool;         // LowLow Alarm
-    STATE : Int;             // Device State (1= OFF, 2= ON)
-    INTERLOCK : Bool;        // Interlock Flag
-    RANGE_ERROR : Bool;      // Range Error (<4mA or >20mA)
-    BROKEN_WIRE : Bool;      // Broken Wire detection
+    ai : "udtAnalog";        // Analog input structure
 END_VAR
 
 VAR_TEMP
-    RET_VAL1 : Word;         // Returns a value of W#16#0000 if the instruction executes without error.
+    retVal : Word;           // Returns a value of W#16#0000 if the instruction executes without error.
     tPV : Real;
     tRAW : Int;
 END_VAR
@@ -75,9 +42,9 @@ TITLE = Raw field input scaling in Auto mode
     //                                                                        //
     // Get the raw field input reading in Auto mode:                          //
     //------------------------------------------------------------------------//
-    A #modeAUTO;
+    A #ai.modeAUTO;
     JCN _a;
-    L #RAW_INPUT;
+    L #ai.RAW_INPUT;
     T #tRAW;
 _a:   NOP 0;
 
@@ -86,9 +53,9 @@ TITLE = User input sets process value in Manual mode
     //------------------------------------------------------------------------//
     // Set the user input value as the PV in Manual mode:                     //
     //------------------------------------------------------------------------//
-    A #modeMANUAL;
+    A #ai.modeMANUAL;
     JCN _b;
-    L #USER_INPUT;
+    L #ai.USER_INPUT;
     T #tPV;
 _b:   NOP 0;
 
@@ -97,14 +64,14 @@ TITLE = Scale the input if not in Manual mode
     //------------------------------------------------------------------------//
     // Scale the raw input reading:                                           //
     //------------------------------------------------------------------------//
-    AN #modeMANUAL;
+    AN #ai.modeMANUAL;
     JCN _c;
     CALL SCALE
     (   IN                             := #tRAW ,
-        HI_LIM                         := #RANGE_UPPER ,
-        LO_LIM                         := #RANGE_LOWER ,
-        BIPOLAR                        := #POLARITY ,
-        RET_VAL                        := #RET_VAL1 ,
+        HI_LIM                         := #ai.RANGE_UPPER ,
+        LO_LIM                         := #ai.RANGE_LOWER ,
+        BIPOLAR                        := #ai.POLARITY ,
+        RET_VAL                        := #retVal ,
         OUT                            := #tPV
     );
 _c:   NOP 0;
@@ -126,8 +93,8 @@ TITLE = Check for out of range error
     <I;
     );
     );
-    AN #modeOOS;
-    = #RANGE_ERROR;
+    AN #ai.modeOOS;
+    = #ai.RANGE_ERROR;
 
 NETWORK
 TITLE = Check for broken wire
@@ -146,75 +113,75 @@ TITLE = Check for broken wire
     ==I;
     );
     );
-    AN #modeOOS;
-    = #BROKEN_WIRE;
+    AN #ai.modeOOS;
+    = #ai.BROKEN_WIRE;
 
 NETWORK
 TITLE = Set Data Quality
     //------------------------------------------------------------------------//
     // If no error set Data Quality DQ=1 (GOOD), else DQ=0 (BAD):             //
     //------------------------------------------------------------------------//
-    AN #RANGE_ERROR;
-    AN #BROKEN_WIRE;
-    AN #modeOOS;
-    O #modeMANUAL;
-    = #DQ;
+    AN #ai.RANGE_ERROR;
+    AN #ai.BROKEN_WIRE;
+    AN #ai.modeOOS;
+    O #ai.modeMANUAL;
+    = #ai.DQ;
 
 NETWORK
 TITLE = HighHigh ALARM
     //------------------------------------------------------------------------//
     // Set HighHigh Alarm if limit reached:                                   //
     //------------------------------------------------------------------------//
-    AN #modeOOS;
-    A #ENABLE_HH;
+    AN #ai.modeOOS;
+    A #ai.ENABLE_HH;
     A(;
     L #tPV;
-    L #LIMIT_HH;
+    L #ai.LIMIT_HH;
     >=R;
     );
-    = #ALARM_HH;
+    = #ai.ALARM_HH;
 
 NETWORK
 TITLE = High ALARM
     //------------------------------------------------------------------------//
     // Set High Alarm if limit reached:                                       //
     //------------------------------------------------------------------------//
-    AN #modeOOS;
-    A #ENABLE_H;
+    AN #ai.modeOOS;
+    A #ai.ENABLE_H;
     A(;
     L #tPV;
-    L #LIMIT_H;
+    L #ai.LIMIT_H;
     >=R;
     );
-    = #ALARM_H;
+    = #ai.ALARM_H;
 
 NETWORK
 TITLE = Low ALARM
     //------------------------------------------------------------------------//
     // Set Low Alarm if limit reached:                                        //
     //------------------------------------------------------------------------//
-    AN #modeOOS;
-    A #ENABLE_L;
+    AN #ai.modeOOS;
+    A #ai.ENABLE_L;
     A(;
     L #tPV;
-    L #LIMIT_L;
+    L #ai.LIMIT_L;
     <=R;
     );
-    = #ALARM_L;
+    = #ai.ALARM_L;
 
 NETWORK
 TITLE = LowLow ALARM
     //------------------------------------------------------------------------//
     // Set LowLow Alarm if limit reached:                                     //
     //------------------------------------------------------------------------//
-    AN #modeOOS;
-    A #ENABLE_LL;
+    AN #ai.modeOOS;
+    A #ai.ENABLE_LL;
     A(;
     L #tPV;
-    L #LIMIT_LL;
+    L #ai.LIMIT_LL;
     <=R;
     );
-    = #ALARM_LL;
+    = #ai.ALARM_LL;
 
 NETWORK
 TITLE = INTERLOCK if bad data quality or high high limit
@@ -222,10 +189,10 @@ TITLE = INTERLOCK if bad data quality or high high limit
     // Set interlock flag if data quality is bad (Range error OR Broken Wire) //
     // or if High High limit reached:                                         //
     //------------------------------------------------------------------------//
-    O #INTERLOCK;
-    O #ALARM_HH;
-    ON #DQ;
-    = #INTERLOCK;
+    O #ai.INTERLOCK;
+    O #ai.ALARM_HH;
+    ON #ai.DQ;
+    = #ai.INTERLOCK;
 
 NETWORK
 TITLE = Set scaled analog process value
@@ -236,8 +203,7 @@ TITLE = Set scaled analog process value
     // Set the process value regardless of any error:                         //
     //------------------------------------------------------------------------//
     L #tPV;
-    T #PV;
-    NOP 0;
+    T #ai.PV;
 
 NETWORK
 TITLE = Set Device State to Enabled if healthy
@@ -247,10 +213,10 @@ TITLE = Set Device State to Enabled if healthy
     //                                                                        //
     // ENABLED if input signal is healthy:                                    //
     //------------------------------------------------------------------------//
-    A #DQ;
+    A #ai.DQ;
     JCN _d;
-    L #STATE_ENABLED;
-    T #STATE;
+    L #ai.STATE_ENABLED;
+    T #ai.STATE;
 _d:   NOP 0;
 
 NETWORK
@@ -258,9 +224,9 @@ TITLE = Set Device State to Fault if any field signal error
     //------------------------------------------------------------------------//
     // FAULT if any input error:                                              //
     //------------------------------------------------------------------------//
-    AN #DQ;
+    AN #ai.DQ;
     JCN _e;
-    L #STATE_FAULT;
-    T #STATE;
+    L #ai.STATE_FAULT;
+    T #ai.STATE;
 _e:   NOP 0;
 END_FUNCTION

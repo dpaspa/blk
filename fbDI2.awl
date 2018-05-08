@@ -19,32 +19,14 @@ VERSION : 1.0
 //----------------------------------------------------------------------------//
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
-VAR_INPUT
-    OWNER : Int;             // Value to be set or reset by Parent
-    SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;            // Critical Interlock in series
-    NCRIL : Bool;           // Non-critical Interlock in series
-    MAN_OVERRIDE : Bool;     // Critical Interlock in series can be Override by this Input
-    CMD_SAFE : Int;          // Safe command for the module
+VAR
+    mc : "udtModeCommand";   // Block mode and command
     DI_Manual : Bool;        // User digital signal for simulating
-END_VAR
-
-VAR_OUTPUT
     ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
     PV : Bool;               // Processed DI
 END_VAR
 
-VAR_IN_OUT
-    CMD : Int;               // Command
-    MODE : Int;              // Control Mode
-    STATE : Int;             // Device State from dbCONST
-    INTERLOCK : Bool;        // Interlock Flag
-END_VAR
-
 VAR_TEMP
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
     tPV : Bool;              // Temporary processed DI signal
 END_VAR
 
@@ -59,20 +41,8 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := #CMD_SAFE ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS ,
-        MODE                 := #MODE ,
-        CMD                  := #CMD ,
-        STATE                := #STATE ,
-        INTERLOCK            := #INTERLOCK
+    (   mc                   := #mc
     );
-    NOP 0;
 
 NETWORK
 TITLE = Set Device command which can only be ENABLE.
@@ -83,7 +53,7 @@ TITLE = Set Device command which can only be ENABLE.
     // CMD is always ENABLE:                                                  //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.DI2.CMD.ENABLE;
-    T #CMD;
+    T #mc.CMD;
 
 NETWORK
 TITLE = Process user input signal
@@ -91,9 +61,8 @@ TITLE = Process user input signal
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
     //                                                                        //
-    // Calculate the process value based on the mode:                         //
+    // Calculate the process value based on the software input:               //
     //------------------------------------------------------------------------//
-    A #modeMANUAL;
     A #DI_Manual;
     = #tPV;
     = #PV;
@@ -107,7 +76,7 @@ TITLE = Set ALARM Flag
     // Set alarms:                                                            //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #modeOOS;
+    AN #mc.modeOOS;
     = #ALARM;
 
 NETWORK
@@ -118,9 +87,9 @@ TITLE = Set INTERLOCK Flag
     //                                                                        //
     // Set interlocks:                                                        //
     //------------------------------------------------------------------------//
-    O #INTERLOCK;
+    O #mc.INTERLOCK;
     O #tPV;
-    = #INTERLOCK;
+    = #mc.INTERLOCK;
 
 NETWORK
 TITLE = Set Device State to Enabled if user input is on
@@ -133,7 +102,7 @@ TITLE = Set Device State to Enabled if user input is on
     A #tPV;
     JCN _a;
     L "dbCONST".BLK.DI2.STATE.ENABLED;
-    T #STATE;
+    T #mc.STATE;
 _a:   NOP 0;
 
 NETWORK
@@ -142,9 +111,9 @@ TITLE = Setting Device State to ALARM
     // ALARM if user input is off and not OOS:                                //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #modeOOS;
+    AN #mc.modeOOS;
     JCN _b;
     L "dbCONST".BLK.DI2.STATE.ALARM;
-    T #STATE;
+    T #mc.STATE;
 _b:   NOP 0;
 END_FUNCTION_BLOCK

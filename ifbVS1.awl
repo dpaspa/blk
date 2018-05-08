@@ -29,34 +29,39 @@ VAR
 @@TEMPLATE_END@@
 END_VAR
 
-//----------------------------------------------------------------------------//
-// Call the class function to process each instance:                          //
-//----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
+TITLE = @@INSTANCE@@ : Owner
+    //------------------------------------------------------------------------//
+    // Set the instance owner:                                                //
+    //------------------------------------------------------------------------//
+    L 0;
+    T #@@INSTANCE@@.mc.OWNER;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command
+    //------------------------------------------------------------------------//
+    // Set the safe command:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.VS1.SAFE.CMD;
+    T #@@INSTANCE@@.mc.CMD_SAFE;
+
+NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   OWNER                := #@@INSTANCE@@.OWNER ,
-        SERIAL               := #@@INSTANCE@@.SERIAL ,
-        CRIL                 := #@@INSTANCE@@.CRIL ,
-        NCRIL                := #@@INSTANCE@@.NCRIL ,
-        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
 @@ATTR_BEGIN|LINK@@
-        VLV1_STATE           := "idb@@V1STATELINKCLASS@@".@@V1STATELINKINSTANCE@@.STATE ,
-        VLV2_STATE           := "idb@@V2STATELINKCLASS@@".@@V2STATELINKINSTANCE@@.STATE ,
-        PUMP1_INTERLOCK      := "idb@@P1ILLINKCLASS@@".@@P1ILLINKINSTANCE@@.INTERLOCK ,
-        PUMP2_INTERLOCK      := "idb@@P2ILLINKCLASS@@".@@P2ILLINKINSTANCE@@.INTERLOCK ,
-        PUMP1_CMD            := "idb@@P1CMDLINKCLASS@@".@@P1CMDLINKINSTANCE@@.CMD ,
-        PUMP2_CMD            := "idb@@P2CMDLINKCLASS@@".@@P2CMDLINKINSTANCE@@.CMD ,
+    (   VLV1_STATE           := "idb@@V1STATELINKCLASS@@".@@V1STATELINKINSTANCE@@.mc.STATE ,
+        VLV2_STATE           := "idb@@V2STATELINKCLASS@@".@@V2STATELINKINSTANCE@@.mc.STATE ,
+        PUMP1_INTERLOCK      := "idb@@P1ILLINKCLASS@@".@@P1ILLINKINSTANCE@@.mc.INTERLOCK ,
+        PUMP2_INTERLOCK      := "idb@@P2ILLINKCLASS@@".@@P2ILLINKINSTANCE@@.mc.INTERLOCK ,
+        PUMP1_CMD            := "idb@@P1CMDLINKCLASS@@".@@P1CMDLINKINSTANCE@@.mc.CMD ,
+        PUMP2_CMD            := "idb@@P2CMDLINKCLASS@@".@@P2CMDLINKINSTANCE@@.mc.CMD
 @@ATTR_END|LINK@@
-        FAULT                := #@@INSTANCE@@.FAULT ,
-        CMD                  := #@@INSTANCE@@.CMD ,
-        MODE                 := #@@INSTANCE@@.MODE ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
     );
-    NOP 0;
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

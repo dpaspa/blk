@@ -23,35 +23,20 @@ NAME : fbZSC1
 VERSION : 2.0
 
 VAR_INPUT
-    OWNER : Int;             // Value to be set or reset by Parent
-    SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;            // Critical Interlock in series
-    NCRIL : Bool;           // Non-critical Interlock in series
-    MAN_OVERRIDE : Bool;     // Critical Interlock in series can be Override by this Input
-    CMD_SAFE : Int;          // Safe command for the module
     DI_Auto : Bool;          // Input signal from Field
+END_VAR
+
+VAR
+    mc : "udtModeCommand";   // Block mode and command
     DI_Manual : Bool;        // User digital signal for simulating
     CUTOUT : Bool;           // Flag indicating if alarm is to be cutout (0= Alarm Enabled, 1= Alarm Disabled)
-END_VAR
-
-VAR_OUTPUT
     ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
     PV : Bool;               // Processed DI
-END_VAR
-
-VAR_IN_OUT
-    CMD : Int;               // Command
-    MODE : Int;              // Control Mode
-    STATE : Int;             // Device State from dbCONST
-    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
 END_VAR
 
 VAR_TEMP
     cmdCLOSE : Bool;
     cmdOPEN : Bool;
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
     tPV : Bool;              // Temporary processed DI signal
 END_VAR
 
@@ -66,18 +51,7 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (
-        CRIL                := #CRIL ,
-        NCRIL               := #NCRIL ,
-        MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := #CMD_SAFE ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS ,
-        MODE                 := #MODE ,
-        CMD                  := #CMD ,
-        STATE                := #STATE ,
-        INTERLOCK            := #INTERLOCK
+    (   mc                   := #mc
     );
 
 NETWORK
@@ -89,7 +63,7 @@ TITLE = Get Device command if CLOSE
     // CMD is CLOSE
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ZSC1.CMD.CLOSE;
-    L #CMD;
+    L #mc.CMD;
     ==I;
     = #cmdCLOSE;
 
@@ -99,7 +73,7 @@ TITLE = Get Device command if OPEN
     // CMD is OPEN:                                                           //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ZSC1.CMD.OPEN;
-    L #CMD;
+    L #mc.CMD;
     ==I;
     = #cmdOPEN;
 
@@ -113,11 +87,11 @@ TITLE = Process Digital Input Signal
     //------------------------------------------------------------------------//
     O(;
     A #DI_Auto;
-    A #modeAUTO;
+    A #mc.modeAUTO;
     );
     O(;
     A #DI_Manual;
-    A #modeMANUAL;
+    A #mc.modeMANUAL;
     );
     = #tPV;
     = #PV;
@@ -132,7 +106,7 @@ TITLE = Set ALARM Flag
     //------------------------------------------------------------------------//
     AN #tPV;
     AN #CUTOUT;
-    AN #modeOOS;
+    AN #mc.modeOOS;
     AN #cmdOPEN;
     = #ALARM;
 
@@ -145,7 +119,7 @@ TITLE = Set INTERLOCK Flag if OPENED
     // Set interlock if manway is opened:                                     //
     //------------------------------------------------------------------------//
     AN #tPV;
-    = #INTERLOCK;
+    = #mc.INTERLOCK;
 
 NETWORK
 TITLE = Set Device State to CLOSED if switch is on
@@ -158,7 +132,7 @@ TITLE = Set Device State to CLOSED if switch is on
     A #tPV;
     JCN _a;
     L "dbCONST".BLK.ZSC1.STATE.CLOSED;
-    T #STATE;
+    T #mc.STATE;
 _a:   NOP 0;
 
 NETWORK
@@ -171,7 +145,7 @@ TITLE = Set Device State to MISMATCH if CLOSED state does not follow command
     AN #tPV;
     JCN _b;
     L "dbCONST".BLK.ZSC1.STATE.MISMATCH;
-    T #STATE;
+    T #mc.STATE;
 _b:   NOP 0;
 
 NETWORK
@@ -183,6 +157,6 @@ TITLE = Set Device State to OPENED if switch is off and command is OPEN
     AN #tPV;
     JCN _c;
     L "dbCONST".BLK.ZSC1.STATE.OPENED;
-    T #STATE;
+    T #mc.STATE;
 _c:   NOP 0;
 END_FUNCTION_BLOCK

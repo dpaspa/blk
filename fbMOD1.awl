@@ -30,37 +30,23 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
-VAR_INPUT
-    OWNER : Int;             // Value to be set by Parent
-    SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;             // Critical interlock
-    NCRIL : Bool;            // Non-critical interlock
-    MAN_OVERRIDE : Bool;     // Override non-critical interlocks
-    POSN_LOCAL : Real;       // Local valve position setpoint
-    POSN_REMOTE : Real;      // Remote valve position setpoint
-    POLARITY : Bool;         // Input signal is BIPOLAR (1) or UNIPOLAR (0)
-END_VAR
-
 VAR_OUTPUT
     RAW_OUTPUT : Int;        // Raw output signal to Field (4mA = 0, 20mA = 27648)
 END_VAR
 
-VAR_IN_OUT
-    CMD : Int;               // Device Command from dbCONST
-    MODE : Int;              // Control Mode
-    STATE : Int;             // Device State from dbCONST
-    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
+VAR
+    mc : "udtModeCommand";   // Block mode and command
+    POS_LOCAL : Real;        // Local valve position setpoint
+    POS_REMOTE : Real;       // Remote valve position setpoint
+    POLARITY : Bool;         // Input signal is BIPOLAR (1) or UNIPOLAR (0)
 END_VAR
 
 VAR_TEMP
     cmdLocal : Bool;
     cmdRemote : Bool;
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
     tRetVal : Word;          // Returns a value of W#16#0000 if the instruction executes without error.
     tDO : Bool;              // Flag indicating whether to drive output
-    tPOSN : Real;            // Output position of the valve
+    tPOS : Real;             // Output position of the valve
 END_VAR
 
 BEGIN
@@ -73,20 +59,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := "dbCONST".BLK.MOD1.SAFE.CMD ,
-        MODE                 := #MODE ,
-        CMD                  := #CMD ,
-        STATE                := #STATE ,
-        INTERLOCK            := #INTERLOCK ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS
+    (   mc                   := #mc
     );
-    NOP 0;
 
 NETWORK
 TITLE = Device command LOCAL
@@ -96,8 +70,8 @@ TITLE = Device command LOCAL
     //                                                                        //
     // CMD is LOCAL:                                                          //
     //------------------------------------------------------------------------//
-    AN #INTERLOCK;
-    L #CMD;
+    AN #mc.INTERLOCK;
+    L #mc.CMD;
     L "dbCONST".BLK.MOD1.CMD.LOCAL;
     ==I;
     = #cmdLocal;
@@ -108,8 +82,8 @@ TITLE = Device command REMOTE
     //------------------------------------------------------------------------//
     // CMD is REMOTE:                                                         //
     //------------------------------------------------------------------------//
-    AN #INTERLOCK;
-    L #CMD;
+    AN #mc.INTERLOCK;
+    L #mc.CMD;
     L "dbCONST".BLK.MOD1.CMD.REMOTE;
     ==I;
     = #cmdRemote;
@@ -120,7 +94,7 @@ TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
     // CMD is DISABLE then close regardless of any interlock:                 //
     //------------------------------------------------------------------------//
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.HE1.CMD.DISABLE;
     ==I;
     JCN _a;
@@ -137,8 +111,8 @@ TITLE = LOCAL valve position setpoint
     //------------------------------------------------------------------------//
     A #cmdLocal;
     JCN _b;
-    L #POSN_LOCAL;
-    T #tPOSN;
+    L #POS_LOCAL;
+    T #tPOS;
 _b:   NOP 0;
 
 NETWORK
@@ -148,8 +122,8 @@ TITLE = REMOTE valve position setpoint
     //------------------------------------------------------------------------//
     A #cmdRemote;
     JCN _c;
-    L #POSN_REMOTE;
-    T #tPOSN;
+    L #POS_REMOTE;
+    T #tPOS;
 _c:   NOP 0;
 
 NETWORK
@@ -164,7 +138,7 @@ TITLE = Unscaling of Control Valve Position
     A #tDO;
     JCN _d;
     CALL UNSCALE
-    (   IN                   := #tPOSN ,
+    (   IN                   := #tPOS ,
         HI_LIM               := 100.0 ,
         LO_LIM               := 0.0 ,
         BIPOLAR              := #POLARITY ,
@@ -182,10 +156,10 @@ TITLE = Device State DISABLED if valve not operating
     // DISABLED if valve output is to be off:                                 //
     //------------------------------------------------------------------------//
     ON #tDO;
-    O #INTERLOCK;
+    O #mc.INTERLOCK;
     JCN _e;
     L "dbCONST".BLK.MOD1.STATE.DISABLED;
-    T #STATE;
+    T #mc.STATE;
 _e:   NOP 0;
 
 NETWORK
@@ -194,7 +168,7 @@ TITLE = Valve close if Device State DISABLED
     // If valve DISABLED then analog output setpoint value should be 0:       //
     //------------------------------------------------------------------------//
     ON #tDO;
-    O #INTERLOCK;
+    O #mc.INTERLOCK;
     JCN _f;
     L 0;
     T #RAW_OUTPUT;
@@ -207,7 +181,7 @@ _f:   NOP 0;
     A #cmdLocal;
     JCN _g;
     L "dbCONST".BLK.MOD1.STATE.LOCAL;
-    T #STATE;
+    T #mc.STATE;
 _g:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -217,6 +191,6 @@ _g:   NOP 0;
     A #cmdRemote;
     JCN _h;
     L "dbCONST".BLK.MOD1.STATE.REMOTE;
-    T #STATE;
+    T #mc.STATE;
 _h:   NOP 0;
 END_FUNCTION_BLOCK

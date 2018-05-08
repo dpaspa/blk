@@ -2,10 +2,12 @@ FUNCTION "fbTimeSyncPLC" : Void
 TITLE = Time sync from Batch PC to CPUs
 { S7_Optimized_Access := 'TRUE' }
 VERSION : 0.1
-   VAR_TEMP
-      Error1 : Int;
-      Error2 : Int;
-   END_VAR
+
+VAR_TEMP
+    Error1 : Int;
+    Error2 : Int;
+    setTime : Bool;
+END_VAR
 
 
 BEGIN
@@ -21,9 +23,9 @@ TITLE = Read time from CPU and transfer for display on Batch PC
 NETWORK
 TITLE = Set time on CPU which is transfered from Batch PC
       A "TimeSyncBlock".SettimefromPC;
-      = %L4.0;
+      = #setTime;
       A(;
-      A %L4.0;
+      A #setTime;
       JNB Label_0;
       L INT#40;
       T "TimeSyncBlock".JOB_MailBoxHMI1;
@@ -39,7 +41,7 @@ Label_0:      A BR;
          RET_VAL                     := #Error2
       );
 Label_1:      NOP 0;
-      A %L4.0;
+      A #setTime;
       L S5T#50MS;
       SD "timerPCSync";
       NOP 0;

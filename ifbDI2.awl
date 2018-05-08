@@ -27,29 +27,30 @@ VAR
 @@TEMPLATE_END@@
 END_VAR
 
-//----------------------------------------------------------------------------//
-// Call the class function to process each instance:                          //
-//----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
+TITLE = @@INSTANCE@@ : Owner
+    //------------------------------------------------------------------------//
+    // Set the instance owner:                                                //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.OWNER.@@PARENT@@;
+    T #@@INSTANCE@@.mc.OWNER;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command
+    //------------------------------------------------------------------------//
+    // Set the safe command:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.DI2.SAFE.CMD;
+    T #@@INSTANCE@@.mc.CMD_SAFE;
+
+NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
-    CALL #@@INSTANCE@@
-    (   OWNER                := #@@INSTANCE@@.OWNER ,
-        SERIAL               := #@@INSTANCE@@.SERIAL ,
-        CRIL                 := #@@INSTANCE@@.CRIL ,
-        NCRIL                := #@@INSTANCE@@.NCRIL ,
-        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
-        CMD_SAFE             := #@@INSTANCE@@.CMD_SAFE ,
-        DI_Manual            := #@@INSTANCE@@.DI_Manual ,
-        ALARM                := #@@INSTANCE@@.ALARM ,
-        PV                   := #@@INSTANCE@@.PV ,
-        CMD                  := #@@INSTANCE@@.CMD ,
-        MODE                 := #@@INSTANCE@@.MODE ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
-    );
-    NOP 0;
-    
+    //------------------------------------------------------------------------//
+    // Call the class function to process the instance:                       //
+    //------------------------------------------------------------------------//
+    CALL #@@INSTANCE@@;
+
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

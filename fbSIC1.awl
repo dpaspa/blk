@@ -58,15 +58,8 @@ VERSION : 2.0
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
 VAR_INPUT
-    OWNER : Int;             // Value to be set by Parent
-    SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;             // Critical interlock
-    NCRIL : Bool;            // Non-critical interlock
-    MAN_OVERRIDE : Bool;     // Override non-critical interlocks
     _SETPOINT : Real;        // Agitator speed setpoint
-    RAW_INPUT : Word;        // Measured Process Value received from control module
-    USER_INPUT : Word;       // Manual mode, equivallent of Analog input, to be entered by Operator
-    MAN_PID : Bool;          // Manual non pid selection
+    RAW_INPUT : Int;         // Raw input from the field
     BRK	: Bool;              // Motor breaker fault
     PHR : Bool;              // Three-phase relay alarm
     FLP : Bool;              // Pulse counter fault
@@ -74,13 +67,13 @@ VAR_INPUT
     THM : Bool;              // Thermistor module alarm
     MASS_RUN : Real;         // Low mass threshold at which the agitator may run
     MASS_STOP : Real;        // Low low mass threshold at which the agitator must stop
+    MI1_MASS : Real;         // Measured Mass
+    MI1_DQ : Bool;           // Measured Mass Data Quality
     RANGE_UPPER : Real;      // Upper mass range limit
     RANGE_LOWER : Real;      // Lower mass range limit
     POLARITY : Bool;         // 0- no polarity(0 to z), 1= dual polarity(-x to +y)
     LIMIT_HH : Real;         // High High speed alarm limit
     LIMIT_H : Real;          // High speed alarm limit
-    MI1_MASS : Real;         // Measured Mass
-    MI1_DQ : Bool;           // Measured Mass Data Quality
     FB_TDELAY : Time := T#20S;
     P_SEL : Bool := TRUE;
     I_SEL : Bool := TRUE;
@@ -93,6 +86,22 @@ END_VAR
 
 VAR_OUTPUT
     OUT_Q : Bool;            // Inverter Motor Run/Stop Command
+END_VAR
+
+VAR_IN_OUT
+    OUT_Q_F : Bool;
+    OUT_Q_R : Bool;
+    LMN : Real;              // PID controller output (0-100%)
+END_VAR
+
+VAR
+    mc : "udtModeCommand";   // Block mode and command
+    ai : "udtAnalog";        // Analog input structure
+    RUNNING : Bool;
+    PV : Real;               // Measured Value (after scaling)
+    DQ : Bool;
+    USER_INPUT : Word;       // Manual mode, equivallent of Analog input, to be entered by Operator
+    MAN_PID : Bool;          // Manual non pid selection
     ALM_BRK : Bool;
     ALM_PHR : Bool;
     ALM_FLP : Bool;
@@ -102,31 +111,17 @@ VAR_OUTPUT
     OUT_SETPOINT : Real;     // Setpoint readvalue
     OUT_LMN_PER : Word;      // Inverter speed reference input
     OUT_LMN : Real;          // Inverter Speed reference from PID
-END_VAR
-
-VAR_IN_OUT
-    RUNNING : Bool;
-    OUT_Q_F : Bool;
-    OUT_Q_R : Bool;
-    PV : Real;               // Measured Value (after scaling)
-    DQ : Bool;
-    ALARM_HH : Bool;         // Alamr HH
-    ALARM_H : Bool;          // Alarm_H
-    LMN : Real;              // PID controller output (0-100%)
-    CMD : Int;               // Device Command from dbCONST
-    MODE : Int;              // Control Mode
-    STATE : Int;             // Device State from dbCONST
-    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
-END_VAR
-
-VAR
+    FB_TDELAY : Time := T#20S;
+    P_SEL : Bool := TRUE;
+    I_SEL : Bool := TRUE;
+    D_SEL : Bool := TRUE;
+    GAIN : Real := 1.0;
+    TI : Time := T#20S;
+    TD : Time := T#10S;
+    CYCLE : Time := T#1S;    // SAMPLING TIME:The time between the block calls constant
     startTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
     dirTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-    startTMRElapsed : Time;
-    dirTMRElapsed : Time;
     PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
-    permitMass : Bool;
-    enable : Bool;
 END_VAR
 
 VAR_TEMP
@@ -148,13 +143,14 @@ VAR_TEMP
     tSetpoint : Real;
     RANGE_ERROR : Bool;
     BROKEN_WIRE : Bool;
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
     dirTMRStart : Bool;
     startTMRExpired : Bool;
     dirTMRExpired : Bool;
     tManual_Not_PID : Bool;
+    startTMRElapsed : Time;
+    dirTMRElapsed : Time;
+    permitMass : Bool;
+    enable : Bool;
 END_VAR
 
 BEGIN
@@ -167,20 +163,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := "dbCONST".BLK.SIC1.SAFE.CMD ,
-        MODE                 := #MODE ,
-        CMD                  := #CMD ,
-        STATE                := #STATE ,
-        INTERLOCK            := #INTERLOCK ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS
+    (   mc                   := #mc
     );
-    NOP 0;
 
 NETWORK
 TITLE = Enable command
@@ -190,7 +174,7 @@ TITLE = Enable command
     //                                                                        //
     // CMD is ENABLE:                                                         //
     //------------------------------------------------------------------------//
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.SIC1.CMD.ENABLE;
     ==I;
     =#cmdEnable;
@@ -200,10 +184,42 @@ TITLE = Disable command
     //------------------------------------------------------------------------//
     // CMD is DISABLE:                                                        //
     //------------------------------------------------------------------------//
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.SIC1.CMD.DISABLE;
     ==I;
     = #cmdDisable
+
+NETWORK
+TITLE = Analog input attributes
+    //------------------------------------------------------------------------//
+    // Set the analog input attributes:                                       //
+    //------------------------------------------------------------------------//
+    L #RANGE_LOWER;
+    T #ai.RANGE_LOWER;
+    L #RANGE_UPPER;
+    T #ai.RANGE_UPPER;
+    L #LIMIT_HH;
+    T #ai.LIMIT_HH;
+    L #LIMIT_H;
+    T #ai.LIMIT_H;
+    L 0.0;
+    T #ai.LIMIT_L;
+    L 0.0;
+    T #ai.LIMIT_LL;
+    A "alwaysHigh";
+    = #ai.ENABLE_HH;
+    A "alwaysHigh";
+    = #ai.ENABLE_H;
+    A "alwaysLow";
+    = #ai.ENABLE_L;
+    A "alwaysLow";
+    = #ai.ENABLE_LL;
+    L "dbCONST".BLK.SIC1.STATE.ENABLED;
+    T #ai.STATE_ENABLED;
+    L "dbCONST".BLK.SIC1.STATE.FAULT;
+    T #ai.STATE_FAULT;
+    L #RAW_INPUT;
+    T #ai.RAW_INPUT;
 
 NETWORK
 TITLE = Call Analog Input handling function
@@ -214,36 +230,8 @@ TITLE = Call Analog Input handling function
     // Scale the analog input value and check it is healty:                   //
     //------------------------------------------------------------------------//
     CALL "fcAnalog"
-    (   RAW_INPUT            := #RAW_INPUT ,
-        USER_INPUT           := #USER_INPUT ,
-        RANGE_UPPER          := #RANGE_UPPER ,
-        RANGE_LOWER          := #RANGE_LOWER ,
-        POLARITY             := #POLARITY ,
-        LIMIT_HH             := #LIMIT_HH ,
-        LIMIT_H              := #LIMIT_H ,
-        LIMIT_L              := -1.0 ,
-        LIMIT_LL             := -2.0 ,
-        ENABLE_HH            := 1 ,
-        ENABLE_H             := 1 ,
-        ENABLE_L             := 0 ,
-        ENABLE_LL            := 0 ,
-        STATE_ENABLED        := "dbCONST".BLK.SIC1.STATE.ENABLED ,
-        STATE_FAULT          := "dbCONST".BLK.SIC1.STATE.FAULT ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS ,
-        PV                   := #PV ,
-        DQ                   := #DQ ,
-        ALARM_HH             := #ALARM_HH ,
-        ALARM_H              := #ALARM_H ,
-        ALARM_L              := #ALARM_L ,
-        ALARM_LL             := #ALARM_LL ,
-        STATE                := #STATE ,
-        INTERLOCK            := #tILAnalog ,
-        RANGE_ERROR          := #RANGE_ERROR ,
-        BROKEN_WIRE          := #BROKEN_WIRE
+    (   ai                   := #ai
     );
-    NOP 0;
 
 NETWORK
 TITLE = Motor faults and three phase relay alarm
@@ -279,14 +267,14 @@ TITLE = Aggregate all interlock conditions
     //------------------------------------------------------------------------//
     // Collect all interlock conditions:                                      //
     //------------------------------------------------------------------------//
-    O #INTERLOCK;
+    O #mc.INTERLOCK;
     O tILAnalog;
     O #BRK;
     O #THM;
     O #FLP;
     O #FLT;
     ON #MI1_DQ;
-    = #INTERLOCK;
+    = #mc.INTERLOCK;
 
 NETWORK
 TITLE = Interlock overrides ENABLE command
@@ -294,7 +282,7 @@ TITLE = Interlock overrides ENABLE command
     // Don't allow enable command if any interlock:                           //
     //------------------------------------------------------------------------//
     A #cmdEnable;
-    AN #INTERLOCK;
+    AN #mc.INTERLOCK;
     = #cmdEnable;
 
 NETWORK
@@ -319,7 +307,7 @@ TITLE = Permitted to run agitator if mass above minimum value
     // Permit the agitator to run if mass above minimum start level:          //
     //------------------------------------------------------------------------//
     L #tPV_MASS;
-    L #_MASS_RUN;
+    L #MASS_RUN;
     >=R;
     JCN _a;
     S #permitMass;
@@ -331,7 +319,7 @@ TITLE = Low mass condition must stop the agitator from running
     // Inhibit the agitator from running if mass below minimum stop level:    //
     //------------------------------------------------------------------------//
     L #tPV_MASS;
-    L #_MASS_STOP;
+    L #MASS_STOP;
     <R;
     JCN _b;
     R #permitMass;
@@ -367,7 +355,7 @@ TITLE = PID in manual if disabled or manual flag set
     O #cmdDisable;
     O(;
     A #cmdEnable;
-    A #modeMANUAL;
+    A #mc.modeMANUAL;
     A #MAN_PID;
     );
     = #tManual_Not_PID;
@@ -383,7 +371,7 @@ TITLE = Disable command
     A #cmdDisable;
     JCN _e;
     L "dbCONST".BLK.SIC1.CMD.DISABLE;
-    T #CMD;
+    T #mc.CMD;
 _e:   NOP 0;
 
 NETWORK
@@ -394,7 +382,7 @@ TITLE = Flag output should be on if command is ENABLE and mass is enough
     //------------------------------------------------------------------------//
     A #cmdEnable;
     A #permitMass;
-    AN #modeOOS;
+    AN #mc.modeOOS;
     = #tDO;
 
 NETWORK
@@ -435,8 +423,8 @@ TITLE = Unscale Setpoint
     JCN _g;
     CALL UNSCALE
     (   IN                   := #tSetpoint ,
-        HI_LIM               := #RANGE_UPPER ,
-        LO_LIM               := #RANGE_LOWER ,
+        HI_LIM               := #ai.RANGE_UPPER ,
+        LO_LIM               := #ai.RANGE_LOWER ,
         BIPOLAR              := 0 ,
         RET_VAL              := #RET_VAL1 ,
         OUT                  := #unscaledOUT
@@ -520,7 +508,7 @@ TITLE = Fault if start timer expired and not running
     //------------------------------------------------------------------------//
     A #startTMR.Q;
     AN #RUNNING;
-    AN #modeOOS;
+    AN #mc.modeOOS;
     = #RUN_FAULT;
 
 NETWORK
@@ -639,7 +627,7 @@ TITLE = Disable state
     A #cmdDisable;
     JCN _q;
     L "dbCONST".BLK.SIC1.STATE.DISABLED;
-    T #STATE;
+    T #mc.STATE;
 _q:   NOP 0;
 
 NETWORK
@@ -653,7 +641,7 @@ TITLE = FAULT if any fault condition active
     O #FLT;
     JCN _r;
     L "dbCONST".BLK.SIC1.STATE.FAULT;
-    T #STATE;
+    T #mc.STATE;
 _r:   NOP 0;
 
 NETWORK
@@ -665,7 +653,7 @@ TITLE = Stopped if command is ENABLE and mass not enough
     AN #permitMass;
     JCN _s;
     L "dbCONST".BLK.SIC1.STATE.STOPPED;
-    T #STATE;
+    T #mc.STATE;
 _s:   NOP 0;
 
 NETWORK
@@ -676,6 +664,6 @@ TITLE = Running if output should be on
     A #tDO;
     JCN _t;
     L "dbCONST".BLK.SIC1.STATE.RUNNING;
-    T #STATE;
+    T #mc.STATE;
 _t:   NOP 0;
 END_FUNCTION_BLOCK

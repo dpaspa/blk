@@ -45,8 +45,6 @@ VAR
 END_VAR
 
 VAR_TEMP
-    CRIL : Bool;
-    NCRIL : Bool;
     FB_C : Bool;
     FB_O : Bool;
 END_VAR
@@ -64,7 +62,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbCRIL".@@INSTANCE@@cril.INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
-    = #CRIL;
+    = #@@INSTANCE@@.mc.CRIL;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -77,36 +75,45 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbNCRIL".@@INSTANCE@@ncril.INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
-    = #NCRIL;
+    = #@@INSTANCE@@.mc.NCRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Owner
+    //------------------------------------------------------------------------//
+    // Set the instance owner:                                                //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.OWNER.@@PARENT@@;
+    T #@@INSTANCE@@.mc.OWNER;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command
+    //------------------------------------------------------------------------//
+    // Set the safe command:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.POS2.SAFE.CMD;
+    T #@@INSTANCE@@.mc.CMD_SAFE;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Feedback from the field
+    //------------------------------------------------------------------------//
+    // Get the position feedback values:                                      //
+    //------------------------------------------------------------------------//
+    A "@@INSTANCE@@-ZSC";
+    = #FB_C;
+    AN "@@INSTANCE@@-ZSC";
+    = #FB_O;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    A "@@INSTANCE@@-ZSC";
-    = #FB_C;
-    AN "@@INSTANCE@@-ZSC";
-    = #FB_O;
     CALL #@@INSTANCE@@
-    (   OWNER                := #@@INSTANCE@@.OWNER ,
-        SERIAL               := #@@INSTANCE@@.SERIAL ,
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
-        TMR                  := #@@INSTANCE@@.TMR ,
-        FB_C                 := #FB_C ,
+    (   FB_C                 := #FB_C ,
         FB_O                 := #FB_O ,
         NC                   := @@NC@@ ,
-        OUT_Q                := "@@INSTANCE@@-CMD" ,
-        FAULT_C              := #@@INSTANCE@@.FAULT_C ,
-        FAULT_O              := #@@INSTANCE@@.FAULT_O ,
-        CMD                  := #@@INSTANCE@@.CMD ,
-        MODE                 := #@@INSTANCE@@.MODE ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
+        OUT_Q                := "@@INSTANCE@@-CMD"
     );
-    NOP 0;
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

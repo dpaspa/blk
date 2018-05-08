@@ -1,18 +1,21 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Description: The entry point for the entire program called by the system.  //
+// Description:                                                               //
+// The entry point for the entire program called by the system. This block is //
+// called cyclically after the Startup OB100 is called on first scan after    //
+// PLC start.                                                                 //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
 // 2.0 David Paspa      09-Feb-2018 NA        Reboot for S7-1500.             //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-ORGANIZATION_BLOCK "obMain"
+ORGANIZATION_BLOCK "Main"
 TITLE =  "Main Program Sweep (Cycle)"
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
-NAME : MainOrganizationBlock
+NAME : Main
 VERSION : 2.0
 
 VAR_TEMP
@@ -32,21 +35,6 @@ VAR_TEMP
 END_VAR
 
 BEGIN
-NETWORK
-TITLE = Always Low bit
-    A "alwaysLow";
-    R "alwaysLow";
-
-NETWORK
-TITLE = Always High bit
-    AN "alwaysLow";
-    S "alwaysHigh";
-
-NETWORK
-TITLE = Unconditional Jump bits
-    A "alwaysHigh";
-    S "uncondJump";
-
 NETWORK
 TITLE = Communication with SMS1
 //      CALL "fcGD_COMM";
@@ -132,7 +120,7 @@ TITLE = Calling all process message events
     // Call the message function to interface the PLC to the HMI. Messages    //
     // have prompt and confirm handshake:                                     //
     //------------------------------------------------------------------------//
-    CALL "fbEventProcess";
+    CALL "fcEventProcess";
     NOP 0;
 
 NETWORK
@@ -141,7 +129,7 @@ TITLE = Calling all sequence message events
     // Call the message function to interface the PLC to the HMI. Messages    //
     // have prompt and confirm handshake:                                     //
     //------------------------------------------------------------------------//
-    CALL "fbEventSequence";
+    CALL "fcEventSequence";
     NOP 0;
 
 NETWORK
@@ -165,7 +153,6 @@ TITLE = HMI DATA LOG FOR THE REPORT WITH ACK IN DB8
       CALL "fcBatch_Report";
       NOP 0;
 
-
 NETWORK
 TITLE = Get PLC CPU LED states
     //------------------------------------------------------------------------//
@@ -186,7 +173,8 @@ NETWORK
 TITLE = Initialise All Modes
     //------------------------------------------------------------------------//
     // Very Important!!!!!!!!!!!!!!!!!!!!!                                    //
-    // This MUST be the last instruction of OB1:                              //
+    // This MUST be the last instruction of OB1. The flag is set in OB100     //
+    // which is the startup OB which is called only once on PLC start:        //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
     R "flagFirstScanRestart";

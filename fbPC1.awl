@@ -56,15 +56,11 @@ NAME : fbPC1
 VERSION : 2.0
 
 VAR_INPUT
-    OWNER : Int;             // Value to be set by Parent
-    SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;             // Critical interlock
-    NCRIL : Bool;            // Non-critical interlock
-    MAN_OVERRIDE : Bool;     // Override non-critical interlocks
     PI1_PV : Real;           // Pressure measured process value (after scaling)
     PI1_INTERLOCK : Bool;    // Pressure indicator interlock
     DB_L : Real;             // Deadband LOW differential
     DB_H : Real;             // Deadband HIGH differential
+    _SETPOINT : Real;        // Pressure setpoint
     _SELECT_GAS : Int;       // Select Valve to be operated
 END_VAR
 
@@ -74,24 +70,16 @@ VAR_OUTPUT
     VLV_LPCA : Int;          // Output command to LPCA VALVE
     VLV_VACUUM : Int;        // Output command to VACUUM VALVE
     VLV_VENT : Int;          // Output command to VENT VALVE
-    OUT_Q : Bool;            // Intermediate Output Signal
 END_VAR
 
-VAR_IN_OUT
-    _SETPOINT : Real;        // Pressure setpoint
-    CMD : Int;               // Device Command from dbCONST
-    MODE : Int;              // Control Mode
-    STATE : Int;             // Device State from dbCONST
-    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
+VAR
+    mc : "udtModeCommand";   // Block mode and command
 END_VAR
 
 VAR_TEMP
     cmdDISABLE : Bool;
     cmdPRESSURE : Bool;
     cmdVALVE : Bool;
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
     selectDRAIN : Bool;
     selectHPCA : Bool;
     selectLPCA : Bool;
@@ -112,20 +100,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := "dbCONST".BLK.PC1.SAFE.CMD ,
-        MODE                 := #MODE ,
-        CMD                  := #CMD ,
-        STATE                := #STATE ,
-        INTERLOCK            := #INTERLOCK ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS
+    (   mc                   := #mc
     );
-    NOP 0;
 
 NETWORK
 TITLE = Command is DISABLE
@@ -135,7 +111,7 @@ TITLE = Command is DISABLE
     //                                                                        //
     // CMD is DISABLE:                                                        //
     //------------------------------------------------------------------------//
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.PC1.CMD.DISABLE;
     ==I;
     = #cmdDISABLE;
@@ -145,10 +121,10 @@ TITLE = Command is PRESSURE control
     //------------------------------------------------------------------------//
     // CMD is PRESSURE control and no fault condition:                        //
     //------------------------------------------------------------------------//
-    AN modeOOS;
-    AN INTERLOCK;
+    AN mc.modeOOS;
+    AN mc.INTERLOCK;
     AN PI1_INTERLOCK;
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.PC1.CMD.PRESSURE;
     ==I;
     = #cmdPRESSURE;
@@ -158,9 +134,9 @@ TITLE = Command is VALVE open
     //------------------------------------------------------------------------//
     // CMD is VALVE open and no fault condition:                              //
     //------------------------------------------------------------------------//
-    AN modeOOS;
-    AN INTERLOCK;
-    L #CMD;
+    AN mc.modeOOS;
+    AN mc.INTERLOCK;
+    L #mc.CMD;
     L "dbCONST".BLK.PC1.CMD.VALVE;
     ==I;
     = #cmdVALVE;
@@ -176,7 +152,7 @@ TITLE = Calculate high pressure valve close limit in PRESSURE
     //------------------------------------------------------------------------//
     A #cmdPRESSURE;
     JCN _a;
-    L #SETPOINT;
+    L #_SETPOINT;
     L #DB_H;
     +R;
     T #dbHigh;
@@ -190,7 +166,7 @@ TITLE = Calculate low pressure valve open limit in PRESSURE
     //------------------------------------------------------------------------//
     A #cmdPRESSURE;
     JCN _b;
-    L #SETPOINT;
+    L #_SETPOINT;
     L #DB_L;
     -R;
     T #dbLow;
@@ -201,7 +177,7 @@ TITLE = Selected valve is DRAIN
     //------------------------------------------------------------------------//
     // Selected GAS valve is DRAIN:                                           //
     //------------------------------------------------------------------------//
-    L #SELECT_GAS;
+    L #_SELECT_GAS;
     L "dbCONST".SEL.GAS.DRAIN;
     ==I;
     = #selectDRAIN;
@@ -211,7 +187,7 @@ TITLE = Selected valve is HPCA
     //------------------------------------------------------------------------//
     // Selected GAS valve is HPCA:                                            //
     //------------------------------------------------------------------------//
-    L #SELECT_GAS;
+    L #_SELECT_GAS;
     L "dbCONST".SEL.GAS.HPCA;
     ==I;
     = #selectHPCA;
@@ -221,7 +197,7 @@ TITLE = Selected valve is LPCA
     //------------------------------------------------------------------------//
     // Selected GAS valve is LPCA:                                            //
     //------------------------------------------------------------------------//
-    L #SELECT_GAS;
+    L #_SELECT_GAS;
     L "dbCONST".SEL.GAS.LPCA;
     ==I;
     = #selectLPCA;
@@ -231,7 +207,7 @@ TITLE = Selected valve is VACUUM
     //------------------------------------------------------------------------//
     // Selected GAS valve is VACUUM:                                          //
     //------------------------------------------------------------------------//
-    L #SELECT_GAS;
+    L #_SELECT_GAS;
     L "dbCONST".SEL.GAS.VACUUM;
     ==I;
     = #selectVACUUM;
@@ -241,7 +217,7 @@ TITLE = Selected valve is VENT
     //------------------------------------------------------------------------//
     // Selected GAS valve is VENT:                                            //
     //------------------------------------------------------------------------//
-    L #SELECT_GAS;
+    L #_SELECT_GAS;
     L "dbCONST".SEL.GAS.VENT;
     ==I;
     = #selectVENT;
@@ -250,7 +226,7 @@ NETWORK
 TITLE = Check if selected vclve should be OPENED
     //------------------------------------------------------------------------//
     // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
-    c/ OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
     //                                                                        //
     // Check if selected valve should be OPENED if PRESSURE control and       //
     // pressure measured process PV is less than the setpoint minus the       //
@@ -266,7 +242,6 @@ TITLE = Check if selected vclve should be OPENED
     );
     );
     JCN _c;
-    S #OUT_Q;
     S #tDO;
 _c:   NOP 0;
 
@@ -287,7 +262,6 @@ TITLE = Check if selected valve should be CLOSED
     );
     );
     JCN _d;
-    R #OUT_Q;
     R #tDO;
 _d:   NOP 0;
 
@@ -426,7 +400,7 @@ TITLE = Set Device State to Disabled if commanded
     A #cmdDISABLE;
     JCN _o;
     L "dbCONST".BLK.PC1.STATE.DISABLED;
-    T #STATE;
+    T #mc.STATE;
 _o:   NOP 0;
 
 NETWORK
@@ -437,7 +411,7 @@ TITLE = Set Device State to PRESSURE if commanded
     A #cmdPRESSURE;
     JCN _p;
     L "dbCONST".BLK.PC1.STATE.PRESSURE;
-    T #STATE;
+    T #mc.STATE;
 _p:   NOP 0;
 
 NETWORK
@@ -448,6 +422,6 @@ TITLE = Set Device State to Fault if field fault signal is on
     A #cmdVALVE;
     JCN _q;
     L "dbCONST".BLK.PC1.STATE.VALVE;
-    T #STATE;
+    T #mc.STATE;
 _q:   NOP 0;
 END_FUNCTION_BLOCK

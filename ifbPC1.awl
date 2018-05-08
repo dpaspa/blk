@@ -47,12 +47,6 @@ VAR
 @@TEMPLATE_END@@
 END_VAR
 
-VAR_TEMP
-    CRIL : Bool;
-    NCRIL : Bool;
-    SP : Real;
-END_VAR
-
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
@@ -66,7 +60,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbCRIL".@@INSTANCE@@cril.INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
-    = #CRIL;
+    = #@@INSTANCE@@.mc.CRIL;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -79,7 +73,23 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbNCRIL".@@INSTANCE@@ncril.INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
-    = #NCRIL;
+    = #@@INSTANCE@@.mc.NCRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Owner
+    //------------------------------------------------------------------------//
+    // Set the instance owner:                                                //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.OWNER.@@PARENT@@;
+    T #@@INSTANCE@@.mc.OWNER;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command
+    //------------------------------------------------------------------------//
+    // Set the safe command:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.PC1.SAFE.CMD;
+    T #@@INSTANCE@@.mc.CMD_SAFE;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -87,31 +97,22 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   OWNER                := #@@INSTANCE@@.OWNER ,
-        SERIAL               := #@@INSTANCE@@.SERIAL ,
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
 @@ATTR_BEGIN|LINK@@
-        PI1_PV               := "idb@@PILINKCLASS@@".@@PILINKINSTANCE@@.PV ,
-        PI1_INTERLOCK        := "idb@@PILINKCLASS@@".@@PILINKINSTANCE@@.INTERLOCK ,
+    (   PI1_PV               := "idb@@PILINKCLASS@@".@@PILINKINSTANCE@@.ai.PV ,
+        PI1_INTERLOCK        := "idb@@PILINKCLASS@@".@@PILINKINSTANCE@@.mc.INTERLOCK ,
 @@ATTR_END|LINK@@
         DB_L                 := 0.1 ,
         DB_H                 := 0.1 ,
-        SELECT_GAS           := #@@INSTANCE@@.SELECT_GAS ,
-        VLV_DRAIN            := #@@INSTANCE@@.VLV_DRAIN ,
-        VLV_HPCA             := #@@INSTANCE@@.VLV_HPCA ,
-        VLV_LPCA             := #@@INSTANCE@@.VLV_LPCA ,
-        VLV_VACUUM           := #@@INSTANCE@@.VLV_VACUUM ,
-        VLV_VENT             := #@@INSTANCE@@.VLV_VENT ,
-        OUT_Q                := #@@INSTANCE@@.OUT_Q ,
-        SETPOINT             := #@@INSTANCE@@.SETPOINT ,
-        CMD                  := #@@INSTANCE@@.CMD ,
-        MODE                 := #@@INSTANCE@@.MODE ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
+        _SETPOINT            := #@@INSTANCE@@._SETPOINT ,
+        _SELECT_GAS          := #@@INSTANCE@@._SELECT_GAS ,
+@@ATTR_BEGIN|LINK@@
+        VLV_DRAIN            := "idb@@DRAINLINKCLASS@@".@@DRAINLINKINSTANCE@@.mc.CMD ,
+        VLV_HPCA             := "idb@@HPCALINKCLASS@@".@@HPCALINKINSTANCE@@.mc.CMD ,
+        VLV_LPCA             := "idb@@LPCALINKCLASS@@".@@LPCALINKINSTANCE@@.mc.CMD ,
+        VLV_VACUUM           := "idb@@VACUUMLINKCLASS@@".@@VACUUMLINKINSTANCE@@.mc.CMD ,
+        VLV_VENT             := "idb@@VENTLINKCLASS@@".@@VENTLINKINSTANCE@@.mc.CMD
+@@ATTR_END|LINK@@
     );
-    NOP 0;
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

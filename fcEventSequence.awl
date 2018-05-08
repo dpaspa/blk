@@ -13,17 +13,19 @@
 //----------------------------------------------------------------------------//
 // Function definition:                                                       //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "fbEventProcess"
-TITLE = Event indexing function for SFC messages on the HMI
+FUNCTION "fcEventSequence" : Void
+TITLE = Event indexing function for SFC steps
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
-NAME : fbEventProcess
+NAME : fcEventSequence
 VERSION : 1.0
 
 //----------------------------------------------------------------------------//
 // Declare variables which must retain their values between block calls:      //
 //----------------------------------------------------------------------------//
-VAR
+VAR_IN_OUT
+    eventElement : "udtEventSequence";
+    elementTerminationBit : Bool;
     elementCount : Int;                // Number of elements in the data block
     elementSize : Int;                 // Size of the entire data block
     scanCount : Int;
@@ -35,8 +37,6 @@ END_VAR
 // be able to measure the size of the UDT:                                    //
 //----------------------------------------------------------------------------//
 VAR_TEMP
-    eventElement : "udtMsgEvent";
-    elementTerminationBit : Bool;
     edgeStart : Bool;
     raiseEvent : Bool;
     scanEnabled : Bool;
@@ -54,7 +54,7 @@ TITLE = Check if request to start
     // Open the Event global data block and save the block length locally:    //
     //------------------------------------------------------------------------//
     A "enableEventsProcess";
-    = #scanEnabled;
+    T #scanEnabled;
 
 NETWORK
 TITLE = Check if starting up
@@ -71,9 +71,7 @@ TITLE = Open globally shared event DB if starting
     // Open the Event global data block if starting to scan:                  //
     //------------------------------------------------------------------------//
     A #scanStart;
-    JCN _a;
     OPN "dbEVENTProcess";
-_a:   NOP 0;
 
 NETWORK
 TITLE = Get shared event DB size
@@ -81,10 +79,8 @@ TITLE = Get shared event DB size
     // Get the overall size of the shared event data block if starting:       //
     //------------------------------------------------------------------------//
     A #scanStart;
-    JCN _b;
     L DBLG;
     T #blockSize;
-_b:   NOP 0;
 
 NETWORK
 TITLE = Get the size of a single DB UDT element
@@ -93,13 +89,11 @@ TITLE = Get the size of a single DB UDT element
     // temporary variables defined in this function:                          //
     //------------------------------------------------------------------------//
     A #scanStart;
-    JCN _c;
     L P##elementTerminationBit;        // Pointer to the first element after the measured one
     L P##eventElement;                 // Pointer to the temp element to mesure it
     -D;                                // Pointer subtraction to determine length
     SRD 3;                             // Shift pointer to only have length
     T #elementSize;
-_c:   NOP 0;
 
 NETWORK
 TITLE = Calculate iteration loop dimensions based on block size
@@ -108,12 +102,10 @@ TITLE = Calculate iteration loop dimensions based on block size
     // element data structure size if starting:                               //
     //------------------------------------------------------------------------//
     A #scanStart;
-    JCN _d;
     L #blockSize;
     L #elementSize;
     /D;
     T #elementCount;
-_d:   NOP 0;
 
 NETWORK
 TITLE = Initialise the counter if starting
@@ -121,10 +113,8 @@ TITLE = Initialise the counter if starting
     // Start counting at 1 if starting up:                                    //
     //------------------------------------------------------------------------//
     A #scanStart;
-    JCN _e;
     L 1;
     T #scanCount;
-_e:   NOP 0;
 
 NETWORK
 TITLE = Start at the first block element if reached the end
@@ -134,10 +124,8 @@ TITLE = Start at the first block element if reached the end
     L #scanCount;
     L #elementCount;
     >I;
-    JCN _f;
     L 1;
     T #scanCount;
-_f:   NOP 0;
 
 NETWORK
 TITLE = Initialise the starting address of the DB pointer if first element
@@ -148,10 +136,8 @@ TITLE = Initialise the starting address of the DB pointer if first element
     L #scanCount;
     L 1;
     ==I;
-    JCN _g;
     L P#0.0;
     LAR1;
-_g:   NOP 0;
 
 NETWORK
 TITLE = Bypass scanning if not currently enabled
@@ -209,13 +195,11 @@ TITLE = Clear response flags if message event needs to be raised
     // Clear the alarm request and response flags if raising a new event:     //
     //------------------------------------------------------------------------//
     A #raiseEvent;
-    JCN _h;
     R #eventElement.confirmNo;
     R #eventElement.confirmYes;
     R #eventElement.trigger;
     R #eventElement.ackPending;
     R #scComplete;
-_h:   NOP 0;
 
 NETWORK
 TITLE = Raise message event without acknowledgement if required
@@ -224,7 +208,6 @@ TITLE = Raise message event without acknowledgement if required
     //------------------------------------------------------------------------//
     A #raiseEvent;
     AN #eventElement.ackRequired;
-    JCN _i;
     CALL ALARM_D
     (   SIG                         := #eventElement.trigger ,
         ID                          := WORD#16#EEEE ,         // S7 Data Channel for alarms
@@ -233,7 +216,6 @@ TITLE = Raise message event without acknowledgement if required
         SD                          := #eventElement.payLoad ,
         RET_VAL                     := #sRetval
     );
-_i:   NOP 0;
 
 NETWORK
 TITLE = Flag acknowledgement will be pending
@@ -243,9 +225,7 @@ TITLE = Flag acknowledgement will be pending
     //------------------------------------------------------------------------//
     A #raiseEvent;
     A #eventElement.ackRequired;
-    JCN _j;
     S #eventElement.ackPending;
-_j:   NOP 0;
 
 NETWORK
 TITLE = Raise event with acknowledgement if required
@@ -254,7 +234,6 @@ TITLE = Raise event with acknowledgement if required
     //------------------------------------------------------------------------//
     A #raiseEvent;
     A #eventElement.ackRequired;
-    JCN _k;
     CALL ALARM_DQ
     (   SIG                         := #eventElement.trigger ,
         ID                          := WORD#16#EEEE ,         // S7 Data Channel for alarms
@@ -263,7 +242,6 @@ TITLE = Raise event with acknowledgement if required
         SD                          := #eventElement.payLoad ,
         RET_VAL                     := #sRetval
     );
-_k:   NOP 0;
 
 NETWORK
 TITLE = Get acknowledgement if pending
@@ -273,7 +251,6 @@ TITLE = Get acknowledgement if pending
     // the event message:                                                     //
     //------------------------------------------------------------------------//
     A #eventElement.ackPending;
-    JCN _l;
     CALL ALARM_SC
     (   EV_ID                       := #eventElement.eventID ,
         RET_VAL                     := #scRetval ,
@@ -281,7 +258,6 @@ TITLE = Get acknowledgement if pending
         Q_STATE                     := #scComplete
     );
     NOP 0;
-_l:   NOP 0;
 
 NETWORK
 TITLE = Flag acknowledge response received if so
@@ -290,9 +266,7 @@ TITLE = Flag acknowledge response received if so
     //------------------------------------------------------------------------//
     A #eventElement.ackPending;
     A #scComplete;
-    JCN _m;
     R #eventElement.ackPending;
-_m:   NOP 0;
 
 NETWORK
 TITLE = Only Acknowledge or Ack plus Cancel
@@ -310,24 +284,13 @@ TITLE = Save the current element data back into the global DB
     // Write the current element data back to the global shared DB:           //
     //------------------------------------------------------------------------//
     A #eventElement.trigger;
-    JCN _n;
     T DBD[AR1,P#0.0];
-_n:   NOP 0;
-
     A #eventElement.confirmYes;
-    JCN _o;
     T DBD[AR1,P#0.1];
-_o:   NOP 0;
-
     A #eventElement.confirmNo;
-    JCN _p;
     T DBD[AR1,P#0.2];
-_p:   NOP 0;
-
     A #eventElement.ackPending;
-    JCN _q;
     T DBD[AR1,P#0.3];
-_q:   NOP 0;
 
 NETWORK
 TITLE = Increment the DB point offset
@@ -348,4 +311,4 @@ TITLE = Increment the DB element counter
 
 _scanBypass:   NOP 0;
 
-END_FUNCTION_BLOCK
+END_FUNCTION

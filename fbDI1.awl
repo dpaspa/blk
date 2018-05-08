@@ -26,18 +26,14 @@ VERSION : 2.0
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
 VAR_INPUT
-    CMD_SAFE : Int;          // Safe command for the module
     DI_Auto : Bool;          // Input signal from Field
-    DI_Manual : Bool;        // User digital signal for simulating
 END_VAR
 
-VAR_OUTPUT
+VAR
+    mc : "udtModeCommand";   // Block mode and command
+    DI_Manual : Bool;        // User digital signal for simulating
     ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
     PV : Bool;               // Processed DI
-END_VAR
-
-VAR_IN_OUT
-    mc : "udtModeCommand";   // Block mode and command
 END_VAR
 
 VAR_TEMP
@@ -54,9 +50,8 @@ TITLE = Call Mode and Command handling function
     // Process the standard block functions for command, mode, interlock and  //
     // state:                                                                 //
     //------------------------------------------------------------------------//
-    CALL "fcModeCmd1"
-    (
-        mc                   := #mc
+    CALL "fcModeCmd"
+    (   mc                   := #mc
     );
 
 NETWORK

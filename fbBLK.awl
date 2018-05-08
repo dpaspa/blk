@@ -160,7 +160,7 @@ VAR_INPUT
     @@CHILDALIAS@@_STATE : Int;    // @@CHILDALIASDESCRIPTION@@
 @@ATTR_END|CHILD@@
 @@ATTR_BEGIN|pBLKCallingIN@@
-    @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
+    @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
 @@ATTR_END|pBLKCallingIN@@
 @@ATTR_BEGIN|pSFCCallingIN@@
     @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
@@ -182,7 +182,7 @@ VAR_OUTPUT
     REM_TIME_S : Int;
 @@ATTR_END|TIMER@@
 @@ATTR_BEGIN|pBLKCallingOUT@@
-    @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
+    @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
 @@ATTR_END|pBLKCallingOUT@@
 @@ATTR_BEGIN|pChildIN@@
     @@CHILDPARAMETER@@_@@CLASS@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
@@ -199,20 +199,10 @@ VAR_OUTPUT
 END_VAR
 
 VAR_IN_OUT
-    mc : "udtModeCommand";             // Block mode and command
-    SUBSelected : Int := 0;            // Currently selected running substate
     isBatch : Bool;
-    ME : Int;                          // Block unique ID
-    SQ_STATE : Int;
-    SQ_ACK : Bool;
-    SQ_RESUME : Bool;
-    SUBLast : Int;
 @@ATTR_BEGIN|pBLKCallingIN_OUT@@
-    @@PARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
+    @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
 @@ATTR_END|pBLKCallingIN_OUT@@
-@@ATTR_BEGIN|HYGIENE@@
-    HYGIENE : Int;   // Hygiene status of the unit
-@@ATTR_END|HYGIENE@@
 @@ATTR_BEGIN|CHILD@@
     @@CHILDALIAS@@_CMD : Int;     // @@CHILDALIASDESCRIPTION@@
 @@ATTR_END|CHILD@@
@@ -234,21 +224,21 @@ VAR_IN_OUT
 END_VAR
 
 VAR
-    timeCheckChildState {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-    RUNTMR : "fbRunTimer";
+    mc : "udtModeCommand";             // General mode and command
+    mcb : "udtModeCommandBLK";         // Block mode and command
+    cmc : Array[1..@@NUMCHILDREN@@] of "udtModeCommand";
 @@ATTR_BEGIN|HYGIENE@@
-    HYGIENE_DATA : "udtHygiene";
+    hs : "udtHygiene";
 @@ATTR_END|HYGIENE@@
+    RUNTMR : "fbRunTimer";
 @@ATTR_BEGIN|SFC@@
     @@SFC@@ : "fb@@SFC@@";       // @@STATEDESCRIPTION@@
 @@ATTR_END|SFC@@
-    events : Struct
-        commandStart : Bool;
-        commandStop : Bool;
-        modeAUTO: Bool;
-        modeMANUAL: Bool;
-        modeOOS: Bool;
-    END_STRUCT;
+    timeCheckChildState {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+    ME : Int;                          // Block unique ID
+    SQ_STATE : Int;
+    SQ_ACK : Bool;
+    SQ_RESUME : Bool;
     flags : Struct
         badParameter: Bool;
         childCommandChange : Bool;
@@ -256,7 +246,6 @@ VAR
         childInterlocked : Bool;
         childNotAuto : Bool;
         childMismatch : Bool; childUnavailable : Bool;
-        permitStart : Bool;
         sfcCompleted : Bool;
         sfcRunning : Bool;
     END_STRUCT;
@@ -326,12 +315,14 @@ TITLE = Check if child @@CHILDALIAS@@ is not in AUTO mode
     // Check the child device to see if it is not in Auto mode. Only need to  //
     // find the first one so bypass further checks if this child in Manual:   //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
+    JCN _childAuto_@@COUNTER|1@@_@@STATE@@;
     L #@@CHILDALIAS@@_MODE;
     L "dbCONST".BLK.MODE.AUTO;
     <>I;
     = #flags.childNotAuto;
+_childAuto_@@COUNTER|1@@_@@STATE@@:    NOP 0;
     JC _completedChildAutoChecks;
 
 @@ATTR_END|CHILD_ACQUIRE@@
@@ -350,7 +341,7 @@ TITLE = Check if child @@CHILDALIAS@@ is Interlocked
     // need to find the first one so bypass further checks if this child is   //
     // interlocked:                                                           //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
     A #@@CHILDALIAS@@_INTERLOCK;
     = #flags.childInterlocked;
@@ -373,7 +364,7 @@ TITLE = Check if Child @@CHILDALIAS@@ is not already Owned or not Available
     // later to execute a command. Only need to find the first one so bypass  //
     // further checks if this child is unavailable:                           //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
     AN(;
     L #@@CHILDALIAS@@_OWNER;
@@ -420,43 +411,39 @@ TITLE = Set Start command permitted flag if all okay
     AN #INTERLOCK;
     AN #flags.childFailed;
     AN #flags.badParameter;
-    = #flags.permitStart;
+    = #mcb.permitStart;
 
 NETWORK
-TITLE = Call Mode and Command handling block
+TITLE = Call General Mode and Command handling block
     //------------------------------------------------------------------------//
     // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
     //                                                                        //
     // Process the standard block functions for command, mode, interlock and  //
     // state:                                                                 //
     //------------------------------------------------------------------------//
-    CALL "fcModeCmdBLK"
-    (
-        CRIL                       := #CRIL ,
-        NCRIL                      := #NCRIL ,
-        MAN_OVERRIDE                := #MAN_OVERRIDE ,
-        permitStart                 := #flags.permitStart ,
-        eventModeAuto               := #events.modeAUTO ,
-        eventModeManual             := #events.modeMANUAL ,
-        eventModeOOS                := #events.modeOOS ,
-        MODE                        := #MODE ,
-        CMD                         := #CMD ,
-        STATE                       := #STATE ,
-        eventCmdStart               := #events.commandStart ,
-        eventCmdStop                := #events.commandStop ,
-        SUBSelected                 := #SUBSelected ,
-        SUBLast                     := #SUBLast ,
-        INTERLOCK                   := #INTERLOCK
+    CALL "fcModeCmd"
+    (   mc                   := #mc
     );
-    NOP 0;
+
+NETWORK
+TITLE = Call BLOCK Mode and Command handling block
+    //------------------------------------------------------------------------//
+    // Process the stackable block functions for mode and command change      //
+    // events:                                                                //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmdBLK"
+    (   mcb                  := #mcb
+    );
 
 NETWORK
 TITLE = Flag SFC not running if a new running substate command issued
     //------------------------------------------------------------------------//
     // Flag SFC is not yet running if new start command:                      //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
+    JCN _notStart;
     R flags.sfcRunning;
+_notStart:    NOP 0;
 
 //----------------------------------------------------------------------------//
 // RUNNING SUBSTATE    RUNNING SUBSTATE    RUNNING SUBSTATE    RUNNING SUBSTA //
@@ -474,9 +461,9 @@ TITLE = Running Substate flags
     // Convert running substate values into boolean flags for ease of use in  //
     // boolean logic if starting a new substate:                              //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A(;
-    L #SUBSelected;
+    L #mcb.SUBSelected;
     L "dbCONST".BLK.@@CLASS@@.SUBS.@@STATE@@;
     ==I;
     );
@@ -494,7 +481,7 @@ TITLE = Calling Parameter Selection flags
     // Convert calling parameter selections into the boolean flags for ease   //
     // of use in boolean logic if starting a new substate:                    //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A(;
     L #@@PARAMETER@@;
     L "dbCONST".SEL.@@SELECTION@@.@@SELECTIONVALUE@@;
@@ -518,7 +505,7 @@ TITLE = Acquire child @@CHILDALIAS@@ for new command if required for the state
     // the child is available as it would be a child unavailabile failure     //
     // already above if not available at this point:                          //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
     L #@@CHILDALIAS@@_OWNER;
     L "dbCONST".BLK.OWNER.AVAILABLE;
@@ -532,6 +519,7 @@ TITLE = Acquire child @@CHILDALIAS@@ for new command
     // the child owner variable:                                              //
     //------------------------------------------------------------------------//
     A #own.@@CHILDALIAS@@;
+    JCN childAuto_@@COUNTER|1@@_@@STATE@@;
     L #ME;
     T #@@CHILDALIAS@@_OWNER;
 
@@ -547,7 +535,7 @@ TITLE = Cascade Batch Serial Number to children
     //                                                                        //
     // Cascade this block's Batch Serial Number to all child devices:         //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
     L #SERIALNUM;
     T #@@CHILDALIAS@@_SERIALNUM;
@@ -564,7 +552,7 @@ TITLE = Download calling parameter @@PARAMETER@@ value to child device @@CHILDAL
     //                                                                        //
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
     L #@@PARAMETER@@;
     T #@@PARAMETER@@_@@CHILDALIAS@@;
@@ -582,7 +570,7 @@ TITLE = Command child device @@CHILDALIAS@@ for state @@STATE@@ to its initial t
     // Set the initial command values for the child devices.                  //
     // Command the child device to its initial command if condition is true:  //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
     @@TRUESTATEMENT@@
 
@@ -599,7 +587,7 @@ TITLE = Command child device @@CHILDALIAS@@ for state @@STATE@@ to its initial f
     // Set the initial command values for the child devices.                  //
     // Command the child device to its initial command:                       //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
     @@FALSESTATEMENT@@
 
@@ -619,7 +607,7 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
     // Set the SFC calling parameters if this is the running substate:        //
     //------------------------------------------------------------------------//
     A(;
-    O #events.commandStart;
+    O #mcb.eventCmdStart;
     O flags.sfcRunning;
     );
     A #subs.@@STATE@@;
@@ -628,7 +616,7 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
         MODE                        := #@@SFC@@.MODE ,
         SQ_CMD                      := #@@SFC@@.SQ_CMD ,
 @@ATTR_BEGIN|pSFCCallingIN@@
-        @@CHILDPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
+        @@BLOCKPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pSFCCallingIN@@
         SQ_STATE                    := #@@SFC@@.SQ_STATE ,
         CURSTEP                     := #@@SFC@@.CURSTEP ,
@@ -636,7 +624,7 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
         S_ACTIVE                    := #@@SFC@@.S_ACTIVE ,
         ERR_FAULT                   := #@@SFC@@.ERR_FAULT ,
 @@ATTR_BEGIN|pSFCCallingOUT@@
-        @@CHILDPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
+        @@BLOCKPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pSFCCallingOUT@@
         SQ_FINISHED                 := #@@SFC@@.SQ_FINISHED ,
         OFF_IDLE                    := #@@SFC@@.OFF_IDLE ,
@@ -645,7 +633,7 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
         MAN_JUMP                    := #@@SFC@@.MAN_JUMP ,
         NO_VERIFIC                  := #@@SFC@@.NO_VERIFIC ,
 @@ATTR_BEGIN|pSFCCallingIN_OUT@@
-        @@CHILDPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
+        @@BLOCKPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pSFCCallingIN_OUT@@
         TRN_AND_JUMP                := #@@SFC@@.TRN_AND_JUMP
     );
@@ -659,9 +647,9 @@ TITLE = Make sure any non-active SFCs are stopped
     // Stop any SFC if not the current running substate or if the stop        //
     // command has been issued:                                               //
     //------------------------------------------------------------------------//
-    O #events.commandStop;
+    O #mcb.eventCmdStop;
     O(;
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     AN #subs.@@STATE@@;
     );
     L "dbCONST".SEQ.CMD.STOP;
@@ -677,12 +665,12 @@ TITLE = Clear the operator prompt flag
     //                                                                        //
     // Clear the SFC prompt bit:                                              //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
-    R #@@SFC@@.@@CHILDPARAMETER@@;
+    A #mcb.eventCmdStart;
+    R #@@PARAMETERSFC@@.@@CHILDPARAMETER@@;
 
 NETWORK
 TITLE = Clear the global event DB operator prompt flag
-    AN #events.commandStart;
+    AN #mcb.eventCmdStart;
     = #blkPrompt@@CHILDPARAMETER@@;
 
 @@ATTR_END|pSFCPrompt@@
@@ -695,12 +683,12 @@ TITLE = Clear the operator confirm flag
     //                                                                        //
     // Clear the SFC confirm bit:                                             //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
-    R #@@SFC@@.@@CHILDPARAMETER@@;
+    A #mcb.eventCmdStart;
+    R #@@PARAMETERSFC@@.@@CHILDPARAMETER@@;
 
 NETWORK
 TITLE = Clear the global event DB operator confirm flag
-    AN #events.commandStart;
+    AN #mcb.eventCmdStart;
     = #blkConfirm@@CHILDPARAMETER@@;
 
 @@ATTR_END|pSFCConfirm@@
@@ -716,7 +704,7 @@ TITLE = Synchronise SFC @@SFC@@ child state for child @@CHILDPARAMETER@@
     // running:                                                               //
     //------------------------------------------------------------------------//
     A(;
-    O #events.commandStart;
+    O #mcb.eventCmdStart;
     O flags.sfcRunning;
     );
     A #subs.@@STATE@@;
@@ -736,7 +724,7 @@ TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
     // Write the initial command to any SFC child commands to synchronise     //
     // them at the start of the SFC:                                          //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
     L #@@BLOCKPARAMETER@@;
     T #@@SFC@@.@@CHILDPARAMETER@@;
@@ -754,7 +742,7 @@ TITLE = Start the SFC sequence @@SFC@@ for running substate @@STATE@@
     //                                                                        //
     // Bypass if not the current running substate:                            //
     //------------------------------------------------------------------------//
-    A #events.commandStart;
+    A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
     JCN _notSFCStarting_2_@@STATE@@;
 
@@ -864,7 +852,7 @@ TITLE = Raise operator prompt if required
     //                                                                        //
     // Transfer the SFC prompt bit to the global event datablock:             //
     //------------------------------------------------------------------------//
-    A #@@SFC@@.@@CHILDPARAMETER@@;
+    A #@@PARAMETERSFC@@.@@CHILDPARAMETER@@;
     = #blkPrompt@@CHILDPARAMETER@@;
 
 @@ATTR_END|pSFCPrompt@@
@@ -878,7 +866,7 @@ TITLE = Return operator bit if made
     // Receive the SFC confirm bit from the global event datablock:           //
     //------------------------------------------------------------------------//
     A #blkConfirm@@CHILDPARAMETER@@;
-    = #@@SFC@@.@@CHILDPARAMETER@@;
+    = #@@PARAMETERSFC@@.@@CHILDPARAMETER@@;
 
 @@ATTR_END|pSFCConfirm@@
 
@@ -890,7 +878,7 @@ TITLE = Log data if required
     //                                                                        //
     // Transfer the SFC log data to the global event datablock:               //
     //------------------------------------------------------------------------//
-    A #@@SFC@@.@@CHILDPARAMETER@@;
+    A #@@PARAMETERSFC@@.@@CHILDPARAMETER@@;
     = #blkLog@@CHILDPARAMETER@@;
 
 @@ATTR_END|pSFCLog@@
@@ -901,7 +889,7 @@ TITLE = Any Interlock must pause the running SFC
     //------------------------------------------------------------------------//
     // Pause the running SFC sequence if any interlock or failure condition:  //
     //------------------------------------------------------------------------//
-    AN #flags.permitStart;
+    AN #mcb.permitStart;
     A flags.sfcRunning;
     A #subs.@@STATE@@;
     L "dbCONST".SEQ.CMD.PAUSE;
@@ -917,9 +905,9 @@ TITLE = Stop the module if any problem
     // Stop the block if any interlock condition or not permitted to strat:   //
     //------------------------------------------------------------------------//
     O #INTERLOCK;
-    ON #flags.permitStart;
+    ON #mcb.permitStart;
     L "dbCONST".BLK.CMD.STOP;
-    T #CMD;
+    T #mc.CMD;
 
 @@ATTR_BEGIN|CHILD@@
 NETWORK
@@ -931,7 +919,7 @@ TITLE = Set child device @@CHILDALIAS@@ to safe state if any interlock or child 
     // child failure:                                                         //
     //------------------------------------------------------------------------//
     O #INTERLOCK;
-    ON #flags.permitStart;
+    ON #mcb.permitStart;
     L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
     T #@@CHILDALIAS@@_CMD;
 
@@ -945,7 +933,7 @@ TITLE = Set child devices to safe state if SFC @@SFC@@ Paused or Error
     //                                                                        //
     // Bypass if the current SFC is running okay:                             //
     //------------------------------------------------------------------------//
-    A #flags.permitStart;
+    A #mcb.permitStart;
     A #subs.@@STATE@@;
     A #flags.sfcRunning;
     A(;
@@ -1051,9 +1039,9 @@ TITLE = All SQ are in Auto mode when EM in Auto
     //                                                                        //
     // Set all SFCs to AUTO mode if the block is in AUTO:                     //
     //------------------------------------------------------------------------//
-    A #events.modeAUTO;
+    A #mcb.eventModeAUTO;
     JNB nomc;
-    L #MODE;
+    L #mc.MODE;
 @@ATTR_BEGIN|SFC@@
     T #@@SFC@@.MODE;
 @@ATTR_END|SFC@@
@@ -1146,7 +1134,7 @@ TITLE = Clean up if SFC no longer running
     A #subs.@@STATE@@;
     A(;
     O(;
-    L #SUBSelected;
+    L #mcb.SUBSelected;
     L "dbCONST".BLK.@@CLASS@@.SAFE.CMD;
     ==I;
     );
@@ -1190,9 +1178,9 @@ TITLE = Cascade Auto or OOS Mode to child @@CHILDALIAS@@
     //                                                                        //
     // Switch child mode to Auto or OOS when parent mode transitions:         //
     //------------------------------------------------------------------------//
-    O #events.modeAUTO;
-    O #events.modeOOS;
-    L #MODE;
+    O #mcb.eventModeAUTO;
+    O #mcb.eventModeOOS;
+    L #mc.MODE;
     T #@@CHILDALIAS@@_MODE;
 
 @@ATTR_END|CHILD@@
@@ -1206,16 +1194,8 @@ TITLE = HYGIENE STATE CALCULATION
     // Calculate the hygiene status of the block:                             //
     //------------------------------------------------------------------------//
     CALL "fcHygiene"
-    (
-        CLEAN_TIME                  := #HYGIENE_DATA.CLEAN_TIME ,
-        STERILE_TIME                := #HYGIENE_DATA.STERILE_TIME ,
-        CLEAN_TOUT                  := #HYGIENE_DATA.CLEAN_TOUT ,
-        STERILE_TOUT                := #HYGIENE_DATA.STERILE_TOUT ,
-        HYGIENE_STATE               := #HYGIENE ,
-        CLEAN_ELAPSED_TIME          := #HYGIENE_DATA.CLEAN_ELAPSED_TIME ,
-        STERILE_ELAPSED_TIME        := #HYGIENE_DATA.STERILE_ELAPSED_TIME
+    (   hs                   := #hs
     );
-    NOP 0;
 @@ATTR_END|HYGIENE@@
 
 @@ATTR_BEGIN|TIMER@@
@@ -1226,7 +1206,7 @@ TITLE = Hour Min & Sec to Time variable
     //                                                                        //
     // Convert calling timer value to Time variable:                          //
     //------------------------------------------------------------------------//
-    A #flags.permitStart;
+    A #mcb.permitStart;
     CALL "fcHMS2Time"
     (
         H                           := #TIME_H ,

@@ -31,31 +31,20 @@ VERSION : 2.0
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
 VAR_INPUT
-    OWNER : Int;             // Value to be set by Parent
-    SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;             // Critical interlock
-    NCRIL : Bool;            // Non-critical interlock
-    MAN_OVERRIDE : Bool;     // Override non-critical interlocks
     FAULT : Bool;            // Fault input signal from Field
 END_VAR
 
 VAR_OUTPUT
     DO : Bool;               // Output Signal to Heating Element
+END_VAR
+
+VAR
+    mc : "udtModeCommand";   // Block mode and command
     ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
     CUTOUT : Bool;           // Flag indicating if TI alarm is to cutout (0= Alarm Enabled, 1= Alarm Disabled)
 END_VAR
 
-VAR_IN_OUT
-    CMD : Int;               // Device Command from dbCONST
-    MODE : Int;              // Control Mode
-    STATE : Int;             // Device State from dbCONST
-    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
-END_VAR
-
 VAR_TEMP
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
     tDO : Bool;              // Temporary processed DO signal
     tFault : Bool;
 END_VAR
@@ -70,20 +59,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := "dbCONST".BLK.HE1.SAFE.CMD ,
-        MODE                 := #MODE ,
-        CMD                  := #CMD ,
-        STATE                := #STATE ,
-        INTERLOCK            := #INTERLOCK ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS
+    (   mc                   := #mc
     );
-    NOP 0;
 
 NETWORK
 TITLE = Device command ENABLE
@@ -94,8 +71,8 @@ TITLE = Device command ENABLE
     // CMD is ENABLE if no fault or interlock, otherwise DISABLE:             //
     //------------------------------------------------------------------------//
     AN #tFault;
-    AN #INTERLOCK;
-    L #CMD;
+    AN #mc.INTERLOCK;
+    L #mc.CMD;
     L "dbCONST".BLK.HE1.CMD.ENABLE;
     ==I;
     = #tDO;
@@ -116,7 +93,7 @@ TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
     // CMD is DISABLE then switch off regardless of any fault or interlock:   //
     //------------------------------------------------------------------------//
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.HE1.CMD.DISABLE;
     ==I;
     JCN _a;
@@ -154,7 +131,7 @@ TITLE = Set Device State to Enabled if output is on
     A #tDO;
     JCN _b;
     L "dbCONST".BLK.HE1.STATE.ENABLED;
-    T #STATE;
+    T #mc.STATE;
 _b:   NOP 0;
 
 NETWORK
@@ -166,7 +143,7 @@ TITLE = Set Device State to Disabled if output is off
     AN #tFault;
     JCN _c;
     L "dbCONST".BLK.HE1.STATE.DISABLED;
-    T #STATE;
+    T #mc.STATE;
 _c:   NOP 0;
 
 NETWORK
@@ -177,6 +154,6 @@ TITLE = Set Device State to Fault if field fault signal is on
     A #tFault;
     JCN _d;
     L "dbCONST".BLK.HE1.STATE.FAULT;
-    T #STATE;
+    T #mc.STATE;
 _d:   NOP 0;
 END_FUNCTION_BLOCK

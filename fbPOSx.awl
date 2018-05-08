@@ -60,12 +60,6 @@ VERSION : 2.0
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
 VAR_INPUT
-    OWNER : Int;             // Value to be set by Parent
-    SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;             // Critical interlock
-    NCRIL : Bool;            // Non-critical interlock
-    MAN_OVERRIDE : Bool;     // Override non-critical interlocks
-    TMR : Time := T#3S;      // Close/Open feedback delay limit
     FB_C : Bool;             // Close feedback signal from field
     FB_O : Bool;             // Open feedback signal from field
     NC : Bool;               // Set if Normally Close valve
@@ -75,24 +69,15 @@ VAR_OUTPUT
     OUT_Q : Bool;            // Valve open/close command
 END_VAR
 
-VAR_IN_OUT
+VAR
+    mc : "udtModeCommand";   // Block mode and command
     FAULT_C : Bool;          // Valve fail to close
     FAULT_O : Bool;          // Valve fail to Open
-    CMD : Int;               // Device Command from dbCONST
-    MODE : Int;              // Control Mode
-    STATE : Int;             // Device State from dbCONST
-    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
-END_VAR
-
-VAR
     openTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
     closeTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-    openTMRElapsed : Time;
-    closeTMRElapsed : Time;
 END_VAR
 
 VAR_TEMP
-    CMD_SAFE : Int;
     cmdCLOSE : Bool;
     cmdOPEN : Bool;
     modeAUTO : Bool;
@@ -104,6 +89,9 @@ VAR_TEMP
     feedbackFAULT : Bool;
     OUT_Q_Close : Bool;
     OUT_Q_Open : Bool;
+    TMR : Time := T#3S;      // Close/Open feedback delay limit
+    openTMRElapsed : Time;
+    closeTMRElapsed : Time;
     openTMRExpired : Bool;
     closeTMRExpired : Bool;
 END_VAR
@@ -120,7 +108,7 @@ TITLE = Call Mode and Command handling function
     A #NC;
     JCN _a;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T CMD_SAFE;
+    T #mc.CMD_SAFE;
 _a:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -129,7 +117,7 @@ _a:   NOP 0;
     AN #NC;
     JCN _b;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T CMD_SAFE;
+    T #mc.CMD_SAFE;
 _b:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -137,18 +125,7 @@ _b:   NOP 0;
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := #CMD_SAFE ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS ,
-        MODE                 := #MODE ,
-        CMD                  := #CMD ,
-        STATE                := #STATE ,
-        INTERLOCK            := #INTERLOCK
+    (   mc                   := #mc
     );
 
 NETWORK
@@ -159,7 +136,7 @@ TITLE = Device command OPEN
     //                                                                        //
     // CMD is OPEN:                                                           //
     //------------------------------------------------------------------------//
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.POSx.CMD.OPEN;
     ==I;
     = #cmdOPEN;
@@ -169,7 +146,7 @@ TITLE = Device command CLOSE
     //------------------------------------------------------------------------//
     // CMD is CLOSE:                                                          //
     //------------------------------------------------------------------------//
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
     ==I;
     = #cmdCLOSE;
@@ -194,8 +171,8 @@ TITLE = Open command is alowable if normal operation
     // Allow OPEN command if everything is operating normally:                //
     //------------------------------------------------------------------------//
     A #cmdOPEN;
-    AN #INTERLOCK;
-    AN #modeOOS;
+    AN #mc.INTERLOCK;
+    AN #mc.modeOOS;
     = #cmdOPEN;
 
 NETWORK
@@ -204,8 +181,8 @@ TITLE = Close command is alowable if normal operation
     // Allow CLOSE command if everything is operating normally:               //
     //------------------------------------------------------------------------//
     A #cmdCLOSE;
-    AN #INTERLOCK;
-    AN #modeOOS;
+    AN #mc.INTERLOCK;
+    AN #mc.modeOOS;
     = #cmdCLOSE;
 
 NETWORK
@@ -310,7 +287,7 @@ TITLE = Valve CLOSED if command and feedback CLOSED
     A #feedbackCLOSED;
     JCN _c;
     L "dbCONST".BLK.POSx.STATE.CLOSED;
-    T #STATE;
+    T #mc.STATE;
 _c:   NOP 0;
 
 NETWORK
@@ -322,7 +299,7 @@ TITLE = Valve OPENED if command and feedback OPENED
     A #feedbackOPENED;
     JCN _d;
     L "dbCONST".BLK.POSx.STATE.OPENED;
-    T #STATE;
+    T #mc.STATE;
 _d:   NOP 0;
 
 NETWORK
@@ -343,7 +320,7 @@ TITLE = Valve TRAVEL if command issued and travel timer not expired
     );
     JCN _e;
     L "dbCONST".BLK.POSx.STATE.TRAVEL;
-    T #STATE;
+    T #mc.STATE;
 _e:   NOP 0;
 
 NETWORK
@@ -386,6 +363,6 @@ TITLE = Valve FAULT if both feedbacks on or travel timer expired
     O FAULT_O;
     JCN _f;
     L "dbCONST".BLK.POSx.STATE.FAULT;
-    T #STATE;
+    T #mc.STATE;
 _f:   NOP 0;
 END_FUNCTION_BLOCK

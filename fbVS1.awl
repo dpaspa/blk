@@ -22,11 +22,6 @@ VERSION : 2.0
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
 VAR_INPUT
-    OWNER : Int;             // Value to be set or reset by Parent
-    SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;             // Critical Interlock in series
-    NCRIL : Bool;            // Non-critical Interlock in series
-    MAN_OVERRIDE : Bool;     // Critical Interlock in series can be Override by this Input
     VLV1_STATE : Int;        // State of the user 1 valve
     VLV2_STATE : Int;        // State of the user 2 valve
     PUMP1_INTERLOCK : Bool;  // Vacuum Pump 1 interlock
@@ -38,20 +33,14 @@ VAR_OUTPUT
     PUMP2_CMD : Int;         // Vacuum Pump 2 command
 END_VAR
 
-VAR_IN_OUT
+VAR
+    mc : "udtModeCommand";   // Block mode and command
     FAULT : Bool;
-    CMD : Int;               // Command
-    MODE : Int;              // Control Mode
-    STATE : Int;             // Device State from dbCONST
-    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
 END_VAR
 
 VAR_TEMP
     cmdDISABLE : Bool;
     cmdENABLE : Bool;
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
     tDO : Bool;              // Temporary processed output signal
 END_VAR
 
@@ -66,18 +55,7 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := "dbCONST".BLK.VS1.SAFE.CMD ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS ,
-        MODE                 := #MODE ,
-        CMD                  := #CMD ,
-        STATE                := #STATE ,
-        INTERLOCK            := #INTERLOCK
+    (   mc                   := #mc
     );
 
 NETWORK
@@ -88,7 +66,7 @@ TITLE = DISABLE command
     //                                                                        //
     // CMD is DISABLE:                                                        //
     //------------------------------------------------------------------------//
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.VS1.CMD.DISABLE;
     ==I;
     = #cmdDISABLE;
@@ -96,9 +74,9 @@ TITLE = DISABLE command
     //------------------------------------------------------------------------//
     // CMD is ENABLE:                                                         //
     //------------------------------------------------------------------------//
-    AN #modeOOS;
-    AN #INTERLOCK;
-    L #CMD;
+    AN #mc.modeOOS;
+    AN #mc.INTERLOCK;
+    L #mc.CMD;
     L "dbCONST".BLK.VS1.CMD.ENABLE;
     ==I;
     = #cmdENABLE;
@@ -111,7 +89,7 @@ TITLE = Check vacuum pumps are available
     //                                                                        //
     // Check vacuum pumps are not interlocked:                                //
     //------------------------------------------------------------------------//
-    AN #modeOOS;
+    AN #mc.modeOOS;
     A(;
     O #PUMP1_INTERLOCK;
     O #PUMP2_INTERLOCK;
@@ -190,7 +168,7 @@ TITLE = Set Device State to DISABLED if commanded or cannot ENABLE
     ON #cmdENABLE;
     JCN _e;
     L "dbCONST".BLK.VS1.STATE.DISABLED;
-    T #STATE;
+    T #mc.STATE;
 _e:   NOP 0;
 
 NETWORK
@@ -201,7 +179,7 @@ TITLE = Set Device State to ENABLED if commanded
     A #cmdENABLE;
     JCN _f;
     L "dbCONST".BLK.VS1.STATE.ENABLED;
-    T #STATE;
+    T #mc.STATE;
 _f:   NOP 0;
 
 NETWORK
@@ -212,6 +190,6 @@ TITLE = Setting Device State to FAULT
     A #FAULT;
     JCN _g;
     L "dbCONST".BLK.VS1.STATE.FAULT;
-    T #STATE;
+    T #mc.STATE;
 _g:   NOP 0;
 END_FUNCTION_BLOCK

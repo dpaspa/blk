@@ -49,12 +49,6 @@ VERSION : 2.0
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
 VAR_INPUT
-    OWNER : Int;             // Value to be set by Parent
-    SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;             // Critical interlock
-    NCRIL : Bool;            // Non-critical interlock
-    MAN_OVERRIDE : Bool;     // Override non-critical interlocks
-    TMR : Time := T#3S;      // Motor Start/Stop transition time for checking status
     BRK	: Bool;              // Motor breaker fault
     PHR : Bool;              // Three-phase relay alarm
     FB_RUN : Bool;
@@ -62,23 +56,15 @@ END_VAR
 
 VAR_OUTPUT
     OUT_Q : Bool;            // Output to OPEN/CLOSE solenoid valve
-    ALM_BRK : Bool;
-    ALM_PHR : Bool;
-END_VAR
-
-VAR_IN_OUT
-    FAIL_START : Bool;       // Fail to start
-    CMD : Int;               // Device Command from dbCONST
-    MODE : Int;              // Control Mode
-    STATE : Int;             // Device State from dbCONST
-    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
 END_VAR
 
 VAR
+    mc : "udtModeCommand";   // Block mode and command
+    ALM_BRK : Bool;
+    ALM_PHR : Bool;
+    FAIL_START : Bool;       // Fail to start
     startTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Motor Start/Stop Transition timer
     stopTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
-    startTMRElapsed : Time;
-    stopTMRElapsed : Time;
 END_VAR
 
 VAR_TEMP
@@ -86,13 +72,13 @@ VAR_TEMP
     cmdStop : Bool;
     enableStartTimer : Bool;
     enableStopTimer : Bool;
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
-    startTMRExpired : Bool;
-    stopTMRExpired : Bool;
     tDO : Bool;              // Flag indicating whether to drive output
     tFault: Bool;
+    TMR : Time := T#3S;      // Motor Start/Stop transition time for checking status
+    startTMRElapsed : Time;
+    stopTMRElapsed : Time;
+    startTMRExpired : Bool;
+    stopTMRExpired : Bool;
 END_VAR
 
 BEGIN
@@ -105,20 +91,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := "dbCONST".BLK.MOT1.SAFE.CMD ,
-        MODE                 := #MODE ,
-        CMD                  := #CMD ,
-        STATE                := #STATE ,
-        INTERLOCK            := #INTERLOCK ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS
+    (   mc                   := #mc
     );
-    NOP 0;
 
 NETWORK
 TITLE = Start command
@@ -128,7 +102,7 @@ TITLE = Start command
     //                                                                        //
     // CMD is START:                                                          //
     //------------------------------------------------------------------------//
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.MOT1.CMD.START;
     ==I;
     =#cmdStart;
@@ -138,7 +112,7 @@ TITLE = Stop command
     //------------------------------------------------------------------------//
     // CMD is STOP:                                                           //
     //------------------------------------------------------------------------//
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.MOT1.CMD.STOP;
     ==I;
     = #cmdStop
@@ -164,10 +138,10 @@ TITLE = Interlock if any field fault
     //------------------------------------------------------------------------//
     // Include motor field faults in the interlock calculation:
     //------------------------------------------------------------------------//
-    O #INTERLOCK;
+    O #mc.INTERLOCK;
     O #BRK;
     O #PHR;
-    = #INTERLOCK;
+    = #mc.INTERLOCK;
 
 NETWORK
 TITLE = Start comand allowable if no fault conditions or OOS
@@ -175,8 +149,8 @@ TITLE = Start comand allowable if no fault conditions or OOS
     // Allow start if no interlock or OOS mode:                               //
     //------------------------------------------------------------------------//
     A cmdStart;
-    AN modeOOS;
-    AN #INTERLOCK;
+    AN mc.modeOOS;
+    AN #mc.INTERLOCK;
     = cmdStart;
 
     //------------------------------------------------------------------------//
@@ -246,7 +220,7 @@ TITLE = Device State RUNNING if running feedback on or bypass
     AN #FB_RUN;
     JCN _a;
     L "dbCONST".BLK.MOT1.STATE.STOPPED;
-    T #STATE;
+    T #mc.STATE;
 _a:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -258,7 +232,7 @@ _a:   NOP 0;
     AN #FAIL_START;
     JCN _b;
     L "dbCONST".BLK.MOT1.STATE.RUNNING;
-    T #STATE;
+    T #mc.STATE;
 _b:   NOP 0;
 
 NETWORK
@@ -279,7 +253,7 @@ TITLE = Device State transition if waiting for running or stopped
     );
     JCN _c;
     L "dbCONST".BLK.MOT1.STATE.STARTING_STOPPING;
-    T #STATE;
+    T #mc.STATE;
 _c:   NOP 0;
 
 NETWORK
@@ -314,6 +288,6 @@ TITLE = Set State FAULT if any fault condition
     A #tFault;
     JCN _d;
     L "dbCONST".BLK.MOT1.STATE.FAULT;
-    T #STATE;
+    T #mc.STATE;
 _d:   NOP 0;
 END_FUNCTION_BLOCK

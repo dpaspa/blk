@@ -46,11 +46,6 @@ VAR
 @@TEMPLATE_END@@
 END_VAR
 
-VAR_TEMP
-    CRIL : Bool;
-    NCRIL : Bool;
-END_VAR
-
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
@@ -64,7 +59,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbCRIL".@@INSTANCE@@cril.INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
-    = #CRIL;
+    = #@@INSTANCE@@.mc.CRIL;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -77,7 +72,23 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbNCRIL".@@INSTANCE@@ncril.INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
-    = #NCRIL;
+    = #@@INSTANCE@@.mc.NCRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Owner
+    //------------------------------------------------------------------------//
+    // Set the instance owner:                                                //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.OWNER.@@PARENT@@;
+    T #@@INSTANCE@@.mc.OWNER;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command
+    //------------------------------------------------------------------------//
+    // Set the safe command:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.TC1.SAFE.CMD;
+    T #@@INSTANCE@@.mc.CMD_SAFE;
 
 @@TEMPLATE_BEGIN@@
 NETWORK
@@ -86,29 +97,11 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   OWNER                := #@@INSTANCE@@.OWNER ,
-        SERIAL               := #@@INSTANCE@@.SERIAL ,
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
-        SETPOINT             := #@@INSTANCE@@.SETPOINT ,
-        PV                   := #@@INSTANCE@@.PV ,
-        MAN_PID              := #@@INSTANCE@@.MAN_PID ,
-        GAIN                 := #@@INSTANCE@@.GAIN ,
-        TI                   := #@@INSTANCE@@.TI ,
-        TD                   := #@@INSTANCE@@.TD ,
-        CYCLE                := #@@INSTANCE@@.CYCLE ,
-        P_SEL                := #@@INSTANCE@@.P_SEL ,
-        I_SEL                := #@@INSTANCE@@.I_SEL ,
-        D_SEL                := #@@INSTANCE@@.D_SEL ,
+    (   _SETPOINT            := #@@INSTANCE@@._SETPOINT ,
 @@ATTR_BEGIN|LINK@@
-        TCVPOSN              := "idb@@TCVLINKCLASS@@".@@TCVLINKINSTANCE@@.POSN_REMOTE ,
+        TCVPOS               := "idb@@TCVLINKCLASS@@".@@TCVLINKINSTANCE@@.POS_REMOTE ,
 @@ATTR_END|LINK@@
-        LMN                  := #@@INSTANCE@@.LMN ,
-        CMD                  := #@@INSTANCE@@.CMD ,
-        MODE                 := #@@INSTANCE@@.MODE ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
+        LMN                  := #@@INSTANCE@@.LMN
     );
     NOP 0;
 

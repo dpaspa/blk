@@ -17,34 +17,15 @@
 // changed.                                                                   //
 //----------------------------------------------------------------------------//
 FUNCTION "fcModeCmdBLK" : Void
-TITLE = Generic Block Mode, Command & Interlock handling block
+TITLE = Stackable Block Mode, Command & Interlock handling block
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
 NAME : fcModeCmdBLK
 VERSION : 2.0
 
-VAR_INPUT
-    CRIL : Bool;                  // Critical Interlock
-    NCRIL : Bool;                 // Non critical Interlock
-    MAN_OVERRIDE : Bool;           // Manual override for Non-critical interlocks
-    permitStart: Bool;
-END_VAR
-
-VAR_OUTPUT
-    eventModeAuto : Bool;
-    eventModeManual : Bool;
-    eventModeOOS : Bool;
-END_VAR
-
 VAR_IN_OUT
-    MODE : Int;                    // Block Mode
-    CMD : Int;                     // Block Command for auto mode
-    STATE : Int;                   // Device state
-    eventCmdStart : Bool;
-    eventCmdStop : Bool;
-    SUBSelected : Int;             // Selected substate
-    SUBLast : Int;
-    INTERLOCK : Bool;              // if there is any interlock
+    mc : "udtModeCommand";             // General mode and command
+    mcb : "udtModeCommandBLK";         // Block mode and command
 END_VAR
 
 VAR_TEMP
@@ -57,61 +38,34 @@ END_VAR
 
 BEGIN
 NETWORK
-TITLE = Auto Mode on CPU startup
-    //------------------------------------------------------------------------//
-    // RESTART   RESTART   RESTART   RESTART   RESTART   RESTART   RESTART    //
-    // RESTART   RESTART   RESTART   RESTART   RESTART   RESTART   RESTART    //
-    //                                                                        //
-    // Set the mode to Auto if CPU has restarted:                             //
-    //------------------------------------------------------------------------//
-    A "flagFirstScanRestart";
-    JCN _a;
-    L "dbCONST".BLK.MODE.AUTO;
-    T #MODE;
-_a:   NOP 0;
-
-NETWORK
 TITLE = Flag if block Mode just changed to Auto
     //------------------------------------------------------------------------//
-    // AUTO MODE   AUTO MODE   AUTO MODE   AUTO MODE   AUTO MODE   AUTO MODE  //
+    // MODE CHANGE EVENT   MODE CHANGE EVENT   MODE CHANGE EVENT   MODE CHANG //
     //                                                                        //
     // Check if the mode has just been changed to Auto if the bit positive    //
     // edge. The result will only last for one scan after the positive edge:  //
     //------------------------------------------------------------------------//
-    L #MODE;
-    L "dbCONST".BLK.MODE.AUTO;
-    ==I;
+    A #mc.modeAUTO;
     FP #edgeModeAuto;
-    = #eventModeAuto;
+    = #mcb.eventModeAuto;
 
 NETWORK
 TITLE = Flag if block Mode just changed to Manual
     //------------------------------------------------------------------------//
-    // MANUAL MODE   MANUAL MODE   MANUAL MODE   MANUAL MODE   MANUAL MODE    //
-    //                                                                        //
-    // Check if the mode has just been changed to Manual if the bit positive  //
-    // edge. The result will only last for one scan after the positive edge:  //
+    // Check if the mode has just been changed to Manual:                     //
     //------------------------------------------------------------------------//
-    L #MODE;
-    L "dbCONST".BLK.MODE.MANUAL;
-    ==I;
+    A #mc.modeMANUAL;
     FP #edgeModeManual;
-    = #eventModeManual;
+    = #mcb.eventModeManual;
 
 NETWORK
 TITLE = Flag if block Mode just changed to Out Of Service
     //------------------------------------------------------------------------//
-    // OOS MODE   OOS MODE   OOS MODE   OOS MODE   OOS MODE   OOS MODE   OOS  //
-    //                                                                        //
-    // Check if the mode has just been changed to Out of Service if the bit   //
-    // positive edge. The result will only last for one scan after the        //
-    // positive edge:                                                         //
+    // Check if the mode has just been changed to Out of Service:             //
     //------------------------------------------------------------------------//
-    L #MODE;
-    L "dbCONST".BLK.MODE.OOS;
-    ==I;
+    = #mc.modeOOS;
     FP #edgeModeOOS;
-    = #eventModeOOS;
+    = #mcb.eventModeOOS;
 
 NETWORK
 TITLE = Flag if a new block running substate command issued
@@ -121,21 +75,21 @@ TITLE = Flag if a new block running substate command issued
     // Check if the start command has just been issued if the bit positive    //
     // edge. The result will only last for one scan after the positive edge:  //
     //------------------------------------------------------------------------//
-    A #permitStart;
+    A #mcb.permitStart;
     A(;
     O(;
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.CMD.START;
     ==I;
     );
     O(;
-    L #SUBSelected;
-    L #SUBLast;
+    L #mcb.SUBSelected;
+    L #mcb.SUBLast;
     <>I;
     );
     );
     FP #edgeCommandStart;
-    = #eventCmdStart;
+    = #mcb.eventCmdStart;
 
 NETWORK
 TITLE = Save last running substate if starting
@@ -145,10 +99,10 @@ TITLE = Save last running substate if starting
     // Save the running substate for next scan check if starting. It may have //
     // changed:                                                               //
     //------------------------------------------------------------------------//
-    A #eventCmdStart;
+    A #mcb.eventCmdStart;
     JCN _b;
-    L #SUBSelected;
-    T #SUBLast;
+    L #mcb.SUBSelected;
+    T #mcb.SUBLast;
 _b:   NOP 0;
 
 NETWORK
@@ -159,35 +113,21 @@ TITLE = Flag if block stop command issued
     // Check if the stop command has just been issued if the bit positive     //
     // edge. The result will only last for one scan after the positive edge:  //
     //------------------------------------------------------------------------//
-    L #CMD;
+    L #mc.CMD;
     L "dbCONST".BLK.CMD.STOP;
     ==I;
     FP #edgeCommandStop;
-    = #eventCmdStop;
+    = #mcb.eventCmdStop;
 
 NETWORK
 TITLE = Stop command takes precedence over Start command
     //------------------------------------------------------------------------//
     // If commanded to Stop then reset any Start command:                     //
     //------------------------------------------------------------------------//
-    A #eventCmdStop;
+    A #mcb.eventCmdStop;
     JCN _c;
-    R #eventCmdStart;
+    R #mcb.eventCmdStart;
 _c:   NOP 0;
-
-NETWORK
-TITLE = Interlock Flag
-    //------------------------------------------------------------------------//
-    // Set boolean interlock flag if any interlock condition exists:          //
-    // Instance Specific Non-Critical Interlocks can be bypassed by Manual    //
-    // Override command from Operator Station (HMI):                          //
-    //------------------------------------------------------------------------//
-    O #CRIL;
-    O(;
-    A #NCRIL;
-    AN #MAN_OVERRIDE;
-    );
-    = #INTERLOCK;
 
 NETWORK
 TITLE = Interlocked State if Stopped
@@ -196,17 +136,17 @@ TITLE = Interlocked State if Stopped
     // child failed:                                                          //
     //------------------------------------------------------------------------//
     A(;
-    L #STATE;
+    L #mc.STATE;
     L "dbCONST".BLK.STATE.STOPPED;
     ==I;
     );
     A(;
-    O #INTERLOCK;
-    ON #permitStart;
+    O #mc.INTERLOCK;
+    ON #mcb.permitStart;
     );
     JCN _d;
     L "dbCONST".BLK.STATE.INTERLOCKED;
-    T #STATE;
+    T #mc.STATE;
 _d:   NOP 0;
 
 NETWORK
@@ -216,38 +156,38 @@ TITLE = Paused State if Running
     // failed:                                                                //
     //------------------------------------------------------------------------//
     A(;
-    L #STATE;
+    L #mc.STATE;
     L "dbCONST".BLK.STATE.INTERLOCKED;
     <>I;
     );
     A(;
-    L #STATE;
+    L #mc.STATE;
     L "dbCONST".BLK.STATE.PAUSED;
     <>I;
     );
     A(;
-    L #STATE;
+    L #mc.STATE;
     L "dbCONST".BLK.STATE.STOPPED;
     <>I;
     );
     A(;
-    O #INTERLOCK;
-    ON #permitStart;
+    O #mc.INTERLOCK;
+    ON #mcb.permitStart;
     );
     JCN _e;
     L "dbCONST".BLK.STATE.PAUSED;
-    T #STATE;
+    T #mc.STATE;
 _e:   NOP 0;
 
     //------------------------------------------------------------------------//
     // Set the substate safe if any interlock:                                //
     //------------------------------------------------------------------------//
-    L #STATE;
+    L #mc.STATE;
     L "dbCONST".BLK.STATE.INTERLOCKED;
     ==I;
     JCN _f;
     L "dbCONST".BLK.SAFE.CMD;
-    T #SUBSelected;
+    T #mcb.SUBSelected;
 _f:   NOP 0;
 
 NETWORK
@@ -255,11 +195,10 @@ TITLE = Send safe command in case of any interlock or failure
     //------------------------------------------------------------------------//
     // Send safe command if any interlock:                                    //
     //------------------------------------------------------------------------//
-    O #INTERLOCK;
-    ON #permitStart;
+    AN #mcb.permitStart;
     JCN _g;
     L "dbCONST".BLK.SAFE.CMD;
-    T #CMD;
+    T #mc.CMD;
 _g:   NOP 0;
 
 NETWORK
@@ -268,10 +207,9 @@ TITLE = Set the safe state in case of any interlock or failure
     // Set safe state to match command if any interlock. The safe command     //
     // must match the safe state index number in dbCONST.                     //
     //------------------------------------------------------------------------//
-    O #INTERLOCK;
-    ON #permitStart;
+    AN #mcb.permitStart;
     JCN _h;
     L "dbCONST".BLK.SAFE.CMD;
-    T #STATE;
+    T #mc.STATE;
 _h:   NOP 0;
 END_FUNCTION

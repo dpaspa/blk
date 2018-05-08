@@ -25,7 +25,7 @@ NAME : ifbZSC2
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-//                                                                            //
+// Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
 @@TEMPLATE_BEGIN@@
@@ -33,30 +33,32 @@ VAR
 @@TEMPLATE_END@@
 END_VAR
 
-//----------------------------------------------------------------------------//
-//                                                                            //
-//----------------------------------------------------------------------------//
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
+TITLE = @@INSTANCE@@ : Owner
+    //------------------------------------------------------------------------//
+    // Set the instance owner:                                                //
+    //------------------------------------------------------------------------//
+    L 0;
+    T #@@INSTANCE@@.mc.OWNER;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command
+    //------------------------------------------------------------------------//
+    // Set the safe command:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ZSC2.SAFE.CMD;
+    T #@@INSTANCE@@.mc.CMD_SAFE;
+
+NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   OWNER                := #@@INSTANCE@@.OWNER ,
-        SERIAL               := #@@INSTANCE@@.SERIAL ,
-        CRIL                 := #@@INSTANCE@@.CRIL ,
-        NCRIL                := #@@INSTANCE@@.NCRIL ,
-        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
-        CMD_SAFE             := #@@INSTANCE@@.CMD_SAFE ,
-        DI_Auto              := "@@INSTANCE@@-DI" ,
-        DI_Manual            := #@@INSTANCE@@.DI_Manual ,
-        ALARM                := #@@INSTANCE@@.ALARM ,
-        PV                   := #@@INSTANCE@@.PV ,
-        CMD                  := #@@INSTANCE@@.CMD ,
-        MODE                 := #@@INSTANCE@@.MODE ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
-      );
-      NOP 0;
+    (   DI_Auto              := "@@INSTANCE@@-DI"
+    );
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

@@ -35,11 +35,6 @@ VAR
 @@TEMPLATE_END@@
 END_VAR
 
-VAR_TEMP
-    CRIL : Bool;
-    NCRIL : Bool;
-END_VAR
-
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
@@ -53,7 +48,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbCRIL".@@INSTANCE@@cril.INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
-    = #CRIL;
+    = #@@INSTANCE@@.mc.CRIL;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -66,7 +61,46 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbNCRIL".@@INSTANCE@@ncril.INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
-    = #NCRIL;
+    = #@@INSTANCE@@.mc.NCRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Owner
+    //------------------------------------------------------------------------//
+    // Set the instance owner:                                                //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.OWNER.@@PARENT@@;
+    T #@@INSTANCE@@.mc.OWNER;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command
+    //------------------------------------------------------------------------//
+    // Set the safe command:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.MOD1.SAFE.CMD;
+    T #@@INSTANCE@@.mc.CMD_SAFE;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Signal polarity
+    //------------------------------------------------------------------------//
+    // Input signal is BIPOLAR (1) or UNIPOLAR (0). Assume 0:                 //
+    //------------------------------------------------------------------------//
+    R #@@INSTANCE@@.POLARITY;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Initial remote position is closed
+    //------------------------------------------------------------------------//
+    // Set the initial remote position to be zero which is closed:            //
+    //------------------------------------------------------------------------//
+    L 0.0;
+    T #@@INSTANCE@@.POS_REMOTE;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Initial local position is closed
+    //------------------------------------------------------------------------//
+    // Set the initial local position to be zero which is closed:             //
+    //------------------------------------------------------------------------//
+    L 0.0;
+    T #@@INSTANCE@@.POS_LOCAL;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -74,21 +108,8 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   OWNER                := #@@INSTANCE@@.OWNER ,
-        SERIAL               := #@@INSTANCE@@.SERIAL ,
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
-        POSN_LOCAL           := #@@INSTANCE@@.POSN_LOCAL ,
-        POSN_REMOTE          := #@@INSTANCE@@.POSN_REMOTE ,
-        POLARITY             := #@@INSTANCE@@.POLARITY ,
-        RAW_OUTPUT           := "@@INSTANCE@@-MOD":P ,
-        CMD                  := #@@INSTANCE@@.CMD ,
-        MODE                 := #@@INSTANCE@@.MODE ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        INTERLOCK            := #@@INSTANCE@@.INTERLOCK
-      );
-      NOP 0;
+    (   RAW_OUTPUT           := "@@INSTANCE@@-MOD":P
+    );
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

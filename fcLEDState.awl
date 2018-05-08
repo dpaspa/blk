@@ -51,14 +51,14 @@ VERSION : 0.1
 BEGIN
 NETWORK
 TITLE = SMS1 HEART BEAT- for SMS1 & FL PLC communication
-      AN "HEART_BEAT_FL";
+      AN "HEART_BEAT_CPU1";
       L S5T#2S;
       SP "timerHeartRate";
       NOP 0;
       NOP 0;
       NOP 0;
       A "timerHeartRate";
-      = "HREAT_BEAT_ToSMS1";
+      = "HEART_BEAT_CPU2";
 NETWORK
 TITLE =
       BEU;
@@ -71,11 +71,8 @@ NETWORK
 TITLE =
 NETWORK
 TITLE = Call SFC51 with SSL 0119
-      A #HEART_BEAT;
-      = %L23.0;
-      BLD 103;
       CALL RDSYSST
-      (  REQ                         := %L23.0 ,
+      (  REQ                         := #HEART_BEAT ,
          SZL_ID                      := WORD#16#0119 ,
          INDEX                       := #LED_Index ,
          RET_VAL                     := #RVal ,
@@ -88,9 +85,6 @@ NETWORK
 TITLE = If SSL 0119 not supported, try 0174
 //If SFC51 fails with SSL 0119, it returns -32638 (W#16#8082) in the RET_VAL
 //parameter.
-      A #HEART_BEAT;
-      = %L23.0;
-      BLD 103;
       A(;
       L #RVal;
       L -32638;
@@ -98,7 +92,7 @@ TITLE = If SSL 0119 not supported, try 0174
       );
       JNB Label_0;
       CALL RDSYSST
-      (  REQ                         := %L23.0 ,
+      (  REQ                         := #HEART_BEAT ,
          SZL_ID                      := WORD#16#0174 ,
          INDEX                       := #LED_Index ,
          RET_VAL                     := #RVal ,

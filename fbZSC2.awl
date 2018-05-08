@@ -21,34 +21,19 @@ NAME : fbZSC2
 VERSION : 2.0
 
 VAR_INPUT
-    OWNER : Int;             // Value to be set or reset by Parent
-    SERIAL : Int;            // Unique batch or CIPSIP serial number
-    CRIL : Bool;            // Critical Interlock in series
-    NCRIL : Bool;           // Non-critical Interlock in series
-    MAN_OVERRIDE : Bool;     // Critical Interlock in series can be Override by this Input
-    CMD_SAFE : Int;          // Safe command for the module
     DI_Auto : Bool;          // Input signal from Field
-    DI_Manual : Bool;        // User digital signal for simulating
 END_VAR
 
-VAR_OUTPUT
+VAR
+    mc : "udtModeCommand";   // Block mode and command
+    DI_Manual : Bool;        // User digital signal for simulating
     ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
     PV : Bool;               // Processed DI
-END_VAR
-
-VAR_IN_OUT
-    CMD : Int;               // Command
-    MODE : Int;              // Control Mode
-    STATE : Int;             // Device State from dbCONST
-    INTERLOCK : Bool;        // Interlock Flag (0 = Inactive, 1 = Active)
 END_VAR
 
 VAR_TEMP
     cmdIN : Bool;
     cmdOUT : Bool;
-    modeAUTO : Bool;
-    modeMANUAL : Bool;
-    modeOOS : Bool;
     tMismatch : Bool;        // Temporary mismatch variable
     tPV : Bool;              // Temporary processed DI signal
 END_VAR
@@ -64,18 +49,7 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (
-        CRIL                := #CRIL ,
-        NCRIL               := #NCRIL ,
-        MAN_OVERRIDE         := #MAN_OVERRIDE ,
-        CMD_SAFE             := #CMD_SAFE ,
-        modeAUTO             := #modeAUTO ,
-        modeMANUAL           := #modeMANUAL ,
-        modeOOS              := #modeOOS ,
-        MODE                 := #MODE ,
-        CMD                  := #CMD ,
-        STATE                := #STATE ,
-        INTERLOCK            := #INTERLOCK
+    (   mc                   := #mc
     );
 
 NETWORK
@@ -87,7 +61,7 @@ TITLE = Get Device command if IN
     // CMD is IN
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ZSC2.CMD.IN;
-    L #CMD;
+    L #mc.CMD;
     ==I;
     = #cmdIN;
 
@@ -100,7 +74,7 @@ TITLE = Get Device command if OUT
     // CMD is OUT:                                                           //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ZSC2.CMD.OUT;
-    L #CMD;
+    L #mc.CMD;
     ==I;
     = #cmdOUT;
 
@@ -114,41 +88,14 @@ TITLE = Process Digital Input Signal
     //------------------------------------------------------------------------//
     O(;
     A #DI_Auto;
-    A #modeAUTO;
+    A #mc.modeAUTO;
     );
     O(;
     A #DI_Manual;
-    A #modeMANUAL;
+    A #mc.modeMANUAL;
     );
     = #tPV;
     = #PV;
-
-NETWORK
-TITLE = Set Device State to IN if switch is on and command is IN
-    //------------------------------------------------------------------------//
-    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
-    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
-    //                                                                        //
-    // IN if switch is on and commanded to be IN:                             //
-    //------------------------------------------------------------------------//
-    A #tPV;
-    A #cmdIN;
-    JCN _a;
-    L "dbCONST".BLK.ZSC2.STATE.IN;
-    T #STATE;
-_a:   NOP 0;
-
-NETWORK
-TITLE = Set Device State to OUT if switch is on and command is OUT
-    //------------------------------------------------------------------------//
-    // OUT if switch is off and commanded to be OUT:                          //
-    //------------------------------------------------------------------------//
-    AN #tPV;
-    A #cmdOUT;
-    JCN _b;
-    L "dbCONST".BLK.ZSC2.STATE.OUT;
-    T #STATE;
-_b:   NOP 0;
 
 NETWORK
 TITLE = Check if MISMATCH if state does not follow command
@@ -166,14 +113,6 @@ TITLE = Check if MISMATCH if state does not follow command
     = tMismatch;
 
 NETWORK
-TITLE = Set Device State to MISMATCH if state does not follow command
-    A tMismatch;
-    JCN _c;
-    L "dbCONST".BLK.ZSC2.STATE.MISMATCH;
-    T #STATE;
-_c:   NOP 0;
-
-NETWORK
 TITLE = Set ALARM Flag
     //------------------------------------------------------------------------//
     // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
@@ -182,11 +121,11 @@ TITLE = Set ALARM Flag
     // Alarm if mismatch and not OOS:                                         //
     //------------------------------------------------------------------------//
     A tMismatch;
-    AN #modeOOS;
+    AN #mc.modeOOS;
     = #ALARM;
 
 NETWORK
-TITLE = Set INTERLOCK Flag if OUTE
+TITLE = Set INTERLOCK Flag if OUT
     //------------------------------------------------------------------------//
     // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
     // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
@@ -194,5 +133,40 @@ TITLE = Set INTERLOCK Flag if OUTE
     // Set interlock if switch not made:                                      //
     //------------------------------------------------------------------------//
     AN #tPV;
-    = #INTERLOCK;
+    = #mc.INTERLOCK;
+
+NETWORK
+TITLE = Set Device State to IN if switch is on and command is IN
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // IN if switch is on and commanded to be IN:                             //
+    //------------------------------------------------------------------------//
+    A #tPV;
+    A #cmdIN;
+    JCN _a;
+    L "dbCONST".BLK.ZSC2.STATE.IN;
+    T #mc.STATE;
+_a:   NOP 0;
+
+NETWORK
+TITLE = Set Device State to OUT if switch is on and command is OUT
+    //------------------------------------------------------------------------//
+    // OUT if switch is off and commanded to be OUT:                          //
+    //------------------------------------------------------------------------//
+    AN #tPV;
+    A #cmdOUT;
+    JCN _b;
+    L "dbCONST".BLK.ZSC2.STATE.OUT;
+    T #mc.STATE;
+_b:   NOP 0;
+
+NETWORK
+TITLE = Set Device State to MISMATCH if state does not follow command
+    A tMismatch;
+    JCN _c;
+    L "dbCONST".BLK.ZSC2.STATE.MISMATCH;
+    T #mc.STATE;
+_c:   NOP 0;
 END_FUNCTION_BLOCK

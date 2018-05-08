@@ -1,0 +1,27 @@
+﻿FUNCTION "Block_1" : Void
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+
+BEGIN
+NETWORK
+TITLE = 
+      CALL Get_AlarmState;
+
+
+NETWORK
+TITLE = 
+
+      CALL Gen_UsrMsg;
+
+NETWORK
+TITLE = 
+      CALL Get_Alarm, "Get_Alarm_DB";
+
+
+NETWORK
+TITLE = 
+      CALL Ack_Alarms;
+
+
+END_FUNCTION
+
