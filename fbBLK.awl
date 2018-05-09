@@ -152,22 +152,6 @@ VAR_INPUT
     TIME_M : Int;
     TIME_S : Int;
 @@ATTR_END|TIMER@@
-    childINTERLOCK : Array[*] of Bool;
-@@ATTR_BEGIN|CHILD@@
-    @@CHILDALIAS@@_INTERLOCK : Bool;     // @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD@@
-@@ATTR_BEGIN|CHILD@@
-    @@CHILDALIAS@@_STATE : Int;    // @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD@@
-@@ATTR_BEGIN|pBLKCallingIN@@
-    @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pBLKCallingIN@@
-@@ATTR_BEGIN|pSFCCallingIN@@
-    @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pSFCCallingIN@@
-@@ATTR_BEGIN|pSFCConfirm@@
-    blkConfirm@@CHILDPARAMETER@@ : Bool;
-@@ATTR_END|pSFCConfirm@@
 END_VAR
 
 VAR_OUTPUT
@@ -181,52 +165,28 @@ VAR_OUTPUT
     REM_TIME_M : Int;
     REM_TIME_S : Int;
 @@ATTR_END|TIMER@@
-@@ATTR_BEGIN|pBLKCallingOUT@@
-    @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pBLKCallingOUT@@
 @@ATTR_BEGIN|pChildIN@@
     @@CHILDPARAMETER@@_@@CLASS@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
 @@ATTR_END|pChildIN@@
-@@ATTR_BEGIN|CHILD@@
-    @@CHILDALIAS@@_SERIALNUM : Int;     // @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD@@
-@@ATTR_BEGIN|CHILD@@
-    @@CHILDALIAS@@_isBatch : Bool;      // @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD@@
-@@ATTR_BEGIN|pSFCCallingOUT@@
-    @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pSFCCallingOUT@@
 END_VAR
 
 VAR_IN_OUT
     isBatch : Bool;
-@@ATTR_BEGIN|pBLKCallingIN_OUT@@
+@@ATTR_BEGIN|pBLK@@
     @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pBLKCallingIN_OUT@@
-@@ATTR_BEGIN|CHILD@@
-    @@CHILDALIAS@@_CMD : Int;     // @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD@@
-@@ATTR_BEGIN|CHILD@@
-    @@CHILDALIAS@@_MODE : Int;     // @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD@@
-@@ATTR_BEGIN|CHILD@@
-    @@CHILDALIAS@@_OWNER : Int;     // @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD@@
-@@ATTR_BEGIN|pSFCCallingIN_OUT@@
+@@ATTR_END|pBLK@@
+@@ATTR_BEGIN|pSFC@@
     @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pSFCCallingIN_OUT@@
-@@ATTR_BEGIN|pSFCPrompt@@
-    blkPrompt@@CHILDPARAMETER@@ : Bool;
-@@ATTR_END|pSFCPrompt@@
-@@ATTR_BEGIN|pSFCLog@@
-    blkLog@@CHILDPARAMETER@@ : Real;
-@@ATTR_END|pSFCLog@@
+@@ATTR_END|pSFC@@
 END_VAR
 
 VAR
     mc : "udtModeCommand";             // General mode and command
     mcb : "udtModeCommandBLK";         // Block mode and command
-    cmc : Array[1..@@NUMCHILDREN@@] of "udtModeCommand";
+    mcs : "udtModeCommandSFC";         // SFC mode and command
+@@ATTR_BEGIN|CHILD_INDEX_MAX@@
+    cmc : Array[0..@@CHILDINDEXMAX@@] of "udtModeCommand";
+@@ATTR_END|CHILD_INDEX_MAX@@
 @@ATTR_BEGIN|HYGIENE@@
     hs : "udtHygiene";
 @@ATTR_END|HYGIENE@@
@@ -235,6 +195,7 @@ VAR
     @@SFC@@ : "fb@@SFC@@";       // @@STATEDESCRIPTION@@
 @@ATTR_END|SFC@@
     timeCheckChildState {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+    iErr : Int;                        // Block error flag
     ME : Int;                          // Block unique ID
     SQ_STATE : Int;
     SQ_ACK : Bool;
@@ -271,6 +232,41 @@ VAR
         @@STATE@@ : Bool := @@HASSFC@@;       // @@STATEDESCRIPTION@@
 @@ATTR_END|STATE@@
     END_STRUCT;
+@@ATTR_BEGIN|pEventPromptExists@@
+    blkPrompt : Struct
+@@ATTR_BEGIN|pEventPrompt@@
+        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pEventPrompt@@
+    END_STRUCT;
+@@ATTR_END|pEventPromptExists@@
+@@ATTR_BEGIN|pEventConfirmExists@@
+    blkConfirm : Struct
+@@ATTR_BEGIN|pEventConfirm@@
+        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pEventConfirm@@
+    END_STRUCT;
+@@ATTR_END|pEventConfirmExists@@
+@@ATTR_BEGIN|pEventLogMsgExists@@
+    blkLogMsg : Struct
+@@ATTR_BEGIN|pEventLogMsg@@
+        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pEventLogMsg@@
+    END_STRUCT;
+@@ATTR_END|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogRealExists@@
+    blkLogReal : Struct
+@@ATTR_BEGIN|pEventLogReal@@
+        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pEventLogReal@@
+    END_STRUCT;
+@@ATTR_END|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogTimeExists@@
+    blkLogTime : Struct
+@@ATTR_BEGIN|pEventLogTime@@
+        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pEventLogTime@@
+    END_STRUCT;
+@@ATTR_END|pEventLogTimeExists@@
 END_VAR
 
 VAR_TEMP
@@ -317,12 +313,8 @@ TITLE = Check if child @@CHILDALIAS@@ is not in AUTO mode
     //------------------------------------------------------------------------//
     A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
-    JCN _childAuto_@@COUNTER|1@@_@@STATE@@;
-    L #@@CHILDALIAS@@_MODE;
-    L "dbCONST".BLK.MODE.AUTO;
-    <>I;
+    AN #cmc[@@CHILDINDEX@@].modeAUTO;
     = #flags.childNotAuto;
-_childAuto_@@COUNTER|1@@_@@STATE@@:    NOP 0;
     JC _completedChildAutoChecks;
 
 @@ATTR_END|CHILD_ACQUIRE@@
@@ -343,7 +335,7 @@ TITLE = Check if child @@CHILDALIAS@@ is Interlocked
     //------------------------------------------------------------------------//
     A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
-    A #@@CHILDALIAS@@_INTERLOCK;
+    A #cmc[@@CHILDINDEX@@].INTERLOCK;
     = #flags.childInterlocked;
     JC _completedChildInterlockChecks;
 
@@ -367,12 +359,12 @@ TITLE = Check if Child @@CHILDALIAS@@ is not already Owned or not Available
     A #mcb.eventCmdStart;
     A #subs.@@STATE@@;
     AN(;
-    L #@@CHILDALIAS@@_OWNER;
+    L #cmc[@@CHILDINDEX@@].OWNER;
     L "dbCONST".BLK.OWNER.AVAILABLE;
     ==I;
     );
     AN(;
-    L #@@CHILDALIAS@@_OWNER;
+    L #cmc[@@COUNTER|0@@].OWNER;
     L #ME;
     ==I;
     );
@@ -408,7 +400,7 @@ TITLE = Set Start command permitted flag if all okay
     // If no interlock and all calling parameters and child devices are okay  //
     // then a Start is permitted:                                             //
     //------------------------------------------------------------------------//
-    AN #INTERLOCK;
+    AN #mc.INTERLOCK;
     AN #flags.childFailed;
     AN #flags.badParameter;
     = #mcb.permitStart;
@@ -613,29 +605,10 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
     A #subs.@@STATE@@;
     CALL #@@SFC@@
     (
-        MODE                        := #@@SFC@@.MODE ,
-        SQ_CMD                      := #@@SFC@@.SQ_CMD ,
-@@ATTR_BEGIN|pSFCCallingIN@@
-        @@BLOCKPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
-@@ATTR_END|pSFCCallingIN@@
-        SQ_STATE                    := #@@SFC@@.SQ_STATE ,
-        CURSTEP                     := #@@SFC@@.CURSTEP ,
-        NXT_STEP                    := #@@SFC@@.NXT_STEP ,
-        S_ACTIVE                    := #@@SFC@@.S_ACTIVE ,
-        ERR_FAULT                   := #@@SFC@@.ERR_FAULT ,
-@@ATTR_BEGIN|pSFCCallingOUT@@
-        @@BLOCKPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
-@@ATTR_END|pSFCCallingOUT@@
-        SQ_FINISHED                 := #@@SFC@@.SQ_FINISHED ,
-        OFF_IDLE                    := #@@SFC@@.OFF_IDLE ,
-        PAUSED                      := #@@SFC@@.PAUSED ,
-        STEPNO_JUMP                 := #@@SFC@@.STEPNO_JUMP ,
-        MAN_JUMP                    := #@@SFC@@.MAN_JUMP ,
-        NO_VERIFIC                  := #@@SFC@@.NO_VERIFIC ,
-@@ATTR_BEGIN|pSFCCallingIN_OUT@@
-        @@BLOCKPARAMETER@@              := #@@BLOCKPARAMETER@@ ,
-@@ATTR_END|pSFCCallingIN_OUT@@
-        TRN_AND_JUMP                := #@@SFC@@.TRN_AND_JUMP
+@@ATTR_BEGIN|pSFCChild@@
+        @@CHILDPARAMETER@@   := #cmc[@@CHILDINDEX@@].@@CHILDPARAMETERATTRIBUTE@@;
+@@ATTR_END|pSFCChild@@
+        mcs                  := #mcs
     );
 
 @@ATTR_END|SFC@@
@@ -657,7 +630,7 @@ TITLE = Make sure any non-active SFCs are stopped
 
 @@ATTR_END|SFC@@
 
-@@ATTR_BEGIN|pSFCPrompt@@
+@@ATTR_BEGIN|pEventPrompt@@
 NETWORK
 TITLE = Clear the operator prompt flag
     //------------------------------------------------------------------------//
@@ -666,16 +639,16 @@ TITLE = Clear the operator prompt flag
     // Clear the SFC prompt bit:                                              //
     //------------------------------------------------------------------------//
     A #mcb.eventCmdStart;
-    R #@@PARAMETERSFC@@.@@CHILDPARAMETER@@;
+    R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 
 NETWORK
 TITLE = Clear the global event DB operator prompt flag
     AN #mcb.eventCmdStart;
-    = #blkPrompt@@CHILDPARAMETER@@;
+    = #blkPrompt.@@CHILDPARAMETER@@;
 
-@@ATTR_END|pSFCPrompt@@
+@@ATTR_END|pEventPrompt@@
 
-@@ATTR_BEGIN|pSFCConfirm@@
+@@ATTR_BEGIN|pEventConfirm@@
 NETWORK
 TITLE = Clear the operator confirm flag
     //------------------------------------------------------------------------//
@@ -684,14 +657,14 @@ TITLE = Clear the operator confirm flag
     // Clear the SFC confirm bit:                                             //
     //------------------------------------------------------------------------//
     A #mcb.eventCmdStart;
-    R #@@PARAMETERSFC@@.@@CHILDPARAMETER@@;
+    R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 
 NETWORK
 TITLE = Clear the global event DB operator confirm flag
     AN #mcb.eventCmdStart;
-    = #blkConfirm@@CHILDPARAMETER@@;
+    = #blkConfirm.@@CHILDPARAMETER@@;
 
-@@ATTR_END|pSFCConfirm@@
+@@ATTR_END|pEventConfirm@@
 
 @@ATTR_BEGIN|SFC@@
 @@ATTR_BEGIN|pSFCChildIN@@
@@ -844,7 +817,7 @@ TITLE = Reset the new child command flag if a mismatch
     A #timeCheckChildState.Q;
     R #flags.childCommandChange;
 
-@@ATTR_BEGIN|pSFCPrompt@@
+@@ATTR_BEGIN|pEventPrompt@@
 NETWORK
 TITLE = Raise operator prompt if required
     //------------------------------------------------------------------------//
@@ -852,12 +825,12 @@ TITLE = Raise operator prompt if required
     //                                                                        //
     // Transfer the SFC prompt bit to the global event datablock:             //
     //------------------------------------------------------------------------//
-    A #@@PARAMETERSFC@@.@@CHILDPARAMETER@@;
-    = #blkPrompt@@CHILDPARAMETER@@;
+    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    = #blkPrompt.@@CHILDPARAMETER@@;
 
-@@ATTR_END|pSFCPrompt@@
+@@ATTR_END|pEventPrompt@@
 
-@@ATTR_BEGIN|pSFCConfirm@@
+@@ATTR_BEGIN|pEventConfirm@@
 NETWORK
 TITLE = Return operator bit if made
     //------------------------------------------------------------------------//
@@ -865,23 +838,49 @@ TITLE = Return operator bit if made
     //                                                                        //
     // Receive the SFC confirm bit from the global event datablock:           //
     //------------------------------------------------------------------------//
-    A #blkConfirm@@CHILDPARAMETER@@;
-    = #@@PARAMETERSFC@@.@@CHILDPARAMETER@@;
+    A #blkConfirm.@@CHILDPARAMETER@@;
+    = #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 
-@@ATTR_END|pSFCConfirm@@
+@@ATTR_END|pEventConfirm@@
 
-@@ATTR_BEGIN|pSFCLog@@
+@@ATTR_BEGIN|pEventLogMsg@@
 NETWORK
 TITLE = Log data if required
     //------------------------------------------------------------------------//
-    // LOG DATA   LOG DATA   LOG DATA   LOG DATA   LOG DATA   LOG DATA   LOG  //
+    // LOG MSG   LOG MSG   LOG MSG   LOG MSG   LOG MSG   LOG MSG   LOG MSG    //
     //                                                                        //
     // Transfer the SFC log data to the global event datablock:               //
     //------------------------------------------------------------------------//
-    A #@@PARAMETERSFC@@.@@CHILDPARAMETER@@;
-    = #blkLog@@CHILDPARAMETER@@;
+    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    = #blkLog.@@CHILDPARAMETER@@;
 
-@@ATTR_END|pSFCLog@@
+@@ATTR_END|pEventLogMsg@@
+
+@@ATTR_BEGIN|pEventLogReal@@
+NETWORK
+TITLE = Log real data if required
+    //------------------------------------------------------------------------//
+    // LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG  //
+    //                                                                        //
+    // Transfer the SFC log data to the global event datablock:               //
+    //------------------------------------------------------------------------//
+    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    = #blkLog.@@CHILDPARAMETER@@;
+
+@@ATTR_END|pEventLogReal@@
+
+@@ATTR_BEGIN|pEventLogTime@@
+NETWORK
+TITLE = Log time data if required
+    //------------------------------------------------------------------------//
+    // LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG  //
+    //                                                                        //
+    // Transfer the SFC log data to the global event datablock:               //
+    //------------------------------------------------------------------------//
+    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    = #blkLog.@@CHILDPARAMETER@@;
+
+@@ATTR_END|pEventLogTime@@
 
 @@ATTR_BEGIN|SFC@@
 NETWORK

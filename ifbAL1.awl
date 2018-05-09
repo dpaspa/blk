@@ -39,10 +39,11 @@ END_VAR
 
 BEGIN
 @@TEMPLATE_BEGIN@@
-@@ATTR_BEGIN|ANALOG@@
 NETWORK
 TITLE = @@INSTANCE@@ : Owner
     //------------------------------------------------------------------------//
+    // ANALOG INPUT   ANALOG INPUT   ANALOG INPUT   ANALOG INPUT   ANALOG INP //
+    //                                                                        //
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.OWNER.@@PARENT@@;
@@ -56,6 +57,7 @@ TITLE = @@INSTANCE@@ : Safe Command
     L "dbCONST".BLK.AL1.SAFE.CMD;
     T #@@INSTANCE@@.mc.CMD_SAFE;
 
+@@ATTR_BEGIN|ANALOG@@
 NETWORK
 TITLE = @@INSTANCE@@ : Analog input attributes
     //------------------------------------------------------------------------//
@@ -88,6 +90,8 @@ TITLE = @@INSTANCE@@ : Analog input attributes
     L "@@INSTANCE@@-RAW";
     T #@@INSTANCE@@.ai.RAW_INPUT;
 
+@@ATTR_END|ANALOG@@
+
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
@@ -95,6 +99,5 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@;
 
-@@ATTR_END|ANALOG@@
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

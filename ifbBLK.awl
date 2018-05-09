@@ -35,11 +35,6 @@ VAR
 @@TEMPLATE_END@@
 END_VAR
 
-VAR_TEMP
-    CRIL;
-    NCRIL;
-END_VAR
-
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
@@ -53,7 +48,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbCRIL".@@INSTANCE@@cril.INTERLOCK;
 @@ATTR_END|CRIL_EXISTS@@
-    = #CRIL;
+    = #@@INSTANCE@@.mc.CRIL;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -66,7 +61,37 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_END@@
     A "idbNCRIL".@@INSTANCE@@ncril.INTERLOCK;
 @@ATTR_END|NCRIL_EXISTS@@
-    = #NCRIL;
+    = #@@INSTANCE@@.mc.NCRIL;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Owner
+    //------------------------------------------------------------------------//
+    // Set the instance owner:                                                //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.OWNER.@@PARENT@@;
+    T #@@INSTANCE@@.mc.OWNER;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command
+    //------------------------------------------------------------------------//
+    // Set the safe command:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.@@CLASS@@.SAFE.CMD;
+    T #@@INSTANCE@@.mc.CMD_SAFE;
+
+@@ATTR_BEGIN|CHILD_INSTANCE@@
+NETWORK
+TITLE = @@INSTANCE@@ : Child @@CHILDINSTANCE@@ @@CHILDDESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Copy the child mode and command data:                                  //
+    //------------------------------------------------------------------------//
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := "idb@@CHILDCLASS@@".@@CHILDINSTANCE@@.mc
+        OUT                  := #@@INSTANCE@@.cmc[@@CHILDINDEX@@]
+    );
+
+@@ATTR_END|CHILD_INSTANCE@@
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -74,73 +99,11 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   OWNER                := #@@INSTANCE@@.OWNER ,
-        SERIAL               := #@@INSTANCE@@.SERIAL ,
-        CRIL                 := #CRIL ,
-        NCRIL                := #NCRIL ,
-        MAN_OVERRIDE         := #@@INSTANCE@@.MAN_OVERRIDE ,
-        CHILD_RELEASE        := #@@INSTANCE@@.CHILD_RELEASE ,
-@@ATTR_BEGIN|TIMER@@
-        TIME_H               := #@@INSTANCE@@.TIME_H ,
-        TIME_M               := #@@INSTANCE@@.TIME_M ,
-        TIME_S               := #@@INSTANCE@@.TIME_S ,
-@@ATTR_END|TIMER@@
-@@ATTR_BEGIN|CHILD@@
-        @@CHILDALIAS@@_INTERLOCK            := "idb@@CHILDALIASCLASS@@".@@CHILDALIAS@@.INTERLOCK
-@@ATTR_END|CHILD@@
-@@ATTR_BEGIN|CHILD@@
-        @@CHILDALIAS@@_STATE                := "idb@@CHILDALIASCLASS@@".@@CHILDALIAS@@.STATE ,
-@@ATTR_END|CHILD@@
-@@ATTR_BEGIN|pBLKCallingIN@@
-        @@PARAMETER@@               := #@@INSTANCE@@.@@BLOCKPARAMETER@@ ,
-@@ATTR_END|pBLKCallingIN@@
-@@ATTR_BEGIN|pSFCCallingIN@@
-        @@BLOCKPARAMETER@@               := #@@INSTANCE@@.@@BLOCKPARAMETER@@ ,
-@@ATTR_END|pSFCCallingIN@@
-@@ATTR_BEGIN|pSFCConfirm@@
-        blkConfirm@@CHILDPARAMETER@@        := #@@INSTANCE@@.blkConfirm@@CHILDPARAMETER@@ ,
-@@ATTR_END|pSFCConfirm@@
-        STATE                       := #@@INSTANCE@@.STATE ,
-        RUNNING                     := #@@INSTANCE@@.RUNNING ,
-        SQ_ERROR                    := #@@INSTANCE@@.SQ_ERROR ,
-        CURSTEP                     := #@@INSTANCE@@.CURSTEP ,
-        CHILD_FAIL                  := #@@INSTANCE@@.CHILD_FAIL ,
-        BAD_PARAM                   := #@@INSTANCE@@.BAD_PARAM ,
-@@ATTR_BEGIN|TIMER@@
-        REM_TIME_H                  := #@@INSTANCE@@.REM_TIME_H ,
-        REM_TIME_M                  := #@@INSTANCE@@.REM_TIME_M ,
-        REM_TIME_S                  := #@@INSTANCE@@.REM_TIME_S ,
-@@ATTR_END|TIMER@@
-        HYGIENE                     := #@@INSTANCE@@.HYGIENE ,
-        CMD                         := #@@INSTANCE@@.CMD ,
-        MODE                        := #@@INSTANCE@@.MODE
-        INTERLOCK                   := #@@INSTANCE@@.INTERLOCK ,
-        SUBSelected                 := #@@INSTANCE@@.SUBSelected ,
-        isBatch                     := #@@INSTANCE@@.isBatch ,
-        ME                          := @@ID@@ ,
-        SQ_STATE                    := #@@INSTANCE@@.SQ_STATE ,
-        SQ_ACK                      := #@@INSTANCE@@.SQ_ACK ,
-        SQ_RESUME                   := #@@INSTANCE@@.SQ_RESUME
-        SUBLast                     := #@@INSTANCE@@.SUBLast ,
-@@ATTR_BEGIN|CHILD@@
-        @@CHILDALIAS@@_CMD                  := "idb@@CHILDALIASCLASS@@".@@CHILDALIAS@@.CMD ,
-@@ATTR_END|CHILD@@
-@@ATTR_BEGIN|pBLKCallingOUT@@
-        @@PARAMETER@@               := #@@INSTANCE@@.@@BLOCKPARAMETER@@ ,
-@@ATTR_END|pBLKCallingOUT@@
-@@ATTR_BEGIN|pBLKCallingIN_OUT@@
-        @@PARAMETER@@               := #@@INSTANCE@@.@@BLOCKPARAMETER@@ ,
-@@ATTR_END|pBLKCallingIN_OUT@@
-@@ATTR_BEGIN|pSFCPrompt@@
-        blkPrompt@@CHILDPARAMETER@@                := "dbEVENT".PROMPT.@@INSTANCE@@_@@SFC@@@@CHILDPARAMETER@@.prompt ,
-@@ATTR_END|pSFCPrompt@@
-@@ATTR_BEGIN|pSFCConfirm@@
-        blkConfirm@@CHILDPARAMETER@@                := "dbEVENT".PROMPT.@@INSTANCE@@_@@SFC@@_@@dbEventParameter@@ ,
-@@ATTR_END|pSFCConfirm@@
-@@ATTR_BEGIN|pSFCLog@@
-        blkLog@@CHILDPARAMETER@@                := "dbEVENT".LOG.@@INSTANCE@@_@@SFC@@@@CHILDPARAMETER@@.realValue;
-@@ATTR_END|pSFCLog@@
-        ME                          := #@@INSTANCE@@.ME
+        CHILD_RELEASE                  := #@@INSTANCE@@.CHILD_RELEASE ,
+@@ATTR_BEGIN|pBLK@@
+        @@CHILDPARAMETER@@             := #@@INSTANCE@@.@@BLOCKPARAMETER@@ ,
+@@ATTR_END|pBLK@@
+        ME                             := @@ID@@
     );
     NOP 0;
 
