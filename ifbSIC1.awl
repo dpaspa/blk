@@ -91,11 +91,19 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     = #@@INSTANCE@@.mc.NCRIL;
 
 NETWORK
+TITLE = @@INSTANCE@@ : Unique ID
+    //------------------------------------------------------------------------//
+    // Set the instance unique ID:                                            //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ID.@@INSTANCE@@;
+    T #@@INSTANCE@@.mc.ME;
+
+NETWORK
 TITLE = @@INSTANCE@@ : Owner
     //------------------------------------------------------------------------//
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
-    L "dbCONST".BLK.OWNER.@@PARENT@@;
+    L "dbCONST".BLK.ID.@@PARENT@@;
     T #@@INSTANCE@@.mc.OWNER;
 
 NETWORK

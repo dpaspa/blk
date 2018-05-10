@@ -405,7 +405,7 @@ STRUCT
                 OPEN : INT  := 2;
             END_STRUCT ;
             SAFE : STRUCT
-                CMD : INT  := -1;      // Class safe command is no change
+                CMD : INT  := 1;       // Class safe command is no change
             END_STRUCT ;
             STATE : STRUCT
                 CLOSED : INT  := 1;
@@ -419,7 +419,7 @@ STRUCT
                 OUT : INT  := 2;
             END_STRUCT ;
             SAFE : STRUCT
-                CMD : INT  := -1;      // Class safe command is no change
+                CMD : INT  := 1;       // Class safe command is no change
             END_STRUCT ;
             STATE : STRUCT
                 IN : INT  := 1;
@@ -451,21 +451,21 @@ STRUCT
         END_STRUCT ;
 @@ATTR_END|PARENT@@
 @@TEMPLATE_END@@
-        OWNER : STRUCT                 // Resource arbitration
+        ID : STRUCT                    // Resource arbitration
             AVAILABLE : INT;           // Block is available for parent acquisition
 @@TEMPLATE_BEGIN@@
-@@ATTR_BEGIN|OWNER@@
+@@ATTR_BEGIN|UNIQUEID@@
             @@INSTANCE@@ : INT;
-@@ATTR_END|OWNER@@
+@@ATTR_END|UNIQUEID@@
         END_STRUCT ;
     END_STRUCT ;
 END_STRUCT ;
 
 BEGIN
-    BLK.OWNER.AVAILABLE := 0;
-@@ATTR_BEGIN|OWNER@@
-    BLK.OWNER.@@INSTANCE@@ := @@ID@@;
-@@ATTR_END|OWNER@@
+    BLK.ID.AVAILABLE := 0;
+@@ATTR_BEGIN|UNIQUEID@@
+    BLK.ID.@@INSTANCE@@ := @@ID@@;
+@@ATTR_END|UNIQUEID@@
 @@TEMPLATE_END@@
 
 END_DATA_BLOCK

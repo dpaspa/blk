@@ -32,11 +32,19 @@ END_VAR
 BEGIN
 @@TEMPLATE_BEGIN@@
 NETWORK
+TITLE = @@INSTANCE@@ : Unique ID
+    //------------------------------------------------------------------------//
+    // Set the instance unique ID:                                            //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ID.@@INSTANCE@@;
+    T #@@INSTANCE@@.mc.ME;
+
+NETWORK
 TITLE = @@INSTANCE@@ : Owner
     //------------------------------------------------------------------------//
-    // Set the instance owner:                                                //
+    // Set the instance available:                                            //
     //------------------------------------------------------------------------//
-    L 0;
+    L "dbCONST".BLK.ID.AVAILABLE;
     T #@@INSTANCE@@.mc.OWNER;
 
 NETWORK
