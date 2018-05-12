@@ -1,0 +1,27 @@
+NETWORK
+TITLE =S0@@STEP_NUM@@:: STEP-0@@STEP_NUM@@:: : ACTION CODE
+    //================================ ACT HEADER ============================//
+    // ACTION ACTION ACTION ACTION ACTION ACTION ACTION ACTION ACTION ACTION  //
+    // AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTO //
+    // ACTION ACTION ACTION ACTION ACTION ACTION ACTION ACTION ACTION ACTION  //
+    //------------------------------------------------------------------------//
+    // @@ACT_DESCRIPTION@@
+    @@ACT_CODE@@@@STEP_NUM@@: NOP   0;
+
+    //------------------------------------------------------------------------//
+    // ACT ACT ACT ACT ACT ACT ACT ACT ACT ACT ACT ACT ACT ACT ACT ACT ACT    //
+    //------------------------------------------------------------------------//
+    @@ACT_ACTOR@@
+
+    //------------------------------------------------------------------------//
+    // VERIFY  VERIFY VERIFY VERIFY VERIFY VERIFY VERIFY VERIFY VERIFY VERIFY //
+    //------------------------------------------------------------------------//
+    @@ACT_VERIFICATION@@
+    S     #sqSequencer.STEP.ActionVerified; //Action verified
+
+    //------------------------------------------------------------------------//
+    // Action done:                                                           //
+    //------------------------------------------------------------------------//
+    O     #sqSequencer.STEP.ActionVerified;
+    O     #NO_VERIFIC;       //No verification , bypass verification code
+    S     #sqSequencer.STEP.ActionFinished;

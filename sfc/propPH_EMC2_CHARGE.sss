@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:31:30 PM by David Paspa
+generated on 12/05/2018 3:03:12 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -330,7 +330,7 @@ S #_log_time_charge_begin;
 SET;
 R #_Report_End_Event;
 R #_Report_Start_Event;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -350,11 +350,15 @@ Condition:-  A(;
 --------------------------------------------------
 TRANSITION::04
 --------------------------------------------------
-TRNNo:- 4.0000
+TRNNo:- 04
 Title:- Phase Parameter ready
 EmptyTransition:- False
 Description:- Vessel mass Target value is available.
-Condition:- A M1.1;
+Condition:-  A(; 
+ L     #_mass_charge; 
+ L     1.000000e+000;
+<=R; 
+  ); 
 
 
 --------------------------------------------------
@@ -371,7 +375,7 @@ Description:- Mass calculation fail try again.
 Action:- SET;
 S #_log_msg_invalid_mass;
 S #_prompt_invalid_mass;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -408,7 +412,7 @@ Description:- Log operator abort.
 Action:- //Log operator abort.
 SET;
 S #_log_msg_invalid_mass_abort;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -425,17 +429,17 @@ Description:- Log operator repeat
 Action:- //Log operator repeat.
 SET;
 S #_log_msg_invalid_mass_repeat;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::06
 --------------------------------------------------
-TRNNo:- 6.0000
+TRNNo:- 06
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -463,7 +467,7 @@ ACTION::02
 Description:- Store current mass to initial mass.
 Action:- L     #_mi_vessel_pv;
 T     #_mass_initial; 
-Verification:-   A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -473,7 +477,7 @@ TRNNo:- 07
 Title:- Jump
 EmptyTransition:- False
 Description:- Jump unconditionally
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -481,7 +485,7 @@ STEP::06
 --------------------------------------------------
 StepNo:- 06
 Title:- PH_EMC2_CHARGE : Open selected duty supply valve
-Description:- Open WFI or PW supply valve. Start the sequence timer.
+Description:- Open selected WFI or PW supply valve. Start the sequence timer.
 
 --------------------------------------------------
 ACTION::01
@@ -594,8 +598,7 @@ T #SQ_TIMER.PT;
 
 SET;
 S #SQ_TIMER.IN;
-Verification:- A M1.1;
-
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -770,7 +773,7 @@ Action:- //Log operator abort.
 SET;
 S #_log_msg_filling_timeout_abort;
 R #_prompt_filling_timeout_confirm_no;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -780,7 +783,7 @@ TRNNo:- 12
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -839,7 +842,7 @@ Condition:-  A #_mass_ready;
 --------------------------------------------------
 STEP::10
 --------------------------------------------------
-StepNo:- 10.0000
+StepNo:- 10
 Title:- PH_EMC2_CHARGE : Log operator repeat
 Description:- Log operator repeat
 
@@ -851,7 +854,7 @@ Action:- //Log operator repeat.
 SET;
 S #_log_msg_filling_timeout_repeat;
 R #_prompt_filling_timeout_confirm_yes;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -861,7 +864,7 @@ TRNNo:- 13
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -907,7 +910,7 @@ TRNNo:- 15
 Title:- TRN Title
 EmptyTransition:- False
 Description:- Jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -935,7 +938,7 @@ S #_Report_End_Event;
 
 SET;
 R #_Report_Start_Event;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

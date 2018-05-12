@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:32:30 PM by David Paspa
+generated on 12/05/2018 3:03:50 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -104,7 +104,7 @@ S #_log_time_filter_bleed_begin;
 S #_prompt_filter;
 R #_prompt_filter_confirm_yes;
 
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -120,7 +120,7 @@ Condition:- A #_prompt_filter_confirm_yes;
 --------------------------------------------------
 STEP::02
 --------------------------------------------------
-StepNo:- 2.0000
+StepNo:- 02
 Title:- PH_EMX6_FILTER_BLEED : Last step
 Description:- Log operator confirmation and FILTER_BLEED operation end time.
 
@@ -139,7 +139,7 @@ T #_time_filter_bleed_end;
 
 SET;
 S #_log_time_filter_bleed_end;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

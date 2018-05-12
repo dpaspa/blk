@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:31:50 PM by David Paspa
+generated on 12/05/2018 3:03:25 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -92,7 +92,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::8
 --------------------------------------------------
-Name:- time_settle
+Name:- settling_time
 Type:- TIME
 Description:- Settling time for disturbance
 ParameterInOut:- IN
@@ -119,12 +119,12 @@ SET;
 S #_log_time_measure_begin;
 
 //Load the settling time
-L #_time_settle;
+L #_settling_time;
 T #SQ_TIMER.PT;
 
 SET;
 S #SQ_TIMER.IN;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -155,17 +155,17 @@ Action:- L #_mi_vessel_pv;
 L #_mass_tare;
 -R;
 T  #_mass_nett;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::02
 --------------------------------------------------
-TRNNo:- 2.0000
+TRNNo:- 02
 Title:- Phase Finish Normal
 EmptyTransition:- False
-Description:- Phase Finish Normal
-Condition:- A M1.1; //Always High flag
+Description:- Jump unconditionally.
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -190,7 +190,7 @@ T #_time_measure_end;
 SET;
 S #_log_time_measure_end;
 
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

@@ -69,6 +69,28 @@ TITLE = load OB1 maximum cycle time into DB memory
     T "timeOBMax";
 notMaximum:      NOP 0;
 
+@@TEMPLATE_BEGIN@@
+@@ATTR_BEGIN|callListExistsCRIL@@
+NETWORK
+TITLE = Calling all Critical Interlocks
+    //------------------------------------------------------------------------//
+    // Call the Critical Interlock block:                                     //
+    //------------------------------------------------------------------------//
+    CALL "ifbCRIL", "idbCRIL";
+    NOP 0;
+@@ATTR_END|callListExistsCRIL@@
+
+@@ATTR_BEGIN|callListExistsNCRIL@@
+NETWORK
+TITLE = Calling all Non Critical Interlocks
+    //------------------------------------------------------------------------//
+    // Call the Non-Critical Interlock block:                                 //
+    //------------------------------------------------------------------------//
+    CALL "ifbNCRIL", "idbNCRIL";
+    NOP 0;
+@@ATTR_END|callListExistsNCRIL@@
+@@TEMPLATE_END@@
+
 NETWORK
 TITLE = Calling all Control Modules (CM)
     //------------------------------------------------------------------------//
@@ -76,15 +98,6 @@ TITLE = Calling all Control Modules (CM)
     // Each CM is a bespoke hand coded module with specific I/O and function: //
     //------------------------------------------------------------------------//
     CALL "fcCallCMs";
-    NOP 0;
-
-NETWORK
-TITLE = Calling all Interlocks
-    //------------------------------------------------------------------------//
-    // Call all user Interlock blocks to execute the user application.        //
-    // These are all instances of the various interlock logic templates:      //
-    //------------------------------------------------------------------------//
-    CALL "fcCallILs";
     NOP 0;
 
 NETWORK

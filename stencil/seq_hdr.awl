@@ -141,36 +141,18 @@ NAME : @@HEADER_NAME@@
 AUTHOR : REO
 VERSION : @@VERSION@@
 
-VAR_INPUT
-    MODE : INT :=2;
-    SQ_CMD : INT :=0;
-@@PARAMETER_LIST_IN@@
-END_VAR
-
-VAR_OUTPUT
-    SQ_STATE : INT ;
-    CURSTEP : INT ;
-    NXT_STEP : INT ;
-    S_ACTIVE : BOOL ;
-    ERR_FAULT : BOOL ;
-@@PARAMETER_LIST_OUT@@
-END_VAR
-
 VAR_IN_OUT
-    SQ_FINISHED : BOOL ;
-    OFF_IDLE : BOOL ;
-    PAUSED : BOOL ;
-    STEPNO_JUMP : INT ;
-    MAN_JUMP : BOOL ;
-    NO_VERIFIC : BOOL ;
+@@PARAMETER_LIST_IN@@
+@@PARAMETER_LIST_OUT@@
 @@PARAMETER_LIST_IN_OUT@@
-    TRN_AND_JUMP : BOOL ;
+    smc : "udtModeCommandSFC";         // SFC mode and command
 END_VAR
 
 VAR
     sqStepTimer : "TON";
     sqRunTimer : "fbRunTimer";
     sqSequencer : "udtSFCSequence@@PARAMETER_UPPER_ARRAY@@";
+    RESET : Bool;                      // Request to stop and clear smc reference
     SQ_TIMER: "TON";
 @@PARAMETER_LIST_VAR@@
 END_VAR
@@ -185,20 +167,19 @@ END_VAR
 BEGIN
 NETWORK
 TITLE =Call Mode checking function
-
-      L     #MODE;
-      T     #sqSequencer.MODE.current;
-      CALL "fcSFCMode" (
-           Mode                     := #sqSequencer.MODE);
+    L     #smc.MODE;
+    T     #sqSequencer.MODE.current;
+    CALL "fcSFCMode"
+    (   Mode                 := #sqSequencer.MODE
+    );
 
 NETWORK
 TITLE =Call Command checking function
-
-      L     #SQ_CMD;
-      T     #sqSequencer.CMD.New;
-
-      CALL "fcSFCCommand" (
-           Comand                   := #sqSequencer.CMD);
+    L     #smc.SQ_CMD;
+    T     #sqSequencer.CMD.New;
+    CALL "fcSFCCommand"
+    (   Comand               := #sqSequencer.CMD
+    );
 
 NETWORK
 TITLE =Sequencer Mode function
@@ -225,7 +206,7 @@ MDCH: NOP   0;
       SET   ;
       R     #sqStepTimer.IN;
       L     #sqSequencer.STEP.NumberCurrent;
-      T     #STEPNO_JUMP;
+      T     #smc.STEPNO_JUMP;
       JU    EMOD;
 
 NETWORK
@@ -239,15 +220,15 @@ MANU: NOP   0; //Manual mode selected
 
 @@SEQ_MAN_CODE@@
 
-      A     #MAN_JUMP;
+      A     #smc.MAN_JUMP;
       =     #sqSequencer.STEP.JumpCtrl;
-      A     #MAN_JUMP;
+      A     #smc.MAN_JUMP;
       JCN   EMOD;
 
-      L     #STEPNO_JUMP;
+      L     #smc.STEPNO_JUMP;
       T     #sqSequencer.STEP.NumberNext;
       T     #sqSequencer.STEP.NumberCurrent;
-      R     #MAN_JUMP; //Reset MAN_JUMP after loading user destination Step number
+      R     #smc.MAN_JUMP; //Reset MAN_JUMP after loading user destination Step number
       R     #sqSequencer.STEP.Finished; //Reset finish flag, to execute next step action
       JU    EMOD;
 
@@ -262,13 +243,13 @@ AUTO: NOP   0; //Auto mode selected
 
 @@SEQ_AUTO_CODE@@
 
-      R     #MAN_JUMP;
-      S     #TRN_AND_JUMP;
-      R     #NO_VERIFIC;
+      R     #smc.MAN_JUMP;
+      S     #smc.TRN_AND_JUMP;
+      R     #smc.NO_VERIFIC;
       S     #sqSequencer.STEP.JumpCtrl; //Always Set in auto mode
 
       L     #sqSequencer.STEP.NumberCurrent;
-      T     #STEPNO_JUMP;
+      T     #smc.STEPNO_JUMP;
       JU    EMOD;
 NETWORK
 TITLE =OOS mode function
@@ -278,7 +259,7 @@ OOS:  NOP   0; // Out of service
 WRMD: NOP   0; //Wrong mode selected
       S     #sqSequencer.Error_Fault;
       L     "dbCONST".SEQ.STATE.WRMODE;
-      T     #SQ_STATE;
+      T     #smc.SQ_STATE;
 
       JU    EMOD;
 
@@ -334,8 +315,8 @@ NETWORK
 TITLE =Comand -Start/Initiate action function
 
 STRT: NOP   0;
-      R     #OFF_IDLE;
-      R     #PAUSED;
+      R     #smc.OFF_IDLE;
+      R     #smc.PAUSED;
       R     #sqSequencer.STEP.Active;
       R     #sqSequencer.STEP.Finished;
       R     #sqSequencer.STEP.ActionFinished;
@@ -357,7 +338,7 @@ STRT: NOP   0;
       T     #sqSequencer.STEP.NumberNext;
 
       L     "dbCONST".SEQ.STATE.STARTED;
-      T     #SQ_STATE;
+      T     #smc.SQ_STATE;
 
 NETWORK
 TITLE = Reset sequence Done bits
@@ -389,7 +370,7 @@ NETWORK
 TITLE =Comand -Stop action function
 
 STOP: NOP   0;
-      S     #OFF_IDLE;
+      S     #smc.OFF_IDLE;
       R     #sqSequencer.STEP.Active;
       R     #sqSequencer.STEP.Finished;
       R     #sqSequencer.STEP.ActionFinished;
@@ -401,7 +382,7 @@ STOP: NOP   0;
       R     #sqRunTimer.ENABLE;
       R     #sqStepTimer.IN;
       R     #SQ_TIMER.IN;
-      R     #PAUSED;
+      R     #smc.PAUSED;
 
 
 //Go to last step
@@ -410,7 +391,7 @@ STOP: NOP   0;
       L     #sqSequencer.FinalStep;
       T     #sqSequencer.STEP.NumberNext;
       L     "dbCONST".SEQ.STATE.OFF_IDLE;
-      T     #SQ_STATE;
+      T     #smc.SQ_STATE;
 
       JU    ECMD; //End Function
 
@@ -418,13 +399,13 @@ NETWORK
 TITLE =Comand -Pause action function
 
 PAUS: NOP   0;
-      S     #PAUSED;
-      R     #S_ACTIVE;
+      S     #smc.PAUSED;
+      R     #smc.S_ACTIVE;
       S     #sqRunTimer.PAUSE;
       L     #sqSequencer.STEP.NumberCurrent;
-      T     #STEPNO_JUMP;
+      T     #smc.STEPNO_JUMP;
       L     "dbCONST".SEQ.STATE.PAUSED;
-      T     #SQ_STATE;
+      T     #smc.SQ_STATE;
 
       JU    ECMD; //End Function
 
@@ -432,13 +413,13 @@ NETWORK
 TITLE =Comand -Resume action function
 
 RESM: NOP   0;
-      R     #PAUSED;
+      R     #smc.PAUSED;
       R     #sqRunTimer.PAUSE;
       R     #sqStepTimer.IN; //Reset Step timer
       L     "dbCONST".SEQ.STATE.RESUMED;
-      T     #SQ_STATE;
+      T     #smc.SQ_STATE;
 
-      A     #SQ_FINISHED;
+      A     #smc.SQ_FINISHED;
       JC    ECMD;
       R     #sqSequencer.STEP.Active;
       R     #sqSequencer.STEP.Finished;
@@ -451,7 +432,7 @@ TITLE =Comand -Abort action function
 
 _abrt_begin: NOP   0;
       L     "dbCONST".SEQ.STATE.ABORTED;
-      T     #SQ_STATE;
+      T     #smc.SQ_STATE;
 
       JC    STOP; //Stop & Abort same
       JU    ECMD;
@@ -460,10 +441,10 @@ NETWORK
 TITLE =Comand -Acknowledge action function
 
 ACKN: NOP   0;
-      R     #ERR_FAULT;
+      R     #smc.ERR_FAULT;
       R     #sqSequencer.Error_Fault;
       L     "dbCONST".SEQ.STATE.ACKNOWLEDGED;
-      T     #SQ_STATE;
+      T     #smc.SQ_STATE;
 
       JU    ECMD; //End Function
 
@@ -474,7 +455,7 @@ WCMD: NOP   0;
 
       S     #sqSequencer.Error_Fault;
       L     "dbCONST".SEQ.STATE.WRCMD;
-      T     #SQ_STATE;
+      T     #smc.SQ_STATE;
 
       JU    ECMD;
 NETWORK

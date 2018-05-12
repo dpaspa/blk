@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:41:18 PM by David Paspa
+generated on 12/05/2018 3:07:50 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -248,7 +248,7 @@ R #_filtration_complete_sy;
 R #_filtration_complete_mx;
 R #_prompt_abort;
 R #_Report_End; //REPORT END FLAG
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -273,11 +273,11 @@ L #_mx_vessel_hygiene;
 --------------------------------------------------
 TRANSITION::02
 --------------------------------------------------
-TRNNo:- 2.0000
+TRNNo:- 02
 Title:- Incorrect Hygiene Status
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -300,7 +300,7 @@ SET;
 S #_log_time_wrong_hygiene;
 S #_log_msg_wrong_hygiene;
 S #_prompt_abort;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -400,7 +400,6 @@ Description:- Check if SMFLx and MMFLx has flagged it is ready for HPCA
 Condition:- A #_ready_hpca_mx;
 
 
-
 --------------------------------------------------
 STEP::05
 --------------------------------------------------
@@ -414,7 +413,7 @@ ACTION::01
 Description:- Set MX ready_hpn2 flag.
 Action:- SET;
 S #_start_hpca_mx;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -424,7 +423,7 @@ TRNNo:- 06
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -444,7 +443,7 @@ Action:- SET;
 S #_filtration_complete_mx;
 S #_filtration_complete_sy;
 R #_start_hpca_mx;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -484,17 +483,17 @@ T #_mx_vessel_hygiene;
 
 //SET REPORT END FLAG
 S #_Report_End; 
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::08
 --------------------------------------------------
-TRNNo:- 8.0000
+TRNNo:- 08
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -531,7 +530,7 @@ R #_filtration_complete_mx;
 R #_filtration_complete_sy;
 R #_prompt_abort_confirm_yes;
 R #_Report_End; 
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

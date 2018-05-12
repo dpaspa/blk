@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:41:21 PM by David Paspa
+generated on 12/05/2018 3:07:52 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -169,7 +169,7 @@ S #_log_time_make_begin;
 SET;
 R #_toggle_mode;
 R #_prompt_abort;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -189,11 +189,11 @@ L #_mx_vessel_hygiene;
 --------------------------------------------------
 TRANSITION::02
 --------------------------------------------------
-TRNNo:- 2.0000
+TRNNo:- 02
 Title:- Incorrect Hygiene Status
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -216,7 +216,7 @@ SET;
 S #_log_time_wrong_hygiene;
 S #_log_msg_wrong_hygiene;
 S #_prompt_abort;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -301,17 +301,17 @@ R #_toggle_mode;
 
 //Release the water system
 S #_Release_Water_System_Mx;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::05
 --------------------------------------------------
-TRNNo:- 5.0000
+TRNNo:- 05
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -327,20 +327,12 @@ ACTION::01
 --------------------------------------------------
 Description:- Stop Mx unit operation.
 Log product manufacture operation end time.
-Action:- A(;
-L "dbCONST".BLK.HYGIENE.BATCH;
-L #_mx_vessel_hygiene;
-==I;
-);
-JC NORM;
-
-//Stop MX Unit Operation
+Action:- //Stop MX Unit Operation
 L "dbCONST".BLK.CMD.STOP;
 T #_mx_vessel_cmd;
 L "dbCONST".BLK.SAFE.CMD;
 T #_mx_vessel_subs;
 
-NORM: NOP 0;
 
 //Log Make operation end time.
 L "dbCONST".CHRONO.CPU_TIME;
@@ -349,7 +341,7 @@ T #_time_make_end;
 SET;
 S #_log_time_make_end;
 R #_prompt_abort_confirm_yes;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

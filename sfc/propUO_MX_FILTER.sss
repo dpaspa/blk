@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:37:44 PM by David Paspa
+generated on 12/05/2018 3:05:25 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -630,7 +630,7 @@ AN #_FL_TIMER.Q;
 S #_FL_TIMER.IN;
 L #_time_mass_reduce;
 T #_FL_TIMER.PT;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -787,7 +787,7 @@ ACTION::02
 Description:- Set flag ready_HPCA
 Action:- SET;
 S #_ready_hpca;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -904,17 +904,17 @@ Log automatic ABORT.
 Action:- SET;
 S #_log_msg_hihi_temperature;
 S #_log_msg_temperature_abort;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::11
 --------------------------------------------------
-TRNNo:- 11.0000
+TRNNo:- 11
 Title:- Always High
 EmptyTransition:- False
 Description:- Always High
-Condition:- A M1.1;
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -933,17 +933,17 @@ SET;
 S #_log_msg_vessel_mass;
 S #_vessel_mass_alarm;
 
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::09
 --------------------------------------------------
-TRNNo:- 9.0000
+TRNNo:- 09
 Title:- Always High
 EmptyTransition:- False
 Description:- Always High
-Condition:- A M1.1;
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -962,17 +962,17 @@ SET;
 S #_log_msg_hi_temperature;
 S #_hi_temperature_alarm;
 
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::10
 --------------------------------------------------
-TRNNo:- 10.0000
+TRNNo:- 10
 Title:- Always High
 EmptyTransition:- False
 Description:- Always High
-Condition:- A M1.1;
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -993,7 +993,7 @@ T #_emc_gas_setpoint;
 
 SET;
 R #_ready_HPCA;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -1027,7 +1027,7 @@ T #_time_filtration_end;
 
 SET;
 S #_log_time_filtration_end;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -1117,7 +1117,7 @@ TRNNo:- 14
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Unconditional jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------

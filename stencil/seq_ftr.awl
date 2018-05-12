@@ -45,28 +45,28 @@ NETWORK
 TITLE =General Assignments
 
     L     #sqSequencer.STEP.NumberNext;
-    T     #NXT_STEP;
+    T     #smc.NXT_STEP;
     T     #sqSequencer.STEP.NumberCurrent;
-    T     #CURSTEP;
+    T     #smc.CURSTEP;
 
     A     #sqSequencer.STEP.Active;
-    =     #S_ACTIVE;
+    =     #smc.S_ACTIVE;
 
     A     #sqSequencer.Error_Fault;
-    =     #ERR_FAULT;
+    =     #smc.ERR_FAULT;
 
 NETWORK
 TITLE =Sequencer Finished
 
-    AN    #OFF_IDLE;
-    AN    #PAUSED;
+    AN    #smc.OFF_IDLE;
+    AN    #smc.PAUSED;
     A     #sqSequencer.STEP.Done[@@LAST_STEP_NUM@@];
     =     #sqSequencer.Finished;
-    =     #SQ_FINISHED;
+    =     #smc.SQ_FINISHED;
     JCN   fnsd;
     L     "dbCONST".SEQ.STATE.COMPLETED;
-    T     #SQ_STATE;
-    R     #PAUSED;
+    T     #smc.SQ_STATE;
+    R     #smc.PAUSED;
     R     #sqSequencer.STEP.Error_Fault;
     R     #sqSequencer.Error_Fault;
 fnsd: NOP   0;
@@ -74,18 +74,18 @@ fnsd: NOP   0;
     //------------------------------------------------------------------------//
     // Reset Finished flag if SQ OFF for Last step to scan:                   //
     //------------------------------------------------------------------------//
-    A     #OFF_IDLE;
+    A     #smc.OFF_IDLE;
     AN    #sqSequencer.STEP.Done[@@LAST_STEP_NUM@@];
     AN    #sqSequencer.STEP.WithError[@@LAST_STEP_NUM@@];
     JCN   _abrt_end;
     R     #sqSequencer.STEP.Finished;
     L     "dbCONST".SEQ.STATE.ABORTED;
-    T     #SQ_STATE;
-    S     #OFF_IDLE;
-    R     #PAUSED;
+    T     #smc.SQ_STATE;
+    S     #smc.OFF_IDLE;
+    R     #smc.PAUSED;
     R     #sqSequencer.STEP.Error_Fault;
     R     #sqSequencer.Error_Fault;
-    R     #PAUSED;
+    R     #smc.PAUSED;
 _abrt_end: NOP   0;
 
     //------------------------------------------------------------------------//

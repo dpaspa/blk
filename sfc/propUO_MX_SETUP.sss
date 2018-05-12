@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:38:04 PM by David Paspa
+generated on 12/05/2018 3:05:40 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -746,7 +746,7 @@ T #_time_vacuum_fail;
 SET;
 S #_log_time_vacuum_fail;
 S #_prompt_not_reach;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -810,17 +810,17 @@ Verification:- A #SQ_TIMER.IN;
 --------------------------------------------------
 TRANSITION::08
 --------------------------------------------------
-TRNNo:- 8.0000
+TRNNo:- 08
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::07
 --------------------------------------------------
-StepNo:- 7.0000
+StepNo:- 07
 Title:- UO_MX_SETUP : Log operator repeat
 Description:- Log operator repeat.
 
@@ -832,23 +832,23 @@ Action:- //Log operator repeat.
 SET;
 S #_log_msg_not_reach_repeat;
 R #SQ_TIMER.IN;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::09
 --------------------------------------------------
-TRNNo:- 9.0000
+TRNNo:- 09
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::08
 --------------------------------------------------
-StepNo:- 8.0000
+StepNo:- 08
 Title:- UO_MX_SETUP : Log operator ABORT
 Description:- Log operator ABORT.
 
@@ -860,25 +860,25 @@ Action:- //Log operator abort.
 SET;
 S #_log_msg_not_reach_abort;
 R #SQ_TIMER.IN;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::10
 --------------------------------------------------
-TRNNo:- 10.0000
+TRNNo:- 10
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::09
 --------------------------------------------------
 StepNo:- 09
-Title:- UO_MX_SETUP : Vacuum Hold Test
-Description:- Set flag to log vessel pressure at 30 second intervals. Logging of values done in HMI.
+Title:- UO_MX_SETUP : Pressure logging
+Description:- Log vessel pressure at 30 second intervals.
 
 --------------------------------------------------
 ACTION::01
@@ -890,12 +890,14 @@ T #_real_pressure_mx;
 
 SET;
 S #_log_real_pressure_mx;
+A #_PRES_TIMER.Q;
+R #_PRES_TIMER.IN;
 
 AN #_PRES_TIMER.Q;
 S #_PRES_TIMER.IN;
 L T#30S;
 T #_PRES_TIMER.PT;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -923,16 +925,28 @@ L #_pres_vac_fail;
 
 
 --------------------------------------------------
+TRANSITION::13
+--------------------------------------------------
+TRNNo:- 13
+Title:- Pressure logging timer expired
+EmptyTransition:- False
+Description:- 30 seconds expired
+Condition:- A #_PRES_TIMER.Q;
+
+
+--------------------------------------------------
 STEP::10
 --------------------------------------------------
 StepNo:- 10
 Title:- UO_MX_SETUP : Log actual time vacuum held.
 Description:- Log actual time vacuum held.
+Log Mx vessel pressure.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Log actual time vacuum held.
+Log Mx vessel pressure.
 Action:- //Store Vacuum Hold test end time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_vacuum_held_end_time;
@@ -946,9 +960,6 @@ CALL T_DIFF
 );
 SET;
 S #_log_time_act_vacuum_held;
-
-A #_PRES_TIMER.Q;
-JCN NEXT;
 R #_PRES_TIMER.IN;
 
 //Log Mx vessel pressure.
@@ -957,23 +968,17 @@ T #_real_pressure_mx;
 
 SET;
 S #_log_real_pressure_mx;
-
-NEXT: NOP 0;
-AN #_PRES_TIMER.Q;
-S #_PRES_TIMER.IN;
-L T#30S;
-T #_PRES_TIMER.PT;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::13
+TRANSITION::14
 --------------------------------------------------
-TRNNo:- 13.0000
+TRNNo:- 14
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -982,11 +987,13 @@ STEP::11
 StepNo:- 11
 Title:- UO_MX_SETUP : Vacuum Hold failed
 Description:- Set flag to raise vacuum failed message and prompt operator.
+Log Mx vessel pressure.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Set flag to raise vacuum failed message and prompt operator.
+Log Mx vessel pressure.
 Action:- //Set flag to raise vacuum failed message and prompt operator.
 SET;
 S #_log_msg_not_held;
@@ -1006,9 +1013,6 @@ SET;
 S #_Report_Evnt_002;
 
 
-A #_PRES_TIMER.Q;
-JCN NEXT1;
-R #_PRES_TIMER.IN;
 
 //Log Mx vessel pressure.
 L #_pi_vessel_pv;
@@ -1016,19 +1020,14 @@ T #_real_pressure_mx;
 
 SET;
 S #_log_real_pressure_mx;
-
-NEXT1: NOP 0;
-AN #_PRES_TIMER.Q;
-S #_PRES_TIMER.IN;
-L T#30S;
-T #_PRES_TIMER.PT;
-Verification:- A M1.1; //Always High flag
+R #_PRES_TIMER.IN;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::14
+TRANSITION::15
 --------------------------------------------------
-TRNNo:- 14
+TRNNo:- 15
 Title:- No try?
 EmptyTransition:- False
 Description:- Operator don't want to try again.
@@ -1036,9 +1035,9 @@ Condition:- A #_prompt_not_held_confirm_no;
 
 
 --------------------------------------------------
-TRANSITION::15
+TRANSITION::16
 --------------------------------------------------
-TRNNo:- 15
+TRNNo:- 16
 Title:- Try again?
 EmptyTransition:- False
 Description:- Operator want to try again.
@@ -1060,25 +1059,7 @@ Action:- //Log operator abort.
 SET;
 S #_log_msg_not_held_abort;
 R #_prompt_not_held_confirm_no;
-
-
-A #_PRES_TIMER.Q;
-JCN NEXT2;
-R #_PRES_TIMER.IN;
-
-//Log Mx vessel pressure.
-L #_pi_vessel_pv;
-T #_real_pressure_mx;
-
-SET;
-S #_log_real_pressure_mx;
-
-NEXT2: NOP 0;
-AN #_PRES_TIMER.Q;
-S #_PRES_TIMER.IN;
-L T#30S;
-T #_PRES_TIMER.PT;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -1096,34 +1077,17 @@ Action:- //Log operator repeat.
 SET;
 S #_log_msg_not_held_repeat;
 R #_prompt_not_held_confirm_yes;
-
-A #_PRES_TIMER.Q;
-JCN NEXT3;
-R #_PRES_TIMER.IN;
-
-//Log Mx vessel pressure.
-L #_pi_vessel_pv;
-T #_real_pressure_mx;
-
-SET;
-S #_log_real_pressure_mx;
-
-NEXT3: NOP 0;
-AN #_PRES_TIMER.Q;
-S #_PRES_TIMER.IN;
-L T#30S;
-T #_PRES_TIMER.PT;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::17
+TRANSITION::18
 --------------------------------------------------
-TRNNo:- 17.0000
+TRNNo:- 18
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -1150,7 +1114,7 @@ T #_time_setup_end;
 
 SET;
 S #_log_time_setup_end;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

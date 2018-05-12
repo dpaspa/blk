@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:38:20 PM by David Paspa
+generated on 12/05/2018 3:05:55 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -868,7 +868,7 @@ SET;
 S #_log_time_vacuum_fail;
 S #_log_msg_vacuum_fail;
 S #_prompt_try_again;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -911,7 +911,7 @@ T  #_emc_gas_cmd;
 // Stop timer
 SET;
 R #SQ_TIMER.IN;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -931,7 +931,7 @@ L 	"dbCONST".BLK.STATE.STOPPED;
 --------------------------------------------------
 STEP::05
 --------------------------------------------------
-StepNo:- 5.0000
+StepNo:- 05
 Title:- UO_MX_SIP : Log Operator Repeat
 Description:- Log operator repeat.
 
@@ -943,13 +943,13 @@ Action:- //Log operator repeat.
 SET;
 S #_log_msg_vacuum_fail_repeat;
 R #_prompt_try_again_confirm_yes;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::06
 --------------------------------------------------
-StepNo:- 6.0000
+StepNo:- 06
 Title:- UO_MX_SIP : Log Operator Abort
 Description:- Log operator abort.
 
@@ -961,17 +961,17 @@ Action:- //Log operator abort.
 SET;
 S #_log_msg_vacuum_fail_abort;
 R #_prompt_try_again_confirm_no;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::07
 --------------------------------------------------
-TRNNo:- 7.0000
+TRNNo:- 07
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -1078,7 +1078,7 @@ TRNNo:- 09
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -1131,7 +1131,7 @@ T #_time_steam_closed;
 
 SET;
 S #_log_time_steam_closed;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -1141,23 +1141,20 @@ TRNNo:- 11
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::11
 --------------------------------------------------
 StepNo:- 11
-Title:- UO_MX_SIP : Monitor MX SIP Temperatures
-Description:- Log all Mx vessel temperatures every 30sec once SIP started first time.
-Start TIME_SIP_ABORT timer.
+Title:- UO_MX_SIP : SIP Started
+Description:- Skip timer for SIP_ABORT if sip_timer_started=FALSE.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Skip timer for SIP_ABORT if sip_timer_started=FALSE.
-Set flags to log all Mx vessel temperatures  every 30sec. 
-Reset flags.
 Action:- //Skip timer for SIP_ABORT if sip_timer_started=FALSE.
 A #_sip_timer_started;
 JC tsi1;
@@ -1174,9 +1171,32 @@ T #_ABORT_TIMER.PT;
 
 tsi1: NOP 0;
 //SIP started.
-//Log all temperatures
-A #_TEMP_TIMER.Q;
-JCN NEXT;
+
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::12
+--------------------------------------------------
+TRNNo:- 12
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::12
+--------------------------------------------------
+StepNo:- 12
+Title:- UO_MX_SIP : Monitor MX SIP Temperatures
+Description:- Log all Mx vessel temperatures every 30sec.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log all Mx vessel temperatures  every 30sec. 
+Action:- //Log all temperatures
 SET;
 R #_TEMP_TIMER.IN;
 L #_emg_ti_vent_pv;
@@ -1194,18 +1214,17 @@ S #_log_real_emg_ti_drain_pv;
 S #_log_real_emv_ti_vessel_pv;
 S #_log_real_emx_ti_drain_pv;
 
-NEXT: NOP 0;
 AN #_TEMP_TIMER.Q;
 S #_TEMP_TIMER.IN;
 L T#30S;
 T #_TEMP_TIMER.PT;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::12
+TRANSITION::13
 --------------------------------------------------
-TRNNo:- 12
+TRNNo:- 13
 Title:- Temperature below setpoint
 EmptyTransition:- False
 Description:- SIP timer running and any temperature below TEMP_SIP or the vent filter inlet temperature below TEMP_SIP_VENT?
@@ -1239,9 +1258,9 @@ L 	#_temp_sip;
 
 
 --------------------------------------------------
-TRANSITION::13
+TRANSITION::14
 --------------------------------------------------
-TRNNo:- 13
+TRNNo:- 14
 Title:- All temperatures above setpoint.
 EmptyTransition:- False
 Description:- All SIP temperatures above TEMP_SIP °C and the vent filter inlet temperature above TEMP_SIP_VENT?
@@ -1277,9 +1296,19 @@ L 	#_temp_sip;
 
 
 --------------------------------------------------
-TRANSITION::14
+TRANSITION::15
 --------------------------------------------------
-TRNNo:- 14
+TRNNo:- 15.0000
+Title:- Temperature logging timer expired
+EmptyTransition:- False
+Description:- 30 seconds expired.
+Condition:- A #_TEMP_TIMER.Q;
+
+
+--------------------------------------------------
+TRANSITION::16
+--------------------------------------------------
+TRNNo:- 16.0000
 Title:- SIP Timer Expired
 EmptyTransition:- False
 Description:- Timer TIME_SIP expired.
@@ -1288,9 +1317,9 @@ A #_sip_timer_started;
 
 
 --------------------------------------------------
-TRANSITION::15
+TRANSITION::17
 --------------------------------------------------
-TRNNo:- 15
+TRNNo:- 17.0000
 Title:- Abort timer expired
 EmptyTransition:- False
 Description:- Timer TIME_SIP_ABORT is expired.
@@ -1299,9 +1328,9 @@ AN #_sip_timer_started;
 
 
 --------------------------------------------------
-STEP::12
+STEP::13
 --------------------------------------------------
-StepNo:- 12
+StepNo:- 13
 Title:- UO_MX_SIP : Start MX SIP timer 
 Description:- Start SIP timer TIME_SIP.
 Set sip_timer_started.
@@ -1328,40 +1357,13 @@ T #_time_sip_start;
 SET;
 S #_log_time_sip_start;
 S #_sip_timer_started;
-
-
-//Log all temperatures if 30 seconds passed.
-A #_TEMP_TIMER.Q;
-JCN NEXT1;
-SET;
-R #_TEMP_TIMER.IN;
-L #_emg_ti_vent_pv;
-T #_real_emg_ti_vent_pv;
-L #_emg_ti_vent_pv;
-T #_real_emg_ti_drain_pv;
-L #_emg_ti_vent_pv;
-T #_real_emv_ti_vessel_pv;
-L #_emg_ti_vent_pv;
-T #_real_emx_ti_drain_pv;
-
-SET;
-S #_log_real_emg_ti_vent_pv;
-S #_log_real_emg_ti_drain_pv;
-S #_log_real_emv_ti_vessel_pv;
-S #_log_real_emx_ti_drain_pv;
-
-NEXT1: NOP 0;
-AN #_TEMP_TIMER.Q;
-S #_TEMP_TIMER.IN;
-L T#30S;
-T #_TEMP_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::16
+TRANSITION::18
 --------------------------------------------------
-TRNNo:- 16
+TRNNo:- 18
 Title:- SIP Timer Expired
 EmptyTransition:- False
 Description:- Timer TIME_SIP not yet expired.
@@ -1369,14 +1371,12 @@ Condition:- AN #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::13
+STEP::14
 --------------------------------------------------
-StepNo:- 13
+StepNo:- 14
 Title:- UO_MX_SIP : Low MX temperature during SIP
 Description:- Reset sip_timer_started and log timer RESET.
 Increase counter.
-
-Log all temperatures if 30 seconds passed.
 
 --------------------------------------------------
 ACTION::01
@@ -1395,44 +1395,13 @@ S #_log_msg_sip_timer_reset;
 L #_ctr_sip_abort;
 INC 1;
 T #_ctr_sip_abort;
-Verification:- A M1.1; //Always High flag
-
---------------------------------------------------
-ACTION::02
---------------------------------------------------
-Description:- Log all temperatures if 30 seconds passed.
-Action:- //Log all temperatures if 30 seconds passed.
-A #_TEMP_TIMER.Q;
-JCN NEXT2;
-SET;
-R #_TEMP_TIMER.IN;
-L #_emg_ti_vent_pv;
-T #_real_emg_ti_vent_pv;
-L #_emg_ti_vent_pv;
-T #_real_emg_ti_drain_pv;
-L #_emg_ti_vent_pv;
-T #_real_emv_ti_vessel_pv;
-L #_emg_ti_vent_pv;
-T #_real_emx_ti_drain_pv;
-
-SET;
-S #_log_real_emg_ti_vent_pv;
-S #_log_real_emg_ti_drain_pv;
-S #_log_real_emv_ti_vessel_pv;
-S #_log_real_emx_ti_drain_pv;
-
-NEXT2: NOP 0;
-AN #_TEMP_TIMER.Q;
-S #_TEMP_TIMER.IN;
-L T#30S;
-T #_TEMP_TIMER.PT;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::17
+TRANSITION::19
 --------------------------------------------------
-TRNNo:- 17
+TRNNo:- 19
 Title:- Retry SIP again
 EmptyTransition:- False
 Description:- Temperature has dropped less than 'NUM_SIP_ABORT' times
@@ -1444,9 +1413,9 @@ L 	#_num_sip_abort;
 
 
 --------------------------------------------------
-TRANSITION::18
+TRANSITION::20
 --------------------------------------------------
-TRNNo:- 18
+TRNNo:- 20
 Title:- Abort SIP
 EmptyTransition:- False
 Description:- Temperature has dropped 'NUM_SIP_ABORT' times.
@@ -1463,13 +1432,14 @@ L 	#_num_sip_abort;
 
 
 --------------------------------------------------
-STEP::14
+STEP::15
 --------------------------------------------------
-StepNo:- 14
+StepNo:- 15
 Title:- UO_MX_SIP : MX complete
 Description:- Log SIP completion time.
 Clear pulse_counter.
 Close Mx steam supply on WFI/PS.
+Log all temperatures.
 
 --------------------------------------------------
 ACTION::01
@@ -1477,6 +1447,7 @@ ACTION::01
 Description:- Log SIP completion time.
 Clear counter CTR_PULSE_VLV.
 Close Mx steam supply on WFI/PS.
+Log all temperatures.
 Action:- //Log SIP completion time
 L "dbCONST".CHRONO.CPU_TIME;
 T #_time_sip_complete;
@@ -1493,9 +1464,7 @@ T  #_emc_water_subs;
 L "dbCONST".BLK.CMD.STOP;
 T  #_emc_water_cmd;
 
-//Log all temperatures if 30 seconds passed.
-A #_TEMP_TIMER.Q;
-JCN NEXT3;
+//Log all temperatures.
 SET;
 R #_TEMP_TIMER.IN;
 L #_emg_ti_vent_pv;
@@ -1512,12 +1481,6 @@ S #_log_real_emg_ti_vent_pv;
 S #_log_real_emg_ti_drain_pv;
 S #_log_real_emv_ti_vessel_pv;
 S #_log_real_emx_ti_drain_pv;
-
-NEXT3: NOP 0;
-AN #_TEMP_TIMER.Q;
-S #_TEMP_TIMER.IN;
-L T#30S;
-T #_TEMP_TIMER.PT;
 Verification:- A(;
 L #_emc_water_state;
 L "dbCONST".BLK.STATE.STOPPED;
@@ -1526,9 +1489,9 @@ L "dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::20
+TRANSITION::22
 --------------------------------------------------
-TRNNo:- 20
+TRNNo:- 22
 Title:- Pressure dopped below PRES_HPCA_BLOW.
 EmptyTransition:- False
 Description:- Pressure dropped to PRES_HPCA_BLOW. PIC-x103 <= PRES_HPCA_BLOW
@@ -1540,9 +1503,9 @@ L 	#_pres_hpca_blow;
 
 
 --------------------------------------------------
-STEP::15
+STEP::16
 --------------------------------------------------
-StepNo:- 15
+StepNo:- 16
 Title:- UO_MX_SIP : Automatic MX SIP ABORT
 Description:- Log automatic ABORT.
 
@@ -1552,23 +1515,23 @@ ACTION::01
 Description:- Log automatic ABORT.
 Action:- SET;
 S #_log_msg_sip_abort;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::19
+TRANSITION::21
 --------------------------------------------------
-TRNNo:- 19
+TRNNo:- 21
 Title:- Always High
 EmptyTransition:- False
 Description:- Always High
-Condition:- A M1.1;
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::16
+STEP::17
 --------------------------------------------------
-StepNo:- 16
+StepNo:- 17
 Title:- UO_MX_SIP : Start HPCA pressure control
 Description:- Log time when pressure reached.
 Enable Mx HPCA pressure control at setpoint PRES_HPCA_BLOW.
@@ -1600,19 +1563,19 @@ L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 
 
 --------------------------------------------------
-TRANSITION::21
+TRANSITION::23
 --------------------------------------------------
-TRNNo:- 21
+TRNNo:- 23
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Empty transition.
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::17
+STEP::18
 --------------------------------------------------
-StepNo:- 17
+StepNo:- 18
 Title:- UO_MX_SIP : Wait for HPCA blow complete or to pulse drain
 Description:- Start MX Drain valve pulse timer (time_drain_pulse)
 
@@ -1628,15 +1591,13 @@ AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
 L #_time_drain_pulse;
 T #SQ_TIMER.PT;
-Verification:- A M1.1; //Always High flag
-
-A #SQ_TIMER.IN;
+Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::22
+TRANSITION::24
 --------------------------------------------------
-TRNNo:- 22
+TRNNo:- 24
 Title:- Finished pulsing drain valves?
 EmptyTransition:- False
 Description:- Drain valves pulsed pulse_number times
@@ -1649,9 +1610,9 @@ L 	#_pulse_number;
 
 
 --------------------------------------------------
-STEP::18
+STEP::19
 --------------------------------------------------
-StepNo:- 18
+StepNo:- 19
 Title:- UO_MX_SIP : Pulse SIP drain valve opened
 Description:- Close valves on Sy, SMFLx and FLz path to Drain flow path, SIP condensate drain valve and vent filter drain valve.
 
@@ -1706,9 +1667,9 @@ Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::24
+TRANSITION::26
 --------------------------------------------------
-TRNNo:- 24
+TRNNo:- 26
 Title:- Timer expired?
 EmptyTransition:- False
 Description:- Time for drain pulsing TIME_DRAIN_PULSE expired.
@@ -1716,9 +1677,9 @@ Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::19
+STEP::20
 --------------------------------------------------
-StepNo:- 19
+StepNo:- 20
 Title:- UO_MX_SIP : Wait for time to pulse drain valve
 Description:- Increment pulse_counter.
 Open valves on Sy, SMFLx and FLz path to Drain flow path, SIP condensate drain valve and vent filter drain valve.
@@ -1732,7 +1693,7 @@ Action:- //Counter
 L #_pulse_counter;
 INC 1;
 T #_pulse_counter;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 --------------------------------------------------
 ACTION::02
@@ -1790,9 +1751,9 @@ Verification:- A #SQ_TIMER.IN;
 
 
 --------------------------------------------------
-TRANSITION::25
+TRANSITION::27
 --------------------------------------------------
-TRNNo:- 25
+TRNNo:- 27
 Title:- Finished pulsing drain valves after repeats.
 EmptyTransition:- False
 Description:- Drain valves pulsed pulse_number times after delay OR pulse wait time expired
@@ -1807,9 +1768,9 @@ O #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::20
+STEP::21
 --------------------------------------------------
-StepNo:- 20
+StepNo:- 21
 Title:- UO_MX_SIP : Disable HPCA and wait for reduced pressure
 Description:- Disable Mx HPCA pressure control.
 
@@ -1830,9 +1791,9 @@ L 	"dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::26
+TRANSITION::28
 --------------------------------------------------
-TRNNo:- 26
+TRNNo:- 28
 Title:- HPCA pressure below PRES_HPCA_LEAVE.
 EmptyTransition:- False
 Description:- Pressure below PRES_HPCA_LEAVE. PIC_x103 <= PRES_HPCA_LEAVE
@@ -1844,9 +1805,9 @@ L 	#_pres_hpca_leave;
 
 
 --------------------------------------------------
-STEP::21
+STEP::22
 --------------------------------------------------
-StepNo:- 21
+StepNo:- 22
 Title:- UO_MX_SIP : Pressure reduced. Wait to close vessel outlet valve
 Description:- Log time when pressure reached.
 Close Mx vent filter drain valve and valves on Mx to Drain flow path sequentially backwards until Mx vessel outlet valve.
@@ -1902,19 +1863,19 @@ L "dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::27
+TRANSITION::29
 --------------------------------------------------
-TRNNo:- 27
+TRNNo:- 29
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Unconditional jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::22
+STEP::23
 --------------------------------------------------
-StepNo:- 22
+StepNo:- 23
 Title:- UO_MX_SIP : Start LPCA blanketing and open vent valve
 Description:- Enable Mx LPCA pressure control at setpoint PRES_LPCA_BLANK.
 Open vent valve.
@@ -1944,19 +1905,19 @@ L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 
 
 --------------------------------------------------
-TRANSITION::28
+TRANSITION::30
 --------------------------------------------------
-TRNNo:- 28
+TRNNo:- 30
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Unconditional jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::23
+STEP::24
 --------------------------------------------------
-StepNo:- 23
+StepNo:- 24
 Title:- UO_MX_SIP : Unit Operation Completed
 Description:- Set equipment to SAFE state.
 Log SIP operation end time.
@@ -1977,7 +1938,7 @@ T #_time_sip_end;
 
 SET;
 S #_log_time_sip_end;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

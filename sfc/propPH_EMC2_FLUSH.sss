@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:31:33 PM by David Paspa
+generated on 12/05/2018 3:03:15 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -177,7 +177,7 @@ S #SQ_TIMER.IN;
 //Load flush time
 L #_runtime;
 T #SQ_TIMER.PT;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -366,7 +366,7 @@ STEP::06
 --------------------------------------------------
 StepNo:- 06
 Title:- PH_EMC2_FLUSH : Last Step
-Description:- Last Step
+Description:- Reset the timer and close PW, WFI, PS_PW and PS_WFI valves.
 
 --------------------------------------------------
 ACTION::01
@@ -386,7 +386,7 @@ T #_time_flush_end;
 SET;
 S #_log_time_flush_end;
 
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

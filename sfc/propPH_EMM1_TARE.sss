@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:31:52 PM by David Paspa
+generated on 12/05/2018 3:03:26 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -84,7 +84,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- time_settle
+Name:- settling_time
 Type:- TIME
 Description:- Settling time for disturbance
 ParameterInOut:- IN
@@ -111,13 +111,12 @@ SET;
 S #_log_time_tare_begin;
 
 //Load the settling time
-L #_time_settle;
+L #_settling_time;
 T #SQ_TIMER.PT;
 
 SET;
 S #SQ_TIMER.IN;
-Verification:- A M1.1; //Always High flag
-
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -144,17 +143,17 @@ ACTION::01
 Description:- Save Current mass field value into Tare mass parameter for users reference.
 Action:- L #_mi_vessel_pv;
 T #_mass_tare;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::02
 --------------------------------------------------
-TRNNo:- 2.0000
+TRNNo:- 02
 Title:- Phase Finish Normal
 EmptyTransition:- False
 Description:- Phase Finish Normal
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -177,7 +176,7 @@ S #_log_time_tare_end;
 
 SET;
 R #SQ_TIMER.IN;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

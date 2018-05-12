@@ -107,50 +107,48 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   CHILD_RELEASE                  := #@@INSTANCE@@.CHILD_RELEASE ,
+    (   CHILD_RELEASE        := #@@INSTANCE@@.CHILD_RELEASE ,
 @@ATTR_BEGIN|TIMER@@
-        TIME_H                         := #@@INSTANCE@@.TIME_H ,
-        TIME_M                         := #@@INSTANCE@@.TIME_M ,
-        TIME_S                         := #@@INSTANCE@@.TIME_S ,
-        REM_TIME_H                     := #@@INSTANCE@@.REM_TIME_H ,
-        REM_TIME_M                     := #@@INSTANCE@@.REM_TIME_M ,
-        REM_TIME_S                     := #@@INSTANCE@@.REM_TIME_S ,
+        TIME_H               := #@@INSTANCE@@.TIME_H ,
+        TIME_M               := #@@INSTANCE@@.TIME_M ,
+        TIME_S               := #@@INSTANCE@@.TIME_S ,
 @@ATTR_END|TIMER@@
 @@ATTR_BEGIN|pChildIN@@
-        @@CHILDPARAMETER@@_@@CLASS@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@_@@CLASS@@ ,
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
 @@ATTR_END|pChildIN@@
-@@ATTR_BEGIN|pBLK@@
-        @@BLOCKPARAMETER@@             := #@@INSTANCE@@.@@BLOCKPARAMETER@@ ,
-@@ATTR_END|pBLK@@
-@@ATTR_BEGIN|pEventPrompt@@
-        eventPrompt.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ :=
-                    "dbEVENTProcess".eventPrompt.@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ ,
-@@ATTR_END|pEventPrompt@@
-@@ATTR_BEGIN|pEventConfirm@@
-        eventConfirm.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ :=
-                    "dbEVENTProcess".eventConfirm.@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ ,
-@@ATTR_END|pEventConfirm@@
-@@ATTR_BEGIN|pEventLogMsg@@
-        eventLogMsg.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ :=
-                    "dbEVENTProcess".eventLogMsg.@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ ,
-@@ATTR_END|pEventLogMsg@@
-@@ATTR_BEGIN|pEventLogReal@@
-        eventLogReal.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ :=
-                    "dbEVENTProcess".eventLogReal.@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ ,
-@@ATTR_END|pEventLogReal@@
-@@ATTR_BEGIN|pEventLogTime@@
-        eventLogTime.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ :=
-                    "dbEVENTProcess".eventLogTime.@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ ,
-@@ATTR_END|pEventLogTime@@
-@@ATTR_BEGIN|pEventDataReal@@
-        eventDataReal.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ :=
-                    "dbEVENTProcess".eventDataReal.@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ ,
-@@ATTR_END|pEventDataReal@@
-@@ATTR_BEGIN|pEventDataTime@@
-        eventDataTime.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ :=
-                    "dbEVENTProcess".eventDataTime.@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ ,
-@@ATTR_END|pEventDataTime@@
-        DUMMY                          := #@@INSTANCE@@.DUMMY
+@@ATTR_BEGIN|pClassIN@@
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
+@@ATTR_END|pClassIN@@
+@@ATTR_BEGIN|TIMER@@
+        REM_TIME_H           := #@@INSTANCE@@.REM_TIME_H ,
+        REM_TIME_M           := #@@INSTANCE@@.REM_TIME_M ,
+        REM_TIME_S           := #@@INSTANCE@@.REM_TIME_S ,
+@@ATTR_END|TIMER@@
+@@ATTR_BEGIN|pChildOUT@@
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
+@@ATTR_END|pChildOUT@@
+@@ATTR_BEGIN|pClassOUT@@
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
+@@ATTR_END|pClassOUT@@
+@@ATTR_BEGIN|pChildIN_OUT@@
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
+@@ATTR_END|pChildIN_OUT@@
+@@ATTR_BEGIN|pClassIN_OUT@@
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
+@@ATTR_END|pClassIN_OUT@@
+@@ATTR_BEGIN|pEventPromptExists@@
+        eventPrompt          := "dbEVENTProcess".@@INSTANCE@@.eventPrompt ,
+@@ATTR_END|pEventPromptExists@@
+@@ATTR_BEGIN|pEventLogMsgExists@@
+        eventLogMsg          := "dbEVENTProcess".@@INSTANCE@@.eventLogMsg ,
+@@ATTR_END|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogRealExists@@
+        eventLogReal         := "dbEVENTProcess".@@INSTANCE@@.eventLogReal ,
+@@ATTR_END|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogTimeExists@@
+        eventLogTime         := "dbEVENTProcess".@@INSTANCE@@.eventLogTime ,
+@@ATTR_END|pEventLogTimeExists@@
+        DUMMY                := #@@INSTANCE@@.DUMMY
     );
     NOP 0;
 

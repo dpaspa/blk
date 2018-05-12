@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:41:15 PM by David Paspa
+generated on 12/05/2018 3:07:47 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -176,7 +176,7 @@ S #_log_time_fill_begin;
 // Reset used flags
 SET;
 R #_prompt_abort;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -200,7 +200,7 @@ TRNNo:- 02
 Title:- Incorrect Hygiene Status
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -223,7 +223,7 @@ SET;
 S #_log_time_wrong_hygiene;
 S #_log_msg_wrong_hygiene;
 S #_prompt_abort;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -303,7 +303,7 @@ T #_mx_vessel_hygiene;
 //Release FLZ
 SET;
 S #_release_flz;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -313,7 +313,7 @@ TRNNo:- 05
 Title:- Empty step
 EmptyTransition:- False
 Description:- Jump unconditionally
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -345,7 +345,7 @@ T #_time_fill_end;
 SET;
 S #_log_time_fill_end;
 R #_prompt_abort_confirm_yes;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

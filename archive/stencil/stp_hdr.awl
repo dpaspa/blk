@@ -1,0 +1,54 @@
+NETWORK
+TITLE =S0@@STEP_NUM@@: STEP-@@STEP_NUM@@::@@STEP_TITLE@@
+    //================================ STEP HEADER ===========================//
+    // STEP0@@STEP_NUM@@ STEP0@@STEP_NUM@@ STEP0@@STEP_NUM@@ STEP0@@STEP_NUM@@
+    // AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTO //
+    // STEP0@@STEP_NUM@@ STEP0@@STEP_NUM@@ STEP0@@STEP_NUM@@ STEP0@@STEP_NUM@@
+    //------------------------------------------------------------------------//
+    // @@STEP_DESCRIPTION@@
+    //------------------------------------------------------------------------//
+S0@@STEP_NUM@@: NOP   0;
+
+      A     #sqSequencer.CMD.Pause; //If paused jump
+      JC    COMM;
+
+NETWORK
+TITLE =S0@@STEP_NUM@@:STEP-@@STEP_NUM@@:Begin Action
+
+      A     #sqSequencer.STEP.Finished;
+      JC    A0@@STEP_NUM@@; // Exit Action code, Jump to A0@@STEP_NUM@@ Transition code
+
+      //----------------------------------------------------------------------//
+      // Begin step Action:                                                   //
+      //----------------------------------------------------------------------//
+      A     #sqSequencer.STEP.Active;
+      JC    L0@@STEP_NUM@@; // Action number loaded, Jump to L0@@STEP_NUM@@--Step Action List
+
+      //----------------------------------------------------------------------//
+      // Load Default/Initial Step action number:                             //
+      //----------------------------------------------------------------------//
+      S     #sqSequencer.STEP.Active;
+      S     #sqStepTimer.IN;
+      L     1; //First Action, Step must contain Minimum one action
+      T     #sqSequencer.STEP.ActionNumber;
+
+//----------------------------------------------------------------------------//
+// Step action list.                                                          //
+// aann=mini Action step number(aa) inside main step number(nn)               //
+// First Action aa00, Second action ab00, Third ac00, etc.                    //
+//----------------------------------------------------------------------------//
+L0@@STEP_NUM@@: NOP   0;
+
+      L     #sqSequencer.STEP.ActionNumber;
+      JL    r0@@STEP_NUM@@; //Wrong Action number
+      JU    _0@@STEP_NUM@@; //Action error handling
+       @@ACT_LIST@@
+
+//----------------------------------------------------------------------------//
+// More step action in the list can be inserted here, upto ab is tested:      //
+//----------------------------------------------------------------------------//
+r0@@STEP_NUM@@: NOP   0; //Wrong action number
+      S     #sqSequencer.Error_Fault;
+      JU    k0@@STEP_NUM@@; //Exit
+_0@@STEP_NUM@@: NOP   0; // Action error handling
+      JU    k0@@STEP_NUM@@; // Exit

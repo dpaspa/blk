@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:32:14 PM by David Paspa
+generated on 12/05/2018 3:03:40 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -73,7 +73,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- flz
+Name:- fill_flz
 Type:- INT
 Description:- Filling line selection
 ParameterInOut:- IN
@@ -81,7 +81,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- mx
+Name:- vessel_mx
 Type:- INT
 Description:- Manufacturing vessel (M1/M2) selection
 ParameterInOut:- IN
@@ -121,21 +121,13 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::12
 --------------------------------------------------
-Name:- flowpath_fillmc
-Type:- BOOL
-Description:- Enable flow path to filling machine
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::13
---------------------------------------------------
 Name:- prompt_connect_confirm_yes
 Type:- BOOL
 Description:- confirm that filling machine line connected
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::13
 --------------------------------------------------
 Name:- prompt_connect
 Type:- BOOL
@@ -160,7 +152,7 @@ T #_time_setup_begin;
 
 SET;
 S #_log_time_setup_begin;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -170,13 +162,13 @@ TRNNo:- 01
 Title:- Unconditional Jump
 EmptyTransition:- False
 Description:- Jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::02
 --------------------------------------------------
-StepNo:- 2.0000
+StepNo:- 02
 Title:- PH_EMX2_SETUP : Prompt to connect filling machine
 Description:- Prompt operator to connect filling machine flowpath
 
@@ -186,9 +178,7 @@ ACTION::01
 Description:- Prompt operator to connect filling machine flowpath 
 Action:- SET;
 S #_prompt_connect;
-R #_prompt_connect_confirm_yes;
-R #_flowpath_fillmc;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -204,7 +194,7 @@ Condition:- A #_prompt_connect_confirm_yes;
 --------------------------------------------------
 STEP::03
 --------------------------------------------------
-StepNo:- 3.0000
+StepNo:- 03
 Title:- PH_EMX2_SETUP : Check connection
 Description:- Log operator confirmation and continue to check connection.
 
@@ -215,13 +205,13 @@ Description:- Log operator confirmation
 Action:- SET;
 S #_log_msg_confirm_connect;
 R #_prompt_connect_confirm_yes;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::03
 --------------------------------------------------
-TRNNo:- 3.0000
+TRNNo:- 03
 Title:- Connection correctly inserted
 EmptyTransition:- False
 Description:- Jump if correct switch conection has been made.
@@ -231,7 +221,7 @@ A(;
 	A(;
 	//If M1 selected, then check the resp. flowpath status.
 		A(;
-		L #_mx;
+		L #_vessel_mx;
 		L "dbCONST".SEL.MX.M1;
 		==I ;  
 	);
@@ -244,7 +234,7 @@ A(;
 	//If M2 selected, then check the resp. flowpath status.
 	O(;
 		A(;
-		L #_mx;
+		L #_vessel_mx;
 		L "dbCONST".SEL.MX.M2;
 		==I ;  
 		);
@@ -260,7 +250,7 @@ A(;
 	A(;
 	//If F1P1 selected, then check the resp. flowpath status.
 		A(;
-		L #_flz;
+		L #_fill_flz;
 		L "dbCONST".SEL.FLZ.FL1;
 		==I ;  
 		);
@@ -273,7 +263,7 @@ A(;
 	O(;
 	//If F2P1 selected, then check the resp. flowpath status.
 		A(;
-		L #_flz;
+		L #_fill_flz;
 		L "dbCONST".SEL.FLZ.FL2;
 		==I ;  
 		);
@@ -289,43 +279,17 @@ A(;
 --------------------------------------------------
 TRANSITION::04
 --------------------------------------------------
-TRNNo:- 4.0000
+TRNNo:- 04
 Title:- Operator not setup correctly
-EmptyTransition:- 0.0000
+EmptyTransition:- False
 Description:- Jump unconditionally, the connections are not made correctly
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
 StepNo:- 4.0000
-Title:- PH_EMX2_SETUP : Setup completed
-Description:- Set the flowpath flag.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set the flowpath flag.
-Action:- SET;
-S #_flowpath_fillmc;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::05
---------------------------------------------------
-TRNNo:- 5.0000
-Title:- Phase Finish Normal
-EmptyTransition:- False
-Description:- Phase Finish Normal
-Condition:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::05
---------------------------------------------------
-StepNo:- 5.0000
 Title:- PH_EMX2_SETUP : Last Step
 Description:- Log SETUP operation end time.
 
@@ -339,7 +303,7 @@ T #_time_setup_end;
 
 SET;
 S #_log_time_setup_end;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

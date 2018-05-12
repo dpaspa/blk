@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:31:24 PM by David Paspa
+generated on 12/05/2018 3:03:09 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -98,7 +98,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::8
 --------------------------------------------------
-Name:- sic_agit_running
+Name:- agit_running
 Type:- BOOL
 Description:- Agitator running
 ParameterInOut:- OUT
@@ -170,7 +170,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::17
 --------------------------------------------------
-Name:- sic_agit_stopped
+Name:- agit_stopped
 Type:- BOOL
 Description:- Agitator stopped message to be logged
 ParameterInOut:- OUT
@@ -236,17 +236,17 @@ S #_Report_Evnt_Start;
 //Report Event Reset
 SET;
 R #_Report_Evnt_End;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::01
 --------------------------------------------------
-TRNNo:- 1.0000
+TRNNo:- 01
 Title:- Unconditional Jump
-EmptyTransition:- 0.0000
+EmptyTransition:- False
 Description:- Jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -264,13 +264,13 @@ Action:- // Make sure the timer is not being reset
 SET;
 R #sqRunTimer.RESET;
 R #sqRunTimer.NON_RET;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
 TRANSITION::02
 --------------------------------------------------
-TRNNo:- 2.0000
+TRNNo:- 02
 Title:- TIME_RUN expired
 EmptyTransition:- False
 Description:- Jump if running time has expired
@@ -281,55 +281,63 @@ Condition:- A #sqRunTimer.TIME_EXPIRED;
 TRANSITION::03
 --------------------------------------------------
 TRNNo:- 03
-Title:- Change of State
+Title:- Change of SIC State
 EmptyTransition:- False
-Description:- SIC State Changed
+Description:- SIC State Changed.
+SIC not running.
 Condition:- //Check whether the last SIC state is not equal to current state
 A(;
 L #_sic_agit_hist;
 L #_sic_agit_state;
 <>I;
 );
+//SIC not running.
+A(;
+L "dbCONST".BLK.SIC1.STATE.RUNNING;
+L #_sic_agit_state;
+<>I;
+);
 
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
+Title:- Change of SIC State
+EmptyTransition:- False
+Description:- SIC State Changed.
+SIC running.
+Condition:- //Check whether the last SIC state is not equal to current state
+A(;
+L #_sic_agit_hist;
+L #_sic_agit_state;
+<>I;
+);
+//SIC running.
+A(;
+L "dbCONST".BLK.SIC1.STATE.RUNNING;
+L #_sic_agit_state;
+==I;
+);
 
 
 --------------------------------------------------
 STEP::03
 --------------------------------------------------
 StepNo:- 03
-Title:- PH_EMA1_MIX : SIC State Change
-Description:- Log SIC Running/Stopped to the batch report. Store Running time if now Stopped.
+Title:- PH_EMA1_MIX : SIC State Changed to Stop
+Description:- Stop the timer, report accumulative total running time and Save the previous state of the mixer..
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log SIC RUnning/Stopped to the batch report. Store Running time if now Stopped.
-Action:- //If mixer is not running for some reason then don't start the timer
-A(;
-L "dbCONST".BLK.SIC1.STATE.RUNNING;
-L #_sic_agit_state;
-<>I;
-);
-JC S011 ;
-
-// Mixer is running again so start the run timer.
-S #sqRunTimer.ENABLE;
-
-S #_sic_agit_running;
-R #_sic_agit_stopped;
-
-// Jump around the stopped logic below
-JU S022 ;
-
-
-S011:NOP 0;
-
-// Mixer is currently not running
+Description:- Stop the timer, report accumulative total running time and Save the previous state of the mixer.
+Action:- // Mixer is currently not running
 // Stop the timer
 R #sqRunTimer.ENABLE;
 
-R #_sic_agit_running;
-S #_sic_agit_stopped;
+R #_agit_running;
+S #_agit_stopped;
 
 //Report accumulative total running time
    CALL  fcTime2HMS(
@@ -340,28 +348,60 @@ S #_sic_agit_stopped;
       NOP   0;
 
 
-S022:NOP 0;
 // Save the previous run or stopped state of the mixer
 L #_sic_agit_state;
 T #_sic_agit_hist;
-Verification:- A M1.1; //Always High flag
-
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::04
+TRANSITION::05
 --------------------------------------------------
-TRNNo:- 4.0000
+TRNNo:- 05
 Title:- Unconditional Jump
-EmptyTransition:- 0.0000
+EmptyTransition:- False
 Description:- Jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
 StepNo:- 04
+Title:- PH_EMA1_MIX : SIC State Changed to Run
+Description:- Run the timer, report accumulative total running time and Save the previous state of the mixer.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Run the timer, report accumulative total running time and Save the previous state of the mixer.
+Action:- // Mixer is running again so start the run timer.
+S #sqRunTimer.ENABLE;
+
+S #_agit_running;
+R #_agit_stopped;
+
+// Save the previous state of the mixer
+L #_sic_agit_state;
+T #_sic_agit_hist;
+Verification:- A "uncondJump";
+
+
+
+--------------------------------------------------
+TRANSITION::06
+--------------------------------------------------
+TRNNo:- 06
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
 Title:- PH_EMA1_MIX : Disable SIC
 Description:- Disable SIC.
 
@@ -371,14 +411,13 @@ ACTION::01
 Description:- Disable SIC.
 Action:- L "dbCONST".BLK.SIC1.CMD.DISABLE;
 T #_sic_agit_cmd;
-Verification:- A M1.1; //Always High flag
-
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::05
+TRANSITION::07
 --------------------------------------------------
-TRNNo:- 05
+TRNNo:- 07
 Title:- SIC Disabled
 EmptyTransition:- False
 Description:- Jump
@@ -391,9 +430,9 @@ L #_sic_agit_hist;
 
 
 --------------------------------------------------
-STEP::05
+STEP::06
 --------------------------------------------------
-StepNo:- 05
+StepNo:- 06
 Title:- PH_EMA1_MIX : Last Step
 Description:- Reset the timer, store current SIC state and report the event.
 Log EMA1_MIX end time.
@@ -434,7 +473,7 @@ T #_time_mix_end;
 
 SET;
 S #_log_time_mix_end;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 ****************************************************************************************************

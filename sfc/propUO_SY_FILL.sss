@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:38:49 PM by David Paspa
+generated on 12/05/2018 3:06:19 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -577,7 +577,7 @@ S #_log_msg_fl_ready;
 S #_prompt_start_filling;
 R #_prompt_fl_ready_confirm_yes;
 
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -606,7 +606,7 @@ Description:- Log time operator confirmed ready to start Filling.
 Action:- SET;
 S #_log_msg_confirm_start_filling;
 R #_prompt_start_filling_confirm_yes;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 --------------------------------------------------
 ACTION::02
@@ -643,7 +643,7 @@ TRNNo:- 03
 Title:- Path ready.
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -708,7 +708,7 @@ Description:- Prompt operator to confirm that filling machine sterile filter has
 Action:- // Prompt operator to confirm that filling machine sterile filter has been bled
 SET;
 S #_prompt_filter_bled;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -814,7 +814,7 @@ SET;
 S #_log_msg_filling_paused;
 S #_prompt_reset_button;
 
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -853,7 +853,7 @@ Action:- //Log operator abort.
 SET;
 S #_log_msg_reset_button_abort;
 R #_prompt_reset_button_confirm_no;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -863,7 +863,7 @@ TRNNo:- 09
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -881,7 +881,7 @@ Action:- //Log operator repeat.
 SET;
 S #_log_msg_reset_button_retry;
 R #_prompt_reset_button_confirm_yes;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -891,7 +891,7 @@ TRNNo:- 10
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -930,7 +930,7 @@ TRNNo:- 11
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -1012,7 +1012,7 @@ T #_time_fill_end;
 
 SET;
 S #_log_time_fill_end;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

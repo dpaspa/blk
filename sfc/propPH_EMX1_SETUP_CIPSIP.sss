@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:32:02 PM by David Paspa
+generated on 12/05/2018 3:03:33 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -72,29 +72,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- MMFLx_Interlock_Armed
-Type:- BOOL
-Description:- Filter interlock armed flag
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::7
---------------------------------------------------
-Name:- CIPSIP_Interlock_Armed
-Type:- BOOL
-Description:- CIPSIP interlock armed flag
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::8
---------------------------------------------------
 Name:- zsc_cipsip_state
 Type:- INT
 Description:- CIPSIP connection sensor switch.
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::7
 --------------------------------------------------
 Name:- prompt_connect_confirm_yes
 Type:- BOOL
@@ -102,7 +86,7 @@ Description:- Confirm CIPSIP path connection
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::8
 --------------------------------------------------
 Name:- prompt_connect
 Type:- BOOL
@@ -128,7 +112,7 @@ T #_time_setup_cipsip_begin;
 SET;
 S #_log_time_setup_cipsip_begin;
 
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -138,7 +122,7 @@ TRNNo:- 01
 Title:- Unconditional Jump
 EmptyTransition:- False
 Description:- Jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -157,11 +141,7 @@ Description:- Prompt operator to connect CIP flowpath ZSCx115
 Action:- //Prompt to connect CIPSIP.
 SET;
 S #_prompt_connect;
-
-//Reset filter and CIPSIP interlock flag
-R #_CIPSIP_Interlock_Armed;
-R #_MMFLx_Interlock_Armed;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -188,7 +168,7 @@ Description:- Log operator confirmation and continue to check connection.
 Action:- SET;
 S #_log_msg_confirm_connect;
 R  #_prompt_connect_confirm_yes;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -213,39 +193,13 @@ TRNNo:- 04
 Title:- Operator not setup correctly
 EmptyTransition:- False
 Description:- Jump unconditionally, the connections are not made correctly
-Condition:- A M1.1; // Always High Bit
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
-StepNo:- 04
-Title:- PH_EMX1_SETUP_CIPSIP : Setup Completed
-Description:- Enable flowpath interlock armed flag.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set the CIPSIP interlock armed flag 
-Action:- SET;
-S #_CIPSIP_Interlock_Armed;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::05
---------------------------------------------------
-TRNNo:- 05
-Title:- Phase Finish Normal
-EmptyTransition:- False
-Description:- Phase Finish Normal
-Condition:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::05
---------------------------------------------------
-StepNo:- 05
+StepNo:- 4.0000
 Title:- PH_EMX1_SETUP_CIPSIP : Last Step
 Description:- Log SETUP CIPSIP operation end time.
 
@@ -259,7 +213,7 @@ T #_time_setup_cipsip_end;
 
 SET;
 S #_log_time_setup_cipsip_end;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

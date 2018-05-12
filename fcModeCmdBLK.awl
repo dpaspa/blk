@@ -25,7 +25,7 @@ VERSION : 2.0
 
 VAR_IN_OUT
     mc : "udtModeCommand";             // General mode and command
-    mcb : "udtModeCommandBLK";         // Block mode and command
+    bmc : "udtModeCommandBLK";         // Block mode and command
 END_VAR
 
 VAR_TEMP
@@ -47,7 +47,7 @@ TITLE = Flag if block Mode just changed to Auto
     //------------------------------------------------------------------------//
     A #mc.modeAUTO;
     FP #edgeModeAuto;
-    = #mcb.eventModeAuto;
+    = #bmc.eventModeAuto;
 
 NETWORK
 TITLE = Flag if block Mode just changed to Manual
@@ -56,7 +56,7 @@ TITLE = Flag if block Mode just changed to Manual
     //------------------------------------------------------------------------//
     A #mc.modeMANUAL;
     FP #edgeModeManual;
-    = #mcb.eventModeManual;
+    = #bmc.eventModeManual;
 
 NETWORK
 TITLE = Flag if block Mode just changed to Out Of Service
@@ -65,7 +65,7 @@ TITLE = Flag if block Mode just changed to Out Of Service
     //------------------------------------------------------------------------//
     = #mc.modeOOS;
     FP #edgeModeOOS;
-    = #mcb.eventModeOOS;
+    = #bmc.eventModeOOS;
 
 NETWORK
 TITLE = Flag if a new block running substate command issued
@@ -75,7 +75,7 @@ TITLE = Flag if a new block running substate command issued
     // Check if the start command has just been issued if the bit positive    //
     // edge. The result will only last for one scan after the positive edge:  //
     //------------------------------------------------------------------------//
-    A #mcb.permitStart;
+    A #bmc.permitStart;
     A(;
     O(;
     L #mc.CMD;
@@ -83,13 +83,13 @@ TITLE = Flag if a new block running substate command issued
     ==I;
     );
     O(;
-    L #mcb.SUBSelected;
-    L #mcb.SUBLast;
+    L #bmc.SUBSelected;
+    L #bmc.SUBLast;
     <>I;
     );
     );
     FP #edgeCommandStart;
-    = #mcb.eventCmdStart;
+    = #bmc.eventCmdStart;
 
 NETWORK
 TITLE = Save last running substate if starting
@@ -99,10 +99,10 @@ TITLE = Save last running substate if starting
     // Save the running substate for next scan check if starting. It may have //
     // changed:                                                               //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     JCN _b;
-    L #mcb.SUBSelected;
-    T #mcb.SUBLast;
+    L #bmc.SUBSelected;
+    T #bmc.SUBLast;
 _b:   NOP 0;
 
 NETWORK
@@ -117,16 +117,16 @@ TITLE = Flag if block stop command issued
     L "dbCONST".BLK.CMD.STOP;
     ==I;
     FP #edgeCommandStop;
-    = #mcb.eventCmdStop;
+    = #bmc.eventCmdStop;
 
 NETWORK
 TITLE = Stop command takes precedence over Start command
     //------------------------------------------------------------------------//
     // If commanded to Stop then reset any Start command:                     //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStop;
+    A #bmc.eventCmdStop;
     JCN _c;
-    R #mcb.eventCmdStart;
+    R #bmc.eventCmdStart;
 _c:   NOP 0;
 
 NETWORK
@@ -142,7 +142,7 @@ TITLE = Interlocked State if Stopped
     );
     A(;
     O #mc.INTERLOCK;
-    ON #mcb.permitStart;
+    ON #bmc.permitStart;
     );
     JCN _d;
     L "dbCONST".BLK.STATE.INTERLOCKED;
@@ -172,7 +172,7 @@ TITLE = Paused State if Running
     );
     A(;
     O #mc.INTERLOCK;
-    ON #mcb.permitStart;
+    ON #bmc.permitStart;
     );
     JCN _e;
     L "dbCONST".BLK.STATE.PAUSED;
@@ -187,7 +187,7 @@ _e:   NOP 0;
     ==I;
     JCN _f;
     L "dbCONST".BLK.SAFE.CMD;
-    T #mcb.SUBSelected;
+    T #bmc.SUBSelected;
 _f:   NOP 0;
 
 NETWORK
@@ -195,7 +195,7 @@ TITLE = Send safe command in case of any interlock or failure
     //------------------------------------------------------------------------//
     // Send safe command if any interlock:                                    //
     //------------------------------------------------------------------------//
-    AN #mcb.permitStart;
+    AN #bmc.permitStart;
     JCN _g;
     L "dbCONST".BLK.SAFE.CMD;
     T #mc.CMD;
@@ -207,7 +207,7 @@ TITLE = Set the safe state in case of any interlock or failure
     // Set safe state to match command if any interlock. The safe command     //
     // must match the safe state index number in dbCONST.                     //
     //------------------------------------------------------------------------//
-    AN #mcb.permitStart;
+    AN #bmc.permitStart;
     JCN _h;
     L "dbCONST".BLK.SAFE.CMD;
     T #mc.STATE;

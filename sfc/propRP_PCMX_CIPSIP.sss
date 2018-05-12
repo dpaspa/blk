@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:41:08 PM by David Paspa
+generated on 12/05/2018 3:07:43 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -261,7 +261,7 @@ R #_Report_Evnt_022;
 R #_Report_Evnt_023;
 R #_Report_Evnt_024;
 R #_Report_Evnt_025;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -281,11 +281,11 @@ L #_mx_vessel_hygiene;
 --------------------------------------------------
 TRANSITION::02
 --------------------------------------------------
-TRNNo:- 2.0000
+TRNNo:- 02
 Title:- Incorrect Hygiene Status
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -309,7 +309,7 @@ SET;
 S #_log_time_wrong_hygiene;
 S #_log_msg_wrong_hygiene;
 S #_prompt_abort;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -354,9 +354,6 @@ TRNNo:- 04
 Title:- SETUP operations complete?
 EmptyTransition:- False
 Description:- All setup operations are complete. 
-
-MX STATE=SETUP
-
 Condition:- A(;
 L 	#_mx_vessel_state;
 L 	"dbCONST".BLK.STATE.COMPLETED;
@@ -420,7 +417,7 @@ Description:- Set Mx Hygiene status to CLEAN.
 Action:- //Set Sy hygiene status to CLEAN
 L "dbCONST".BLK.HYGIENE.CLEAN;
 T #_mx_vessel_hygiene;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -430,7 +427,7 @@ TRNNo:- 06
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -511,7 +508,7 @@ S #_release_mx;
 //Report Event Set
 SET;
 S #_Report_Evnt_020;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -521,7 +518,7 @@ TRNNo:- 08
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -569,7 +566,7 @@ R #_Report_Evnt_022;
 R #_Report_Evnt_023;
 R #_Report_Evnt_024;
 R #_Report_Evnt_025;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

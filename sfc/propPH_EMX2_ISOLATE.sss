@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:32:10 PM by David Paspa
+generated on 12/05/2018 3:03:38 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -105,21 +105,13 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::10
 --------------------------------------------------
-Name:- flowpath_isolated
-Type:- BOOL
-Description:- Flow path of filling machine line is isolated and no more integral
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::11
---------------------------------------------------
 Name:- prompt_isolate_confirm_yes
 Type:- BOOL
 Description:- Operator confirmed that filling machine is disconnected.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::11
 --------------------------------------------------
 Name:- prompt_isolate
 Type:- BOOL
@@ -145,7 +137,7 @@ T #_time_isolate_begin;
 SET;
 S #_log_time_isolate_begin;
 
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -155,7 +147,7 @@ TRNNo:- 01
 Title:- Unconditional Jump
 EmptyTransition:- False
 Description:- Jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -171,9 +163,7 @@ ACTION::01
 Description:- Prompt operator to remove filling machine flowpath ZSC-4x30
 Action:- SET;
 S #_prompt_isolate; //Prompt to isolate the PW & WFI line
-//Reset used bit
-R #_flowpath_isolated;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -201,7 +191,7 @@ Description:- Log operator confirmation.
 Action:- SET;
 S #_log_msg_isolate_confirm;
 R #_prompt_isolate_confirm_yes;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -241,39 +231,13 @@ TRNNo:- 04
 Title:- Operator not removed correctly
 EmptyTransition:- False
 Description:- Jump unconditionally, the connections have not been removed correctly
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
-StepNo:- 04
-Title:- PH_EMX2_ISOLATE : Setup completed
-Description:- Flowpath isolated interlock armed flag
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set flowpath isolated interlock armed flag
-Action:- SET;
-S #_flowpath_isolated;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::05
---------------------------------------------------
-TRNNo:- 5.0000
-Title:- Phase Finish Normal
-EmptyTransition:- False
-Description:- Phase Finish Normal
-Condition:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::05
---------------------------------------------------
-StepNo:- 05
+StepNo:- 4.0000
 Title:- PH_EMX2_ISOLATE : Last Step
 Description:- Log ISOLATE operation end time.
 
@@ -287,7 +251,7 @@ T #_time_isolate_end;
 
 SET;
 S #_log_time_isolate_end;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

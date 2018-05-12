@@ -19,63 +19,40 @@ VERSION : 1.0
 
 @@TEMPLATE_BEGIN@@
 STRUCT
-
-    eventPrompt : Struct
 @@ATTR_BEGIN|INSTANCE_BLK@@
+@@ATTR_BEGIN|pEventExists@@
+    @@INSTANCE@@ : Struct
+@@ATTR_BEGIN|pEventPromptExists@@
+        eventPrompt : Struct
 @@ATTR_BEGIN|pEventPrompt@@
-        @@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : udtEventProcess;
+            @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : udtEventPrompt;
 @@ATTR_END|pEventPrompt@@
-@@ATTR_END|INSTANCE_BLK@@
-    END_STRUCT;
-
-    eventConfirm : Struct
-@@ATTR_BEGIN|INSTANCE_BLK@@
-@@ATTR_BEGIN|pEventConfirm@@
-        @@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : udtEventProcess;
-@@ATTR_END|pEventConfirm@@
-@@ATTR_END|INSTANCE_BLK@@
-    END_STRUCT;
-
-    eventLogMsg : Struct
-@@ATTR_BEGIN|INSTANCE_BLK@@
+        END_STRUCT;
+@@ATTR_END|pEventPromptExists@@
+@@ATTR_BEGIN|pEventLogMsgExists@@
+        eventLogMsg : Struct
 @@ATTR_BEGIN|pEventLogMsg@@
-        @@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : udtEventProcess;
+            @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : udtEventLogMessage;
 @@ATTR_END|pEventLogMsg@@
-@@ATTR_END|INSTANCE_BLK@@
-    END_STRUCT;
-
-    eventLogReal : Struct
-@@ATTR_BEGIN|INSTANCE_BLK@@
+        END_STRUCT;
+@@ATTR_END|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogRealExists@@
+        eventLogReal : Struct
 @@ATTR_BEGIN|pEventLogReal@@
-        @@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : udtEventProcess;
+            @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : udtEventLogReal;
 @@ATTR_END|pEventLogReal@@
-@@ATTR_END|INSTANCE_BLK@@
-    END_STRUCT;
-
-    eventLogTime : Struct
-@@ATTR_BEGIN|INSTANCE_BLK@@
+        END_STRUCT;
+@@ATTR_END|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogTimeExists@@
+        eventLogTime : Struct
 @@ATTR_BEGIN|pEventLogTime@@
-        @@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : udtEventProcess;
+            @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : udtEventLogTime;
 @@ATTR_END|pEventLogTime@@
-@@ATTR_END|INSTANCE_BLK@@
+        END_STRUCT;
+@@ATTR_END|pEventLogTimeExists@@
     END_STRUCT;
-
-    eventDataReal : Struct
-@@ATTR_BEGIN|INSTANCE_BLK@@
-@@ATTR_BEGIN|pEventDataReal@@
-        @@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : udtEventProcess;
-@@ATTR_END|pEventDataReal@@
+@@ATTR_END|pEventExists@@
 @@ATTR_END|INSTANCE_BLK@@
-    END_STRUCT;
-
-    eventDataTime : Struct
-@@ATTR_BEGIN|INSTANCE_BLK@@
-@@ATTR_BEGIN|pEventDataTime@@
-        @@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : udtEventProcess;
-@@ATTR_END|pEventDataTime@@
-@@ATTR_END|INSTANCE_BLK@@
-    END_STRUCT;
-
 END_STRUCT ;
 @@TEMPLATE_END@@
 

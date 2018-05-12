@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:32:06 PM by David Paspa
+generated on 12/05/2018 3:03:35 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -72,29 +72,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- CIPSIP_Interlock_Armed
-Type:- BOOL
-Description:- CIPSIP interlock armed flag
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::7
---------------------------------------------------
-Name:- MMFLx_Interlock_Armed
-Type:- BOOL
-Description:- Filter interlock armed flag
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::8
---------------------------------------------------
 Name:- zsc_filter_state
 Type:- INT
 Description:- MMFLx Filter connection sensor switch.
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::7
 --------------------------------------------------
 Name:- prompt_connect_confirm_yes
 Type:- BOOL
@@ -102,7 +86,7 @@ Description:- Confirmation on filter connection
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::8
 --------------------------------------------------
 Name:- prompt_connect
 Type:- BOOL
@@ -127,7 +111,7 @@ T #_time_setup_filter_begin;
 
 SET;
 S #_log_time_setup_filter_begin;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -137,7 +121,7 @@ TRNNo:- 01
 Title:- Unconditional Jump
 EmptyTransition:- False
 Description:- Jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -155,12 +139,7 @@ Description:- Prompt operator to connect the filter
 Action:- //Prompt to connect filter.
 SET;
 S #_prompt_connect;
-R #_prompt_connect_confirm_yes;
-
-//Reset filter and CIPSIP interlock armed flag
-R #_CIPSIP_Interlock_Armed;
-R #_MMFLx_Interlock_Armed;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -187,7 +166,7 @@ Description:- Log operator confirmation and continue to check connection.
 Action:- SET;
 S #_log_msg_confirm_connect;
 R  #_prompt_connect_confirm_yes;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -212,40 +191,13 @@ TRNNo:- 04
 Title:- Operator not setup correctly
 EmptyTransition:- False
 Description:- Jump unconditionally, the connections are not made correctly
-Condition:- A M1.1 ;// Always High Bit
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
-StepNo:- 04
-Title:- PH_EMX1_SETUP_FILTER : Setup Completed
-Description:- Enable flowpath interlock armed flag.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set the filter interlock armed flag 
-Action:- SET;
-S #_MMFLx_Interlock_Armed;
-Verification:- A M1.1;
-
-
-
---------------------------------------------------
-TRANSITION::05
---------------------------------------------------
-TRNNo:- 5.0000
-Title:- Phase Finish Normal
-EmptyTransition:- False
-Description:- Phase Finish Normal
-Condition:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::05
---------------------------------------------------
-StepNo:- 05
+StepNo:- 4.0000
 Title:- PH_EMX1_SETUP_FILTER : Last Step
 Description:- Log SETUP FILTER operation end time.
 
@@ -259,7 +211,7 @@ T #_time_setup_filter_end;
 
 SET;
 S #_log_time_setup_filter_end;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

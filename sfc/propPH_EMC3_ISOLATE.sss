@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:31:44 PM by David Paspa
+generated on 12/05/2018 3:03:22 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -72,21 +72,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- flowpath_isolated
-Type:- BOOL
-Description:- Flow path of WFI line and PW line is isolated and no more integral
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::7
---------------------------------------------------
 Name:- zsc_fpwfi_state
 Type:- INT
 Description:- WFI line connection sensor switch
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::7
 --------------------------------------------------
 Name:- zsc_fppw_state
 Type:- INT
@@ -94,7 +86,7 @@ Description:- PW line connection sensor switch
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::8
 --------------------------------------------------
 Name:- prompt_isolate_confirm_yes
 Type:- BOOL
@@ -102,7 +94,7 @@ Description:- Operator confirmed that WFI and PW line is disconnected.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::9
 --------------------------------------------------
 Name:- prompt_isolate
 Type:- BOOL
@@ -128,7 +120,7 @@ T #_time_isolate_begin;
 SET;
 S #_log_time_isolate_begin;
 
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -138,7 +130,7 @@ TRNNo:- 01
 Title:- Unconditional Jump
 EmptyTransition:- False
 Description:- Jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -154,9 +146,7 @@ ACTION::01
 Description:- Prompt operator to disconnect WFI and PW supply and isolate the vessel inlet line.
 Action:- SET;
 S #_prompt_isolate; //Prompt to isolate the PW & WFI line.
-R #_prompt_isolate_confirm_yes; //Reset WFI and PW line isolation confirmation.
-R #_flowpath_isolated;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -184,7 +174,7 @@ Description:- Log operator confirmation.
 Action:- SET;
 S #_log_msg_isolate_confirm;
 R #_prompt_isolate_confirm_yes;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -215,39 +205,13 @@ TRNNo:- 04
 Title:- Operator do not remove connections correctly
 EmptyTransition:- False
 Description:- Jump unconditionally, the connections have not been removed correctly
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
-StepNo:- 04
-Title:- PH_EMC3_ISOLATE : Setup completed
-Description:- Flowpath interlock isolated
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Flow path of WFI line and PW line is isolated.
-Action:- SET;
-S #_flowpath_isolated;
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::05
---------------------------------------------------
-TRNNo:- 05
-Title:- Unconditional Jump
-EmptyTransition:- False
-Description:- Jump
-Condition:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::05
---------------------------------------------------
-StepNo:- 05
+StepNo:- 4.0000
 Title:- PH_EMC3_ISOLATE : Last Step
 Description:- Log ISOLATE operation end time.
 
@@ -261,7 +225,7 @@ T #_time_isolate_end;
 
 SET;
 S #_log_time_isolate_end;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

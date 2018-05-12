@@ -1,0 +1,43 @@
+    //============================= STEP FOOTER ==============================//
+    // AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTOCODE   AUTO //
+    // Get Ready after action finished:                                       //
+    //------------------------------------------------------------------------//
+    A     #sqSequencer.STEP.ActionFinished;
+    JCN   k0@@STEP_NUM@@;
+
+    //------------------------------------------------------------------------//
+    // Reset Action finished flag, ready for next step action:                //
+    //------------------------------------------------------------------------//
+    R     #sqSequencer.STEP.ActionVerified;
+    R     #sqSequencer.STEP.ActionFinished;
+
+    //------------------------------------------------------------------------//
+    // If ALL actions are finished:                                           //
+    //------------------------------------------------------------------------//
+    SET   ;
+    S     #sqSequencer.STEP.Finished;
+    R     #sqSequencer.STEP.Active;
+    S     #sqSequencer.STEP.Done[@@STEP_NUM@@];
+
+    //------------------------------------------------------------------------//
+    // End Step action(s):                                                    //
+    //------------------------------------------------------------------------//
+    JU    k0@@STEP_NUM@@;
+
+//----------------------------------------------------------------------------//
+// Finished Step Action(s):                                                   //
+//----------------------------------------------------------------------------//
+k0@@STEP_NUM@@: NOP   0;
+
+    A     #sqStepTimerExpired;
+    S     #sqSequencer.STEP.WithError[@@STEP_NUM@@]; // Step error flag
+    S     #sqSequencer.Error_Fault;
+    R     #sqStepTimer.IN;
+
+NETWORK
+TITLE =S0@@STEP_NUM@@:STEP-0@@STEP_NUM@@::Begin Transition
+    //------------------------------------------------------------------------//
+    // Begin the transition code:                                             //
+    //------------------------------------------------------------------------//
+    A0@@STEP_NUM@@: NOP   0;
+    R     #sqStepTimer.IN;

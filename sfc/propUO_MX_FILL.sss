@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:37:38 PM by David Paspa
+generated on 12/05/2018 3:05:20 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -506,7 +506,7 @@ ACTION::02
 Description:- Prompt operator to start filtration and reset flags.
 Action:- SET;
 S #_prompt_filtration;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -682,7 +682,7 @@ Action:- L "dbCONST".BLK.SAFE.CMD;
 T  #_emc_gas_subs;
 L "dbCONST".BLK.CMD.STOP;
 T  #_emc_gas_cmd;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -754,7 +754,7 @@ Description:- HPCA pressure control at setpoint 2, PRES_HPCA_FILT2.
 Action:- // Set HPCA valve pressure control at setpoint 2
 L #_pres_hpca_filt2;
 T #_emc_gas_setpoint;
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -789,7 +789,7 @@ T #_time_filtration_end;
 SET;
 S #_log_time_filtration_end;
 
-Verification:- A M1.1;
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -799,7 +799,7 @@ TRNNo:- 07
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -879,7 +879,7 @@ TRNNo:- 08
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Unconditional jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------

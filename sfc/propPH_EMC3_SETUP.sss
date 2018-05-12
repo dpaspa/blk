@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/05/2018 5:31:47 PM by David Paspa
+generated on 12/05/2018 3:03:24 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -72,29 +72,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- flowpath_pw
-Type:- BOOL
-Description:- Flow path of PW line is integral & ready for operation
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::7
---------------------------------------------------
-Name:- flowpath_wfi
-Type:- BOOL
-Description:- Flow path of WFI line is integral & ready for operation
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::8
---------------------------------------------------
 Name:- zsc_fpwfi_state
 Type:- INT
 Description:- WFI line connection sensor switch
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::7
 --------------------------------------------------
 Name:- zsc_fppw_state
 Type:- INT
@@ -102,7 +86,7 @@ Description:- PW line connection sensor switch state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::8
 --------------------------------------------------
 Name:- prompt_pw_confirm_yes
 Type:- BOOL
@@ -110,7 +94,7 @@ Description:- operator confirmed the PW Connection
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::9
 --------------------------------------------------
 Name:- prompt_wfi_confirm_yes
 Type:- BOOL
@@ -118,7 +102,7 @@ Description:- operator confirmed the WFI Connection
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::10
 --------------------------------------------------
 Name:- prompt_pw
 Type:- BOOL
@@ -126,7 +110,7 @@ Description:- Prompt operator to connect PW line
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::11
 --------------------------------------------------
 Name:- prompt_wfi
 Type:- BOOL
@@ -134,7 +118,7 @@ Description:- Prompt operator to connect WFI line
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::12
 --------------------------------------------------
 Name:- medium
 Type:- INT
@@ -160,7 +144,7 @@ T #_time_setup_begin;
 SET;
 S #_log_time_setup_begin;
 
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -170,7 +154,7 @@ TRNNo:- 01
 Title:- Unconditional Jump
 EmptyTransition:- False
 Description:- Jump
-Condition:- A M1.1; //Always High flag
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -184,12 +168,7 @@ Description:- Prompt operator to connect WFI or PW supply to the vessel Sy inlet
 ACTION::01
 --------------------------------------------------
 Description:- Prompt operator to connect WFI or PW supply to the vessel Sy inlet line, based on selected medium.
-Action:- //Reset Old Bits
-SET;
-R #_flowpath_pw;
-R #_flowpath_wfi;
-
-//Check if WFI or PS_WFI medium selected, then prompt to connect WFI.
+Action:- //Check if WFI or PS_WFI medium selected, then prompt to connect WFI.
 O(     ;
 L #_medium;
 L "dbCONST".SEL.LIQUID.WFI;
@@ -215,7 +194,7 @@ L "dbCONST".SEL.LIQUID.PSPW;
 ==I;
 );
 S #_prompt_pw;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -247,7 +226,7 @@ S #_log_msg_confirm_connect;
 R #_prompt_wfi_confirm_yes;
 R #_prompt_pw_confirm_yes;
 
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -306,54 +285,13 @@ TRNNo:- 04
 Title:- Operator not setup correctly
 EmptyTransition:- False
 Description:- Jump unconditionally, the connections are not made correctly
-Condition:- //None
-A  M1.1 ;// Always High Bit
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
-StepNo:- 04
-Title:- PH_EMC3_SETUP : Setup Completed
-Description:- Enable flowpath interlock
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Set the flowpath flag according to the selected medium.
-Action:- //If PW or PW PS line is selected, then set flowpath_PW flag. 
-A(    ;
-L #_zsc_fppw_state;
-L "dbCONST".BLK.ZSC2.STATE.IN;
-      ==I;   
-      ) ;
- S #_flowpath_pw;
-
-//If WFI or WFI PS line is selected, then set flowpath_WFI flag.    
-A(  ;
-L #_zsc_fpwfi_state;
-L "dbCONST".BLK.ZSC2.STATE.IN;
- ==I ;  
- ) ;
-S #_flowpath_wfi;
-
-Verification:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-TRANSITION::05
---------------------------------------------------
-TRNNo:- 05
-Title:- Phase Finish Normal
-EmptyTransition:- False
-Description:- Phase Finish Normal
-Condition:- A M1.1; //Always High flag
-
-
---------------------------------------------------
-STEP::05
---------------------------------------------------
-StepNo:- 05
+StepNo:- 4.0000
 Title:- PH_EMC3_SETUP : Last Step
 Description:- Log SETUP operation end time.
 
@@ -367,7 +305,7 @@ T #_time_setup_end;
 
 SET;
 S #_log_time_setup_end;
-Verification:- A M1.1; //Always High flag
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

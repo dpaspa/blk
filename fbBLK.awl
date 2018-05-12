@@ -152,6 +152,12 @@ VAR_INPUT
     TIME_M : Int;
     TIME_S : Int;
 @@ATTR_END|TIMER@@
+@@ATTR_BEGIN|pChildIN@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pChildIN@@
+@@ATTR_BEGIN|pClassIN@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pClassIN@@
 END_VAR
 
 VAR_OUTPUT
@@ -160,74 +166,46 @@ VAR_OUTPUT
     REM_TIME_M : Int;
     REM_TIME_S : Int;
 @@ATTR_END|TIMER@@
-@@ATTR_BEGIN|pChildIN@@
-    @@CHILDPARAMETER@@_@@CLASS@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pChildIN@@
+@@ATTR_BEGIN|pChildOUT@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pChildOUT@@
+@@ATTR_BEGIN|pClassOUT@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pClassOUT@@
 END_VAR
 
 VAR_IN_OUT
-@@ATTR_BEGIN|pBLK@@
-    @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pBLK@@
+@@ATTR_BEGIN|pChildIN_OUT@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pChildIN_OUT@@
+@@ATTR_BEGIN|pClassIN_OUT@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pClassIN_OUT@@
 @@ATTR_BEGIN|pEventPromptExists@@
-    eventPrompt : Struct
-@@ATTR_BEGIN|pEventPrompt@@
-        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pEventPrompt@@
-    END_STRUCT;
+    eventPrompt : udtEventPrompt;      // SFC events for operator prompts
 @@ATTR_END|pEventPromptExists@@
-@@ATTR_BEGIN|pEventConfirmExists@@
-    eventConfirm : Struct
-@@ATTR_BEGIN|pEventConfirm@@
-        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pEventConfirm@@
-    END_STRUCT;
-@@ATTR_END|pEventConfirmExists@@
 @@ATTR_BEGIN|pEventLogMsgExists@@
-    eventLogMsg : Struct
-@@ATTR_BEGIN|pEventLogMsg@@
-        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pEventLogMsg@@
-    END_STRUCT;
+    eventLogMsg : udtEventLogMessage;  // SFC events for logging messages
 @@ATTR_END|pEventLogMsgExists@@
 @@ATTR_BEGIN|pEventLogRealExists@@
-    eventLogReal : Struct
-@@ATTR_BEGIN|pEventLogReal@@
-        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pEventLogReal@@
-    END_STRUCT;
+    eventLogReal : udtEventLogReal;    // SFC events for logging real data
 @@ATTR_END|pEventLogRealExists@@
 @@ATTR_BEGIN|pEventLogTimeExists@@
-    eventLogTime : Struct
-@@ATTR_BEGIN|pEventLogTime@@
-        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pEventLogTime@@
-    END_STRUCT;
+    eventLogTime : udtEventLogTime;    // SFC events for logging time data
 @@ATTR_END|pEventLogTimeExists@@
-@@ATTR_BEGIN|pEventDataRealExists@@
-    eventDataReal : Struct
-@@ATTR_BEGIN|pEventDataReal@@
-        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pEventDataReal@@
-    END_STRUCT;
-@@ATTR_END|pEventDataRealExists@@
-@@ATTR_BEGIN|pEventDataTimeExists@@
-    eventDataTime : Struct
-@@ATTR_BEGIN|pEventDataTime@@
-        @@PARAMETERSOURCE@@@@CHILDPARAMETER@@ : Real;      // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pEventDataTime@@
-    END_STRUCT;
-@@ATTR_END|pEventDataTimeExists@@
     DUMMY : Bool;                      // Dummy bit for last parameter without comma
 END_VAR
 
 VAR
     mc : "udtModeCommand";             // General mode and command
-    mcb : "udtModeCommandBLK";         // Block mode and command
-    mcs : "udtModeCommandSFC";         // SFC mode and command
+    bmc : "udtModeCommandBLK";         // Block mode and command
+    smc : "udtModeCommandSFC";         // SFC mode and command
 @@ATTR_BEGIN|CHILD_INDEX_MAX@@
     cmc : Array[0..@@CHILDINDEXMAX@@] of "udtModeCommand";
 @@ATTR_END|CHILD_INDEX_MAX@@
+@@ATTR_BEGIN|PARAMETER_INDEX_MAX@@
+    p : Array[0..@@PARAMETERINDEXMAX@@] of "udtParameter";
+@@ATTR_END|PARAMETER_INDEX_MAX@@
 @@ATTR_BEGIN|HYGIENE@@
     hs : "udtHygiene";
 @@ATTR_END|HYGIENE@@
@@ -236,6 +214,8 @@ VAR
     @@SFC@@ : "fb@@SFC@@";       // @@STATEDESCRIPTION@@
 @@ATTR_END|SFC@@
     timeCheckChildState {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+    timeCheckChildStateExpired : Bool;
+    timeCheckChildStateElapsed : Time;
     iErr : Int;                        // Block error flag
     flags : Struct
         badParameter: Bool;
@@ -253,7 +233,7 @@ VAR
 @@ATTR_END|CHILD@@
     END_STRUCT;
 @@ATTR_BEGIN|SELECT@@
-    select@@PARAMETER@@_@@SELECTION@@ : Struct
+    selected_@@PARAMETER@@_@@SELECTION@@ : Struct
 @@ATTR_BEGIN|SELVALUE@@
         @@SELECTIONVALUE@@ : Bool;
 @@ATTR_END|SELVALUE@@
@@ -301,7 +281,7 @@ TITLE = Check if calling parameters are valid
     //------------------------------------------------------------------------//
     A "alwaysLow";
     = #flags.badParameter;
-    = #mcb.BAD_PARAM;
+    = #bmc.BAD_PARAM;
 
 @@ATTR_BEGIN|STATE@@
 @@ATTR_BEGIN|CHILD_ACQUIRE@@
@@ -313,7 +293,7 @@ TITLE = Check if child @@CHILDALIAS@@ is not in AUTO mode
     // Check the child device to see if it is not in Auto mode. Only need to  //
     // find the first one so bypass further checks if this child in Manual:   //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A #subs.@@STATE@@;
     AN #cmc[@@CHILDINDEX@@].modeAUTO;
     = #flags.childNotAuto;
@@ -335,7 +315,7 @@ TITLE = Check if child @@CHILDALIAS@@ is Interlocked
     // need to find the first one so bypass further checks if this child is   //
     // interlocked:                                                           //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A #subs.@@STATE@@;
     A #cmc[@@CHILDINDEX@@].INTERLOCK;
     = #flags.childInterlocked;
@@ -358,7 +338,7 @@ TITLE = Check if Child @@CHILDALIAS@@ is not already Owned or not Available
     // later to execute a command. Only need to find the first one so bypass  //
     // further checks if this child is unavailable:                           //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A #subs.@@STATE@@;
     AN #cmc[@@CHILDINDEX@@].isAvailable;
     AN(;
@@ -388,7 +368,7 @@ TITLE = Check if any Child has Failed
     O #flags.childUnavailable;
     O #flags.childMismatch;
     = #flags.childFailed;
-    = #mcb.CHILD_FAIL;
+    = #bmc.CHILD_FAIL;
 
 NETWORK
 TITLE = Call General Mode and Command handling block
@@ -413,7 +393,7 @@ TITLE = Set Start command permitted flag if all okay
     AN #mc.INTERLOCK;
     AN #flags.childFailed;
     AN #flags.badParameter;
-    = #mcb.permitStart;
+    = #bmc.permitStart;
 
 NETWORK
 TITLE = Call BLOCK Mode and Command handling block
@@ -422,7 +402,8 @@ TITLE = Call BLOCK Mode and Command handling block
     // events:                                                                //
     //------------------------------------------------------------------------//
     CALL "fcModeCmdBLK"
-    (   mcb                  := #mcb
+    (   mc                   := #mc ,
+        bmc                  := #bmc
     );
 
 NETWORK
@@ -430,7 +411,7 @@ TITLE = Flag SFC not running if a new running substate command issued
     //------------------------------------------------------------------------//
     // Flag SFC is not yet running if new start command:                      //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     JCN _notStart;
     R flags.sfcRunning;
 _notStart:    NOP 0;
@@ -451,9 +432,9 @@ TITLE = Running Substate flags
     // Convert running substate values into boolean flags for ease of use in  //
     // boolean logic if starting a new substate:                              //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A(;
-    L #mcb.SUBSelected;
+    L #bmc.SUBSelected;
     L "dbCONST".BLK.@@CLASS@@.SUBS.@@STATE@@;
     ==I;
     );
@@ -471,13 +452,13 @@ TITLE = Calling Parameter Selection flags
     // Convert calling parameter selections into the boolean flags for ease   //
     // of use in boolean logic if starting a new substate:                    //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A(;
-    L #@@PARAMETER@@;
+    L #@@PARAMETER@@_@@SELECTION@@;
     L "dbCONST".SEL.@@SELECTION@@.@@SELECTIONVALUE@@;
     ==I;
     );
-    = #select_@@PARAMETER@@_@@SELECTION@@.@@SELECTIONVALUE@@;
+    = #selected_@@PARAMETER@@_@@SELECTION@@.@@SELECTIONVALUE@@;
 
 @@ATTR_END|SELVALUE@@
 @@ATTR_END|SELECT@@
@@ -495,7 +476,7 @@ TITLE = Acquire child @@CHILDALIAS@@ for new command if required for the state
     // the child is available as it would be a child unavailabile failure     //
     // already above if not available at this point:                          //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A #subs.@@STATE@@;
     A #cmc[@@CHILDINDEX@@].isAvailable;
     = #own.@@CHILDALIASBLOCK@@;
@@ -525,7 +506,7 @@ TITLE = Cascade Batch Serial Number to children
     //                                                                        //
     // Cascade this block's Batch Serial Number to all child devices:         //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A #subs.@@STATE@@;
     JCN _childBatch_@@COUNTER|1@@_@@STATE@@;
     L #mc.SERIALNUM;
@@ -539,16 +520,16 @@ _childBatch_@@COUNTER@@_@@STATE@@:   NOP 0;
 @@ATTR_BEGIN|STATE@@
 @@ATTR_BEGIN|pChildIN@@
 NETWORK
-TITLE = Download calling parameter @@PARAMETER@@ value to child device @@CHILDALIAS@@ for state @@STATE@@
+TITLE = Download calling parameter @@CHILDPARAMETER@@ value to child device @@CHILDPARAMETERALIAS@@ for state @@STATE@@
     //------------------------------------------------------------------------//
     // CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER  //
     //                                                                        //
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A #subs.@@STATE@@;
     JCN _childParmIN_@@COUNTER|1@@_@@STATE@@;
-    L #@@BLOCKPARAMETER@@;
+    L #@@CHILDPARAMETER@@;
     T #cmc[@@CHILDINDEX@@].@@CHILDPARAMETER@@;
 
 _childParmIN_@@COUNTER@@_@@STATE@@:   NOP 0;
@@ -559,15 +540,18 @@ _childParmIN_@@COUNTER@@_@@STATE@@:   NOP 0;
 @@ATTR_BEGIN|STATE@@
 @@ATTR_BEGIN|CHILD_INIT_COMMAND@@
 NETWORK
-TITLE = Command child device @@CHILDALIAS@@ for state @@STATE@@ to its initial true condition command
+TITLE = Command child device @@CHILDALIAS@@ for state @@STATE@@ to its initial TRUE condition command
     //------------------------------------------------------------------------//
     // CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
     //                                                                        //
     // Set the initial command values for the child devices.                  //
     // Command the child device to its initial command if condition is true:  //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A #subs.@@STATE@@;
+    A(;
+    @@CONDITIONSTATEMENT@@
+    );
     JCN _childInitTrue_@@COUNTER|1@@_@@STATE@@;
     @@TRUESTATEMENT@@
 
@@ -579,15 +563,18 @@ _childInitTrue_@@COUNTER@@_@@STATE@@:   NOP 0;
 @@ATTR_BEGIN|STATE@@
 @@ATTR_BEGIN|CHILD_INIT_COMMAND@@
 NETWORK
-TITLE = Command child device @@CHILDALIAS@@ for state @@STATE@@ to its initial false condition command
+TITLE = Command child device @@CHILDALIAS@@ for state @@STATE@@ to its initial FALSE condition command
     //------------------------------------------------------------------------//
     // CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
     //                                                                        //
     // Set the initial command values for the child devices.                  //
     // Command the child device to its initial command:                       //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A #subs.@@STATE@@;
+    AN(;
+    @@CONDITIONSTATEMENT@@
+    );
     JCN _childInitFalse_@@COUNTER|1@@_@@STATE@@;
     @@FALSESTATEMENT@@
 
@@ -598,18 +585,60 @@ _childInitFalse_@@COUNTER@@_@@STATE@@:   NOP 0;
 
 @@ATTR_BEGIN|SFC@@
 NETWORK
-TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
+TITLE = Make sure all SFCs are stopped if stop command or new start command
     //------------------------------------------------------------------------//
     // SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC     //
     // SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC     //
-    // SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC     //
     //                                                                        //
+    // Stop the SFC if new stop or start command issued. Reset the SFC mode   //
+    // and command variable to clear the object referece:                     //
+    //------------------------------------------------------------------------//
+    O #bmc.eventCmdStop;
+    O #bmc.eventCmdStart;
+    JCN _notResetSFC_@@COUNTER|1@@_@@STATE@@;
+    A "alwaysHigh";
+    = #@@SFC@@.RESET;
+
+_notResetSFC_@@COUNTER@@_@@STATE@@:   NOP 0;
+
+@@ATTR_END|SFC@@
+
+NETWORK
+TITLE = Reset sequence mode and command structure
+    //------------------------------------------------------------------------//
+    // Reset the sequence mode and command structure:                         //
+    //------------------------------------------------------------------------//
+    A "alwaysLow";
+    = #smc.ERR_FAULT;
+    = #smc.MAN_JUMP;
+    = #smc.NO_VERIFIC;
+    = #smc.OFF_IDLE;
+    = #smc.PAUSED;
+    = #smc.RUNNING;
+    = #smc.S_ACTIVE;
+    = #smc.SQ_ACK;
+    = #smc.SQ_ERROR;
+    = #smc.SQ_FINISHED;
+    = #smc.SQ_RESUME;
+    = #smc.TRN_AND_JUMP;
+    L 0;
+    T #smc.CURSTEP;
+    T #smc.MODE;
+    T #smc.SQ_CMD;
+    T #smc.SQ_STATE;
+    T #smc.STEPNO_JUMP;
+    T #smc.NXT_STEP;
+
+@@ATTR_BEGIN|SFC@@
+NETWORK
+TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
+    //------------------------------------------------------------------------//
     // SFC PARAMETERS   SFC PARAMETERS   SFC PARAMETERS   SFC PARAMETERS   SF //
     //                                                                        //
     // Set the SFC calling parameters if this is the running substate:        //
     //------------------------------------------------------------------------//
     A(;
-    O #mcb.eventCmdStart;
+    O #bmc.eventCmdStart;
     O flags.sfcRunning;
     );
     A #subs.@@STATE@@;
@@ -619,30 +648,9 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
 @@ATTR_BEGIN|pSFCChild@@
         @@CHILDPARAMETER@@   := #cmc[@@CHILDINDEX@@].@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pSFCChild@@
-        mcs                  := #mcs
+        smc                  := #smc
     );
-
 _notSFC_@@COUNTER@@_@@STATE@@:   NOP 0;
-
-@@ATTR_END|SFC@@
-
-@@ATTR_BEGIN|SFC@@
-NETWORK
-TITLE = Make sure any non-active SFCs are stopped
-    //------------------------------------------------------------------------//
-    // Stop any SFC if not the current running substate or if the stop        //
-    // command has been issued:                                               //
-    //------------------------------------------------------------------------//
-    O #mcb.eventCmdStop;
-    O(;
-    A #mcb.eventCmdStart;
-    AN #subs.@@STATE@@;
-    );
-    JCN _stopSFC_@@COUNTER|1@@_@@STATE@@;
-    L "dbCONST".SEQ.CMD.STOP;
-    T #@@SFC@@.SQ_CMD;
-
-_stopSFC_@@COUNTER@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|SFC@@
 
@@ -652,22 +660,15 @@ TITLE = Clear the operator prompt flag
     //------------------------------------------------------------------------//
     // CLEAR OPERATOR PROMPT   CLEAR OPERATOR PROMPT   CLEAR OPERATOR PROMPT  //
     //                                                                        //
-    // Clear the SFC prompt bit:                                              //
+    // Clear the SFC prompt and confirm bits and the global shared event bits://
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     JCN _evPrompt_@@COUNTER|1@@;
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    R #eventPrompt.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.trigger;
+    R #eventPrompt.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.confirmYes;
+    R #eventPrompt.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.confirmNo;
 _evPrompt_@@COUNTER@@:   NOP 0;
-
-NETWORK
-TITLE = Clear the global event DB operator prompt flag
-    //------------------------------------------------------------------------//
-    // Clear the global shared event DB Prompt bit:                           //
-    //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
-    JCN _evgPrompt_@@COUNTER|1@@;
-    R #eventPrompt.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
-_evgPrompt_@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|pEventPrompt@@
 
@@ -677,22 +678,12 @@ TITLE = Clear the operator confirm flag
     //------------------------------------------------------------------------//
     // CLEAR OPERATOR CONFIRM   CLEAR OPERATOR CONFIRM   CLEAR OPERATOR CONFI //
     //                                                                        //
-    // Clear the SFC confirm bit:                                             //
+    // Clear the SFC confirm bit and the global shared event DB bit:          //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     JCN _evConfirm_@@COUNTER|1@@;
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 _evConfirm_@@COUNTER@@:   NOP 0;
-
-NETWORK
-TITLE = Clear the global event DB operator confirm flag
-    //------------------------------------------------------------------------//
-    // Clear the global shared event DB Confirm bit:                          //
-    //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
-    JCN _evgConfirm_@@COUNTER|1@@;
-    R #eventConfirm.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
-_evgConfirm_@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|pEventConfirm@@
 
@@ -702,22 +693,13 @@ TITLE = Clear the log message flag
     //------------------------------------------------------------------------//
     // CLEAR LOG MESSAGE   CLEAR LOG MESSAGE   CLEAR LOG MESSAGE   CLEAR LOG  //
     //                                                                        //
-    // Clear the SFC log message bit:                                         //
+    // Clear the SFC log message bit and the global shared event DB bit:      //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     JCN _evLogMsg_@@COUNTER|1@@;
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    R #eventLogMsg.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.trigger;
 _evLogMsg_@@COUNTER@@:   NOP 0;
-
-NETWORK
-TITLE = Clear the global event DB log message flag
-    //------------------------------------------------------------------------//
-    // Clear the global shared event DB Log Message bit:                      //
-    //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
-    JCN _evgLogMsg_@@COUNTER|1@@;
-    R #eventLogMsg.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
-_evgLogMsg_@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|pEventLogMsg@@
 
@@ -727,22 +709,16 @@ TITLE = Clear the log real data flag
     //------------------------------------------------------------------------//
     // CLEAR LOG REAL   CLEAR LOG REAL   CLEAR LOG REAL   CLEAR LOG REAL   CL //
     //                                                                        //
-    // Clear the SFC log real bit:                                            //
+    // Clear the SFC log real bit and the global shared event DB bit and      //
+    // zero the global data:                                                  //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     JCN _evLogReal_@@COUNTER|1@@;
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    R #eventLogReal.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.trigger;
+    L 0;
+    T #eventLogReal.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.dataValue;
 _evLogReal_@@COUNTER@@:   NOP 0;
-
-NETWORK
-TITLE = Clear the global event DB log real data flag
-    //------------------------------------------------------------------------//
-    // Clear the global shared event DB Log Real data bit:                    //
-    //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
-    JCN _evgLogReal_@@COUNTER|1@@;
-    R #eventLogReal.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
-_evgLogReal_@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|pEventLogReal@@
 
@@ -752,22 +728,16 @@ TITLE = Clear the log message flag
     //------------------------------------------------------------------------//
     // CLEAR LOG TIME   CLEAR LOG TIME   CLEAR LOG TIME   CLEAR LOG TIME   CL //
     //                                                                        //
-    // Clear the SFC log time bit:                                            //
+    // Clear the SFC log time bit and the global shared event DB bit and      //
+    // zero the global data:                                                  //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     JCN _evLogTime_@@COUNTER|1@@;
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    R #eventLogTime.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.trigger;
+    L 0;
+    T #eventLogTime.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.dataValue;
 _evLogTime_@@COUNTER@@:   NOP 0;
-
-NETWORK
-TITLE = Clear the global event DB log time data flag
-    //------------------------------------------------------------------------//
-    // Clear the global shared event DB Log Time data bit:                    //
-    //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
-    JCN _evgLogTime_@@COUNTER|1@@;
-    R #eventLogTime.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
-_evgLogTime_@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|pEventLogTime@@
 
@@ -777,24 +747,13 @@ TITLE = Zero the real data value
     //------------------------------------------------------------------------//
     // ZERO DATA REAL   ZERO DATA REAL   ZERO DATA REAL   ZERO DATA REAL   ZE //
     //                                                                        //
-    // Zero the SFC log real data:                                            //
+    // Zero the SFC log real data parameter:                                  //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     JCN _evDataReal_@@COUNTER|1@@;
     L 0;
     T #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 _evDataReal_@@COUNTER@@:   NOP 0;
-
-NETWORK
-TITLE = Zero the global event DB log real data
-    //------------------------------------------------------------------------//
-    // Clear the global shared event DB Data Real data bit:                    //
-    //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
-    JCN _evgDataReal_@@COUNTER|1@@;
-    L 0;
-    T #eventDataReal.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
-_evgDataReal_@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|pEventDataReal@@
 
@@ -804,24 +763,13 @@ TITLE = Zero the log time data
     //------------------------------------------------------------------------//
     // ZERO DATA TIME   ZERO DATA TIME   ZERO DATA TIME   ZERO DATA TIME   ZE //
     //                                                                        //
-    // Zero the SFC log time data:                                            //
+    // Zero the SFC log time data and the global shared event DB data:        //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     JCN _evDataTime_@@COUNTER|1@@;
     L 0;
     T #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 _evDataTime_@@COUNTER@@:   NOP 0;
-
-NETWORK
-TITLE = Zero the global event DB log time data
-    //------------------------------------------------------------------------//
-    // Zero the global shared event DB Time data:                             //
-    //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
-    JCN _evgDataTime_@@COUNTER|1@@;
-    L 0;
-    T #eventDataTime.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
-_evgDataTime_@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|pEventDataTime@@
 
@@ -836,7 +784,7 @@ TITLE = Synchronise SFC @@SFC@@ child state for child @@CHILDPARAMETER@@
     // running:                                                               //
     //------------------------------------------------------------------------//
     A(;
-    O #mcb.eventCmdStart;
+    O #bmc.eventCmdStart;
     O flags.sfcRunning;
     );
     A #subs.@@STATE@@;
@@ -859,7 +807,7 @@ TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
     // Write the initial command to any SFC child commands to synchronise     //
     // them at the start of the SFC:                                          //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A #subs.@@STATE@@;
     JCN _cCmd_@@COUNTER|1@@_@@STATE@@;
     L #cmc[@@CHILDINDEX@@].@@CHILDPARAMETERATTRIBUTE@@;
@@ -876,11 +824,11 @@ TITLE = Start the SFC sequence @@SFC@@ for running substate @@STATE@@
     //------------------------------------------------------------------------//
     // START SFC   START SFC   START SFC   START SFC   START SFC   START SFC  //
     //                                                                        //
-    // Start the substate SFC.                                                //
+    // Start the running substate SFC.                                        //
     //                                                                        //
     // Bypass if not the current running substate:                            //
     //------------------------------------------------------------------------//
-    A #mcb.eventCmdStart;
+    A #bmc.eventCmdStart;
     A #subs.@@STATE@@;
     JCN _notSFCStarting_2_@@STATE@@;
 
@@ -888,7 +836,7 @@ TITLE = Start the SFC sequence @@SFC@@ for running substate @@STATE@@
     // Start the SFC for the running substate:                                //
     //------------------------------------------------------------------------//
     L "dbCONST".SEQ.CMD.START;
-    T #@@SFC@@.SQ_CMD;
+    T #smc.SQ_CMD;
     S flags.sfcRunning;
 
 _notSFCStarting_2_@@STATE@@:      NOP 0;
@@ -905,8 +853,8 @@ TITLE = Check if any new Child command if SFC @@SFC@@ is running
     //------------------------------------------------------------------------//
     A #subs.@@STATE@@;
     A flags.sfcRunning;
-    AN #@@SFC@@.PAUSED;
-    AN #@@SFC@@.ERR_FAULT;
+    AN #smc.PAUSED;
+    AN #smc.ERR_FAULT;
     JCN _notSFCRunning_1_@@STATE@@;
     NOP 0;
 
@@ -952,8 +900,8 @@ TITLE = If child command changed, start timer to wait for child state
     {time_type := 'Time'}
     (   IN                          := #flags.childCommandChange ,
         PT                          := T#10S ,
-        Q                           := #timeCheckChildState.Q ,
-        ET                          := #timeCheckChildState.ET
+        Q                           := #timeCheckChildStateExpired ,
+        ET                          := #timeCheckChildStateElapsed
     );
     NOP 0;
 
@@ -968,7 +916,7 @@ TITLE = Check if any Child state does not match the command
     // parent block if the child state grace period timer has expired. Stop   //
     // checking if the first child state mismatch found:                      //
     //------------------------------------------------------------------------//
-    A #timeCheckChildState.Q;
+    A #timeCheckChildStateExpired;
     L #cmc[@@CHILDINDEX@@].STATE;
     L #cmc[@@CHILDINDEX@@].CMD;
     <>I;
@@ -985,7 +933,7 @@ TITLE = Reset the new child command flag if a mismatch
     //------------------------------------------------------------------------//
     // Reset the child device command changed flag if a mismatch occurred:    //
     //------------------------------------------------------------------------//
-    A #timeCheckChildState.Q;
+    A #timeCheckChildStateExpired;
     JCN _ccstate;
     R #flags.childCommandChange;
 _ccstate:   NOP 0;
@@ -999,22 +947,26 @@ TITLE = Raise operator prompt if required
     // Transfer the SFC prompt bit to the global event datablock:             //
     //------------------------------------------------------------------------//
     A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = #eventPrompt.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
+    = #eventPrompt.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.trigger;
 
 @@ATTR_END|pEventPrompt@@
 
-@@ATTR_BEGIN|pEventConfirm@@
+@@ATTR_BEGIN|pEventPrompt@@
 NETWORK
-TITLE = Return operator bit if made
+TITLE = Return operator confirm bits if made
     //------------------------------------------------------------------------//
     // OPERATOR CONFIRM   OPERATOR CONFIRM   OPERATOR CONFIRM   OPERATOR CONF //
     //                                                                        //
-    // Receive the SFC confirm bit from the global event datablock:           //
+    // Receive the SFC confirm bits from the global event datablock:          //
     //------------------------------------------------------------------------//
-    A #eventConfirm.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
-    = #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    A #eventPrompt.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.confirmYes;
+    = #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_yes;
+@@ATTR_BEGIN|pEventConfirmNoExists@@
+    A #eventPrompt.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.confirmNo;
+    = #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_no;
+@@ATTR_END|pEventConfirmNoExists@@
 
-@@ATTR_END|pEventConfirm@@
+@@ATTR_END|pEventPrompt@@
 
 @@ATTR_BEGIN|pEventLogMsg@@
 NETWORK
@@ -1025,35 +977,9 @@ TITLE = Log message if required
     // Transfer the SFC log data to the global event datablock:               //
     //------------------------------------------------------------------------//
     A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = #eventLogMsg.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
+    = #eventLogMsg.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.trigger;
 
 @@ATTR_END|pEventLogMsg@@
-
-@@ATTR_BEGIN|pEventLogReal@@
-NETWORK
-TITLE = Log real data if required
-    //------------------------------------------------------------------------//
-    // LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG  //
-    //                                                                        //
-    // Transfer the SFC log data to the global event datablock:               //
-    //------------------------------------------------------------------------//
-    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = #eventLogReal.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
-
-@@ATTR_END|pEventLogReal@@
-
-@@ATTR_BEGIN|pEventLogTime@@
-NETWORK
-TITLE = Log time data if required
-    //------------------------------------------------------------------------//
-    // LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG  //
-    //                                                                        //
-    // Transfer the SFC log data to the global event datablock:               //
-    //------------------------------------------------------------------------//
-    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = #eventLogTime.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
-
-@@ATTR_END|pEventLogTime@@
 
 @@ATTR_BEGIN|pEventDataReal@@
 NETWORK
@@ -1064,9 +990,22 @@ TITLE = Real data
     // Transfer the SFC log data to the global event datablock:               //
     //------------------------------------------------------------------------//
     L #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    T #eventDataReal.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
+    T #eventLogReal.@@PARAMETERSOURCE@@_log@@CHILDPARAMETER@@.dataValue;
 
 @@ATTR_END|pEventDataReal@@
+
+@@ATTR_BEGIN|pEventLogReal@@
+NETWORK
+TITLE = Log real data if required
+    //------------------------------------------------------------------------//
+    // LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG  //
+    //                                                                        //
+    // Transfer the SFC log data to the global event datablock:               //
+    //------------------------------------------------------------------------//
+    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    = #eventLogReal.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.trigger;
+
+@@ATTR_END|pEventLogReal@@
 
 @@ATTR_BEGIN|pEventDataTime@@
 NETWORK
@@ -1077,9 +1016,22 @@ TITLE = Time data
     // Transfer the SFC log data to the global event datablock:               //
     //------------------------------------------------------------------------//
     L #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    T #eventDataTime.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
+    T #eventLogTime.@@PARAMETERSOURCE@@_log@@CHILDPARAMETER@@.dataValue;
 
 @@ATTR_END|pEventDataTime@@
+
+@@ATTR_BEGIN|pEventLogTime@@
+NETWORK
+TITLE = Log time data if required
+    //------------------------------------------------------------------------//
+    // LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG  //
+    //                                                                        //
+    // Transfer the SFC log data to the global event datablock:               //
+    //------------------------------------------------------------------------//
+    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    = #eventLogTime.@@PARAMETERSOURCE@@@@CHILDPARAMETER@@.trigger;
+
+@@ATTR_END|pEventLogTime@@
 
 @@ATTR_BEGIN|SFC@@
 NETWORK
@@ -1087,12 +1039,12 @@ TITLE = Any Interlock must pause the running SFC
     //------------------------------------------------------------------------//
     // Pause the running SFC sequence if any interlock or failure condition:  //
     //------------------------------------------------------------------------//
-    AN #mcb.permitStart;
+    AN #bmc.permitStart;
     A flags.sfcRunning;
     A #subs.@@STATE@@;
     JCN _ilSFC_@@COUNTER|1@@;
     L "dbCONST".SEQ.CMD.PAUSE;
-    T #@@SFC@@.SQ_CMD;
+    T #smc.SQ_CMD;
 _ilSFC_@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|SFC@@
@@ -1105,7 +1057,7 @@ TITLE = Stop the module if any problem
     // Stop the block if any interlock condition or not permitted to strat:   //
     //------------------------------------------------------------------------//
     O #mc.INTERLOCK;
-    ON #mcb.permitStart;
+    ON #bmc.permitStart;
     JCN _stopBlock;
     L "dbCONST".BLK.CMD.STOP;
     T #mc.CMD;
@@ -1122,7 +1074,7 @@ TITLE = Set child device @@CHILDALIAS@@ to safe state if any interlock or child 
     // child failure:                                                         //
     //------------------------------------------------------------------------//
     O #mc.INTERLOCK;
-    ON #mcb.permitStart;
+    ON #bmc.permitStart;
     JCN _childSafe_@@COUNTER|1@@_@@STATE@@;
     L "dbCONST".BLK.@@CHILDCLASS@@.SAFE.CMD;
     T #cmc[@@CHILDINDEX@@].CMD;
@@ -1141,12 +1093,12 @@ TITLE = Set child devices to safe state if SFC @@SFC@@ Paused or Error
     //                                                                        //
     // Bypass if the current SFC is running okay:                             //
     //------------------------------------------------------------------------//
-    A #mcb.permitStart;
+    A #bmc.permitStart;
     A #subs.@@STATE@@;
     A #flags.sfcRunning;
     A(;
-    O #@@SFC@@.PAUSED;
-    O #@@SFC@@.ERR_FAULT;
+    O #smc.PAUSED;
+    O #smc.ERR_FAULT;
     );
     JCN _safeSFC@@COUNTER|1@@_@@SFC@@;
 
@@ -1172,12 +1124,12 @@ TITLE = Acknowlede Sequence Error Fault
     // If the sequence error has been acknowledged, set the SFC command to    //
     // error acknowledged:                                                    //
     //------------------------------------------------------------------------//
-    A #mcs.SQ_ACK;
-    A #mcs.SQ_ERROR;
+    A #smc.SQ_ACK;
+    A #smc.SQ_ERROR;
     A #subs.@@STATE@@;
     JCN _ackSFC@@COUNTER|1@@;
     L "dbCONST".SEQ.CMD.ACKNOWLEDGE_ERR;
-    T #@@SFC@@.SQ_CMD;
+    T #smc.SQ_CMD;
 _ackSFC@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|SFC@@
@@ -1188,11 +1140,11 @@ TITLE = SQ Acknowlede Error Fault and Resume
     //------------------------------------------------------------------------//
     // Reset the sequence error acknowledge flag:                             //
     //------------------------------------------------------------------------//
-    A #mcs.SQ_ACK;
-    A #mcs.SQ_ERROR;
+    A #smc.SQ_ACK;
+    A #smc.SQ_ERROR;
     A #subs.@@STATE@@;
     JCN _rAckSFC@@COUNTER|1@@;
-    R #mcs.SQ_ACK;
+    R #smc.SQ_ACK;
 _rAckSFC@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|SFC@@
@@ -1206,24 +1158,24 @@ TITLE = SQ Acknowlede Error Fault and Resume
     // Check if the sequence was paused or an error was acknowledged and the  //
     // SFC is to be resumed:                                                  //
     //------------------------------------------------------------------------//
-    A #mcs.SQ_RESUME;
+    A #smc.SQ_RESUME;
     A #subs.@@STATE@@;
     A(;
     O(;
-    L #mcs.SQ_STATE;
+    L #smc.SQ_STATE;
     L "dbCONST".SEQ.CMD.PAUSE;
     ==I;
     );
     O(;
-    L #mcs.SQ_STATE;
+    L #smc.SQ_STATE;
     L "dbCONST".SEQ.CMD.ACKNOWLEDGE_ERR;
     ==I;
     );
     );
     JCN _res1SFC@@COUNTER|1@@;
     L "dbCONST".SEQ.CMD.RESUME;
-    T #@@SFC@@.SQ_CMD;
-    R #mcs.SQ_RESUME;
+    T #smc.SQ_CMD;
+    R #smc.SQ_RESUME;
 _res1SFC@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|SFC@@
@@ -1236,10 +1188,10 @@ TITLE = All SQ are in Auto mode when EM in Auto
     //                                                                        //
     // Set all SFCs to AUTO mode if the block is in AUTO:                     //
     //------------------------------------------------------------------------//
-    A #mcb.eventModeAUTO;
+    A #bmc.eventModeAUTO;
     JCN _nomc@@COUNTER|1@@;
     L #mc.MODE;
-    T #@@SFC@@.MODE;
+    T #smc.MODE;
 _nomc@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|SFC@@
@@ -1253,7 +1205,7 @@ TITLE = Flag SFC finished if completed execution
     // Flag SFC completed if the sequence has finished executing:             //
     //------------------------------------------------------------------------//
     A #subs.@@STATE@@;
-    A #@@SFC@@.SQ_FINISHED;
+    A #smc.SQ_FINISHED;
     JCN _notFin@@COUNTER|1@@;
     S #flags.sfcCompleted;
 _notFin@@COUNTER@@:   NOP 0;
@@ -1302,7 +1254,7 @@ TITLE = Set block running substate completed if finished
     L "dbCONST".BLK.@@CLASS@@.STATE.COMPLETED;
     T #mc.STATE;
     R #flags.sfcCompleted;
-_blkComplete@@COUNTER@@   NOP 0;
+_blkComplete@@COUNTER@@:   NOP 0;
 
 @@ATTR_END|STATE@@
 
@@ -1318,17 +1270,17 @@ TITLE = Clean up if SFC no longer running
     A #subs.@@STATE@@;
     A(;
     O(;
-    L #mcb.SUBSelected;
+    L #bmc.SUBSelected;
     L "dbCONST".BLK.@@CLASS@@.SAFE.CMD;
     ==I;
     );
     O(;
-    L #mcs.SQ_STATE;
+    L #smc.SQ_STATE;
     L "dbCONST".SEQ.STATE.ABORTED;
     ==I;
     );
     O(;
-    L #mcs.SQ_STATE;
+    L #smc.SQ_STATE;
     L "dbCONST".SEQ.STATE.COMPLETED;
     ==I;
     );
@@ -1339,16 +1291,16 @@ TITLE = Clean up if SFC no longer running
     // SFC is no longer running:                                              //
     //------------------------------------------------------------------------//
     L "dbCONST".SEQ.SAFE.CMD;
-    T #mcs.SQ_STATE;
+    T #smc.SQ_STATE;
 
     L 0;
-    T #mcs.CURSTEP;
-    T #@@SFC@@.CURSTEP;
-    T #@@SFC@@.SQ_STATE;
+    T #smc.CURSTEP;
+    T #smc.CURSTEP;
+    T #smc.SQ_STATE;
 
-    R #mcs.SQ_ERROR;
-    R #@@SFC@@.ERR_FAULT;
-    R #@@SFC@@.PAUSED;
+    R #smc.SQ_ERROR;
+    R #smc.ERR_FAULT;
+    R #smc.PAUSED;
 
 sfcd@@COUNTER@@:      NOP 0;
 
@@ -1363,12 +1315,12 @@ TITLE = Cascade Auto or OOS Mode to child @@CHILDALIAS@@
     //                                                                        //
     // Switch child mode to Auto or OOS when parent mode transitions:         //
     //------------------------------------------------------------------------//
-    O #mcb.eventModeAUTO;
-    O #mcb.eventModeOOS;
+    O #bmc.eventModeAUTO;
+    O #bmc.eventModeOOS;
     JCN _cascMode@@COUNTER|1@@_@@STATE@@;
     L #mc.MODE;
     T #cmc[@@CHILDINDEX@@].MODE;
-_cascMode@@COUNTER|1@@_@@STATE@@   NOP 0;
+_cascMode@@COUNTER|1@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|CHILD_ACQUIRE@@
 @@ATTR_END|STATE@@
@@ -1394,7 +1346,7 @@ TITLE = Hour Min & Sec to Time variable
     //                                                                        //
     // Convert calling timer value to Time variable:                          //
     //------------------------------------------------------------------------//
-    A #mcb.permitStart;
+    A #bmc.permitStart;
     CALL "fcHMS2Time"
     (
         H                           := #TIME_H ,
