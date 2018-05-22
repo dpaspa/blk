@@ -5,18 +5,29 @@
 // Class:       ifbDI2                                                        //
 // Description: Instances of DI2                                              //
 //                                                                            //
-// General alarm input using software only. No field I/O.                     //
+// General alarm single digital input.                                        //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 1.0 David Paspa      17-Apr-2018 NA        Initial design from DI1.        //
+// 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.6 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.5 Khairul Basar    03-Oct-2009 CC-09/016 PSH_parameters corrected.       //
+// 0.4 Khairul Basar    15-Sep-2009 CC-09/016 PSA_1010 DI_USER assigned       //
+//                                            correctly.                      //
+// 0.3 Khairul Basar    09-Sep-2009 CC-09/016 I/O assignment associated with  //
+//                                            corresponding Instance is       //
+//                                            corrected.                      //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Mode=1 initialized.             //
+//                                            Instance comment added.         //
+// 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbDI2"
-TITLE = Instances of DI2 General alarm with software input
+TITLE = Instances of DI2 General alarm single digital input Normally OFF
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
 NAME : ifbDI2
-VERSION : 1.0
+VERSION : 2.0
 
 //----------------------------------------------------------------------------//
 // Declare the instance objects of the class:                                 //
@@ -28,7 +39,7 @@ VAR
 END_VAR
 
 BEGIN
-@@TEMPLATE_BEGIN@@
+@@TEMPLATE_BEGIN|createInstances@@
 NETWORK
 TITLE = @@INSTANCE@@ : Unique ID
     //------------------------------------------------------------------------//
@@ -46,19 +57,24 @@ TITLE = @@INSTANCE@@ : Owner
     T #@@INSTANCE@@.mc.OWNER;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Safe Command
+TITLE = @@INSTANCE@@ : Safe Command on restart
     //------------------------------------------------------------------------//
-    // Set the safe command:                                                  //
+    // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    JCN _notRestart_@@COUNTER|1@@;
     L "dbCONST".BLK.DI2.SAFE.CMD;
     T #@@INSTANCE@@.mc.CMD_SAFE;
+_notRestart_@@COUNTER@@:   NOP 0;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process the instance:                       //
     //------------------------------------------------------------------------//
-    CALL #@@INSTANCE@@;
+    CALL #@@INSTANCE@@
+    (   DI_Auto              := "@@INSTANCE@@-DI"
+    );
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

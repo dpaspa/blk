@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/05/2018 3:06:19 PM by David Paspa
+generated on 22/05/2018 2:26:27 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -31,13 +31,29 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- vessel_sy
+Type:- INT
+Description:- Storage vessel selection S1 or S2
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- fill_flz
+Type:- INT
+Description:- Filling line selection FL1 or FL2
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
 Name:- emx_smfl_cmd
 Type:- INT
 Description:- Command to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::4
 --------------------------------------------------
 Name:- emx_smfl_subs
 Type:- INT
@@ -45,7 +61,7 @@ Description:- Substate selection to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::5
 --------------------------------------------------
 Name:- emx_smfl_state
 Type:- INT
@@ -53,55 +69,31 @@ Description:- Device State of emx_smfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::6
 --------------------------------------------------
-Name:- emc_water_cmd
+Name:- emc_water_sy_cmd
 Type:- INT
 Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::7
 --------------------------------------------------
-Name:- emc_water_subs
+Name:- emc_water_sy_subs
 Type:- INT
 Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::8
 --------------------------------------------------
-Name:- emc_water_state
+Name:- emc_water_sy_state
 Type:- INT
 Description:- Device State of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::7
---------------------------------------------------
-Name:- emx_mmfl_cmd
-Type:- INT
-Description:- Description
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::8
---------------------------------------------------
-Name:- emx_mmfl_subs
-Type:- INT
-Description:- Description
-ParameterInOut:- OUT
-
---------------------------------------------------
 PARAMETER::9
---------------------------------------------------
-Name:- emx_mmfl_state
-Type:- INT
-Description:- Description
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::10
 --------------------------------------------------
 Name:- log_time_filling_start
 Type:- BOOL
@@ -109,7 +101,7 @@ Description:- Flags the HMI that filling started
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::10
 --------------------------------------------------
 Name:- log_msg_reset_button_abort
 Type:- BOOL
@@ -117,7 +109,7 @@ Description:- Operator confirmed to abort pause button reset
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::11
 --------------------------------------------------
 Name:- log_msg_reset_button_retry
 Type:- BOOL
@@ -125,7 +117,7 @@ Description:- Operator confirmed to reset pause button
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::12
 --------------------------------------------------
 Name:- log_msg_filling_paused
 Type:- BOOL
@@ -133,7 +125,7 @@ Description:- HMI message: Filling paused
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::13
 --------------------------------------------------
 Name:- prompt_transfer_complete_confirm_no
 Type:- BOOL
@@ -141,7 +133,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::14
 --------------------------------------------------
 Name:- log_msg_transfer_complete
 Type:- BOOL
@@ -149,7 +141,7 @@ Description:- Log operator confirmation transfer is complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::15
 --------------------------------------------------
 Name:- log_time_hpca_begin
 Type:- BOOL
@@ -157,7 +149,7 @@ Description:- Flags the HMI that HPCA started
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::16
 --------------------------------------------------
 Name:- log_time_fill_begin
 Type:- BOOL
@@ -165,7 +157,7 @@ Description:- Flags the HMI that Sy Fill operation started
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::17
 --------------------------------------------------
 Name:- time_fill_begin
 Type:- TOD
@@ -173,7 +165,7 @@ Description:- Logging Sy Fill operation start time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::18
 --------------------------------------------------
 Name:- log_time_fill_end
 Type:- BOOL
@@ -181,7 +173,7 @@ Description:- Flags the HMI that Sy Fill operation ended
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::19
 --------------------------------------------------
 Name:- time_fill_end
 Type:- TOD
@@ -189,7 +181,7 @@ Description:- Logging Sy Fill operation end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::20
 --------------------------------------------------
 Name:- fill_proceed
 Type:- BOOL
@@ -197,7 +189,7 @@ Description:- Parent synchronisation flag to proceed with filling operation
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::21
 --------------------------------------------------
 Name:- prompt_transfer_complete
 Type:- BOOL
@@ -205,7 +197,7 @@ Description:- Prompt operator to confirm when transfer is complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::22
 --------------------------------------------------
 Name:- prompt_reset_button_confirm_no
 Type:- BOOL
@@ -213,7 +205,7 @@ Description:- Operator confirmed to ABORT filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::23
 --------------------------------------------------
 Name:- prompt_transfer_complete_confirm_yes
 Type:- BOOL
@@ -221,7 +213,7 @@ Description:- Operator confirmed completion
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::24
 --------------------------------------------------
 Name:- prompt_filter_bled_confirm_yes
 Type:- BOOL
@@ -229,7 +221,7 @@ Description:- Operator confirmed Filling machine filter has been bled.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::25
 --------------------------------------------------
 Name:- prompt_filter_bled
 Type:- BOOL
@@ -237,7 +229,7 @@ Description:- Prompt operator to confirm that filling machine sterile filter has
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::26
 --------------------------------------------------
 Name:- log_msg_fl_ready
 Type:- BOOL
@@ -245,7 +237,7 @@ Description:- Logging time operator confirmation Filling Line ready.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::27
 --------------------------------------------------
 Name:- log_msg_filter_bled
 Type:- BOOL
@@ -253,7 +245,7 @@ Description:- Logging time operator confirmed filter has been bled.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::29
+PARAMETER::28
 --------------------------------------------------
 Name:- prompt_reset_button_confirm_yes
 Type:- BOOL
@@ -261,7 +253,7 @@ Description:- Operator confirmed to RESUME filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::29
 --------------------------------------------------
 Name:- prompt_reset_button
 Type:- BOOL
@@ -269,7 +261,7 @@ Description:- Prompt operator to RESET Filling Paused button else ABORT the sequ
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::31
+PARAMETER::30
 --------------------------------------------------
 Name:- prompt_start_filling
 Type:- BOOL
@@ -277,7 +269,7 @@ Description:- Prompt operator to confirm to start Filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::31
 --------------------------------------------------
 Name:- prompt_start_filling_confirm_yes
 Type:- BOOL
@@ -285,7 +277,7 @@ Description:- Operator confirms to Start Filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::32
 --------------------------------------------------
 Name:- log_msg_confirm_start_filling
 Type:- BOOL
@@ -293,7 +285,7 @@ Description:- Logging operator confirmation to start filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::33
 --------------------------------------------------
 Name:- time_hpca_begin
 Type:- TOD
@@ -301,7 +293,7 @@ Description:- Logging HPCA begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::34
 --------------------------------------------------
 Name:- time_filling_start
 Type:- TOD
@@ -309,7 +301,7 @@ Description:- Logging FILL begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::35
 --------------------------------------------------
 Name:- prompt_fl_ready_confirm_yes
 Type:- BOOL
@@ -317,7 +309,7 @@ Description:- Operator confirms Filling Line is ready
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::36
 --------------------------------------------------
 Name:- prompt_fl_ready
 Type:- BOOL
@@ -325,7 +317,7 @@ Description:- Prompt operator when Filling Line is ready
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::37
 --------------------------------------------------
 Name:- pause_button
 Type:- BOOL
@@ -333,7 +325,7 @@ Description:- Filling Pause Button
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::38
 --------------------------------------------------
 Name:- emc_gas_medium
 Type:- INT
@@ -341,7 +333,7 @@ Description:- emc_gas_medium
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::39
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -349,7 +341,7 @@ Description:- emc_gas_setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::40
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -357,7 +349,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::41
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -365,7 +357,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::43
+PARAMETER::42
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -373,31 +365,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::44
---------------------------------------------------
-Name:- ema_vessel_state
-Type:- INT
-Description:- Device State of ema_vessel
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::45
---------------------------------------------------
-Name:- ema_vessel_subs
-Type:- INT
-Description:- Substate selection to ema_vessel
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::46
---------------------------------------------------
-Name:- ema_vessel_cmd
-Type:- INT
-Description:- Command to ema_vessel
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::47
+PARAMETER::43
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -405,7 +373,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::44
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -413,7 +381,7 @@ Description:- Command to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::45
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -421,7 +389,7 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::46
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -429,7 +397,7 @@ Description:- Device State of emx_transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::47
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -437,7 +405,7 @@ Description:- Substate selection to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::48
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -445,7 +413,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::49
 --------------------------------------------------
 Name:- pres_hpca_fill
 Type:- REAL
@@ -453,7 +421,7 @@ Description:- HPCA setpoint for filling after filter has been bled
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::54
+PARAMETER::50
 --------------------------------------------------
 Name:- path_ready
 Type:- BOOL
@@ -496,14 +464,9 @@ T #_emc_gas_cmd;
 
 //Set all Sy equipment to safe state.
 L "dbCONST".BLK.CMD.STOP;
-T  #_ema_vessel_cmd;
+T  #_emc_water_sy_cmd;
 L "dbCONST".BLK.SAFE.CMD;
-T  #_ema_vessel_subs;
-
-L "dbCONST".BLK.CMD.STOP;
-T  #_emc_water_cmd;
-L "dbCONST".BLK.SAFE.CMD;
-T  #_emc_water_subs;
+T  #_emc_water_sy_subs;
 
 L "dbCONST".BLK.CMD.STOP;
 T  #_emv_vessel_cmd;
@@ -526,12 +489,7 @@ L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ==I;
 );
 A(;
-L #_emc_water_state;
-L "dbCONST".BLK.STATE.STOPPED;
-==I;
-);
-A(;
-L #_ema_vessel_state;
+L #_emc_water_sy_state;
 L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
@@ -951,11 +909,6 @@ Action:- // Set remaining Sy equipment to SAFE state.
 
 //Stop FILTER.
 L "dbCONST".BLK.SAFE.CMD;
-T #_emx_mmfl_subs;
-L "dbCONST".BLK.CMD.STOP;
-T #_emx_mmfl_cmd;
-
-L "dbCONST".BLK.SAFE.CMD;
 T #_emx_transfer_subs;
 L "dbCONST".BLK.CMD.STOP;
 T #_emx_transfer_cmd;
@@ -973,11 +926,6 @@ T #_emv_vessel_cmd;
 
 Verification:- A(;
 L #_emc_gas_state;
-L "dbCONST".BLK.STATE.STOPPED;
-==I;
-);
-A(;
-L #_emx_mmfl_state;
 L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );

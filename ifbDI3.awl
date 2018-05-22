@@ -1,0 +1,67 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Class:       ifbDI3                                                        //
+// Description: Instances of DI3                                              //
+//                                                                            //
+// General alarm input using software only. No field I/O.                     //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      17-Apr-2018 NA        Initial design from DI1.        //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbDI3"
+TITLE = Instances of DI3 software alarm
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifbDI3
+VERSION : 1.0
+
+//----------------------------------------------------------------------------//
+// Declare the instance objects of the class:                                 //
+//----------------------------------------------------------------------------//
+VAR
+@@TEMPLATE_BEGIN@@
+    @@INSTANCE@@ : "fbDI3";  // @@DESCRIPTION@@
+@@TEMPLATE_END@@
+END_VAR
+
+BEGIN
+@@TEMPLATE_BEGIN|createInstances@@
+NETWORK
+TITLE = @@INSTANCE@@ : Unique ID
+    //------------------------------------------------------------------------//
+    // Set the instance unique ID:                                            //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ID.@@INSTANCE@@;
+    T #@@INSTANCE@@.mc.ME;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Owner
+    //------------------------------------------------------------------------//
+    // Set the instance owner:                                                //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ID.@@PARENT@@;
+    T #@@INSTANCE@@.mc.OWNER;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command on restart
+    //------------------------------------------------------------------------//
+    // Set the safe command if restarting the PLC:                            //
+    //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    JCN _notRestart_@@COUNTER|1@@;
+    L "dbCONST".BLK.DI3.SAFE.CMD;
+    T #@@INSTANCE@@.mc.CMD_SAFE;
+_notRestart_@@COUNTER@@:   NOP 0;
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process the instance:                       //
+    //------------------------------------------------------------------------//
+    CALL #@@INSTANCE@@;
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

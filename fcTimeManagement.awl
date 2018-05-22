@@ -1,4 +1,4 @@
-FUNCTION "fcTimeManagement" : Int
+FUNCTION "fcTimeManagement" : Void
 TITLE = TIME MANAGEMENT
 { S7_Optimized_Access := 'TRUE' }
 NAME : BYT_INT
@@ -11,6 +11,7 @@ VERSION : 0.1
    END_VAR
 
    VAR_OUTPUT
+      Ret_Val : Int;
       CPU_TIME : Time_Of_Day;
       CPU_DATE : Date;
       WEEKDAY : Int;
@@ -45,7 +46,7 @@ Label_0:      A BR;
       CALL WR_SYS_T
       {date_type := 'Date_And_Time'}
       (  IN                          := #DAT_TIM ,
-         RET_VAL                     := #fcTimeManagement
+         RET_VAL                     := #Ret_Val
       );
 Label_1:      NOP 0;
 NETWORK
@@ -79,19 +80,4 @@ TITLE = EXTRAXT DATE
          OUT                         := #CPU_DATE
       );
 Label_4:      NOP 0;
-NETWORK
-TITLE = EXTRACT DAY OF THE WEEK AS INTEGER
-// 1 = Sunday
-// 2 = Monday
-// 3 = Tuesday
-// 4 = Wednesday
-// 5 = Thursday
-// 6 = Friday
-// 7 = Saturday
-      CALL T_CONV
-      {src_type := 'Date_And_Time', dest_type := 'Int'}
-      (  IN                          := #DAT_TIM ,
-         OUT                         := #WEEKDAY
-      );
-      NOP 0;
 END_FUNCTION

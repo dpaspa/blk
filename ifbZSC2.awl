@@ -34,7 +34,7 @@ VAR
 END_VAR
 
 BEGIN
-@@TEMPLATE_BEGIN@@
+@@TEMPLATE_BEGIN|createInstances@@
 NETWORK
 TITLE = @@INSTANCE@@ : Unique ID
     //------------------------------------------------------------------------//
@@ -52,12 +52,15 @@ TITLE = @@INSTANCE@@ : Owner
     T #@@INSTANCE@@.mc.OWNER;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Safe Command
+TITLE = @@INSTANCE@@ : Safe Command on restart
     //------------------------------------------------------------------------//
-    // Set the safe command:                                                  //
+    // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    JCN _notRestart_@@COUNTER|1@@;
     L "dbCONST".BLK.ZSC2.SAFE.CMD;
     T #@@INSTANCE@@.mc.CMD_SAFE;
+_notRestart_@@COUNTER@@:   NOP 0;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@

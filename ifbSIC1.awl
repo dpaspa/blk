@@ -63,7 +63,7 @@ VAR
 END_VAR
 
 BEGIN
-@@TEMPLATE_BEGIN@@
+@@TEMPLATE_BEGIN|createInstances@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
@@ -107,12 +107,15 @@ TITLE = @@INSTANCE@@ : Owner
     T #@@INSTANCE@@.mc.OWNER;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Safe Command
+TITLE = @@INSTANCE@@ : Safe Command on restart
     //------------------------------------------------------------------------//
-    // Set the safe command:                                                  //
+    // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    JCN _notRestart_@@COUNTER|1@@;
     L "dbCONST".BLK.SIC1.SAFE.CMD;
     T #@@INSTANCE@@.mc.CMD_SAFE;
+_notRestart_@@COUNTER@@:   NOP 0;
 
 NETWORK
 TITLE = @@INSTANCE@@ : Signal polarity
@@ -158,6 +161,8 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
         TD                   := #@@INSTANCE@@.TD ,
         CYCLE                := #@@INSTANCE@@.CYCLE ,
         OUT_Q                := "@@INSTANCE@@-CMD" ,
+        _PV                  := #@@INSTANCE@@._PV ,
+        RUNNING              := #@@INSTANCE@@.RUNNING ,
         OUT_Q_F              := "@@INSTANCE@@-OUT_F" ,
         OUT_Q_R              := "@@INSTANCE@@-OUT_R" ,
         LMN                  := "@@INSTANCE@@-OUT" ,

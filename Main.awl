@@ -11,6 +11,7 @@
 // 2.0 David Paspa      09-Feb-2018 NA        Reboot for S7-1500.             //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
+@@TEMPLATE_BEGIN@@
 ORGANIZATION_BLOCK "Main"
 TITLE =  "Main Program Sweep (Cycle)"
 { S7_Optimized_Access := 'TRUE' }
@@ -69,7 +70,6 @@ TITLE = load OB1 maximum cycle time into DB memory
     T "timeOBMax";
 notMaximum:      NOP 0;
 
-@@TEMPLATE_BEGIN@@
 @@ATTR_BEGIN|callListExistsCRIL@@
 NETWORK
 TITLE = Calling all Critical Interlocks
@@ -89,7 +89,6 @@ TITLE = Calling all Non Critical Interlocks
     CALL "ifbNCRIL", "idbNCRIL";
     NOP 0;
 @@ATTR_END|callListExistsNCRIL@@
-@@TEMPLATE_END@@
 
 NETWORK
 TITLE = Calling all Control Modules (CM)
@@ -128,59 +127,60 @@ TITLE = Calling all Process Cells (PC)
     NOP 0;
 
 NETWORK
-TITLE = Calling all process message events
+TITLE = Calling all SFC operator prompts
     //------------------------------------------------------------------------//
     // Call the message function to interface the PLC to the HMI. Messages    //
     // have prompt and confirm handshake:                                     //
     //------------------------------------------------------------------------//
-    CALL "fcEventProcess";
-    NOP 0;
+    CALL "ifbEventPrompt", "idbEventPrompt"
+    (   eventPrompt          := "dbEVENTPrompt".eventPrompt
+    );
 
-NETWORK
-TITLE = Calling all sequence message events
+//NETWORK
+//TITLE = Calling all sequence message events
     //------------------------------------------------------------------------//
     // Call the message function to interface the PLC to the HMI. Messages    //
     // have prompt and confirm handshake:                                     //
     //------------------------------------------------------------------------//
-    CALL "fcEventSequence";
-    NOP 0;
+//    CALL "fcEventSequence";
+//    NOP 0;
 
-NETWORK
-TITLE = Calling all HMI Alarms
+//NETWORK
+//TITLE = Calling all HMI Alarms
     //------------------------------------------------------------------------//
     // Call the alarm function to interface the PLC to the HMI:               //
     //------------------------------------------------------------------------//
-    CALL "fcHMIAlarms";
-    NOP 0;
+//    CALL "fcHMIAlarms";
+//    NOP 0;
 
 NETWORK
 TITLE = HMI Sequence animation and control
     //------------------------------------------------------------------------//
     // Call the sequence control function for the HMI sequence interface:     //
     //------------------------------------------------------------------------//
-    CALL "fcHMISFCControl";
+    CALL "ifcHMISFCControl";
     NOP 0;
 
-NETWORK
-TITLE = HMI DATA LOG FOR THE REPORT WITH ACK IN DB8
-      CALL "fcBatch_Report";
-      NOP 0;
+//NETWORK
+//TITLE = HMI DATA LOG FOR THE REPORT WITH ACK IN DB8
+//      CALL "fcBatch_Report";
+//      NOP 0;
 
-NETWORK
-TITLE = Get PLC CPU LED states
+//NETWORK
+//TITLE = Get PLC CPU LED states
     //------------------------------------------------------------------------//
     // Get the PLC health information for the CPU:                            //
     //------------------------------------------------------------------------//
-    CALL "fcLEDState";
-    NOP 0;
+ //   CALL "fcLEDState";
+//    NOP 0;
 
-NETWORK
-TITLE = Time Sync from Batch PC
+//NETWORK
+//TITLE = Time Sync from Batch PC
     //------------------------------------------------------------------------//
     // Synchronise the PLC CPU time with the master time keeper from the PC:  //
     //------------------------------------------------------------------------//
-    CALL "fbTimeSyncPLC";
-    NOP 0;
+//    CALL "fbTimeSyncPLC";
+//    NOP 0;
 
 NETWORK
 TITLE = Initialise All Modes
@@ -191,4 +191,5 @@ TITLE = Initialise All Modes
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
     R "flagFirstScanRestart";
+@@TEMPLATE_END@@
 END_ORGANIZATION_BLOCK

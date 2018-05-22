@@ -26,6 +26,17 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
+VAR_OUTPUT
+    _PV : Real;              // The measured process value
+    STATE : Int;             // The state of the module
+    DQ : Bool;               // The quality of the measurement
+    INTERLOCK : Bool;        // Interlock flag
+    ALARM_LL : Bool;         // Low low alarm is active if true
+    ALARM_L : Bool;          // Low alarm is active if true
+    ALARM_H : Bool;          // High alarm is active if true
+    ALARM_HH : Bool;         // High high alarm is active if true
+END_VAR
+
 VAR
     mc : "udtModeCommand";   // Block mode and command
     ai : "udtAnalog";        // Analog input structure
@@ -56,4 +67,26 @@ TITLE = Call Analog Input handling function
     CALL "fcAnalog"
     (   ai                   := #ai
     );
+
+NETWORK
+TITLE = Promote the analog input attributes
+    //------------------------------------------------------------------------//
+    // Promote the analog input attributes to module level:                   //
+    //------------------------------------------------------------------------//
+    L #ai.PV;
+    T #_PV;
+    L #ai.STATE;
+    T #STATE;
+    A #ai.DQ;
+    = #DQ;
+    A #ai.INTERLOCK;
+    = #INTERLOCK;
+    A #ai.ALARM_LL;
+    = #ALARM_LL;
+    A #ai.ALARM_L;
+    = #ALARM_L;
+    A #ai.ALARM_H;
+    = #ALARM_H;
+    A #ai.ALARM_HH;
+    = #ALARM_HH;
 END_FUNCTION_BLOCK

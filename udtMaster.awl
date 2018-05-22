@@ -24,6 +24,7 @@ VERSION : 1.0
     STRUCT
         ME : Int;                      // Unique ID of the block instance
         OWNER : Int;                   // Value to be set or reset by Parent
+        RECIPE : Int;                  // Recipe ID of owning Process Cell
         SERIALNUM : Int;               // Unique batch or CIPSIP serial number
         isBatch : Bool;
         MODE : Int;                    // Select auto mode by default
@@ -34,6 +35,7 @@ VERSION : 1.0
         CRIL : Bool;                   // Critical Interlock that cannot be bypased.
         NCRIL : Bool;                  // Non-Critical Interlock that can be manually bypassed.
         MAN_OVERRIDE : Bool;           // Manual override to bypass NCRIL
+        SUBS : Int;                    // Selected substate for Block level modules
         isAvailable : Bool;            // True if blok has no owner
         modeAUTO : Bool;
         modeMANUAL : Bool;
@@ -50,7 +52,7 @@ VERSION : 1.0
         eventModeOOS : Bool;
         eventCmdStart : Bool;
         eventCmdStop : Bool;
-        SUBSelected : Int;             // Selected substate
+        SUBS : Int;                    // Selected substate for Block level modules
         SUBLast : Int;
         CHILD_FAIL : Bool;
         BAD_PARAM : Bool;
@@ -85,7 +87,7 @@ TYPE "udtParameter"
 VERSION : 1.0
     STRUCT
         parameterDataType : Int;       // Parameter primitive data type
-        parameterValue : Variant;
+        parameterValue : Bool;
     END_STRUCT;
 END_TYPE
 
@@ -168,7 +170,7 @@ VERSION : 0.1
     END_STRUCT;
 END_TYPE
 
-TYPE "udtEventLogMessage"
+TYPE "udtEventLogMsg"
 VERSION : 0.1
     STRUCT
         trigger : Bool;

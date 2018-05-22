@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/05/2018 3:03:12 PM by David Paspa
+generated on 22/05/2018 2:27:57 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -110,29 +110,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::10
 --------------------------------------------------
-Name:- Report_End_Event
-Type:- BOOL
-Description:- WFI End event log for report
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::11
---------------------------------------------------
-Name:- Report_Start_Event
-Type:- BOOL
-Description:- WFI Valve open command and event for report log
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::12
---------------------------------------------------
 Name:- prompt_invalid_mass_confirm_yes
 Type:- BOOL
 Description:- Charge Target Value Invalid Operator comfirm try again
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::11
 --------------------------------------------------
 Name:- prompt_invalid_mass_confirm_no
 Type:- BOOL
@@ -140,7 +124,7 @@ Description:- Charge Target Value Invalid Operator comfirm abort
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::12
 --------------------------------------------------
 Name:- log_msg_invalid_mass
 Type:- BOOL
@@ -148,7 +132,7 @@ Description:- Mass Charge Valve Invalid message to operator
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::13
 --------------------------------------------------
 Name:- mass_final
 Type:- REAL
@@ -156,7 +140,7 @@ Description:- mass_final
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::14
 --------------------------------------------------
 Name:- mi_vessel_pv
 Type:- REAL
@@ -164,7 +148,7 @@ Description:- Mass from field EMM1
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::15
 --------------------------------------------------
 Name:- mass_ready
 Type:- BOOL
@@ -172,7 +156,7 @@ Description:- An accurate mass reading is available
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::16
 --------------------------------------------------
 Name:- pos_wfi_state
 Type:- INT
@@ -180,7 +164,7 @@ Description:- WFI supply valve state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::17
 --------------------------------------------------
 Name:- pos_pw_state
 Type:- INT
@@ -188,7 +172,7 @@ Description:- PW supply valve state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::18
 --------------------------------------------------
 Name:- pos_pspw_state
 Type:- INT
@@ -196,7 +180,7 @@ Description:- PS supply for PW loop valve state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::19
 --------------------------------------------------
 Name:- pos_pswfi_state
 Type:- INT
@@ -204,7 +188,7 @@ Description:- PS supply for WFI loop valve state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::20
 --------------------------------------------------
 Name:- pos_pswfi_cmd
 Type:- INT
@@ -212,7 +196,7 @@ Description:- PS supply for WFI loop valve cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::21
 --------------------------------------------------
 Name:- pos_pspw_cmd
 Type:- INT
@@ -220,7 +204,7 @@ Description:- PS supply for PW loop valve cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::22
 --------------------------------------------------
 Name:- pos_wfi_cmd
 Type:- INT
@@ -228,7 +212,7 @@ Description:- WFI supply valve cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::23
 --------------------------------------------------
 Name:- pos_pw_cmd
 Type:- INT
@@ -236,7 +220,7 @@ Description:- PW supply valve cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::24
 --------------------------------------------------
 Name:- prompt_filling_timeout_confirm_yes
 Type:- BOOL
@@ -244,7 +228,7 @@ Description:- confirm to try again
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::25
 --------------------------------------------------
 Name:- prompt_filling_timeout_confirm_no
 Type:- BOOL
@@ -252,7 +236,7 @@ Description:- confirm_abort
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::26
 --------------------------------------------------
 Name:- prompt_filling_timeout
 Type:- BOOL
@@ -260,7 +244,7 @@ Description:- prompt operator  to try again or abort
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::29
+PARAMETER::27
 --------------------------------------------------
 Name:- log_msg_filling_timeout
 Type:- BOOL
@@ -268,7 +252,7 @@ Description:- Raise timeout alarm message
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::28
 --------------------------------------------------
 Name:- timeout
 Type:- TIME
@@ -276,7 +260,7 @@ Description:- timeout
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::31
+PARAMETER::29
 --------------------------------------------------
 Name:- mass_actual
 Type:- REAL
@@ -284,7 +268,7 @@ Description:- mass_actual
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::30
 --------------------------------------------------
 Name:- mass_initial
 Type:- REAL
@@ -292,7 +276,7 @@ Description:- mass_initial
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::31
 --------------------------------------------------
 Name:- mass_charge
 Type:- REAL
@@ -300,11 +284,11 @@ Description:- mass charge
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::32
 --------------------------------------------------
-Name:- medium
+Name:- medium_liquid
 Type:- INT
-Description:- selected medium
+Description:- Selected medium PW, PSPW, WFI or PSWFI
 ParameterInOut:- IN
 
 
@@ -326,10 +310,6 @@ T #_time_charge_begin;
 SET;
 S #_log_time_charge_begin;
 
-//Reset report event for WFI Charge
-SET;
-R #_Report_End_Event;
-R #_Report_Start_Event;
 Verification:- A "uncondJump";
 
 
@@ -492,23 +472,23 @@ ACTION::01
 --------------------------------------------------
 Description:- Open WFI or PW supply valve. 
 Action:- //Enable flow path and Open selected WFI/PW valve
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.WFI;
 ==I;
 JC v021;
 
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSWFI;
 ==I;
 JC v022;
 
 
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PW;
 ==I;
 JC v023;
 
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSPW;
 ==I;
 JC v024;
@@ -539,14 +519,9 @@ T #_pos_pspw_cmd;
 JU en02;
 
 en02: NOP 0;
-
-
-//Log Report Start for WFI Charge
-SET;
-S #_Report_Start_Event;
 Verification:- //Verify state open of selected WFI/PW valve
 A(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.WFI;
 ==I;
 );
@@ -557,7 +532,7 @@ L #_pos_wfi_state;
 );
 O;
 A(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSWFI;
 ==I;
 );
@@ -568,7 +543,7 @@ L #_pos_pswfi_state;
 );
 O;
 A(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PW;
 ==I;
 );
@@ -579,7 +554,7 @@ L #_pos_pw_state;
 );
 O;
 A(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSPW;
 ==I;
 );
@@ -640,22 +615,22 @@ Description:- Close WFI or PW supply valve.
 Raise the timeout alarm message. Prompt operator to try again or abort.
 Action:- //Close selected WFI/PW valve
 
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.WFI;
 ==I;
 JC v041;
 
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSWFI;
 ==I;
 JC v042;
 
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PW;
 ==I;
 JC v043;
 
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSPW;
 ==I;
 JC v044;
@@ -693,7 +668,7 @@ S #_log_msg_filling_timeout;
 R #SQ_TIMER.IN;
 Verification:- //Verify state open of selected WFI/PW valve
 A(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.WFI;
 ==I;
 );
@@ -704,7 +679,7 @@ L #_pos_wfi_state;
 );
 O;
 A(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSWFI;
 ==I;
 );
@@ -715,7 +690,7 @@ L #_pos_pswfi_state;
 );
 O;
 A(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PW;
 ==I;
 );
@@ -726,7 +701,7 @@ L #_pos_pw_state;
 );
 O;
 A(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSPW;
 ==I;
 );
@@ -931,13 +906,6 @@ T #_time_charge_end;
 SET;
 S #_log_time_charge_end;
 R #SQ_TIMER.IN;
-
-//Log Report End for WFI Charge
-SET;
-S #_Report_End_Event;
-
-SET;
-R #_Report_Start_Event;
 Verification:- A "uncondJump";
 
 ****************************************************************************************************

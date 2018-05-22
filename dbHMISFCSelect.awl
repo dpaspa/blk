@@ -1,0 +1,49 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable HMI interface data for sequence    //
+// selection and control by the operator on the HMI.                          //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      29-Mar-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+DATA_BLOCK "dbHMISFCSelect"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 2.0
+
+STRUCT
+    HMI_SEQ_DONE_SA : Int;
+    HMI_SEQ_WITHERROR_SA : Int;
+    HMI_SEQ_LENGTH : Int;
+    HMI_SEQ_SA : Int;
+    HMI_Common_Buffer_OFFSET : Int;
+    HMI_Common_SEQ_DATA : "udtHMISequence";
+    HMI_TextField_Anim : Array[1..10] of Int;
+    HMI_TextField_Anim_SA : Int;
+    HMI_Common_Buffer : Array[1..104] of Int;
+    HMI_Common_Buffer_SA : Int;
+@@TEMPLATE_BEGIN@@
+@@ATTR_BEGIN|INSTANCE_SFC@@
+    @@INSTANCE@@_@@SFC@@ : Array[1..104] of Int;
+    @@INSTANCE@@_@@SFC@@_SA : Int;
+@@ATTR_END|INSTANCE_SFC@@
+@@TEMPLATE_END@@
+END_STRUCT;
+
+BEGIN
+    HMI_SEQ_DONE_SA := 22;
+    HMI_SEQ_WITHERROR_SA := 36;
+    HMI_SEQ_LENGTH := 104;
+    HMI_TextField_Anim_SA := 50;
+    HMI_Common_Buffer_SA := 72;
+@@TEMPLATE_BEGIN@@
+@@ATTR_BEGIN|INSTANCE_SFC@@
+    @@INSTANCE@@_@@SFC@@_SA :=  282; // Increment by 210
+@@ATTR_END|INSTANCE_SFC@@
+@@TEMPLATE_END@@
+
+END_DATA_BLOCK

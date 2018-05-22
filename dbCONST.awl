@@ -38,10 +38,12 @@ STRUCT
     END_STRUCT ;
     SEL : STRUCT                       // Selection structures
         FLZ : STRUCT
+            NONE : INT  := 0;
             FL1 : INT  := 1;
             FL2 : INT  := 2;
         END_STRUCT ;
         GAS : STRUCT
+            NONE : INT  := 0;
             HPCA : INT  := 1;
             LPCA : INT  := 2;
             VENT : INT  := 3;
@@ -49,20 +51,19 @@ STRUCT
             DRAIN : INT  := 5;
         END_STRUCT ;
         LIQUID : STRUCT
+            NONE : INT  := 0;
             WFI : INT  := 1;
             PW : INT  := 2;
             PSWFI : INT  := 3;
             PSPW : INT  := 4;
         END_STRUCT ;
         MX : STRUCT
+            NONE : INT  := 0;
             M1 : INT  := 1;
             M2 : INT  := 2;
         END_STRUCT ;
-        SMFLX : STRUCT
-            SMFL1 : INT  := 1;
-            SMFL2 : INT  := 2;
-        END_STRUCT ;
         SY : STRUCT
+            NONE : INT  := 0;
             S1 : INT  := 1;
             S2 : INT  := 2;
         END_STRUCT ;
@@ -138,7 +139,7 @@ STRUCT
                 FAULT : INT  := 2;
             END_STRUCT ;
         END_STRUCT ;
-        DI1 : STRUCT                   // General Alarm Signal digital input
+        DI1 : STRUCT                   // Alarm digital input Normally ON
             CMD : STRUCT
                 ENABLE : INT  := 1;    // Always Enabled
             END_STRUCT ;
@@ -150,7 +151,19 @@ STRUCT
                 ALARM : INT  := 2;
             END_STRUCT ;
         END_STRUCT ;
-        DI2 : STRUCT                   // General Alarm Signal software input
+        DI2 : STRUCT                   // Alarm digital input Normally OFF
+            CMD : STRUCT
+                ENABLE : INT  := 1;    // Always Enabled
+            END_STRUCT ;
+            SAFE : STRUCT
+                CMD : INT  := 1;       // Class safe command
+            END_STRUCT ;
+            STATE : STRUCT
+                ENABLED : INT  := 1;
+                ALARM : INT  := 2;
+            END_STRUCT ;
+        END_STRUCT ;
+        DI3 : STRUCT                   // Software alarm signal
             CMD : STRUCT
                 ENABLE : INT  := 1;    // Always Enabled
             END_STRUCT ;

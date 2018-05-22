@@ -1,0 +1,35 @@
+@@TEMPLATE_BEGIN@@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable event flags for logging real data. //
+// Events are indexed as follows:                                             //
+@@ATTR_BEGIN|pEventLogRealList@@
+// @@IDXEVENT@@   @@PARAMETERSOURCE@@   @@CHILDPARAMETER@@   @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pEventLogRealList@@
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      14-May-2018 NA        Initial design for S7-1500.     //
+//----------------------------------------------------------------------------//
+DATA_BLOCK "dbEVENTLogReal"
+TITLE = Global process log real data events
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : dbEVENTLogReal
+VERSION : 1.0
+
+STRUCT
+@@ATTR_BEGIN|pEventLogRealNum@@
+    eventLogReal : Array[0..@@IDXEVENTMAX@@] of "udtEventLogReal";
+@@ATTR_END|pEventLogRealNum@@
+END_STRUCT;
+
+BEGIN
+@@ATTR_BEGIN|pEventLogRealList@@
+    eventLogReal[@@IDXEVENT@@].idxMessage := @@IDXEVENT@@;
+@@ATTR_END|pEventLogRealList@@
+@@TEMPLATE_END@@
+END_DATA_BLOCK

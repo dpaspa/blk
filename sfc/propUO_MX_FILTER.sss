@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/05/2018 3:05:25 PM by David Paspa
+generated on 22/05/2018 2:25:25 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -29,13 +29,37 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- emt_hex_setpoint
+Type:- REAL
+Description:- Heat exchanger temperature controller temperature setpoint
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- vessel_mx
+Type:- INT
+Description:- Manufacturing vessel selection M1 or M2
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- vessel_sy
+Type:- INT
+Description:- Storage vessel selection S1 or S2
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
 Name:- log_msg_temperature_abort
 Type:- BOOL
 Description:- Operation aborted due to HiHi temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::5
 --------------------------------------------------
 Name:- log_msg_hihi_temperature
 Type:- BOOL
@@ -43,7 +67,7 @@ Description:- HMI message: Vessel temperature reached High High setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::6
 --------------------------------------------------
 Name:- mass_expect_reduced
 Type:- REAL
@@ -51,15 +75,15 @@ Description:- Expected Mass value to be reduced
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::7
 --------------------------------------------------
-Name:- ti_vessel_pv
+Name:- emv_vessel_pv
 Type:- REAL
 Description:- Mx temperature indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::8
 --------------------------------------------------
 Name:- temp_limit_h
 Type:- REAL
@@ -67,7 +91,7 @@ Description:- Vessel temperature High limit setpoint
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::9
 --------------------------------------------------
 Name:- temp_limit_hh
 Type:- REAL
@@ -75,7 +99,7 @@ Description:- Vessel temperature High High limit setpoint
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::10
 --------------------------------------------------
 Name:- vessel_mass_alarm
 Type:- BOOL
@@ -83,7 +107,7 @@ Description:- Internal vessel mass alarm flag
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::11
 --------------------------------------------------
 Name:- hi_temperature_alarm
 Type:- BOOL
@@ -91,7 +115,7 @@ Description:- Internal vessel temperature alarm flag
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::12
 --------------------------------------------------
 Name:- FL_TIMER
 Type:- "TON"
@@ -99,15 +123,15 @@ Description:- Timer for TIME_FILTER
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::13
 --------------------------------------------------
-Name:- time_mass_reduce
+Name:- set_time_mass_reduce
 Type:- TIME
 Description:- Time for mass reduce
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::14
 --------------------------------------------------
 Name:- mass_initial
 Type:- REAL
@@ -115,7 +139,7 @@ Description:- Initial Mx vessel mass
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::15
 --------------------------------------------------
 Name:- log_msg_vessel_mass
 Type:- BOOL
@@ -123,7 +147,7 @@ Description:- HMI message: Vessel mass not reduced enough in spec. time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::16
 --------------------------------------------------
 Name:- log_msg_hi_temperature
 Type:- BOOL
@@ -131,7 +155,7 @@ Description:- HMI message: Vessel temperature reached High setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::17
 --------------------------------------------------
 Name:- log_time_filtration_end
 Type:- BOOL
@@ -139,7 +163,7 @@ Description:- Flags the HMI that filtration operation ended
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::18
 --------------------------------------------------
 Name:- time_filter_end
 Type:- TIME
@@ -147,7 +171,7 @@ Description:- Flags the HMI that Mx filter operation ended
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::19
 --------------------------------------------------
 Name:- log_time_filter_end
 Type:- BOOL
@@ -155,7 +179,7 @@ Description:- Logging Mx filter operation end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::20
 --------------------------------------------------
 Name:- time_filter_begin
 Type:- TIME
@@ -163,7 +187,7 @@ Description:- Logging Mx filter operation start time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::21
 --------------------------------------------------
 Name:- log_time_filter_begin
 Type:- BOOL
@@ -171,15 +195,15 @@ Description:- Flags the HMI that Mx filter started
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::22
 --------------------------------------------------
-Name:- mi_vessel_pv
+Name:- emm_vessel_pv
 Type:- REAL
 Description:- Mx mass indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::23
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -187,7 +211,7 @@ Description:- Substate selection of emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::24
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -195,7 +219,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::25
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -203,7 +227,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::26
 --------------------------------------------------
 Name:- emt_hex_subs
 Type:- INT
@@ -211,7 +235,7 @@ Description:- Substate selection of emt_hex
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::27
 --------------------------------------------------
 Name:- emt_hex_state
 Type:- INT
@@ -219,7 +243,7 @@ Description:- Device State of emt_hex
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::28
 --------------------------------------------------
 Name:- emt_hex_cmd
 Type:- INT
@@ -227,7 +251,7 @@ Description:- Command to emt_hex
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::29
 --------------------------------------------------
 Name:- prompt_filtration
 Type:- BOOL
@@ -235,7 +259,7 @@ Description:- Prompt operator to start filtration
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::30
 --------------------------------------------------
 Name:- prompt_filtration_confirm_yes
 Type:- BOOL
@@ -243,16 +267,7 @@ Description:- operator confirms to start filtration
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::28
---------------------------------------------------
-Name:- tc_hex_setpoint
-Type:- REAL
-Description:- Heat exchanger temperature setpoint
-
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::29
+PARAMETER::31
 --------------------------------------------------
 Name:- temp_filt
 Type:- REAL
@@ -260,15 +275,7 @@ Description:- Filter temperature setpoint
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::30
---------------------------------------------------
-Name:- tc_hex_cmd
-Type:- INT
-Description:- Heat exchanger temperature controller cmd
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::31
+PARAMETER::32
 --------------------------------------------------
 Name:- emx_smfl_state
 Type:- INT
@@ -276,7 +283,7 @@ Description:- Device State of emx_smfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::33
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -284,7 +291,7 @@ Description:- Device State of emx_transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::34
 --------------------------------------------------
 Name:- emx_smfl_cmd
 Type:- INT
@@ -292,7 +299,7 @@ Description:- Command to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::35
 --------------------------------------------------
 Name:- emx_smfl_subs
 Type:- INT
@@ -300,7 +307,7 @@ Description:- Substate selection of emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::36
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -308,7 +315,7 @@ Description:- Command to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::37
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -316,7 +323,7 @@ Description:- Substate selection of emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::38
 --------------------------------------------------
 Name:- log_msg_filtration_complete
 Type:- BOOL
@@ -324,7 +331,7 @@ Description:- Logging operator confirmation transfer complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::39
 --------------------------------------------------
 Name:- confirm_complete
 Type:- BOOL
@@ -332,23 +339,23 @@ Description:- Operator confirms filtration is complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::40
 --------------------------------------------------
-Name:- mass_throttle_mx
+Name:- r_mass_throttle_mx
 Type:- REAL
 Description:- Mass nearing the end of transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::41
 --------------------------------------------------
-Name:- pres_hpca_filt2
+Name:- r_pres_hpca_filt2
 Type:- REAL
 Description:- HCPA Pressure control setpoint 2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::42
 --------------------------------------------------
 Name:- start_hpca
 Type:- BOOL
@@ -356,7 +363,7 @@ Description:- Synchronisation flag to start HPN2 supply
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::43
 --------------------------------------------------
 Name:- time_filtration_end
 Type:- TOD
@@ -364,7 +371,7 @@ Description:- Logging filtration operation end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::43
+PARAMETER::44
 --------------------------------------------------
 Name:- emx_mmfl_cmd
 Type:- INT
@@ -372,7 +379,7 @@ Description:- Command emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::44
+PARAMETER::45
 --------------------------------------------------
 Name:- emx_mmfl_subs
 Type:- INT
@@ -380,7 +387,7 @@ Description:- Substate selection of emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::46
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -388,7 +395,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::47
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -396,7 +403,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::48
 --------------------------------------------------
 Name:- emc_water_state
 Type:- INT
@@ -404,7 +411,7 @@ Description:- Device state of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::49
 --------------------------------------------------
 Name:- emc_water_subs
 Type:- INT
@@ -412,7 +419,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::50
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -420,7 +427,7 @@ Description:- emc_gas_setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::51
 --------------------------------------------------
 Name:- emx_mmfl_state
 Type:- INT
@@ -428,7 +435,7 @@ Description:- Device State of emx_mmfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::52
 --------------------------------------------------
 Name:- emc_water_cmd
 Type:- INT
@@ -436,7 +443,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::53
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -444,7 +451,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::54
 --------------------------------------------------
 Name:- emc_gas_medium
 Type:- INT
@@ -452,7 +459,7 @@ Description:- emc_gas_medium
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::54
+PARAMETER::55
 --------------------------------------------------
 Name:- ema_vessel_state
 Type:- INT
@@ -460,7 +467,7 @@ Description:- Device State of ema_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::55
+PARAMETER::56
 --------------------------------------------------
 Name:- ema_vessel_subs
 Type:- INT
@@ -468,7 +475,7 @@ Description:- Substate selection to ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::56
+PARAMETER::57
 --------------------------------------------------
 Name:- ema_vessel_cmd
 Type:- INT
@@ -476,7 +483,7 @@ Description:- ema_vessel_cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::57
+PARAMETER::58
 --------------------------------------------------
 Name:- ready_hpca
 Type:- BOOL
@@ -484,7 +491,7 @@ Description:- Synchronisation flag ready to start HPN2 supply
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::58
+PARAMETER::59
 --------------------------------------------------
 Name:- filtration_complete
 Type:- BOOL
@@ -492,9 +499,9 @@ Description:- Synchronisation flag to start transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::59
+PARAMETER::60
 --------------------------------------------------
-Name:- pres_hpca_filt
+Name:- r_pres_hpca_filt
 Type:- REAL
 Description:- HCPA Pressure control setpoint 1
 ParameterInOut:- IN
@@ -619,7 +626,7 @@ R #_vessel_mass_alarm;
 R #_hi_temperature_alarm;
 
 //Store current mass to initial mass.
-L     #_mi_vessel_pv;
+L     #_emm_vessel_pv;
 T     #_mass_initial; 
 
 //Start Timer for TIME_MASS_REDUCE .
@@ -628,7 +635,7 @@ R #_FL_TIMER.IN;
 
 AN #_FL_TIMER.Q;
 S #_FL_TIMER.IN;
-L #_time_mass_reduce;
+L #_set_time_mass_reduce;
 T #_FL_TIMER.PT;
 Verification:- A "uncondJump";
 
@@ -648,11 +655,8 @@ Open MMFLx and SMFLx transfer path to Sy. (FILTER & FILTER_BLEED)
 ACTION::01
 --------------------------------------------------
 Description:- Enable HEX Temperature control with TEMP_FILT setpoint.
-Action:- L  "dbCONST".BLK.TC1.CMD.ENABLE;
-T  #_tc_hex_cmd;
-
-L  #_temp_filt;
-T  #_tc_hex_setpoint;
+Action:- L  #_temp_filt;
+T  #_emt_hex_setpoint;
 
 //Start EMT_PREEMPT.
 L  "dbCONST".BLK.EMT1.SUBS.PREEMPT;
@@ -812,7 +816,7 @@ ACTION::01
 --------------------------------------------------
 Description:- HPCA pressure control at setpoint PRES_HPCA_FILT.
 Action:- // Enable Mx HPCA pressure control at setpoint PRES_HPCA_FILT.
-L  #_pres_hpca_filt;
+L  #_r_pres_hpca_filt;
 T  #_emc_gas_setpoint;
 L  "dbCONST".SEL.GAS.HPCA;
 T  #_emc_gas_medium;
@@ -835,7 +839,7 @@ Title:- Mx temperature exceeds HiHi limit setpoint
 EmptyTransition:- False
 Description:- Mx temperature exceeds HiHi limit setpoint
 Condition:- A(;
-L #_ti_vessel_pv;
+L #_emv_vessel_pv;
 L #_temp_limit_hh;
 >R;
 );
@@ -849,8 +853,8 @@ Title:- Mass of Vessel has reach throttled mass
 EmptyTransition:- False
 Description:- Jump if Mass_Throttle_Mx has reach set point.
 Condition:- A(;
-L #_mi_vessel_pv;
-L #_mass_throttle_mx;
+L #_emm_vessel_pv;
+L #_r_mass_throttle_mx;
 <=R;
 );
 
@@ -866,7 +870,7 @@ Condition:- A #_FL_TIMER.Q;
 AN #_vessel_mass_alarm;
 A(;
 L #_mass_initial;
-L #_mi_vessel_pv;
+L #_emm_vessel_pv;
 -R;
 L #_mass_expect_reduced;
 <R;
@@ -882,7 +886,7 @@ EmptyTransition:- False
 Description:- Mx temperature exceeds Hi limit setpoint
 Condition:- AN #_hi_temperature_alarm;
 A(;
-L #_ti_vessel_pv;
+L #_emv_vessel_pv;
 L #_temp_limit_h;
 >R;
 );
@@ -987,7 +991,7 @@ ACTION::01
 --------------------------------------------------
 Description:- HPCA pressure control at setpoint 2, PRES_HPCA_FILT2.
 Action:- // Set HPCA valve pressure control at setpoint 2
-L #_pres_hpca_filt2;
+L #_r_pres_hpca_filt2;
 T #_emc_gas_setpoint;
 
 
@@ -1053,10 +1057,7 @@ Close sterile filter outlet valve and path sequentially up to including Sy outle
 ACTION::01
 --------------------------------------------------
 Description:- Disable HEX temperature control, HPCA control and stop filter.
-Action:- L  "dbCONST".BLK.TC1.CMD.DISABLE;
-T  #_tc_hex_cmd;
-
-//Stop EMT_PREEMPT.
+Action:- //Stop EMT_PREEMPT.
 L "dbCONST".BLK.SAFE.CMD;
 T  #_emt_hex_subs;
 L "dbCONST".BLK.CMD.STOP;

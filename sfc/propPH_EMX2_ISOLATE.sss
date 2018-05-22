@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/05/2018 3:03:38 PM by David Paspa
+generated on 22/05/2018 2:28:24 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -73,7 +73,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- zsc_cipsip_state
+Name:- zsc_bfs1_state
 Type:- INT
 Description:- S1 to F1P1 flowpath indicator
 ParameterInOut:- IN
@@ -81,7 +81,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- zsc_filter_state
+Name:- zsc_smfl2_state
 Type:- INT
 Description:- VTL1 to M2 flowpath indicator
 ParameterInOut:- IN
@@ -202,7 +202,7 @@ Title:- Connections removed
 EmptyTransition:- False
 Description:- Jump if the connections is removed
 Condition:- A(    ;
-   L #_zsc_cipsip_state; 
+   L #_zsc_bfs1_state; 
    L "dbCONST".BLK.ZSC2.STATE.OUT;
       ==I ;  
     )     ;
@@ -212,7 +212,7 @@ A(    ;
       ==I ;  
     )     ;
 A(    ;
-   L #_zsc_filter_state; 
+   L #_zsc_smfl2_state; 
    L "dbCONST".BLK.ZSC2.STATE.OUT;
       ==I ;  
     )     ;

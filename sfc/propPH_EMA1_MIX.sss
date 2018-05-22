@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/05/2018 3:03:09 PM by David Paspa
+generated on 22/05/2018 2:27:54 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -44,7 +44,7 @@ PARAMETER::1
 --------------------------------------------------
 Name:- sic_agit_cmd
 Type:- INT
-Description:- Description
+Description:- Agitator command
 ParameterInOut:- OUT
 
 --------------------------------------------------
@@ -82,18 +82,18 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- Report_Evnt_End
-Type:- BOOL
-Description:- Make Mix End for batch report
-ParameterInOut:- VAR
+Name:- setpoint
+Type:- REAL
+Description:- Required agitator speed for mixing
+ParameterInOut:- IN
 
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- Report_Evnt_Start
-Type:- BOOL
-Description:- Make Mix Start for batch report
-ParameterInOut:- VAR
+Name:- sic_agit_setpoint
+Type:- REAL
+Description:- Agitator speed setpoint attribute
+ParameterInOut:- OUT
 
 --------------------------------------------------
 PARAMETER::8
@@ -162,7 +162,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::16
 --------------------------------------------------
-Name:- sic_agit_hist
+Name:- agit_hist
 Type:- INT
 Description:- Previous state of SIC 
 ParameterInOut:- VAR
@@ -197,7 +197,11 @@ ACTION::01
 --------------------------------------------------
 Description:- Log EMA1_MIX begin time.
 Initialise the run timer.
-Action:- //Log EMA1_MIX begin time.
+Action:- // Set the agitator speed setpoint
+L #_setpoint;
+T #_sic_agit_setpoint;
+
+//Log EMA1_MIX begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_time_mix_begin;
 
@@ -227,15 +231,7 @@ T #_sic_agit_cmd;
 
 //The  mixer is now be running. 
 L "dbCONST".BLK.SIC1.STATE.RUNNING;
-T #_sic_agit_hist;
-
-//Report Event Set
-SET;
-S #_Report_Evnt_Start;
-
-//Report Event Reset
-SET;
-R #_Report_Evnt_End;
+T #_agit_hist;
 Verification:- A "uncondJump";
 
 
@@ -287,7 +283,7 @@ Description:- SIC State Changed.
 SIC not running.
 Condition:- //Check whether the last SIC state is not equal to current state
 A(;
-L #_sic_agit_hist;
+L #_agit_hist;
 L #_sic_agit_state;
 <>I;
 );
@@ -309,7 +305,7 @@ Description:- SIC State Changed.
 SIC running.
 Condition:- //Check whether the last SIC state is not equal to current state
 A(;
-L #_sic_agit_hist;
+L #_agit_hist;
 L #_sic_agit_state;
 <>I;
 );
@@ -350,7 +346,7 @@ S #_agit_stopped;
 
 // Save the previous run or stopped state of the mixer
 L #_sic_agit_state;
-T #_sic_agit_hist;
+T #_agit_hist;
 Verification:- A "uncondJump";
 
 
@@ -383,7 +379,7 @@ R #_agit_stopped;
 
 // Save the previous state of the mixer
 L #_sic_agit_state;
-T #_sic_agit_hist;
+T #_agit_hist;
 Verification:- A "uncondJump";
 
 
@@ -424,7 +420,7 @@ Description:- Jump
 Condition:- //Proceed to next step if SIC has been disabled
 A(;
 L "dbCONST".BLK.SIC1.STATE.DISABLED;
-L #_sic_agit_hist;
+L #_agit_hist;
 ==I;
 );
 
@@ -446,7 +442,7 @@ Action:- A #_ResetRunTimer;
 =#sqRunTimer.RESET;
 //Store current SIC state.
 L #_sic_agit_state;
-T #_sic_agit_hist;
+T #_agit_hist;
 
 S #sqRunTimer.RESET;
 //Set timer ON delay.
@@ -458,14 +454,6 @@ R #sqRunTimer.ENABLE;
        M      :=#_AcumTimeM,
        S      :=#_AcumTimeS);
       NOP   0;
-
-//Report Event Set.
-SET;
-S #_Report_Evnt_End;
-
-//Report Event Reset.
-SET;
-R #_Report_Evnt_Start;
 
 //Log EMA1_MIX end time.
 L "dbCONST".CHRONO.CPU_TIME;

@@ -44,13 +44,13 @@ VAR_OUTPUT
 END_VAR
 
 VAR_IN_OUT
+    TI1_PV : Real;           // Measured Value from TI
     LMN : Real;              // PID controller output (0-100%)
 END_VAR
 
 VAR
     mc : "udtModeCommand";   // Block mode and command
     PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
-    PV : Real;               // Measured Process Value received from control module
     MAN_PID : Bool;          // Manual non pid selection
     GAIN : Real := 1.0;      // Proportional Gain
     TI : Time := T#20S;      // Integral Time
@@ -174,7 +174,7 @@ TITLE = PID Controller
         D_SEL                := #D_SEL ,
         CYCLE                := #CYCLE ,
         SP_INT               := #tSetpoint ,
-        PV_IN                := #PV ,
+        PV_IN                := #TI1_PV ,
         MAN                  := #tSetpoint ,
         GAIN                 := #GAIN ,
         TI                   := #TI ,

@@ -1,0 +1,148 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable event flags and data. The function //
+// traverses the event datablock UDT structures to see if any event bits have //
+// been raised. This is called each scan from the main program block OB1      //
+// which therefore takes care of the looping required.                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      16-May-2018 NA        Reboot design for S7-1500 not   //
+//                                            using ALARM_D etc.              //
+// 1.0 David Paspa      11-Apr-2018 NA        Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbEventPrompt"
+TITLE = Alarms for SFC operator prompts on the HMI
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifbEventPrompt
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+@@TEMPLATE_BEGIN@@
+VAR_IN_OUT
+@@ATTR_BEGIN|pEventPromptNum@@
+    eventPrompt : Array[0..@@IDXEVENTMAX@@] of "udtEventPrompt";   // SFC events for operator prompts
+@@ATTR_END|pEventPromptNum@@
+END_VAR
+
+VAR
+@@ATTR_BEGIN|pEventPromptList@@
+    Program_Alarm_@@IDXEVENT@@ : Program_Alarm;
+@@ATTR_END|pEventPromptList@@
+END_VAR
+
+VAR_TEMP
+    ackComplete : Bool;
+    almError : Bool;
+    almState : Byte;
+    almStatus : Word;
+    raiseEvent : Bool;
+END_VAR
+
+BEGIN
+@@ATTR_BEGIN|pEventPromptList@@
+NETWORK
+TITLE = Check if message event needs to be raised
+    //------------------------------------------------------------------------//
+    // Check if real message event or test signal number requested:           //
+    //------------------------------------------------------------------------//
+    A #eventPrompt[@@IDXEVENT@@].trigger;
+    O(;
+    L "testEventPrompt";
+    L #eventPrompt[@@IDXEVENT@@].idxMessage;
+    ==I;
+    );
+    = #raiseEvent;
+
+NETWORK
+TITLE = Clear response flags if message event needs to be raised
+    //------------------------------------------------------------------------//
+    // Clear the alarm request and response flags if raising a new event:     //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    JCN _evRaise_@@IDXEVENT@@;
+    R #eventPrompt[@@IDXEVENT@@].confirmYes;
+    R #eventPrompt[@@IDXEVENT@@].confirmNo;
+    R #eventPrompt[@@IDXEVENT@@].ackPending;
+_evRaise_@@IDXEVENT@@:   NOP 0;
+
+NETWORK
+TITLE = Raise message event without acknowledgement if required
+    //------------------------------------------------------------------------//
+    // Raise the simple message event if requested. No acknowledge required:  //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    JCN _evCall_@@IDXEVENT@@;
+    CALL #Program_Alarm_@@IDXEVENT@@
+    (   SIG       := #eventPrompt[@@IDXEVENT@@].trigger ,
+        Error     := #almError ,
+        Status    := #almStatus
+    );
+_evCall_@@IDXEVENT@@:   NOP 0;
+//        TIMESTAMP :=
+//        SD_1      :=
+
+NETWORK
+TITLE = Flag acknowledgement will be pending
+    //------------------------------------------------------------------------//
+    // Flag that an acknowledge event has been raised. In that case the       //
+    // acknowledgement response is pending. Raise the event next:             //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    R #eventPrompt[@@IDXEVENT@@].ackRequired;
+    JCN _evPending_@@IDXEVENT@@;
+    S #eventPrompt[@@IDXEVENT@@].ackPending;
+_evPending_@@IDXEVENT@@:   NOP 0;
+
+NETWORK
+TITLE = Get acknowledgement if pending
+    //------------------------------------------------------------------------//
+    // Get the acknowledgement response if it was still pending. Response is  //
+    // asynchronous and it may take a long time for the operator to attend to //
+    // the event message:                                                     //
+    //------------------------------------------------------------------------//
+    A #eventPrompt[@@IDXEVENT@@].ackPending;
+    JCN _ackNone_@@IDXEVENT@@;
+    CALL  Get_AlarmState
+    (   Alarm      := #Program_Alarm_@@IDXEVENT@@ ,
+        AlarmState := #almState ,
+        Error      := #almError ,
+        STATUS     := #almStatus
+    );
+_ackNone_@@IDXEVENT@@:   NOP 0;
+
+NETWORK
+TITLE = Flag acknowledge response received if so
+    //------------------------------------------------------------------------//
+    // Flag acknowledgement no longer pending if finally received:            //
+    //------------------------------------------------------------------------//
+    A #eventPrompt[@@IDXEVENT@@].ackPending;
+    A(;
+    L #almState;
+    L 0;
+    ==I;
+    );
+    = #ackComplete;
+    JCN _ackDone_@@IDXEVENT@@;
+    R #eventPrompt[@@IDXEVENT@@].ackPending;
+_ackDone_@@IDXEVENT@@:   NOP 0;
+
+NETWORK
+TITLE = Only Acknowledge or Ack plus Cancel
+    //------------------------------------------------------------------------//
+    // Check if the operator did not cancel. If not then it must have been a  //
+    // confirm yes event:                                                     //
+    //------------------------------------------------------------------------//
+    A #ackComplete;
+    AN #eventPrompt[@@IDXEVENT@@].confirmNo;
+    = #eventPrompt[@@IDXEVENT@@].confirmYes;
+
+@@ATTR_END|pEventPromptList@@
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

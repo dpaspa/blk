@@ -89,6 +89,8 @@ VAR_OUTPUT
 END_VAR
 
 VAR_IN_OUT
+    _PV : Real;              // Measured Value (after scaling)
+    RUNNING : Bool;
     OUT_Q_F : Bool;
     OUT_Q_R : Bool;
     LMN : Real;              // PID controller output (0-100%)
@@ -97,8 +99,6 @@ END_VAR
 VAR
     mc : "udtModeCommand";   // Block mode and command
     ai : "udtAnalog";        // Analog input structure
-    RUNNING : Bool;
-    PV : Real;               // Measured Value (after scaling)
     DQ : Bool;
     USER_INPUT : Word;       // Manual mode, equivallent of Analog input, to be entered by Operator
     MAN_PID : Bool;          // Manual non pid selection
@@ -455,7 +455,7 @@ TITLE = PID Controller
         D_SEL                := #D_SEL ,
         CYCLE                := #CYCLE ,
         SP_INT               := #tSetpoint ,
-        PV_IN                := #PV ,
+        PV_IN                := #_PV ,
         MAN                  := #tSetpoint ,
         GAIN                 := #GAIN ,
         TI                   := #TI ,
@@ -538,7 +538,7 @@ TITLE = Calculate speed as a percent of the setpoint
 _l:   NOP 0;
 
 NETWORK
-TITLE = Flag RUNNING if speed above 25% of setponit
+TITLE = Flag RUNNING if speed above 25% of setpoint
     //------------------------------------------------------------------------//
     // Flag RUNNING if actual speed is above 25% of setpoint:                 //
     //------------------------------------------------------------------------//

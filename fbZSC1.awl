@@ -24,12 +24,12 @@ VERSION : 2.0
 
 VAR_INPUT
     DI_Auto : Bool;          // Input signal from Field
+    _CUTOUT : Bool;          // Flag indicating if alarm is to be cutout (0= Alarm Enabled, 1= Alarm Disabled)
 END_VAR
 
 VAR
     mc : "udtModeCommand";   // Block mode and command
     DI_Manual : Bool;        // User digital signal for simulating
-    CUTOUT : Bool;           // Flag indicating if alarm is to be cutout (0= Alarm Enabled, 1= Alarm Disabled)
     ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
     PV : Bool;               // Processed DI
 END_VAR
@@ -105,7 +105,7 @@ TITLE = Set ALARM Flag
     // When the alarm cutout flag is set the alarm message is not raised:     //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #CUTOUT;
+    AN #_CUTOUT;
     AN #mc.modeOOS;
     AN #cmdOPEN;
     = #ALARM;

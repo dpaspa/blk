@@ -35,8 +35,16 @@ VAR
 @@TEMPLATE_END@@
 END_VAR
 
+VAR_TEMP
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|pBLOCK_RECIPE@@
+    t@@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;     // @@PARAMETERDESCRIPTION@@ //
+@@ATTR_END|pBLOCK_RECIPE@@
+@@TEMPLATE_END@@
+END_VAR
+
 BEGIN
-@@TEMPLATE_BEGIN@@
+@@TEMPLATE_BEGIN|createInstances@@
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
@@ -71,6 +79,7 @@ TITLE = @@INSTANCE@@ : Unique ID
     L "dbCONST".BLK.ID.@@INSTANCE@@;
     T #@@INSTANCE@@.mc.ME;
 
+@@ATTR_BEGIN|ISOWNED@@
 NETWORK
 TITLE = @@INSTANCE@@ : Owner
     //------------------------------------------------------------------------//
@@ -78,28 +87,36 @@ TITLE = @@INSTANCE@@ : Owner
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
     T #@@INSTANCE@@.mc.OWNER;
+@@ATTR_END|ISOWNED@@
 
 NETWORK
-TITLE = @@INSTANCE@@ : Safe Command
+TITLE = @@INSTANCE@@ : Safe Command on startup
     //------------------------------------------------------------------------//
-    // Set the safe command:                                                  //
+    // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    JCN _notRestart_@@COUNTER|1@@;
     L "dbCONST".BLK.@@CLASS@@.SAFE.CMD;
     T #@@INSTANCE@@.mc.CMD_SAFE;
+_notRestart_@@COUNTER@@:   NOP 0;
 
-@@ATTR_BEGIN|CHILD_INSTANCE@@
+@@ATTR_BEGIN|RECIPE_CLASS@@
 NETWORK
-TITLE = @@INSTANCE@@ : Child @@CHILDINSTANCE@@ @@CHILDDESCRIPTION@@
+TITLE = Recipe parameters if owned by @@RECIPENAME@@
     //------------------------------------------------------------------------//
-    // Copy the child mode and command data:                                  //
+    // Get the recipe parameters:                                             //
     //------------------------------------------------------------------------//
-    CALL MOVE
-    {value_type := 'Variant'}
-    (   IN                   := "idb@@CHILDCLASS@@".@@CHILDINSTANCE@@.mc ,
-        OUT                  := #@@INSTANCE@@.cmc[@@CHILDINDEX@@]
-    );
+    L "dbCONST".BLK.ID.@@RECIPENAME@@;
+    L #@@INSTANCE@@.mc.RECIPE;
+    ==I;
+    JCN _notRecipe_@@INSTANCE@@_@@RECIPENAME@@;
+@@ATTR_BEGIN|pBLOCK_RECIPE@@
+    L "dbRECIPE".@@RECIPENAME@@.@@BLOCKPARAMETER@@;
+    T #t@@BLOCKPARAMETER@@;
+@@ATTR_END|pBLOCK_RECIPE@@
+_notRecipe_@@INSTANCE@@_@@RECIPENAME@@:   NOP 0;
 
-@@ATTR_END|CHILD_INSTANCE@@
+@@ATTR_END|RECIPE_CLASS@@
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -107,50 +124,41 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #@@INSTANCE@@
-    (   CHILD_RELEASE        := #@@INSTANCE@@.CHILD_RELEASE ,
+    (
 @@ATTR_BEGIN|TIMER@@
         TIME_H               := #@@INSTANCE@@.TIME_H ,
         TIME_M               := #@@INSTANCE@@.TIME_M ,
         TIME_S               := #@@INSTANCE@@.TIME_S ,
-@@ATTR_END|TIMER@@
-@@ATTR_BEGIN|pChildIN@@
-        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
-@@ATTR_END|pChildIN@@
-@@ATTR_BEGIN|pClassIN@@
-        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
-@@ATTR_END|pClassIN@@
-@@ATTR_BEGIN|TIMER@@
         REM_TIME_H           := #@@INSTANCE@@.REM_TIME_H ,
         REM_TIME_M           := #@@INSTANCE@@.REM_TIME_M ,
         REM_TIME_S           := #@@INSTANCE@@.REM_TIME_S ,
 @@ATTR_END|TIMER@@
-@@ATTR_BEGIN|pChildOUT@@
-        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
-@@ATTR_END|pChildOUT@@
-@@ATTR_BEGIN|pClassOUT@@
-        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
-@@ATTR_END|pClassOUT@@
-@@ATTR_BEGIN|pChildIN_OUT@@
-        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
-@@ATTR_END|pChildIN_OUT@@
-@@ATTR_BEGIN|pClassIN_OUT@@
-        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
-@@ATTR_END|pClassIN_OUT@@
+@@ATTR_BEGIN|pBLOCK_UNIQUE@@
+        _@@BLOCKPARAMETER@@   := #@@INSTANCE@@._@@BLOCKPARAMETER@@ ,
+@@ATTR_END|pBLOCK_UNIQUE@@
+@@ATTR_BEGIN|pBLOCK_RECIPE@@
+        _@@BLOCKPARAMETER@@   := #t@@BLOCKPARAMETER@@ ,
+@@ATTR_END|pBLOCK_RECIPE@@
+@@ATTR_BEGIN|LINK_BLK@@
+        _@@BLOCKPARAMETER@@   := "idb@@LINKCLASS@@".@@LINKINSTANCE@@.@@ACTUALATTRIBUTE@@ ,
+@@ATTR_END|LINK_BLK@@
+@@ATTR_BEGIN|CHILD_INSTANCE@@
+        cmc@@CHILDINDEX@@    := "idb@@CHILDCLASS@@".@@CHILDINSTANCE@@.mc ,
+@@ATTR_END|CHILD_INSTANCE@@
 @@ATTR_BEGIN|pEventPromptExists@@
-        eventPrompt          := "dbEVENTProcess".@@INSTANCE@@.eventPrompt ,
+        eventPrompt          := "dbEVENTPrompt".eventPrompt,  // SFC events for operator prompts
 @@ATTR_END|pEventPromptExists@@
 @@ATTR_BEGIN|pEventLogMsgExists@@
-        eventLogMsg          := "dbEVENTProcess".@@INSTANCE@@.eventLogMsg ,
+        eventLogMsg          := "dbEVENTLogMsg".eventLogMsg,  // SFC events for logging messages
 @@ATTR_END|pEventLogMsgExists@@
 @@ATTR_BEGIN|pEventLogRealExists@@
-        eventLogReal         := "dbEVENTProcess".@@INSTANCE@@.eventLogReal ,
+        eventLogReal         := "dbEVENTLogReal".eventLogReal,  // SFC events for logging real data
 @@ATTR_END|pEventLogRealExists@@
 @@ATTR_BEGIN|pEventLogTimeExists@@
-        eventLogTime         := "dbEVENTProcess".@@INSTANCE@@.eventLogTime ,
+        eventLogTime         := "dbEVENTLogTime".eventLogTime,  // SFC events for logging time data
 @@ATTR_END|pEventLogTimeExists@@
-        DUMMY                := #@@INSTANCE@@.DUMMY
+        CHILD_RELEASE        := #@@INSTANCE@@.CHILD_RELEASE
     );
-    NOP 0;
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

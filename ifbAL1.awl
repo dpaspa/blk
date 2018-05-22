@@ -38,7 +38,7 @@ VAR
 END_VAR
 
 BEGIN
-@@TEMPLATE_BEGIN@@
+@@TEMPLATE_BEGIN|createInstances@@
 NETWORK
 TITLE = @@INSTANCE@@ : Unique ID
     //------------------------------------------------------------------------//
@@ -105,7 +105,16 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #@@INSTANCE@@;
+    CALL #@@INSTANCE@@
+    (   _PV                  := #@@INSTANCE@@._PV ,
+        STATE                := #@@INSTANCE@@.STATE ,
+        DQ                   := #@@INSTANCE@@.DQ ,
+        INTERLOCK            := #@@INSTANCE@@.INTERLOCK ,
+        ALARM_LL             := #@@INSTANCE@@.ALARM_LL ,
+        ALARM_L              := #@@INSTANCE@@.ALARM_L ,
+        ALARM_H              := #@@INSTANCE@@.ALARM_H ,
+        ALARM_HH             := #@@INSTANCE@@.ALARM_HH
+    );
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

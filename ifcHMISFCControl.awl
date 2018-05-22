@@ -22,18 +22,11 @@ BEGIN
 NETWORK
 TITLE = @@INSTANCE@@ @@DESCRIPTION@@ : @@STATEDESCRIPTION@@
     CALL "fcHMISFCSelect"
-    (   SEL_CONSTANT                := @@COUNTER|1@@ ,
-        SELECTION                   := "dbHMISFCControl".HMI_SEQ_SELECTION ,
-        SA                          := "dbHMISFCSelect".@@CLASS@@_@@SFC@@_SA ,
-        SQ_STATE                    := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.SQ_STATE ,
-        MODE                        := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.MODE ,
-        SQ_CMD                      := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.SQ_CMD ,
-        STEPNO_JUMP                 := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.STEPNO_JUMP ,
-        MAN_JUMP                    := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.MAN_JUMP ,
-        NO_VERIFIC                  := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.NO_VERIFIC ,
-        TRN_AND_JUMP                := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.TRN_AND_JUMP
+    (   SEL_CONSTANT         := @@COUNTER|1@@ ,
+        SELECTION            := "dbHMISFCControl".HMI_SEQ_SELECTION ,
+        SA                   := "dbHMISFCSelect".@@INSTANCE@@_@@SFC@@_SA ,
+        smc                  := "idb@@CLASS@@".@@INSTANCE@@.@@SFC@@.smc
     );
-    NOP 0;
 
 @@ATTR_END|INSTANCE_SFC@@
 @@TEMPLATE_END@@

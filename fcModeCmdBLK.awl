@@ -83,7 +83,7 @@ TITLE = Flag if a new block running substate command issued
     ==I;
     );
     O(;
-    L #bmc.SUBSelected;
+    L #bmc.SUBS;
     L #bmc.SUBLast;
     <>I;
     );
@@ -101,7 +101,7 @@ TITLE = Save last running substate if starting
     //------------------------------------------------------------------------//
     A #bmc.eventCmdStart;
     JCN _b;
-    L #bmc.SUBSelected;
+    L #bmc.SUBS;
     T #bmc.SUBLast;
 _b:   NOP 0;
 
@@ -187,7 +187,7 @@ _e:   NOP 0;
     ==I;
     JCN _f;
     L "dbCONST".BLK.SAFE.CMD;
-    T #bmc.SUBSelected;
+    T #bmc.SUBS;
 _f:   NOP 0;
 
 NETWORK

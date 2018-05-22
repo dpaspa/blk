@@ -3,22 +3,32 @@
 //----------------------------------------------------------------------------//
 // Class:       fbDI2                                                         //
 // Description:                                                               //
-// General alarm single digital input.                                        //
+// Normally OFF general alarm single digital input.                           //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 1.0 David Paspa      17-Apr-2018 NA        Initial design from DI1.        //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.5 Khairul Basar    02-Oct-2009 CC-09/016 NW4 DI changed from NC to NO.   //
+// 0.4 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.3 Khairul Basar    30-Sep-2009           Mode=2 initialized and Out of   //
+//                                            Service without Alarm.          //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Mode=1 initialized.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fbDI2"
-TITLE = DI2 : General alarm with software input
+TITLE = DI2 : General alarm single digital input Normally OFF
 { S7_Optimized_Access := 'TRUE' }
 NAME : fbDI2
 AUTHOR : REO
-VERSION : 1.0
+VERSION : 2.0
 
 //----------------------------------------------------------------------------//
 // Declare variables:                                                         //
 //----------------------------------------------------------------------------//
+VAR_INPUT
+    DI_Auto : Bool;          // Input signal from Field
+END_VAR
+
 VAR
     mc : "udtModeCommand";   // Block mode and command
     DI_Manual : Bool;        // User digital signal for simulating
@@ -56,14 +66,21 @@ TITLE = Set Device command which can only be ENABLE.
     T #mc.CMD;
 
 NETWORK
-TITLE = Process user input signal
+TITLE = Process Digital Input Signal
     //------------------------------------------------------------------------//
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
     //                                                                        //
-    // Calculate the process value based on the software input:               //
+    // Calculate the process value based on the mode:                         //
     //------------------------------------------------------------------------//
+    O(;
+    A #mc.modeAUTO;
+    A #DI_Auto;
+    );
+    O(;
+    A #mc.modeMANUAL;
     A #DI_Manual;
+    );
     = #tPV;
     = #PV;
 
@@ -75,7 +92,7 @@ TITLE = Set ALARM Flag
     //                                                                        //
     // Set alarms:                                                            //
     //------------------------------------------------------------------------//
-    AN #tPV;
+    A #tPV;
     AN #mc.modeOOS;
     = #ALARM;
 
@@ -87,19 +104,18 @@ TITLE = Set INTERLOCK Flag
     //                                                                        //
     // Set interlocks:                                                        //
     //------------------------------------------------------------------------//
-    O #mc.INTERLOCK;
-    O #tPV;
+    A #tPV;
     = #mc.INTERLOCK;
 
 NETWORK
-TITLE = Set Device State to Enabled if user input is on
+TITLE = Set Device State to Enabled if switch is on
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     //                                                                        //
-    // ENABLED if switch is on:                                               //
+    // ENABLED if switch is off:                                              //
     //------------------------------------------------------------------------//
-    A #tPV;
+    AN #tPV;
     JCN _a;
     L "dbCONST".BLK.DI2.STATE.ENABLED;
     T #mc.STATE;
@@ -108,9 +124,9 @@ _a:   NOP 0;
 NETWORK
 TITLE = Setting Device State to ALARM
     //------------------------------------------------------------------------//
-    // ALARM if user input is off and not OOS:                                //
+    // ALARM if switch is on and not OOS:                                     //
     //------------------------------------------------------------------------//
-    AN #tPV;
+    A #tPV;
     AN #mc.modeOOS;
     JCN _b;
     L "dbCONST".BLK.DI2.STATE.ALARM;

@@ -1,0 +1,218 @@
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+@@TEMPLATE_BEGIN@@
+VAR_INPUT
+    CHILD_RELEASE : Bool;              // Request to release children when complete
+@@ATTR_BEGIN|TIMER@@
+    TIME_H : Int;
+    TIME_M : Int;
+    TIME_S : Int;
+@@ATTR_END|TIMER@@
+@@ATTR_BEGIN|pChildIN@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pChildIN@@
+@@ATTR_BEGIN|pClassIN@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pClassIN@@
+END_VAR
+
+VAR_OUTPUT
+@@ATTR_BEGIN|TIMER@@
+    REM_TIME_H : Int;
+    REM_TIME_M : Int;
+    REM_TIME_S : Int;
+@@ATTR_END|TIMER@@
+@@ATTR_BEGIN|pChildOUT@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pChildOUT@@
+@@ATTR_BEGIN|pClassOUT@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pClassOUT@@
+END_VAR
+
+VAR_IN_OUT
+@@ATTR_BEGIN|pChildIN_OUT@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pChildIN_OUT@@
+@@ATTR_BEGIN|pClassIN_OUT@@
+    @@CHILDPARAMETER@@ : @@PARAMETERDATATYPE@@;             // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pClassIN_OUT@@
+@@ATTR_BEGIN|LINK_BLK@@
+    @@BLOCKPARAMETER@@ : @@LINKDATATYPE@@ ,
+@@ATTR_END|LINK_BLK@@
+@@ATTR_BEGIN|CHILD@@
+    cmc@@CHILDINDEX@@ : "udtModeCommand";
+@@ATTR_END|CHILD@@
+@@ATTR_BEGIN|pEventPromptExists@@
+@@ATTR_BEGIN|pEventPromptNum@@
+    eventPrompt : Array[0..@@IDXEVENTMAX@@] of "udtEventPrompt";   // SFC events for logging time data
+@@ATTR_END|pEventPromptNum@@
+@@ATTR_END|pEventPromptExists@@
+@@ATTR_BEGIN|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogMsgNum@@
+    eventLogMsg : Array[0..@@IDXEVENTMAX@@] of "udtEventLogMsg";   // SFC events for logging messages
+@@ATTR_END|pEventLogMsgNum@@
+@@ATTR_END|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogRealNum@@
+    eventLogReal : Array[0..@@IDXEVENTMAX@@] of "udtEventLogReal";   // SFC events for logging real data
+@@ATTR_END|pEventLogRealNum@@
+@@ATTR_END|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogTimeExists@@
+@@ATTR_BEGIN|pEventLogTimeNum@@
+    eventLogTime : Array[0..@@IDXEVENTMAX@@] of "udtEventLogTime";   // SFC events for logging time data
+@@ATTR_END|pEventLogTimeNum@@
+@@ATTR_END|pEventLogTimeExists@@
+    DUMMY : Bool;                      // Dummy bit for last parameter without comma
+END_VAR
+
+VAR
+    mc : "udtModeCommand";             // General mode and command
+    bmc : "udtModeCommandBLK";         // Block mode and command
+    smc : "udtModeCommandSFC";         // SFC mode and command
+@@ATTR_BEGIN|PARAMETER_INDEX_MAX@@
+    p : Array[0..@@PARAMETERINDEXMAX@@] of "udtParameter";
+@@ATTR_END|PARAMETER_INDEX_MAX@@
+@@ATTR_BEGIN|HYGIENE@@
+    hs : "udtHygiene";
+@@ATTR_END|HYGIENE@@
+    RUNTMR : "fbRunTimer";
+@@ATTR_BEGIN|SFC@@
+    @@SFC@@ : "fb@@SFC@@";       // @@STATEDESCRIPTION@@
+@@ATTR_END|SFC@@
+    timeCheckChildState {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+    timeCheckChildStateExpired : Bool;
+    timeCheckChildStateElapsed : Time;
+    iErr : Int;                        // Block error flag
+    flags : Struct
+        badParameter: Bool;
+        childCommandChange : Bool;
+        childFailed : Bool;
+        childInterlocked : Bool;
+        childNotAuto : Bool;
+        childMismatch : Bool; childUnavailable : Bool;
+        sfcCompleted : Bool;
+        sfcRunning : Bool;
+    END_STRUCT;
+    own : Struct
+@@ATTR_BEGIN|CHILD@@
+        @@CHILDALIASBLOCK@@ : Bool;       // @@CHILDALIASDESCRIPTION@@
+@@ATTR_END|CHILD@@
+    END_STRUCT;
+@@ATTR_BEGIN|SELECT@@
+    selected_@@PARAMETER@@_@@SELECTION@@ : Struct
+@@ATTR_BEGIN|SELVALUE@@
+        @@SELECTIONVALUE@@ : Bool;
+@@ATTR_END|SELVALUE@@
+    END_STRUCT;
+@@ATTR_END|SELECT@@
+    subs : Struct
+@@ATTR_BEGIN|STATE@@
+        @@STATE@@ : Bool;       // @@STATEDESCRIPTION@@
+@@ATTR_END|STATE@@
+    END_STRUCT;
+    subsHasSFC : Struct
+@@ATTR_BEGIN|STATE@@
+        @@STATE@@ : Bool := @@HASSFC@@;       // @@STATEDESCRIPTION@@
+@@ATTR_END|STATE@@
+    END_STRUCT;
+END_VAR
+
+VAR_TEMP
+    sq_finished : Bool;
+//    subsChanged : Bool;
+//    stateRunning : Bool;
+//    tmpTimeExpired : Bool;
+@@ATTR_BEGIN|TIMER@@
+    tTime : Time;
+    dTime : DInt;
+@@ATTR_END|TIMER@@
+    returnValue : Int;
+END_VAR
+
+BEGIN
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ifb
+
+NETWORK
+TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
+    CALL #@@INSTANCE@@
+    (   CHILD_RELEASE        := #@@INSTANCE@@.CHILD_RELEASE ,
+@@ATTR_BEGIN|TIMER@@
+        TIME_H               := #@@INSTANCE@@.TIME_H ,
+        TIME_M               := #@@INSTANCE@@.TIME_M ,
+        TIME_S               := #@@INSTANCE@@.TIME_S ,
+@@ATTR_END|TIMER@@
+@@ATTR_BEGIN|pChildIN@@
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
+@@ATTR_END|pChildIN@@
+@@ATTR_BEGIN|pClassIN@@
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
+@@ATTR_END|pClassIN@@
+@@ATTR_BEGIN|TIMER@@
+        REM_TIME_H           := #@@INSTANCE@@.REM_TIME_H ,
+        REM_TIME_M           := #@@INSTANCE@@.REM_TIME_M ,
+        REM_TIME_S           := #@@INSTANCE@@.REM_TIME_S ,
+@@ATTR_END|TIMER@@
+@@ATTR_BEGIN|pChildOUT@@
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
+@@ATTR_END|pChildOUT@@
+@@ATTR_BEGIN|pClassOUT@@
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
+@@ATTR_END|pClassOUT@@
+@@ATTR_BEGIN|pChildIN_OUT@@
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
+@@ATTR_END|pChildIN_OUT@@
+@@ATTR_BEGIN|pClassIN_OUT@@
+        @@CHILDPARAMETER@@   := #@@INSTANCE@@.@@CHILDPARAMETER@@ ,
+@@ATTR_END|pClassIN_OUT@@
+@@ATTR_BEGIN|LINK_BLK@@
+        @@BLOCKPARAMETER@@   := "idb@@LINKCLASS@@".@@LINKINSTANCE@@.@@ACTUALATTRIBUTE@@ ,
+@@ATTR_END|LINK_BLK@@
+@@ATTR_BEGIN|CHILD_INSTANCE@@
+        cmc@@CHILDINDEX@@    := "idb@@CHILDCLASS@@".@@CHILDINSTANCE@@.mc ,
+@@ATTR_END|CHILD_INSTANCE@@
+@@ATTR_BEGIN|pEventPromptExists@@
+        eventPrompt          := "dbEVENTPrompt".eventPrompt,  // SFC events for operator prompts
+@@ATTR_END|pEventPromptExists@@
+@@ATTR_BEGIN|pEventLogMsgExists@@
+        eventLogMsg          := "dbEVENTLogMsg".eventLogMsg,  // SFC events for logging messages
+@@ATTR_END|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogRealExists@@
+        eventLogReal         := "dbEVENTLogReal".eventLogReal,  // SFC events for logging real data
+@@ATTR_END|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogTimeExists@@
+        eventLogTime         := "dbEVENTLogTime".eventLogTime,  // SFC events for logging time data
+@@ATTR_END|pEventLogTimeExists@@
+        DUMMY                := #@@INSTANCE@@.DUMMY
+    );
+    NOP 0;

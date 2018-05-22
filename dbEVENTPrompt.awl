@@ -1,0 +1,35 @@
+@@TEMPLATE_BEGIN@@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable event for operator prompt          //
+// messages. Events are indexed as follows:                                   //
+@@ATTR_BEGIN|pEventPromptList@@
+// @@IDXEVENT@@   @@PARAMETERSOURCE@@   @@CHILDPARAMETER@@   @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pEventPromptList@@
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      14-May-2018 NA        Initial design for S7-1500.     //
+//----------------------------------------------------------------------------//
+DATA_BLOCK "dbEVENTPrompt"
+TITLE = Global process operator prompt messages
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : dbEVENTPrompt
+VERSION : 1.0
+
+STRUCT
+@@ATTR_BEGIN|pEventPromptNum@@
+    eventPrompt : Array[0..@@IDXEVENTMAX@@] of "udtEventPrompt";
+@@ATTR_END|pEventPromptNum@@
+END_STRUCT;
+
+BEGIN
+@@ATTR_BEGIN|pEventPromptList@@
+    eventPrompt[@@IDXEVENT@@].idxMessage := @@IDXEVENT@@;
+@@ATTR_END|pEventPromptList@@
+@@TEMPLATE_END@@
+END_DATA_BLOCK

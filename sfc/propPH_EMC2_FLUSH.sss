@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/05/2018 3:03:15 PM by David Paspa
+generated on 22/05/2018 2:28:01 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -143,9 +143,9 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::14
 --------------------------------------------------
-Name:- medium
+Name:- medium_liquid
 Type:- INT
-Description:- Medium to be flush
+Description:- Medium to be flushed
 ParameterInOut:- IN
 
 
@@ -189,7 +189,7 @@ EmptyTransition:- False
 Description:- Check if PW medium selected.
 Condition:- A(;
 L "dbCONST".SEL.LIQUID.PW;
-L  #_medium;
+L  #_medium_liquid;
 ==I;
 );
 
@@ -203,7 +203,7 @@ EmptyTransition:- False
 Description:- Check if WFI medium selected.
 Condition:- A(;
 L "dbCONST".SEL.LIQUID.WFI;
-L  #_medium;
+L  #_medium_liquid;
 ==I;
 );
 
@@ -217,7 +217,7 @@ EmptyTransition:- False
 Description:- Check if PSPW medium selected.
 Condition:- A(;
 L "dbCONST".SEL.LIQUID.PSPW;
-L  #_medium;
+L  #_medium_liquid;
 ==I;
 );
 
@@ -231,7 +231,7 @@ EmptyTransition:- False
 Description:- Check if PSWFI medium selected.
 Condition:- A(;
 L "dbCONST".SEL.LIQUID.PSWFI;
-L  #_medium;
+L  #_medium_liquid;
 ==I;
 );
 
@@ -254,7 +254,7 @@ T  #_pos_pw_cmd;
 Verification:- // Verify selected medium and valve state.
 A(;
 L "dbCONST".SEL.LIQUID.PW;
-L  #_medium;
+L  #_medium_liquid;
 ==I;
 );
 A(;
@@ -283,7 +283,7 @@ T  #_pos_wfi_cmd;
 Verification:- // Verify selected medium and valve state.
 A(;
 L "dbCONST".SEL.LIQUID.WFI;
-L  #_medium;
+L  #_medium_liquid;
 ==I;
 );
 A(;
@@ -312,7 +312,7 @@ T  #_pos_pspw_cmd;
 Verification:- // Verify selected medium and valve state.
 A(;
 L "dbCONST".SEL.LIQUID.PSPW;
-L  #_medium;
+L  #_medium_liquid;
 ==I;
 );
 A(;
@@ -340,7 +340,7 @@ T  #_pos_pswfi_cmd;
 Verification:- // Verify selected medium and valve state.
 A(;
 L "dbCONST".SEL.LIQUID.PSWFI;
-L  #_medium;
+L  #_medium_liquid;
 ==I;
 );
 A(;

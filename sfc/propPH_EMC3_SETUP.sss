@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/05/2018 3:03:24 PM by David Paspa
+generated on 22/05/2018 2:28:10 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -120,7 +120,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::12
 --------------------------------------------------
-Name:- medium
+Name:- medium_liquid
 Type:- INT
 Description:- Select Medium
 ParameterInOut:- IN
@@ -170,12 +170,12 @@ ACTION::01
 Description:- Prompt operator to connect WFI or PW supply to the vessel Sy inlet line, based on selected medium.
 Action:- //Check if WFI or PS_WFI medium selected, then prompt to connect WFI.
 O(     ;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.WFI;
 ==I;
 );
 O(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSWFI;
 ==I;
 );
@@ -184,12 +184,12 @@ CLR;
 
 // Check if PW or PS_PW selected, then prompt to connect PW
 O(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PW;
 ==I;
 );
 O(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSPW;
 ==I;
 );
@@ -240,12 +240,12 @@ Condition:- //Check PW connection confirmation, PW or PS_PW medium selected and 
 A #_prompt_pw_confirm_yes;
 A(;
 O(     ;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PW;
 ==I;
    );
 O(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSPW;
 ==I;
    );
@@ -261,12 +261,12 @@ O;
 A #_prompt_wfi_confirm_yes;
 A(;
 O(     ;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.WFI;
 ==I;
   );
 O(;
-L #_medium;
+L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSWFI;
 ==I;
   );

@@ -1,0 +1,119 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbDI3                                                         //
+// Description:                                                               //
+// General alarm single digital input.                                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      17-Apr-2018 NA        Initial design from DI1.        //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbDI3"
+TITLE = DI3 : General alarm with software input
+{ S7_Optimized_Access := 'TRUE' }
+NAME : fbDI3
+AUTHOR : REO
+VERSION : 1.0
+
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+VAR
+    mc : "udtModeCommand";   // Block mode and command
+    DI_Manual : Bool;        // User digital signal for simulating
+    ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
+    PV : Bool;               // Processed DI
+END_VAR
+
+VAR_TEMP
+    tPV : Bool;              // Temporary processed DI signal
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Call Mode and Command handling function
+    //------------------------------------------------------------------------//
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (   mc                   := #mc
+    );
+
+NETWORK
+TITLE = Set Device command which can only be ENABLE.
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is always ENABLE:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.DI3.CMD.ENABLE;
+    T #mc.CMD;
+
+NETWORK
+TITLE = Process user input signal
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Calculate the process value based on the software input:               //
+    //------------------------------------------------------------------------//
+    A #DI_Manual;
+    = #tPV;
+    = #PV;
+
+NETWORK
+TITLE = Set ALARM Flag
+    //------------------------------------------------------------------------//
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    //                                                                        //
+    // Set alarms:                                                            //
+    //------------------------------------------------------------------------//
+    AN #tPV;
+    AN #mc.modeOOS;
+    = #ALARM;
+
+NETWORK
+TITLE = Set INTERLOCK Flag
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Set interlocks:                                                        //
+    //------------------------------------------------------------------------//
+    O #mc.INTERLOCK;
+    O #tPV;
+    = #mc.INTERLOCK;
+
+NETWORK
+TITLE = Set Device State to Enabled if user input is on
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // ENABLED if switch is on:                                               //
+    //------------------------------------------------------------------------//
+    A #tPV;
+    JCN _a;
+    L "dbCONST".BLK.DI3.STATE.ENABLED;
+    T #mc.STATE;
+_a:   NOP 0;
+
+NETWORK
+TITLE = Setting Device State to ALARM
+    //------------------------------------------------------------------------//
+    // ALARM if user input is off and not OOS:                                //
+    //------------------------------------------------------------------------//
+    AN #tPV;
+    AN #mc.modeOOS;
+    JCN _b;
+    L "dbCONST".BLK.DI3.STATE.ALARM;
+    T #mc.STATE;
+_b:   NOP 0;
+END_FUNCTION_BLOCK

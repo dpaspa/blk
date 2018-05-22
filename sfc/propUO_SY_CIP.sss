@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/05/2018 3:06:09 PM by David Paspa
+generated on 22/05/2018 2:26:16 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -29,13 +29,37 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- emc_water_medium
+Name:- vessel_sy
+Type:- INT
+Description:- Storage vessel selection S1 or S2
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- fill_flz
+Type:- INT
+Description:- Filling line selection FL1 or FL2
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- vessel_mx
+Type:- INT
+Description:- Manufacturing vessel selection M1 or M2
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- emc_water_sy_medium
 Type:- INT
 Description:- Medium selection of emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::5
 --------------------------------------------------
 Name:- prompt_steam_confirm_no
 Type:- BOOL
@@ -43,7 +67,7 @@ Description:- Flag indicating if steaming is not required
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::6
 --------------------------------------------------
 Name:- prompt_steam
 Type:- BOOL
@@ -51,31 +75,31 @@ Description:- Prompt operator to confirm continue steaming
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::7
 --------------------------------------------------
-Name:- time_wfi_line_smflx
+Name:- set_time_wfi_line_smflx
 Type:- TIME
 Description:- Description
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::8
 --------------------------------------------------
-Name:- time_pw_line_smflx
+Name:- set_time_pw_line_smflx
 Type:- TIME
 Description:- SMFLx rinse time with PW
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::9
 --------------------------------------------------
-Name:- emc_water_runtime
+Name:- emc_water_sy_runtime
 Type:- TIME
 Description:- run time for emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::10
 --------------------------------------------------
 Name:- wfi_steam_begin_time
 Type:- TOD
@@ -83,7 +107,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::11
 --------------------------------------------------
 Name:- wfi_steam_end_time
 Type:- TOD
@@ -91,7 +115,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::12
 --------------------------------------------------
 Name:- time_act_wfi_steam
 Type:- TIME
@@ -99,7 +123,7 @@ Description:- Actual post CIP PS steaming time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::13
 --------------------------------------------------
 Name:- log_time_act_wfi_steam
 Type:- BOOL
@@ -107,7 +131,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::14
 --------------------------------------------------
 Name:- wfi_smflx_rinse_begin_time
 Type:- TOD
@@ -115,7 +139,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::15
 --------------------------------------------------
 Name:- wfi_smflx_rinse_end_time
 Type:- TOD
@@ -123,7 +147,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::16
 --------------------------------------------------
 Name:- time_act_wfi_smflx_rinse
 Type:- TIME
@@ -131,7 +155,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::17
 --------------------------------------------------
 Name:- log_time_act_wfi_smflx_rinse
 Type:- BOOL
@@ -139,7 +163,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::18
 --------------------------------------------------
 Name:- wfi_flz_rinse_begin_time
 Type:- TOD
@@ -147,7 +171,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::19
 --------------------------------------------------
 Name:- wfi_flz_rinse_end_time
 Type:- TOD
@@ -155,7 +179,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::20
 --------------------------------------------------
 Name:- time_act_wfi_flz_rinse
 Type:- TIME
@@ -163,7 +187,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::21
 --------------------------------------------------
 Name:- log_time_act_wfi_flz_rinse
 Type:- BOOL
@@ -171,7 +195,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::22
 --------------------------------------------------
 Name:- wfi_wash_begin_time
 Type:- TOD
@@ -179,7 +203,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::23
 --------------------------------------------------
 Name:- wfi_wash_end_time
 Type:- TOD
@@ -187,7 +211,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::24
 --------------------------------------------------
 Name:- time_act_wfi_wash
 Type:- TIME
@@ -195,7 +219,7 @@ Description:- Actual WFI wash drain rinse time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::25
 --------------------------------------------------
 Name:- log_time_act_wfi_wash
 Type:- BOOL
@@ -203,7 +227,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::26
 --------------------------------------------------
 Name:- pw_steam_begin_time
 Type:- TOD
@@ -211,7 +235,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::27
 --------------------------------------------------
 Name:- pw_steam_end_time
 Type:- TOD
@@ -219,7 +243,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::28
 --------------------------------------------------
 Name:- time_act_pw_steam
 Type:- TIME
@@ -227,7 +251,7 @@ Description:- Actual PW line steaming time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::29
 --------------------------------------------------
 Name:- log_time_act_pw_steam
 Type:- BOOL
@@ -235,7 +259,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::30
 --------------------------------------------------
 Name:- pw_smflx_rinse_begin_time
 Type:- TOD
@@ -243,7 +267,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::31
 --------------------------------------------------
 Name:- pw_smflx_rinse_end_time
 Type:- TOD
@@ -251,7 +275,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::29
+PARAMETER::32
 --------------------------------------------------
 Name:- time_act_pw_smflx_rinse
 Type:- TIME
@@ -259,7 +283,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::33
 --------------------------------------------------
 Name:- log_time_act_pw_smflx_rinse
 Type:- BOOL
@@ -267,7 +291,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::31
+PARAMETER::34
 --------------------------------------------------
 Name:- pw_flz_rinse_begin_time
 Type:- TOD
@@ -275,7 +299,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::35
 --------------------------------------------------
 Name:- pw_flz_rinse_end_time
 Type:- TOD
@@ -283,7 +307,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::36
 --------------------------------------------------
 Name:- pw_wash_begin_time
 Type:- TOD
@@ -291,7 +315,7 @@ Description:- PW wash begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::37
 --------------------------------------------------
 Name:- pw_wash_end_time
 Type:- TOD
@@ -299,7 +323,7 @@ Description:- PW wash end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::38
 --------------------------------------------------
 Name:- log_time_act_pw_wash
 Type:- BOOL
@@ -307,7 +331,7 @@ Description:- Flags the HMI to log actual PW wash time.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::39
 --------------------------------------------------
 Name:- time_act_pw_flz_rinse
 Type:- TIME
@@ -315,7 +339,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::40
 --------------------------------------------------
 Name:- log_time_act_pw_flz_rinse
 Type:- BOOL
@@ -323,7 +347,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::41
 --------------------------------------------------
 Name:- log_time_cip_begin
 Type:- BOOL
@@ -331,7 +355,7 @@ Description:- Flags the HMI that CIP started
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::42
 --------------------------------------------------
 Name:- log_time_cip_end
 Type:- BOOL
@@ -339,7 +363,7 @@ Description:- Flags the HMI that CIP ended
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::43
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -347,7 +371,7 @@ Description:- Command to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::44
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -355,7 +379,7 @@ Description:- Substate selection emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::45
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -363,7 +387,7 @@ Description:- Device State of emx_transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::43
+PARAMETER::46
 --------------------------------------------------
 Name:- emx_drain_cmd
 Type:- INT
@@ -371,7 +395,7 @@ Description:- Command to emx_drain
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::44
+PARAMETER::47
 --------------------------------------------------
 Name:- emx_drain_subs
 Type:- INT
@@ -379,7 +403,7 @@ Description:- Substate selection emx_drain
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::48
 --------------------------------------------------
 Name:- emx_drain_state
 Type:- INT
@@ -387,23 +411,23 @@ Description:- Device State of emx_drain
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::49
 --------------------------------------------------
-Name:- time_wfi_steam_sy
+Name:- set_time_wfi_steam_sy
 Type:- TIME
 Description:- Timer For WFI PS Steam
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::50
 --------------------------------------------------
-Name:- time_pw_line_flz
+Name:- set_time_pw_line_flz
 Type:- TIME
 Description:- PW FPZ rinse time
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::51
 --------------------------------------------------
 Name:- Report_Evnt_016
 Type:- BOOL
@@ -411,7 +435,7 @@ Description:- WFI Rinse Line Fill End for batch report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::52
 --------------------------------------------------
 Name:- Report_Evnt_015
 Type:- BOOL
@@ -419,7 +443,7 @@ Description:- WFI Rinse Line Fill Start for batch Report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::53
 --------------------------------------------------
 Name:- Report_Evnt_014
 Type:- BOOL
@@ -427,7 +451,7 @@ Description:- WFI Rinse End for Batch Report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::54
 --------------------------------------------------
 Name:- Report_Evnt_013
 Type:- BOOL
@@ -435,7 +459,7 @@ Description:- WFI Rinse Start for Batch Report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::55
 --------------------------------------------------
 Name:- Report_Evnt_012
 Type:- BOOL
@@ -443,7 +467,7 @@ Description:- PW Wash End for Batch Report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::56
 --------------------------------------------------
 Name:- Report_Evnt_011
 Type:- BOOL
@@ -451,15 +475,15 @@ Description:- PW Wash Start for batch Report
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::54
+PARAMETER::57
 --------------------------------------------------
-Name:- time_pw_steam_sy
+Name:- set_time_pw_steam_sy
 Type:- TIME
 Description:- Timer For PW PS Steam
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::55
+PARAMETER::58
 --------------------------------------------------
 Name:- steaming_proceed
 Type:- BOOL
@@ -467,7 +491,7 @@ Description:- Steaming to proceed flag
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::56
+PARAMETER::59
 --------------------------------------------------
 Name:- steaming_ready
 Type:- BOOL
@@ -475,7 +499,7 @@ Description:- Ready to steam filling line
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::57
+PARAMETER::60
 --------------------------------------------------
 Name:- cip_fill_ready
 Type:- BOOL
@@ -483,7 +507,7 @@ Description:- Sy is setup to wash fill line
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::58
+PARAMETER::61
 --------------------------------------------------
 Name:- wash_drain_done
 Type:- BOOL
@@ -491,7 +515,7 @@ Description:- Set Wash Drain Complete
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::59
+PARAMETER::62
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -499,15 +523,15 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::60
+PARAMETER::63
 --------------------------------------------------
-Name:- emc_water_state
+Name:- emc_water_sy_state
 Type:- INT
 Description:- Device State of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::61
+PARAMETER::64
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -515,23 +539,23 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::62
+PARAMETER::65
 --------------------------------------------------
-Name:- emc_water_subs
+Name:- emc_water_sy_subs
 Type:- INT
 Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::63
+PARAMETER::66
 --------------------------------------------------
-Name:- emc_water_cmd
+Name:- emc_water_sy_cmd
 Type:- INT
 Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::64
+PARAMETER::67
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -539,7 +563,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::65
+PARAMETER::68
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -547,7 +571,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::66
+PARAMETER::69
 --------------------------------------------------
 Name:- emc_gas_medium
 Type:- INT
@@ -555,7 +579,7 @@ Description:- Medium selection of emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::67
+PARAMETER::70
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -563,35 +587,11 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::68
+PARAMETER::71
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
 Description:- Command to emc_gas
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::69
---------------------------------------------------
-Name:- ema_vessel_subs
-Type:- INT
-Description:- Substate selection to ema_vessel
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::70
---------------------------------------------------
-Name:- ema_vessel_state
-Type:- INT
-Description:- Device State of ema_vessel
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::71
---------------------------------------------------
-Name:- ema_vessel_cmd
-Type:- INT
-Description:- Command to ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
@@ -621,7 +621,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::75
 --------------------------------------------------
-Name:- time_wfi_empty_sy
+Name:- set_time_wfi_empty_sy
 Type:- TIME
 Description:- Time to wait to empty the vessel after WFI rinse
 ParameterInOut:- IN
@@ -629,7 +629,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::76
 --------------------------------------------------
-Name:- time_wfi_line_flz
+Name:- set_time_wfi_line_flz
 Type:- TIME
 Description:- Time for WFI rinse of filling line
 ParameterInOut:- IN
@@ -637,7 +637,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::77
 --------------------------------------------------
-Name:- time_wfi_tank
+Name:- set_time_wfi_tank
 Type:- TIME
 Description:- Time for WFI rinse of vessel
 ParameterInOut:- IN
@@ -645,7 +645,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::78
 --------------------------------------------------
-Name:- time_pw_empty_sy
+Name:- set_time_pw_empty_sy
 Type:- TIME
 Description:- Time to empty the vessel after the PW wash
 ParameterInOut:- IN
@@ -653,7 +653,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::79
 --------------------------------------------------
-Name:- time_pw_wash_sy
+Name:- set_time_pw_wash_sy
 Type:- TIME
 Description:- PW vessel wash time
 ParameterInOut:- IN
@@ -772,8 +772,8 @@ T #_emc_gas_cmd;
 
 //Load TIME_PW_WASH_Sy.
 SET;
-L #_time_pw_wash_sy;
-T #_emc_water_runtime;
+L #_set_time_pw_wash_sy;
+T #_emc_water_sy_runtime;
 Verification:- A(;
 L #_emc_gas_state;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;  
@@ -787,11 +787,11 @@ Description:- Open PW supply and start FLUSH.
 Store PW Wash begin time.
 Action:- // Open PW supply.
 L "dbCONST".SEL.LIQUID.PW;
-T #_emc_water_medium;
+T #_emc_water_sy_medium;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
-T #_emc_water_subs;
+T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emc_water_cmd;
+T #_emc_water_sy_cmd;
 
 //Store PW Wash begin time.
 L "dbCONST".CHRONO.CPU_TIME;
@@ -802,7 +802,7 @@ SET;
 S #_Report_Evnt_011;
 Verification:- //Verify if emc_water changed to substate FLUSH.
 A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.EMC3.SUBS.FLUSH;
 ==I;
 );
@@ -816,7 +816,7 @@ Title:- Timer expired
 EmptyTransition:- False
 Description:- Timer Sy_TIME_PW_WASH expired.
 Condition:- A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
@@ -880,23 +880,23 @@ L "dbCONST".BLK.STATE.STOPPED;
 ACTION::02
 --------------------------------------------------
 Description:- Start Timer for rinse FLz with PW.
-Action:- L #_time_pw_line_flz;
-T #_emc_water_runtime;
+Action:- L #_set_time_pw_line_flz;
+T #_emc_water_sy_runtime;
 
 // Open PW supply.
 L "dbCONST".SEL.LIQUID.PW;
-T #_emc_water_medium;
+T #_emc_water_sy_medium;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
-T #_emc_water_subs;
+T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emc_water_cmd;
+T #_emc_water_sy_cmd;
 
 //Store FLz rinse begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_pw_flz_rinse_begin_time;
 Verification:- //Verify if emc_water changed to substate FLUSH.
 A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.EMC3.SUBS.FLUSH;
 ==I;
 );
@@ -910,7 +910,7 @@ Title:- FLz Rinse Complete
 EmptyTransition:- False
 Description:- FLz Rinse Complete
 Condition:- A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
@@ -962,16 +962,16 @@ Verification:- A(;
 ACTION::02
 --------------------------------------------------
 Description:- Start Timer for SMFLx rinse.
-Action:- L #_time_pw_line_smflx;
-T #_emc_water_runtime;
+Action:- L #_set_time_pw_line_smflx;
+T #_emc_water_sy_runtime;
 
 // Open PW supply.
 L "dbCONST".SEL.LIQUID.PW;
-T #_emc_water_medium;
+T #_emc_water_sy_medium;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
-T #_emc_water_subs;
+T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emc_water_cmd;
+T #_emc_water_sy_cmd;
 
 //Store SMFLx rinse begin time.
 L "dbCONST".CHRONO.CPU_TIME;
@@ -979,7 +979,7 @@ T #_pw_smflx_rinse_begin_time;
 
 Verification:- //Verify if emc_water changed to substate FLUSH.
 A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.EMC3.SUBS.FLUSH;
 ==I;
 );
@@ -993,7 +993,7 @@ Title:- SMFLx Wash Complete
 EmptyTransition:- False
 Description:- SMFLx Wash Complete
 Condition:- A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
@@ -1030,11 +1030,11 @@ S #_log_time_act_pw_smflx_rinse;
 
 //Close PW supply valve.
 L "dbCONST".BLK.SAFE.CMD;
-T  #_emc_water_subs;
+T  #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.STOP;
-T  #_emc_water_cmd;
+T  #_emc_water_sy_cmd;
 Verification:- A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
@@ -1049,7 +1049,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_time_pw_empty_sy;
+L #_set_time_pw_empty_sy;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
@@ -1094,15 +1094,15 @@ ACTION::02
 Description:- Open PW line PS supply valve.
 Store PW line PS steam begin time.
 Action:- //Open PW line PS supply valve
-L #_time_pw_steam_sy;
-T #_emc_water_runtime;
+L #_set_time_pw_steam_sy;
+T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.PSPW;
-T #_emc_water_medium;
+T #_emc_water_sy_medium;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
-T #_emc_water_subs;
+T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emc_water_cmd;
+T #_emc_water_sy_cmd;
 
 //Store PW line PS steam begin time.
 L "dbCONST".CHRONO.CPU_TIME;
@@ -1110,7 +1110,7 @@ T #_pw_steam_begin_time;
 
 Verification:- //Verify if emc_water changed to substate FLUSH.
 A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.EMC3.SUBS.FLUSH;
 ==I;
 );
@@ -1124,7 +1124,7 @@ Title:- Timer Expired?
 EmptyTransition:- False
 Description:- TIME_PW_STEAM_Sy expired?
 Condition:- A(;
-L #_emc_water_state;
+L #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
@@ -1161,11 +1161,11 @@ S #_log_time_act_pw_steam;
 
 //Close PW line PS supply valve.
 L "dbCONST".BLK.SAFE.CMD;
-T  #_emc_water_subs;
+T  #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.STOP;
-T  #_emc_water_cmd;
+T  #_emc_water_sy_cmd;
 Verification:- A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
@@ -1177,13 +1177,13 @@ Description:- Connect WFI inlet line to Sy.
 Set emc_water to substate SETUP and MEDIUM=WFI.
 Action:- //Connect WFI inlet line to Sy.
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_medium;
+T #_emc_water_sy_medium;
 L "dbCONST".BLK.EMC3.SUBS.SETUP;
-T #_emc_water_subs;
+T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emc_water_cmd;
+T #_emc_water_sy_cmd;
 Verification:- A(;
-L #_emc_water_state;
+L #_emc_water_sy_state;
 L "dbCONST".BLK.EMC3.SUBS.SETUP;
 ==I;
 );
@@ -1197,7 +1197,7 @@ Title:- Setup complete?
 EmptyTransition:- False
 Description:- emc_water SETUP complete
 Condition:- A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
@@ -1247,15 +1247,15 @@ Start timer to rinse tank by TIME_WFI_TANK.
 Store WFI wash begin time.
 Open HPCA supply valve.
 Action:- //Open WFI supply to rinse tank
-L #_time_wfi_tank;
-T #_emc_water_runtime;
+L #_set_time_wfi_tank;
+T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_medium;
+T #_emc_water_sy_medium;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
-T #_emc_water_subs;
+T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emc_water_cmd;
+T #_emc_water_sy_cmd;
 
 //Store WFI wash begin time.
 L "dbCONST".CHRONO.CPU_TIME;
@@ -1274,7 +1274,7 @@ T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emc_gas_cmd;
 Verification:- A(;
-L #_emc_water_state;
+L #_emc_water_sy_state;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 ==I;
 );
@@ -1294,7 +1294,7 @@ Title:- Timer expired?
 EmptyTransition:- False
 Description:- Timer TIME_WFI_TANK expired.
 Condition:- A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
@@ -1358,22 +1358,22 @@ ACTION::02
 --------------------------------------------------
 Description:- Open WFI supply with timer TIME_WFI_LINE_FLz.
 Action:- //Open WFI supply.
-L #_time_wfi_line_flz;
-T #_emc_water_runtime;
+L #_set_time_wfi_line_flz;
+T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_medium;
+T #_emc_water_sy_medium;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
-T #_emc_water_subs;
+T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emc_water_cmd;
+T #_emc_water_sy_cmd;
 
 //Store FLz WFI wash begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_wfi_flz_rinse_begin_time;
 
 Verification:- A(;
-L #_emc_water_state;
+L #_emc_water_sy_state;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 ==I;
 );
@@ -1387,7 +1387,7 @@ Title:- FLz Wash Complete
 EmptyTransition:- False
 Description:- FLz rinsed for TIME_WFI_LINE_FLz
 Condition:- A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
@@ -1448,18 +1448,18 @@ L "dbCONST".CHRONO.CPU_TIME;
 T #_wfi_smflx_rinse_begin_time;
 
 //Open WFI supply
-L #_time_wfi_line_smflx;
-T #_emc_water_runtime;
+L #_set_time_wfi_line_smflx;
+T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_medium;
+T #_emc_water_sy_medium;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
-T #_emc_water_subs;
+T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emc_water_cmd;
+T #_emc_water_sy_cmd;
 
 Verification:- A(;
-   L  #_emc_water_state;
+   L  #_emc_water_sy_state;
    L  "dbCONST".BLK.EMC3.SUBS.FLUSH;
    ==I;
 );
@@ -1497,11 +1497,11 @@ S #_log_time_act_wfi_smflx_rinse;
 
 //Close WFI supply valve
 L "dbCONST".BLK.SAFE.CMD;
-T  #_emc_water_subs;
+T  #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.STOP;
-T  #_emc_water_cmd;
+T  #_emc_water_sy_cmd;
 Verification:- A(;
-L #_emc_water_state;
+L #_emc_water_sy_state;
 L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
@@ -1516,7 +1516,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_time_wfi_empty_sy;
+L #_set_time_wfi_empty_sy;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
@@ -1628,15 +1628,15 @@ ACTION::02
 Description:- Open WFI(PS) supply valve.
 Start timer TIME_WFI_STEAM_Sy for CS supply.
 Action:- //Open WFI(PS) supply to rinse tank
-L #_time_wfi_steam_sy;
-T #_emc_water_runtime;
+L #_set_time_wfi_steam_sy;
+T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.PSWFI;
-T #_emc_water_medium;
+T #_emc_water_sy_medium;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
-T #_emc_water_subs;
+T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
-T #_emc_water_cmd;
+T #_emc_water_sy_cmd;
 
 //Store WFI line PS Steam begin time.
 L "dbCONST".CHRONO.CPU_TIME;
@@ -1646,7 +1646,7 @@ T #_wfi_steam_begin_time;
 SET;
 R #_steaming_ready;
 Verification:- A(;
-   L  #_emc_water_state;
+   L  #_emc_water_sy_state;
    L  "dbCONST".BLK.EMC3.SUBS.FLUSH;
    ==I;
 );
@@ -1661,7 +1661,7 @@ Title:- Timer expired?
 EmptyTransition:- False
 Description:- TIME_WFI_STEAM_Sy expired?
 Condition:- A(;
-L   #_emc_water_state;
+L   #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
@@ -1697,11 +1697,11 @@ S #_log_time_act_wfi_steam;
 
 //Close PS wfi supply valve.
 L "dbCONST".BLK.SAFE.CMD;
-T  #_emc_water_subs;
+T  #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.STOP;
-T  #_emc_water_cmd;
+T  #_emc_water_sy_cmd;
 Verification:- A(;
-L #_emc_water_state;
+L #_emc_water_sy_state;
 L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
