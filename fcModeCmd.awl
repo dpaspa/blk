@@ -50,23 +50,29 @@ TITLE = Mode Auto
     //                                                                        //
     // Get the mode of the module:                                            //
     //------------------------------------------------------------------------//
+    A(;
     L #mc.MODE;
     L "dbCONST".BLK.MODE.AUTO;
     ==I;
+    );
     = #mc.modeAUTO;
 
 NETWORK
 TITLE = Mode Manual
+    A(;
     L #mc.MODE;
     L "dbCONST".BLK.MODE.MANUAL;
     ==I;
+    );
     = #mc.modeMANUAL;
 
 NETWORK
 TITLE = Mode Out Of Service
+    A(;
     L #mc.MODE;
     L "dbCONST".BLK.MODE.OOS;
     ==I;
+    );
     = #mc.modeOOS;
 
 NETWORK
@@ -86,23 +92,12 @@ TITLE = Interlock Flag
 NETWORK
 TITLE = Send safe command in case of any interlock or failure
     //------------------------------------------------------------------------//
-    // Send safe command if any interlock:                                    //
+    // Send safe command if any interlock or startup:                         //
     //------------------------------------------------------------------------//
-    A #mc.INTERLOCK;
+    O "flagFirstScanRestart";
+    O #mc.INTERLOCK;
     JCN _b;
     L #mc.CMD_SAFE;
     T #mc.CMD;
 _b:   NOP 0;
-
-NETWORK
-TITLE = Set the safe state in case of any interlock or failure
-    //------------------------------------------------------------------------//
-    // Set safe state to match command if any interlock. The safe command     //
-    // must match the safe state index number in dbCONST.                     //
-    //------------------------------------------------------------------------//
-    A #mc.INTERLOCK;
-    JCN _c;
-    L #mc.CMD_SAFE;
-    T #mc.STATE;
-_c:   NOP 0;
 END_FUNCTION

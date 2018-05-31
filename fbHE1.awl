@@ -63,21 +63,6 @@ TITLE = Call Mode and Command handling block
     );
 
 NETWORK
-TITLE = Device command ENABLE
-    //------------------------------------------------------------------------//
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
-    //                                                                        //
-    // CMD is ENABLE if no fault or interlock, otherwise DISABLE:             //
-    //------------------------------------------------------------------------//
-    AN #tFault;
-    AN #mc.INTERLOCK;
-    L #mc.CMD;
-    L "dbCONST".BLK.HE1.CMD.ENABLE;
-    ==I;
-    = #tDO;
-
-NETWORK
 TITLE = Process Fault Digital Input Signal
     //------------------------------------------------------------------------//
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
@@ -89,13 +74,45 @@ TITLE = Process Fault Digital Input Signal
     = #tFault;
 
 NETWORK
+TITLE = Interlock if any fault or external interlock
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Interlock also the field indicates a fault:                            //
+    //------------------------------------------------------------------------//
+    O #mc.INTERLOCK;
+    O #FAULT;
+    = #mc.INTERLOCK;
+
+NETWORK
+TITLE = Device command ENABLE
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is ENABLE if no fault or interlock, otherwise DISABLE:             //
+    //------------------------------------------------------------------------//
+    AN #tFault;
+    AN #mc.INTERLOCK;
+    A(;
+    L #mc.CMD;
+    L "dbCONST".BLK.HE1.CMD.ENABLE;
+    ==I;
+    );
+    = #tDO;
+
+NETWORK
 TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
     // CMD is DISABLE then switch off regardless of any fault or interlock:   //
     //------------------------------------------------------------------------//
+    O #mc.INTERLOCK;
+    O(;
     L #mc.CMD;
     L "dbCONST".BLK.HE1.CMD.DISABLE;
     ==I;
+    );
     JCN _a;
     R #tDO;
 _a:   NOP 0;

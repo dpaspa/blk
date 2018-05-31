@@ -71,9 +71,11 @@ TITLE = Device command LOCAL
     // CMD is LOCAL:                                                          //
     //------------------------------------------------------------------------//
     AN #mc.INTERLOCK;
+    A(;
     L #mc.CMD;
     L "dbCONST".BLK.MOD1.CMD.LOCAL;
     ==I;
+    );
     = #cmdLocal;
     = #tDO;
 
@@ -83,9 +85,11 @@ TITLE = Device command REMOTE
     // CMD is REMOTE:                                                         //
     //------------------------------------------------------------------------//
     AN #mc.INTERLOCK;
+    A(;
     L #mc.CMD;
     L "dbCONST".BLK.MOD1.CMD.REMOTE;
     ==I;
+    );
     = #cmdRemote;
     = #tDO;
 
@@ -94,9 +98,11 @@ TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
     // CMD is DISABLE then close regardless of any interlock:                 //
     //------------------------------------------------------------------------//
+    A(;
     L #mc.CMD;
     L "dbCONST".BLK.HE1.CMD.DISABLE;
     ==I;
+    );
     JCN _a;
     R #tDO;
 _a:   NOP 0;

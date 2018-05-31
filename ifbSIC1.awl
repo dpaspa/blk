@@ -46,6 +46,13 @@
 // Now logic state for Interlock is corrected, see 2.                         //
 // ALARM_HH, ALARM_H, ALARM_L, ALARM_LL are added in SIC1 and programmed.     //
 //----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+@@TEMPLATE_BEGIN@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|createInstancesGlobal@@
+// @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
+@@TEMPLATE_END@@
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbSIC1"
 TITLE = Instances of agitator speed control
 { S7_Optimized_Access := 'TRUE' }
@@ -57,15 +64,17 @@ VERSION : 2.0
 // Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
-@@TEMPLATE_BEGIN@@
-    @@INSTANCE@@ : "fbSIC1";   // @@DESCRIPTION@@
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|numInstances@@
+    item : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
+@@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
 
 BEGIN
 @@TEMPLATE_BEGIN|createInstances@@
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     //------------------------------------------------------------------------//
     // Get the critical interlock if there is one. If not set alwaysLow:      //
     //------------------------------------------------------------------------//
@@ -73,12 +82,14 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbCRIL".@@INSTANCE@@cril.INTERLOCK;
+@@ATTR_BEGIN|CRIL_TARGET@@
+    A "idbCRIL".item[@@IDXIL@@].INTERLOCK;
+@@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #@@INSTANCE@@.mc.CRIL;
+    = #item[@@IDX@@].mc.CRIL;
 
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     //------------------------------------------------------------------------//
     // Get the non-critical interlock if there is one. If not set alwaysLow:  //
     //------------------------------------------------------------------------//
@@ -86,51 +97,53 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbNCRIL".@@INSTANCE@@ncril.INTERLOCK;
+@@ATTR_BEGIN|NCRIL_TARGET@@
+    A "idbNCRIL".item[@@IDXIL@@].INTERLOCK;
+@@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #@@INSTANCE@@.mc.NCRIL;
+    = #item[@@IDX@@].mc.NCRIL;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Unique ID
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     //------------------------------------------------------------------------//
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #@@INSTANCE@@.mc.ME;
+    T #item[@@IDX@@].mc.ME;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Owner
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     //------------------------------------------------------------------------//
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #@@INSTANCE@@.mc.OWNER;
+    T #item[@@IDX@@].mc.OWNER;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Safe Command on restart
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     //------------------------------------------------------------------------//
     // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTER|1@@;
     L "dbCONST".BLK.SIC1.SAFE.CMD;
-    T #@@INSTANCE@@.mc.CMD_SAFE;
+    T #item[@@IDX@@].mc.CMD_SAFE;
 _notRestart_@@COUNTER@@:   NOP 0;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Signal polarity
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Signal polarity
     //------------------------------------------------------------------------//
     // Input signal is BIPOLAR (1) or UNIPOLAR (0). Assume 0:                 //
     //------------------------------------------------------------------------//
-    R #@@INSTANCE@@.ai.POLARITY;
+    R #item[@@IDX@@].ai.POLARITY;
 
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #@@INSTANCE@@
-    (   _SETPOINT            := #@@INSTANCE@@._SETPOINT ,
+    CALL #item[@@IDX@@]
+    (   _SETPOINT            := #item[@@IDX@@]._SETPOINT ,
         RAW_INPUT            := "@@INSTANCE@@-RAW" ,
         BRK                  := "@@INSTANCE@@-BRK" ,
 @@ATTR_BEGIN|LINK@@
@@ -142,27 +155,27 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
         MASS_RUN             := @@MXMASSAGITRUN@@ ,
         MASS_STOP            := @@MXMASSAGITSTOP@@ ,
 @@ATTR_BEGIN|LINK@@
-        MI1_MASS             := "idb@@MASSLINKCLASS@@".@@MASSLINKINSTANCE@@.ai.PV ,
-        MI1_DQ               := "idb@@MASSLINKCLASS@@".@@MASSLINKINSTANCE@@.ai.DQ ,
+        MI1_MASS             := "idb@@MASSLINKCLASS@@".item[@@MASSLINKIDX@@].ai.PV ,
+        MI1_DQ               := "idb@@MASSLINKCLASS@@".item[@@MASSLINKIDX@@].ai.DQ ,
 @@ATTR_END|LINK@@
 @@ATTR_BEGIN|ANALOG_EMBED@@
         RANGE_UPPER          := @@RANGELOW@@ ,
         RANGE_LOWER          := @@RANGEHIGH@@ ,
-        POLARITY             := #@@INSTANCE@@.POLARITY ,
+        POLARITY             := #item[@@IDX@@].POLARITY ,
         LIMIT_HH             := @@LIMITHH@@ ,
         LIMIT_H              := @@LIMITH@@ ,
 @@ATTR_END|ANALOG_EMBED@@
-        FB_TDELAY            := #@@INSTANCE@@.FB_TDELAY ,
-        P_SEL                := #@@INSTANCE@@.P_SEL ,
-        I_SEL                := #@@INSTANCE@@.I_SEL ,
-        D_SEL                := #@@INSTANCE@@.D_SEL ,
-        GAIN                 := #@@INSTANCE@@.GAIN ,
-        TI                   := #@@INSTANCE@@.TI ,
-        TD                   := #@@INSTANCE@@.TD ,
-        CYCLE                := #@@INSTANCE@@.CYCLE ,
+        FB_TDELAY            := #item[@@IDX@@].FB_TDELAY ,
+        P_SEL                := #item[@@IDX@@].P_SEL ,
+        I_SEL                := #item[@@IDX@@].I_SEL ,
+        D_SEL                := #item[@@IDX@@].D_SEL ,
+        GAIN                 := #item[@@IDX@@].GAIN ,
+        TI                   := #item[@@IDX@@].TI ,
+        TD                   := #item[@@IDX@@].TD ,
+        CYCLE                := #item[@@IDX@@].CYCLE ,
         OUT_Q                := "@@INSTANCE@@-CMD" ,
-        _PV                  := #@@INSTANCE@@._PV ,
-        RUNNING              := #@@INSTANCE@@.RUNNING ,
+        _PV                  := #item[@@IDX@@]._PV ,
+        RUNNING              := #item[@@IDX@@].RUNNING ,
         OUT_Q_F              := "@@INSTANCE@@-OUT_F" ,
         OUT_Q_R              := "@@INSTANCE@@-OUT_R" ,
         LMN                  := "@@INSTANCE@@-OUT" ,

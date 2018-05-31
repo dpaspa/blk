@@ -1,0 +1,42 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file defines the HMI to PLC command interface for the manual MAKE     //
+// unit operation commands.                                                   //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      25-May-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+DATA_BLOCK "dbMAKE"
+TITLE = MAKE command interface between HMI and PLC
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : dbMAKE
+VERSION : 1.0
+
+STRUCT
+    CMD : STRUCT
+        IDLE : INT  := 0;
+        CHARGE : INT  := 1;
+        MANWAY : INT  := 2;
+        MEASURE : INT  := 3;
+        MIX : INT  := 4;
+        COMPLETE : INT  := 5;
+    END_STRUCT ;
+    CHARGE : STRUCT                    // Charge with WFI
+        MASS : REAL  := 0.0;
+    END_STRUCT ;
+    MIX : STRUCT                      // Charge with WFI
+        SPEED : REAL  := 0.0;
+        H : INT  := 0;
+        M : INT  := 0;
+        S : INT  := 0;
+    END_STRUCT ;
+    SELECTED : INT ;                   // The selected command
+END_STRUCT;
+
+BEGIN
+END_DATA_BLOCK

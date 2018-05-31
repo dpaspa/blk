@@ -539,7 +539,7 @@ _childParmIN_@@COUNTER@@_@@STATE@@:   NOP 0;
 @@ATTR_END|STATE@@
 
 @@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|CHILD_INIT_COMMAND@@
+@@ATTR_BEGIN|CHILD_INIT_COMMAND_TRUE@@
 NETWORK
 TITLE = Command child device @@CHILDALIAS@@ for state @@STATE@@ to its initial TRUE condition command
     //------------------------------------------------------------------------//
@@ -558,11 +558,11 @@ TITLE = Command child device @@CHILDALIAS@@ for state @@STATE@@ to its initial T
 
 _childInitTrue_@@COUNTER@@_@@STATE@@:   NOP 0;
 
-@@ATTR_END|CHILD_INIT_COMMAND@@
+@@ATTR_END|CHILD_INIT_COMMAND_TRUE@@
 @@ATTR_END|STATE@@
 
 @@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|CHILD_INIT_COMMAND@@
+@@ATTR_BEGIN|CHILD_INIT_COMMAND_FALSE@@
 NETWORK
 TITLE = Command child device @@CHILDALIAS@@ for state @@STATE@@ to its initial FALSE condition command
     //------------------------------------------------------------------------//
@@ -581,7 +581,7 @@ TITLE = Command child device @@CHILDALIAS@@ for state @@STATE@@ to its initial F
 
 _childInitFalse_@@COUNTER@@_@@STATE@@:   NOP 0;
 
-@@ATTR_END|CHILD_INIT_COMMAND@@
+@@ATTR_END|CHILD_INIT_COMMAND_FALSE@@
 @@ATTR_END|STATE@@
 
 @@ATTR_BEGIN|SFC@@
@@ -596,11 +596,11 @@ TITLE = Make sure all SFCs are stopped if stop command or new start command
     //------------------------------------------------------------------------//
     O #bmc.eventCmdStop;
     O #bmc.eventCmdStart;
-    JCN _notResetSFC_@@COUNTER|1@@_@@STATE@@;
+    JCN _notRestartSFC_@@COUNTER|1@@_@@STATE@@;
     A "alwaysHigh";
     = #@@SFC@@.RESET;
 
-_notResetSFC_@@COUNTER@@_@@STATE@@:   NOP 0;
+_notRestartSFC_@@COUNTER@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|SFC@@
 
@@ -920,9 +920,11 @@ TITLE = Check if the SFC Child command has changed
     //------------------------------------------------------------------------//
     // Check if the running SFC requests to change this child command:        //
     //------------------------------------------------------------------------//
+    A(;
     L #cmc@@CHILDINDEX@@.@@CHILDPARAMETERATTRIBUTE@@;
     L #@@SFC@@.@@CHILDPARAMETER@@;
     <>I;
+    );
     JCN _noCommandChange_@@COUNTER|1@@_@@STATE@@;
 
 NETWORK
@@ -973,9 +975,11 @@ TITLE = Check if any Child state does not match the command
     // checking if the first child state mismatch found:                      //
     //------------------------------------------------------------------------//
     A #timeCheckChildStateExpired;
+    A(;
     L #cmc@@CHILDINDEX@@.STATE;
     L #cmc@@CHILDINDEX@@.CMD;
     <>I;
+    );
     JCN _cNoMismatch_@@COUNTER|1@@_@@STATE@@;
     S #flags.childMismatch;
 

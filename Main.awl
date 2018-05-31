@@ -49,10 +49,8 @@ TITLE = Time Management
         NEW_TIME                    := "dbCONST".CHRONO.NEW_TIME ,
         Ret_Val                     := #TmRetVal ,
         CPU_TIME                    := "dbCONST".CHRONO.CPU_TIME ,
-        CPU_DATE                    := "dbCONST".CHRONO.CPU_DATE ,
-        WEEKDAY                     := "dbCONST".CHRONO.WEEKDAY
+        CPU_DATE                    := "dbCONST".CHRONO.CPU_DATE
     );
-    NOP 0;
 
 NETWORK
 TITLE = load OB1 previous cycle time into DB memory
@@ -61,9 +59,11 @@ TITLE = load OB1 previous cycle time into DB memory
 
 NETWORK
 TITLE = load OB1 maximum cycle time into DB memory
+    A(;
     L #OB1_PREV_CYCLE;
     L #OB1_MAX_CYCLE;
     >I;
+    );
     JCN notMaximum;
     L #OB1_PREV_CYCLE;
     T #OB1_MAX_CYCLE;

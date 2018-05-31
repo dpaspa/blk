@@ -21,6 +21,13 @@
 //                                            mode simulation.                //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+@@TEMPLATE_BEGIN@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|createInstancesGlobal@@
+// @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
+@@TEMPLATE_END@@
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifb@@CLASS@@"
 TITLE = @@CLASS@@ Instances
 { S7_Optimized_Access := 'TRUE' }
@@ -32,8 +39,10 @@ VERSION : 2.0
 // Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
-@@TEMPLATE_BEGIN@@
-    @@INSTANCE@@ : "fbAL1";   // @@DESCRIPTION@@
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|numInstances@@
+    item : Array[0..@@MAXITEM@@] of "fbAL1";
+@@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
 
@@ -47,7 +56,7 @@ TITLE = @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #@@INSTANCE@@.mc.ME;
+    T #item[@@IDX@@].mc.ME;
 
 NETWORK
 TITLE = @@INSTANCE@@ : Owner
@@ -55,7 +64,7 @@ TITLE = @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #@@INSTANCE@@.mc.OWNER;
+    T #item[@@IDX@@].mc.OWNER;
 
 NETWORK
 TITLE = @@INSTANCE@@ : Safe Command
@@ -63,7 +72,7 @@ TITLE = @@INSTANCE@@ : Safe Command
     // Set the safe command:                                                  //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.AL1.SAFE.CMD;
-    T #@@INSTANCE@@.mc.CMD_SAFE;
+    T #item[@@IDX@@].mc.CMD_SAFE;
 
 @@ATTR_BEGIN|ANALOG@@
 NETWORK
@@ -72,31 +81,27 @@ TITLE = @@INSTANCE@@ : Analog input attributes
     // Set the analog input attributes:                                       //
     //------------------------------------------------------------------------//
     L @@RANGELOW@@;
-    T #@@INSTANCE@@.ai.RANGE_LOWER;
+    T #item[@@IDX@@].ai.RANGE_LOWER;
     L @@RANGEHIGH@@;
-    T #@@INSTANCE@@.ai.RANGE_UPPER;
+    T #item[@@IDX@@].ai.RANGE_UPPER;
     L @@LIMITHH@@;
-    T #@@INSTANCE@@.ai.LIMIT_HH;
+    T #item[@@IDX@@].ai.LIMIT_HH;
     L @@LIMITH@@;
-    T #@@INSTANCE@@.ai.LIMIT_H;
+    T #item[@@IDX@@].ai.LIMIT_H;
     L @@LIMITL@@;
-    T #@@INSTANCE@@.ai.LIMIT_L;
+    T #item[@@IDX@@].ai.LIMIT_L;
     L @@LIMITLL@@;
-    T #@@INSTANCE@@.ai.LIMIT_LL;
+    T #item[@@IDX@@].ai.LIMIT_LL;
     A @@ENABLEHH@@;
-    = #@@INSTANCE@@.ai.ENABLE_HH;
+    = #item[@@IDX@@].ai.ENABLE_HH;
     A @@ENABLEH@@;
-    = #@@INSTANCE@@.ai.ENABLE_H;
+    = #item[@@IDX@@].ai.ENABLE_H;
     A @@ENABLEL@@;
-    = #@@INSTANCE@@.ai.ENABLE_L;
+    = #item[@@IDX@@].ai.ENABLE_L;
     A @@ENABLELL@@;
-    = #@@INSTANCE@@.ai.ENABLE_LL;
-    L "dbCONST".BLK.@@CLASS@@.STATE.ENABLED;
-    T #@@INSTANCE@@.ai.STATE_ENABLED;
-    L "dbCONST".BLK.@@CLASS@@.STATE.FAULT;
-    T #@@INSTANCE@@.ai.STATE_FAULT;
+    = #item[@@IDX@@].ai.ENABLE_LL;
     L "@@INSTANCE@@-RAW";
-    T #@@INSTANCE@@.ai.RAW_INPUT;
+    T #item[@@IDX@@].ai.RAW_INPUT;
 
 @@ATTR_END|ANALOG@@
 
@@ -105,15 +110,16 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #@@INSTANCE@@
-    (   _PV                  := #@@INSTANCE@@._PV ,
-        STATE                := #@@INSTANCE@@.STATE ,
-        DQ                   := #@@INSTANCE@@.DQ ,
-        INTERLOCK            := #@@INSTANCE@@.INTERLOCK ,
-        ALARM_LL             := #@@INSTANCE@@.ALARM_LL ,
-        ALARM_L              := #@@INSTANCE@@.ALARM_L ,
-        ALARM_H              := #@@INSTANCE@@.ALARM_H ,
-        ALARM_HH             := #@@INSTANCE@@.ALARM_HH
+    CALL #item[@@IDX@@]
+    (   CMD_ENABLE           := "dbCONST".BLK.@@CLASS@@.CMD.ENABLE ,
+        STATE_ENABLED        := "dbCONST".BLK.@@CLASS@@.STATE.ENABLED ,
+        STATE_FAULT          := "dbCONST".BLK.@@CLASS@@.STATE.FAULT ,
+        _PV                  := #item[@@IDX@@]._PV ,
+        DQ                   := #item[@@IDX@@].DQ ,
+        ALARM_LL             := #item[@@IDX@@].ALARM_LL ,
+        ALARM_L              := #item[@@IDX@@].ALARM_L ,
+        ALARM_H              := #item[@@IDX@@].ALARM_H ,
+        ALARM_HH             := #item[@@IDX@@].ALARM_HH
     );
 
 @@TEMPLATE_END@@

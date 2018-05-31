@@ -10,9 +10,11 @@ VERSION : 0.1
 BEGIN
 NETWORK
 TITLE = Command checking function
+    A(;
       L #Comand.New;//load current command
       L #Comand.Old;// load old command
       ==I;// check if equal
+    );
       JC CNCH;//if equal, Command not changed, end function
 // Command changed, lets check what is now
       SET;
@@ -21,35 +23,47 @@ TITLE = Command checking function
       T #Comand.Old;
 
 
+    A(;
       L #Comand.New;// Current command
       L "dbCONST".SEQ.CMD.START;//start comand equiv
       ==I;
+    );
       JC STRT;
 
+    A(;
       L #Comand.New;// Current command
       L "dbCONST".SEQ.CMD.STOP;//stop command equiv
       ==I;
+    );
       JC STOP;
 
 
+    A(;
       L #Comand.New;// Current command
       L "dbCONST".SEQ.CMD.PAUSE;//Pause command equiv
       ==I;
+    );
       JC PAUS;
 
+    A(;
       L #Comand.New;// Current command
       L "dbCONST".SEQ.CMD.RESUME;//Resume command equiv
       ==I;
+    );
       JC RESM;
 
+    A(;
       L #Comand.New;// Current command
       L "dbCONST".SEQ.CMD.ABORT;//Abort command equiv
       ==I;
+    );
       JC ABRT;
 
+    A(;
       L #Comand.New;// Current command
       L "dbCONST".SEQ.CMD.ACKNOWLEDGE_ERR;//Acknowledge command equiv
       ==I;
+    );
       JC ACKN;
 //No more specified command
       JU WCMD;//Wrong command/not specified command

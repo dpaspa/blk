@@ -22,6 +22,13 @@
 //                                            Instance comment added.         //
 // 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
 //----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+@@TEMPLATE_BEGIN@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|createInstancesGlobal@@
+// @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
+@@TEMPLATE_END@@
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbDI2"
 TITLE = Instances of DI2 General alarm single digital input Normally OFF
 { S7_Optimized_Access := 'TRUE' }
@@ -33,46 +40,48 @@ VERSION : 2.0
 // Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
-@@TEMPLATE_BEGIN@@
-    @@INSTANCE@@ : "fbDI2";  // @@DESCRIPTION@@
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|numInstances@@
+    item : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
+@@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
 
 BEGIN
 @@TEMPLATE_BEGIN|createInstances@@
 NETWORK
-TITLE = @@INSTANCE@@ : Unique ID
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     //------------------------------------------------------------------------//
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #@@INSTANCE@@.mc.ME;
+    T #item[@@IDX@@].mc.ME;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Owner
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     //------------------------------------------------------------------------//
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #@@INSTANCE@@.mc.OWNER;
+    T #item[@@IDX@@].mc.OWNER;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Safe Command on restart
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     //------------------------------------------------------------------------//
     // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTER|1@@;
     L "dbCONST".BLK.DI2.SAFE.CMD;
-    T #@@INSTANCE@@.mc.CMD_SAFE;
+    T #item[@@IDX@@].mc.CMD_SAFE;
 _notRestart_@@COUNTER@@:   NOP 0;
 
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process the instance:                       //
     //------------------------------------------------------------------------//
-    CALL #@@INSTANCE@@
+    CALL #item[@@IDX@@]
     (   DI_Auto              := "@@INSTANCE@@-DI"
     );
 

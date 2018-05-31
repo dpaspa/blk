@@ -121,9 +121,11 @@ TITLE = Set Data Quality
     //------------------------------------------------------------------------//
     // If no error set Data Quality DQ=1 (GOOD), else DQ=0 (BAD):             //
     //------------------------------------------------------------------------//
+    O(;
     AN #ai.RANGE_ERROR;
     AN #ai.BROKEN_WIRE;
     AN #ai.modeOOS;
+    );
     O #ai.modeMANUAL;
     = #ai.DQ;
 
@@ -184,17 +186,6 @@ TITLE = LowLow ALARM
     = #ai.ALARM_LL;
 
 NETWORK
-TITLE = INTERLOCK if bad data quality or high high limit
-    //------------------------------------------------------------------------//
-    // Set interlock flag if data quality is bad (Range error OR Broken Wire) //
-    // or if High High limit reached:                                         //
-    //------------------------------------------------------------------------//
-    O #ai.INTERLOCK;
-    O #ai.ALARM_HH;
-    ON #ai.DQ;
-    = #ai.INTERLOCK;
-
-NETWORK
 TITLE = Set scaled analog process value
     //------------------------------------------------------------------------//
     // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
@@ -205,28 +196,4 @@ TITLE = Set scaled analog process value
     L #tPV;
     T #ai.PV;
 
-NETWORK
-TITLE = Set Device State to Enabled if healthy
-    //------------------------------------------------------------------------//
-    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
-    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
-    //                                                                        //
-    // ENABLED if input signal is healthy:                                    //
-    //------------------------------------------------------------------------//
-    A #ai.DQ;
-    JCN _d;
-    L #ai.STATE_ENABLED;
-    T #ai.STATE;
-_d:   NOP 0;
-
-NETWORK
-TITLE = Set Device State to Fault if any field signal error
-    //------------------------------------------------------------------------//
-    // FAULT if any input error:                                              //
-    //------------------------------------------------------------------------//
-    AN #ai.DQ;
-    JCN _e;
-    L #ai.STATE_FAULT;
-    T #ai.STATE;
-_e:   NOP 0;
 END_FUNCTION

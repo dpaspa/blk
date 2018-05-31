@@ -23,6 +23,13 @@
 //                                            switch is ON.                   //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+@@TEMPLATE_BEGIN@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|createInstancesGlobal@@
+// @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
+@@TEMPLATE_END@@
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbHE1"
 TITLE = Instances of Manufacturing Filtration Line Heat Exchanger
 { S7_Optimized_Access := 'TRUE' }
@@ -34,15 +41,17 @@ VERSION : 2.0
 // Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
-@@TEMPLATE_BEGIN@@
-    @@INSTANCE@@ : "fbHE1";   // @@DESCRIPTION@@
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|numInstances@@
+    item : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
+@@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
 
 BEGIN
 @@TEMPLATE_BEGIN|createInstances@@
 NETWORK
-TITLE = @@INSTANCE@@ : Critical Interlocks
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     //------------------------------------------------------------------------//
     // Get the critical interlock if there is one. If none set as alwaysLow:  //
     //------------------------------------------------------------------------//
@@ -50,12 +59,14 @@ TITLE = @@INSTANCE@@ : Critical Interlocks
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbCRIL".@@INSTANCE@@cril.INTERLOCK;
+@@ATTR_BEGIN|CRIL_TARGET@@
+    A "idbCRIL".item[@@IDXIL@@].INTERLOCK;
+@@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #@@INSTANCE@@.mc.CRIL;
+    = #item[@@IDX@@].mc.CRIL;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Non-Critical Interlocks
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     //------------------------------------------------------------------------//
     // Get the non-critical interlock if there is one. If not set alwaysLow:  //
     //------------------------------------------------------------------------//
@@ -63,43 +74,45 @@ TITLE = @@INSTANCE@@ : Non-Critical Interlocks
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbNCRIL".@@INSTANCE@@ncril.INTERLOCK;
+@@ATTR_BEGIN|NCRIL_TARGET@@
+    A "idbNCRIL".item[@@IDXIL@@].INTERLOCK;
+@@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #@@INSTANCE@@.mc.NCRIL;
+    = #item[@@IDX@@].mc.NCRIL;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Unique ID
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     //------------------------------------------------------------------------//
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #@@INSTANCE@@.mc.ME;
+    T #item[@@IDX@@].mc.ME;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Owner
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     //------------------------------------------------------------------------//
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #@@INSTANCE@@.mc.OWNER;
+    T #item[@@IDX@@].mc.OWNER;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Safe Command on restart
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     //------------------------------------------------------------------------//
     // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTER|1@@;
     L "dbCONST".BLK.HE1.SAFE.CMD;
-    T #@@INSTANCE@@.mc.CMD_SAFE;
+    T #item[@@IDX@@].mc.CMD_SAFE;
 _notRestart_@@COUNTER@@:   NOP 0;
 
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #@@INSTANCE@@
+    CALL #item[@@IDX@@]
     (   FAULT                := "@@INSTANCE@@-FLT" ,
         DO                   := "@@INSTANCE@@-CMD"
     );

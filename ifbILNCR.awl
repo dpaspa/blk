@@ -11,6 +11,13 @@
 // Rev By               Date        CC        Note                            //
 // 1.0 David Paspa      17-Apr-2018 NA        Initial design.                 //
 //----------------------------------------------------------------------------//
+// Index  Target    Class  Description                                            //
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|NCRIL@@
+// @@IDX@@      @@INSTANCE@@    @@CLASS@@  @@DESCRIPTION@@
+@@ATTR_END|NCRIL@@
+@@TEMPLATE_END@@
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbNCRIL"
 TITLE = Instances of Non-Critical Interlocks
 { S7_Optimized_Access := 'TRUE' }
@@ -22,8 +29,10 @@ VERSION : 1.0
 // Define the instances of the FB type:                                       //
 //----------------------------------------------------------------------------//
 VAR
-@@TEMPLATE_BEGIN@@
-    @@INSTANCE@@ncril : "udtInterlock";     // @@DESCRIPTION@@
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|NCRIL_NUM@@
+    item : Array[0..@@MAXITEM@@] of "udtInterlock";
+@@ATTR_END|NCRIL_NUM@@
 @@TEMPLATE_END@@
 END_VAR
 
@@ -32,10 +41,10 @@ VAR_TEMP
 END_VAR
 
 BEGIN
-@@TEMPLATE_BEGIN@@
+@@TEMPLATE_BEGIN|NCRIL@@
 @@ATTR_BEGIN|NCRIL_EXISTS@@
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ initialise variables
     //------------------------------------------------------------------------//
     // NON-CRITICAL INTERLOCK   NON-CRITICAL INTERLOCK   NON-CRITICAL INTERLO //
     // NON-CRITICAL INTERLOCK   NON-CRITICAL INTERLOCK   NON-CRITICAL INTERLO //
@@ -59,7 +68,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 
 @@ATTR_BEGIN|NCRIL_INSTANCE@@
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTIONIL@@
+TITLE = Item @@IDX@@ @@INSTANCE@@ interlock source : @@DESCRIPTIONIL@@
     //------------------------------------------------------------------------//
     // Calculate the interlock condition:                                     //
     //------------------------------------------------------------------------//
@@ -69,7 +78,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTIONIL@@
 @@ATTR_END|NCRIL_INSTANCE@@
 @@ATTR_BEGIN|NCRIL_EXISTS@@
 NETWORK
-TITLE = @@INSTANCE@@ : Aggregate individual interlocks into overall INTERLOCK flag
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Aggregate individual interlocks into overall INTERLOCK flag
     //------------------------------------------------------------------------//
     // Determine if an interlock is raised:                                   //
     //------------------------------------------------------------------------//
@@ -91,14 +100,14 @@ TITLE = @@INSTANCE@@ : Aggregate individual interlocks into overall INTERLOCK fl
     = #tIL.INTERLOCK;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Update the instance data
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Update the instance data
     //------------------------------------------------------------------------//
     // Update the instance DB with the calculated interlock flags:            //
     //------------------------------------------------------------------------//
     CALL MOVE
     {value_type := 'Variant'}
     (   IN                   := #tIL ,
-        OUT                  := #@@INSTANCE@@ncril
+        OUT                  := #item[@@IDX@@]
     );
 
 @@ATTR_END|NCRIL_EXISTS@@

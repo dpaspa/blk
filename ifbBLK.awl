@@ -19,6 +19,13 @@
 // 0.2 Khairul Basar    28-Aug-2009 CC-09/023 Phases are updated.             //
 // 0.1 Khairul Basar    14-Aug-2009 CC-09/023 Initial design.                 //
 //----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+@@TEMPLATE_BEGIN@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|createInstancesGlobal@@
+// @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
+@@TEMPLATE_END@@
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifb@@CLASS@@"
 TITLE = @@CLASS@@ : @@CLASSDESCRIPTION@@
 { S7_Optimized_Access := 'TRUE' }
@@ -30,8 +37,10 @@ VERSION : 2.0
 // Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
-@@TEMPLATE_BEGIN@@
-    @@INSTANCE@@ : "fb@@CLASS@@";   // @@DESCRIPTION@@
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|numInstances@@
+    item : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
+@@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
 
@@ -54,9 +63,11 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbCRIL".@@INSTANCE@@cril.INTERLOCK;
+@@ATTR_BEGIN|CRIL_TARGET@@
+    A "idbCRIL".item[@@IDXIL@@].INTERLOCK;
+@@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #@@INSTANCE@@.mc.CRIL;
+    = #item[@@IDX@@].mc.CRIL;
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
@@ -67,9 +78,11 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbNCRIL".@@INSTANCE@@ncril.INTERLOCK;
+@@ATTR_BEGIN|NCRIL_TARGET@@
+    A "idbNCRIL".item[@@IDXIL@@].INTERLOCK;
+@@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #@@INSTANCE@@.mc.NCRIL;
+    = #item[@@IDX@@].mc.NCRIL;
 
 NETWORK
 TITLE = @@INSTANCE@@ : Unique ID
@@ -77,7 +90,7 @@ TITLE = @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #@@INSTANCE@@.mc.ME;
+    T #item[@@IDX@@].mc.ME;
 
 @@ATTR_BEGIN|ISOWNED@@
 NETWORK
@@ -86,7 +99,7 @@ TITLE = @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #@@INSTANCE@@.mc.OWNER;
+    T #item[@@IDX@@].mc.OWNER;
 @@ATTR_END|ISOWNED@@
 
 NETWORK
@@ -97,18 +110,21 @@ TITLE = @@INSTANCE@@ : Safe Command on startup
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTER|1@@;
     L "dbCONST".BLK.@@CLASS@@.SAFE.CMD;
-    T #@@INSTANCE@@.mc.CMD_SAFE;
+    T #item[@@IDX@@].mc.CMD_SAFE;
 _notRestart_@@COUNTER@@:   NOP 0;
 
+@@ATTR_BEGIN|pBLOCK_RECIPE_EXISTS@@
 @@ATTR_BEGIN|RECIPE_CLASS@@
 NETWORK
 TITLE = Recipe parameters if owned by @@RECIPENAME@@
     //------------------------------------------------------------------------//
     // Get the recipe parameters:                                             //
     //------------------------------------------------------------------------//
+    A(;
     L "dbCONST".BLK.ID.@@RECIPENAME@@;
-    L #@@INSTANCE@@.mc.RECIPE;
+    L #item[@@IDX@@].mc.RECIPE;
     ==I;
+    );
     JCN _notRecipe_@@INSTANCE@@_@@RECIPENAME@@;
 @@ATTR_BEGIN|pBLOCK_RECIPE@@
     L "dbRECIPE".@@RECIPENAME@@.@@BLOCKPARAMETER@@;
@@ -117,33 +133,34 @@ TITLE = Recipe parameters if owned by @@RECIPENAME@@
 _notRecipe_@@INSTANCE@@_@@RECIPENAME@@:   NOP 0;
 
 @@ATTR_END|RECIPE_CLASS@@
+@@ATTR_END|pBLOCK_RECIPE_EXISTS@@
 
 NETWORK
 TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #@@INSTANCE@@
+    CALL #item[@@IDX@@]
     (
 @@ATTR_BEGIN|TIMER@@
-        TIME_H               := #@@INSTANCE@@.TIME_H ,
-        TIME_M               := #@@INSTANCE@@.TIME_M ,
-        TIME_S               := #@@INSTANCE@@.TIME_S ,
-        REM_TIME_H           := #@@INSTANCE@@.REM_TIME_H ,
-        REM_TIME_M           := #@@INSTANCE@@.REM_TIME_M ,
-        REM_TIME_S           := #@@INSTANCE@@.REM_TIME_S ,
+        TIME_H               := #item[@@IDX@@].TIME_H ,
+        TIME_M               := #item[@@IDX@@].TIME_M ,
+        TIME_S               := #item[@@IDX@@].TIME_S ,
+        REM_TIME_H           := #item[@@IDX@@].REM_TIME_H ,
+        REM_TIME_M           := #item[@@IDX@@].REM_TIME_M ,
+        REM_TIME_S           := #item[@@IDX@@].REM_TIME_S ,
 @@ATTR_END|TIMER@@
 @@ATTR_BEGIN|pBLOCK_UNIQUE@@
-        _@@BLOCKPARAMETER@@   := #@@INSTANCE@@._@@BLOCKPARAMETER@@ ,
+        _@@BLOCKPARAMETER@@   := #item[@@IDX@@]._@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pBLOCK_UNIQUE@@
 @@ATTR_BEGIN|pBLOCK_RECIPE@@
         _@@BLOCKPARAMETER@@   := #t@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pBLOCK_RECIPE@@
 @@ATTR_BEGIN|LINK_BLK@@
-        _@@BLOCKPARAMETER@@   := "idb@@LINKCLASS@@".@@LINKINSTANCE@@.@@ACTUALATTRIBUTE@@ ,
+        _@@BLOCKPARAMETER@@   := "idb@@LINKCLASS@@".item[@@LINKIDX@@].@@ACTUALATTRIBUTE@@ ,
 @@ATTR_END|LINK_BLK@@
 @@ATTR_BEGIN|CHILD_INSTANCE@@
-        cmc@@CHILDINDEX@@    := "idb@@CHILDCLASS@@".@@CHILDINSTANCE@@.mc ,
+        cmc@@CHILDINDEX@@    := "idb@@CHILDCLASS@@".item[@@CHILDIDX@@].mc ,  // @@CHILDDESCRIPTION@@
 @@ATTR_END|CHILD_INSTANCE@@
 @@ATTR_BEGIN|pEventPromptExists@@
         eventPrompt          := "dbEVENTPrompt".eventPrompt,  // SFC events for operator prompts
@@ -157,7 +174,7 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_BEGIN|pEventLogTimeExists@@
         eventLogTime         := "dbEVENTLogTime".eventLogTime,  // SFC events for logging time data
 @@ATTR_END|pEventLogTimeExists@@
-        CHILD_RELEASE        := #@@INSTANCE@@.CHILD_RELEASE
+        CHILD_RELEASE        := #item[@@IDX@@].CHILD_RELEASE
     );
 
 @@TEMPLATE_END@@

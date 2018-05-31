@@ -36,6 +36,10 @@ VAR
     PV : Bool;               // Processed DI
 END_VAR
 
+VAR_IN_OUT
+    p : "udtDI1";            // Block data interface
+END_VAR
+
 VAR_TEMP
     tPV : Bool;              // Temporary processed DI signal
 END_VAR
@@ -51,7 +55,7 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mc                   := #mc
+    (   mc                   := #p.mc
     );
 
 NETWORK
@@ -63,7 +67,7 @@ TITLE = Set Device command which can only be ENABLE.
     // CMD is always ENABLE:                                                  //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.DI1.CMD.ENABLE;
-    T #mc.CMD;
+    T #p.mc.CMD;
 
 NETWORK
 TITLE = Process Digital Input Signal
@@ -74,15 +78,15 @@ TITLE = Process Digital Input Signal
     // Calculate the process value based on the mode:                         //
     //------------------------------------------------------------------------//
     O(;
-    A #mc.modeAUTO;
-    A #DI_Auto;
+    A #p.mc.modeAUTO;
+    A #p.DI_Auto;
     );
     O(;
-    A #mc.modeMANUAL;
-    A #DI_Manual;
+    A #p.mc.modeMANUAL;
+    A #p.DI_Manual;
     );
     = #tPV;
-    = #PV;
+    = #p.PV;
 
 NETWORK
 TITLE = Set ALARM Flag
@@ -93,8 +97,8 @@ TITLE = Set ALARM Flag
     // Set alarms:                                                            //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #mc.modeOOS;
-    = #ALARM;
+    AN #p.mc.modeOOS;
+    = #p.ALARM;
 
 NETWORK
 TITLE = Set INTERLOCK Flag
@@ -105,7 +109,7 @@ TITLE = Set INTERLOCK Flag
     // Set interlocks:                                                        //
     //------------------------------------------------------------------------//
     AN #tPV;
-    = #mc.INTERLOCK;
+    = #p.mc.INTERLOCK;
 
 NETWORK
 TITLE = Set Device State to Enabled if switch is on
@@ -118,7 +122,7 @@ TITLE = Set Device State to Enabled if switch is on
     A #tPV;
     JCN _a;
     L "dbCONST".BLK.DI1.STATE.ENABLED;
-    T #mc.STATE;
+    T #p.mc.STATE;
 _a:   NOP 0;
 
 NETWORK
@@ -127,9 +131,9 @@ TITLE = Setting Device State to ALARM
     // ALARM if switch is off and not OOS:                                    //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #mc.modeOOS;
+    AN #p.mc.modeOOS;
     JCN _b;
     L "dbCONST".BLK.DI1.STATE.ALARM;
-    T #mc.STATE;
+    T #p.mc.STATE;
 _b:   NOP 0;
 END_FUNCTION_BLOCK

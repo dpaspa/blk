@@ -13,6 +13,13 @@
 // Rev By               Date        CC        Note                            //
 // 1.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
 //----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+@@TEMPLATE_BEGIN@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|createInstancesGlobal@@
+// @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
+@@TEMPLATE_END@@
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbVS1"
 TITLE = Instances of VS1 Vacuum System grouped CM
 { S7_Optimized_Access := 'TRUE' }
@@ -24,53 +31,55 @@ VERSION : 2.0
 // Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
-@@TEMPLATE_BEGIN@@
-    @@INSTANCE@@ : "fbVS1";  // @@DESCRIPTION@@
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|numInstances@@
+    item : Array[0..@@MAXITEM@@] of "fbVS1";
+@@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
 
 BEGIN
 @@TEMPLATE_BEGIN|createInstances@@
 NETWORK
-TITLE = @@INSTANCE@@ : Unique ID
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     //------------------------------------------------------------------------//
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #@@INSTANCE@@.mc.ME;
+    T #item[@@IDX@@].mc.ME;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Owner
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     //------------------------------------------------------------------------//
     // Set the instance available:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.AVAILABLE;
-    T #@@INSTANCE@@.mc.OWNER;
+    T #item[@@IDX@@].mc.OWNER;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Safe Command on restart
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     //------------------------------------------------------------------------//
     // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTER|1@@;
     L "dbCONST".BLK.VS1.SAFE.CMD;
-    T #@@INSTANCE@@.mc.CMD_SAFE;
+    T #item[@@IDX@@].mc.CMD_SAFE;
 _notRestart_@@COUNTER@@:   NOP 0;
 
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #@@INSTANCE@@
+    CALL #item[@@IDX@@]
 @@ATTR_BEGIN|LINK@@
-    (   VLV1_STATE           := "idb@@V1STATELINKCLASS@@".@@V1STATELINKINSTANCE@@.mc.STATE ,
-        VLV2_STATE           := "idb@@V2STATELINKCLASS@@".@@V2STATELINKINSTANCE@@.mc.STATE ,
-        PUMP1_INTERLOCK      := "idb@@P1ILLINKCLASS@@".@@P1ILLINKINSTANCE@@.mc.INTERLOCK ,
-        PUMP2_INTERLOCK      := "idb@@P2ILLINKCLASS@@".@@P2ILLINKINSTANCE@@.mc.INTERLOCK ,
-        PUMP1_CMD            := "idb@@P1CMDLINKCLASS@@".@@P1CMDLINKINSTANCE@@.mc.CMD ,
-        PUMP2_CMD            := "idb@@P2CMDLINKCLASS@@".@@P2CMDLINKINSTANCE@@.mc.CMD
+    (   VLV1_STATE           := "idb@@V1STATELINKCLASS@@".item[@@V1STATELINKIDX@@].mc.STATE ,
+        VLV2_STATE           := "idb@@V2STATELINKCLASS@@".item[@@V2STATELINKIDX@@].mc.STATE ,
+        PUMP1_INTERLOCK      := "idb@@P1ILLINKCLASS@@".item[@@P1ILLINKIDX@@].mc.INTERLOCK ,
+        PUMP2_INTERLOCK      := "idb@@P2ILLINKCLASS@@".item[@@P2ILLINKIDX@@].mc.INTERLOCK ,
+        PUMP1_CMD            := "idb@@P1CMDLINKCLASS@@".item[@@P1CMDLINKIDX@@].mc.CMD ,
+        PUMP2_CMD            := "idb@@P2CMDLINKCLASS@@".item[@@P2CMDLINKIDX@@].mc.CMD
 @@ATTR_END|LINK@@
     );
 

@@ -174,9 +174,11 @@ TITLE = Enable command
     //                                                                        //
     // CMD is ENABLE:                                                         //
     //------------------------------------------------------------------------//
+    A(;
     L #mc.CMD;
     L "dbCONST".BLK.SIC1.CMD.ENABLE;
     ==I;
+    );
     =#cmdEnable;
 
 NETWORK
@@ -184,9 +186,11 @@ TITLE = Disable command
     //------------------------------------------------------------------------//
     // CMD is DISABLE:                                                        //
     //------------------------------------------------------------------------//
+    A(;
     L #mc.CMD;
     L "dbCONST".BLK.SIC1.CMD.DISABLE;
     ==I;
+    );
     = #cmdDisable
 
 NETWORK
@@ -214,10 +218,6 @@ TITLE = Analog input attributes
     = #ai.ENABLE_L;
     A "alwaysLow";
     = #ai.ENABLE_LL;
-    L "dbCONST".BLK.SIC1.STATE.ENABLED;
-    T #ai.STATE_ENABLED;
-    L "dbCONST".BLK.SIC1.STATE.FAULT;
-    T #ai.STATE_FAULT;
     L #RAW_INPUT;
     T #ai.RAW_INPUT;
 
@@ -306,9 +306,11 @@ TITLE = Permitted to run agitator if mass above minimum value
     //------------------------------------------------------------------------//
     // Permit the agitator to run if mass above minimum start level:          //
     //------------------------------------------------------------------------//
+    A(;
     L #tPV_MASS;
     L #MASS_RUN;
     >=R;
+    );
     JCN _a;
     S #permitMass;
 _a:   NOP 0;
@@ -318,9 +320,11 @@ TITLE = Low mass condition must stop the agitator from running
     //------------------------------------------------------------------------//
     // Inhibit the agitator from running if mass below minimum stop level:    //
     //------------------------------------------------------------------------//
+    A(;
     L #tPV_MASS;
     L #MASS_STOP;
     <R;
+    );
     JCN _b;
     R #permitMass;
 _b:   NOP 0;

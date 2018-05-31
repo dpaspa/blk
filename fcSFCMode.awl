@@ -10,9 +10,11 @@ VERSION : 0.1
 BEGIN
 NETWORK
 TITLE =
+    A(;
       L #Mode.current;//Load to Accu-1
       L #Mode.history;//Move Accu-1 into Accu-2,Load to Accu-1
       ==I;
+    );
       JC MNCH;//Mode not changed, exit function
 //Mode is changed
       SET;
@@ -20,19 +22,25 @@ TITLE =
       L #Mode.current;//Load current mode
       T #Mode.history;//Save current mode
 
+    A(;
       L #Mode.current;//Load to Accu-1=Mode
       L "dbCONST".SEQ.MODE.MANUAL;//Move Accu-1 into Accu-2,Load to Accu-1=Manual eqv
       ==I;
+    );
       JC MANU;//Jump to Manual label
 
+    A(;
       L #Mode.current;//Load to Accu-1=Mode
       L "dbCONST".SEQ.MODE.AUTO;//Move Accu-1 into Accu-2,Load to Accu-1= Auto Eqv
       ==I;
+    );
       JC AUTO;//Jump to Auto label
 
+    A(;
       L #Mode.current;//Load to Accu-1=Mode
       L "dbCONST".SEQ.MODE.OOS;//Move Accu-1 into Accu-2,Load to Accu-1=OOS eqv
       ==I;
+    );
       JC OOS;//Jump to OOS label
 
 //No more mode specified

@@ -28,14 +28,6 @@ VAR_IN_OUT
     bmc : "udtModeCommandBLK";         // Block mode and command
 END_VAR
 
-VAR_TEMP
-    edgeCommandStart : Bool;
-    edgeCommandStop : Bool;
-    edgeModeAuto : Bool;
-    edgeModeManual : Bool;
-    edgeModeOOS : Bool;
-END_VAR
-
 BEGIN
 NETWORK
 TITLE = Flag if block Mode just changed to Auto
@@ -46,7 +38,7 @@ TITLE = Flag if block Mode just changed to Auto
     // edge. The result will only last for one scan after the positive edge:  //
     //------------------------------------------------------------------------//
     A #mc.modeAUTO;
-    FP #edgeModeAuto;
+    FP #bmc.edgeModeAuto;
     = #bmc.eventModeAuto;
 
 NETWORK
@@ -55,7 +47,7 @@ TITLE = Flag if block Mode just changed to Manual
     // Check if the mode has just been changed to Manual:                     //
     //------------------------------------------------------------------------//
     A #mc.modeMANUAL;
-    FP #edgeModeManual;
+    FP #bmc.edgeModeManual;
     = #bmc.eventModeManual;
 
 NETWORK
@@ -63,8 +55,8 @@ TITLE = Flag if block Mode just changed to Out Of Service
     //------------------------------------------------------------------------//
     // Check if the mode has just been changed to Out of Service:             //
     //------------------------------------------------------------------------//
-    = #mc.modeOOS;
-    FP #edgeModeOOS;
+    A #mc.modeOOS;
+    FP #bmc.edgeModeOOS;
     = #bmc.eventModeOOS;
 
 NETWORK
@@ -88,7 +80,7 @@ TITLE = Flag if a new block running substate command issued
     <>I;
     );
     );
-    FP #edgeCommandStart;
+    FP #bmc.edgeCommandStart;
     = #bmc.eventCmdStart;
 
 NETWORK
@@ -113,10 +105,12 @@ TITLE = Flag if block stop command issued
     // Check if the stop command has just been issued if the bit positive     //
     // edge. The result will only last for one scan after the positive edge:  //
     //------------------------------------------------------------------------//
+    A(;
     L #mc.CMD;
     L "dbCONST".BLK.CMD.STOP;
     ==I;
-    FP #edgeCommandStop;
+    );
+    FP #bmc.edgeCommandStop;
     = #bmc.eventCmdStop;
 
 NETWORK
@@ -182,9 +176,11 @@ _e:   NOP 0;
     //------------------------------------------------------------------------//
     // Set the substate safe if any interlock:                                //
     //------------------------------------------------------------------------//
+    A(;
     L #mc.STATE;
     L "dbCONST".BLK.STATE.INTERLOCKED;
     ==I;
+    );
     JCN _f;
     L "dbCONST".BLK.SAFE.CMD;
     T #bmc.SUBS;

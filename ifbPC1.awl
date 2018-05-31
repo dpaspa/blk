@@ -31,6 +31,13 @@
 // Gas select, & P_CTRL variable created and programmed accordingly.Instance  //
 // parameter calls updated."idbPI1".PI_1010.INTERLOCK is linked with NCRIL.  //
 //----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+@@TEMPLATE_BEGIN@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|createInstancesGlobal@@
+// @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
+@@TEMPLATE_END@@
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "ifbPC1"
 TITLE = Instances of PC1 pressure controller
 { S7_Optimized_Access := 'TRUE' }
@@ -42,15 +49,17 @@ VERSION : 2.0
 // Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
-@@TEMPLATE_BEGIN@@
-    @@INSTANCE@@ : "fbPC1";   // @@DESCRIPTION@@
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|numInstances@@
+    item : Array[0..@@MAXITEM@@] of "fbPC1";
+@@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
 
 BEGIN
 @@TEMPLATE_BEGIN|createInstances@@
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     //------------------------------------------------------------------------//
     // Get the critical interlock if there is one. If not set alwaysLow:      //
     //------------------------------------------------------------------------//
@@ -58,70 +67,75 @@ TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbCRIL".@@INSTANCE@@cril.INTERLOCK;
+@@ATTR_BEGIN|CRIL_TARGET@@
+    A "idbCRIL".item[@@IDXIL@@].INTERLOCK;
+@@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #@@INSTANCE@@.mc.CRIL;
+    = #item[@@IDX@@].mc.CRIL;
 
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     //------------------------------------------------------------------------//
     // Get the non-critical interlock if there is one. If not set alwaysLow:  //
     //------------------------------------------------------------------------//
+
 @@ATTR_BEGIN|NCRIL_EXISTS@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
-    A "idbNCRIL".@@INSTANCE@@ncril.INTERLOCK;
+@@ATTR_BEGIN|NCRIL_TARGET@@
+    A "idbNCRIL".item[@@IDXIL@@].INTERLOCK;
+@@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #@@INSTANCE@@.mc.NCRIL;
+    = #item[@@IDX@@].mc.NCRIL;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Unique ID
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     //------------------------------------------------------------------------//
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #@@INSTANCE@@.mc.ME;
+    T #item[@@IDX@@].mc.ME;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Owner
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     //------------------------------------------------------------------------//
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #@@INSTANCE@@.mc.OWNER;
+    T #item[@@IDX@@].mc.OWNER;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Safe Command on restart
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     //------------------------------------------------------------------------//
     // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTER|1@@;
     L "dbCONST".BLK.PC1.SAFE.CMD;
-    T #@@INSTANCE@@.mc.CMD_SAFE;
+    T #item[@@IDX@@].mc.CMD_SAFE;
 _notRestart_@@COUNTER@@:   NOP 0;
 
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #@@INSTANCE@@
+    CALL #item[@@IDX@@]
 @@ATTR_BEGIN|LINK@@
-    (   PI1_PV               := "idb@@PILINKCLASS@@".@@PILINKINSTANCE@@.ai.PV ,
-        PI1_INTERLOCK        := "idb@@PILINKCLASS@@".@@PILINKINSTANCE@@.mc.INTERLOCK ,
+    (   PI1_PV               := "idb@@PILINKCLASS@@".item[@@PILINKIDX@@].ai.PV ,
+        PI1_INTERLOCK        := "idb@@PILINKCLASS@@".item[@@PILINKIDX@@].mc.INTERLOCK ,
 @@ATTR_END|LINK@@
         DB_L                 := 0.1 ,
         DB_H                 := 0.1 ,
-        _SETPOINT            := #@@INSTANCE@@._SETPOINT ,
-        _MEDIUM_GAS          := #@@INSTANCE@@._MEDIUM_GAS ,
+        _SETPOINT            := #item[@@IDX@@]._SETPOINT ,
+        _MEDIUM_GAS          := #item[@@IDX@@]._MEDIUM_GAS ,
 @@ATTR_BEGIN|LINK@@
-        VLV_DRAIN            := "idb@@DRAINLINKCLASS@@".@@DRAINLINKINSTANCE@@.mc.CMD ,
-        VLV_HPCA             := "idb@@HPCALINKCLASS@@".@@HPCALINKINSTANCE@@.mc.CMD ,
-        VLV_LPCA             := "idb@@LPCALINKCLASS@@".@@LPCALINKINSTANCE@@.mc.CMD ,
-        VLV_VACUUM           := "idb@@VACUUMLINKCLASS@@".@@VACUUMLINKINSTANCE@@.mc.CMD ,
-        VLV_VENT             := "idb@@VENTLINKCLASS@@".@@VENTLINKINSTANCE@@.mc.CMD
+        VLV_DRAIN            := "idb@@DRAINLINKCLASS@@".item[@@DRAINLINKIDX@@].mc.CMD ,
+        VLV_HPCA             := "idb@@HPCALINKCLASS@@".item[@@HPCALINKIDX@@].mc.CMD ,
+        VLV_LPCA             := "idb@@LPCALINKCLASS@@".item[@@LPCALINKIDX@@].mc.CMD ,
+        VLV_VACUUM           := "idb@@VACUUMLINKCLASS@@".item[@@VACUUMLINKIDX@@].mc.CMD ,
+        VLV_VENT             := "idb@@VENTLINKCLASS@@".item[@@VENTLINKIDX@@].mc.CMD
 @@ATTR_END|LINK@@
     );
 
