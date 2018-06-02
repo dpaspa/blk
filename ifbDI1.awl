@@ -42,7 +42,7 @@ VERSION : 2.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
-    item : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
+    p : Array[0..@@MAXITEM@@] of "udt@@CLASS@@";
 @@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
@@ -55,7 +55,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #item[@@IDX@@].mc.ME;
+    T #p[@@IDX@@].mc.c.ME;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
@@ -63,7 +63,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #item[@@IDX@@].mc.OWNER;
+    T #p[@@IDX@@].mc.o.OWNER;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -73,16 +73,24 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTER|1@@;
     L "dbCONST".BLK.DI1.SAFE.CMD;
-    T #item[@@IDX@@].mc.CMD_SAFE;
+    T #p[@@IDX@@].mc.c.CMD_SAFE;
 _notRestart_@@COUNTER@@:   NOP 0;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Field Input
+    //------------------------------------------------------------------------//
+    // Set the instance field input valve:                                    //
+    //------------------------------------------------------------------------//
+    A "@@INSTANCE@@-DI";
+    = #p[@@IDX@@].DI_Auto;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process the instance:                       //
     //------------------------------------------------------------------------//
-    CALL #item[@@IDX@@]
-    (   DI_Auto              := "@@INSTANCE@@-DI"
+    CALL "fc@@CLASS@@"
+    (   p                    := #p[@@IDX@@]
     );
 
 @@TEMPLATE_END@@
