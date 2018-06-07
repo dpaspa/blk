@@ -18,8 +18,6 @@
 // 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
 //----------------------------------------------------------------------------//
 // Index   Instance    Description                                            //
-@@TEMPLATE_BEGIN@@
-@@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|createInstancesGlobal@@
 // @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
 @@TEMPLATE_END@@
@@ -37,7 +35,7 @@ VERSION : 2.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
-    item : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
+    p : Array[0..@@MAXITEM@@] of "udt@@CLASS@@";
 @@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
@@ -47,10 +45,13 @@ BEGIN
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     //------------------------------------------------------------------------//
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    //                                                                        //
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #item[@@IDX@@].mc.ME;
+    T #p[@@IDX@@].origin.mc.ME;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
@@ -58,7 +59,23 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #item[@@IDX@@].mc.OWNER;
+    T #p[@@IDX@@].owner.mc.OWNER;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+    //------------------------------------------------------------------------//
+    // This block can only reside within this CPU:                            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].origin.mc.isOriginBlock;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in this CPU:            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].owner.mc.isOriginOwner;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -66,18 +83,26 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
-    JCN _notRestart_@@COUNTER|1@@;
+    JCN _notRestart_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.ZSC2.SAFE.CMD;
-    T #item[@@IDX@@].mc.CMD_SAFE;
-_notRestart_@@COUNTER@@:   NOP 0;
+    T #p[@@IDX@@].origin.mc.CMD_SAFE;
+_notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Switch Input
+    //------------------------------------------------------------------------//
+    // Set the instance switch input valve:                                   //
+    //------------------------------------------------------------------------//
+    A "@@INSTANCE@@-DI";
+    = #p[@@IDX@@].origin.DI_Auto;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #item[@@IDX@@]
-    (   DI_Auto              := "@@INSTANCE@@-DI"
+    CALL "fc@@CLASS@@"
+    (   p                    := #p[@@IDX@@]
     );
 
 @@TEMPLATE_END@@

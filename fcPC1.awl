@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fbPC1                                                         //
+// Class:       fcPC1                                                         //
 // Description:                                                               //
 // Vessel ON/OFF pressure control loop with output valve selection.           //
 //----------------------------------------------------------------------------//
@@ -48,32 +48,18 @@
 // ENABLED=1, DISABLED=2.                                                     //
 // Initial Value of MEASURE is changed to 1.0                                 //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "fbPC1"
+FUNCTION "fcPC1" : Void
 TITLE = PC1 : Vessel ON/OFF pressure control loop with output valve sel
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
-NAME : fbPC1
+NAME : fcPC1
 VERSION : 2.0
 
-VAR_INPUT
-    PI1_PV : Real;           // Pressure measured process value (after scaling)
-    PI1_INTERLOCK : Bool;    // Pressure indicator interlock
-    DB_L : Real;             // Deadband LOW differential
-    DB_H : Real;             // Deadband HIGH differential
-    _SETPOINT : Real;        // Pressure setpoint
-    _MEDIUM_GAS : Int;           // Select medium valve to be operated
-END_VAR
-
-VAR_OUTPUT
-    VLV_DRAIN : Int;         // Output command to DRAIN VALVE
-    VLV_HPCA : Int;          // Output command to HPCA VALVE
-    VLV_LPCA : Int;          // Output command to LPCA VALVE
-    VLV_VACUUM : Int;        // Output command to VACUUM VALVE
-    VLV_VENT : Int;          // Output command to VENT VALVE
-END_VAR
-
-VAR
-    mc : "udtModeCommand";   // Block mode and command
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR_IN_OUT
+    p : "udtPC1";            // Block data interface
 END_VAR
 
 VAR_TEMP
@@ -85,9 +71,10 @@ VAR_TEMP
     selectLPCA : Bool;
     selectVACUUM : Bool;
     selectVENT : Bool;
-    dbHigh : Real;   // Deadband pressure high
-    dbLow : Real;   // Deadband pressure low
+    dbHigh : Real;           // Deadband pressure high
+    dbLow : Real;            // Deadband pressure low
     tDO : Bool;
+    tDO_VENT : Bool;
 END_VAR
 
 BEGIN
@@ -100,8 +87,27 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mc                   := #mc
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
     );
+
+NETWORK
+TITLE = Check any child device is not in AUTO
+    //------------------------------------------------------------------------//
+    // Check if any child cannot be controlled if not in AUTO:                //
+    //------------------------------------------------------------------------//
+    O #p.origin.mc.INTERLOCK;
+    O #p.origin.mcDRAIN.INTERLOCK;
+    O #p.origin.mcHPCA.INTERLOCK;
+    O #p.origin.mcLPCA.INTERLOCK;
+    O #p.origin.mcVACUUM.INTERLOCK;
+    O #p.origin.mcVENT.INTERLOCK;
+    ON #p.origin.mcDRAIN.modeAUTO;
+    ON #p.origin.mcHPCA.modeAUTO;
+    ON #p.origin.mcLPCA.modeAUTO;
+    ON #p.origin.mcVACUUM.modeAUTO;
+    ON #p.origin.mcVENT.modeAUTO;
+    = #p.origin.mc.INTERLOCK;
 
 NETWORK
 TITLE = Command is DISABLE
@@ -111,8 +117,10 @@ TITLE = Command is DISABLE
     //                                                                        //
     // CMD is DISABLE:                                                        //
     //------------------------------------------------------------------------//
-    A(;
-    L #mc.CMD;
+    O #p.origin.mc.modeOOS;
+    O #p.origin.mc.INTERLOCK;
+    O(;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.PC1.CMD.DISABLE;
     ==I;
     );
@@ -123,11 +131,11 @@ TITLE = Command is PRESSURE control
     //------------------------------------------------------------------------//
     // CMD is PRESSURE control and no fault condition:                        //
     //------------------------------------------------------------------------//
-    AN mc.modeOOS;
-    AN mc.INTERLOCK;
-    AN PI1_INTERLOCK;
+    AN #p.origin.mc.modeOOS;
+    AN #p.origin.mc.INTERLOCK;
+    AN #p.origin.PI1_INTERLOCK;
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.PC1.CMD.PRESSURE;
     ==I;
     );
@@ -138,10 +146,10 @@ TITLE = Command is VALVE open
     //------------------------------------------------------------------------//
     // CMD is VALVE open and no fault condition:                              //
     //------------------------------------------------------------------------//
-    AN mc.modeOOS;
-    AN mc.INTERLOCK;
+    AN #p.origin.mc.modeOOS;
+    AN #p.origin.mc.INTERLOCK;
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.PC1.CMD.VALVE;
     ==I;
     );
@@ -158,8 +166,8 @@ TITLE = Calculate high pressure valve close limit in PRESSURE
     //------------------------------------------------------------------------//
     A #cmdPRESSURE;
     JCN _a;
-    L #_SETPOINT;
-    L #DB_H;
+    L #p.owner.SETPOINT;
+    L #p.owner.DB_H;
     +R;
     T #dbHigh;
 _a:   NOP 0;
@@ -172,8 +180,8 @@ TITLE = Calculate low pressure valve open limit in PRESSURE
     //------------------------------------------------------------------------//
     A #cmdPRESSURE;
     JCN _b;
-    L #_SETPOINT;
-    L #DB_L;
+    L #p.owner.SETPOINT;
+    L #p.owner.DB_L;
     -R;
     T #dbLow;
 _b:   NOP 0;
@@ -184,7 +192,7 @@ TITLE = Selected valve is DRAIN
     // Selected GAS valve is DRAIN:                                           //
     //------------------------------------------------------------------------//
     A(;
-    L #_MEDIUM_GAS;
+    L #p.owner.MEDIUM_GAS;
     L "dbCONST".SEL.GAS.DRAIN;
     ==I;
     );
@@ -196,7 +204,7 @@ TITLE = Selected valve is HPCA
     // Selected GAS valve is HPCA:                                            //
     //------------------------------------------------------------------------//
     A(;
-    L #_MEDIUM_GAS;
+    L #p.owner.MEDIUM_GAS;
     L "dbCONST".SEL.GAS.HPCA;
     ==I;
     );
@@ -208,7 +216,7 @@ TITLE = Selected valve is LPCA
     // Selected GAS valve is LPCA:                                            //
     //------------------------------------------------------------------------//
     A(;
-    L #_MEDIUM_GAS;
+    L #p.owner.MEDIUM_GAS;
     L "dbCONST".SEL.GAS.LPCA;
     ==I;
     );
@@ -220,7 +228,7 @@ TITLE = Selected valve is VACUUM
     // Selected GAS valve is VACUUM:                                          //
     //------------------------------------------------------------------------//
     A(;
-    L #_MEDIUM_GAS;
+    L #p.owner.MEDIUM_GAS;
     L "dbCONST".SEL.GAS.VACUUM;
     ==I;
     );
@@ -232,14 +240,14 @@ TITLE = Selected valve is VENT
     // Selected GAS valve is VENT:                                            //
     //------------------------------------------------------------------------//
     A(;
-    L #_MEDIUM_GAS;
+    L #p.owner.MEDIUM_GAS;
     L "dbCONST".SEL.GAS.VENT;
     ==I;
     );
     = #selectVENT;
 
 NETWORK
-TITLE = Check if selected vclve should be OPENED
+TITLE = Check if selected valve should be OPENED
     //------------------------------------------------------------------------//
     // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
     // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
@@ -252,7 +260,7 @@ TITLE = Check if selected vclve should be OPENED
     O(;
     A #cmdPRESSURE;
     A(;
-    L #PI1_PV;
+    L #p.origin.PI1_PV;
     L #dbLow;
     <R;
     );
@@ -265,21 +273,65 @@ NETWORK
 TITLE = Check if selected valve should be CLOSED
     //------------------------------------------------------------------------//
     // Check if selected valve should be CLOSED if PRESSURE control and       //
-    // pressure measured process PV is greater than the setpoint plus the     //
-    // high deadband or if VALVE open command:                                //
+    // pressure measured process PV is greater than the setpoint:             //
     //------------------------------------------------------------------------//
-    O #cmdDISABLE;
-    O(;
     A #cmdPRESSURE;
     A(;
-    L #PI1_PV;
-    L #dbHigh;
+    L #p.origin.PI1_PV;
+    L #p.owner.SETPOINT;
     >R;
-    );
     );
     JCN _d;
     R #tDO;
 _d:   NOP 0;
+
+NETWORK
+TITLE = Check if VENT valve should be OPENED in PRESSURE control
+    //------------------------------------------------------------------------//
+    // Check if vent valve should be OPENED if PRESSURE control and pressure  //
+    // measured process PV is greater than the setpoint plus the high         //
+    // deadband:                                                              //
+    //------------------------------------------------------------------------//
+    A #cmdPRESSURE;
+    AN #tDO;
+    A(;
+    L #p.origin.PI1_PV;
+    L #dbHigh;
+    >R;
+    );
+    JCN _e;
+    S #tDO_VENT;
+_e:   NOP 0;
+
+NETWORK
+TITLE = Check if VENT valve should be CLOSED
+    //------------------------------------------------------------------------//
+    // Check if vent valve should be CLOSED if PRESSURE control and pressure  //
+    // measured process PV is less than the setpoint:                         //
+    //------------------------------------------------------------------------//
+    A #cmdPRESSURE;
+    AN #tDO;
+    A(;
+    L #p.origin.PI1_PV;
+    L #p.owner.SETPOINT;
+    <R;
+    );
+    JCN _f;
+    R #tDO_VENT;
+_f:   NOP 0;
+
+NETWORK
+TITLE = Check if all valves should be CLOSED
+    //------------------------------------------------------------------------//
+    // Check if vent valve should be OPENED if PRESSURE control and pressure  //
+    // measured process PV is greater than the setpoint plus the high         //
+    // deadband:                                                              //
+    //------------------------------------------------------------------------//
+    A #cmdDISABLE;
+    JCN _g;
+    R #tDO;
+    R #tDO_VENT;
+_g:   NOP 0;
 
 NETWORK
 TITLE = Open DRAIN valve if required
@@ -290,10 +342,10 @@ TITLE = Open DRAIN valve if required
     //------------------------------------------------------------------------//
     A #tDO;
     A #selectDRAIN;
-    JCN _e;
+    JCN _h;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T #VLV_DRAIN;
-_e:   NOP 0;
+    T #p.origin.mcoDRAIN.CMD;
+_h:   NOP 0;
 
 NETWORK
 TITLE = Open HPCA valve if required
@@ -302,10 +354,10 @@ TITLE = Open HPCA valve if required
     //------------------------------------------------------------------------//
     A #tDO;
     A #selectHPCA;
-    JCN _f;
+    JCN _i;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T #VLV_HPCA;
-_f:   NOP 0;
+    T #p.origin.mcoHPCA.CMD;
+_i:   NOP 0;
 
 NETWORK
 TITLE = Open LPCA valve if required
@@ -314,10 +366,10 @@ TITLE = Open LPCA valve if required
     //------------------------------------------------------------------------//
     A #tDO;
     A #selectLPCA;
-    JCN _g;
+    JCN _j;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T #VLV_LPCA;
-_g:   NOP 0;
+    T #p.origin.mcoLPCA.CMD;
+_j:   NOP 0;
 
 NETWORK
 TITLE = Open VACUUM valve if required
@@ -326,22 +378,28 @@ TITLE = Open VACUUM valve if required
     //------------------------------------------------------------------------//
     A #tDO;
     A #selectVACUUM;
-    JCN _h;
+    JCN _k;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T #VLV_VACUUM;
-_h:   NOP 0;
+    T #p.origin.mcoVACUUM.CMD;
+_k:   NOP 0;
 
 NETWORK
 TITLE = Open VENT valve if required
     //------------------------------------------------------------------------//
     // If PRESSURE or VALVE and VENT selected then OPEN it:                   //
     //------------------------------------------------------------------------//
+    O(;
+    A #cmdPRESSURE;
+    A #tDO_VENT;
+    );
+    O(;
     A #tDO;
     A #selectVENT;
-    JCN _i;
+    );
+    JCN _l;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T #VLV_VENT;
-_i:   NOP 0;
+    T #p.origin.mcoVENT.CMD;
+_l:   NOP 0;
 
 NETWORK
 TITLE = Close DRAIN valve if required
@@ -352,10 +410,10 @@ TITLE = Close DRAIN valve if required
     //------------------------------------------------------------------------//
     ON #tDO;
     ON #selectDRAIN;
-    JCN _j;
+    JCN _m;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T #VLV_DRAIN;
-_j:   NOP 0;
+    T #p.origin.mcoDRAIN.CMD;
+_m:   NOP 0;
 
 NETWORK
 TITLE = Close HPCA valve if required
@@ -364,10 +422,10 @@ TITLE = Close HPCA valve if required
     //------------------------------------------------------------------------//
     ON #tDO;
     ON #selectHPCA;
-    JCN _k;
+    JCN _n;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T #VLV_HPCA;
-_k:   NOP 0;
+    T #p.origin.mcoHPCA.CMD;
+_n:   NOP 0;
 
 NETWORK
 TITLE = Close LPCA valve if required
@@ -376,10 +434,10 @@ TITLE = Close LPCA valve if required
     //------------------------------------------------------------------------//
     ON #tDO;
     ON #selectLPCA;
-    JCN _l;
+    JCN _o;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T #VLV_LPCA;
-_l:   NOP 0;
+    T #p.origin.mcoLPCA.CMD;
+_o:   NOP 0;
 
 NETWORK
 TITLE = Close VACUUM valve if required
@@ -388,22 +446,28 @@ TITLE = Close VACUUM valve if required
     //------------------------------------------------------------------------//
     ON #tDO;
     ON #selectVACUUM;
-    JCN _m;
+    JCN _p;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T #VLV_VACUUM;
-_m:   NOP 0;
+    T #p.origin.mcoVACUUM.CMD;
+_p:   NOP 0;
 
 NETWORK
 TITLE = Close VENT valve if required
     //------------------------------------------------------------------------//
     // If VENT valve to be closed then CLOSE it:                              //
     //------------------------------------------------------------------------//
-    ON #tDO;
-    ON #selectVENT;
-    JCN _n;
+    O(;
+    A #cmdPRESSURE;
+    AN #tDO_VENT;
+    );
+    O(;
+    A #selectVENT;
+    AN #tDO;
+    );
+    JCN _q;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T #VLV_VENT;
-_n:   NOP 0;
+    T #p.origin.mcoVENT.CMD;
+_q:   NOP 0;
 
 NETWORK
 TITLE = Set Device State to Disabled if commanded
@@ -414,10 +478,10 @@ TITLE = Set Device State to Disabled if commanded
     // State is DISABLED if commanded to DISABLE:                             //
     //------------------------------------------------------------------------//
     A #cmdDISABLE;
-    JCN _o;
+    JCN _r;
     L "dbCONST".BLK.PC1.STATE.DISABLED;
-    T #mc.STATE;
-_o:   NOP 0;
+    T #p.origin.mc.STATE;
+_r:   NOP 0;
 
 NETWORK
 TITLE = Set Device State to PRESSURE if commanded
@@ -425,10 +489,10 @@ TITLE = Set Device State to PRESSURE if commanded
     // State is PRESSURE if commanded to PRESSURE:                            //
     //------------------------------------------------------------------------//
     A #cmdPRESSURE;
-    JCN _p;
+    JCN _s;
     L "dbCONST".BLK.PC1.STATE.PRESSURE;
-    T #mc.STATE;
-_p:   NOP 0;
+    T #p.origin.mc.STATE;
+_s:   NOP 0;
 
 NETWORK
 TITLE = Set Device State to Fault if field fault signal is on
@@ -436,8 +500,8 @@ TITLE = Set Device State to Fault if field fault signal is on
     // State is VALVE if commanded to VALVE:                                  //
     //------------------------------------------------------------------------//
     A #cmdVALVE;
-    JCN _q;
+    JCN _t;
     L "dbCONST".BLK.PC1.STATE.VALVE;
-    T #mc.STATE;
-_q:   NOP 0;
-END_FUNCTION_BLOCK
+    T #p.origin.mc.STATE;
+_t:   NOP 0;
+END_FUNCTION

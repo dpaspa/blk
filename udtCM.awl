@@ -8,13 +8,440 @@
 // Rev By               Date        CC        Note                            //
 // 1.0 David Paspa      31-May-2018 NA        Reboot for S7-1500.             //
 //----------------------------------------------------------------------------//
+TYPE "udtAL1origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        ai : "udtAnalog";              // Analog input structure
+        PV : Real;                     // The measured process value
+        CMD_ENABLE : Int;              // The enable command for the block
+        STATE_ENABLED : Int;           // The enabled state of the block
+        STATE_FAULT : Int;             // The fault state of the block
+        DQ : Bool;                     // The quality of the measurement
+        ALARM_LL : Bool;               // Low low alarm is active if true
+        ALARM_L : Bool;                // Low alarm is active if true
+        ALARM_H : Bool;                // High alarm is active if true
+        ALARM_HH : Bool;               // High high alarm is active if true
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtAL1owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtAL1"
+VERSION : 1.0
+    STRUCT
+        origin : "udtAL1origin";       // Calculated data on origin CPU
+        owner : "udtAL1owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtDI1origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        DI_Auto : Bool;                // Input signal from Field
+        ALARM : Bool;                  // Alarm Flag (0 = OK, 1 = ALARM)
+        PV : Bool;                     // Processed DI
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtDI1owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+        DI_Manual : Bool;              // User digital signal for simulating
+    END_STRUCT;
+END_TYPE
+
 TYPE "udtDI1"
 VERSION : 1.0
     STRUCT
-        mc : "udtModeCommand";         // Block mode and command
-        ALARM : Bool;                  // Alarm Flag (0 = OK, 1 = ALARM)
+        origin : "udtDI1origin";       // Calculated data on origin CPU
+        owner : "udtDI1owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtDI2origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
         DI_Auto : Bool;                // Input signal from Field
-        DI_Manual : Bool;              // User digital signal for simulating
+        ALARM : Bool;                  // Alarm Flag (0 = OK, 1 = ALARM)
         PV : Bool;                     // Processed DI
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtDI2owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+        DI_Manual : Bool;              // User digital signal for simulating
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtDI2"
+VERSION : 1.0
+    STRUCT
+        origin : "udtDI2origin";       // Calculated data on origin CPU
+        owner : "udtDI2owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtDI3origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        ALARM : Bool;                  // Alarm Flag (0 = OK, 1 = ALARM)
+        PV : Bool;                     // Processed DI
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtDI3owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+        DI_Manual : Bool;              // User digital signal for simulating
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtDI3"
+VERSION : 1.0
+    STRUCT
+        origin : "udtDI3origin";       // Calculated data on origin CPU
+        owner : "udtDI3owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtHE1origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        ALARM : Bool;                  // Alarm Flag (0 = OK, 1 = ALARM)
+        DO : Bool;                     // Output Signal to Heating Element
+        FAULT : Bool;                  // Fault input signal from Field
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtHE1owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+        CUTOUT : Bool;                 // Flag indicating if TI alarm is to cutout (0= Alarm Enabled, 1= Alarm Disabled)
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtHE1"
+VERSION : 1.0
+    STRUCT
+        origin : "udtHE1origin";       // Calculated data on origin CPU
+        owner : "udtHE1owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtMOD1origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        RAW_OUTPUT : Int;              // Raw output signal to Field (4mA = 0, 20mA = 27648)
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtMOD1owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+        POS_LOCAL : Real;              // Local valve position setpoint
+        POS_REMOTE : Real;             // Remote valve position setpoint
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtMOD1"
+VERSION : 1.0
+    STRUCT
+        origin : "udtMOD1origin";       // Calculated data on origin CPU
+        owner : "udtMOD1owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtMOT1origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        BRK	: Bool;                    // Motor breaker fault
+        PHR : Bool;                    // Three-phase relay alarm
+        FB_RUN : Bool;
+        OUT_Q : Bool;                  // Output to Start/Stop the motor
+        ALM_BRK : Bool;
+        ALM_PHR : Bool;
+        FAIL_START : Bool;             // Fail to start
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtMOT1owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtMOT1"
+VERSION : 1.0
+    STRUCT
+        origin : "udtMOT1origin";       // Calculated data on origin CPU
+        owner : "udtMOT1owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtPC1origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        mcDRAIN : "udtMCOrigin";       // Mode and command for DRAIN VALVE origin
+        mcHPCA : "udtMCOrigin";        // Mode and command for HPCA VALVE origin
+        mcLPCA : "udtMCOrigin";        // Mode and command for LPCA VALVE origin
+        mcVACUUM : "udtMCOrigin";      // Mode and command for VACUUM VALVE origin
+        mcVENT : "udtMCOrigin";        // Mode and command for VENT VALVE origin
+        mcoDRAIN : "udtMCOwner";       // Mode and command for DRAIN VALVE owner
+        mcoHPCA : "udtMCOwner";        // Mode and command for HPCA VALVE owner
+        mcoLPCA : "udtMCOwner";        // Mode and command for LPCA VALVE owner
+        mcoVACUUM : "udtMCOwner";      // Mode and command for VACUUM VALVE owner
+        mcoVENT : "udtMCOwner";        // Mode and command for VENT VALVE owner
+        PI1_PV : Real;                 // Pressure measured process value (after scaling)
+        PI1_INTERLOCK : Bool;          // Pressure indicator interlock
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtPC1owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+        SETPOINT : Real;               // Pressure setpoint
+        MEDIUM_GAS : Int;              // Select medium valve to be operated
+        DB_L : Real;                   // Deadband LOW differential
+        DB_H : Real;                   // Deadband HIGH differential
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtPC1"
+VERSION : 1.0
+    STRUCT
+        origin : "udtPC1origin";       // Calculated data on origin CPU
+        owner : "udtPC1owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtPOSxorigin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        FB_C : Bool;                   // Close feedback signal from field
+        FB_O : Bool;                   // Open feedback signal from field
+        NC : Bool;                     // Set if Normally Close valve
+        FAULT_C : Bool;                // Valve fail to close
+        FAULT_O : Bool;                // Valve fail to Open
+        OUT_Q : Bool;                  // Valve open/close command
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtPOSxowner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtPOSx"
+VERSION : 1.0
+    STRUCT
+        origin : "udtPOSxorigin";       // Calculated data on origin CPU
+        owner : "udtPOSxowner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtSIC1origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        ai : "udtAnalog";              // Analog input structure
+        RAW_INPUT : Int;               // Raw input from the field
+        BRK	: Bool;                    // Motor breaker fault
+        PHR : Bool;                    // Three-phase relay alarm
+        FLP : Bool;                    // Pulse counter fault
+        FLT : Bool;                    // Inverter fault
+        THM : Bool;                    // Thermistor module alarm
+        MASS_RUN : Real;               // Low mass threshold at which the agitator may run
+        MASS_STOP : Real;              // Low low mass threshold at which the agitator must stop
+        MI1_MASS : Real;               // Measured Mass
+        MI1_DQ : Bool;                 // Measured Mass Data Quality
+        RANGE_UPPER : Real;            // Upper mass range limit
+        RANGE_LOWER : Real;            // Lower mass range limit
+        POLARITY : Bool;               // 0- no polarity(0 to z), 1= dual polarity(-x to +y)
+        LIMIT_HH : Real;               // High High speed alarm limit
+        LIMIT_H : Real;                // High speed alarm limit
+        FB_TDELAY : Time := T#20S;
+        P_SEL : Bool := TRUE;
+        I_SEL : Bool := TRUE;
+        D_SEL : Bool := TRUE;
+        GAIN : Real := 1.0;
+        TI : Time := T#20S;
+        TD : Time := T#10S;
+        CYCLE : Time := T#1S;          // SAMPLING TIME:The time between the block calls constant
+        OUT_Q : Bool;                  // Inverter Motor Run/Stop Command
+        PV : Real;                     // Measured Value (after scaling)
+        RUNNING : Bool;
+        OUT_Q_F : Bool;
+        OUT_Q_R : Bool;
+        LMN : Real;                    // PID controller output (0-100%)
+        DQ : Bool;
+        ALM_BRK : Bool;
+        ALM_PHR : Bool;
+        ALM_FLP : Bool;
+        ALM_FLT : Bool;
+        ALM_THM : Bool;
+        RUN_FAULT : Bool;
+        OUT_SETPOINT : Real;           // Setpoint readvalue
+        OUT_LMN_PER : Word;            // Inverter speed reference input
+        OUT_LMN : Real;                // Inverter Speed reference from PID
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtSIC1owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+        SETPOINT : Real;               // Agitator speed setpoint
+        USER_INPUT : Word;             // Manual mode, equivallent of Analog input, to be entered by Operator
+        MAN_PID : Bool;                // Manual non pid selection
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtSIC1"
+VERSION : 1.0
+    STRUCT
+        origin : "udtSIC1origin";       // Calculated data on origin CPU
+        owner : "udtSIC1owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtTC1origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        mcTCV : "udtMCOrigin";         // TCV Block mode and command origin
+        mcoTCV : "udtMCOwner";         // TCV Block mode and command owner
+        GAIN : Real := 1.0;            // Proportional Gain
+        TI : Time := T#20S;            // Integral Time
+        TD : Time := T#10S;            // Derivative Time
+        CYCLE : Time := T#100MS;       // PID Block Sampling Time
+        P_SEL : Bool := TRUE;          // Proportional Action ON/OFF
+        I_SEL : Bool := TRUE;          // Integral Action ON/OFF
+        D_SEL : Bool := TRUE;          // Derivative Action ON/OFF
+        TI1_PV : Real;                 // Measured Value from TI
+        LMN : Real;                    // PID controller output (0-100%)
+        TCVPOS : Real;                 // Output (0-100%) to TCV remote setpoint
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtTC1owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+        SETPOINT : Real;               // Setpoint
+        MAN_PID : Bool;                // Manual non pid selection
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtTC1"
+VERSION : 1.0
+    STRUCT
+        origin : "udtTC1origin";       // Calculated data on origin CPU
+        owner : "udtTC1owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtVS1origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        mcPUMP1 : "udtMCOrigin";       // Vacuum Pump 1 mode and command origin
+        mcPUMP2 : "udtMCOrigin";       // Vacuum Pump 1 mode and command origin
+        mcoPUMP1 : "udtMCOwner";       // Vacuum Pump 1 command owner
+        mcoPUMP2 : "udtMCOwner";       // Vacuum Pump 1 command owner
+        mcVALVE1 : "udtMCOrigin";      // State of the user 1 valve
+        mcVALVE2 : "udtMCOrigin";      // State of the user 1 valve
+        FAULT : Bool;
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtVS1owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtVS1"
+VERSION : 1.0
+    STRUCT
+        origin : "udtVS1origin";       // Calculated data on origin CPU
+        owner : "udtVS1owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtZSC1origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        DI_Auto : Bool;                // Input signal from Field
+        ALARM : Bool;                  // Alarm Flag (0 = OK, 1 = ALARM)
+        PV : Bool;                     // Processed DI
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtZSC1owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+        DI_Manual : Bool;              // User digital signal for simulating
+        CUTOUT : Bool;                 // Flag indicating if alarm is to be cutout (0= Alarm Enabled, 1= Alarm Disabled)
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtZSC1"
+VERSION : 1.0
+    STRUCT
+        origin : "udtZSC1origin";       // Calculated data on origin CPU
+        owner : "udtZSC1owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtZSC2origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        DI_Auto : Bool;                // Input signal from Field
+        ALARM : Bool;                  // Alarm Flag (0 = OK, 1 = ALARM)
+        PV : Bool;                     // Processed DI
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtZSC2owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+        DI_Manual : Bool;              // User digital signal for simulating
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtZSC2"
+VERSION : 1.0
+    STRUCT
+        origin : "udtZSC2origin";       // Calculated data on origin CPU
+        owner : "udtZSC2owner";         // Directives from owner CPU
     END_STRUCT;
 END_TYPE

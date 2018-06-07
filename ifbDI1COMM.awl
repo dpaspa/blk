@@ -1,0 +1,321 @@
+﻿FUNCTION_BLOCK "ifbDI1"
+TITLE = Instances of DI1 General alarm single digital input Normally ON
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifbDI1
+VERSION : 2.0
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Class:       ifbDI1                                                        //
+// Description: Instances of DI1                                              //
+//                                                                            //
+// General alarm single digital input.                                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.6 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.5 Khairul Basar    03-Oct-2009 CC-09/016 PSH_parameters corrected.       //
+// 0.4 Khairul Basar    15-Sep-2009 CC-09/016 PSA_1010 DI_USER assigned       //
+//                                            correctly.                      //
+// 0.3 Khairul Basar    09-Sep-2009 CC-09/016 I/O assignment associated with  //
+//                                            corresponding Instance is       //
+//                                            corrected.                      //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Mode=1 initialized.             //
+//                                            Instance comment added.         //
+// 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
+//----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+// 0       ASL1000      Instrument Air Switch
+// 1       ASL2000      Instrument Air Switch
+// 2       ASL3000      Instrument Air Switch
+// 3       ASL4000      Instrument Air Switch
+// 4       ES1100      M1 Emergency Stop mounted on M1 HMI
+// 5       ES1101      M1 Emergency Stop mounted on M1/M2 Shared HMI
+// 6       ES1200      M2 Emergency Stop mounted on M2 HMI Feed to M1
+// 7       ES1201      M2 Emergency Stop mounted on M1/M2 Shared HMI Feed to M1
+// 8       ES2100      M2 Emergency Stop mounted on M2 HMI
+// 9       ES2101      M2 Emergency Stop mounted on M1/M2 Shared HMI
+// 10       ES3100      S1 Emergency Stop mounted on S1 HMI
+// 11       ES3400      S2 Emergency Stop mounted on S2 HMI Feed to S1
+// 12       ES4100      S2 Emergency Stop mounted on S2 HMI
+// 13       RD1101      M1 Burst Disc
+// 14       RD2101      M2 Burst Disc
+// 15       RD3101      S1 Burst Disc
+// 16       RD4101      S2 Burst Disc
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+// Declare the instance objects of the class:                                 //
+//----------------------------------------------------------------------------//
+   VAR 
+      p : Array[0..19] of "udtDI1";
+      BSEND_1 {OriginalPartName := 'BSEND_SFB_PART'; LibVersion := '1.2'} : BSEND;
+      BSEND_2 {OriginalPartName := 'BSEND_SFB_PART'; LibVersion := '1.2'} : BSEND;
+      BRCV_1 {OriginalPartName := 'BRCV_SFB_PART'; LibVersion := '1.2'} : BRCV;
+      BRCV_2 {OriginalPartName := 'BRCV_SFB_PART'; LibVersion := '1.2'} : BRCV;
+      CTR { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Int;   // Counter
+      SendErrorStatus1 : Word;
+      SendErrorStatus2 : Word;
+      RcvErrorStatus1 : Word;
+      RcvErrorStatus2 : Word;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Item 0 ASL1000 : Unique ID
+//------------------------------------------------------------------------//
+// Set the instance unique ID:                                            //
+//------------------------------------------------------------------------//
+      L "dbCONST".BLK.ID.ASL1000;
+      T #p[0].origin.mc.ME;
+
+NETWORK
+TITLE = Item 0 ASL1000 : Owner
+//------------------------------------------------------------------------//
+// Set the instance owner:                                                //
+//------------------------------------------------------------------------//
+      L "dbCONST".BLK.ID.M1;
+      T #p[0].owner.mc.OWNER;
+
+NETWORK
+TITLE = Item 0 ASL1000 : Block Origin
+//------------------------------------------------------------------------//
+// This block can only reside within this CPU:                            //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      = #p[0].origin.mc.isOriginBlock;
+
+NETWORK
+TITLE = Item 0 ASL1000 : Owner Origin
+//------------------------------------------------------------------------//
+// This block can only be owned by a parent block in this CPU:            //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      = #p[0].owner.mc.isOriginOwner;
+
+NETWORK
+TITLE = Item 0 ASL1000 : Safe Command on restart
+//------------------------------------------------------------------------//
+// Set the safe command if restarting the PLC:                            //
+//------------------------------------------------------------------------//
+      A "flagFirstScanRestart";
+      JCN _notRestart_1;
+      L "dbCONST".BLK.DI1.SAFE.CMD;
+      T #p[0].origin.mc.CMD_SAFE;
+_notRestart_1:      NOP 0;
+
+NETWORK
+TITLE = Item 0 ASL1000 : Field Input
+//------------------------------------------------------------------------//
+// Set the instance field input valve:                                    //
+//------------------------------------------------------------------------//
+      A "ASL1000-DI";
+      = #p[0].origin.DI_Auto;
+
+NETWORK
+TITLE = Item 0 ASL1000 : Instrument Air Switch
+//------------------------------------------------------------------------//
+// Call the class function to process the instance:                       //
+//------------------------------------------------------------------------//
+
+      CALL "fcDI1"
+      (  p                           := #p[0]
+      );
+
+NETWORK
+TITLE = Counter
+      A "1SEC_T";
+      JCN NEXT;
+      L #CTR;
+      INC 1;
+      T #CTR;
+NEXT:      NOP 0;
+
+
+NETWORK
+TITLE = Transfer item 0 ASL1000 Block data to partner CPU
+//------------------------------------------------------------------------//
+// If this is the Block origin then transfer the calculated parameters:   //
+//------------------------------------------------------------------------//
+      A #p[0].origin.mc.isOriginBlock;
+      JCN _notOriginBlockASL1000;
+      A(;
+      L #CTR;
+      L 1;
+      ==I;
+      );
+      S #BSEND_1.REQ;
+
+_notOriginBlockASL1000:      NOP 0;
+      AN #p[0].origin.mc.isOriginBlock;
+      O(;
+      L #CTR;
+      L 1;
+      <>I;
+      );
+      R #BSEND_1.REQ;
+
+NETWORK
+TITLE = BSEND 1
+//SEND
+      CALL #BSEND_1
+      {ptr_type := 'Variant', id_type := 'CONN_PRG', r_id_type := 'CONN_R_ID'}
+      (  REQ                         := #BSEND_1.REQ , 
+         R                           := #BSEND_1.R , 
+         ID                          := #BSEND_1.ID , 
+         R_ID                        := #BSEND_1.R_ID , 
+         DONE                        := #BSEND_1.DONE , 
+         ERROR                       := #BSEND_1.ERROR , 
+         STATUS                      := #BSEND_1.STATUS , 
+         SD_1                        := "idbDI1".p[0].origin , 
+         LEN                         := #BSEND_1.LEN
+      );
+
+//STORE PREVIOUS ERROR STATUS
+      A #BSEND_1.ERROR;
+      AN #BSEND_1.DONE;
+      JCN OUT1;
+      L #BSEND_1.STATUS;
+      T #SendErrorStatus1;
+OUT1:      NOP 0;
+
+
+NETWORK
+TITLE = Receive item 0 ASL1000 Block data from partner CPU
+//------------------------------------------------------------------------//
+// If this is the Block origin then transfer the calculated parameters:   //
+//------------------------------------------------------------------------//
+      AN #p[0].origin.mc.isOriginBlock;
+      A(;
+      L #CTR;
+      L 2;
+      ==I;
+      );
+      = #BRCV_1.EN_R;
+
+//RECEIVE
+      CALL #BRCV_1
+      {ptr_type := 'Variant', id_type := 'CONN_PRG', r_id_type := 'CONN_R_ID'}
+      (  EN_R                        := #BRCV_1.EN_R , 
+         ID                          := #BRCV_1.ID , 
+         R_ID                        := #BRCV_1.R_ID , 
+         NDR                         := #BRCV_1.NDR , 
+         ERROR                       := #BRCV_1.ERROR , 
+         STATUS                      := #BRCV_1.STATUS , 
+         RD_1                        := "idbDI1".p[0].origin , 
+         LEN                         := #BRCV_1.LEN
+      );
+
+//STORE PREVIOUS ERROR STATUS
+      A #BRCV_1.ERROR;
+      JCN OUT2;
+      L #BRCV_1.STATUS;
+      T #RcvErrorStatus1;
+OUT2:      NOP 0;
+
+
+NETWORK
+TITLE = Transfer item 0 ASL1000 Owner data to partner CPU
+//------------------------------------------------------------------------//
+// If this is the Owner origin then transfer the owner parameters:        //
+//------------------------------------------------------------------------//
+      A #p[0].owner.mc.isOriginOwner;
+      JCN _notOriginOwnerASL1000;
+      A(;
+      L #CTR;
+      L 3;
+      ==I;
+      );
+      A(;
+      O #BSEND_1.DONE;
+      O #BSEND_1.ERROR;
+      );
+
+      S #BSEND_2.REQ;
+
+
+_notOriginOwnerASL1000:      NOP 0;
+      AN #p[0].owner.mc.isOriginOwner;
+      O(;
+      L #CTR;
+      L 3;
+      <>I;
+      );
+      R #BSEND_2.REQ;
+
+NETWORK
+TITLE = BSEND 2
+//SEND
+      CALL #BSEND_2
+      {ptr_type := 'Variant', id_type := 'CONN_PRG', r_id_type := 'CONN_R_ID'}
+      (  REQ                         := #BSEND_2.REQ , 
+         R                           := #BSEND_2.R , 
+         ID                          := #BSEND_2.ID , 
+         R_ID                        := #BSEND_2.R_ID , 
+         DONE                        := #BSEND_2.DONE , 
+         ERROR                       := #BSEND_2.ERROR , 
+         STATUS                      := #BSEND_2.STATUS , 
+         SD_1                        := "idbDI1".p[0].owner , 
+         LEN                         := #BSEND_2.LEN
+      );
+
+//STORE PREVIOUS ERROR STATUS
+      A #BSEND_2.ERROR;
+      AN #BSEND_2.DONE;
+      JCN OUT3;
+      L #BSEND_2.STATUS;
+      T #SendErrorStatus2;
+OUT3:      NOP 0;
+
+
+NETWORK
+TITLE = Receive item 0 ASL1000 Owner data to partner CPU
+//------------------------------------------------------------------------//
+// If this is the Owner origin then transfer the owner parameters:        //
+//------------------------------------------------------------------------//
+      AN #p[0].owner.mc.isOriginOwner;
+      A(;
+      L #CTR;
+      L 4;
+      ==I;
+      );
+      = #BRCV_2.EN_R;
+
+//RECEIVE
+      CALL #BRCV_2
+      {ptr_type := 'Variant', id_type := 'CONN_PRG', r_id_type := 'CONN_R_ID'}
+      (  EN_R                        := #BRCV_2.EN_R , 
+         ID                          := #BRCV_2.ID , 
+         R_ID                        := #BRCV_2.R_ID , 
+         NDR                         := #BRCV_2.NDR , 
+         ERROR                       := #BRCV_2.ERROR , 
+         STATUS                      := #BRCV_2.STATUS , 
+         RD_1                        := "idbDI1".p[0].owner , 
+         LEN                         := #BRCV_2.LEN
+      );
+
+//STORE PREVIOUS ERROR STATUS
+      A #BRCV_2.ERROR;
+      JCN OUT4;
+      L #BRCV_2.STATUS;
+      T #RcvErrorStatus1;
+OUT4:      NOP 0;
+
+NETWORK
+TITLE = Reset counter
+      A(;
+      L #CTR;
+      L 4;
+      >I;
+      );
+      JCN OUT;
+      L 1;
+      T #CTR;
+OUT:      NOP 0;
+
+END_FUNCTION_BLOCK
+

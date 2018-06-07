@@ -1,32 +1,36 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fbDI3                                                         //
+// Class:       fcZSC2                                                        //
 // Description:                                                               //
-// General alarm single digital input.                                        //
+// Flowpath connection indication.                                            //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 1.0 David Paspa      17-Apr-2018 NA        Initial design from DI1.        //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.4 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic.             //
+// 0.3 Khairul Basar    02-Oct-2009 CC-09/016 NW3 DI changed from NC to NO.   //
+// 0.2 Khairul Basar    04-Sep-2009 CC-09/016 Mode=1 initialized.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "fbDI3"
-TITLE = DI3 : General alarm with software input
+FUNCTION "fcZSC2" : Void
+TITLE = ZSC2 : Flowpath connection indication
 { S7_Optimized_Access := 'TRUE' }
-NAME : fbDI3
 AUTHOR : REO
-VERSION : 1.0
+NAME : fcZSC2
+VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-// Declare variables:                                                         //
+// Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR
-    mc : "udtModeCommand";   // Block mode and command
-    DI_Manual : Bool;        // User digital signal for simulating
-    ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
-    PV : Bool;               // Processed DI
+VAR_IN_OUT
+    p : "udtZSC2";           // Block data interface
 END_VAR
 
 VAR_TEMP
+    cmdIN : Bool;
+    cmdOUT : Bool;
+    tMismatch : Bool;        // Temporary mismatch variable
     tPV : Bool;              // Temporary processed DI signal
 END_VAR
 
@@ -41,31 +45,73 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mc                   := #mc
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
     );
 
 NETWORK
-TITLE = Set Device command which can only be ENABLE.
+TITLE = Get Device command if IN
     //------------------------------------------------------------------------//
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     //                                                                        //
-    // CMD is always ENABLE:                                                  //
+    // CMD is IN:                                                             //
     //------------------------------------------------------------------------//
-    L "dbCONST".BLK.DI3.CMD.ENABLE;
-    T #mc.CMD;
+    A(;
+    L "dbCONST".BLK.ZSC2.CMD.IN;
+    L #p.owner.mc.CMD;
+    ==I;
+    );
+    = #cmdIN;
 
 NETWORK
-TITLE = Process user input signal
+TITLE = Get Device command if OUT
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is OUT:                                                            //
+    //------------------------------------------------------------------------//
+    A(;
+    L "dbCONST".BLK.ZSC2.CMD.OUT;
+    L #p.owner.mc.CMD;
+    ==I;
+    );
+    = #cmdOUT;
+
+NETWORK
+TITLE = Process Digital Input Signal
     //------------------------------------------------------------------------//
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
     //                                                                        //
-    // Calculate the process value based on the software input:               //
+    // Calculate the process value based on the mode:                         //
     //------------------------------------------------------------------------//
-    A #DI_Manual;
+    O(;
+    A #p.origin.DI_Auto;
+    A #p.origin.mc.modeAUTO;
+    );
+    O(;
+    A #p.owner.DI_Manual;
+    A #p.origin.mc.modeMANUAL;
+    );
     = #tPV;
-    = #PV;
+    = #p.origin.PV;
+
+NETWORK
+TITLE = Check if MISMATCH if state does not follow command
+    //------------------------------------------------------------------------//
+    // If commanded to IN and switch not on or commanded to OUT and switch on;//
+    //------------------------------------------------------------------------//
+    O(;
+    A #cmdIN;
+    AN #tPV;
+    );
+    O(;
+    A #cmdOUT;
+    A #tPV;
+    );
+    = tMismatch;
 
 NETWORK
 TITLE = Set ALARM Flag
@@ -73,47 +119,55 @@ TITLE = Set ALARM Flag
     // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
     // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
     //                                                                        //
-    // Set alarms:                                                            //
+    // Alarm if mismatch and not OOS:                                         //
+    //------------------------------------------------------------------------//
+    A tMismatch;
+    AN #p.origin.mc.modeOOS;
+    = #p.origin.ALARM;
+
+NETWORK
+TITLE = Set INTERLOCK Flag if OUT
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Set interlock if switch not made:                                      //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #mc.modeOOS;
-    = #ALARM;
+    = #p.origin.mc.INTERLOCK;
 
 NETWORK
-TITLE = Set INTERLOCK Flag
-    //------------------------------------------------------------------------//
-    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
-    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
-    //                                                                        //
-    // Set interlocks:                                                        //
-    //------------------------------------------------------------------------//
-    O #mc.INTERLOCK;
-    O #tPV;
-    = #mc.INTERLOCK;
-
-NETWORK
-TITLE = Set Device State to Enabled if user input is on
+TITLE = Set Device State to IN if switch is on and command is IN
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     //                                                                        //
-    // ENABLED if switch is on:                                               //
+    // IN if switch is on and commanded to be IN:                             //
     //------------------------------------------------------------------------//
     A #tPV;
+    A #cmdIN;
     JCN _a;
-    L "dbCONST".BLK.DI3.STATE.ENABLED;
-    T #mc.STATE;
+    L "dbCONST".BLK.ZSC2.STATE.IN;
+    T #p.origin.mc.STATE;
 _a:   NOP 0;
 
 NETWORK
-TITLE = Setting Device State to ALARM
+TITLE = Set Device State to OUT if switch is on and command is OUT
     //------------------------------------------------------------------------//
-    // ALARM if user input is off and not OOS:                                //
+    // OUT if switch is off and commanded to be OUT:                          //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #mc.modeOOS;
+    A #cmdOUT;
     JCN _b;
-    L "dbCONST".BLK.DI3.STATE.ALARM;
-    T #mc.STATE;
+    L "dbCONST".BLK.ZSC2.STATE.OUT;
+    T #p.origin.mc.STATE;
 _b:   NOP 0;
-END_FUNCTION_BLOCK
+
+NETWORK
+TITLE = Set Device State to MISMATCH if state does not follow command
+    A tMismatch;
+    JCN _c;
+    L "dbCONST".BLK.ZSC2.STATE.MISMATCH;
+    T #p.origin.mc.STATE;
+_c:   NOP 0;
+END_FUNCTION

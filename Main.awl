@@ -37,8 +37,15 @@ END_VAR
 
 BEGIN
 NETWORK
-TITLE = Communication with SMS1
-//      CALL "fcGD_COMM";
+TITLE = CPU to CPU Communication timer and pulse bit
+    AN "pulseComms";
+    L S5T#5m;
+    SP "timerComms";
+    NOP 0;
+    NOP 0;
+    NOP 0;
+    A "timerComms";
+    = "pulseComms";
     NOP 0;
 
 NETWORK

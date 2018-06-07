@@ -1,14 +1,14 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fbAL1                                                         //
+// Class:       fcAL1                                                         //
 // Description:                                                               //
 // Load Cell mass indicator.                                                  //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
 // 2.0 David Paspa      19-Apr-2018 NA        Reboot for S7-1500 consolidated //
-//                                            into fbAL1 from all analog      //
+//                                            into fcAL1 from all analog      //
 //                                            classes.                        //
 // 0.3 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
 // 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Upper/Lower range hardcoded.    //
@@ -16,34 +16,18 @@
 //                                            mode simulation.                //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "fbAL1"
+FUNCTION "fcAL1" : Void
 TITLE = AL1 : Generic analog indicator
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
-NAME : fbAL1
+NAME : fcAL1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-// Declare variables:                                                         //
+// Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_INPUT
-    CMD_ENABLE : Int;        // The enable command for the block
-    STATE_ENABLED : Int;     // The enabled state of the block
-    STATE_FAULT : Int;       // The fault state of the block
-END_VAR
-
-VAR_OUTPUT
-    _PV : Real;              // The measured process value
-    DQ : Bool;               // The quality of the measurement
-    ALARM_LL : Bool;         // Low low alarm is active if true
-    ALARM_L : Bool;          // Low alarm is active if true
-    ALARM_H : Bool;          // High alarm is active if true
-    ALARM_HH : Bool;         // High high alarm is active if true
-END_VAR
-
-VAR
-    mc : "udtModeCommand";   // Block mode and command
-    ai : "udtAnalog";        // Analog input structure
+VAR_IN_OUT
+    p : "udtAL1";            // Block data interface
 END_VAR
 
 BEGIN
@@ -57,8 +41,21 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mc                   := #mc
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
     );
+
+NETWORK
+TITLE = Cascade the MODE flags
+    //------------------------------------------------------------------------//
+    // Set the ai MODE flags based on the mc calculated values:               //
+    //------------------------------------------------------------------------//
+    A #p.origin.mc.modeAUTO;
+    = #p.origin.ai.modeAUTO;
+    A #p.origin.mc.modeMANUAL;
+    = #p.origin.ai.modeMANUAL;
+    A #p.origin.mc.modeOOS;
+    = #p.origin.ai.modeOOS;
 
 NETWORK
 TITLE = Call Analog Input handling function
@@ -69,7 +66,7 @@ TITLE = Call Analog Input handling function
     // Scale the analog input value and check it is healty:                   //
     //------------------------------------------------------------------------//
     CALL "fcAnalog"
-    (   ai                   := #ai
+    (   ai                   := #p.origin.ai
     );
 
 NETWORK
@@ -80,26 +77,26 @@ TITLE = Set Device command which can only be ENABLE.
     //                                                                        //
     // CMD is always ENABLE:                                                  //
     //------------------------------------------------------------------------//
-    L #CMD_ENABLE;
-    T #mc.CMD;
+    L #p.origin.CMD_ENABLE;
+    T #p.owner.mc.CMD;
 
 NETWORK
 TITLE = Promote the analog input attributes
     //------------------------------------------------------------------------//
     // Promote the analog input attributes to module level:                   //
     //------------------------------------------------------------------------//
-    L #ai.PV;
-    T #_PV;
-    A #ai.DQ;
-    = #DQ;
-    A #ai.ALARM_LL;
-    = #ALARM_LL;
-    A #ai.ALARM_L;
-    = #ALARM_L;
-    A #ai.ALARM_H;
-    = #ALARM_H;
-    A #ai.ALARM_HH;
-    = #ALARM_HH;
+    L #p.origin.ai.PV;
+    T #p.origin.PV;
+    A #p.origin.ai.DQ;
+    = #p.origin.DQ;
+    A #p.origin.ai.ALARM_LL;
+    = #p.origin.ALARM_LL;
+    A #p.origin.ai.ALARM_L;
+    = #p.origin.ALARM_L;
+    A #p.origin.ai.ALARM_H;
+    = #p.origin.ALARM_H;
+    A #p.origin.ai.ALARM_HH;
+    = #p.origin.ALARM_HH;
 
 NETWORK
 TITLE = Set INTERLOCK Flag
@@ -109,10 +106,10 @@ TITLE = Set INTERLOCK Flag
     //                                                                        //
     // Set interlock if any external or any problem with the measurement:     //
     //------------------------------------------------------------------------//
-    O #mc.INTERLOCK;
-    O #ai.ALARM_HH;
-    ON #ai.DQ;
-    = #mc.INTERLOCK;
+    O #p.origin.mc.INTERLOCK;
+    O #p.origin.ai.ALARM_HH;
+    ON #p.origin.ai.DQ;
+    = #p.origin.mc.INTERLOCK;
 
 NETWORK
 TITLE = Set Device State to Enabled if healthy
@@ -122,10 +119,10 @@ TITLE = Set Device State to Enabled if healthy
     //                                                                        //
     // ENABLED if input signal is healthy:                                    //
     //------------------------------------------------------------------------//
-    A #ai.DQ;
+    A #p.origin.ai.DQ;
     JCN _a;
-    L #STATE_ENABLED;
-    T #mc.STATE;
+    L #p.origin.STATE_ENABLED;
+    T #p.origin.mc.STATE;
 _a:   NOP 0;
 
 NETWORK
@@ -133,10 +130,10 @@ TITLE = Set Device State to Fault if any field signal error
     //------------------------------------------------------------------------//
     // FAULT if any input error:                                              //
     //------------------------------------------------------------------------//
-    AN #ai.DQ;
-    AN #mc.modeOOS;
+    AN #p.origin.ai.DQ;
+    AN #p.origin.mc.modeOOS;
     JCN _b;
-    L #STATE_FAULT;
-    T #mc.STATE;
+    L #p.origin.STATE_FAULT;
+    T #p.origin.mc.STATE;
 _b: NOP 0;
-END_FUNCTION_BLOCK
+END_FUNCTION

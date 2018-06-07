@@ -32,8 +32,6 @@
 // parameter calls updated."idbPI1".PI_1010.INTERLOCK is linked with NCRIL.  //
 //----------------------------------------------------------------------------//
 // Index   Instance    Description                                            //
-@@TEMPLATE_BEGIN@@
-@@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|createInstancesGlobal@@
 // @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
 @@TEMPLATE_END@@
@@ -51,7 +49,7 @@ VERSION : 2.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
-    item : Array[0..@@MAXITEM@@] of "fbPC1";
+    p : Array[0..@@MAXITEM@@] of "udtPC1";
 @@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
@@ -61,6 +59,9 @@ BEGIN
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     //------------------------------------------------------------------------//
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    //                                                                        //
     // Get the critical interlock if there is one. If not set alwaysLow:      //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CRIL_EXISTS@@
@@ -68,10 +69,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
 @@ATTR_BEGIN|CRIL_TARGET@@
-    A "idbCRIL".item[@@IDXIL@@].INTERLOCK;
+    A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #item[@@IDX@@].mc.CRIL;
+    = #p[@@IDX@@].origin.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -84,10 +85,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
 @@ATTR_BEGIN|NCRIL_TARGET@@
-    A "idbNCRIL".item[@@IDXIL@@].INTERLOCK;
+    A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #item[@@IDX@@].mc.NCRIL;
+    = #p[@@IDX@@].origin.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -95,7 +96,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #item[@@IDX@@].mc.ME;
+    T #p[@@IDX@@].origin.mc.ME;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
@@ -103,7 +104,23 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #item[@@IDX@@].mc.OWNER;
+    T #p[@@IDX@@].owner.mc.OWNER;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+    //------------------------------------------------------------------------//
+    // This block can only reside within this CPU:                            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].origin.mc.isOriginBlock;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in this CPU:            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].owner.mc.isOriginOwner;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -111,33 +128,156 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
-    JCN _notRestart_@@COUNTER|1@@;
+    JCN _notRestart_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.PC1.SAFE.CMD;
-    T #item[@@IDX@@].mc.CMD_SAFE;
-_notRestart_@@COUNTER@@:   NOP 0;
+    T #p[@@IDX@@].origin.mc.CMD_SAFE;
+_notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Deadband values
+    //------------------------------------------------------------------------//
+    // Set the instance pressure deadband values for valve open and close:    //
+    //------------------------------------------------------------------------//
+    L 0.1;
+    T #p[@@IDX@@].owner.DB_L;
+    T #p[@@IDX@@].owner.DB_H;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Pressure interlock
+    //------------------------------------------------------------------------//
+    // Set the instance pressure interlock:                                   //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|LINK@@
+    A "idb@@PILINKCLASS@@".p[@@PILINKIDX@@].origin.mc.INTERLOCK;
+@@ATTR_END|LINK@@
+    = #p[@@IDX@@].origin.PI1_INTERLOCK;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Pressure measured value
+    //------------------------------------------------------------------------//
+    // Set the instance pressure measured value from the PI1:                 //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|LINK@@
+    L "idb@@PILINKCLASS@@".p[@@PILINKIDX@@].origin.ai.PV;
+@@ATTR_END|LINK@@
+    T #p[@@IDX@@].origin.PI1_PV;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : DRAIN valve mode and command
+    //------------------------------------------------------------------------//
+    // Set the instance pressure measured value from the PI1:                 //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|LINK@@
+    CALL MOVE
+    {value_type := 'udtMCOrigin'}
+    (   IN                   := "idb@@DRAINLINKCLASS@@".p[@@DRAINLINKIDX@@].origin.mc ,
+        OUT                  := #p[@@IDX@@].origin.mcDRAIN
+    );
+    CALL MOVE
+    {value_type := 'udtMCOwner'}
+    (   IN                   := "idb@@DRAINLINKCLASS@@".p[@@DRAINLINKIDX@@].owner.mc ,
+        OUT                  := #p[@@IDX@@].origin.mcoDRAIN
+    );
+@@ATTR_END|LINK@@
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : HPCA valve mode and command
+    //------------------------------------------------------------------------//
+    // Copy the HPCA valve mode and command structures to the PC1 instance:   //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|LINK@@
+    CALL MOVE
+    {value_type := 'udtMCOrigin'}
+    (   IN                   := "idb@@HPCALINKCLASS@@".p[@@HPCALINKIDX@@].origin.mc ,
+        OUT                  := #p[@@IDX@@].origin.mcHPCA
+    );
+    CALL MOVE
+    {value_type := 'udtMCOwner'}
+    (   IN                   := "idb@@HPCALINKCLASS@@".p[@@HPCALINKIDX@@].owner.mc ,
+        OUT                  := #p[@@IDX@@].origin.mcoHPCA
+    );
+@@ATTR_END|LINK@@
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : LPCA valve mode and command
+    //------------------------------------------------------------------------//
+    // Copy the LPCA valve mode and command structures to the PC1 instance:   //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|LINK@@
+    CALL MOVE
+    {value_type := 'udtMCOrigin'}
+    (   IN                   := "idb@@LPCALINKCLASS@@".p[@@LPCALINKIDX@@].origin.mc ,
+        OUT                  := #p[@@IDX@@].origin.mcLPCA
+    );
+    CALL MOVE
+    {value_type := 'udtMCOwner'}
+    (   IN                   := "idb@@LPCALINKCLASS@@".p[@@LPCALINKIDX@@].owner.mc ,
+        OUT                  := #p[@@IDX@@].origin.mcoLPCA
+    );
+@@ATTR_END|LINK@@
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : VACUUM valve mode and command
+    //------------------------------------------------------------------------//
+    // Copy the VACUUM valve mode and command structures to the PC1 instance: //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|LINK@@
+    CALL MOVE
+    {value_type := 'udtMCOrigin'}
+    (   IN                   := "idb@@VACUUMLINKCLASS@@".p[@@VACUUMLINKIDX@@].origin.mc ,
+        OUT                  := #p[@@IDX@@].origin.mcVACUUM
+    );
+    CALL MOVE
+    {value_type := 'udtMCOwner'}
+    (   IN                   := "idb@@VACUUMLINKCLASS@@".p[@@VACUUMLINKIDX@@].owner.mc ,
+        OUT                  := #p[@@IDX@@].origin.mcoVACUUM
+    );
+@@ATTR_END|LINK@@
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : VENT valve mode and command
+    //------------------------------------------------------------------------//
+    // Copy the VENT valve mode and command structures to the PC1 instance:   //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|LINK@@
+    CALL MOVE
+    {value_type := 'udtMCOrigin'}
+    (   IN                   := "idb@@VENTLINKCLASS@@".p[@@VENTLINKIDX@@].origin.mc ,
+        OUT                  := #p[@@IDX@@].origin.mcVENT
+    );
+    CALL MOVE
+    {value_type := 'udtMCOwner'}
+    (   IN                   := "idb@@VENTLINKCLASS@@".p[@@VENTLINKIDX@@].owner.mc ,
+        OUT                  := #p[@@IDX@@].origin.mcoVENT
+    );
+@@ATTR_END|LINK@@
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #item[@@IDX@@]
-@@ATTR_BEGIN|LINK@@
-    (   PI1_PV               := "idb@@PILINKCLASS@@".item[@@PILINKIDX@@].ai.PV ,
-        PI1_INTERLOCK        := "idb@@PILINKCLASS@@".item[@@PILINKIDX@@].mc.INTERLOCK ,
-@@ATTR_END|LINK@@
-        DB_L                 := 0.1 ,
-        DB_H                 := 0.1 ,
-        _SETPOINT            := #item[@@IDX@@]._SETPOINT ,
-        _MEDIUM_GAS          := #item[@@IDX@@]._MEDIUM_GAS ,
-@@ATTR_BEGIN|LINK@@
-        VLV_DRAIN            := "idb@@DRAINLINKCLASS@@".item[@@DRAINLINKIDX@@].mc.CMD ,
-        VLV_HPCA             := "idb@@HPCALINKCLASS@@".item[@@HPCALINKIDX@@].mc.CMD ,
-        VLV_LPCA             := "idb@@LPCALINKCLASS@@".item[@@LPCALINKIDX@@].mc.CMD ,
-        VLV_VACUUM           := "idb@@VACUUMLINKCLASS@@".item[@@VACUUMLINKIDX@@].mc.CMD ,
-        VLV_VENT             := "idb@@VENTLINKCLASS@@".item[@@VENTLINKIDX@@].mc.CMD
-@@ATTR_END|LINK@@
+    CALL "fc@@CLASS@@"
+    (   p                    := #p[@@IDX@@]
     );
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Ouput valve commands
+    //------------------------------------------------------------------------//
+    // Set the instance output commands for the valves to the field:          //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|LINK@@
+    L #p[@@IDX@@].origin.mcoDRAIN.CMD;
+    T "idb@@DRAINLINKCLASS@@".p[@@DRAINLINKIDX@@].owner.mc.CMD;
+    L #p[@@IDX@@].origin.mcoHPCA.CMD;
+    T "idb@@HPCALINKCLASS@@".p[@@HPCALINKIDX@@].owner.mc.CMD;
+    L #p[@@IDX@@].origin.mcoLPCA.CMD;
+    T "idb@@LPCALINKCLASS@@".p[@@LPCALINKIDX@@].owner.mc.CMD;
+    L #p[@@IDX@@].origin.mcoVACUUM.CMD;
+    T "idb@@VACUUMLINKCLASS@@".p[@@VACUUMLINKIDX@@].owner.mc.CMD;
+    L #p[@@IDX@@].origin.mcoVENT.CMD;
+    T "idb@@VENTLINKCLASS@@".p[@@VENTLINKIDX@@].owner.mc.CMD;
+@@ATTR_END|LINK@@
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

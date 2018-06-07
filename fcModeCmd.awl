@@ -24,7 +24,8 @@ NAME : fcModeCmd
 VERSION : 2.0
 
 VAR_IN_OUT
-    mc : "udtModeCommand";   // Block mode and command
+    mcOrigin : "udtMCOrigin";   // Block mode and command from origin CPU
+    mcOwner : "udtMCOwner";     // Block mode and command directives from owner CPU
 END_VAR
 
 BEGIN
@@ -39,7 +40,7 @@ TITLE = Auto Mode on CPU startup
     A "flagFirstScanRestart";
     JCN _a;
     L "dbCONST".BLK.MODE.AUTO;
-    T #mc.MODE;
+    T #mcOwner.MODE;
 _a:   NOP 0;
 
 NETWORK
@@ -51,29 +52,29 @@ TITLE = Mode Auto
     // Get the mode of the module:                                            //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.MODE;
+    L #mcOwner.MODE;
     L "dbCONST".BLK.MODE.AUTO;
     ==I;
     );
-    = #mc.modeAUTO;
+    = #mcOrigin.modeAUTO;
 
 NETWORK
 TITLE = Mode Manual
     A(;
-    L #mc.MODE;
+    L #mcOwner.MODE;
     L "dbCONST".BLK.MODE.MANUAL;
     ==I;
     );
-    = #mc.modeMANUAL;
+    = #mcOrigin.modeMANUAL;
 
 NETWORK
 TITLE = Mode Out Of Service
     A(;
-    L #mc.MODE;
+    L #mcOwner.MODE;
     L "dbCONST".BLK.MODE.OOS;
     ==I;
     );
-    = #mc.modeOOS;
+    = #mcOrigin.modeOOS;
 
 NETWORK
 TITLE = Interlock Flag
@@ -82,12 +83,12 @@ TITLE = Interlock Flag
     // Instance Specific Non-Critical Interlocks can be bypassed by Manual    //
     // Override command from Operator Station (HMI):                          //
     //------------------------------------------------------------------------//
-    O #mc.CRIL;
+    O #mcOrigin.CRIL;
     O(;
-    A #mc.NCRIL;
-    AN #mc.MAN_OVERRIDE;
+    A #mcOrigin.NCRIL;
+    AN #mcOwner.MAN_OVERRIDE;
     );
-    = #mc.INTERLOCK;
+    = #mcOrigin.INTERLOCK;
 
 NETWORK
 TITLE = Send safe command in case of any interlock or failure
@@ -95,9 +96,9 @@ TITLE = Send safe command in case of any interlock or failure
     // Send safe command if any interlock or startup:                         //
     //------------------------------------------------------------------------//
     O "flagFirstScanRestart";
-    O #mc.INTERLOCK;
+    O #mcOrigin.INTERLOCK;
     JCN _b;
-    L #mc.CMD_SAFE;
-    T #mc.CMD;
+    L #mcOrigin.CMD_SAFE;
+    T #mcOwner.CMD;
 _b:   NOP 0;
 END_FUNCTION

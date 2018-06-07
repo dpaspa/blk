@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 22/05/2018 2:26:32 PM by David Paspa
+generated on 4/06/2018 3:15:10 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -77,7 +77,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- pres_lpca_purge
+Name:- r_pres_lpca_purge
 Type:- REAL
 Description:- Pressure LPCA purge after filtration complete
 ParameterInOut:- IN
@@ -189,7 +189,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::21
 --------------------------------------------------
-Name:- set_time_lpca_purge
+Name:- r_time_lpca_purge
 Type:- Time
 Description:- Time setting for LPCA purging
 ParameterInOut:- IN
@@ -197,7 +197,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::22
 --------------------------------------------------
-Name:- pres_lpca_blanket
+Name:- r_pres_lpca_blanket
 Type:- REAL
 Description:- Pressure LPCA blanket
 ParameterInOut:- IN
@@ -300,7 +300,7 @@ Description:- Enable Sy LPCA control at PRES_LPCA_PURGE.
 
 Start Timer with TIME_LPCA_PURGE.
 Action:- //Enable Sy LPCA control at PRES_LPCA_PURGE.
-L  #_pres_lpca_purge;
+L  #_r_pres_lpca_purge;
 T  #_emc_gas_setpoint;
 L  "dbCONST".SEL.GAS.LPCA;
 T  #_emc_gas_medium;
@@ -316,7 +316,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_lpca_purge;
+L #_r_time_lpca_purge;
 T #SQ_TIMER.PT;
 R #_path_ready;
 Verification:- A(;
@@ -356,7 +356,7 @@ Adjust Sy LPCA pressure control setpoint to PRES_CA_BLANKET with the Vent valve 
 Set other equipment to safe state:
 
 Action:- // Adjust Sy LPCA pressure control setpoint to PRES_LPCA_BLANKET with the Vent valve closed.
-L  #_pres_lpca_blanket;
+L  #_r_pres_lpca_blanket;
 T  #_emc_gas_setpoint;
 L  "dbCONST".SEL.GAS.LPCA;
 T  #_emc_gas_medium;

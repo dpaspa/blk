@@ -46,23 +46,13 @@ NAME : fbMOT1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-// Declare variables:                                                         //
+// Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_INPUT
-    BRK	: Bool;              // Motor breaker fault
-    PHR : Bool;              // Three-phase relay alarm
-    FB_RUN : Bool;
-END_VAR
-
-VAR_OUTPUT
-    OUT_Q : Bool;            // Output to OPEN/CLOSE solenoid valve
+VAR_IN_OUT
+    p : "udtMOT1";           // Block data interface
 END_VAR
 
 VAR
-    mc : "udtModeCommand";   // Block mode and command
-    ALM_BRK : Bool;
-    ALM_PHR : Bool;
-    FAIL_START : Bool;       // Fail to start
     startTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Motor Start/Stop Transition timer
     stopTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
 END_VAR
@@ -91,7 +81,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mc                   := #mc
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
     );
 
 NETWORK
@@ -103,7 +94,7 @@ TITLE = Start command
     // CMD is START:                                                          //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.MOT1.CMD.START;
     ==I;
     );
@@ -115,7 +106,7 @@ TITLE = Stop command
     // CMD is STOP:                                                           //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.MOT1.CMD.STOP;
     ==I;
     );
@@ -129,23 +120,23 @@ TITLE = Motor faults and three phase relay alarm
     // MOTOR FAULTS                                                           //
     // Raise alarm if any motor control fault condition is active:            //
     //------------------------------------------------------------------------//
-    A #PHR;
-    = #ALM_PHR;
+    A #p.origin.PHR;
+    = #p.origin.ALM_PHR;
 
 NETWORK
 TITLE = Motor breaker fault
-    A #BRK;
-    = #ALM_BRK;
+    A #p.origin.BRK;
+    = #p.origin.ALM_BRK;
 
 NETWORK
 TITLE = Interlock if any field fault
     //------------------------------------------------------------------------//
     // Include motor field faults in the interlock calculation:
     //------------------------------------------------------------------------//
-    O #mc.INTERLOCK;
-    O #BRK;
-    O #PHR;
-    = #mc.INTERLOCK;
+    O #p.origin.mc.INTERLOCK;
+    O #p.origin.BRK;
+    O #p.origin.PHR;
+    = #p.origin.mc.INTERLOCK;
 
 NETWORK
 TITLE = Start comand allowable if no fault conditions or OOS
@@ -153,8 +144,8 @@ TITLE = Start comand allowable if no fault conditions or OOS
     // Allow start if no interlock or OOS mode:                               //
     //------------------------------------------------------------------------//
     A cmdStart;
-    AN mc.modeOOS;
-    AN #mc.INTERLOCK;
+    AN #p.origin.mc.modeOOS;
+    AN #p.origin.mc.INTERLOCK;
     = cmdStart;
 
     //------------------------------------------------------------------------//
@@ -164,7 +155,7 @@ TITLE = Start comand allowable if no fault conditions or OOS
     // Set the output on if start selected and allowable:                     //
     //------------------------------------------------------------------------//
     A cmdStart;
-    = #OUT_Q;
+    = #p.origin.OUT_Q;
     = #tDO;
 
 NETWORK
@@ -221,10 +212,10 @@ TITLE = Device State RUNNING if running feedback on or bypass
     //------------------------------------------------------------------------//
     AN #cmdStart;
     AN #tDO;
-    AN #FB_RUN;
+    AN #p.origin.FB_RUN;
     JCN _a;
     L "dbCONST".BLK.MOT1.STATE.STOPPED;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _a:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -232,11 +223,11 @@ _a:   NOP 0;
     //------------------------------------------------------------------------//
     A #cmdStart;
     A #tDO;
-    A #FB_RUN;
-    AN #FAIL_START;
+    A #p.origin.FB_RUN;
+    AN #p.origin.FAIL_START;
     JCN _b;
     L "dbCONST".BLK.MOT1.STATE.RUNNING;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _b:   NOP 0;
 
 NETWORK
@@ -248,16 +239,16 @@ TITLE = Device State transition if waiting for running or stopped
     O(;
     A #tDO;
     AN #startTMR.Q;
-    AN #FB_RUN;
+    AN #p.origin.FB_RUN;
     );
     O(;
     AN #tDO;
     AN #stopTMR.Q;
-    A #FB_RUN;
+    A #p.origin.FB_RUN;
     );
     JCN _c;
     L "dbCONST".BLK.MOT1.STATE.STARTING_STOPPING;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _c:   NOP 0;
 
 NETWORK
@@ -267,9 +258,9 @@ TITLE = Device State FAULT if timed out waiting for running
     //------------------------------------------------------------------------//
     A #tDO;
     A #startTMR.Q;
-    AN #FB_RUN;
+    AN #p.origin.FB_RUN;
     = #tFault;
-    = #FAIL_START;
+    = #p.origin.FAIL_START;
     JC _fault;
 
 NETWORK
@@ -279,7 +270,7 @@ TITLE = Device State FAULT if timed out waiting for stopped
     //------------------------------------------------------------------------//
     AN #tDO;
     A #stopTMR.Q;
-    A #FB_RUN;
+    A #p.origin.FB_RUN;
     = #tFault;
 
 _fault:   NOP 0;
@@ -292,6 +283,6 @@ TITLE = Set State FAULT if any fault condition
     A #tFault;
     JCN _d;
     L "dbCONST".BLK.MOT1.STATE.FAULT;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _d:   NOP 0;
 END_FUNCTION_BLOCK

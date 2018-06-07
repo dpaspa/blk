@@ -55,70 +55,13 @@ NAME : fbSIC1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-// Declare variables:                                                         //
+// Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_INPUT
-    _SETPOINT : Real;        // Agitator speed setpoint
-    RAW_INPUT : Int;         // Raw input from the field
-    BRK	: Bool;              // Motor breaker fault
-    PHR : Bool;              // Three-phase relay alarm
-    FLP : Bool;              // Pulse counter fault
-    FLT : Bool;              // Inverter fault
-    THM : Bool;              // Thermistor module alarm
-    MASS_RUN : Real;         // Low mass threshold at which the agitator may run
-    MASS_STOP : Real;        // Low low mass threshold at which the agitator must stop
-    MI1_MASS : Real;         // Measured Mass
-    MI1_DQ : Bool;           // Measured Mass Data Quality
-    RANGE_UPPER : Real;      // Upper mass range limit
-    RANGE_LOWER : Real;      // Lower mass range limit
-    POLARITY : Bool;         // 0- no polarity(0 to z), 1= dual polarity(-x to +y)
-    LIMIT_HH : Real;         // High High speed alarm limit
-    LIMIT_H : Real;          // High speed alarm limit
-    FB_TDELAY : Time := T#20S;
-    P_SEL : Bool := TRUE;
-    I_SEL : Bool := TRUE;
-    D_SEL : Bool := TRUE;
-    GAIN : Real := 1.0;
-    TI : Time := T#20S;
-    TD : Time := T#10S;
-    CYCLE : Time := T#1S;    // SAMPLING TIME:The time between the block calls constant
-END_VAR
-
-VAR_OUTPUT
-    OUT_Q : Bool;            // Inverter Motor Run/Stop Command
-END_VAR
-
 VAR_IN_OUT
-    _PV : Real;              // Measured Value (after scaling)
-    RUNNING : Bool;
-    OUT_Q_F : Bool;
-    OUT_Q_R : Bool;
-    LMN : Real;              // PID controller output (0-100%)
+    p : "udtSIC1";           // Block data interface
 END_VAR
 
 VAR
-    mc : "udtModeCommand";   // Block mode and command
-    ai : "udtAnalog";        // Analog input structure
-    DQ : Bool;
-    USER_INPUT : Word;       // Manual mode, equivallent of Analog input, to be entered by Operator
-    MAN_PID : Bool;          // Manual non pid selection
-    ALM_BRK : Bool;
-    ALM_PHR : Bool;
-    ALM_FLP : Bool;
-    ALM_FLT : Bool;
-    ALM_THM : Bool;
-    RUN_FAULT : Bool;
-    OUT_SETPOINT : Real;     // Setpoint readvalue
-    OUT_LMN_PER : Word;      // Inverter speed reference input
-    OUT_LMN : Real;          // Inverter Speed reference from PID
-    FB_TDELAY : Time := T#20S;
-    P_SEL : Bool := TRUE;
-    I_SEL : Bool := TRUE;
-    D_SEL : Bool := TRUE;
-    GAIN : Real := 1.0;
-    TI : Time := T#20S;
-    TD : Time := T#10S;
-    CYCLE : Time := T#1S;    // SAMPLING TIME:The time between the block calls constant
     startTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
     dirTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
     PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
@@ -163,7 +106,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mc                   := #mc
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
     );
 
 NETWORK
@@ -175,7 +119,7 @@ TITLE = Enable command
     // CMD is ENABLE:                                                         //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.SIC1.CMD.ENABLE;
     ==I;
     );
@@ -187,39 +131,51 @@ TITLE = Disable command
     // CMD is DISABLE:                                                        //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.SIC1.CMD.DISABLE;
     ==I;
     );
     = #cmdDisable
 
 NETWORK
+TITLE = Cascade the MODE flags to the analog input structure
+    //------------------------------------------------------------------------//
+    // Set the ai MODE flags based on the mc calculated values:               //
+    //------------------------------------------------------------------------//
+    A #p.origin.mc.modeAUTO;
+    = #p.origin.ai.modeAUTO;
+    A #p.origin.mc.modeMANUAL;
+    = #p.origin.ai.modeMANUAL;
+    A #p.origin.mc.modeOOS;
+    = #p.origin.ai.modeOOS;
+
+NETWORK
 TITLE = Analog input attributes
     //------------------------------------------------------------------------//
     // Set the analog input attributes:                                       //
     //------------------------------------------------------------------------//
-    L #RANGE_LOWER;
-    T #ai.RANGE_LOWER;
-    L #RANGE_UPPER;
-    T #ai.RANGE_UPPER;
-    L #LIMIT_HH;
-    T #ai.LIMIT_HH;
-    L #LIMIT_H;
-    T #ai.LIMIT_H;
+    L #p.origin.RANGE_LOWER;
+    T #p.origin.ai.RANGE_LOWER;
+    L #p.origin.RANGE_UPPER;
+    T #p.origin.ai.RANGE_UPPER;
+    L #p.origin.LIMIT_HH;
+    T #p.origin.ai.LIMIT_HH;
+    L #p.origin.LIMIT_H;
+    T #p.origin.ai.LIMIT_H;
     L 0.0;
-    T #ai.LIMIT_L;
+    T #p.origin.ai.LIMIT_L;
     L 0.0;
-    T #ai.LIMIT_LL;
+    T #p.origin.ai.LIMIT_LL;
     A "alwaysHigh";
-    = #ai.ENABLE_HH;
+    = #p.origin.ai.ENABLE_HH;
     A "alwaysHigh";
-    = #ai.ENABLE_H;
+    = #p.origin.ai.ENABLE_H;
     A "alwaysLow";
-    = #ai.ENABLE_L;
+    = #p.origin.ai.ENABLE_L;
     A "alwaysLow";
-    = #ai.ENABLE_LL;
-    L #RAW_INPUT;
-    T #ai.RAW_INPUT;
+    = #p.origin.ai.ENABLE_LL;
+    L #p.origin.RAW_INPUT;
+    T #p.origin.ai.RAW_INPUT;
 
 NETWORK
 TITLE = Call Analog Input handling function
@@ -230,7 +186,7 @@ TITLE = Call Analog Input handling function
     // Scale the analog input value and check it is healty:                   //
     //------------------------------------------------------------------------//
     CALL "fcAnalog"
-    (   ai                   := #ai
+    (   ai                   := #p.origin.ai
     );
 
 NETWORK
@@ -239,42 +195,42 @@ TITLE = Motor faults and three phase relay alarm
     // MOTOR FAULTS                                                           //
     // Raise alarm if any motor control fault condition is active:            //
     //------------------------------------------------------------------------//
-    A #PHR;
-    = #ALM_PHR;
+    A #p.origin.PHR;
+    = #p.origin.ALM_PHR;
 
 NETWORK
 TITLE = Motor breaker fault
-    A #BRK;
-    = #ALM_BRK;
+    A #p.origin.BRK;
+    = #p.origin.ALM_BRK;
 
 NETWORK
 TITLE = Pulse counter fault
-    A #FLP;
-    = #ALM_FLP;
+    A #p.origin.FLP;
+    = #p.origin.ALM_FLP;
 
 NETWORK
 TITLE = Inverter fault
-    A #FLT;
-    = #ALM_FLT;
+    A #p.origin.FLT;
+    = #p.origin.ALM_FLT;
 
 NETWORK
 TITLE = Thermistor module alarm
-    A #THM;
-    = #ALM_THM;
+    A #p.origin.THM;
+    = #p.origin.ALM_THM;
 
 NETWORK
 TITLE = Aggregate all interlock conditions
     //------------------------------------------------------------------------//
     // Collect all interlock conditions:                                      //
     //------------------------------------------------------------------------//
-    O #mc.INTERLOCK;
+    O #p.origin.mc.INTERLOCK;
     O tILAnalog;
-    O #BRK;
-    O #THM;
-    O #FLP;
-    O #FLT;
-    ON #MI1_DQ;
-    = #mc.INTERLOCK;
+    O #p.origin.BRK;
+    O #p.origin.THM;
+    O #p.origin.FLP;
+    O #p.origin.FLT;
+    ON #p.origin.MI1_DQ;
+    = #p.origin.mc.INTERLOCK;
 
 NETWORK
 TITLE = Interlock overrides ENABLE command
@@ -282,7 +238,7 @@ TITLE = Interlock overrides ENABLE command
     // Don't allow enable command if any interlock:                           //
     //------------------------------------------------------------------------//
     A #cmdEnable;
-    AN #mc.INTERLOCK;
+    AN #p.origin.mc.INTERLOCK;
     = #cmdEnable;
 
 NETWORK
@@ -298,7 +254,7 @@ TITLE = Vessel mass
     //------------------------------------------------------------------------//
     // Get the vessel mass from the MI1 CM:                                   //
     //------------------------------------------------------------------------//
-    L #MI1_MASS;
+    L #p.origin.MI1_MASS;
     T #tPV_MASS;
 
 NETWORK
@@ -308,7 +264,7 @@ TITLE = Permitted to run agitator if mass above minimum value
     //------------------------------------------------------------------------//
     A(;
     L #tPV_MASS;
-    L #MASS_RUN;
+    L #p.origin.MASS_RUN;
     >=R;
     );
     JCN _a;
@@ -322,7 +278,7 @@ TITLE = Low mass condition must stop the agitator from running
     //------------------------------------------------------------------------//
     A(;
     L #tPV_MASS;
-    L #MASS_STOP;
+    L #p.origin.MASS_STOP;
     <R;
     );
     JCN _b;
@@ -336,7 +292,7 @@ TITLE = Setpoint if Enabled
     //------------------------------------------------------------------------//
     A #cmdEnable;
     JCN _c;
-    L #_SETPOINT;
+    L #p.owner.SETPOINT;
     T #tSetpoint;
 _c:   NOP 0;
 
@@ -359,8 +315,8 @@ TITLE = PID in manual if disabled or manual flag set
     O #cmdDisable;
     O(;
     A #cmdEnable;
-    A #mc.modeMANUAL;
-    A #MAN_PID;
+    A #p.origin.mc.modeMANUAL;
+    A #p.owner.MAN_PID;
     );
     = #tManual_Not_PID;
 
@@ -375,7 +331,7 @@ TITLE = Disable command
     A #cmdDisable;
     JCN _e;
     L "dbCONST".BLK.SIC1.CMD.DISABLE;
-    T #mc.CMD;
+    T #p.owner.mc.CMD;
 _e:   NOP 0;
 
 NETWORK
@@ -386,7 +342,7 @@ TITLE = Flag output should be on if command is ENABLE and mass is enough
     //------------------------------------------------------------------------//
     A #cmdEnable;
     A #permitMass;
-    AN #mc.modeOOS;
+    AN #p.origin.mc.modeOOS;
     = #tDO;
 
 NETWORK
@@ -396,7 +352,7 @@ TITLE = Drive the agitator output on if commanded and safe to run
     // are no interlocks and mass in the vessel is sufficient:                //
     //------------------------------------------------------------------------//
     A #tDO;
-    = #OUT_Q;
+    = #p.origin.OUT_Q;
 
 NETWORK
 TITLE = Transfer the setpoint to the inverter reference value
@@ -407,7 +363,7 @@ TITLE = Transfer the setpoint to the inverter reference value
     A #tDO;
     JCN _f;
     L #tSetpoint;
-    T #OUT_LMN;
+    T #p.origin.OUT_LMN;
 _f:   NOP 0;
 
 NETWORK
@@ -416,20 +372,21 @@ TITLE = Transfer the setpoint to the output setpoint
     // Transfer setpoint to output setpoint:                                  //
     //------------------------------------------------------------------------//
     L #tSetpoint;
-    T #OUT_SETPOINT;
+    T #p.origin.OUT_SETPOINT;
 
 NETWORK
 TITLE = Unscale Setpoint
     //------------------------------------------------------------------------//
-    // Unscale the setpoint to set the inverter percent reference value:      //
+    // Unscale the setpoint to set the inverter percent reference value.      //
+    // For POLARITY, 0 = no polarity (0 to +x), 1 = dual polarity (-x to +x): //
     //------------------------------------------------------------------------//
     A #tDO;
     JCN _g;
     CALL UNSCALE
     (   IN                   := #tSetpoint ,
-        HI_LIM               := #ai.RANGE_UPPER ,
-        LO_LIM               := #ai.RANGE_LOWER ,
-        BIPOLAR              := 0 ,
+        HI_LIM               := #p.origin.ai.RANGE_UPPER ,
+        LO_LIM               := #p.origin.ai.RANGE_LOWER ,
+        BIPOLAR              := 1 ,
         RET_VAL              := #RET_VAL1 ,
         OUT                  := #unscaledOUT
     );
@@ -443,7 +400,7 @@ TITLE = Setpoint reference to inverter in percent
     A #tDO;
     JCN _h;
     L #unscaledOUT;
-    T #OUT_LMN_PER;
+    T #p.origin.OUT_LMN_PER;
 _h:   NOP 0;
 
 NETWORK
@@ -454,19 +411,19 @@ TITLE = PID Controller
     CALL #PID1
     (   COM_RST              := "flagFirstScanRestart" ,
         MAN_ON               := #tManual_Not_PID ,
-        P_SEL                := #P_SEL ,
-        I_SEL                := #I_SEL ,
-        D_SEL                := #D_SEL ,
-        CYCLE                := #CYCLE ,
+        P_SEL                := #p.origin.P_SEL ,
+        I_SEL                := #p.origin.I_SEL ,
+        D_SEL                := #p.origin.D_SEL ,
+        CYCLE                := #p.origin.CYCLE ,
         SP_INT               := #tSetpoint ,
-        PV_IN                := #_PV ,
+        PV_IN                := #p.origin.PV ,
         MAN                  := #tSetpoint ,
-        GAIN                 := #GAIN ,
-        TI                   := #TI ,
-        TD                   := #TD ,
+        GAIN                 := #p.origin.GAIN ,
+        TI                   := #p.origin.TI ,
+        TD                   := #p.origin.TD ,
         LMN_HLM              := 100.0 ,
         LMN_LLM              := 0.0 ,
-        LMN                  := #LMN
+        LMN                  := #p.origin.LMN
     );
 
 NETWORK
@@ -477,7 +434,7 @@ TITLE = Output if Disabled
     A #cmdDisable;
     JCN _i;
     L 0.0;
-    T #LMN;
+    T #p.origin.LMN;
 _i:   NOP 0;
 
 NETWORK
@@ -499,7 +456,7 @@ TITLE = Start timer to check if fail to start or run at low speed
     CALL #startTMR
     {time_type := 'Time'}
     (   IN                   := #tDO ,
-        PT                   := #FB_TDELAY ,
+        PT                   := #p.origin.FB_TDELAY ,
         Q                    := #startTMRExpired ,
         ET                   := #startTMRElapsed
     );
@@ -511,9 +468,9 @@ TITLE = Fault if start timer expired and not running
     // Fault if start timer expired and still not running:                    //
     //------------------------------------------------------------------------//
     A #startTMR.Q;
-    AN #RUNNING;
-    AN #mc.modeOOS;
-    = #RUN_FAULT;
+    AN #p.origin.RUNNING;
+    AN #p.origin.mc.modeOOS;
+    = #p.origin.RUN_FAULT;
 
 NETWORK
 TITLE = Calculate speed as a fraction of the setpoint
@@ -550,7 +507,7 @@ TITLE = Flag RUNNING if speed above 25% of setpoint
     L #percentSpeed;
     L 25.0;
     >R;
-    = #RUNNING;
+    = #p.origin.RUNNING;
 
 NETWORK
 TITLE = Run Direction Forward if just started
@@ -558,7 +515,7 @@ TITLE = Run Direction Forward if just started
     // Direction is forward if command to start raised:                       //
     //------------------------------------------------------------------------//
     A #eventStart;
-    = #OUT_Q_F;
+    = #p.origin.OUT_Q_F;
 
 NETWORK
 TITLE = Check run command and direction timer expired
@@ -589,31 +546,31 @@ TITLE = Reverse direction if timer expired
     // Change direction if timer expired:                                     //
     //------------------------------------------------------------------------//
     A #dirTMR.Q;
-    A #OUT_Q_F;
+    A #p.origin.OUT_Q_F;
     = #eventTMRRev;
 
     A #eventTMRRev;
     JCN _m;
-    R #OUT_Q_F;
+    R #p.origin.OUT_Q_F;
 _m:   NOP 0;
 
     A #eventTMRRev;
     JCN _n;
-    S #OUT_Q_R;
+    S #p.origin.OUT_Q_R;
 _n:   NOP 0;
 
     A #dirTMR.Q;
-    A #OUT_Q_R;
+    A #p.origin.OUT_Q_R;
     = #eventTMRFwd;
 
     A #eventTMRFwd;
     JCN _o;
-    S #OUT_Q_F;
+    S #p.origin.OUT_Q_F;
 _o:   NOP 0;
 
     A #eventTMRFwd;
     JCN _p;
-    R #OUT_Q_R;
+    R #p.origin.OUT_Q_R;
 _p:   NOP 0;
 NETWORK
 
@@ -624,14 +581,14 @@ TITLE = Disable state
     //                                                                        //
     // DISABLED if command is disable or any interlock and not motor fault:   //
     //------------------------------------------------------------------------//
-    AN #BRK;
-    AN #THM;
-    AN #FLP;
-    AN #FLT;
+    AN #p.origin.BRK;
+    AN #p.origin.THM;
+    AN #p.origin.FLP;
+    AN #p.origin.FLT;
     A #cmdDisable;
     JCN _q;
     L "dbCONST".BLK.SIC1.STATE.DISABLED;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _q:   NOP 0;
 
 NETWORK
@@ -639,13 +596,13 @@ TITLE = FAULT if any fault condition active
     //------------------------------------------------------------------------//
     // FAULT if any motor fault condition is active:                          //
     //------------------------------------------------------------------------//
-    O #BRK;
-    O #THM;
-    O #FLP;
-    O #FLT;
+    O #p.origin.BRK;
+    O #p.origin.THM;
+    O #p.origin.FLP;
+    O #p.origin.FLT;
     JCN _r;
     L "dbCONST".BLK.SIC1.STATE.FAULT;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _r:   NOP 0;
 
 NETWORK
@@ -657,7 +614,7 @@ TITLE = Stopped if command is ENABLE and mass not enough
     AN #permitMass;
     JCN _s;
     L "dbCONST".BLK.SIC1.STATE.STOPPED;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _s:   NOP 0;
 
 NETWORK
@@ -668,6 +625,6 @@ TITLE = Running if output should be on
     A #tDO;
     JCN _t;
     L "dbCONST".BLK.SIC1.STATE.RUNNING;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _t:   NOP 0;
 END_FUNCTION_BLOCK

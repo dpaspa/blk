@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fbHE1                                                         //
+// Class:       fcHE1                                                         //
 // Description:                                                               //
 // Vessel vent filter Electric heater element.                                //
 //----------------------------------------------------------------------------//
@@ -20,28 +20,18 @@
 // Ref1.Cutout ON when key switch is OFF and Command is ON or OFF.When Key    //
 // switch is ON cutout can be ON or OFF by using user ON/OFF command.         //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "fbHE1"
+FUNCTION "fcHE1" : Void
 TITLE = HE1 : Vessel vent filter Electric heater element
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
-NAME : fbHE1
+NAME : fcHE1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-// Declare variables:                                                         //
+// Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_INPUT
-    FAULT : Bool;            // Fault input signal from Field
-END_VAR
-
-VAR_OUTPUT
-    DO : Bool;               // Output Signal to Heating Element
-END_VAR
-
-VAR
-    mc : "udtModeCommand";   // Block mode and command
-    ALARM : Bool;            // Alarm Flag (0 = OK, 1 = ALARM)
-    CUTOUT : Bool;           // Flag indicating if TI alarm is to cutout (0= Alarm Enabled, 1= Alarm Disabled)
+VAR_IN_OUT
+    p : "udtHE1";            // Block data interface
 END_VAR
 
 VAR_TEMP
@@ -59,7 +49,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mc                   := #mc
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
     );
 
 NETWORK
@@ -70,7 +61,7 @@ TITLE = Process Fault Digital Input Signal
     //                                                                        //
     // Check if the field indicates there is a fault:                         //
     //------------------------------------------------------------------------//
-    A #FAULT;
+    A #p.origin.FAULT;
     = #tFault;
 
 NETWORK
@@ -81,9 +72,9 @@ TITLE = Interlock if any fault or external interlock
     //                                                                        //
     // Interlock also the field indicates a fault:                            //
     //------------------------------------------------------------------------//
-    O #mc.INTERLOCK;
-    O #FAULT;
-    = #mc.INTERLOCK;
+    O #p.origin.mc.INTERLOCK;
+    O #p.origin.FAULT;
+    = #p.origin.mc.INTERLOCK;
 
 NETWORK
 TITLE = Device command ENABLE
@@ -94,9 +85,9 @@ TITLE = Device command ENABLE
     // CMD is ENABLE if no fault or interlock, otherwise DISABLE:             //
     //------------------------------------------------------------------------//
     AN #tFault;
-    AN #mc.INTERLOCK;
+    AN #p.origin.mc.INTERLOCK;
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.HE1.CMD.ENABLE;
     ==I;
     );
@@ -107,9 +98,9 @@ TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
     // CMD is DISABLE then switch off regardless of any fault or interlock:   //
     //------------------------------------------------------------------------//
-    O #mc.INTERLOCK;
+    O #p.origin.mc.INTERLOCK;
     O(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.HE1.CMD.DISABLE;
     ==I;
     );
@@ -127,7 +118,7 @@ TITLE = Set CUTOUT Flag if output is off
     // HE is OFF:                                                             //
     //------------------------------------------------------------------------//
     AN #tDO;
-    = #CUTOUT;
+    = #p.owner.CUTOUT;
 
 NETWORK
 TITLE = Set Digital Output Signal
@@ -135,7 +126,7 @@ TITLE = Set Digital Output Signal
     // Set the output ON or OFF as required:                                  //
     //------------------------------------------------------------------------//
     A #tDO;
-    = #DO;
+    = #p.origin.DO;
 
 NETWORK
 TITLE = Set Device State to Enabled if output is on
@@ -148,7 +139,7 @@ TITLE = Set Device State to Enabled if output is on
     A #tDO;
     JCN _b;
     L "dbCONST".BLK.HE1.STATE.ENABLED;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _b:   NOP 0;
 
 NETWORK
@@ -160,7 +151,7 @@ TITLE = Set Device State to Disabled if output is off
     AN #tFault;
     JCN _c;
     L "dbCONST".BLK.HE1.STATE.DISABLED;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _c:   NOP 0;
 
 NETWORK
@@ -171,6 +162,6 @@ TITLE = Set Device State to Fault if field fault signal is on
     A #tFault;
     JCN _d;
     L "dbCONST".BLK.HE1.STATE.FAULT;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _d:   NOP 0;
-END_FUNCTION_BLOCK
+END_FUNCTION

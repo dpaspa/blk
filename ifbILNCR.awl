@@ -31,7 +31,7 @@ VERSION : 1.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|NCRIL_NUM@@
-    item : Array[0..@@MAXITEM@@] of "udtInterlock";
+    p : Array[0..@@MAXITEM@@] of "udtInterlock";
 @@ATTR_END|NCRIL_NUM@@
 @@TEMPLATE_END@@
 END_VAR
@@ -73,7 +73,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ interlock source : @@DESCRIPTIONIL@@
     // Calculate the interlock condition:                                     //
     //------------------------------------------------------------------------//
     @@INTERLOCK@@
-    = #tIL.Source[@@COUNTER|0@@];
+    = #tIL.Source[@@COUNTERATTR|0@@];
 
 @@ATTR_END|NCRIL_INSTANCE@@
 @@ATTR_BEGIN|NCRIL_EXISTS@@
@@ -107,7 +107,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Update the instance data
     CALL MOVE
     {value_type := 'Variant'}
     (   IN                   := #tIL ,
-        OUT                  := #item[@@IDX@@]
+        OUT                  := #p[@@IDX@@]
     );
 
 @@ATTR_END|NCRIL_EXISTS@@

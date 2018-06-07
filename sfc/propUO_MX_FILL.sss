@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 22/05/2018 2:25:19 PM by David Paspa
+generated on 4/06/2018 3:14:18 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -205,7 +205,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::21
 --------------------------------------------------
-Name:- temp_filt
+Name:- r_temp_filt
 Type:- REAL
 Description:- Filter temperature setpoint
 ParameterInOut:- IN
@@ -277,7 +277,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::30
 --------------------------------------------------
-Name:- mass_throttle
+Name:- r_mass_throttle
 Type:- REAL
 Description:- Mass nearing the end of transfer
 ParameterInOut:- IN
@@ -285,7 +285,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::31
 --------------------------------------------------
-Name:- pres_hpca_filt2
+Name:- r_pres_hpca_filt2
 Type:- REAL
 Description:- HCPA Pressure control setpoint 2
 ParameterInOut:- IN
@@ -413,7 +413,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::47
 --------------------------------------------------
-Name:- pres_hpca_filt
+Name:- r_pres_hpca_filt
 Type:- REAL
 Description:- HCPA Pressure control setpoint 1
 ParameterInOut:- IN
@@ -575,7 +575,7 @@ SET;
 S #_log_time_filtration_start;
 R #_prompt_filtration_confirm_yes;
 
-L  #_temp_filt;
+L  #_r_temp_filt;
 T  #_emt_hex_setpoint;
 
 //Start EMT_PREEMPT.
@@ -739,7 +739,7 @@ ACTION::01
 --------------------------------------------------
 Description:- HPCA pressure control at setpoint PRES_HPCA_FILT.
 Action:- // Enable Mx HPCA pressure control at setpoint PRES_HPCA_FILT.
-L  #_pres_hpca_filt;
+L  #_r_pres_hpca_filt;
 T  #_emc_gas_setpoint;
 L  "dbCONST".SEL.GAS.HPCA;
 T  #_emc_gas_medium;
@@ -762,7 +762,7 @@ Title:- Mass of Vessel has reach throttled mass
 EmptyTransition:- False
 Description:- Mass_Throttle_Mx has reach set point.
 Condition:- A(;
-L #_mass_throttle;
+L #_r_mass_throttle;
 L #_emm_vessel_pv;
 >=R;
 );
@@ -780,7 +780,7 @@ ACTION::01
 --------------------------------------------------
 Description:- HPCA pressure control at setpoint 2, PRES_HPCA_FILT2.
 Action:- // Set HPCA valve pressure control at setpoint 2
-L #_pres_hpca_filt2;
+L #_r_pres_hpca_filt2;
 T #_emc_gas_setpoint;
 Verification:- A "uncondJump";
 

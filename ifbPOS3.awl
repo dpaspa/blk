@@ -29,8 +29,6 @@
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
 // Index   Instance    Description                                            //
-@@TEMPLATE_BEGIN@@
-@@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|createInstancesGlobal@@
 // @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
 @@TEMPLATE_END@@
@@ -48,8 +46,9 @@ VERSION : 2.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
-    item : Array[0..@@MAXITEM@@] of "fbPOSx";
+    p : Array[0..@@MAXITEM@@] of "udtPOSx";
 @@ATTR_END|numInstances@@
+    f : "fbPOSx";
 @@TEMPLATE_END@@
 END_VAR
 
@@ -63,6 +62,9 @@ BEGIN
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     //------------------------------------------------------------------------//
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    //                                                                        //
     // Get the critical interlock if there is one. If not set alwaysLow:      //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CRIL_EXISTS@@
@@ -70,10 +72,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
 @@ATTR_BEGIN|CRIL_TARGET@@
-    A "idbCRIL".item[@@IDXIL@@].INTERLOCK;
+    A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #item[@@IDX@@].mc.CRIL;
+    = #p[@@IDX@@].origin.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -85,10 +87,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
 @@ATTR_BEGIN|NCRIL_TARGET@@
-    A "idbNCRIL".item[@@IDXIL@@].INTERLOCK;
+    A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #item[@@IDX@@].mc.NCRIL;
+    = #p[@@IDX@@].origin.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -96,7 +98,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #item[@@IDX@@].mc.ME;
+    T #p[@@IDX@@].origin.mc.ME;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
@@ -104,7 +106,23 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #item[@@IDX@@].mc.OWNER;
+    T #p[@@IDX@@].owner.mc.OWNER;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+    //------------------------------------------------------------------------//
+    // This block can only reside within this CPU:                            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].origin.mc.isOriginBlock;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in this CPU:            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].owner.mc.isOriginOwner;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -112,10 +130,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
-    JCN _notRestart_@@COUNTER|1@@;
+    JCN _notRestart_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.POS3.SAFE.CMD;
-    T #item[@@IDX@@].mc.CMD_SAFE;
-_notRestart_@@COUNTER@@:   NOP 0;
+    T #p[@@IDX@@].origin.mc.CMD_SAFE;
+_notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Feedback from the field
@@ -128,16 +146,45 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Feedback from the field
     = #FB_O;
 
 NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Closed feedback
+    //------------------------------------------------------------------------//
+    // Set the instance closed feedback value from the field:                 //
+    //------------------------------------------------------------------------//
+    A #FB_C;
+    = #p[@@IDX@@].origin.FB_C;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Opened feedback
+    //------------------------------------------------------------------------//
+    // Set the instance opened feedback value from the field:                 //
+    //------------------------------------------------------------------------//
+    A #FB_O;
+    = #p[@@IDX@@].origin.FB_O;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Normally opened or closed
+    //------------------------------------------------------------------------//
+    // Set the instance opened feedback value from the field:                 //
+    //------------------------------------------------------------------------//
+    A @@NC@@;
+    = #p[@@IDX@@].origin.NC;
+
+NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #item[@@IDX@@]
-    (   FB_C                 := #FB_C ,
-        FB_O                 := #FB_O ,
-        NC                   := @@NC@@ ,
-        OUT_Q                := "@@INSTANCE@@-CMD"
+    CALL #f
+    (   p                    := #p[@@IDX@@]
     );
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
+    //------------------------------------------------------------------------//
+    // Set the instance output command to the field:                          //
+    //------------------------------------------------------------------------//
+    A #p[@@IDX@@].origin.OUT_Q;
+    = "@@INSTANCE@@-CMD";
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

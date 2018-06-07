@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 22/05/2018 2:25:25 PM by David Paspa
+generated on 4/06/2018 3:14:23 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -69,7 +69,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- mass_expect_reduced
+Name:- r_mass_expect_reduced
 Type:- REAL
 Description:- Expected Mass value to be reduced 
 ParameterInOut:- IN
@@ -85,7 +85,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::8
 --------------------------------------------------
-Name:- temp_limit_h
+Name:- r_temp_limit_h
 Type:- REAL
 Description:- Vessel temperature High limit setpoint
 ParameterInOut:- IN
@@ -93,7 +93,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::9
 --------------------------------------------------
-Name:- temp_limit_hh
+Name:- r_temp_limit_hh
 Type:- REAL
 Description:- Vessel temperature High High limit setpoint
 ParameterInOut:- IN
@@ -125,7 +125,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::13
 --------------------------------------------------
-Name:- set_time_mass_reduce
+Name:- r_time_mass_reduce
 Type:- TIME
 Description:- Time for mass reduce
 ParameterInOut:- IN
@@ -635,7 +635,7 @@ R #_FL_TIMER.IN;
 
 AN #_FL_TIMER.Q;
 S #_FL_TIMER.IN;
-L #_set_time_mass_reduce;
+L #_r_time_mass_reduce;
 T #_FL_TIMER.PT;
 Verification:- A "uncondJump";
 
@@ -840,7 +840,7 @@ EmptyTransition:- False
 Description:- Mx temperature exceeds HiHi limit setpoint
 Condition:- A(;
 L #_emv_vessel_pv;
-L #_temp_limit_hh;
+L #_r_temp_limit_hh;
 >R;
 );
 
@@ -872,7 +872,7 @@ A(;
 L #_mass_initial;
 L #_emm_vessel_pv;
 -R;
-L #_mass_expect_reduced;
+L #_r_mass_expect_reduced;
 <R;
 );
 
@@ -887,7 +887,7 @@ Description:- Mx temperature exceeds Hi limit setpoint
 Condition:- AN #_hi_temperature_alarm;
 A(;
 L #_emv_vessel_pv;
-L #_temp_limit_h;
+L #_r_temp_limit_h;
 >R;
 );
 

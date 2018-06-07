@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 22/05/2018 2:25:13 PM by David Paspa
+generated on 4/06/2018 3:14:12 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -327,7 +327,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::38
 --------------------------------------------------
-Name:- agit_setpoint
+Name:- r_agit_setpoint
 Type:- REAL
 Description:- Speed Setpoint for Agitator from parent
 ParameterInOut:- IN
@@ -351,7 +351,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::41
 --------------------------------------------------
-Name:- set_time_wfi_rinse_mx
+Name:- r_time_wfi_rinse_mx
 Type:- TIME
 Description:- Time to rinse tank outlet drain line with WFI
 ParameterInOut:- IN
@@ -359,7 +359,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::42
 --------------------------------------------------
-Name:- set_time_pw_wash_mmflx
+Name:- r_time_pw_wash_mmflx
 Type:- TIME
 Description:- Time to wash with PW
 ParameterInOut:- IN
@@ -631,7 +631,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::76
 --------------------------------------------------
-Name:- set_time_wfi_rinse_mmflx
+Name:- r_time_wfi_rinse_mmflx
 Type:- TIME
 Description:- Time to rinse filtration line with WFI
 ParameterInOut:- IN
@@ -639,7 +639,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::77
 --------------------------------------------------
-Name:- set_time_wfi_empty
+Name:- r_time_wfi_empty
 Type:- TIME
 Description:- Time to empty the vessel after WFI rinse
 ParameterInOut:- IN
@@ -647,7 +647,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::78
 --------------------------------------------------
-Name:- set_time_pw_steam
+Name:- r_time_pw_steam
 Type:- TIME
 Description:- Time to steam PW line
 ParameterInOut:- IN
@@ -655,7 +655,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::79
 --------------------------------------------------
-Name:- set_time_pw_wash_mx
+Name:- r_time_pw_wash_mx
 Type:- TIME
 Description:- Time to wash with PW
 ParameterInOut:- IN
@@ -663,7 +663,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::80
 --------------------------------------------------
-Name:- set_time_pw_empty2
+Name:- r_time_pw_empty2
 Type:- TIME
 Description:- Time to empty the vessel after washing
 ParameterInOut:- IN
@@ -671,7 +671,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::81
 --------------------------------------------------
-Name:- set_time_pw_empty1
+Name:- r_time_pw_empty1
 Type:- TIME
 Description:- Time to empty the vessel after flooding
 ParameterInOut:- IN
@@ -679,7 +679,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::82
 --------------------------------------------------
-Name:- set_time_pw_agit
+Name:- r_time_pw_agit
 Type:- TIME
 Description:- Mixing time for flooded agitator
 ParameterInOut:- IN
@@ -687,7 +687,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::83
 --------------------------------------------------
-Name:- set_time_pw_flood
+Name:- r_time_pw_flood
 Type:- TIME
 Description:- Timeout for PW Flood Stage
 ParameterInOut:- IN
@@ -695,7 +695,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::84
 --------------------------------------------------
-Name:- set_time_pw_flush
+Name:- r_time_pw_flush
 Type:- TIME
 Description:- Flushing time for PW pre-stage
 ParameterInOut:- IN
@@ -703,7 +703,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::85
 --------------------------------------------------
-Name:- mass_pw_flood
+Name:- r_mass_pw_flood
 Type:- REAL
 Description:- PW Mass Value Limit
 ParameterInOut:- IN
@@ -837,7 +837,7 @@ ACTION::02
 Description:- Preflush vessel.
 Load flushing time and start PW flush.
 Action:- // Load flushing time for PW pre-stage.
-L #_set_time_pw_flush;
+L #_r_time_pw_flush;
 T #_emc_water_runtime;
 
 //Set emc_water to substate FLUSH and open PW supply valve.
@@ -974,7 +974,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Enable Mx Agitator EAn010 (STATE=MIX, TIME RUN HOUR=1)
 Action:- // Load setpoint and enable Mx Agitator.
-L #_agit_setpoint; 
+L #_r_agit_setpoint; 
 T #_ema_vessel_setpoint;
 L 1;
 T #_ema_vessel_runtime_h;
@@ -1003,7 +1003,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_pw_agit;
+L #_r_time_pw_agit;
 T #SQ_TIMER.PT;
 
 //Store flood mixing begin time.
@@ -1036,11 +1036,11 @@ Description:- Set medium to PW and start FLUSH.
 Action:- //Set emc_water to substate FLUSH and open PW supply valve.
 L "dbCONST".SEL.LIQUID.PW;
 T #_emc_water_medium;
-L #_set_time_pw_flood;
+L #_r_time_pw_flood;
 T #_emc_water_timeout;
 
 //Load Mass to charge vessel.
-L #_mass_pw_flood;
+L #_r_mass_pw_flood;
 T #_emc_water_mass;
 
 //Start Charge
@@ -1168,7 +1168,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_pw_empty1;
+L #_r_time_pw_empty1;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
@@ -1206,7 +1206,7 @@ L "dbCONST".BLK.CMD.START;
 T #_emc_water_cmd;
 
 
-L #_set_time_pw_wash_mx;
+L #_r_time_pw_wash_mx;
 T #_emc_water_runtime;   //RunTimeECn00
 
 
@@ -1321,7 +1321,7 @@ T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emc_water_cmd;
 
-L #_set_time_pw_wash_mmflx;
+L #_r_time_pw_wash_mmflx;
 T #_emc_water_runtime;   //RunTimeECn001
 
 
@@ -1402,7 +1402,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_pw_empty2;
+L #_r_time_pw_empty2;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
@@ -1447,7 +1447,7 @@ ACTION::02
 Description:- Open PW line PS supply valve with Timer TIME_PW_STEAM.
 Store PW steaming begin time.
 Action:- //Open PW line PS supply valve
-L #_set_time_pw_steam;
+L #_r_time_pw_steam;
 T #_emc_water_runtime;  //RunTimeECn001
 
 L "dbCONST".SEL.LIQUID.PSPW;
@@ -1654,7 +1654,7 @@ ACTION::03
 Description:- Open WFI supply valve with TIME_WFI_RINSE timer.
 Store WFI rinse begin time.
 Action:- //Set to MEDIUM WFI and open WFI supply valve
-L #_set_time_wfi_rinse_mx;
+L #_r_time_wfi_rinse_mx;
 T #_emc_water_runtime;  //RunTimeECn001
 
 L "dbCONST".SEL.LIQUID.WFI;
@@ -1742,7 +1742,7 @@ ACTION::02
 Description:- Start FLUSH WFI with TIME_WFI_RINSE_MMFLx timer.
 Store WFI filtration line rinse begin time.
 Action:- //Set to MEDIUM WFI and open WFI supply valve.
-L #_set_time_pw_wash_mmflx;
+L #_r_time_pw_wash_mmflx;
 T #_emc_water_runtime;  //RunTimeECn001
 
 L "dbCONST".SEL.LIQUID.WFI;
@@ -1828,7 +1828,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_wfi_empty;
+L #_r_time_wfi_empty;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 

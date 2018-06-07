@@ -31,8 +31,6 @@
 // 0.1 Khairul Basar    31-Aug-2009           Initial design                  //
 //----------------------------------------------------------------------------//
 // Index   Instance    Description                                            //
-@@TEMPLATE_BEGIN@@
-@@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|createInstancesGlobal@@
 // @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
 @@TEMPLATE_END@@
@@ -50,8 +48,9 @@ VERSION : 2.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
-    item : Array[0..@@MAXITEM@@] of "fbTC1";
+    p : Array[0..@@MAXITEM@@] of "udtTC1";
 @@ATTR_END|numInstances@@
+    f : "fb@@CLASS@@";
 @@TEMPLATE_END@@
 END_VAR
 
@@ -60,6 +59,9 @@ BEGIN
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     //------------------------------------------------------------------------//
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    //                                                                        //
     // Get the critical interlock if there is one. If not set alwaysLow:      //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CRIL_EXISTS@@
@@ -67,10 +69,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
 @@ATTR_BEGIN|CRIL_TARGET@@
-    A "idbCRIL".item[@@IDXIL@@].INTERLOCK;
+    A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #item[@@IDX@@].mc.CRIL;
+    = #p[@@IDX@@].origin.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -82,10 +84,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
 @@ATTR_BEGIN|NCRIL_TARGET@@
-    A "idbNCRIL".item[@@IDXIL@@].INTERLOCK;
+    A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #item[@@IDX@@].mc.NCRIL;
+    = #p[@@IDX@@].origin.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -93,7 +95,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #item[@@IDX@@].mc.ME;
+    T #p[@@IDX@@].origin.mc.ME;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
@@ -101,7 +103,23 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #item[@@IDX@@].mc.OWNER;
+    T #p[@@IDX@@].owner.mc.OWNER;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+    //------------------------------------------------------------------------//
+    // This block can only reside within this CPU:                            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].origin.mc.isOriginBlock;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in this CPU:            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].owner.mc.isOriginOwner;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -109,26 +127,39 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
-    JCN _notRestart_@@COUNTER|1@@;
+    JCN _notRestart_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.TC1.SAFE.CMD;
-    T #item[@@IDX@@].mc.CMD_SAFE;
-_notRestart_@@COUNTER@@:   NOP 0;
+    T #p[@@IDX@@].origin.mc.CMD_SAFE;
+_notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 
-@@TEMPLATE_BEGIN@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Remote position setpoint
+    //------------------------------------------------------------------------//
+    // Set the instance remote position setpoint:                             //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|LINK@@
+    L "idb@@TCVLINKCLASS@@".p[@@TCVLINKIDX@@].owner.POS_REMOTE;
+@@ATTR_END|LINK@@
+    T #p[@@IDX@@].origin.TCVPOS;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Temperature measured value
+    //------------------------------------------------------------------------//
+    // Set the instance temperature measured value from the TI1:              //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|LINK@@
+    L "idb@@TILINKCLASS@@".p[@@TILINKIDX@@].origin.PV;
+@@ATTR_END|LINK@@
+    T #p[@@IDX@@].origin.TI1_PV;
+
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #item[@@IDX@@]
-    (   _SETPOINT            := #item[@@IDX@@]._SETPOINT ,
-@@ATTR_BEGIN|LINK@@
-        TCVPOS               := "idb@@TCVLINKCLASS@@".item[@@TCVLINKIDX@@].POS_REMOTE ,
-        TI1_PV               := "idb@@TILINKCLASS@@".item[@@TILINKIDX@@]._PV ,
-@@ATTR_END|LINK@@
-        LMN                  := #item[@@IDX@@].LMN
+    CALL #f
+    (   p                    := #p[@@IDX@@]
     );
-    NOP 0;
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

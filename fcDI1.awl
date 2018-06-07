@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fbDI1                                                         //
+// Class:       fcDI1                                                         //
 // Description:                                                               //
 // Normally ON general alarm single digital input.                            //
 //----------------------------------------------------------------------------//
@@ -44,7 +44,8 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mc                   := #p.mc
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
     );
 
 NETWORK
@@ -56,7 +57,7 @@ TITLE = Set Device command which can only be ENABLE.
     // CMD is always ENABLE:                                                  //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.DI1.CMD.ENABLE;
-    T #p.mc.CMD;
+    T #p.owner.mc.CMD;
 
 NETWORK
 TITLE = Process Digital Input Signal
@@ -67,15 +68,15 @@ TITLE = Process Digital Input Signal
     // Calculate the process value based on the mode:                         //
     //------------------------------------------------------------------------//
     O(;
-    A #p.mc.modeAUTO;
-    A #p.DI_Auto;
+    A #p.origin.mc.modeAUTO;
+    A #p.origin.DI_Auto;
     );
     O(;
-    A #p.mc.modeMANUAL;
-    A #p.DI_Manual;
+    A #p.origin.mc.modeMANUAL;
+    A #p.owner.DI_Manual;
     );
     = #tPV;
-    = #p.PV;
+    = #p.origin.PV;
 
 NETWORK
 TITLE = Set ALARM Flag
@@ -86,8 +87,8 @@ TITLE = Set ALARM Flag
     // Set alarms:                                                            //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #p.mc.modeOOS;
-    = #p.ALARM;
+    AN #p.origin.mc.modeOOS;
+    = #p.origin.ALARM;
 
 NETWORK
 TITLE = Set INTERLOCK Flag
@@ -98,7 +99,7 @@ TITLE = Set INTERLOCK Flag
     // Set interlocks:                                                        //
     //------------------------------------------------------------------------//
     AN #tPV;
-    = #p.mc.INTERLOCK;
+    = #p.origin.mc.INTERLOCK;
 
 NETWORK
 TITLE = Set Device State to Enabled if switch is on
@@ -111,7 +112,7 @@ TITLE = Set Device State to Enabled if switch is on
     A #tPV;
     JCN _a;
     L "dbCONST".BLK.DI1.STATE.ENABLED;
-    T #p.mc.STATE;
+    T #p.origin.mc.STATE;
 _a:   NOP 0;
 
 NETWORK
@@ -120,9 +121,9 @@ TITLE = Setting Device State to ALARM
     // ALARM if switch is off and not OOS:                                    //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #p.mc.modeOOS;
+    AN #p.origin.mc.modeOOS;
     JCN _b;
     L "dbCONST".BLK.DI1.STATE.ALARM;
-    T #p.mc.STATE;
+    T #p.origin.mc.STATE;
 _b:   NOP 0;
 END_FUNCTION

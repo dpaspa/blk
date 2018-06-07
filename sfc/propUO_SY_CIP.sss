@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 22/05/2018 2:26:16 PM by David Paspa
+generated on 4/06/2018 3:15:04 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -77,7 +77,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- set_time_wfi_line_smflx
+Name:- r_time_wfi_line_smflx
 Type:- TIME
 Description:- Description
 ParameterInOut:- IN
@@ -85,7 +85,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::8
 --------------------------------------------------
-Name:- set_time_pw_line_smflx
+Name:- r_time_pw_line_smflx
 Type:- TIME
 Description:- SMFLx rinse time with PW
 ParameterInOut:- IN
@@ -413,7 +413,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::49
 --------------------------------------------------
-Name:- set_time_wfi_steam_sy
+Name:- r_time_wfi_steam_sy
 Type:- TIME
 Description:- Timer For WFI PS Steam
 ParameterInOut:- IN
@@ -421,7 +421,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::50
 --------------------------------------------------
-Name:- set_time_pw_line_flz
+Name:- r_time_pw_line_flz
 Type:- TIME
 Description:- PW FPZ rinse time
 ParameterInOut:- IN
@@ -477,7 +477,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::57
 --------------------------------------------------
-Name:- set_time_pw_steam_sy
+Name:- r_time_pw_steam_sy
 Type:- TIME
 Description:- Timer For PW PS Steam
 ParameterInOut:- IN
@@ -621,7 +621,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::75
 --------------------------------------------------
-Name:- set_time_wfi_empty_sy
+Name:- r_time_wfi_empty_sy
 Type:- TIME
 Description:- Time to wait to empty the vessel after WFI rinse
 ParameterInOut:- IN
@@ -629,7 +629,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::76
 --------------------------------------------------
-Name:- set_time_wfi_line_flz
+Name:- r_time_wfi_line_flz
 Type:- TIME
 Description:- Time for WFI rinse of filling line
 ParameterInOut:- IN
@@ -637,7 +637,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::77
 --------------------------------------------------
-Name:- set_time_wfi_tank
+Name:- r_time_wfi_tank
 Type:- TIME
 Description:- Time for WFI rinse of vessel
 ParameterInOut:- IN
@@ -645,7 +645,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::78
 --------------------------------------------------
-Name:- set_time_pw_empty_sy
+Name:- r_time_pw_empty_sy
 Type:- TIME
 Description:- Time to empty the vessel after the PW wash
 ParameterInOut:- IN
@@ -653,7 +653,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::79
 --------------------------------------------------
-Name:- set_time_pw_wash_sy
+Name:- r_time_pw_wash_sy
 Type:- TIME
 Description:- PW vessel wash time
 ParameterInOut:- IN
@@ -772,7 +772,7 @@ T #_emc_gas_cmd;
 
 //Load TIME_PW_WASH_Sy.
 SET;
-L #_set_time_pw_wash_sy;
+L #_r_time_pw_wash_sy;
 T #_emc_water_sy_runtime;
 Verification:- A(;
 L #_emc_gas_state;
@@ -880,7 +880,7 @@ L "dbCONST".BLK.STATE.STOPPED;
 ACTION::02
 --------------------------------------------------
 Description:- Start Timer for rinse FLz with PW.
-Action:- L #_set_time_pw_line_flz;
+Action:- L #_r_time_pw_line_flz;
 T #_emc_water_sy_runtime;
 
 // Open PW supply.
@@ -962,7 +962,7 @@ Verification:- A(;
 ACTION::02
 --------------------------------------------------
 Description:- Start Timer for SMFLx rinse.
-Action:- L #_set_time_pw_line_smflx;
+Action:- L #_r_time_pw_line_smflx;
 T #_emc_water_sy_runtime;
 
 // Open PW supply.
@@ -1049,7 +1049,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_pw_empty_sy;
+L #_r_time_pw_empty_sy;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
@@ -1094,7 +1094,7 @@ ACTION::02
 Description:- Open PW line PS supply valve.
 Store PW line PS steam begin time.
 Action:- //Open PW line PS supply valve
-L #_set_time_pw_steam_sy;
+L #_r_time_pw_steam_sy;
 T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.PSPW;
@@ -1247,7 +1247,7 @@ Start timer to rinse tank by TIME_WFI_TANK.
 Store WFI wash begin time.
 Open HPCA supply valve.
 Action:- //Open WFI supply to rinse tank
-L #_set_time_wfi_tank;
+L #_r_time_wfi_tank;
 T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.WFI;
@@ -1358,7 +1358,7 @@ ACTION::02
 --------------------------------------------------
 Description:- Open WFI supply with timer TIME_WFI_LINE_FLz.
 Action:- //Open WFI supply.
-L #_set_time_wfi_line_flz;
+L #_r_time_wfi_line_flz;
 T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.WFI;
@@ -1448,7 +1448,7 @@ L "dbCONST".CHRONO.CPU_TIME;
 T #_wfi_smflx_rinse_begin_time;
 
 //Open WFI supply
-L #_set_time_wfi_line_smflx;
+L #_r_time_wfi_line_smflx;
 T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.WFI;
@@ -1516,7 +1516,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_wfi_empty_sy;
+L #_r_time_wfi_empty_sy;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
@@ -1628,7 +1628,7 @@ ACTION::02
 Description:- Open WFI(PS) supply valve.
 Start timer TIME_WFI_STEAM_Sy for CS supply.
 Action:- //Open WFI(PS) supply to rinse tank
-L #_set_time_wfi_steam_sy;
+L #_r_time_wfi_steam_sy;
 T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.PSWFI;

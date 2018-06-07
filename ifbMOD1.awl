@@ -20,8 +20,6 @@
 // 0.1 Khairul Basar    03-Aug-2009 CC-09/016 Initial design.                 //
 //----------------------------------------------------------------------------//
 // Index   Instance    Description                                            //
-@@TEMPLATE_BEGIN@@
-@@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|createInstancesGlobal@@
 // @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
 @@TEMPLATE_END@@
@@ -39,7 +37,7 @@ VERSION : 2.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
-    item : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
+    p : Array[0..@@MAXITEM@@] of "udt@@CLASS@@";
 @@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
@@ -49,6 +47,9 @@ BEGIN
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     //------------------------------------------------------------------------//
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    //                                                                        //
     // Get the critical interlock if there is one. If not set alwaysLow:      //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CRIL_EXISTS@@
@@ -56,10 +57,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
 @@ATTR_BEGIN|CRIL_TARGET@@
-    A "idbCRIL".item[@@IDXIL@@].INTERLOCK;
+    A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #item[@@IDX@@].mc.CRIL;
+    = #p[@@IDX@@].origin.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -71,10 +72,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
 @@ATTR_BEGIN|NCRIL_TARGET@@
-    A "idbNCRIL".item[@@IDXIL@@].INTERLOCK;
+    A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #item[@@IDX@@].mc.NCRIL;
+    = #p[@@IDX@@].origin.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -82,7 +83,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #item[@@IDX@@].mc.ME;
+    T #p[@@IDX@@].origin.mc.ME;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
@@ -90,7 +91,23 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #item[@@IDX@@].mc.OWNER;
+    T #p[@@IDX@@].owner.mc.OWNER;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+    //------------------------------------------------------------------------//
+    // This block can only reside within this CPU:                            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].origin.mc.isOriginBlock;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in this CPU:            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].owner.mc.isOriginOwner;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -98,17 +115,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
-    JCN _a_@@COUNTER|1@@;
+    JCN _a_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.MOD1.SAFE.CMD;
-    T #item[@@IDX@@].mc.CMD_SAFE;
-_a_@@COUNTER@@:   NOP 0;
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Signal polarity
-    //------------------------------------------------------------------------//
-    // Input signal is BIPOLAR (1) or UNIPOLAR (0). Assume 0:                 //
-    //------------------------------------------------------------------------//
-    R #item[@@IDX@@].POLARITY;
+    T #p[@@IDX@@].origin.mc.CMD_SAFE;
+_a_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Initial remote position is closed
@@ -116,10 +126,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Initial remote position is closed
     // Set the initial remote position to be zero which is closed:            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
-    JCN _b_@@COUNTER|1@@;
+    JCN _b_@@COUNTERTEMPLATE@@;
     L 0.0;
-    T #item[@@IDX@@].POS_REMOTE;
-_b_@@COUNTER@@:   NOP 0;
+    T #p[@@IDX@@].owner.POS_REMOTE;
+_b_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Initial local position is closed
@@ -127,19 +137,27 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Initial local position is closed
     // Set the initial local position to be zero which is closed:             //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
-    JCN _c_@@COUNTER|1@@;
+    JCN _c_@@COUNTERTEMPLATE@@;
     L 0.0;
-    T #item[@@IDX@@].POS_LOCAL;
-_c_@@COUNTER@@:   NOP 0;
+    T #p[@@IDX@@].owner.POS_LOCAL;
+_c_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #item[@@IDX@@]
-    (   RAW_OUTPUT           := "@@INSTANCE@@-MOD"
+    CALL "fc@@CLASS@@"
+    (   p                    := #p[@@IDX@@]
     );
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Output valve position
+    //------------------------------------------------------------------------//
+    // Set the instance output valve position to the field:                   //
+    //------------------------------------------------------------------------//
+    L #p[@@IDX@@].origin.RAW_OUTPUT;
+    T "@@INSTANCE@@-MOD";
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

@@ -22,8 +22,6 @@
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
 // Index   Instance    Description                                            //
-@@TEMPLATE_BEGIN@@
-@@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|createInstancesGlobal@@
 // @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
 @@TEMPLATE_END@@
@@ -41,7 +39,7 @@ VERSION : 2.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
-    item : Array[0..@@MAXITEM@@] of "fbAL1";
+    p : Array[0..@@MAXITEM@@] of "udtAL1";
 @@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
@@ -51,12 +49,13 @@ BEGIN
 NETWORK
 TITLE = @@INSTANCE@@ : Unique ID
     //------------------------------------------------------------------------//
-    // ANALOG INPUT   ANALOG INPUT   ANALOG INPUT   ANALOG INPUT   ANALOG INP //
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
     //                                                                        //
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #item[@@IDX@@].mc.ME;
+    T #p[@@IDX@@].origin.mc.ME;
 
 NETWORK
 TITLE = @@INSTANCE@@ : Owner
@@ -64,7 +63,23 @@ TITLE = @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #item[@@IDX@@].mc.OWNER;
+    T #p[@@IDX@@].owner.mc.OWNER;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+    //------------------------------------------------------------------------//
+    // This block can only reside within this CPU:                            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].origin.mc.isOriginBlock;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in this CPU:            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].owner.mc.isOriginOwner;
 
 NETWORK
 TITLE = @@INSTANCE@@ : Safe Command
@@ -72,7 +87,7 @@ TITLE = @@INSTANCE@@ : Safe Command
     // Set the safe command:                                                  //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.AL1.SAFE.CMD;
-    T #item[@@IDX@@].mc.CMD_SAFE;
+    T #p[@@IDX@@].origin.mc.CMD_SAFE;
 
 @@ATTR_BEGIN|ANALOG@@
 NETWORK
@@ -81,45 +96,51 @@ TITLE = @@INSTANCE@@ : Analog input attributes
     // Set the analog input attributes:                                       //
     //------------------------------------------------------------------------//
     L @@RANGELOW@@;
-    T #item[@@IDX@@].ai.RANGE_LOWER;
+    T #p[@@IDX@@].origin.ai.RANGE_LOWER;
     L @@RANGEHIGH@@;
-    T #item[@@IDX@@].ai.RANGE_UPPER;
+    T #p[@@IDX@@].origin.ai.RANGE_UPPER;
     L @@LIMITHH@@;
-    T #item[@@IDX@@].ai.LIMIT_HH;
+    T #p[@@IDX@@].origin.ai.LIMIT_HH;
     L @@LIMITH@@;
-    T #item[@@IDX@@].ai.LIMIT_H;
+    T #p[@@IDX@@].origin.ai.LIMIT_H;
     L @@LIMITL@@;
-    T #item[@@IDX@@].ai.LIMIT_L;
+    T #p[@@IDX@@].origin.ai.LIMIT_L;
     L @@LIMITLL@@;
-    T #item[@@IDX@@].ai.LIMIT_LL;
+    T #p[@@IDX@@].origin.ai.LIMIT_LL;
     A @@ENABLEHH@@;
-    = #item[@@IDX@@].ai.ENABLE_HH;
+    = #p[@@IDX@@].origin.ai.ENABLE_HH;
     A @@ENABLEH@@;
-    = #item[@@IDX@@].ai.ENABLE_H;
+    = #p[@@IDX@@].origin.ai.ENABLE_H;
     A @@ENABLEL@@;
-    = #item[@@IDX@@].ai.ENABLE_L;
+    = #p[@@IDX@@].origin.ai.ENABLE_L;
     A @@ENABLELL@@;
-    = #item[@@IDX@@].ai.ENABLE_LL;
+    = #p[@@IDX@@].origin.ai.ENABLE_LL;
+    A @@POLARITY@@;
+    = #p[@@IDX@@].origin.ai.POLARITY;
     L "@@INSTANCE@@-RAW";
-    T #item[@@IDX@@].ai.RAW_INPUT;
+    T #p[@@IDX@@].origin.ai.RAW_INPUT;
 
 @@ATTR_END|ANALOG@@
 
 NETWORK
-TITLE = @@INSTANCE@@ : @@DESCRIPTION@@
+TITLE = @@INSTANCE@@ : Command and state values
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #item[@@IDX@@]
-    (   CMD_ENABLE           := "dbCONST".BLK.@@CLASS@@.CMD.ENABLE ,
-        STATE_ENABLED        := "dbCONST".BLK.@@CLASS@@.STATE.ENABLED ,
-        STATE_FAULT          := "dbCONST".BLK.@@CLASS@@.STATE.FAULT ,
-        _PV                  := #item[@@IDX@@]._PV ,
-        DQ                   := #item[@@IDX@@].DQ ,
-        ALARM_LL             := #item[@@IDX@@].ALARM_LL ,
-        ALARM_L              := #item[@@IDX@@].ALARM_L ,
-        ALARM_H              := #item[@@IDX@@].ALARM_H ,
-        ALARM_HH             := #item[@@IDX@@].ALARM_HH
+    L "dbCONST".BLK.@@CLASS@@.CMD.ENABLE;
+    T #p[@@IDX@@].origin.CMD_ENABLE;
+    L "dbCONST".BLK.@@CLASS@@.STATE.ENABLED;
+    T #p[@@IDX@@].origin.STATE_ENABLED;
+    L "dbCONST".BLK.@@CLASS@@.STATE.FAULT;
+    T #p[@@IDX@@].origin.STATE_FAULT;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process the instance:                       //
+    //------------------------------------------------------------------------//
+    CALL "fcAL1"
+    (   p                    := #p[@@IDX@@]
     );
 
 @@TEMPLATE_END@@

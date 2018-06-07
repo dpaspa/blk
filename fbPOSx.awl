@@ -57,22 +57,13 @@ NAME : fbPOSx
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-// Declare variables:                                                         //
+// Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_INPUT
-    FB_C : Bool;             // Close feedback signal from field
-    FB_O : Bool;             // Open feedback signal from field
-    NC : Bool;               // Set if Normally Close valve
-END_VAR
-
-VAR_OUTPUT
-    OUT_Q : Bool;            // Valve open/close command
+VAR_IN_OUT
+    p : "udtPOSx";           // Block data interface
 END_VAR
 
 VAR
-    mc : "udtModeCommand";   // Block mode and command
-    FAULT_C : Bool;          // Valve fail to close
-    FAULT_O : Bool;          // Valve fail to Open
     openTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
     closeTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
 END_VAR
@@ -105,19 +96,19 @@ TITLE = Call Mode and Command handling function
     //                                                                        //
     // Set the safe command to CLOSE if normally closed valve:                //
     //------------------------------------------------------------------------//
-    AN #NC;
+    AN #p.origin.NC;
     JCN _a;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T #mc.CMD_SAFE;
+    T #p.origin.mc.CMD_SAFE;
 _a:   NOP 0;
 
     //------------------------------------------------------------------------//
     // Set the safe command to OPEN if normally opened valve:                 //
     //------------------------------------------------------------------------//
-    A #NC;
+    A #p.origin.NC;
     JCN _b;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T #mc.CMD_SAFE;
+    T #p.origin.mc.CMD_SAFE;
 _b:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -125,7 +116,8 @@ _b:   NOP 0;
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mc                   := #mc
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
     );
 
 NETWORK
@@ -137,7 +129,7 @@ TITLE = Device command OPEN
     // CMD is OPEN:                                                           //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.POSx.CMD.OPEN;
     ==I;
     );
@@ -149,7 +141,7 @@ TITLE = Device command CLOSE
     // CMD is CLOSE:                                                          //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
     ==I;
     );
@@ -164,7 +156,7 @@ TITLE = Valve Command open
     // Set output bit to high if Normally Closed valve. Open is the energised //
     // state. The opposite is the case for Normally Opened valve.             //
     //------------------------------------------------------------------------//
-    A #NC;
+    A #p.origin.NC;
     = #OUT_Q_Open;
     NOT;
     = #OUT_Q_Close;
@@ -175,8 +167,8 @@ TITLE = Open command is alowable if normal operation
     // Allow OPEN command if everything is operating normally:                //
     //------------------------------------------------------------------------//
     A #cmdOPEN;
-    AN #mc.INTERLOCK;
-    AN #mc.modeOOS;
+    AN #p.origin.mc.INTERLOCK;
+    AN #p.origin.mc.modeOOS;
     = #cmdOPEN;
 
 NETWORK
@@ -185,8 +177,8 @@ TITLE = Close command is alowable if normal operation
     // Allow CLOSE command if everything is operating normally:               //
     //------------------------------------------------------------------------//
     A #cmdCLOSE;
-    AN #mc.INTERLOCK;
-    AN #mc.modeOOS;
+    AN #p.origin.mc.INTERLOCK;
+    AN #p.origin.mc.modeOOS;
     = #cmdCLOSE;
 
 NETWORK
@@ -194,8 +186,8 @@ TITLE = Valve OPEN if feedback open
     //------------------------------------------------------------------------//
     // Valve is open if open feedback on and closed feedback off:             //
     //------------------------------------------------------------------------//
-    A #FB_O;
-    AN #FB_C;
+    A #p.origin.FB_O;
+    AN #p.origin.FB_C;
     = #feedbackOPENED;
 
 NETWORK
@@ -203,8 +195,8 @@ TITLE = Valve CLOSED if feedback closed
     //------------------------------------------------------------------------//
     // Valve is closed if open feedback off and closed feedback on:           //
     //------------------------------------------------------------------------//
-    AN #FB_O;
-    A #FB_C;
+    AN #p.origin.FB_O;
+    A #p.origin.FB_C;
     = #feedbackCLOSED;
 
 NETWORK
@@ -212,8 +204,8 @@ TITLE = Valve is fault if both feedbacks on
     //------------------------------------------------------------------------//
     // Valve is fault if both open and closed feedbacks are both on:          //
     //------------------------------------------------------------------------//
-    A #FB_O;
-    A #FB_C;
+    A #p.origin.FB_O;
+    A #p.origin.FB_C;
     = #feedbackFAULT;
 
 NETWORK
@@ -222,8 +214,8 @@ TITLE = Valve might be TRAVEL if neither feedback on
     // Valve is travel if neither open nor closed feedbacks are on, provided  //
     // the travel timer hasn't expired:                                       //
     //------------------------------------------------------------------------//
-    AN #FB_O;
-    AN #FB_C;
+    AN #p.origin.FB_O;
+    AN #p.origin.FB_C;
     = #feedbackTRAVEL;
 
 NETWORK
@@ -237,7 +229,7 @@ TITLE = Close command
     A #cmdCLOSE;
     JCN _not_close;
     A #OUT_Q_Close;
-    = #OUT_Q;
+    = #p.origin.OUT_Q;
 _not_close:    NOP 0;
 
 NETWORK
@@ -248,7 +240,7 @@ TITLE = Open command
     A #cmdOPEN;
     JCN _not_open;
     A #OUT_Q_Open;
-    = #OUT_Q;
+    = #p.origin.OUT_Q;
 _not_open:    NOP 0;
 
 NETWORK
@@ -291,7 +283,7 @@ TITLE = Valve CLOSED if command and feedback CLOSED
     A #feedbackCLOSED;
     JCN _c;
     L "dbCONST".BLK.POSx.STATE.CLOSED;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _c:   NOP 0;
 
 NETWORK
@@ -303,7 +295,7 @@ TITLE = Valve OPENED if command and feedback OPENED
     A #feedbackOPENED;
     JCN _d;
     L "dbCONST".BLK.POSx.STATE.OPENED;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _d:   NOP 0;
 
 NETWORK
@@ -324,7 +316,7 @@ TITLE = Valve TRAVEL if command issued and travel timer not expired
     );
     JCN _e;
     L "dbCONST".BLK.POSx.STATE.TRAVEL;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _e:   NOP 0;
 
 NETWORK
@@ -338,7 +330,7 @@ TITLE = Valve failed to CLOSE
     ON #feedbackCLOSED;
     O #feedbackOPENED;
     );
-    = #FAULT_C;
+    = #p.origin.FAULT_C;
 
 NETWORK
 TITLE = Valve failed to OPEN
@@ -351,7 +343,7 @@ TITLE = Valve failed to OPEN
     O #feedbackCLOSED;
     ON #feedbackOPENED;
     );
-    = #FAULT_O;
+    = #p.origin.FAULT_O;
 
 NETWORK
 TITLE = Valve FAULT if both feedbacks on or travel timer expired
@@ -363,10 +355,10 @@ TITLE = Valve FAULT if both feedbacks on or travel timer expired
     A #feedbackCLOSED;
     A #feedbackOPENED;
     );
-    O FAULT_C;
-    O FAULT_O;
+    O #p.origin.FAULT_C;
+    O #p.origin.FAULT_O;
     JCN _f;
     L "dbCONST".BLK.POSx.STATE.FAULT;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _f:   NOP 0;
 END_FUNCTION_BLOCK

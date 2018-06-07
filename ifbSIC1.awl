@@ -47,8 +47,6 @@
 // ALARM_HH, ALARM_H, ALARM_L, ALARM_LL are added in SIC1 and programmed.     //
 //----------------------------------------------------------------------------//
 // Index   Instance    Description                                            //
-@@TEMPLATE_BEGIN@@
-@@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|createInstancesGlobal@@
 // @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
 @@TEMPLATE_END@@
@@ -66,8 +64,9 @@ VERSION : 2.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
-    item : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
+    p : Array[0..@@MAXITEM@@] of "udt@@CLASS@@";
 @@ATTR_END|numInstances@@
+    f : "fb@@CLASS@@";
 @@TEMPLATE_END@@
 END_VAR
 
@@ -76,6 +75,9 @@ BEGIN
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     //------------------------------------------------------------------------//
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    //                                                                        //
     // Get the critical interlock if there is one. If not set alwaysLow:      //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CRIL_EXISTS@@
@@ -83,10 +85,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
 @@ATTR_BEGIN|CRIL_TARGET@@
-    A "idbCRIL".item[@@IDXIL@@].INTERLOCK;
+    A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #item[@@IDX@@].mc.CRIL;
+    = #p[@@IDX@@].origin.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -98,10 +100,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "alwaysLow";
 @@ATTR_DEFAULT_END@@
 @@ATTR_BEGIN|NCRIL_TARGET@@
-    A "idbNCRIL".item[@@IDXIL@@].INTERLOCK;
+    A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #item[@@IDX@@].mc.NCRIL;
+    = #p[@@IDX@@].origin.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -109,7 +111,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #item[@@IDX@@].mc.ME;
+    T #p[@@IDX@@].origin.mc.ME;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
@@ -117,7 +119,23 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #item[@@IDX@@].mc.OWNER;
+    T #p[@@IDX@@].owner.mc.OWNER;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+    //------------------------------------------------------------------------//
+    // This block can only reside within this CPU:                            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].origin.mc.isOriginBlock;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in this CPU:            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #p[@@IDX@@].owner.mc.isOriginOwner;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -125,62 +143,111 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     // Set the safe command if restarting the PLC:                            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
-    JCN _notRestart_@@COUNTER|1@@;
+    JCN _notRestart_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.SIC1.SAFE.CMD;
-    T #item[@@IDX@@].mc.CMD_SAFE;
-_notRestart_@@COUNTER@@:   NOP 0;
+    T #p[@@IDX@@].origin.mc.CMD_SAFE;
+_notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Signal polarity
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Speed measured value
     //------------------------------------------------------------------------//
-    // Input signal is BIPOLAR (1) or UNIPOLAR (0). Assume 0:                 //
+    // Set the instance speed measured value from the field:                  //
     //------------------------------------------------------------------------//
-    R #item[@@IDX@@].ai.POLARITY;
+    L "@@INSTANCE@@-RAW";
+    T #p[@@IDX@@].origin.RAW_INPUT;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Field Fault Inputs
+    //------------------------------------------------------------------------//
+    // Set the instance fault input values from the field:                    //
+    //------------------------------------------------------------------------//
+    A "@@INSTANCE@@-BRK";
+    = #p[@@IDX@@].origin.BRK;
+    A "@@INSTANCE@@-FLP";
+    = #p[@@IDX@@].origin.FLP;
+    A "@@INSTANCE@@-FLT";
+    = #p[@@IDX@@].origin.FLT;
+    A "@@INSTANCE@@-THM";
+    = #p[@@IDX@@].origin.THM;
+@@ATTR_BEGIN|LINK@@
+    A "@@PHRLINKINSTANCE@@-DI";
+    = #p[@@IDX@@].origin.PHR;
+@@ATTR_END|LINK@@
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Mass measured value
+    //------------------------------------------------------------------------//
+    // Set the instance mass measured value and data quality from the field:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|LINK@@
+    L "idb@@MASSLINKCLASS@@".p[@@MASSLINKIDX@@].origin.ai.PV;
+    T #p[@@IDX@@].origin.MI1_MASS;
+    A "idb@@MASSLINKCLASS@@".p[@@MASSLINKIDX@@].origin.ai.DQ;
+    = #p[@@IDX@@].origin.MI1_DQ;
+@@ATTR_END|LINK@@
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Mass values to run and stop agitator
+    //------------------------------------------------------------------------//
+    // Set the instance mass measured value and data quality from the field:  //
+    //------------------------------------------------------------------------//
+    L @@MXMASSAGITRUN@@;
+    T #p[@@IDX@@].origin.MASS_RUN;
+    L @@MXMASSAGITSTOP@@;
+    T #p[@@IDX@@].origin.MASS_STOP;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Speed measurement attributes
+    //------------------------------------------------------------------------//
+    // Set the speed measurement attribute values:                            //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|ANALOG_EMBED@@
+    L @@RANGEHIGH@@;
+    T #p[@@IDX@@].origin.RANGE_UPPER;
+    L @@RANGELOW@@;
+    T #p[@@IDX@@].origin.RANGE_LOWER;
+    A @@POLARITY@@;
+    = #p[@@IDX@@].origin.POLARITY;
+    L @@LIMITHH@@;
+    T #p[@@IDX@@].origin.LIMIT_HH;
+    L @@LIMITH@@;
+    T #p[@@IDX@@].origin.LIMIT_H;
+@@ATTR_END|ANALOG_EMBED@@
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #item[@@IDX@@]
-    (   _SETPOINT            := #item[@@IDX@@]._SETPOINT ,
-        RAW_INPUT            := "@@INSTANCE@@-RAW" ,
-        BRK                  := "@@INSTANCE@@-BRK" ,
-@@ATTR_BEGIN|LINK@@
-        PHR                  := "@@PHRLINKINSTANCE@@-DI" ,
-@@ATTR_END|LINK@@
-        FLP                  := "@@INSTANCE@@-FLP" ,
-        FLT                  := "@@INSTANCE@@-FLT" ,
-        THM                  := "@@INSTANCE@@-THM" ,
-        MASS_RUN             := @@MXMASSAGITRUN@@ ,
-        MASS_STOP            := @@MXMASSAGITSTOP@@ ,
-@@ATTR_BEGIN|LINK@@
-        MI1_MASS             := "idb@@MASSLINKCLASS@@".item[@@MASSLINKIDX@@].ai.PV ,
-        MI1_DQ               := "idb@@MASSLINKCLASS@@".item[@@MASSLINKIDX@@].ai.DQ ,
-@@ATTR_END|LINK@@
-@@ATTR_BEGIN|ANALOG_EMBED@@
-        RANGE_UPPER          := @@RANGELOW@@ ,
-        RANGE_LOWER          := @@RANGEHIGH@@ ,
-        POLARITY             := #item[@@IDX@@].POLARITY ,
-        LIMIT_HH             := @@LIMITHH@@ ,
-        LIMIT_H              := @@LIMITH@@ ,
-@@ATTR_END|ANALOG_EMBED@@
-        FB_TDELAY            := #item[@@IDX@@].FB_TDELAY ,
-        P_SEL                := #item[@@IDX@@].P_SEL ,
-        I_SEL                := #item[@@IDX@@].I_SEL ,
-        D_SEL                := #item[@@IDX@@].D_SEL ,
-        GAIN                 := #item[@@IDX@@].GAIN ,
-        TI                   := #item[@@IDX@@].TI ,
-        TD                   := #item[@@IDX@@].TD ,
-        CYCLE                := #item[@@IDX@@].CYCLE ,
-        OUT_Q                := "@@INSTANCE@@-CMD" ,
-        _PV                  := #item[@@IDX@@]._PV ,
-        RUNNING              := #item[@@IDX@@].RUNNING ,
-        OUT_Q_F              := "@@INSTANCE@@-OUT_F" ,
-        OUT_Q_R              := "@@INSTANCE@@-OUT_R" ,
-        LMN                  := "@@INSTANCE@@-OUT" ,
-      );
-      NOP 0;
+    CALL #f
+    (   p                    := #p[@@IDX@@]
+    );
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Speed Setpoint
+    //------------------------------------------------------------------------//
+    // Set the instance output speed setpoint to the field:                   //
+    //------------------------------------------------------------------------//
+    L #p[@@IDX@@].origin.LMN;
+    T "@@INSTANCE@@-OUT";
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
+    //------------------------------------------------------------------------//
+    // Set the instance output command to the field:                          //
+    //------------------------------------------------------------------------//
+    A #p[@@IDX@@].origin.OUT_Q;
+    = "@@INSTANCE@@-CMD";
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Forward and Reverse direction
+    //------------------------------------------------------------------------//
+    // Set the instance output forward and reverse direction to the field:    //
+    //------------------------------------------------------------------------//
+    A #p[@@IDX@@].origin.OUT_Q_F;
+    = "@@INSTANCE@@-OUT_F";
+    A #p[@@IDX@@].origin.OUT_Q_R;
+    = "@@INSTANCE@@-OUT_R";
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

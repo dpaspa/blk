@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fbVS1                                                         //
+// Class:       fcVS1                                                         //
 // Description:                                                               //
 // Grouped CM for the two vacuum pumps to comprise one vacuum system which    //
 // starts sucking if any user vacuum valve opens indicating a call for the    //
@@ -11,31 +11,18 @@
 // Rev By               Date        CC        Note                            //
 // 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "fbVS1"
+FUNCTION "fcVS1" : Void
 TITLE = VS1 : VS1 Vacuum System grouped CM
 { S7_Optimized_Access := 'TRUE' }
-NAME : fbVS1
+NAME : fcVS1
 AUTHOR : REO
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-// Declare variables:                                                         //
+// Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_INPUT
-    VLV1_STATE : Int;        // State of the user 1 valve
-    VLV2_STATE : Int;        // State of the user 2 valve
-    PUMP1_INTERLOCK : Bool;  // Vacuum Pump 1 interlock
-    PUMP2_INTERLOCK : Bool;  // Vacuum Pump 2 interlock
-END_VAR
-
-VAR_OUTPUT
-    PUMP1_CMD : Int;         // Vacuum Pump 1 command
-    PUMP2_CMD : Int;         // Vacuum Pump 2 command
-END_VAR
-
-VAR
-    mc : "udtModeCommand";   // Block mode and command
-    FAULT : Bool;
+VAR_IN_OUT
+    p : "udtVS1";            // Block data interface
 END_VAR
 
 VAR_TEMP
@@ -55,7 +42,8 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mc                   := #mc
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
     );
 
 NETWORK
@@ -67,7 +55,7 @@ TITLE = DISABLE command
     // CMD is DISABLE:                                                        //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.VS1.CMD.DISABLE;
     ==I;
     );
@@ -76,10 +64,10 @@ TITLE = DISABLE command
     //------------------------------------------------------------------------//
     // CMD is ENABLE:                                                         //
     //------------------------------------------------------------------------//
-    AN #mc.modeOOS;
-    AN #mc.INTERLOCK;
+    AN #p.origin.mc.modeOOS;
+    AN #p.origin.mc.INTERLOCK;
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.VS1.CMD.ENABLE;
     ==I;
     );
@@ -93,26 +81,28 @@ TITLE = Check vacuum pumps are available
     //                                                                        //
     // Check vacuum pumps are not interlocked:                                //
     //------------------------------------------------------------------------//
-    AN #mc.modeOOS;
+    AN #p.origin.mc.modeOOS;
     A(;
-    O #PUMP1_INTERLOCK;
-    O #PUMP2_INTERLOCK;
+    O #p.origin.mcPUMP1.INTERLOCK;
+    O #p.origin.mcPUMP2.INTERLOCK;
+    ON #p.origin.mcPUMP1.modeAUTO;
+    ON #p.origin.mcPUMP2.modeAUTO;
     );
-    = #FAULT;
+    = #p.origin.FAULT;
 
     //------------------------------------------------------------------------//
     // Check if any user valve is open which is a call for vacuum:            //
     //------------------------------------------------------------------------//
     A #cmdENABLE;
-    AN #FAULT;
+    AN #p.origin.FAULT;
     A(;
     O(;
-    L #VLV1_STATE;
+    L #p.origin.mcVALVE1.STATE;
     L "dbCONST".BLK.POSx.STATE.OPENED;
     ==I;
     );
     O(;
-    L #VLV2_STATE;
+    L #p.origin.mcVALVE2.STATE;
     L "dbCONST".BLK.POSx.STATE.OPENED;
     ==I;
     );
@@ -130,7 +120,7 @@ TITLE = Check vacuum pumps are available
     A #tDO;
     JCN _a;
     L "dbCONST".BLK.MOT1.CMD.START;
-    T #PUMP1_CMD;
+    T #p.origin.mcoPUMP1.CMD;
 _a:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -139,7 +129,7 @@ _a:   NOP 0;
     A #tDO;
     JCN _b;
     L "dbCONST".BLK.MOT1.CMD.START;
-    T #PUMP2_CMD;
+    T #p.origin.mcoPUMP2.CMD;
 _b:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -148,7 +138,7 @@ _b:   NOP 0;
     AN #tDO;
     JCN _c;
     L "dbCONST".BLK.MOT1.CMD.STOP;
-    T #PUMP1_CMD;
+    T #p.origin.mcoPUMP1.CMD;
 _c:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -157,7 +147,7 @@ _c:   NOP 0;
     AN #tDO;
     JCN _d;
     L "dbCONST".BLK.MOT1.CMD.STOP;
-    T #PUMP2_CMD;
+    T #p.origin.mcoPUMP2.CMD;
 _d:   NOP 0;
 
 NETWORK
@@ -172,7 +162,7 @@ TITLE = Set Device State to DISABLED if commanded or cannot ENABLE
     ON #cmdENABLE;
     JCN _e;
     L "dbCONST".BLK.VS1.STATE.DISABLED;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _e:   NOP 0;
 
 NETWORK
@@ -183,7 +173,7 @@ TITLE = Set Device State to ENABLED if commanded
     A #cmdENABLE;
     JCN _f;
     L "dbCONST".BLK.VS1.STATE.ENABLED;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _f:   NOP 0;
 
 NETWORK
@@ -191,9 +181,9 @@ TITLE = Setting Device State to FAULT
     //------------------------------------------------------------------------//
     // FAULT if problem with either vacuum pump:                              //
     //------------------------------------------------------------------------//
-    A #FAULT;
+    A #p.origin.FAULT;
     JCN _g;
     L "dbCONST".BLK.VS1.STATE.FAULT;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _g:   NOP 0;
-END_FUNCTION_BLOCK
+END_FUNCTION

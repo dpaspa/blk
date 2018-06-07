@@ -33,32 +33,14 @@ NAME : fbTC1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
-// Declare variables:                                                         //
+// Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_INPUT
-    _SETPOINT : Real;        // Setpoint
-END_VAR
-
-VAR_OUTPUT
-    TCVPOS : Real;           // Output (0-100%) to TCV remote setpoint
-END_VAR
-
 VAR_IN_OUT
-    TI1_PV : Real;           // Measured Value from TI
-    LMN : Real;              // PID controller output (0-100%)
+    p : "udtTC1";            // Block data interface
 END_VAR
 
 VAR
-    mc : "udtModeCommand";   // Block mode and command
     PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
-    MAN_PID : Bool;          // Manual non pid selection
-    GAIN : Real := 1.0;      // Proportional Gain
-    TI : Time := T#20S;      // Integral Time
-    TD : Time := T#10S;      // Derivative Time
-    CYCLE : Time := T#100MS; // PID Block Sampling Time
-    P_SEL : Bool := TRUE;    // Proportional Action ON/OFF
-    I_SEL : Bool := TRUE;    // Integral Action ON/OFF
-    D_SEL : Bool := TRUE;    // Derivative Action ON/OFF
 END_VAR
 
 VAR_TEMP
@@ -78,8 +60,19 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mc                   := #mc
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
     );
+
+NETWORK
+TITLE = Check if the TCV is not in AUTO
+    //------------------------------------------------------------------------//
+    // Check if the TCV cannot be controlled if not in AUTO:                  //
+    //------------------------------------------------------------------------//
+    O #p.origin.mc.INTERLOCK;
+    O #p.origin.mcTCV.INTERLOCK;
+    ON #p.origin.mcTCV.modeAUTO;
+    = #p.origin.mc.INTERLOCK;
 
 NETWORK
 TITLE = Device command ENABLE
@@ -89,10 +82,10 @@ TITLE = Device command ENABLE
     //                                                                        //
     // CMD is ENABLE:                                                         //
     //------------------------------------------------------------------------//
-    AN #mc.modeOOS;
-    AN #mc.INTERLOCK;
+    AN #p.origin.mc.modeOOS;
+    AN #p.origin.mc.INTERLOCK;
     A(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.TC1.CMD.ENABLE;
     ==I;
     );
@@ -105,7 +98,7 @@ TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
     ON #cmdEnable;
     O(;
-    L #mc.CMD;
+    L #p.owner.mc.CMD;
     L "dbCONST".BLK.TC1.CMD.DISABLE;
     ==I;
     );
@@ -119,7 +112,7 @@ TITLE = Command should be DISABLE if not ENABLE
     A #cmdDisable;
     JCN _a;
     L "dbCONST".BLK.TC1.CMD.DISABLE;
-    T #mc.CMD;
+    T #p.owner.mc.CMD;
 _a:   NOP 0;
 
 NETWORK
@@ -132,7 +125,7 @@ TITLE = Setpoint if Enabled
     //------------------------------------------------------------------------//
     A #cmdEnable;
     JCN _b;
-    L #_SETPOINT;
+    L #p.owner.SETPOINT;
     T #tSetpoint;
 _b:   NOP 0;
 
@@ -158,8 +151,8 @@ TITLE = PID in manual if disabled or manual flag set
     O #cmdDisable;
     O(;
     A #cmdEnable;
-    A #mc.modeMANUAL;
-    A #MAN_PID;
+    A #p.origin.mc.modeMANUAL;
+    A #p.owner.MAN_PID;
     );
     = #tManual_Not_PID;
 
@@ -171,19 +164,19 @@ TITLE = PID Controller
     CALL #PID1
     (   COM_RST              := "flagFirstScanRestart" ,
         MAN_ON               := #tManual_Not_PID ,
-        P_SEL                := #P_SEL ,
-        I_SEL                := #I_SEL ,
-        D_SEL                := #D_SEL ,
-        CYCLE                := #CYCLE ,
+        P_SEL                := #p.origin.P_SEL ,
+        I_SEL                := #p.origin.I_SEL ,
+        D_SEL                := #p.origin.D_SEL ,
+        CYCLE                := #p.origin.CYCLE ,
         SP_INT               := #tSetpoint ,
-        PV_IN                := #TI1_PV ,
+        PV_IN                := #p.origin.TI1_PV ,
         MAN                  := #tSetpoint ,
-        GAIN                 := #GAIN ,
-        TI                   := #TI ,
-        TD                   := #TD ,
+        GAIN                 := #p.origin.GAIN ,
+        TI                   := #p.origin.TI ,
+        TD                   := #p.origin.TD ,
         LMN_HLM              := 100.0 ,
         LMN_LLM              := 0.0 ,
-        LMN                  := #LMN
+        LMN                  := #p.origin.LMN
     );
 
 NETWORK
@@ -192,9 +185,9 @@ TITLE = Output should be reverse acting
     // Change the output to be reverse acting:                                //
     //------------------------------------------------------------------------//
     L 100.0;
-    L #LMN;
+    L #p.origin.LMN;
     -R;
-    T #LMN;
+    T #p.origin.LMN;
 
 NETWORK
 TITLE = Output if Disabled
@@ -204,7 +197,7 @@ TITLE = Output if Disabled
     A #cmdDisable;
     JCN _d;
     L 0.0;
-    T #LMN;
+    T #p.origin.LMN;
 _d:   NOP 0;
 
 NETWORK
@@ -213,8 +206,8 @@ TITLE = Transfer PID output to TCV
     // Write the PID controller output to the temperature control valve (TCV) //
     // remote position setpoint:                                              //
     //------------------------------------------------------------------------//
-    L #LMN;
-    T #TCVPOS;
+    L #p.origin.LMN;
+    T #p.origin.TCVPOS;
 
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
@@ -225,7 +218,7 @@ TITLE = Transfer PID output to TCV
     A #cmdDisable;
     JCN _e;
     L "dbCONST".BLK.TC1.STATE.DISABLED;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _e:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -234,6 +227,6 @@ _e:   NOP 0;
     A #cmdEnable;
     JCN _f;
     L "dbCONST".BLK.TC1.STATE.ENABLED;
-    T #mc.STATE;
+    T #p.origin.mc.STATE;
 _f:   NOP 0;
 END_FUNCTION_BLOCK

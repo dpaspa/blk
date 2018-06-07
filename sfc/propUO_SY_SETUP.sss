@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 22/05/2018 2:26:46 PM by David Paspa
+generated on 4/06/2018 3:15:13 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -317,7 +317,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::37
 --------------------------------------------------
-Name:- pres_vac_fail
+Name:- r_pres_vac_fail
 Type:- REAL
 Description:- Vacuum hold fail pressure
 ParameterInOut:- IN
@@ -325,7 +325,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::38
 --------------------------------------------------
-Name:- pres_stm_pos
+Name:- r_pres_stm_pos
 Type:- REAL
 Description:- Positive steam pressure threshold setpoint
 ParameterInOut:- IN
@@ -333,7 +333,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::39
 --------------------------------------------------
-Name:- pres_vac
+Name:- r_pres_vac
 Type:- REAL
 Description:- Setpoint for vacuum pressure
 ParameterInOut:- IN
@@ -341,7 +341,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::40
 --------------------------------------------------
-Name:- set_time_vac_hold
+Name:- r_time_vac_hold
 Type:- TIME
 Description:- Vacuum Hold Timer
 ParameterInOut:- IN
@@ -349,7 +349,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::41
 --------------------------------------------------
-Name:- set_time_eject
+Name:- r_time_eject
 Type:- TIME
 Description:- Vacuum time
 ParameterInOut:- IN
@@ -757,7 +757,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_eject;
+L #_r_time_eject;
 T #SQ_TIMER.PT;
 
 //Log vacuum begin time
@@ -855,7 +855,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_vac_hold;
+L #_r_time_vac_hold;
 T #SQ_TIMER.PT;
 
 
@@ -1006,7 +1006,7 @@ EmptyTransition:- False
 Description:- Pressure increased above PRES_VAC_FAIL
 Condition:- O(;
 L #_emc_gas_pv;
-L #_pres_vac_fail;
+L #_r_pres_vac_fail;
 >R;
 );
 

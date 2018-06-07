@@ -440,8 +440,7 @@ STRUCT
                 MISMATCH : INT  := 3;
             END_STRUCT ;
         END_STRUCT ;
-@@TEMPLATE_BEGIN@@
-@@ATTR_BEGIN|PARENT@@
+@@TEMPLATE_BEGIN|PARENT@@
         @@CLASS@@ : STRUCT             // @@DESCRIPTION@@
             CMD : STRUCT
                 STOP : INT  := 1;
@@ -458,27 +457,24 @@ STRUCT
             END_STRUCT ;
             SUBS : STRUCT
 @@ATTR_BEGIN|STATE@@
-                @@STATE@@ : INT  := @@COUNTER|1@@;
+                @@STATE@@ : INT  := @@COUNTERATTR|1@@;
 @@ATTR_END|STATE@@
             END_STRUCT ;
         END_STRUCT ;
-@@ATTR_END|PARENT@@
 @@TEMPLATE_END@@
         ID : STRUCT                    // Resource arbitration
             AVAILABLE : INT;           // Block is available for parent acquisition
-@@TEMPLATE_BEGIN@@
-@@ATTR_BEGIN|UNIQUEID@@
+@@TEMPLATE_BEGIN|UNIQUEID@@
             @@INSTANCE@@ : INT;
-@@ATTR_END|UNIQUEID@@
+@@TEMPLATE_END@@
         END_STRUCT ;
     END_STRUCT ;
 END_STRUCT ;
 
 BEGIN
     BLK.ID.AVAILABLE := 0;
-@@ATTR_BEGIN|UNIQUEID@@
+@@TEMPLATE_BEGIN|UNIQUEID@@
     BLK.ID.@@INSTANCE@@ := @@ID@@;
-@@ATTR_END|UNIQUEID@@
 @@TEMPLATE_END@@
 
 END_DATA_BLOCK

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 22/05/2018 2:28:12 PM by David Paspa
+generated on 4/06/2018 3:11:59 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -36,13 +36,37 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- sic_agit_state
+Type:- INT
+Description:- Agitator running status
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- sic_agit_cmd
+Type:- INT
+Description:- Command to agitator
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- agit_hist
+Type:- INT
+Description:- Previous Agitator running status
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
 Name:- mi_vessel_pv
 Type:- REAL
 Description:- Current mass
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::5
 --------------------------------------------------
 Name:- time_measure_begin
 Type:- TOD
@@ -50,7 +74,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::6
 --------------------------------------------------
 Name:- log_time_measure_begin
 Type:- BOOL
@@ -58,7 +82,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::7
 --------------------------------------------------
 Name:- time_measure_end
 Type:- TOD
@@ -66,7 +90,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::8
 --------------------------------------------------
 Name:- log_time_measure_end
 Type:- BOOL
@@ -74,7 +98,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::9
 --------------------------------------------------
 Name:- mass_tare
 Type:- REAL
@@ -82,7 +106,7 @@ Description:- Tare mass
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::10
 --------------------------------------------------
 Name:- mass_nett
 Type:- REAL
@@ -90,7 +114,7 @@ Description:- Nett Mass
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::11
 --------------------------------------------------
 Name:- settling_time
 Type:- TIME
@@ -102,15 +126,17 @@ ParameterInOut:- IN
 STEP::01
 --------------------------------------------------
 StepNo:- 01
-Title:- PH_EMM1_MEASURE : Wait Settle Time
+Title:- PH_EMM1_MEASURE : Log MEASURE operation begin time.
 Description:- Log MEASURE operation begin time.
-Wait to allow the contents to settle. 
+Store current agitator status.
+Disable agitator.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Log MEASURE operation begin time.
-The settling time is loaded to allow the contents to settle. 
+Store current agitator status.
+Disable agitator.
 Action:- //Log MEASURE operation begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_time_measure_begin;
@@ -118,7 +144,42 @@ T #_time_measure_begin;
 SET;
 S #_log_time_measure_begin;
 
-//Load the settling time
+//Store current agitator status.
+L #_sic_agit_state;
+T #_agit_hist;
+
+//Disable agitator.
+L "dbCONST".BLK.SIC1.CMD.DISABLE;
+T #_sic_agit_cmd;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- SIC Disabled
+EmptyTransition:- False
+Description:- Proceed if agitator stopped.
+Condition:- A(;
+L "dbCONST".BLK.SIC1.STATE.STOPPED;
+L #_sic_agit_state;
+==I;
+); 
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- PH_EMM1_MEASURE : Wait Settle Time
+Description:- Wait to allow the contents to settle. 
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- The settling time is loaded to allow the contents to settle. 
+Action:- //Load the settling time
 L #_settling_time;
 T #SQ_TIMER.PT;
 
@@ -128,9 +189,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::01
+TRANSITION::02
 --------------------------------------------------
-TRNNo:- 01
+TRNNo:- 02
 Title:- Wait until settling time expired
 EmptyTransition:- False
 Description:- Wait until timer settling time expired
@@ -139,9 +200,9 @@ A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::02
+STEP::03
 --------------------------------------------------
-StepNo:- 02
+StepNo:- 03
 Title:- PH_EMM1_MEASURE : Update Net Mass
 Description:- Calculate the net mass value from current and tare mass difference.
 
@@ -159,19 +220,72 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::02
+TRANSITION::03
 --------------------------------------------------
-TRNNo:- 02
+TRNNo:- 03
+Title:- Change of SIC State
+EmptyTransition:- False
+Description:- SIC State Changed.
+SIC was running.
+Condition:- //Check whether the last SIC state is not equal to current state
+A(;
+L #_agit_hist;
+L #_sic_agit_state;
+<>I;
+);
+//SIC was running.
+A(;
+L "dbCONST".BLK.SIC1.STATE.RUNNING;
+L #_agit_hist;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 04
 Title:- Phase Finish Normal
 EmptyTransition:- False
-Description:- Jump unconditionally.
+Description:- Phase Finish Normal
 Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::03
+STEP::04
 --------------------------------------------------
-StepNo:- 03
+StepNo:- 04
+Title:- PH_EMM1_MEASURE : Enable agitator.
+Description:- Enable agitator.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Enable agitator.
+Action:- //Enable agitator.
+L "dbCONST".BLK.SIC1.CMD.ENABLE;
+T #_sic_agit_cmd;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 05
+Title:- Agitator running
+EmptyTransition:- False
+Description:- Agitator running
+Condition:- A(;
+L "dbCONST".BLK.SIC1.STATE.RUNNING;
+L #_sic_agit_state;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 05
 Title:- PH_EMM1_MEASURE : Last Step
 Description:- Log MEASURE operation end time.
 
@@ -189,7 +303,6 @@ T #_time_measure_end;
 
 SET;
 S #_log_time_measure_end;
-
 Verification:- A "uncondJump";
 
 ****************************************************************************************************

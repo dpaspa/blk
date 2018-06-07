@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 22/05/2018 2:27:22 PM by David Paspa
+generated on 4/06/2018 3:15:21 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -55,7 +55,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- set_time_sip
+Name:- r_time_sip
 Type:- TIME
 Description:- SIP timer
 ParameterInOut:- VAR
@@ -375,7 +375,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::44
 --------------------------------------------------
-Name:- temp_sip_vent
+Name:- r_temp_sip_vent
 Type:- REAL
 Description:- VENT valve SIP temperature
 ParameterInOut:- IN
@@ -383,7 +383,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::45
 --------------------------------------------------
-Name:- temp_sip
+Name:- r_temp_sip
 Type:- REAL
 Description:- SIP temperature
 ParameterInOut:- IN
@@ -439,7 +439,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::52
 --------------------------------------------------
-Name:- pres_vac
+Name:- r_pres_vac
 Type:- REAL
 Description:- Setpoint for vacuum pressure
 ParameterInOut:- IN
@@ -455,7 +455,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::54
 --------------------------------------------------
-Name:- pulse_number
+Name:- r_pulse_number
 Type:- INT
 Description:- Number of pulse times
 ParameterInOut:- IN
@@ -471,7 +471,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::56
 --------------------------------------------------
-Name:- num_sip_abort
+Name:- r_num_sip_abort
 Type:- INT
 Description:- number of SIP abort times
 ParameterInOut:- IN
@@ -487,7 +487,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::58
 --------------------------------------------------
-Name:- set_time_sip_abort
+Name:- r_time_sip_abort
 Type:- TIME
 Description:- Time to abort SIP
 ParameterInOut:- IN
@@ -511,7 +511,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::61
 --------------------------------------------------
-Name:- set_time_eject
+Name:- r_time_eject
 Type:- TIME
 Description:- Vacuum eject timer
 ParameterInOut:- IN
@@ -719,7 +719,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::87
 --------------------------------------------------
-Name:- set_time_drain_pulse
+Name:- r_time_drain_pulse
 Type:- TIME
 Description:- Time for drain pulsing.
 ParameterInOut:- IN
@@ -735,7 +735,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::89
 --------------------------------------------------
-Name:- pres_hpca_leave
+Name:- r_pres_hpca_leave
 Type:- REAL
 Description:- HPCA pressure to leave 
 ParameterInOut:- IN
@@ -751,7 +751,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::91
 --------------------------------------------------
-Name:- set_time_stm_drain_sy
+Name:- r_time_stm_drain_sy
 Type:- TIME
 Description:- Time to steam the vent line
 ParameterInOut:- IN
@@ -759,7 +759,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::92
 --------------------------------------------------
-Name:- pres_hpca_blow
+Name:- r_pres_hpca_blow
 Type:- REAL
 Description:- Pressure
 ParameterInOut:- IN
@@ -767,7 +767,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::93
 --------------------------------------------------
-Name:- pres_lpca_blank
+Name:- r_pres_lpca_blank
 Type:- REAL
 Description:- lpca blanket pressure
 ParameterInOut:- IN
@@ -775,7 +775,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::94
 --------------------------------------------------
-Name:- pres_stm_pos
+Name:- r_pres_stm_pos
 Type:- REAL
 Description:- Positive steam pressure threshold
 ParameterInOut:- IN
@@ -898,7 +898,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_eject;
+L #_r_time_eject;
 T #SQ_TIMER.PT;
 
 //Log vacuum begin time.
@@ -919,7 +919,7 @@ EmptyTransition:- False
 Description:- Pressure reduced below PRES_VAC.
 Condition:- A(;
 L #_emc_gas_pv;
-L #_pres_vac;
+L #_r_pres_vac;
 <R;
 );
 
@@ -1122,7 +1122,7 @@ PI_y103 > PRES_STM_POS
 
 Condition:- A(;
 L 	#_emc_gas_pv;
-L 	#_pres_stm_pos;
+L 	#_r_pres_stm_pos;
 >R;
 );
 
@@ -1178,7 +1178,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_stm_drain_sy;
+L #_r_time_stm_drain_sy;
 T #SQ_TIMER.PT;
 
 Verification:- A(;
@@ -1413,7 +1413,7 @@ R #_ABORT_TIMER.IN;
 
 AN #_ABORT_TIMER.Q;
 S #_ABORT_TIMER.IN;
-L #_set_time_sip_abort;
+L #_r_time_sip_abort;
 T #_ABORT_TIMER.PT;
 
 tsi1: NOP 0;
@@ -1492,7 +1492,7 @@ Verification:- A #_TEMP_TIMER.IN;
 --------------------------------------------------
 TRANSITION::21
 --------------------------------------------------
-TRNNo:- 21.0000
+TRNNo:- 21
 Title:- Temperature below setpoint
 EmptyTransition:- False
 Description:- SIP timer running and any temperature below TEMP_SIP or the vent filter inlet temperature below TEMP_SIP_VENT?
@@ -1501,31 +1501,31 @@ A(;
 //TIn101.
 O(;
   L 	#_emg_ti_vent_pv;
-  L 	#_temp_sip_vent; 
+  L 	#_r_temp_sip_vent; 
   <R;
 );
 //TIn103.
 O(;
   L            #_emg_ti_drain_pv;
-  L 	#_temp_sip_vent;
+  L 	#_r_temp_sip_vent;
   <R;
   );
 //TIn105.
 O(;
   L            #_emv_ti_vessel_pv;
-  L 	#_temp_sip;
+  L 	#_r_temp_sip;
   <R;
 );
 //TIn107.
 O(;
   L              #_emx_6_ti_drain_pv;
-  L 	#_temp_sip;
+  L 	#_r_temp_sip;
   <R;
 );
 //TIn111.
 O(;
   L              #_emx_11_ti_drain_pv;
-  L 	#_temp_sip;
+  L 	#_r_temp_sip;
   <R;
 );
 );
@@ -1534,7 +1534,7 @@ O(;
 --------------------------------------------------
 TRANSITION::22
 --------------------------------------------------
-TRNNo:- 22.0000
+TRNNo:- 22
 Title:- All temperatures above setpoint.
 EmptyTransition:- False
 Description:- All SIP temperatures above TEMP_SIP °C and the vent filter inlet temperature above TEMP_SIP_VENT and SIP timer not running? 
@@ -1548,31 +1548,31 @@ Condition:- AN #_sip_timer_started;
 //TIn101.
 A(;
   L 	#_emg_ti_vent_pv;
-  L 	#_temp_sip_vent; 
+  L 	#_r_temp_sip_vent; 
   >R;
 );
 //TIn103.
 A(;
   L            #_emg_ti_drain_pv;
-  L 	#_temp_sip_vent;
+  L 	#_r_temp_sip_vent;
   >R;
   );
 //TIn105.
 A(;
   L            #_emv_ti_vessel_pv;
-  L 	#_temp_sip;
+  L 	#_r_temp_sip;
   >R;
 );
 //TIn107.
 A(;
   L              #_emx_6_ti_drain_pv;
-  L 	#_temp_sip;
+  L 	#_r_temp_sip;
   >R;
 );
 //TIn111.
 A(;
   L              #_emx_11_ti_drain_pv;
-  L 	#_temp_sip;
+  L 	#_r_temp_sip;
   >R;
 );
 
@@ -1630,7 +1630,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_sip;
+L #_r_time_sip;
 T #SQ_TIMER.PT;
 
 //Log SIP start time.
@@ -1685,13 +1685,13 @@ Verification:- A M1.1; //Always High flag
 --------------------------------------------------
 TRANSITION::27
 --------------------------------------------------
-TRNNo:- 27.0000
+TRNNo:- 27
 Title:- Retry SIP again
 EmptyTransition:- False
 Description:- Temperature has dropped less than NUM_SIP_ABORT times
 Condition:- A(;
 L 	#_ctr_sip_abort;
-L 	#_num_sip_abort;
+L 	#_r_num_sip_abort;
 <I;
 );
 
@@ -1699,7 +1699,7 @@ L 	#_num_sip_abort;
 --------------------------------------------------
 TRANSITION::28
 --------------------------------------------------
-TRNNo:- 28.0000
+TRNNo:- 28
 Title:- Abort SIP
 EmptyTransition:- False
 Description:- Temperature has dropped NUM_SIP_ABORT times.
@@ -1708,7 +1708,7 @@ O #_ABORT_TIMER.Q;
 //Temperature has dropped NUM_SIP_ABORT times.
 O(;
 L 	#_ctr_sip_abort;
-L 	#_num_sip_abort;
+L 	#_r_num_sip_abort;
 >=I;
 );
 
@@ -1880,7 +1880,7 @@ EmptyTransition:- False
 Description:- Pressure dropped to PRES_HPCA_BLOW. PI-xy10 <= PRES_HPCA_BLOW
 Condition:- A(;
 L 	#_emc_gas_pv;
-L 	#_pres_hpca_blow;
+L 	#_r_pres_hpca_blow;
 <=R;
 );
 
@@ -1888,7 +1888,7 @@ L 	#_pres_hpca_blow;
 --------------------------------------------------
 STEP::23
 --------------------------------------------------
-StepNo:- 23.0000
+StepNo:- 23
 Title:- UO_SY_SIP : Enable HPCA pressure control
 Description:- Log time when pressure reached.
 
@@ -1918,7 +1918,7 @@ ACTION::02
 --------------------------------------------------
 Description:- Enable Sy HPCA pressure control at setpoint pres_hpca_blow.
 Action:- // Open Sy HPCA pressure control at setpoint PRES_HPCA_BLOW
-L #_pres_hpca_blow;
+L #_r_pres_hpca_blow;
 T #_emc_gas_setpoint;
 L "dbCONST".SEL.GAS.HPCA;
 T #_emc_gas_medium;
@@ -1960,7 +1960,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_drain_pulse;
+L #_r_time_drain_pulse;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
@@ -2026,7 +2026,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_drain_pulse;
+L #_r_time_drain_pulse;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
@@ -2132,7 +2132,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_set_time_drain_pulse;
+L #_r_time_drain_pulse;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 
@@ -2140,14 +2140,14 @@ Verification:- A #SQ_TIMER.IN;
 --------------------------------------------------
 TRANSITION::38
 --------------------------------------------------
-TRNNo:- 38.0000
+TRNNo:- 38
 Title:- Finished pulsing drain valves after repeats.
 EmptyTransition:- False
 Description:- Drain valves pulsed PULSE_NUMBER times after delay OR TIME_DRAIN_PULSE expired
 Condition:- A(;
 O(;
 L 	#_pulse_counter;
-L 	#_pulse_number;
+L 	#_r_pulse_number;
 >=I;
 );
 O #SQ_TIMER.Q;
@@ -2186,7 +2186,7 @@ EmptyTransition:- False
 Description:- Pressure below PRES_HPCA_LEAVE. PI_xy10 <= PRES_HPCA_LEAVE
 Condition:- A(;
 L 	#_emc_gas_pv;
-L 	#_pres_hpca_leave;
+L 	#_r_pres_hpca_leave;
 <=R;
 );
 
@@ -2258,7 +2258,7 @@ Condition:- A "uncondJump";
 --------------------------------------------------
 STEP::29
 --------------------------------------------------
-StepNo:- 29.0000
+StepNo:- 29
 Title:- UO_SY_SIP : Close outlet valve and start LPCA blanketing
 Description:- Enable Sy LPCA pressure control at setpoint PRES_LPCA_BLANK.
 
@@ -2267,7 +2267,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Enable Sy LPCA pressure control at setpoint PRES_LPCA_BLANK with VENT valve closed.
 Action:- // Enable Sy LPCA pressure control at setpoint PRES_LPCA_BLANK.
-L #_pres_lpca_blank;
+L #_r_pres_lpca_blank;
 T #_emc_gas_setpoint;
 L "dbCONST".SEL.GAS.LPCA;
 T #_emc_gas_medium;

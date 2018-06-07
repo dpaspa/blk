@@ -24,7 +24,8 @@ NAME : fcModeCmdBLK
 VERSION : 2.0
 
 VAR_IN_OUT
-    mc : "udtModeCommand";             // General mode and command
+    mcOrigin : "udtMCOrigin";          // Block mode and command from origin CPU
+    mcOwner : "udtMCOwner";            // Block mode and command directives from owner CPU
     bmc : "udtModeCommandBLK";         // Block mode and command
 END_VAR
 
@@ -37,7 +38,7 @@ TITLE = Flag if block Mode just changed to Auto
     // Check if the mode has just been changed to Auto if the bit positive    //
     // edge. The result will only last for one scan after the positive edge:  //
     //------------------------------------------------------------------------//
-    A #mc.modeAUTO;
+    A #mcOrigin.modeAUTO;
     FP #bmc.edgeModeAuto;
     = #bmc.eventModeAuto;
 
@@ -46,7 +47,7 @@ TITLE = Flag if block Mode just changed to Manual
     //------------------------------------------------------------------------//
     // Check if the mode has just been changed to Manual:                     //
     //------------------------------------------------------------------------//
-    A #mc.modeMANUAL;
+    A #mcOrigin.modeMANUAL;
     FP #bmc.edgeModeManual;
     = #bmc.eventModeManual;
 
@@ -55,7 +56,7 @@ TITLE = Flag if block Mode just changed to Out Of Service
     //------------------------------------------------------------------------//
     // Check if the mode has just been changed to Out of Service:             //
     //------------------------------------------------------------------------//
-    A #mc.modeOOS;
+    A #mcOrigin.modeOOS;
     FP #bmc.edgeModeOOS;
     = #bmc.eventModeOOS;
 
@@ -70,7 +71,7 @@ TITLE = Flag if a new block running substate command issued
     A #bmc.permitStart;
     A(;
     O(;
-    L #mc.CMD;
+    L #mcOwner.CMD;
     L "dbCONST".BLK.CMD.START;
     ==I;
     );
@@ -106,7 +107,7 @@ TITLE = Flag if block stop command issued
     // edge. The result will only last for one scan after the positive edge:  //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.CMD;
+    L #mcOwner.CMD;
     L "dbCONST".BLK.CMD.STOP;
     ==I;
     );
@@ -130,17 +131,17 @@ TITLE = Interlocked State if Stopped
     // child failed:                                                          //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.STATE;
+    L #mcOrigin.STATE;
     L "dbCONST".BLK.STATE.STOPPED;
     ==I;
     );
     A(;
-    O #mc.INTERLOCK;
+    O #mcOrigin.INTERLOCK;
     ON #bmc.permitStart;
     );
     JCN _d;
     L "dbCONST".BLK.STATE.INTERLOCKED;
-    T #mc.STATE;
+    T #mcOrigin.STATE;
 _d:   NOP 0;
 
 NETWORK
@@ -150,34 +151,34 @@ TITLE = Paused State if Running
     // failed:                                                                //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.STATE;
+    L #mcOrigin.STATE;
     L "dbCONST".BLK.STATE.INTERLOCKED;
     <>I;
     );
     A(;
-    L #mc.STATE;
+    L #mcOrigin.STATE;
     L "dbCONST".BLK.STATE.PAUSED;
     <>I;
     );
     A(;
-    L #mc.STATE;
+    L #mcOrigin.STATE;
     L "dbCONST".BLK.STATE.STOPPED;
     <>I;
     );
     A(;
-    O #mc.INTERLOCK;
+    O #mcOrigin.INTERLOCK;
     ON #bmc.permitStart;
     );
     JCN _e;
     L "dbCONST".BLK.STATE.PAUSED;
-    T #mc.STATE;
+    T #mcOrigin.STATE;
 _e:   NOP 0;
 
     //------------------------------------------------------------------------//
     // Set the substate safe if any interlock:                                //
     //------------------------------------------------------------------------//
     A(;
-    L #mc.STATE;
+    L #mcOrigin.STATE;
     L "dbCONST".BLK.STATE.INTERLOCKED;
     ==I;
     );
@@ -194,7 +195,7 @@ TITLE = Send safe command in case of any interlock or failure
     AN #bmc.permitStart;
     JCN _g;
     L "dbCONST".BLK.SAFE.CMD;
-    T #mc.CMD;
+    T #mcOwner.CMD;
 _g:   NOP 0;
 
 NETWORK
@@ -206,6 +207,6 @@ TITLE = Set the safe state in case of any interlock or failure
     AN #bmc.permitStart;
     JCN _h;
     L "dbCONST".BLK.SAFE.CMD;
-    T #mc.STATE;
+    T #mcOrigin.STATE;
 _h:   NOP 0;
 END_FUNCTION
