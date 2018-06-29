@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:14:12 PM by David Paspa
+generated on 28/06/2018 4:45:32 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -503,7 +503,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::60
 --------------------------------------------------
-Name:- emc_gas_medium
+Name:- emc_gas_medium_gas
 Type:- INT
 Description:- emc_gas medium
 ParameterInOut:- OUT
@@ -511,7 +511,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::61
 --------------------------------------------------
-Name:- emc_water_medium
+Name:- emc_water_medium_liquid
 Type:- INT
 Description:- Medium selection for emc_water
 ParameterInOut:- OUT
@@ -639,7 +639,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::77
 --------------------------------------------------
-Name:- r_time_wfi_empty
+Name:- r_time_wfi_empty_mx
 Type:- TIME
 Description:- Time to empty the vessel after WFI rinse
 ParameterInOut:- IN
@@ -647,7 +647,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::78
 --------------------------------------------------
-Name:- r_time_pw_steam
+Name:- r_time_pw_steam_mx
 Type:- TIME
 Description:- Time to steam PW line
 ParameterInOut:- IN
@@ -695,7 +695,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::84
 --------------------------------------------------
-Name:- r_time_pw_flush
+Name:- r_time_pw_flush_mx
 Type:- TIME
 Description:- Flushing time for PW pre-stage
 ParameterInOut:- IN
@@ -819,7 +819,7 @@ ACTION::01
 Description:- Open HPCA supply valve.
 Action:- // Open HPCA supply valve.
 L "dbCONST".SEL.GAS.HPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;
@@ -837,12 +837,12 @@ ACTION::02
 Description:- Preflush vessel.
 Load flushing time and start PW flush.
 Action:- // Load flushing time for PW pre-stage.
-L #_r_time_pw_flush;
+L #_r_time_pw_flush_mx;
 T #_emc_water_runtime;
 
 //Set emc_water to substate FLUSH and open PW supply valve.
 L "dbCONST".SEL.LIQUID.PW;
-T #_emc_water_medium;
+T #_emc_water_medium_liquid;
 L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1035,7 +1035,7 @@ ACTION::01
 Description:- Set medium to PW and start FLUSH.
 Action:- //Set emc_water to substate FLUSH and open PW supply valve.
 L "dbCONST".SEL.LIQUID.PW;
-T #_emc_water_medium;
+T #_emc_water_medium_liquid;
 L #_r_time_pw_flood;
 T #_emc_water_timeout;
 
@@ -1147,7 +1147,7 @@ ACTION::01
 Description:- Open HPCA supply valve.
 Action:- // Open HPCA supply valve.
 L "dbCONST".SEL.GAS.HPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;  
@@ -1199,7 +1199,7 @@ Load Time to wash with PW.
 Store PW wash begin time.
 Action:- //Set emc_water to substate FLUSH and open PW supply valve.
 L "dbCONST".SEL.LIQUID.PW;
-T #_emc_water_medium;
+T #_emc_water_medium_liquid;
 L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1315,7 +1315,7 @@ Description:- Start FLUSH PW with TIME_PW_WASH_MMFLx timer.
 Store PW filtration wash begin time.
 Action:- //Set emc_water to substate FLUSH and open PW supply valve.
 L "dbCONST".SEL.LIQUID.PW;
-T #_emc_water_medium;
+T #_emc_water_medium_liquid;
 L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1447,11 +1447,11 @@ ACTION::02
 Description:- Open PW line PS supply valve with Timer TIME_PW_STEAM.
 Store PW steaming begin time.
 Action:- //Open PW line PS supply valve
-L #_r_time_pw_steam;
-T #_emc_water_runtime;  //RunTimeECn001
+L #_r_time_pw_steam_mx;
+T #_emc_water_runtime;  
 
 L "dbCONST".SEL.LIQUID.PSPW;
-T #_emc_water_medium;
+T #_emc_water_medium_liquid;
 L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1562,7 +1562,7 @@ ACTION::01
 Description:- SETUP for WFI addition.
 Action:- //Set to MEDIUM WFI and start SETUP substate.
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_medium;
+T #_emc_water_medium_liquid;
 L "dbCONST".BLK.EMC2.SUBS.SETUP;
 T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1636,7 +1636,7 @@ ACTION::02
 Description:- Open HPCA supply valve.
 Action:- //Open HPCA supply valve.
 L "dbCONST".SEL.GAS.HPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.VALVE; 
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1658,7 +1658,7 @@ L #_r_time_wfi_rinse_mx;
 T #_emc_water_runtime;  //RunTimeECn001
 
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_medium;
+T #_emc_water_medium_liquid;
 L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1743,10 +1743,10 @@ Description:- Start FLUSH WFI with TIME_WFI_RINSE_MMFLx timer.
 Store WFI filtration line rinse begin time.
 Action:- //Set to MEDIUM WFI and open WFI supply valve.
 L #_r_time_pw_wash_mmflx;
-T #_emc_water_runtime;  //RunTimeECn001
+T #_emc_water_runtime; 
 
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_medium;
+T #_emc_water_medium_liquid;
 L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1828,7 +1828,7 @@ R #SQ_TIMER.IN;
 
 AN #SQ_TIMER.Q;
 S #SQ_TIMER.IN;
-L #_r_time_wfi_empty;
+L #_r_time_wfi_empty_mx;
 T #SQ_TIMER.PT;
 Verification:- A #SQ_TIMER.IN;
 

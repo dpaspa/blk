@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:15:13 PM by David Paspa
+generated on 28/06/2018 4:46:55 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -357,7 +357,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::42
 --------------------------------------------------
-Name:- emc_gas_medium
+Name:- emc_gas_medium_gas
 Type:- INT
 Description:- Medium selection for emc_gas
 ParameterInOut:- OUT
@@ -421,7 +421,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::50
 --------------------------------------------------
-Name:- emc_water_sy_medium
+Name:- emc_water_sy_medium_liquid
 Type:- INT
 Description:- Medium selection for emc_water
 ParameterInOut:- OUT
@@ -663,7 +663,7 @@ Set emx_transfer to substate SETUP.
 Set emv_vessel to substate DISCHARGE.
 Action:- // Connect PW inlet line to Sy.
 L "dbCONST".SEL.LIQUID.PW;
-T #_emc_water_sy_medium;
+T #_emc_water_sy_medium_liquid;
 L "dbCONST".BLK.EMC3.SUBS.SETUP;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
@@ -745,7 +745,7 @@ Description:- Enable vacuum.
 Start vacuum timer. Log Vacuum begin time
 Action:- //Enable vacuum.
 L "dbCONST".SEL.GAS.VACUUM;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;

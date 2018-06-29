@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:14:56 PM by David Paspa
+generated on 28/06/2018 4:46:14 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -575,7 +575,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::69
 --------------------------------------------------
-Name:- emc_water_medium
+Name:- emc_water_medium_liquid
 Type:- INT
 Description:- Medium selection to emc_water
 ParameterInOut:- OUT
@@ -623,7 +623,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::75
 --------------------------------------------------
-Name:- emc_gas_medium
+Name:- emc_gas_medium_gas
 Type:- INT
 Description:- emc_gas_medium
 ParameterInOut:- OUT
@@ -805,7 +805,7 @@ ACTION::02
 Description:- Enable vacuum and start vacuum timer. Log Vacuum begin time
 Action:- //Enable vacuum.
 L "dbCONST".SEL.GAS.VACUUM;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;
@@ -999,7 +999,7 @@ Description:- Open Mx steam supply on WFI/PS lines.
 Log steam opened time.
 Action:- //Set emc_water to substate FLUSH and open WFI/PS supply valve.
 L "dbCONST".SEL.LIQUID.PSWFI;
-T #_emc_water_medium;
+T #_emc_water_medium_liquid;
 L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1578,7 +1578,7 @@ S #_log_msg_pres_blow_reached;
 L #_r_pres_hpca_blow;
 T #_emc_gas_setpoint;
 L "dbCONST".SEL.GAS.HPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1917,7 +1917,7 @@ Action:- // Enable Mx LPCA pressure control and open Vent valve.
 L #_r_pres_lpca_blank;
 T #_emc_gas_setpoint;
 L "dbCONST".SEL.GAS.LPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:15:04 PM by David Paspa
+generated on 28/06/2018 4:46:26 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -53,7 +53,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- emc_water_sy_medium
+Name:- emc_water_sy_medium_liquid
 Type:- INT
 Description:- Medium selection of emc_water
 ParameterInOut:- OUT
@@ -77,7 +77,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- r_time_wfi_line_smflx
+Name:- r_time_wfi_rinse_smflx
 Type:- TIME
 Description:- Description
 ParameterInOut:- IN
@@ -85,7 +85,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::8
 --------------------------------------------------
-Name:- r_time_pw_line_smflx
+Name:- r_time_pw_wash_smflx
 Type:- TIME
 Description:- SMFLx rinse time with PW
 ParameterInOut:- IN
@@ -421,9 +421,9 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::50
 --------------------------------------------------
-Name:- r_time_pw_line_flz
+Name:- r_time_pw_wash_flz
 Type:- TIME
-Description:- PW FPZ rinse time
+Description:- PW FLZ rinse time
 ParameterInOut:- IN
 
 --------------------------------------------------
@@ -573,7 +573,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::69
 --------------------------------------------------
-Name:- emc_gas_medium
+Name:- emc_gas_medium_gas
 Type:- INT
 Description:- Medium selection of emc_gas
 ParameterInOut:- OUT
@@ -629,7 +629,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::76
 --------------------------------------------------
-Name:- r_time_wfi_line_flz
+Name:- r_time_wfi_rinse_flz
 Type:- TIME
 Description:- Time for WFI rinse of filling line
 ParameterInOut:- IN
@@ -637,7 +637,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::77
 --------------------------------------------------
-Name:- r_time_wfi_tank
+Name:- r_time_wfi_rinse_sy
 Type:- TIME
 Description:- Time for WFI rinse of vessel
 ParameterInOut:- IN
@@ -752,7 +752,7 @@ STEP::02
 StepNo:- 02
 Title:- SY_UO_CIP : Commence Flush with PW
 Description:- Open HPCA supply valve. 
-Start timer to flush Tank Sy_TIME_PW_WASH.
+Start timer to flush Tank with TIME_PW_WASH.
 
 Open PW supply to flush tank.
 
@@ -764,7 +764,7 @@ Load TIME_PW_WASH.
 
 Action:- // Open CA supply valve
 L "dbCONST".SEL.GAS.HPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;  
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;
@@ -787,7 +787,7 @@ Description:- Open PW supply and start FLUSH.
 Store PW Wash begin time.
 Action:- // Open PW supply.
 L "dbCONST".SEL.LIQUID.PW;
-T #_emc_water_sy_medium;
+T #_emc_water_sy_medium_liquid;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
@@ -830,7 +830,7 @@ Title:- Sy_UO_CIP : Set Flag for Sy_PW_Wash_Complete
 Description:- Log actual Sy PW wash time.
 Divert path to Filling Machine FLz and Drain Line.
 
-Start Timer for rinse FLz with PW.
+Start Timer for rinse FLz with PW, time_pw_wash_flz.
 
 --------------------------------------------------
 ACTION::01
@@ -880,12 +880,12 @@ L "dbCONST".BLK.STATE.STOPPED;
 ACTION::02
 --------------------------------------------------
 Description:- Start Timer for rinse FLz with PW.
-Action:- L #_r_time_pw_line_flz;
+Action:- L #_r_time_pw_wash_flz;
 T #_emc_water_sy_runtime;
 
 // Open PW supply.
 L "dbCONST".SEL.LIQUID.PW;
-T #_emc_water_sy_medium;
+T #_emc_water_sy_medium_liquid;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
@@ -926,7 +926,7 @@ Description:- Log actual FLz PW rinse time.
 Divert path to SMFLx.
 Close path to Filling Macine FLz and Drain Line.
 
-Start Timer for SMFLx rinse.
+Start Timer for SMFLx rinse, time_pw_wash_smflx.
 
 --------------------------------------------------
 ACTION::01
@@ -962,12 +962,12 @@ Verification:- A(;
 ACTION::02
 --------------------------------------------------
 Description:- Start Timer for SMFLx rinse.
-Action:- L #_r_time_pw_line_smflx;
+Action:- L #_r_time_pw_wash_smflx;
 T #_emc_water_sy_runtime;
 
 // Open PW supply.
 L "dbCONST".SEL.LIQUID.PW;
-T #_emc_water_sy_medium;
+T #_emc_water_sy_medium_liquid;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1098,7 +1098,7 @@ L #_r_time_pw_steam_sy;
 T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.PSPW;
-T #_emc_water_sy_medium;
+T #_emc_water_sy_medium_liquid;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1177,7 +1177,7 @@ Description:- Connect WFI inlet line to Sy.
 Set emc_water to substate SETUP and MEDIUM=WFI.
 Action:- //Connect WFI inlet line to Sy.
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_sy_medium;
+T #_emc_water_sy_medium_liquid;
 L "dbCONST".BLK.EMC3.SUBS.SETUP;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1211,7 +1211,7 @@ Title:- SY_UO_CIP : Commence WFI Rinse of vessel
 Description:- Open Sy path to Wash Drain.
 
 Open WFI supply to rinse tank.
-Start timer to rinse tank by TIME_WFI_TANK.
+Start timer to rinse tank by time_wfi_rinse_sy.
 Open HPCA supply valve.
 
 --------------------------------------------------
@@ -1243,15 +1243,15 @@ L "dbCONST".BLK.EMX4.SUBS.CIP;
 ACTION::02
 --------------------------------------------------
 Description:- Open WFI supply to rinse tank.
-Start timer to rinse tank by TIME_WFI_TANK.
+Start timer to rinse tank by time_wfi_rinse_sy.
 Store WFI wash begin time.
 Open HPCA supply valve.
 Action:- //Open WFI supply to rinse tank
-L #_r_time_wfi_tank;
+L #_r_time_wfi_rinse_sy;
 T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_sy_medium;
+T #_emc_water_sy_medium_liquid;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1268,7 +1268,7 @@ S #_Report_Evnt_013;
 
 // Open HPCA supply
 L "dbCONST".SEL.GAS.HPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;  
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1292,7 +1292,7 @@ TRANSITION::08
 TRNNo:- 08
 Title:- Timer expired?
 EmptyTransition:- False
-Description:- Timer TIME_WFI_TANK expired.
+Description:- Timer time_wfi_rinse_sy expired.
 Condition:- A(;
 L   #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
@@ -1356,13 +1356,13 @@ L "dbCONST".BLK.STATE.STOPPED;
 --------------------------------------------------
 ACTION::02
 --------------------------------------------------
-Description:- Open WFI supply with timer TIME_WFI_LINE_FLz.
+Description:- Open WFI supply with timer time_wfi_rinse_flz.
 Action:- //Open WFI supply.
-L #_r_time_wfi_line_flz;
+L #_r_time_wfi_rinse_flz;
 T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_sy_medium;
+T #_emc_water_sy_medium_liquid;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1385,7 +1385,7 @@ TRANSITION::09
 TRNNo:- 09
 Title:- FLz Wash Complete
 EmptyTransition:- False
-Description:- FLz rinsed for TIME_WFI_LINE_FLz
+Description:- FLz rinsed for time_wfi_rinse_flz
 Condition:- A(;
 L   #_emc_water_sy_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
@@ -1403,7 +1403,7 @@ Description:- Log actual FLz WFI wash time.
 Divert path to SMFLx
 Open DVy125, Close DVy129
 
-Start flush WFI with timer time_wfi_line_smflx.
+Start flush WFI with timer time_wfi_rinse_smflx.
 
 --------------------------------------------------
 ACTION::01
@@ -1442,17 +1442,17 @@ Verification:- A(;
 ACTION::02
 --------------------------------------------------
 Description:- Store SMFLx WFI rinse begin time.
-Start flush WFI with timer time_wfi_line_smflx.
+Start flush WFI with timer time_wfi_rinse_smflx.
 Action:- //Store SMFLx WFI rinse begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_wfi_smflx_rinse_begin_time;
 
 //Open WFI supply
-L #_r_time_wfi_line_smflx;
+L #_r_time_wfi_rinse_smflx;
 T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_sy_medium;
+T #_emc_water_sy_medium_liquid;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1632,7 +1632,7 @@ L #_r_time_wfi_steam_sy;
 T #_emc_water_sy_runtime;
 
 L "dbCONST".SEL.LIQUID.PSWFI;
-T #_emc_water_sy_medium;
+T #_emc_water_sy_medium_liquid;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;

@@ -1,0 +1,85 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Title:       udtBLK                                                        //
+// Description: Master definition of user defined data structures for Blocks. //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      04-Jun-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+@@TEMPLATE_BEGIN|PARENTEM@@
+TYPE "udt@@CLASS@@origin"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+@@ATTR_BEGIN|CHILD@@
+        @@CHILDPARAMETERALIAS@@ : "udt@@CHILDALIASCLASS@@";          // @@CHILDALIASCLASS@@ @@CHILDPARAMETERALIAS@@ @@CHILDALIASDESCRIPTION@@
+@@ATTR_END|CHILD@@
+        bmc : "udtModeCommandBLK";         // Block mode and command
+@@ATTR_BEGIN|TIMER@@
+        REM_TIME_H : Int;
+        REM_TIME_M : Int;
+        REM_TIME_S : Int;
+@@ATTR_END|TIMER@@
+@@ATTR_BEGIN|LINK_BLK@@
+        @@BLOCKPARAMETER@@ : @@LINKDATATYPE@@;
+@@ATTR_END|LINK_BLK@@
+@@ATTR_BEGIN|pEventPromptExists@@
+@@ATTR_BEGIN|pEventPromptNum@@
+        eventPrompt : Array[0..@@IDXEVENTMAX@@] of "udtEventPrompt";   // SFC events for operator prompts
+@@ATTR_END|pEventPromptNum@@
+@@ATTR_END|pEventPromptExists@@
+@@ATTR_BEGIN|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogMsgNum@@
+        eventLogMsg : Array[0..@@IDXEVENTMAX@@] of "udtEventLogMsg";   // SFC events for logging messages
+@@ATTR_END|pEventLogMsgNum@@
+@@ATTR_END|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogRealNum@@
+        eventLogReal : Array[0..@@IDXEVENTMAX@@] of "udtEventLogReal";   // SFC events for logging real data
+@@ATTR_END|pEventLogRealNum@@
+@@ATTR_END|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogTimeExists@@
+@@ATTR_BEGIN|pEventLogTimeNum@@
+        eventLogTime : Array[0..@@IDXEVENTMAX@@] of "udtEventLogTime";   // SFC events for logging time data
+@@ATTR_END|pEventLogTimeNum@@
+@@ATTR_END|pEventLogTimeExists@@
+@@ATTR_BEGIN|HYGIENE@@
+        hs : "udtHygiene";
+@@ATTR_END|HYGIENE@@
+    END_STRUCT;
+END_TYPE
+
+TYPE "udt@@CLASS@@owner"
+VERSION : 1.0
+    STRUCT
+        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+@@ATTR_BEGIN|TIMER@@
+        TIME_H : Int;
+        TIME_M : Int;
+        TIME_S : Int;
+@@ATTR_END|TIMER@@
+        CHILD_RELEASE : Bool;              // Request to release children when complete
+@@ATTR_BEGIN|pChildDefine@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+@@ATTR_END|pChildDefine@@
+@@ATTR_BEGIN|LINK_BLK_Define@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+@@ATTR_END|LINK_BLK_Define@@
+@@ATTR_BEGIN|pBLOCK_RECIPE@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pBLOCK_RECIPE@@
+    END_STRUCT;
+END_TYPE
+
+TYPE "udt@@CLASS@@"
+VERSION : 1.0
+    STRUCT
+        origin : "udt@@CLASS@@origin";       // Calculated data on origin CPU
+        owner : "udt@@CLASS@@owner";         // Directives from owner CPU
+    END_STRUCT;
+END_TYPE
+
+@@TEMPLATE_END@@

@@ -153,8 +153,8 @@ VAR
     sqStepTimer : "TON";
     sqRunTimer : "fbRunTimer";
     sqSequencer : "udtSFCSequence@@PARAMETER_UPPER_ARRAY@@";
-    RESET : Bool;                      // Request to stop and clear smc reference
     SQ_TIMER: "TON";
+    sqSeqTimerStart : Bool;
 @@PARAMETER_LIST_VAR@@
 END_VAR
 
@@ -327,7 +327,7 @@ STRT: NOP   0;
       R     #sqSequencer.STEP.ActionVerified;
       R     #sqStepTimer.IN;
 
-      S     #sqRunTimer.RESET;
+//      S     #sqRunTimer.RESET;
 
 //----------------------------------------------------------------------------//
 // Load Initial step Number:                                                  //
@@ -382,7 +382,7 @@ STOP: NOP   0;
       R     #sqSequencer.STEP.ActionVerified;
       R     #sqRunTimer.ENABLE;
       R     #sqStepTimer.IN;
-      R     #SQ_TIMER.IN;
+      R     #sqSeqTimerStart;
       R     #smc.PAUSED;
 
 

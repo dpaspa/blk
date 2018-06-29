@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:11:38 PM by David Paspa
+generated on 28/06/2018 4:44:05 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -82,7 +82,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- setpoint
+Name:- agit_setpoint
 Type:- REAL
 Description:- Required agitator speed for mixing
 ParameterInOut:- IN
@@ -198,7 +198,7 @@ ACTION::01
 Description:- Log EMA1_MIX begin time.
 Initialise the run timer.
 Action:- // Set the agitator speed setpoint
-L #_setpoint;
+L #_agit_setpoint;
 T #_sic_agit_setpoint;
 
 //Log EMA1_MIX begin time.
@@ -420,7 +420,7 @@ Description:- Jump
 Condition:- //Proceed to next step if SIC has been disabled
 A(;
 L "dbCONST".BLK.SIC1.STATE.DISABLED;
-L #_agit_hist;
+L #_sic_agit_state;
 ==I;
 );
 

@@ -97,16 +97,16 @@ TITLE = Check any child device is not in AUTO
     // Check if any child cannot be controlled if not in AUTO:                //
     //------------------------------------------------------------------------//
     O #p.origin.mc.INTERLOCK;
-    O #p.origin.mcDRAIN.INTERLOCK;
-    O #p.origin.mcHPCA.INTERLOCK;
-    O #p.origin.mcLPCA.INTERLOCK;
-    O #p.origin.mcVACUUM.INTERLOCK;
-    O #p.origin.mcVENT.INTERLOCK;
-    ON #p.origin.mcDRAIN.modeAUTO;
-    ON #p.origin.mcHPCA.modeAUTO;
-    ON #p.origin.mcLPCA.modeAUTO;
-    ON #p.origin.mcVACUUM.modeAUTO;
-    ON #p.origin.mcVENT.modeAUTO;
+    O #p.origin.DRAIN.origin.mc.INTERLOCK;
+    O #p.origin.HPCA.origin.mc.INTERLOCK;
+    O #p.origin.LPCA.origin.mc.INTERLOCK;
+    O #p.origin.VACUUM.origin.mc.INTERLOCK;
+    O #p.origin.VENT.origin.mc.INTERLOCK;
+    ON #p.origin.DRAIN.origin.mc.modeAUTO;
+    ON #p.origin.HPCA.origin.mc.modeAUTO;
+    ON #p.origin.LPCA.origin.mc.modeAUTO;
+    ON #p.origin.VACUUM.origin.mc.modeAUTO;
+    ON #p.origin.VENT.origin.mc.modeAUTO;
     = #p.origin.mc.INTERLOCK;
 
 NETWORK
@@ -344,7 +344,7 @@ TITLE = Open DRAIN valve if required
     A #selectDRAIN;
     JCN _h;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T #p.origin.mcoDRAIN.CMD;
+    T #p.origin.DRAIN.owner.mc.CMD;
 _h:   NOP 0;
 
 NETWORK
@@ -356,7 +356,7 @@ TITLE = Open HPCA valve if required
     A #selectHPCA;
     JCN _i;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T #p.origin.mcoHPCA.CMD;
+    T #p.origin.HPCA.owner.mc.CMD;
 _i:   NOP 0;
 
 NETWORK
@@ -368,7 +368,7 @@ TITLE = Open LPCA valve if required
     A #selectLPCA;
     JCN _j;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T #p.origin.mcoLPCA.CMD;
+    T #p.origin.LPCA.owner.mc.CMD;
 _j:   NOP 0;
 
 NETWORK
@@ -380,7 +380,7 @@ TITLE = Open VACUUM valve if required
     A #selectVACUUM;
     JCN _k;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T #p.origin.mcoVACUUM.CMD;
+    T #p.origin.VACUUM.owner.mc.CMD;
 _k:   NOP 0;
 
 NETWORK
@@ -398,7 +398,7 @@ TITLE = Open VENT valve if required
     );
     JCN _l;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T #p.origin.mcoVENT.CMD;
+    T #p.origin.VENT.owner.mc.CMD;
 _l:   NOP 0;
 
 NETWORK
@@ -412,7 +412,7 @@ TITLE = Close DRAIN valve if required
     ON #selectDRAIN;
     JCN _m;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T #p.origin.mcoDRAIN.CMD;
+    T #p.origin.DRAIN.owner.mc.CMD;
 _m:   NOP 0;
 
 NETWORK
@@ -424,7 +424,7 @@ TITLE = Close HPCA valve if required
     ON #selectHPCA;
     JCN _n;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T #p.origin.mcoHPCA.CMD;
+    T #p.origin.HPCA.owner.mc.CMD;
 _n:   NOP 0;
 
 NETWORK
@@ -436,7 +436,7 @@ TITLE = Close LPCA valve if required
     ON #selectLPCA;
     JCN _o;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T #p.origin.mcoLPCA.CMD;
+    T #p.origin.LPCA.owner.mc.CMD;
 _o:   NOP 0;
 
 NETWORK
@@ -448,7 +448,7 @@ TITLE = Close VACUUM valve if required
     ON #selectVACUUM;
     JCN _p;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T #p.origin.mcoVACUUM.CMD;
+    T #p.origin.VACUUM.owner.mc.CMD;
 _p:   NOP 0;
 
 NETWORK
@@ -466,7 +466,7 @@ TITLE = Close VENT valve if required
     );
     JCN _q;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T #p.origin.mcoVENT.CMD;
+    T #p.origin.VENT.owner.mc.CMD;
 _q:   NOP 0;
 
 NETWORK

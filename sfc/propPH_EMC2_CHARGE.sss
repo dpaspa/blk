@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:11:42 PM by David Paspa
+generated on 28/06/2018 4:44:09 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -572,7 +572,7 @@ Action:- L #_timeout;
 T #SQ_TIMER.PT;
 
 SET;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 Verification:- A "uncondJump";
 
 
@@ -665,7 +665,7 @@ en04: NOP 0;
 SET;
 S #_prompt_filling_timeout;
 S #_log_msg_filling_timeout;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 Verification:- //Verify state open of selected WFI/PW valve
 A(;
 L #_medium_liquid;
@@ -905,7 +905,7 @@ T #_time_charge_end;
 
 SET;
 S #_log_time_charge_end;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 Verification:- A "uncondJump";
 
 ****************************************************************************************************

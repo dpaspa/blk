@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:14:32 PM by David Paspa
+generated on 28/06/2018 4:45:49 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -86,7 +86,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::8
 --------------------------------------------------
-Name:- emc_gas_setpoint
+Name:- emc_gas_pc_vessel_setpoint
 Type:- REAL
 Description:- Description
 ParameterInOut:- OUT
@@ -374,7 +374,7 @@ ParameterInOut:- IN_OUT
 --------------------------------------------------
 PARAMETER::44
 --------------------------------------------------
-Name:- ema_vessel_runtime_h
+Name:- ema_vessel_sic_agit_runtime_h
 Type:- INT
 Description:- Agitator run time Hours for ema_vessel
 ParameterInOut:- OUT
@@ -382,7 +382,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::45
 --------------------------------------------------
-Name:- ema_vessel_runtime_s
+Name:- ema_vessel_sic_agit_runtime_s
 Type:- INT
 Description:- Agitator run time Seconds for ema_vessel
 ParameterInOut:- OUT
@@ -390,7 +390,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::46
 --------------------------------------------------
-Name:- ema_vessel_runtime_m
+Name:- ema_vessel_sic_agit_runtime_m
 Type:- INT
 Description:- Agitator run time Minutes for ema_vessel
 ParameterInOut:- OUT
@@ -398,7 +398,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::47
 --------------------------------------------------
-Name:- ema_vessel_setpoint
+Name:- ema_vessel_sic_agit_setpoint
 Type:- REAL
 Description:- Agitator speed setpoint
 ParameterInOut:- OUT
@@ -422,7 +422,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::50
 --------------------------------------------------
-Name:- emc_water_medium
+Name:- emc_water_medium_liquid
 Type:- INT
 Description:- Medium selection emc_water
 ParameterInOut:- OUT
@@ -462,7 +462,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::55
 --------------------------------------------------
-Name:- emc_gas_medium
+Name:- emc_gas_pc_vessel_medium_gas
 Type:- INT
 Description:- Medium selection of emc_gas
 ParameterInOut:- OUT
@@ -536,7 +536,7 @@ S #_log_time_make_begin;
 L #_r_pres_lpca_make;
 T #_emc_gas_setpoint;
 L "dbCONST".SEL.GAS.LPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;
@@ -851,7 +851,7 @@ T #_emc_water_mass;
 
 //Select WFI medium.
 L "dbCONST".SEL.LIQUID.WFI;
-T #_emc_water_medium;
+T #_emc_water_medium_liquid;
 
 //Start Charge
 L "dbCONST".BLK.EMC2.SUBS.CHARGE;

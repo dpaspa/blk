@@ -34,6 +34,18 @@ VAR
 @@ATTR_BEGIN|pEventPromptList@@
     Program_Alarm_@@IDXEVENT@@ : Program_Alarm;
 @@ATTR_END|pEventPromptList@@
+@@ATTR_BEGIN|pEventPromptList@@
+	Alarm@@IDXEVENT@@_Inactive_Acknowledged : Bool;   // Alarm inactive
+    Alarm@@IDXEVENT@@_Inactive_Unacknowledged : Bool;   // Alarm was active & no acknowledgement
+    Alarm@@IDXEVENT@@_Active_Acknowledged : Bool;   // Alarm active & acknowledged
+    Alarm@@IDXEVENT@@_Active_Unacknowleged : Bool;   // Alarm active & was not acknowledged
+    Alarm@@IDXEVENT@@_ErrorBit1 : Bool;
+    Alarm@@IDXEVENT@@_ErrorBit2 : Bool;
+    Alarm@@IDXEVENT@@_StatusWord1 : Word;
+    Alarm@@IDXEVENT@@_StatusWord2 : Word;
+    Alarm@@IDXEVENT@@_StateByte : Byte;
+@@ATTR_END|pEventPromptList@@
+	SourceData : Word;
 END_VAR
 
 VAR_TEMP
@@ -72,6 +84,14 @@ TITLE = Clear response flags if message event needs to be raised
 _evRaise_@@IDXEVENT@@:   NOP 0;
 
 NETWORK
+TITLE = Set the message number
+    //------------------------------------------------------------------------//
+    // Set the alarm list message number:                                     //
+    //------------------------------------------------------------------------//
+    L @@IDXEVENT@@;
+    T #SourceData;
+
+NETWORK
 TITLE = Raise message event without acknowledgement if required
     //------------------------------------------------------------------------//
     // Raise the simple message event if requested. No acknowledge required:  //
@@ -80,12 +100,11 @@ TITLE = Raise message event without acknowledgement if required
     JCN _evCall_@@IDXEVENT@@;
     CALL #Program_Alarm_@@IDXEVENT@@
     (   SIG       := #eventPrompt[@@IDXEVENT@@].trigger ,
-        Error     := #almError ,
-        Status    := #almStatus
+		SD_1      := #SourceData ,
+        Error     := #Alarm@@IDXEVENT@@_ErrorBit1 ,
+        Status    := #Alarm@@IDXEVENT@@_StatusWord1
     );
 _evCall_@@IDXEVENT@@:   NOP 0;
-//        TIMESTAMP :=
-//        SD_1      :=
 
 NETWORK
 TITLE = Flag acknowledgement will be pending
@@ -110,11 +129,53 @@ TITLE = Get acknowledgement if pending
     JCN _ackNone_@@IDXEVENT@@;
     CALL  Get_AlarmState
     (   Alarm      := #Program_Alarm_@@IDXEVENT@@ ,
-        AlarmState := #almState ,
-        Error      := #almError ,
-        STATUS     := #almStatus
+        AlarmState := #Alarm@@IDXEVENT@@_StateByte  ,
+        Error      := #Alarm@@IDXEVENT@@_ErrorBit2 ,
+        STATUS     := #Alarm@@IDXEVENT@@_StatusWord2
     );
 _ackNone_@@IDXEVENT@@:   NOP 0;
+
+NETWORK
+TITLE = Alarm status
+    //------------------------------------------------------------------------//
+    // Alarm inactive and unacknowledged:                                     //
+    //------------------------------------------------------------------------//
+    A(;
+    L #Alarm@@IDXEVENT@@_StateByte;
+    L 16#84;
+    ==I;
+    );
+    = #Alarm@@IDXEVENT@@_Inactive_Unacknowledged;
+
+    //------------------------------------------------------------------------//
+    // Alarm inactive and acknowledged:                                       //
+    //------------------------------------------------------------------------//
+    A(;
+    L #Alarm@@IDXEVENT@@_StateByte;
+    L 16#86;
+    ==I;
+    );
+    = #Alarm@@IDXEVENT@@_Inactive_Acknowledged;
+
+    //------------------------------------------------------------------------//
+    // Alarm active and unacknowledged:                                       //
+    //------------------------------------------------------------------------//
+    A(;
+    L #Alarm@@IDXEVENT@@_StateByte;
+    L 16#85;
+    ==I;
+    );
+    = #Alarm@@IDXEVENT@@_Active_Unacknowleged;
+
+    //------------------------------------------------------------------------//
+    // Alarm active and acknowledged:                                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #Alarm@@IDXEVENT@@_StateByte;
+    L 16#87;
+    ==I;
+    );
+    = #Alarm@@IDXEVENT@@_Active_Acknowledged;
 
 NETWORK
 TITLE = Flag acknowledge response received if so
@@ -122,11 +183,7 @@ TITLE = Flag acknowledge response received if so
     // Flag acknowledgement no longer pending if finally received:            //
     //------------------------------------------------------------------------//
     A #eventPrompt[@@IDXEVENT@@].ackPending;
-    A(;
-    L #almState;
-    L 0;
-    ==I;
-    );
+    A #Alarm@@IDXEVENT@@_Active_Acknowledged;
     = #ackComplete;
     JCN _ackDone_@@IDXEVENT@@;
     R #eventPrompt[@@IDXEVENT@@].ackPending;

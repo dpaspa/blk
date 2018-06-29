@@ -1,18 +1,25 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This function can be used to run Non-retentive as well as retentive On     //
+// delay timer. User Can select any of these timers. For retentive timer      //
+// reset must be done to restart the timer next time. For non rtentive timer  //
+// automatically will be reset in every positive edge of EABLE signal.        //
+//                                                                            //
+// User can give set point in Hour, min, & Sec also be able to read out the   //
+// remaining time as integer variable.                                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      16-May-2018 NA        Reboot design for S7-1500.      //
+// 0.1 Khairul          20-Jul-2009 NA        Initial design.                 //
+//----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fbRunTimer"
 TITLE = Run Rimer
 { S7_Optimized_Access := 'TRUE' }
 VERSION : 0.1
-//<V0.2 Khairul 20/07/09>
-//
-//This function can be used to run Non-retentive as well as retentive On delay
-//timer.User Can select any of these timer. For retentive timer reset must be
-//done
-//to restart the timer next time.For non rtentive timer automatically will be
-//reset in every positive edge of EABLE signal.
-//
-//User can give set point in Hour, min, & Sec also be able to read out the
-//remaining time as integer variable.
-//
+
    VAR_INPUT
       TIME_H : Int;
       TIME_M : Int;
@@ -39,6 +46,7 @@ VERSION : 0.1
       Tmr_Running : Bool;
       RunTmrQbit : Bool;
       Time_Remain : DInt;
+      TONR_TIME1 {OriginalPartName := 'IEC_TIMER'; LibVersion := '1.0'} : TONR_TIME;
    END_VAR
 
    VAR_TEMP
@@ -188,7 +196,7 @@ TITLE = Retentive timer
       AN #NON_RET;
       AN #PAUSE;
       JNB Label_8;
-      CALL TONR, "dbTONR"
+      CALL #TONR_TIME1
       (  IN                          := #ENABLE ,
          R                           := #RESET ,
          PT                          := #dTimeValue ,

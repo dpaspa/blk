@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:15:08 PM by David Paspa
+generated on 28/06/2018 4:46:37 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -327,7 +327,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::38
 --------------------------------------------------
-Name:- emc_gas_medium
+Name:- emc_gas_medium_gas
 Type:- INT
 Description:- emc_gas_medium
 ParameterInOut:- OUT
@@ -455,7 +455,7 @@ S #_log_time_fill_begin;
 
 // Start LPCA valve pressure control and VENT valve closed
 L "dbCONST".SEL.GAS.LPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T #_emc_gas_subs;
 L  "dbCONST".BLK.CMD.START;
@@ -648,7 +648,7 @@ ACTION::02
 Description:- Set Sy LPCA valve fully open
 Action:- //Fully open LPCA valve 
 L "dbCONST".SEL.GAS.LPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;
 T #_emc_gas_subs;
 L  "dbCONST".BLK.CMD.START;
@@ -710,7 +710,7 @@ S #_log_msg_filter_bled;
 L  #_r_pres_hpca_fill;
 T  #_emc_gas_setpoint;
 L  "dbCONST".SEL.GAS.HPCA;
-T  #_emc_gas_medium;
+T  #_emc_gas_medium_gas;
 L  "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T  #_emc_gas_subs;
 L  "dbCONST".BLK.CMD.START;

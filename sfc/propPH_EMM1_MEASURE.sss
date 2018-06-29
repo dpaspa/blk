@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:11:59 PM by David Paspa
+generated on 28/06/2018 4:44:19 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -184,7 +184,7 @@ L #_settling_time;
 T #SQ_TIMER.PT;
 
 SET;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 Verification:- A "uncondJump";
 
 
@@ -295,7 +295,7 @@ ACTION::01
 Description:- Reset the timer input.
 Log MEASURE operation end time.
 Action:- SET;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 //Log MEASURE operation end time.
 L "dbCONST".CHRONO.CPU_TIME;

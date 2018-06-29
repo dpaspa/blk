@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:14:18 PM by David Paspa
+generated on 28/06/2018 4:45:37 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -381,7 +381,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::43
 --------------------------------------------------
-Name:- emc_gas_medium
+Name:- emc_gas_medium_gas
 Type:- INT
 Description:- emc_gas_medium
 ParameterInOut:- OUT
@@ -482,7 +482,7 @@ Description:- Set all Mx equipment to safe state with Mx LCPA control enabled an
 
 Action:- // Enable Mx LPCA pressure control.
 L "dbCONST".SEL.GAS.LPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T #_emc_gas_subs;
 L  "dbCONST".BLK.CMD.START;
@@ -603,7 +603,7 @@ T #_emv_vessel_cmd;
 
 //Fully open LPCA valve 
 L "dbCONST".SEL.GAS.LPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;
 T #_emc_gas_subs;
 L  "dbCONST".BLK.CMD.START;
@@ -742,7 +742,7 @@ Action:- // Enable Mx HPCA pressure control at setpoint PRES_HPCA_FILT.
 L  #_r_pres_hpca_filt;
 T  #_emc_gas_setpoint;
 L  "dbCONST".SEL.GAS.HPCA;
-T  #_emc_gas_medium;
+T  #_emc_gas_medium_gas;
 L  "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T  #_emc_gas_subs;
 L  "dbCONST".BLK.CMD.START;

@@ -38,8 +38,9 @@ VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
     p : Array[0..@@MAXITEM@@] of "udt@@CLASS@@";
+    c : Array[0..@@MAXITEM@@] of "udt@@CLASS@@children";
 @@ATTR_END|numInstances@@
-    f : "fb@@CLASS@@";
+    s : "fb@@CLASS@@";
 @@TEMPLATE_END@@
 END_VAR
 
@@ -183,19 +184,9 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Child instance @@CHILDDESCRIPTION@@
     // Set the child instance mode and command structures:                    //
     //------------------------------------------------------------------------//
     CALL MOVE
-    {value_type := 'udt@@CHILDCLASS@@'}
+    {value_type := 'Variant'}
     (   IN                   := "idb@@CHILDCLASS@@".p[@@CHILDIDX@@] ,
-        OUT                  := #p[@@IDX@@].origin.@@CHILDPARAMETERALIAS@@
-    );
-    CALL MOVE
-    {value_type := 'Variant'}
-    (   IN                   := "idb@@CHILDCLASS@@".p[@@CHILDIDX@@].origin.mc ,
-        OUT                  := #p[@@IDX@@].origin.cmc@@CHILDINDEX@@
-    );
-    CALL MOVE
-    {value_type := 'Variant'}
-    (   IN                   := "idb@@CHILDCLASS@@".p[@@CHILDIDX@@].owner.mc ,
-        OUT                  := #p[@@IDX@@].origin.cmco@@CHILDINDEX@@
+        OUT                  := #c[@@IDX@@].@@CHILDPARAMETERALIAS@@
     );
 
 @@ATTR_END|CHILD_INSTANCE@@
@@ -207,7 +198,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : SFC events for operator prompts
     // Copy the SFC operator prompt event structure:                          //
     //------------------------------------------------------------------------//
     CALL MOVE
-    {value_type := 'Variant'}
+    {value_type := 'udtEventPrompt'}
     (   IN                   := "dbEVENTPrompt".eventPrompt ,
         OUT                  := #p[@@IDX@@].origin.eventPrompt
     );
@@ -221,7 +212,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : SFC events for logging messages
     // Copy the SFC message log event structure:                              //
     //------------------------------------------------------------------------//
     CALL MOVE
-    {value_type := 'Variant'}
+    {value_type := 'udtEventLogMsg'}
     (   IN                   := "dbEVENTLogMsg".eventLogMsg ,
         OUT                  := #p[@@IDX@@].origin.eventLogMsg
     );
@@ -235,7 +226,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : SFC events for logging real data
     // Copy the SFC real data log event structure:                            //
     //------------------------------------------------------------------------//
     CALL MOVE
-    {value_type := 'Variant'}
+    {value_type := 'udtEventLogReal'}
     (   IN                   := "dbEVENTLogReal".eventLogReal ,
         OUT                  := #p[@@IDX@@].origin.eventLogReal
     );
@@ -249,7 +240,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : SFC events for logging time data
     // Copy the SFC time data log event structure:                            //
     //------------------------------------------------------------------------//
     CALL MOVE
-    {value_type := 'Variant'}
+    {value_type := 'udtEventLogTime'}
     (   IN                   := "dbEVENTLogTime".eventLogTime ,
         OUT                  := #p[@@IDX@@].origin.eventLogTime
     );
@@ -261,8 +252,9 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #f
-    (   p                    := #p[@@IDX@@]
+    CALL #s
+    (   p                    := #p[@@IDX@@] ,
+        c                    := #c[@@IDX@@]
     );
 
 NETWORK
@@ -271,7 +263,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Ouput pump start/stop commands
     // Set the instance output commands for the vacuume pumps to the field:   //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_INSTANCE@@
-    L #p[@@IDX@@].origin.cmco@@CHILDINDEX@@.CMD;
+    L #c[@@IDX@@].@@CHILDPARAMETERALIAS@@.owner.mc.CMD;
     T "idb@@CHILDCLASS@@".p[@@CHILDIDX@@].owner.mc.CMD;
 @@ATTR_END|CHILD_INSTANCE@@
 

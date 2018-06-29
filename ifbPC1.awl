@@ -170,13 +170,8 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : DRAIN valve mode and command
 @@ATTR_BEGIN|LINK@@
     CALL MOVE
     {value_type := 'udtMCOrigin'}
-    (   IN                   := "idb@@DRAINLINKCLASS@@".p[@@DRAINLINKIDX@@].origin.mc ,
-        OUT                  := #p[@@IDX@@].origin.mcDRAIN
-    );
-    CALL MOVE
-    {value_type := 'udtMCOwner'}
-    (   IN                   := "idb@@DRAINLINKCLASS@@".p[@@DRAINLINKIDX@@].owner.mc ,
-        OUT                  := #p[@@IDX@@].origin.mcoDRAIN
+    (   IN                   := "idb@@DRAINLINKCLASS@@".p[@@DRAINLINKIDX@@] ,
+        OUT                  := #p[@@IDX@@].origin.DRAIN
     );
 @@ATTR_END|LINK@@
 
@@ -188,13 +183,8 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : HPCA valve mode and command
 @@ATTR_BEGIN|LINK@@
     CALL MOVE
     {value_type := 'udtMCOrigin'}
-    (   IN                   := "idb@@HPCALINKCLASS@@".p[@@HPCALINKIDX@@].origin.mc ,
-        OUT                  := #p[@@IDX@@].origin.mcHPCA
-    );
-    CALL MOVE
-    {value_type := 'udtMCOwner'}
-    (   IN                   := "idb@@HPCALINKCLASS@@".p[@@HPCALINKIDX@@].owner.mc ,
-        OUT                  := #p[@@IDX@@].origin.mcoHPCA
+    (   IN                   := "idb@@HPCALINKCLASS@@".p[@@HPCALINKIDX@@] ,
+        OUT                  := #p[@@IDX@@].origin.HPCA
     );
 @@ATTR_END|LINK@@
 
@@ -206,13 +196,8 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : LPCA valve mode and command
 @@ATTR_BEGIN|LINK@@
     CALL MOVE
     {value_type := 'udtMCOrigin'}
-    (   IN                   := "idb@@LPCALINKCLASS@@".p[@@LPCALINKIDX@@].origin.mc ,
-        OUT                  := #p[@@IDX@@].origin.mcLPCA
-    );
-    CALL MOVE
-    {value_type := 'udtMCOwner'}
-    (   IN                   := "idb@@LPCALINKCLASS@@".p[@@LPCALINKIDX@@].owner.mc ,
-        OUT                  := #p[@@IDX@@].origin.mcoLPCA
+    (   IN                   := "idb@@LPCALINKCLASS@@".p[@@LPCALINKIDX@@] ,
+        OUT                  := #p[@@IDX@@].origin.LPCA
     );
 @@ATTR_END|LINK@@
 
@@ -224,13 +209,8 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : VACUUM valve mode and command
 @@ATTR_BEGIN|LINK@@
     CALL MOVE
     {value_type := 'udtMCOrigin'}
-    (   IN                   := "idb@@VACUUMLINKCLASS@@".p[@@VACUUMLINKIDX@@].origin.mc ,
-        OUT                  := #p[@@IDX@@].origin.mcVACUUM
-    );
-    CALL MOVE
-    {value_type := 'udtMCOwner'}
-    (   IN                   := "idb@@VACUUMLINKCLASS@@".p[@@VACUUMLINKIDX@@].owner.mc ,
-        OUT                  := #p[@@IDX@@].origin.mcoVACUUM
+    (   IN                   := "idb@@VACUUMLINKCLASS@@".p[@@VACUUMLINKIDX@@] ,
+        OUT                  := #p[@@IDX@@].origin.VACUUM
     );
 @@ATTR_END|LINK@@
 
@@ -242,13 +222,8 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : VENT valve mode and command
 @@ATTR_BEGIN|LINK@@
     CALL MOVE
     {value_type := 'udtMCOrigin'}
-    (   IN                   := "idb@@VENTLINKCLASS@@".p[@@VENTLINKIDX@@].origin.mc ,
-        OUT                  := #p[@@IDX@@].origin.mcVENT
-    );
-    CALL MOVE
-    {value_type := 'udtMCOwner'}
-    (   IN                   := "idb@@VENTLINKCLASS@@".p[@@VENTLINKIDX@@].owner.mc ,
-        OUT                  := #p[@@IDX@@].origin.mcoVENT
+    (   IN                   := "idb@@VENTLINKCLASS@@".p[@@VENTLINKIDX@@] ,
+        OUT                  := #p[@@IDX@@].origin.VENT
     );
 @@ATTR_END|LINK@@
 
@@ -267,15 +242,15 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Ouput valve commands
     // Set the instance output commands for the valves to the field:          //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|LINK@@
-    L #p[@@IDX@@].origin.mcoDRAIN.CMD;
+    L #p[@@IDX@@].origin.DRAIN.owner.mc.CMD;
     T "idb@@DRAINLINKCLASS@@".p[@@DRAINLINKIDX@@].owner.mc.CMD;
-    L #p[@@IDX@@].origin.mcoHPCA.CMD;
+    L #p[@@IDX@@].origin.HPCA.owner.mc.CMD;
     T "idb@@HPCALINKCLASS@@".p[@@HPCALINKIDX@@].owner.mc.CMD;
-    L #p[@@IDX@@].origin.mcoLPCA.CMD;
+    L #p[@@IDX@@].origin.LPCA.owner.mc.CMD;
     T "idb@@LPCALINKCLASS@@".p[@@LPCALINKIDX@@].owner.mc.CMD;
-    L #p[@@IDX@@].origin.mcoVACUUM.CMD;
+    L #p[@@IDX@@].origin.VACUUM.owner.mc.CMD;
     T "idb@@VACUUMLINKCLASS@@".p[@@VACUUMLINKIDX@@].owner.mc.CMD;
-    L #p[@@IDX@@].origin.mcoVENT.CMD;
+    L #p[@@IDX@@].origin.VENT.owner.mc.CMD;
     T "idb@@VENTLINKCLASS@@".p[@@VENTLINKIDX@@].owner.mc.CMD;
 @@ATTR_END|LINK@@
 

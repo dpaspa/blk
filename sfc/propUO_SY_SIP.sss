@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:15:21 PM by David Paspa
+generated on 28/06/2018 4:47:30 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -623,7 +623,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::75
 --------------------------------------------------
-Name:- emc_water_sy_medium
+Name:- emc_water_sy_medium_liquid
 Type:- INT
 Description:- Medium selection to ECn002
 ParameterInOut:- OUT
@@ -671,7 +671,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::81
 --------------------------------------------------
-Name:- emc_gas_medium
+Name:- emc_gas_medium_gas
 Type:- INT
 Description:- emc_gas_medium
 ParameterInOut:- OUT
@@ -886,7 +886,7 @@ ACTION::01
 Description:- Enable vacuum and start vacuum timer. Log Vacuum begin time
 Action:- //Enable vacuum.
 L "dbCONST".SEL.GAS.VACUUM;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1091,7 +1091,7 @@ Description:- Open Sy steam supply on WFI/PS.
 Log steam open time.
 Action:- //Open WFI line PS supply valve
 L "dbCONST".SEL.LIQUID.PSWFI;
-T #_emc_water_sy_medium;
+T #_emc_water_sy_medium_liquid;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1921,7 +1921,7 @@ Action:- // Open Sy HPCA pressure control at setpoint PRES_HPCA_BLOW
 L #_r_pres_hpca_blow;
 T #_emc_gas_setpoint;
 L "dbCONST".SEL.GAS.HPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;
@@ -2270,7 +2270,7 @@ Action:- // Enable Sy LPCA pressure control at setpoint PRES_LPCA_BLANK.
 L #_r_pres_lpca_blank;
 T #_emc_gas_setpoint;
 L "dbCONST".SEL.GAS.LPCA;
-T #_emc_gas_medium;
+T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;

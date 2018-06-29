@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 4/06/2018 3:11:45 PM by David Paspa
+generated on 28/06/2018 4:44:10 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -79,45 +79,13 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- pos_pw_state
-Type:- INT
-Description:- PW supply valve state
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::7
---------------------------------------------------
-Name:- pos_wfi_state
-Type:- INT
-Description:- WFI supply valve state
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::8
---------------------------------------------------
-Name:- pos_pspw_state
-Type:- INT
-Description:- PS PW valve state
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::9
---------------------------------------------------
-Name:- pos_pswfi_state
-Type:- INT
-Description:- PS WFI valve_state
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::10
---------------------------------------------------
 Name:- pos_pswfi_cmd
 Type:- INT
 Description:- PS supply for WFI loop cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::7
 --------------------------------------------------
 Name:- pos_pspw_cmd
 Type:- INT
@@ -125,7 +93,7 @@ Description:- PS supply for PW loop valve cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::8
 --------------------------------------------------
 Name:- pos_pw_cmd
 Type:- INT
@@ -133,20 +101,12 @@ Description:- PW supply valve cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::9
 --------------------------------------------------
 Name:- pos_wfi_cmd
 Type:- INT
 Description:- WFI supply valve cmd
 ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::14
---------------------------------------------------
-Name:- medium_liquid
-Type:- INT
-Description:- Medium to be flushed
-ParameterInOut:- IN
 
 
 --------------------------------------------------
@@ -169,10 +129,10 @@ S #_log_time_flush_begin;
 
 //Start timer
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 
 //Load flush time
 L #_runtime;
@@ -184,176 +144,6 @@ Verification:- A "uncondJump";
 TRANSITION::01
 --------------------------------------------------
 TRNNo:- 01
-Title:- PW medium selected.
-EmptyTransition:- False
-Description:- Check if PW medium selected.
-Condition:- A(;
-L "dbCONST".SEL.LIQUID.PW;
-L  #_medium_liquid;
-==I;
-);
-
-
---------------------------------------------------
-TRANSITION::02
---------------------------------------------------
-TRNNo:- 02
-Title:- WFI medium selected.
-EmptyTransition:- False
-Description:- Check if WFI medium selected.
-Condition:- A(;
-L "dbCONST".SEL.LIQUID.WFI;
-L  #_medium_liquid;
-==I;
-);
-
-
---------------------------------------------------
-TRANSITION::03
---------------------------------------------------
-TRNNo:- 03
-Title:- PSPW medium selected.
-EmptyTransition:- False
-Description:- Check if PSPW medium selected.
-Condition:- A(;
-L "dbCONST".SEL.LIQUID.PSPW;
-L  #_medium_liquid;
-==I;
-);
-
-
---------------------------------------------------
-TRANSITION::04
---------------------------------------------------
-TRNNo:- 04
-Title:- PSWFI medium selected.
-EmptyTransition:- False
-Description:- Check if PSWFI medium selected.
-Condition:- A(;
-L "dbCONST".SEL.LIQUID.PSWFI;
-L  #_medium_liquid;
-==I;
-);
-
-
---------------------------------------------------
-STEP::02
---------------------------------------------------
-StepNo:- 02
-Title:- PH_EMC2_FLUSH : Open PW supply valve
-Description:- Open PW supply valve
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Open PW supply valve
-Action:- //Open PW supply valve.
-L  "dbCONST".BLK.POSx.CMD.OPEN;
-T  #_pos_pw_cmd;
-
-Verification:- // Verify selected medium and valve state.
-A(;
-L "dbCONST".SEL.LIQUID.PW;
-L  #_medium_liquid;
-==I;
-);
-A(;
-L "dbCONST".BLK.POSx.STATE.OPENED;
-L  #_pos_pw_state;
-==I;
-);
-
-
-
---------------------------------------------------
-STEP::03
---------------------------------------------------
-StepNo:- 03
-Title:- PH_EMC2_FLUSH : Open WFI supply valve
-Description:- Open WFI supply valve
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Open WFI supply valve
-Action:- //Open WFI supply valve.
-L  "dbCONST".BLK.POSx.CMD.OPEN;
-T  #_pos_wfi_cmd;
-
-Verification:- // Verify selected medium and valve state.
-A(;
-L "dbCONST".SEL.LIQUID.WFI;
-L  #_medium_liquid;
-==I;
-);
-A(;
-L "dbCONST".BLK.POSx.STATE.OPENED;
-L  #_pos_wfi_state;
-==I;
-);
-
-
-
---------------------------------------------------
-STEP::04
---------------------------------------------------
-StepNo:- 04
-Title:- PH_EMC2_FLUSH : Open PS(PW) supply valve
-Description:- Open PS(PW) supply valve
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Open PS(PW) supply valve
-Action:- //Open PS(PW) supply valve.
-L  "dbCONST".BLK.POSx.CMD.OPEN;
-T  #_pos_pspw_cmd;
-
-Verification:- // Verify selected medium and valve state.
-A(;
-L "dbCONST".SEL.LIQUID.PSPW;
-L  #_medium_liquid;
-==I;
-);
-A(;
-L "dbCONST".BLK.POSx.STATE.OPENED;
-L  #_pos_pspw_state;
-==I;
-);
-
-
---------------------------------------------------
-STEP::05
---------------------------------------------------
-StepNo:- 05
-Title:- PH_EMC2_FLUSH : Open PS(WFI) supply valve
-Description:- Open PS(WFI) supply valve
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Open PS(WFI) supply valve
-Action:- //Open PS(WFI) supply valve.
-L  "dbCONST".BLK.POSx.CMD.OPEN;
-T  #_pos_pswfi_cmd;
-
-Verification:- // Verify selected medium and valve state.
-A(;
-L "dbCONST".SEL.LIQUID.PSWFI;
-L  #_medium_liquid;
-==I;
-);
-A(;
-L "dbCONST".BLK.POSx.STATE.OPENED;
-L  #_pos_pswfi_state;
-==I;
-);
-
-
---------------------------------------------------
-TRANSITION::05
---------------------------------------------------
-TRNNo:- 05
 Title:- Wait for flush time
 EmptyTransition:- False
 Description:- Jump if flush time has expired.
@@ -362,9 +152,9 @@ A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::06
+STEP::02
 --------------------------------------------------
-StepNo:- 06
+StepNo:- 02
 Title:- PH_EMC2_FLUSH : Last Step
 Description:- Reset the timer and close PW, WFI, PS_PW and PS_WFI valves.
 
@@ -385,7 +175,7 @@ T #_time_flush_end;
 
 SET;
 S #_log_time_flush_end;
-
+R #sqSeqTimerStart;
 Verification:- A "uncondJump";
 
 ****************************************************************************************************

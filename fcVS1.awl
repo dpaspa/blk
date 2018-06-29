@@ -83,10 +83,10 @@ TITLE = Check vacuum pumps are available
     //------------------------------------------------------------------------//
     AN #p.origin.mc.modeOOS;
     A(;
-    O #p.origin.mcPUMP1.INTERLOCK;
-    O #p.origin.mcPUMP2.INTERLOCK;
-    ON #p.origin.mcPUMP1.modeAUTO;
-    ON #p.origin.mcPUMP2.modeAUTO;
+    O #p.origin.PUMP1.origin.mc.INTERLOCK;
+    O #p.origin.PUMP2.origin.mc.INTERLOCK;
+    ON #p.origin.PUMP1.origin.mc.modeAUTO;
+    ON #p.origin.PUMP2.origin.mc.modeAUTO;
     );
     = #p.origin.FAULT;
 
@@ -97,12 +97,12 @@ TITLE = Check vacuum pumps are available
     AN #p.origin.FAULT;
     A(;
     O(;
-    L #p.origin.mcVALVE1.STATE;
+    L #p.origin.VALVE1.origin.mc.STATE;
     L "dbCONST".BLK.POSx.STATE.OPENED;
     ==I;
     );
     O(;
-    L #p.origin.mcVALVE2.STATE;
+    L #p.origin.VALVE2.origin.mc.STATE;
     L "dbCONST".BLK.POSx.STATE.OPENED;
     ==I;
     );
@@ -120,7 +120,7 @@ TITLE = Check vacuum pumps are available
     A #tDO;
     JCN _a;
     L "dbCONST".BLK.MOT1.CMD.START;
-    T #p.origin.mcoPUMP1.CMD;
+    T #p.origin.PUMP1.owner.mc.CMD;
 _a:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -129,7 +129,7 @@ _a:   NOP 0;
     A #tDO;
     JCN _b;
     L "dbCONST".BLK.MOT1.CMD.START;
-    T #p.origin.mcoPUMP2.CMD;
+    T #p.origin.PUMP2.owner.mc.CMD;
 _b:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -138,7 +138,7 @@ _b:   NOP 0;
     AN #tDO;
     JCN _c;
     L "dbCONST".BLK.MOT1.CMD.STOP;
-    T #p.origin.mcoPUMP1.CMD;
+    T #p.origin.PUMP1.owner.mc.CMD;
 _c:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -147,7 +147,7 @@ _c:   NOP 0;
     AN #tDO;
     JCN _d;
     L "dbCONST".BLK.MOT1.CMD.STOP;
-    T #p.origin.mcoPUMP2.CMD;
+    T #p.origin.PUMP2.owner.mc.CMD;
 _d:   NOP 0;
 
 NETWORK

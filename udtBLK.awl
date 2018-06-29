@@ -14,17 +14,9 @@ TYPE "udt@@CLASS@@origin"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
-@@ATTR_BEGIN|CHILD@@
-        @@CHILDPARAMETERALIAS@@ : "udt@@CHILDALIASCLASS@@";          // @@CHILDALIASCLASS@@ @@CHILDPARAMETERALIAS@@ @@CHILDALIASDESCRIPTION@@
-@@ATTR_END|CHILD@@
         bmc : "udtModeCommandBLK";         // Block mode and command
-@@ATTR_BEGIN|TIMER@@
-        REM_TIME_H : Int;
-        REM_TIME_M : Int;
-        REM_TIME_S : Int;
-@@ATTR_END|TIMER@@
 @@ATTR_BEGIN|LINK_BLK@@
-        _@@BLOCKPARAMETER@@ : @@LINKDATATYPE@@;
+        @@BLOCKPARAMETER@@ : @@LINKDATATYPE@@;
 @@ATTR_END|LINK_BLK@@
 @@ATTR_BEGIN|pEventPromptExists@@
 @@ATTR_BEGIN|pEventPromptNum@@
@@ -56,21 +48,28 @@ TYPE "udt@@CLASS@@owner"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
-@@ATTR_BEGIN|TIMER@@
-        TIME_H : Int;
-        TIME_M : Int;
-        TIME_S : Int;
-@@ATTR_END|TIMER@@
         CHILD_RELEASE : Bool;              // Request to release children when complete
+@@ATTR_BEGIN|pClassSFC@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+@@ATTR_END|pClassSFC@@
+@@ATTR_BEGIN|PARAMETER_CLASS@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+@@ATTR_END|PARAMETER_CLASS@@
 @@ATTR_BEGIN|pChildDefine@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
 @@ATTR_END|pChildDefine@@
-@@ATTR_BEGIN|LINK_BLK_Define@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
-@@ATTR_END|LINK_BLK_Define@@
 @@ATTR_BEGIN|pBLOCK_RECIPE@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
 @@ATTR_END|pBLOCK_RECIPE@@
+    END_STRUCT;
+END_TYPE
+
+TYPE "udt@@CLASS@@children"
+VERSION : 1.0
+    STRUCT
+@@ATTR_BEGIN|CHILD@@
+        @@CHILDPARAMETERALIAS@@ : "udt@@CHILDALIASCLASS@@";          // @@CHILDALIASCLASS@@ @@CHILDPARAMETERALIAS@@ @@CHILDALIASDESCRIPTION@@
+@@ATTR_END|CHILD@@
     END_STRUCT;
 END_TYPE
 

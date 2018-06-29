@@ -145,7 +145,9 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 VAR_IN_OUT
     p : "udt@@CLASS@@";            // Block data interface
+    c : "udt@@CLASS@@children";    // Block child interface
 END_VAR
+
 VAR
     RUNTMR : "fbRunTimer";
 @@ATTR_BEGIN|SFC@@
@@ -164,9 +166,8 @@ VAR
         childMismatch : Bool;
         childUnavailable : Bool;
         sfcCompleted : Bool;
-        sfcRunning : Bool;
     END_STRUCT;
-    own : Struct
+    acquire : Struct
 @@ATTR_BEGIN|CHILD@@
         @@CHILDPARAMETERALIAS@@ : Bool;       // @@CHILDPARAMETERALIAS@@
 @@ATTR_END|CHILD@@
@@ -178,14 +179,19 @@ VAR
 @@ATTR_END|SELVALUE@@
     END_STRUCT;
 @@ATTR_END|SELECT@@
-    subs : Struct
+    subsHasSFC : Struct
+@@ATTR_BEGIN|STATE@@
+        @@STATE@@ : Bool := @@HASSFC@@;       // @@STATEDESCRIPTION@@
+@@ATTR_END|STATE@@
+    END_STRUCT;
+    subsRunning : Struct
 @@ATTR_BEGIN|STATE@@
         @@STATE@@ : Bool;       // @@STATEDESCRIPTION@@
 @@ATTR_END|STATE@@
     END_STRUCT;
-    subsHasSFC : Struct
+    subsStart : Struct
 @@ATTR_BEGIN|STATE@@
-        @@STATE@@ : Bool := @@HASSFC@@;       // @@STATEDESCRIPTION@@
+        @@STATE@@ : Bool;       // @@STATEDESCRIPTION@@
 @@ATTR_END|STATE@@
     END_STRUCT;
 END_VAR
@@ -215,76 +221,50 @@ TITLE = Check if calling parameters are valid
     = #flags.badParameter;
     = #p.origin.bmc.BAD_PARAM;
 
-@@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|CHILD_ACQUIRED@@
 NETWORK
-TITLE = Check if child @@CHILDPARAMETERALIAS@@ is not in AUTO mode
+TITLE = Check if any child is not in AUTO mode
     //------------------------------------------------------------------------//
     // CHILD NOT AUTO   CHILD NOT AUTO   CHILD NOT AUTO   CHILD NOT AUTO   CH //
     //                                                                        //
-    // Check the child device to see if it is not in Auto mode. Only need to  //
-    // find the first one so bypass further checks if this child in Manual:   //
+    // Check the child devices to see if any is not in Auto mode:             //
     //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
-    AN #p.origin.cmc@@CHILDINDEX@@.modeAUTO;
+@@ATTR_BEGIN|CHILD@@
+    ON #c.@@CHILDPARAMETERALIAS@@.origin.mc.modeAUTO;
+@@ATTR_END|CHILD@@
     = #flags.childNotAuto;
-    JC _completedChildAutoChecks;
 
-@@ATTR_END|CHILD_ACQUIRED@@
-@@ATTR_END|STATE@@
-
-_completedChildAutoChecks:      NOP 0;
-
-@@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|CHILD_ACQUIRED@@
 NETWORK
-TITLE = Check if child @@CHILDPARAMETERALIAS@@ is Interlocked
+TITLE = Check if any child is Interlocked
     //------------------------------------------------------------------------//
     // CHILD INTERLOCK   CHILD INTERLOCK   CHILD INTERLOCK   CHILD INTERLOCK  //
     //                                                                        //
-    // Check the child device to see if it is in the INTERLOCK state. Only    //
-    // need to find the first one so bypass further checks if this child is   //
-    // interlocked:                                                           //
+    // Check the child devices to see if any is in the INTERLOCK state:       //
     //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
-    A #p.origin.cmc@@CHILDINDEX@@.INTERLOCK;
+@@ATTR_BEGIN|CHILD@@
+    O #c.@@CHILDPARAMETERALIAS@@.origin.mc.INTERLOCK;
+@@ATTR_END|CHILD@@
     = #flags.childInterlocked;
-    JC _completedChildInterlockChecks;
 
-@@ATTR_END|CHILD_ACQUIRED@@
-@@ATTR_END|STATE@@
-
-_completedChildInterlockChecks:      NOP 0;
-
-@@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|CHILD_ACQUIRED@@
 NETWORK
-TITLE = Check if Child @@CHILDPARAMETERALIAS@@ is not already Owned or not Available
+TITLE = Check if any Child is not already Owned or not Available
     //------------------------------------------------------------------------//
     // CHILD UNAVAILABLE   CHILD UNAVAILABLE   CHILD UNAVAILABLE   CHILD UNAV //
     //                                                                        //
-    // Check the child device to see if it is already owned by this parent    //
+    // Check the child device to see if any is already owned by this parent   //
     // or else if it is Available. If Available it will be acquired if needed //
-    // later to execute a command. Only need to find the first one so bypass  //
-    // further checks if this child is unavailable:                           //
+    // later to execute a command:                                            //
     //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
-    AN #p.origin.cmco@@CHILDINDEX@@.isAvailable;
+@@ATTR_BEGIN|CHILD@@
+    O(;
+    AN #c.@@CHILDPARAMETERALIAS@@.owner.mc.isAvailable;
     AN(;
-    L #p.origin.cmco@@CHILDINDEX@@.OWNER;
+    L #c.@@CHILDPARAMETERALIAS@@.owner.mc.OWNER;
     L #p.origin.mc.ME;
     ==I;
     );
+    );
+@@ATTR_END|CHILD@@
     = #flags.childUnavailable;
-    JC _completedChildUnavailableChecks;
-
-@@ATTR_END|CHILD_ACQUIRED@@
-@@ATTR_END|STATE@@
-
-_completedChildUnavailableChecks:      NOP 0;
 
 NETWORK
 TITLE = Check if any Child has Failed
@@ -340,16 +320,6 @@ TITLE = Call BLOCK Mode and Command handling block
         bmc                  := #p.origin.bmc
     );
 
-NETWORK
-TITLE = Flag SFC not running if a new running substate command issued
-    //------------------------------------------------------------------------//
-    // Flag SFC is not yet running if new start command:                      //
-    //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    JCN _notStart;
-    R flags.sfcRunning;
-_notStart:    NOP 0;
-
 //----------------------------------------------------------------------------//
 // RUNNING SUBSTATE    RUNNING SUBSTATE    RUNNING SUBSTATE    RUNNING SUBSTA //
 // RUNNING SUBSTATE    RUNNING SUBSTATE    RUNNING SUBSTATE    RUNNING SUBSTA //
@@ -359,7 +329,7 @@ _notStart:    NOP 0;
 //----------------------------------------------------------------------------//
 @@ATTR_BEGIN|STATE@@
 NETWORK
-TITLE = Running Substate flags
+TITLE = Substate selected flags
     //------------------------------------------------------------------------//
     // RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG  //
     //                                                                        //
@@ -372,15 +342,20 @@ TITLE = Running Substate flags
     L "dbCONST".BLK.@@CLASS@@.SUBS.@@STATE@@;
     ==I;
     );
-    = #subs.@@STATE@@;
+    = #subsStart.@@STATE@@;
+
+NETWORK
+TITLE = Set substate running flags
+    A #subsStart.@@STATE@@;
+    S #subsRunning.@@STATE@@;
 
 NETWORK
 TITLE = Transfer the Running Substate to the Block mode and command
-    A #subs.@@STATE@@;
-    JCN _subs_@@STATE@@;
+    A #subsStart.@@STATE@@;
+    JCN _subsStart@@STATE@@;
     L #p.owner.mc.SUBS;
     T #p.origin.bmc.SUBS;
-_subs_@@STATE@@:   NOP 0;
+_subsStart@@STATE@@:   NOP 0;
 
 @@ATTR_END|STATE@@
 
@@ -418,11 +393,10 @@ TITLE = Acquire child @@CHILDPARAMETERALIAS@@ for new command if required for th
     // the child is available as it would be a child unavailabile failure     //
     // already above if not available at this point:                          //
     //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
+    A #subsStart.@@STATE@@;
     @@CHILDACQUIRESTATEMENT@@
-    A #p.origin.cmco@@CHILDINDEX@@.isAvailable;
-    = #own.@@CHILDPARAMETERALIAS@@;
+    A #c.@@CHILDPARAMETERALIAS@@.owner.mc.isAvailable;
+    = #acquire.@@CHILDPARAMETERALIAS@@;
 
 NETWORK
 TITLE = Acquire child @@CHILDPARAMETERALIAS@@ for new command
@@ -430,18 +404,17 @@ TITLE = Acquire child @@CHILDPARAMETERALIAS@@ for new command
     // If the child is available take ownership by this block by writing to   //
     // the child owner variable:                                              //
     //------------------------------------------------------------------------//
-    A #own.@@CHILDPARAMETERALIAS@@;
+    A #acquire.@@CHILDPARAMETERALIAS@@;
     JCN _childAvail_@@COUNTERATTR|1@@_@@STATE@@;
     L #p.origin.mc.ME;
-    T #p.origin.cmco@@CHILDINDEX@@.OWNER;
+    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.OWNER;
 
 _childAvail_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|CHILD_ACQUIRE_REQ@@
 @@ATTR_END|STATE@@
 
-@@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|CHILD_ACQUIRED@@
+@@ATTR_BEGIN|CHILD@@
 NETWORK
 TITLE = Cascade Batch Serial Number to all children
     //------------------------------------------------------------------------//
@@ -449,22 +422,18 @@ TITLE = Cascade Batch Serial Number to all children
     //                                                                        //
     // Cascade this block's Batch Number and Recipe ID to all child devices:  //
     //------------------------------------------------------------------------//
-    A #own.@@CHILDPARAMETERALIAS@@;
     A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
-    JCN _childBatch_@@COUNTERATTR|1@@_@@STATE@@;
+    JCN _childBatch_@@COUNTERATTR|1@@;
     L #p.owner.mc.SERIALNUM;
-    T #p.origin.cmco@@CHILDINDEX@@.SERIALNUM;
+    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.SERIALNUM;
     L #p.owner.mc.RECIPE;
-    T #p.origin.cmco@@CHILDINDEX@@.RECIPE;
+    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.RECIPE;
 
-_childBatch_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+_childBatch_@@COUNTERATTR@@:   NOP 0;
 
-@@ATTR_END|CHILD_ACQUIRED@@
-@@ATTR_END|STATE@@
+@@ATTR_END|CHILD@@
 
-@@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|CHILD_ACQUIRED@@
+@@ATTR_BEGIN|CHILD@@
 @@ATTR_BEGIN|pChild@@
 NETWORK
 TITLE = Download calling parameter @@BLOCKPARAMETER@@ value to child device @@CHILDPARAMETERALIAS@@
@@ -473,18 +442,15 @@ TITLE = Download calling parameter @@BLOCKPARAMETER@@ value to child device @@CH
     //                                                                        //
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
-    A #own.@@CHILDPARAMETERALIAS@@;
     A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
-    JCN _childParmIN_@@COUNTERATTR|1@@_@@STATE@@;
-    L #p.owner.@@CHILDPARAMETERATTRIBUTE@@;
-    T #p.origin.cmco@@CHILDINDEX@@.@@CHILDPARAMETERATTRIBUTE@@;
+    JCN _childParmIN_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@;
+    L #p.owner.@@BLOCKPARAMETER@@;
+    T #c.@@CHILDPARAMETERALIAS@@.owner.@@CHILDPARAMETERATTRIBUTE@@;
 
-_childParmIN_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+_childParmIN_@@COUNTERATTR@@_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
 @@ATTR_END|pChild@@
-@@ATTR_END|CHILD_ACQUIRED@@
-@@ATTR_END|STATE@@
+@@ATTR_END|CHILD@@
 
 @@ATTR_BEGIN|STATE@@
 @@ATTR_BEGIN|CHILD_INIT_COMMAND_TRUE@@
@@ -496,8 +462,7 @@ TITLE = Command child device @@CHILDPARAMETERALIAS@@ for state @@STATE@@ to its 
     // Set the initial command values for the child devices.                  //
     // Command the child device to its initial command if condition is true:  //
     //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
+    A #subsStart.@@STATE@@;
     A(;
     @@CONDITIONSTATEMENT@@
     );
@@ -519,8 +484,7 @@ TITLE = Command child device @@CHILDPARAMETERALIAS@@ for state @@STATE@@ to its 
     // Set the initial command values for the child devices.                  //
     // Command the child device to its initial command:                       //
     //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
+    A #subsStart.@@STATE@@;
     AN(;
     @@CONDITIONSTATEMENT@@
     );
@@ -531,144 +495,6 @@ _childInitFalse_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|CHILD_INIT_COMMAND_FALSE@@
 @@ATTR_END|STATE@@
-
-@@ATTR_BEGIN|SFC@@
-NETWORK
-TITLE = Make sure all SFCs are stopped if stop command or new start command
-    //------------------------------------------------------------------------//
-    // SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC     //
-    // SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC     //
-    //                                                                        //
-    // Stop the SFC if new stop or start command issued. Reset the SFC mode   //
-    // and command variable to clear the object referece:                     //
-    //------------------------------------------------------------------------//
-    O #p.origin.bmc.eventCmdStop;
-    O #p.origin.bmc.eventCmdStart;
-    JCN _notRestartSFC_@@COUNTERATTR|1@@_@@STATE@@;
-    A "alwaysHigh";
-    = #@@SFC@@.RESET;
-
-_notRestartSFC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
-@@ATTR_END|SFC@@
-
-@@ATTR_BEGIN|SFC@@
-NETWORK
-TITLE = Reset sequence mode and command structure
-    //------------------------------------------------------------------------//
-    // Reset the sequence mode and command structure:                         //
-    //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
-    JCN _notResetSFC_@@COUNTERATTR|1@@_@@STATE@@;
-    A "alwaysLow";
-    = #@@SFC@@.smc.ERR_FAULT;
-    = #@@SFC@@.smc.MAN_JUMP;
-    = #@@SFC@@.smc.NO_VERIFIC;
-    = #@@SFC@@.smc.OFF_IDLE;
-    = #@@SFC@@.smc.PAUSED;
-    = #@@SFC@@.smc.RUNNING;
-    = #@@SFC@@.smc.S_ACTIVE;
-    = #@@SFC@@.smc.SQ_ACK;
-    = #@@SFC@@.smc.SQ_ERROR;
-    = #@@SFC@@.smc.SQ_FINISHED;
-    = #@@SFC@@.smc.SQ_RESUME;
-    = #@@SFC@@.smc.TRN_AND_JUMP;
-    L 0;
-    T #@@SFC@@.smc.CURSTEP;
-    T #@@SFC@@.smc.MODE;
-    T #@@SFC@@.smc.SQ_CMD;
-    T #@@SFC@@.smc.SQ_STATE;
-    T #@@SFC@@.smc.STEPNO_JUMP;
-    T #@@SFC@@.smc.NXT_STEP;
-_notResetSFC_@@COUNTERATTR|1@@_@@STATE@@: NOP 0;
-
-@@ATTR_END|SFC@@
-
-@@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|CHILD_INSTANCE_BIND@@
-NETWORK
-TITLE = Bind the selected child to the called child device
-    //------------------------------------------------------------------------//
-    // Copy the selected child to the called child device:                    //
-    //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
-    A(;
-    @@CONDITIONSTATEMENT@@
-    );
-    JCN _childBind_@@COUNTERATTR|1@@_@@STATE@@;
-    CALL MOVE
-    {value_type := 'Variant'}
-    (   IN                   := #p.origin.cmc@@CHILDINDEX@@ ,
-        OUT                  := #p.origin.cmc@@CHILDBIND@@
-    );
-    CALL MOVE
-    {value_type := 'Variant'}
-    (   IN                   := #p.origin.cmco@@CHILDINDEX@@ ,
-        OUT                  := #p.origin.cmco@@CHILDBIND@@
-    );
-
-_childBind_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
-@@ATTR_END|CHILD_INSTANCE_BIND@@
-@@ATTR_END|SFC@@
-
-@@ATTR_BEGIN|SFC@@
-NETWORK
-TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
-    //------------------------------------------------------------------------//
-    // SFC PARAMETERS   SFC PARAMETERS   SFC PARAMETERS   SFC PARAMETERS   SF //
-    //                                                                        //
-    // Set the SFC calling parameters if this is the running substate:        //
-    //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
-    JCN _notSFC_@@COUNTERATTR|1@@_@@STATE@@;
-    CALL #@@SFC@@
-    (
-@@ATTR_BEGIN|pSFC@@
-        @@CHILDPARAMETER@@   := #p.owner.@@BLOCKPARAMETER@@ ,
-@@ATTR_END|pSFC@@
-@@ATTR_BEGIN|pSFCChildOrigin@@
-        @@CHILDPARAMETER@@   := #p.origin.cmc@@CHILDINDEX@@.@@CHILDPARAMETERATTRIBUTE@@ ,
-@@ATTR_END|pSFCChildOrigin@@
-@@ATTR_BEGIN|pSFCChildOwner@@
-        @@CHILDPARAMETER@@   := #p.origin.cmco@@CHILDINDEX@@.@@CHILDPARAMETERATTRIBUTE@@ ,
-@@ATTR_END|pSFCChildOwner@@
-        dummy                := #dummy
-    );
-_notSFC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
-@@ATTR_END|SFC@@
-
-@@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|CHILD_INSTANCE_BIND@@
-NETWORK
-TITLE = Return the bound child to the selected child device
-    //------------------------------------------------------------------------//
-    // Copy the selected child to the called child device:                    //
-    //------------------------------------------------------------------------//
-    A #subs.@@STATE@@;
-    A(;
-    @@CONDITIONSTATEMENT@@
-    );
-    JCN _childBound_@@COUNTERATTR|1@@_@@STATE@@;
-    CALL MOVE
-    {value_type := 'Variant'}
-    (   IN                   := #p.origin.cmc@@CHILDBIND@@ ,
-        OUT                  := #p.origin.cmc@@CHILDINDEX@@
-    );
-    CALL MOVE
-    {value_type := 'Variant'}
-    (   IN                   := #p.origin.cmco@@CHILDBIND@@ ,
-        OUT                  := #p.origin.cmco@@CHILDINDEX@@
-    );
-
-_childBound_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
-@@ATTR_END|CHILD_INSTANCE_BIND@@
-@@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|pEventPrompt@@
 NETWORK
@@ -791,7 +617,50 @@ _evDataTime_@@COUNTERATTR@@:   NOP 0;
 @@ATTR_END|pEventDataTime@@
 
 @@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|pSFCChildIN@@
+NETWORK
+TITLE = Make sure all SFCs are stopped if stop command or new start command
+    //------------------------------------------------------------------------//
+    // SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC     //
+    // SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC    SFC     //
+    //                                                                        //
+    // Stop the SFC if new stop or start command issued. Reset the SFC mode   //
+    // and command variable to clear the object referece:                     //
+    //------------------------------------------------------------------------//
+    O #p.origin.bmc.eventCmdStop;
+    O #p.origin.bmc.eventCmdStart;
+    JCN _notRestartSFC_@@COUNTERATTR|1@@_@@STATE@@;
+    L "dbCONST".SEQ.CMD.STOP;
+    T #@@SFC@@.smc.SQ_CMD;
+
+_notRestartSFC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+
+@@ATTR_END|SFC@@
+
+@@ATTR_BEGIN|SFC@@
+@@ATTR_BEGIN|CHILD_INSTANCE_BIND@@
+NETWORK
+TITLE = Bind the selected child to the called child device
+    //------------------------------------------------------------------------//
+    // Copy the selected child to the called child device:                    //
+    //------------------------------------------------------------------------//
+    A #subsRunning.@@STATE@@;
+    A(;
+    @@CONDITIONSTATEMENT@@
+    );
+    JCN _childBind_@@COUNTERATTR|1@@_@@STATE@@;
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := #c.@@CHILDPARAMETERALIAS@@ ,
+        OUT                  := #c.@@CHILDPARAMETERALIASBIND@@
+    );
+
+_childBind_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+
+@@ATTR_END|CHILD_INSTANCE_BIND@@
+@@ATTR_END|SFC@@
+
+@@ATTR_BEGIN|SFC@@
+@@ATTR_BEGIN|pSFCChildMC@@
 NETWORK
 TITLE = Synchronise SFC @@SFC@@ child state for child @@CHILDPARAMETER@@
     //------------------------------------------------------------------------//
@@ -800,22 +669,16 @@ TITLE = Synchronise SFC @@SFC@@ child state for child @@CHILDPARAMETER@@
     // Update the SFC child states if the SFC is about to start or already    //
     // running:                                                               //
     //------------------------------------------------------------------------//
-    A(;
-    O #p.origin.bmc.eventCmdStart;
-    O flags.sfcRunning;
-    );
-    A #subs.@@STATE@@;
-    JCN _cState_@@COUNTERATTR|1@@_@@STATE@@;
-    L #p.origin.cmc@@CHILDINDEX@@.@@CHILDPARAMETERATTRIBUTE@@;
+    A #subsRunning.@@STATE@@;
+    JCN _cMC_@@COUNTERATTR|1@@_@@STATE@@;
+    L #c.@@CHILDPARAMETERALIAS@@.origin.mc.@@CHILDPARAMETERATTRIBUTE@@;
     T #@@SFC@@.@@CHILDPARAMETER@@;
 
-_cState_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+_cMC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
-@@ATTR_END|pSFCChildIN@@
-@@ATTR_END|SFC@@
+@@ATTR_END|pSFCChildMC@@
 
-@@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|pSFCChildOUT@@
+@@ATTR_BEGIN|pSFCChildMCO@@
 NETWORK
 TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
     //------------------------------------------------------------------------//
@@ -824,15 +687,88 @@ TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
     // Write the initial command to any SFC child commands to synchronise     //
     // them at the start of the SFC:                                          //
     //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
-    JCN _cCmd_@@COUNTERATTR|1@@_@@STATE@@;
-    L #p.origin.cmco@@CHILDINDEX@@.@@CHILDPARAMETERATTRIBUTE@@;
+    A #subsStart.@@STATE@@;
+    JCN _cMCO_@@COUNTERATTR|1@@_@@STATE@@;
+    L #c.@@CHILDPARAMETERALIAS@@.owner.mc.@@CHILDPARAMETERATTRIBUTE@@;
     T #@@SFC@@.@@CHILDPARAMETER@@;
 
-_cCmd_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+_cMCO_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
-@@ATTR_END|pSFCChildOUT@@
+@@ATTR_END|pSFCChildMCO@@
+
+@@ATTR_BEGIN|pSFCChildOwner@@
+NETWORK
+TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
+    //------------------------------------------------------------------------//
+    // SYNC SFC CHILD OWNER PARAMETERS    SYNC SFC CHILD OWNER PARAMETERS     //
+    //                                                                        //
+    // Write the initial command to any SFC child parameters to synchronise   //
+    // them at the start of the SFC:                                          //
+    //------------------------------------------------------------------------//
+    A #subsStart.@@STATE@@;
+    JCN _cOwner_@@COUNTERATTR|1@@_@@STATE@@;
+    L #c.@@CHILDPARAMETERALIAS@@.owner.@@CHILDPARAMETERATTRIBUTE@@;
+    T #@@SFC@@.@@CHILDPARAMETER@@;
+
+_cOwner_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+
+@@ATTR_END|pSFCChildOwner@@
+@@ATTR_END|SFC@@
+
+@@ATTR_BEGIN|SFC@@
+NETWORK
+TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
+    //------------------------------------------------------------------------//
+    // SFC PARAMETERS   SFC PARAMETERS   SFC PARAMETERS   SFC PARAMETERS   SF //
+    //                                                                        //
+    // Set the SFC calling parameters if this is the running substate:        //
+    //------------------------------------------------------------------------//
+    A #subsRunning.@@STATE@@;
+    JCN _notSFC_@@COUNTERATTR|1@@_@@STATE@@;
+    CALL #@@SFC@@
+    (
+@@ATTR_BEGIN|pSFC@@
+        @@CHILDPARAMETER@@   := #p.owner.@@BLOCKPARAMETER@@ ,
+@@ATTR_END|pSFC@@
+@@ATTR_BEGIN|pSFCChildMC@@
+        @@CHILDPARAMETER@@   := #c.@@CHILDPARAMETERALIAS@@.origin.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
+@@ATTR_END|pSFCChildMC@@
+@@ATTR_BEGIN|pSFCChildOrigin@@
+        @@CHILDPARAMETER@@   := #c.@@CHILDPARAMETERALIAS@@.origin.@@CHILDPARAMETERATTRIBUTE@@ ,
+@@ATTR_END|pSFCChildOrigin@@
+@@ATTR_BEGIN|pSFCChildMCO@@
+        @@CHILDPARAMETER@@   := #c.@@CHILDPARAMETERALIAS@@.owner.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
+@@ATTR_END|pSFCChildMCO@@
+@@ATTR_BEGIN|pSFCChildOwner@@
+        @@CHILDPARAMETER@@   := #c.@@CHILDPARAMETERALIAS@@.owner.@@CHILDPARAMETERATTRIBUTE@@ ,
+@@ATTR_END|pSFCChildOwner@@
+        dummy                := #dummy
+    );
+_notSFC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+
+@@ATTR_END|SFC@@
+
+@@ATTR_BEGIN|SFC@@
+@@ATTR_BEGIN|CHILD_INSTANCE_BIND@@
+NETWORK
+TITLE = Return the bound child to the selected child device
+    //------------------------------------------------------------------------//
+    // Copy the selected child to the called child device:                    //
+    //------------------------------------------------------------------------//
+    A #subsRunning.@@STATE@@;
+    A(;
+    @@CONDITIONSTATEMENT@@
+    );
+    JCN _childBound_@@COUNTERATTR|1@@_@@STATE@@;
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := #c.@@CHILDPARAMETERALIASBIND@@ ,
+        OUT                  := #c.@@CHILDPARAMETERALIAS@@
+    );
+
+_childBound_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+
+@@ATTR_END|CHILD_INSTANCE_BIND@@
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
@@ -843,18 +779,12 @@ TITLE = Start the SFC sequence @@SFC@@ for running substate @@STATE@@
     //                                                                        //
     // Start the running substate SFC.                                        //
     //                                                                        //
-    // Bypass if not the current running substate:                            //
-    //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
-    A #subs.@@STATE@@;
-    JCN _notSFCStarting_2_@@STATE@@;
-
-    //------------------------------------------------------------------------//
     // Start the SFC for the running substate:                                //
     //------------------------------------------------------------------------//
+    A #subsStart.@@STATE@@;
+    JCN _notSFCStarting_2_@@STATE@@;
     L "dbCONST".SEQ.CMD.START;
     T #@@SFC@@.smc.SQ_CMD;
-    S flags.sfcRunning;
 
 _notSFCStarting_2_@@STATE@@:      NOP 0;
 @@ATTR_END|SFC@@
@@ -868,38 +798,54 @@ TITLE = Check if any new Child command if SFC @@SFC@@ is running
     // Check if the running SFC requests to change any child command. Check   //
     // this is the running SFC:                                               //
     //------------------------------------------------------------------------//
-    A #subs.@@STATE@@;
-    A flags.sfcRunning;
+    A #subsRunning.@@STATE@@;
     AN #@@SFC@@.smc.PAUSED;
     AN #@@SFC@@.smc.ERR_FAULT;
     JCN _notSFCRunning_1_@@STATE@@;
-    NOP 0;
 
-@@ATTR_BEGIN|pSFCChildOUT@@
-NETWORK
-TITLE = Check if the SFC Child command has changed
+@@ATTR_BEGIN|pSFCChildMCO@@
     //------------------------------------------------------------------------//
     // Check if the running SFC requests to change this child command:        //
     //------------------------------------------------------------------------//
     A(;
-    L #p.origin.cmco@@CHILDINDEX@@.@@CHILDPARAMETERATTRIBUTE@@;
+    L #c.@@CHILDPARAMETERALIAS@@.owner.mc.@@CHILDPARAMETERATTRIBUTE@@;
     L #@@SFC@@.@@CHILDPARAMETER@@;
     <>I;
     );
-    JCN _noCommandChange_@@COUNTERATTR|1@@_@@STATE@@;
+    JCN _noCmdChange_@@COUNTERATTR|1@@_@@STATE@@;
 
-NETWORK
-TITLE = Send the updated SFC Child command to the child
     //------------------------------------------------------------------------//
     // Send the udpated SFC child command to the child:                       //
     //------------------------------------------------------------------------//
     L #@@SFC@@.@@CHILDPARAMETER@@;
-    T #p.origin.cmco@@CHILDINDEX@@.@@CHILDPARAMETERATTRIBUTE@@;
+    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.@@CHILDPARAMETERATTRIBUTE@@;
     S #flags.childCommandChange;
 
-_noCommandChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
+_noCmdChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
 
-@@ATTR_END|pSFCChildOUT@@
+@@ATTR_END|pSFCChildMCO@@
+
+@@ATTR_BEGIN|pSFCChildOwner@@
+    //------------------------------------------------------------------------//
+    // Check if the running SFC requests to change this child parameter:      //
+    //------------------------------------------------------------------------//
+    A(;
+    L #c.@@CHILDPARAMETERALIAS@@.owner.@@CHILDPARAMETERATTRIBUTE@@;
+    L #@@SFC@@.@@CHILDPARAMETER@@;
+    <>I;
+    );
+    JCN _noParmChange_@@COUNTERATTR|1@@_@@STATE@@;
+
+    //------------------------------------------------------------------------//
+    // Send the udpated SFC child parameter to the child:                     //
+    //------------------------------------------------------------------------//
+    L #@@SFC@@.@@CHILDPARAMETER@@;
+    T #c.@@CHILDPARAMETERALIAS@@.owner.@@CHILDPARAMETERATTRIBUTE@@;
+    S #flags.childCommandChange;
+
+_noParmChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
+
+@@ATTR_END|pSFCChildOwner@@
 
 _notSFCRunning_1_@@STATE@@:      NOP 0;
 
@@ -937,8 +883,8 @@ TITLE = Check if any Child state does not match the command
     //------------------------------------------------------------------------//
     A #timeCheckChildStateExpired;
     A(;
-    L #p.origin.cmc@@CHILDINDEX@@.STATE;
-    L #p.origin.cmco@@CHILDINDEX@@.CMD;
+    L #c.@@CHILDPARAMETERALIAS@@.origin.mc.STATE;
+    L #c.@@CHILDPARAMETERALIAS@@.owner.mc.CMD;
     <>I;
     );
     JCN _cNoMismatch_@@COUNTERATTR|1@@_@@STATE@@;
@@ -950,9 +896,9 @@ _cNoMismatch_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 @@ATTR_END|STATE@@
 
 NETWORK
-TITLE = Reset the new child command flag if a mismatch
+TITLE = Reset the new child command flag if timer expired
     //------------------------------------------------------------------------//
-    // Reset the child device command changed flag if a mismatch occurred:    //
+    // Reset the child device command changed flag if timer expired:          //
     //------------------------------------------------------------------------//
     A #timeCheckChildStateExpired;
     JCN _ccstate;
@@ -1063,8 +1009,7 @@ TITLE = Any Interlock must pause the running SFC
     // Pause the running SFC sequence if any interlock or failure condition:  //
     //------------------------------------------------------------------------//
     AN #p.origin.bmc.permitStart;
-    A flags.sfcRunning;
-    A #subs.@@STATE@@;
+    A #subsRunning.@@STATE@@;
     JCN _ilSFC_@@COUNTERATTR|1@@;
     L "dbCONST".SEQ.CMD.PAUSE;
     T #@@SFC@@.smc.SQ_CMD;
@@ -1086,10 +1031,8 @@ TITLE = Stop the module if any problem
     T #p.owner.mc.CMD;
 _stopBlock:   NOP 0;
 
-@@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|CHILD_ACQUIRED@@
 NETWORK
-TITLE = Set child device @@CHILDPARAMETERALIAS@@ to safe state if any interlock or child failure
+TITLE = Set child devices to safe state if any interlock or child failure
     //------------------------------------------------------------------------//
     // SAFE STATE   SAFE STATE   SAFE STATE   SAFE STATE  SAFE STATE  SAFE ST //
     //                                                                        //
@@ -1098,14 +1041,14 @@ TITLE = Set child device @@CHILDPARAMETERALIAS@@ to safe state if any interlock 
     //------------------------------------------------------------------------//
     O #p.origin.mc.INTERLOCK;
     ON #p.origin.bmc.permitStart;
-    JCN _childSafe_@@COUNTERATTR|1@@_@@STATE@@;
-    L "dbCONST".BLK.@@CHILDCLASS@@.SAFE.CMD;
-    T #p.origin.cmco@@CHILDINDEX@@.CMD;
+    JCN _childSafe;
+    R #flags.childMismatch;
+@@ATTR_BEGIN|CHILD@@
+    L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
+    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.CMD;
+@@ATTR_END|CHILD@@
 
-_childSafe_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
-@@ATTR_END|CHILD_ACQUIRED@@
-@@ATTR_END|STATE@@
+_childSafe:   NOP 0;
 
 @@ATTR_BEGIN|SFC@@
 NETWORK
@@ -1116,8 +1059,7 @@ TITLE = Set child devices to safe state if SFC @@SFC@@ Paused or Error
     // Bypass if the current SFC is running okay:                             //
     //------------------------------------------------------------------------//
     A #p.origin.bmc.permitStart;
-    A #subs.@@STATE@@;
-    A #flags.sfcRunning;
+    A #subsRunning.@@STATE@@;
     A(;
     O #@@SFC@@.smc.PAUSED;
     O #@@SFC@@.smc.ERR_FAULT;
@@ -1128,10 +1070,11 @@ TITLE = Set child devices to safe state if SFC @@SFC@@ Paused or Error
     //------------------------------------------------------------------------//
     // Set all child devices to safe state due to sequence problem:           //
     //------------------------------------------------------------------------//
-@@ATTR_BEGIN|CHILD_ACQUIRED@@
-    L "dbCONST".BLK.@@CHILDCLASS@@.SAFE.CMD;
-    T #p.origin.cmco@@CHILDINDEX@@.CMD;
-@@ATTR_END|CHILD_ACQUIRED@@
+    R #flags.childMismatch;
+@@ATTR_BEGIN|CHILD@@
+    L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
+    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.CMD;
+@@ATTR_END|CHILD@@
 
 _safeSFC_@@COUNTERTEMPLATE@@_@@SFC@@:   NOP 0;
 
@@ -1149,7 +1092,7 @@ TITLE = Acknowlede Sequence Error Fault
     //------------------------------------------------------------------------//
     A #@@SFC@@.smc.SQ_ACK;
     A #@@SFC@@.smc.SQ_ERROR;
-    A #subs.@@STATE@@;
+    A #subsStart.@@STATE@@;
     JCN _ackSFC_@@COUNTERATTR|1@@;
     L "dbCONST".SEQ.CMD.ACKNOWLEDGE_ERR;
     T #@@SFC@@.smc.SQ_CMD;
@@ -1165,7 +1108,7 @@ TITLE = SQ Acknowlede Error Fault and Resume
     //------------------------------------------------------------------------//
     A #@@SFC@@.smc.SQ_ACK;
     A #@@SFC@@.smc.SQ_ERROR;
-    A #subs.@@STATE@@;
+    A #subsStart.@@STATE@@;
     JCN _rAckSFC_@@COUNTERATTR|1@@;
     R #@@SFC@@.smc.SQ_ACK;
 _rAckSFC_@@COUNTERATTR@@:   NOP 0;
@@ -1182,7 +1125,7 @@ TITLE = SQ Acknowlede Error Fault and Resume
     // SFC is to be resumed:                                                  //
     //------------------------------------------------------------------------//
     A #@@SFC@@.smc.SQ_RESUME;
-    A #subs.@@STATE@@;
+    A #subsStart.@@STATE@@;
     A(;
     O(;
     L #@@SFC@@.smc.SQ_STATE;
@@ -1227,7 +1170,7 @@ TITLE = Flag SFC finished if completed execution
     //                                                                        //
     // Flag SFC completed if the sequence has finished executing:             //
     //------------------------------------------------------------------------//
-    A #subs.@@STATE@@;
+    A #subsRunning.@@STATE@@;
     A #@@SFC@@.smc.SQ_FINISHED;
     JCN _notFin@@COUNTERATTR|1@@;
     S #flags.sfcCompleted;
@@ -1249,12 +1192,12 @@ TITLE = Release child @@CHILDPARAMETERALIAS@@ if acquired and command completed
     // Release the child device if acquired earlier to run the command:       //
     //------------------------------------------------------------------------//
     A #flags.sfcCompleted;
-    A #own.@@CHILDPARAMETERALIAS@@;
+    A #acquire.@@CHILDPARAMETERALIAS@@;
     A #p.owner.CHILD_RELEASE;
     JCN _notOwn@@COUNTERATTR|1@@_@@STATE@@;
     L "dbCONST".BLK.ID.AVAILABLE;
-    T #p.origin.cmco@@CHILDINDEX@@.OWNER;
-    R #own.@@CHILDPARAMETERALIAS@@;
+    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.OWNER;
+    R #acquire.@@CHILDPARAMETERALIAS@@;
 _notOwn@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|CHILD_ACQUIRED@@
@@ -1277,6 +1220,7 @@ TITLE = Set block running substate completed if finished
     L "dbCONST".BLK.@@CLASS@@.STATE.COMPLETED;
     T #p.origin.mc.STATE;
     R #flags.sfcCompleted;
+    R #subsRunning.@@STATE@@;
 _blkComplete@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|STATE@@
@@ -1290,7 +1234,7 @@ TITLE = Clean up if SFC no longer running
     // Clean up all flags if SFC is no longer running.                        //
     // Check if current SFC is aborted or completed successfully:             //
     //------------------------------------------------------------------------//
-    A #subs.@@STATE@@;
+    A #subsStart.@@STATE@@;
     A(;
     O(;
     L #p.owner.mc.SUBS;
@@ -1316,14 +1260,13 @@ TITLE = Clean up if SFC no longer running
     L "dbCONST".SEQ.SAFE.CMD;
     T #@@SFC@@.smc.SQ_STATE;
 
-    L 0;
-    T #@@SFC@@.smc.CURSTEP;
-    T #@@SFC@@.smc.CURSTEP;
-    T #@@SFC@@.smc.SQ_STATE;
+//    L 0;
+//    T #@@SFC@@.smc.CURSTEP;
+//    T #@@SFC@@.smc.SQ_STATE;
 
-    R #@@SFC@@.smc.SQ_ERROR;
-    R #@@SFC@@.smc.ERR_FAULT;
-    R #@@SFC@@.smc.PAUSED;
+//    R #@@SFC@@.smc.SQ_ERROR;
+//    R #@@SFC@@.smc.ERR_FAULT;
+//    R #@@SFC@@.smc.PAUSED;
 
 sfcd@@COUNTERATTR@@:      NOP 0;
 
@@ -1342,7 +1285,7 @@ TITLE = Cascade Auto or OOS Mode to child @@CHILDPARAMETERALIAS@@
     O #p.origin.bmc.eventModeOOS;
     JCN _cascMode@@COUNTERATTR|1@@_@@STATE@@;
     L #p.owner.mc.MODE;
-    T #p.origin.cmco@@CHILDINDEX@@.MODE;
+    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.MODE;
 _cascMode@@COUNTERATTR|1@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|CHILD_ACQUIRED@@
@@ -1360,26 +1303,6 @@ TITLE = HYGIENE STATE CALCULATION
     (   hs                   := #p.origin.hs
     );
 @@ATTR_END|HYGIENE@@
-
-@@ATTR_BEGIN|TIMER@@
-NETWORK
-TITLE = Hour Min & Sec to Time variable
-    //------------------------------------------------------------------------//
-    // TIMER   TIMER   TIMER   TIMER   TIMER   TIMER   TIMER   TIMER   TIMER  //
-    //                                                                        //
-    // Convert calling timer value to Time variable:                          //
-    //------------------------------------------------------------------------//
-    A #p.origin.bmc.permitStart;
-    CALL "fcHMS2Time"
-    (
-        H                           := #p.owner.TIME_H ,
-        M                           := #p.owner.TIME_M ,
-        S                           := #p.owner.TIME_S ,
-        TTIM_VAL                    := #tTime ,
-        dTIM_VAL                    := #dTime
-    );
-    NOP 0;
-@@ATTR_END|TIMER@@
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK
