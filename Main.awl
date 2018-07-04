@@ -38,14 +38,14 @@ END_VAR
 BEGIN
 NETWORK
 TITLE = CPU to CPU Communication timer and pulse bit
-    AN "pulseComms";
+    AN "commsPulse";
     L S5T#5m;
     SP "timerComms";
     NOP 0;
     NOP 0;
     NOP 0;
     A "timerComms";
-    = "pulseComms";
+    = "commsPulse";
     NOP 0;
 
 NETWORK
@@ -134,6 +134,46 @@ TITLE = Calling all Process Cells (PC)
     NOP 0;
 
 NETWORK
+TITLE = Call CM communications between PLCs if enabled
+    //------------------------------------------------------------------------//
+    // Call the communications functions if comms is enabled:                 //
+    //------------------------------------------------------------------------//
+    A "commsEnable";
+    JCN _xCM;
+    CALL "fcCallxCMs";
+_xCM:   NOP 0;
+
+NETWORK
+TITLE = Call EM communications between PLCs if enabled
+    //------------------------------------------------------------------------//
+    // Call the communications functions if comms is enabled:                 //
+    //------------------------------------------------------------------------//
+    A "commsEnable";
+    JCN _xEM;
+    CALL "fcCallxEMs";
+_xEM:   NOP 0;
+
+NETWORK
+TITLE = Call UN communications between PLCs if enabled
+    //------------------------------------------------------------------------//
+    // Call the communications functions if comms is enabled:                 //
+    //------------------------------------------------------------------------//
+    A "commsEnable";
+    JCN _xUN;
+    CALL "fcCallxUNs";
+_xUN:   NOP 0;
+
+NETWORK
+TITLE = Call PC communications between PLCs if enabled
+    //------------------------------------------------------------------------//
+    // Call the communications functions if comms is enabled:                 //
+    //------------------------------------------------------------------------//
+    A "commsEnable";
+    JCN _xPC;
+    CALL "fcCallxPCs";
+_xPC:   NOP 0;
+
+NETWORK
 TITLE = Calling all SFC operator prompts
     //------------------------------------------------------------------------//
     // Call the message function to interface the PLC to the HMI. Messages    //
@@ -141,6 +181,33 @@ TITLE = Calling all SFC operator prompts
     //------------------------------------------------------------------------//
     CALL "ifbEventPrompt", "idbEventPrompt"
     (   eventPrompt          := "dbEVENTPrompt".eventPrompt
+    );
+
+NETWORK
+TITLE = Calling all SFC log messages
+    //------------------------------------------------------------------------//
+    // Call the message function to interface the PLC to the HMI:             //
+    //------------------------------------------------------------------------//
+    CALL "ifbEventLogMsg", "idbEventLogMsg"
+    (   eventLogMsg          := "dbEVENTLogMsg".eventLogMsg
+    );
+
+NETWORK
+TITLE = Calling all SFC log real data messages
+    //------------------------------------------------------------------------//
+    // Call the message function to interface the PLC to the HMI:             //
+    //------------------------------------------------------------------------//
+    CALL "ifbEventLogReal", "idbEventLogReal"
+    (   eventLogReal          := "dbEVENTLogReal".eventLogReal
+    );
+
+NETWORK
+TITLE = Calling all SFC log time data messages
+    //------------------------------------------------------------------------//
+    // Call the message function to interface the PLC to the HMI:             //
+    //------------------------------------------------------------------------//
+    CALL "ifbEventLogTime", "idbEventLogTime"
+    (   eventLogTime          := "dbEVENTLogTime".eventLogTime
     );
 
 //NETWORK

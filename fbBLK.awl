@@ -334,9 +334,8 @@ TITLE = Substate selected flags
     // RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG  //
     //                                                                        //
     // Convert running substate values into boolean flags for ease of use in  //
-    // boolean logic if starting a new substate:                              //
+    // boolean logic:                                                         //
     //------------------------------------------------------------------------//
-    A #p.origin.bmc.eventCmdStart;
     A(;
     L #p.owner.mc.SUBS;
     L "dbCONST".BLK.@@CLASS@@.SUBS.@@STATE@@;
@@ -362,6 +361,15 @@ _subsStart@@STATE@@:   NOP 0;
 @@ATTR_BEGIN|SELECT@@
 @@ATTR_BEGIN|SELVALUE@@
 NETWORK
+TITLE = Reset Calling Parameter Selection flags
+    A #p.origin.bmc.eventCmdStart;
+    R #selected_@@PARAMETER@@_@@SELECTION@@.@@SELECTIONVALUE@@;
+@@ATTR_END|SELVALUE@@
+@@ATTR_END|SELECT@@
+
+@@ATTR_BEGIN|SELECT@@
+@@ATTR_BEGIN|SELVALUE@@
+NETWORK
 TITLE = Calling Parameter Selection flags
     //------------------------------------------------------------------------//
     // CALLING PARAMETER SELECTION FLAG   CALLING PARAMETER SELECTION FLAG    //
@@ -375,10 +383,19 @@ TITLE = Calling Parameter Selection flags
     L "dbCONST".SEL.@@SELECTION@@.@@SELECTIONVALUE@@;
     ==I;
     );
-    = #selected_@@PARAMETER@@_@@SELECTION@@.@@SELECTIONVALUE@@;
+    S #selected_@@PARAMETER@@_@@SELECTION@@.@@SELECTIONVALUE@@;
 
 @@ATTR_END|SELVALUE@@
 @@ATTR_END|SELECT@@
+
+@@ATTR_BEGIN|STATE@@
+@@ATTR_BEGIN|CHILD_ACQUIRE_REQ@@
+NETWORK
+TITLE = Reset child acquire flags
+    A #p.origin.bmc.eventCmdStart;
+    R #acquire.@@CHILDPARAMETERALIAS@@;
+@@ATTR_END|CHILD_ACQUIRE_REQ@@
+@@ATTR_END|STATE@@
 
 @@ATTR_BEGIN|STATE@@
 @@ATTR_BEGIN|CHILD_ACQUIRE_REQ@@
@@ -396,7 +413,7 @@ TITLE = Acquire child @@CHILDPARAMETERALIAS@@ for new command if required for th
     A #subsStart.@@STATE@@;
     @@CHILDACQUIRESTATEMENT@@
     A #c.@@CHILDPARAMETERALIAS@@.owner.mc.isAvailable;
-    = #acquire.@@CHILDPARAMETERALIAS@@;
+    S #acquire.@@CHILDPARAMETERALIAS@@;
 
 NETWORK
 TITLE = Acquire child @@CHILDPARAMETERALIAS@@ for new command
@@ -434,22 +451,41 @@ _childBatch_@@COUNTERATTR@@:   NOP 0;
 @@ATTR_END|CHILD@@
 
 @@ATTR_BEGIN|CHILD@@
-@@ATTR_BEGIN|pChild@@
+@@ATTR_BEGIN|pPairInput@@
 NETWORK
-TITLE = Download calling parameter @@BLOCKPARAMETER@@ value to child device @@CHILDPARAMETERALIAS@@
+TITLE = Upload calling parameter @@CHILDPAIRPARAMETER@@ value to child device @@CHILDPAIRALIAS@@
+    //------------------------------------------------------------------------//
+    // CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER  //
+    //                                                                        //
+    // Get the initial input value for the child parameter:                   //
+    //------------------------------------------------------------------------//
+    A #p.origin.bmc.eventCmdStart;
+    JCN _pairInput_@@COUNTERATTR|1@@_@@CHILDPAIRALIAS@@;
+    L #c.@@CHILDPAIRALIAS@@.origin.@@CHILDPAIRPARAMETER@@;
+    T #p.owner.@@CHILDPAIRPARAMETER@@;
+
+_pairInput_@@COUNTERATTR@@_@@CHILDPAIRALIAS@@:   NOP 0;
+
+@@ATTR_END|pPairInput@@
+@@ATTR_END|CHILD@@
+
+@@ATTR_BEGIN|CHILD@@
+@@ATTR_BEGIN|pPairOutput@@
+NETWORK
+TITLE = Download calling parameter @@CHILDPAIRPARAMETER@@ value to child device @@CHILDPAIRALIAS@@
     //------------------------------------------------------------------------//
     // CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER  //
     //                                                                        //
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
     A #p.origin.bmc.eventCmdStart;
-    JCN _childParmIN_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@;
-    L #p.owner.@@BLOCKPARAMETER@@;
-    T #c.@@CHILDPARAMETERALIAS@@.owner.@@CHILDPARAMETERATTRIBUTE@@;
+    JCN _pairOutput_@@COUNTERATTR|1@@_@@CHILDPAIRALIAS@@;
+    L #p.owner.@@CHILDPAIRPARAMETER@@;
+    T #c.@@CHILDPAIRALIAS@@.owner.@@CHILDPAIRPARAMETER@@;
 
-_childParmIN_@@COUNTERATTR@@_@@CHILDPARAMETERALIAS@@:   NOP 0;
+_pairOutput_@@COUNTERATTR@@_@@CHILDPAIRALIAS@@:   NOP 0;
 
-@@ATTR_END|pChild@@
+@@ATTR_END|pPairOutput@@
 @@ATTR_END|CHILD@@
 
 @@ATTR_BEGIN|STATE@@
@@ -696,6 +732,24 @@ _cMCO_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|pSFCChildMCO@@
 
+@@ATTR_BEGIN|pSFCChildOrigin@@
+NETWORK
+TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
+    //------------------------------------------------------------------------//
+    // SYNC SFC CHILD ORIGIN PARAMETERS    SYNC SFC CHILD ORIGIN PARAMETERS   //
+    //                                                                        //
+    // Write the initial value to any SFC child parameters to synchronise     //
+    // them at the start of the SFC:                                          //
+    //------------------------------------------------------------------------//
+    A #subsStart.@@STATE@@;
+    JCN _cOrigin_@@COUNTERATTR|1@@_@@STATE@@;
+    L #c.@@CHILDPARAMETERALIAS@@.origin.@@CHILDPARAMETERATTRIBUTE@@;
+    T #@@SFC@@.@@CHILDPARAMETER@@;
+
+_cOrigin_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+
+@@ATTR_END|pSFCChildOrigin@@
+
 @@ATTR_BEGIN|pSFCChildOwner@@
 NETWORK
 TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
@@ -713,6 +767,25 @@ TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
 _cOwner_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|pSFCChildOwner@@
+
+@@ATTR_BEGIN|pSFCGrandChildOwner@@
+NETWORK
+TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
+    //------------------------------------------------------------------------//
+    // SYNC SFC GRANDCHILD OWNER PARAMETERS    SYNC SFC GRANDCHILD OWNER PARM //
+    //                                                                        //
+    // Write the initial command to any SFC child parameters to synchronise   //
+    // them at the start of the SFC:                                          //
+    //------------------------------------------------------------------------//
+    A #subsStart.@@STATE@@;
+    JCN _cOwner_@@COUNTERATTR|1@@_@@STATE@@;
+    L #c.@@CHILDPARAMETERALIAS@@.owner.@@GRANDCHILDPARAMETERALIAS@@.@@GRANDCHILDPARAMETERATTRIBUTE@@;
+    T #@@SFC@@.@@CHILDPARAMETER@@;
+
+_cOwner_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+
+@@ATTR_END|pSFCGrandChildOwner@@
+
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
@@ -730,6 +803,9 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
 @@ATTR_BEGIN|pSFC@@
         @@CHILDPARAMETER@@   := #p.owner.@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pSFC@@
+@@ATTR_BEGIN|pSFCLink@@
+        @@CHILDPARAMETER@@   := #p.origin.@@BLOCKPARAMETER@@ ,
+@@ATTR_END|pSFCLink@@
 @@ATTR_BEGIN|pSFCChildMC@@
         @@CHILDPARAMETER@@   := #c.@@CHILDPARAMETERALIAS@@.origin.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pSFCChildMC@@
@@ -846,6 +922,27 @@ _noCmdChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
 _noParmChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
 
 @@ATTR_END|pSFCChildOwner@@
+
+@@ATTR_BEGIN|pSFCChildOrigin@@
+    //------------------------------------------------------------------------//
+    // Check if any child parameter changed and need to update the SFC:       //
+    //------------------------------------------------------------------------//
+    A(;
+    L #c.@@CHILDPARAMETERALIAS@@.origin.@@CHILDPARAMETERATTRIBUTE@@;
+    L #@@SFC@@.@@CHILDPARAMETER@@;
+    <>I;
+    );
+    JCN _noOriginChange_@@COUNTERATTR|1@@_@@STATE@@;
+
+    //------------------------------------------------------------------------//
+    // Send the udpated SFC child parameter to the child:                     //
+    //------------------------------------------------------------------------//
+    L #c.@@CHILDPARAMETERALIAS@@.origin.@@CHILDPARAMETERATTRIBUTE@@;
+    T #@@SFC@@.@@CHILDPARAMETER@@;
+
+_noOriginChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
+
+@@ATTR_END|pSFCChildOrigin@@
 
 _notSFCRunning_1_@@STATE@@:      NOP 0;
 
@@ -1219,6 +1316,8 @@ TITLE = Set block running substate completed if finished
     JCN _blkComplete@@COUNTERATTR|1@@;
     L "dbCONST".BLK.@@CLASS@@.STATE.COMPLETED;
     T #p.origin.mc.STATE;
+    L #p.origin.bmc.SUBS;
+    T #p.origin.bmc.SUBLast;
     R #flags.sfcCompleted;
     R #subsRunning.@@STATE@@;
 _blkComplete@@COUNTERATTR@@:   NOP 0;

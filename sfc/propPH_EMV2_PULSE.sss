@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 28/06/2018 4:44:25 PM by David Paspa
+generated on 29/06/2018 3:00:18 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -153,7 +153,7 @@ T  #_pos_sprayball2_cmd;
 
 //Start timer.
 SET;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 Verification:- //Valve 01 opened.
 A(;
 L "dbCONST".BLK.POSx.STATE.OPENED;
@@ -191,7 +191,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Open valve 2 and close valve 1.
 Action:- SET;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 //Open valve 02
 L "dbCONST".BLK.POSx.CMD.OPEN;
@@ -236,7 +236,7 @@ ACTION::01
 Description:- Start timer
 Action:- //Start timer
 SET;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 Verification:- A "uncondJump";
 
 
@@ -272,7 +272,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Last Step
 Action:- SET;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 Verification:- A "uncondJump";
 
 
@@ -298,7 +298,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Log PULSE operation end time.
 Action:- SET;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 //Log PULSE operation end time.
 L "dbCONST".CHRONO.CPU_TIME;

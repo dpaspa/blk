@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 28/06/2018 4:45:32 PM by David Paspa
+generated on 2/07/2018 12:19:24 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -38,7 +38,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::2
 --------------------------------------------------
-Name:- emc_water_mass
+Name:- emc_water_mass_charge
 Type:- REAL
 Description:- Description
 ParameterInOut:- OUT
@@ -495,7 +495,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::59
 --------------------------------------------------
-Name:- ema_vessel_setpoint
+Name:- ema_vessel_agit_setpoint
 Type:- REAL
 Description:- Speed Setpoint Parameter Agitator
 ParameterInOut:- OUT
@@ -941,13 +941,13 @@ ACTION::02
 --------------------------------------------------
 Description:- Initialize timer.
 Action:- A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L T#10S;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -975,7 +975,7 @@ ACTION::01
 Description:- Enable Mx Agitator EAn010 (STATE=MIX, TIME RUN HOUR=1)
 Action:- // Load setpoint and enable Mx Agitator.
 L #_r_agit_setpoint; 
-T #_ema_vessel_setpoint;
+T #_ema_vessel_agit_setpoint;
 L 1;
 T #_ema_vessel_runtime_h;
 L 0;
@@ -999,17 +999,17 @@ ACTION::02
 Description:- Re-initilialize timer.
 Store mixing begin time.
 Action:- A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_pw_agit;
 T #SQ_TIMER.PT;
 
 //Store flood mixing begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_flood_mixing_begin_time;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1041,7 +1041,7 @@ T #_emc_water_timeout;
 
 //Load Mass to charge vessel.
 L #_r_mass_pw_flood;
-T #_emc_water_mass;
+T #_emc_water_mass_charge;
 
 //Start Charge
 L "dbCONST".BLK.EMC2.SUBS.CHARGE;
@@ -1164,13 +1164,13 @@ ACTION::02
 Description:- Load time to empty vessel after flooding.
 Action:- //Start timer for PW Empty.
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_pw_empty1;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1398,13 +1398,13 @@ ACTION::02
 Description:- Start Timer for PW Empty
 Action:- //Start Timer for PW Empty
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_pw_empty2;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1529,13 +1529,13 @@ ACTION::02
 Description:- Start Timer for PS Steam
 Action:- //Start Timer for 10s.
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L T#10S;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1824,13 +1824,13 @@ ACTION::02
 Description:- Start timer to empty Tank.
 Action:- //Start Timer for WFI Empty
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_wfi_empty_mx;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------

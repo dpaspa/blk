@@ -1,9 +1,11 @@
+@@TEMPLATE_BEGIN|createLevel@@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //                Automatically Generated File - Do Not Edit                  //
 //----------------------------------------------------------------------------//
-// Class:       ifbVS1Comms                                                   //
-// Description: Instances of VS1 Communications                               //
+// Class:       fbx@@CLASS@@                                                        //
+// Description: Instances of @@CLASS@@ Communications                               //
+@@TEMPLATE_END@@
 //                                                                            //
 // Transfer of instance DB data between multiple CPUs.                        //
 //----------------------------------------------------------------------------//
@@ -16,23 +18,18 @@
 // @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
 @@TEMPLATE_END@@
 //----------------------------------------------------------------------------//
-FUNCTION_BLOCK "ifbVS1Comms"
-TITLE = Transfer idb data for instances of VS1
+FUNCTION_BLOCK "fbx@@CLASS@@"
+TITLE = Transfer idb data for instances of @@CLASS@@
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
-NAME : ifbVS1Comms
+NAME : fbx@@CLASS@@
 VERSION : 1.0
 
 //----------------------------------------------------------------------------//
 // Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
-@@TEMPLATE_BEGIN|createClassNone@@
-@@ATTR_BEGIN|numInstances@@
-    p : Array[0..@@MAXITEM@@] of "udtVS1";
-@@ATTR_END|numInstances@@
-@@TEMPLATE_END@@
-@@TEMPLATE_BEGIN|createInstances@@
+@@TEMPLATE_BEGIN|createInstancesGlobal@@
     BSENDOrigin_@@IDX@@ {OriginalPartName := 'BSEND_SFB_PART'; LibVersion := '1.2'} : BSEND;
     BSENDOwner_@@IDX@@ {OriginalPartName := 'BSEND_SFB_PART'; LibVersion := '1.2'} : BSEND;
     BRCVOrigin_@@IDX@@ {OriginalPartName := 'BRCV_SFB_PART'; LibVersion := '1.2'} : BRCV;
@@ -51,128 +48,6 @@ VAR_TEMP
 END_VAR
 
 BEGIN
-@@TEMPLATE_BEGIN|createInstances@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
-    //------------------------------------------------------------------------//
-    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
-    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
-    //                                                                        //
-    // Set the instance unique ID:                                            //
-    //------------------------------------------------------------------------//
-    L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #p[@@IDX@@].origin.mc.ME;
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
-    //------------------------------------------------------------------------//
-    // Set the instance available:                                            //
-    //------------------------------------------------------------------------//
-    L "dbCONST".BLK.ID.AVAILABLE;
-    T #p[@@IDX@@].owner.mc.OWNER;
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
-    //------------------------------------------------------------------------//
-    // This block can only reside within this CPU:                            //
-    //------------------------------------------------------------------------//
-    A "alwaysHigh";
-    = #p[@@IDX@@].origin.mc.isOriginBlock;
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
-    //------------------------------------------------------------------------//
-    // This block can only be owned by a parent block in this CPU:            //
-    //------------------------------------------------------------------------//
-    A "alwaysHigh";
-    = #p[@@IDX@@].owner.mc.isOriginOwner;
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
-    //------------------------------------------------------------------------//
-    // Set the safe command if restarting the PLC:                            //
-    //------------------------------------------------------------------------//
-    A "flagFirstScanRestart";
-    JCN _notRestart_@@COUNTERTEMPLATE|1@@;
-    L "dbCONST".BLK.VS1.SAFE.CMD;
-    T #p[@@IDX@@].origin.mc.CMD_SAFE;
-_notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Pump 1 mode and command
-    //------------------------------------------------------------------------//
-    // Copy the PUMP 1 structure to the VS1 instance:                         //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|LINK@@
-    CALL MOVE
-    {value_type := 'udtMCOrigin'}
-    (   IN                   := "idb@@PUMP1LINKCLASS@@".p[@@PUMP1LINKIDX@@] ,
-        OUT                  := #p[@@IDX@@].origin.PUMP1
-    );
-@@ATTR_END|LINK@@
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Pump 2 mode and command
-    //------------------------------------------------------------------------//
-    // Copy the PUMP 2 structure to the VS1 instance:                         //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|LINK@@
-    CALL MOVE
-    {value_type := 'udtMCOrigin'}
-    (   IN                   := "idb@@PUMP2LINKCLASS@@".p[@@PUMP2LINKIDX@@] ,
-        OUT                  := #p[@@IDX@@].origin.PUMP2
-    );
-@@ATTR_END|LINK@@
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Vacuum user valve 1 state
-    //------------------------------------------------------------------------//
-    // Copy the VACUUM user valve 1 structure:                                //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|LINK@@
-    CALL MOVE
-    {value_type := 'udtMCOrigin'}
-    (   IN                   := "idb@@VALVE1LINKCLASS@@".p[@@VALVE1LINKIDX@@] ,
-        OUT                  := #p[@@IDX@@].origin.VALVE1
-    );
-@@ATTR_END|LINK@@
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Vacuum user valve 2 state
-    //------------------------------------------------------------------------//
-    // Copy the VACUUM user valve 2 structure:                                //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|LINK@@
-    CALL MOVE
-    {value_type := 'udtMCOrigin'}
-    (   IN                   := "idb@@VALVE2LINKCLASS@@".p[@@VALVE2LINKIDX@@] ,
-        OUT                  := #p[@@IDX@@].origin.VALVE2
-    );
-@@ATTR_END|LINK@@
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
-    //------------------------------------------------------------------------//
-    // Call the class function to process each instance:                      //
-    //------------------------------------------------------------------------//
-    CALL "fc@@CLASS@@"
-    (   p                    := #p[@@IDX@@]
-    );
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Ouput pump start/stop commands
-    //------------------------------------------------------------------------//
-    // Set the instance output commands for the vacuume pumps to the field:   //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|LINK@@
-    L #p[@@IDX@@].origin.PUMP1.owner.mc.CMD;
-    T "idb@@PUMP1LINKCLASS@@".p[@@PUMP1LINKIDX@@].owner.mc.CMD;
-    L #p[@@IDX@@].origin.PUMP2.owner.mc.CMD;
-    T "idb@@PUMP2LINKCLASS@@".p[@@PUMP2LINKIDX@@].owner.mc.CMD;
-@@ATTR_END|LINK@@
-
-@@TEMPLATE_END@@
-
 NETWORK
 TITLE = COMMS Counter
     //------------------------------------------------------------------------//
@@ -181,21 +56,21 @@ TITLE = COMMS Counter
     //                                                                        //
     // Increment the counter if pulse timer is high:                          //
     //------------------------------------------------------------------------//
-    A "pulseComms";
+    A "commsPulse";
     JCN _commsTimerNotExpired;
     L #CTR;
     INC 1;
     T #CTR;
 _commsTimerNotExpired:   NOP 0;
 
-@@TEMPLATE_BEGIN|createInstances@@
+@@TEMPLATE_BEGIN|createInstancesGlobal@@
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ if send Origin to partner CPU
     //------------------------------------------------------------------------//
     // If this is the Block origin then set the transaction send and receive  //
     // IDs and transfer the calculated parameters:                            //
     //------------------------------------------------------------------------//
-    A #p[@@IDX@@].origin.mc.isOriginBlock;
+    A "idb@@CLASS@@".p[@@IDX@@].origin.mc.isOriginBlock;
     A(;
     L #CTR;
     L @@COUNTERTEMPLATE|1@@;
@@ -215,7 +90,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if receive Origin from partner CPU
     // If this is not the Block origin then set the transaction send and      //
     // receive  IDs to receive the calculated parameters:                     //
     //------------------------------------------------------------------------//
-    AN #p[@@IDX@@].origin.mc.isOriginBlock;
+    AN "idb@@CLASS@@".p[@@IDX@@].origin.mc.isOriginBlock;
     O(;
     L #CTR;
     L @@COUNTERTEMPLATE@@;
@@ -262,7 +137,7 @@ TITLE = Check item @@IDX@@ @@INSTANCE@@ if receive Origin from partner CPU
     //------------------------------------------------------------------------//
     // If not origin then receive the calculated parameters:                  //
     //------------------------------------------------------------------------//
-    AN #p[@@IDX@@].origin.mc.isOriginBlock;
+    AN "idb@@CLASS@@".p[@@IDX@@].origin.mc.isOriginBlock;
     = #BRCVOrigin_@@IDX@@.EN_R;
 
 NETWORK
@@ -298,7 +173,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if send Owner to partner CPU
     // send the owner parameters:                                             //
     //------------------------------------------------------------------------//
 @@COUNTERTEMPLATEINCR@@
-    A #p[@@IDX@@].owner.mc.isOriginOwner;
+    A "idb@@CLASS@@".p[@@IDX@@].owner.mc.isOriginOwner;
     A(;
     L #CTR;
     L @@COUNTERTEMPLATE@@;
@@ -322,7 +197,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if receive Owner from partner CPU
     // If this is not the Owner then set the transaction send and receive IDs //
     // and receive the owner parameters:                                      //
     //------------------------------------------------------------------------//
-    AN #p[0].owner.mc.isOriginOwner;
+    AN "idb@@CLASS@@".p[@@IDX@@].owner.mc.isOriginOwner;
     O(;
     L #CTR;
     L @@COUNTERTEMPLATE@@;
@@ -369,7 +244,7 @@ TITLE = Check item @@IDX@@ @@INSTANCE@@ if receive Owner data from partner CPU
     //------------------------------------------------------------------------//
     // If not the Owner origin then receive the owner parameters:             //
     //------------------------------------------------------------------------//
-    AN #p[@@IDX@@].owner.mc.isOriginOwner;
+    AN "idb@@CLASS@@".p[@@IDX@@].owner.mc.isOriginOwner;
     = #BRCVOwner_@@IDX@@.EN_R;
 
 NETWORK

@@ -1,0 +1,94 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable event flags and data. The function //
+// traverses the event datablock UDT structures to see if any event bits have //
+// been raised. This is called each scan from the main program block OB1      //
+// which therefore takes care of the looping required.                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      29-Jun-2018 NA        Reboot design for S7-1500 from  //
+//                                            ifbEventPrompt.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbEventLogMsg"
+TITLE = S7 Alarms for SFC log messages
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifbEventLogMsg
+VERSION : 1.0
+
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+@@TEMPLATE_BEGIN@@
+VAR_IN_OUT
+@@ATTR_BEGIN|pEventLogMsgNum@@
+    eventLogMsg : Array[0..@@IDXEVENTMAX@@] of "udtEventLogMsg";   // SFC events for logging messages
+@@ATTR_END|pEventLogMsgNum@@
+END_VAR
+
+VAR
+@@ATTR_BEGIN|pEventLogMsgList@@
+    Program_Alarm_@@IDXEVENT@@ : Program_Alarm;
+@@ATTR_END|pEventLogMsgList@@
+@@ATTR_BEGIN|pEventLogMsgList@@
+    Alarm@@IDXEVENT@@_ErrorBit1 : Bool;
+    Alarm@@IDXEVENT@@_ErrorBit2 : Bool;
+    Alarm@@IDXEVENT@@_StatusWord1 : Word;
+    Alarm@@IDXEVENT@@_StatusWord2 : Word;
+    Alarm@@IDXEVENT@@_StateByte : Byte;
+@@ATTR_END|pEventLogMsgList@@
+	SourceData : Word;
+END_VAR
+
+VAR_TEMP
+    almError : Bool;
+    almState : Byte;
+    almStatus : Word;
+    raiseEvent : Bool;
+END_VAR
+
+BEGIN
+@@ATTR_BEGIN|pEventLogMsgList@@
+NETWORK
+TITLE = Check if message event needs to be raised
+    //------------------------------------------------------------------------//
+    // Check if real message event or test signal number requested:           //
+    //------------------------------------------------------------------------//
+    A #eventLogMsg[@@IDXEVENT@@].trigger;
+    O(;
+    L "testEventLogMsg";
+    L #eventLogMsg[@@IDXEVENT@@].idxMessage;
+    ==I;
+    );
+    = #raiseEvent;
+
+NETWORK
+TITLE = Set the message number
+    //------------------------------------------------------------------------//
+    // Set the alarm list message number:                                     //
+    //------------------------------------------------------------------------//
+    L @@IDXEVENT@@;
+    T #SourceData;
+
+NETWORK
+TITLE = Raise message event if required
+    //------------------------------------------------------------------------//
+    // Raise the simple message event if requested. No acknowledge required:  //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    JCN _evCall_@@IDXEVENT@@;
+    CALL #Program_Alarm_@@IDXEVENT@@
+    (   SIG       := #eventLogMsg[@@IDXEVENT@@].trigger ,
+		SD_1      := #SourceData ,
+        Error     := #Alarm@@IDXEVENT@@_ErrorBit1 ,
+        Status    := #Alarm@@IDXEVENT@@_StatusWord1
+    );
+_evCall_@@IDXEVENT@@:   NOP 0;
+
+@@ATTR_END|pEventLogMsgList@@
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

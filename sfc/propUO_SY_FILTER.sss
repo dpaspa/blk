@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 28/06/2018 4:46:42 PM by David Paspa
+generated on 29/06/2018 2:56:29 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -312,10 +312,10 @@ T  #_emc_gas_cmd;
 
 // Start Timer
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_lpca_purge;
 T #SQ_TIMER.PT;
 R #_path_ready;
@@ -324,7 +324,7 @@ L #_emc_gas_state;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ==I;
 );
-A #SQ_TIMER.IN;
+A #sqSeqTimerStart;
 
 
 --------------------------------------------------

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 28/06/2018 4:46:14 PM by David Paspa
+generated on 2/07/2018 1:45:19 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -319,7 +319,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::37
 --------------------------------------------------
-Name:- emc_gas_pv
+Name:- emc_gas_pi_vessel_pv
 Type:- REAL
 Description:- Vessel pressure
 ParameterInOut:- IN
@@ -495,7 +495,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::59
 --------------------------------------------------
-Name:- emv_vessel_pv
+Name:- emv_vessel_ti_vessel_pv
 Type:- REAL
 Description:- TIn105 Vessel Temperature
 ParameterInOut:- IN
@@ -813,10 +813,10 @@ T #_emc_gas_cmd;
 
 // Start vacuum timer
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_eject;
 T #SQ_TIMER.PT;
 
@@ -826,7 +826,7 @@ T #_time_vacuum_begin;
 
 SET;
 S #_log_time_vacuum_begin;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -837,7 +837,7 @@ Title:- Pressure below setpoint?
 EmptyTransition:- False
 Description:- Pressure reduced below PRES_VAC.
 Condition:- A(;
-L #_emc_gas_pv;
+L #_emc_gas_pi_vessel_pv;
 L #_r_pres_vac;
 <R;
 );
@@ -918,7 +918,7 @@ T  #_emc_gas_cmd;
 
 // Stop timer
 SET;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 Verification:- A "uncondJump";
 
 
@@ -1028,7 +1028,7 @@ Title:- Pressure check
 EmptyTransition:- False
 Description:- Pressure increased above PRES_STM_POS. PCx013> PRES_STM_POS
 Condition:- A(;
-L 	#_emc_gas_pv;
+L 	#_emc_gas_pi_vessel_pv;
 L 	#_r_pres_stm_pos;
 >R;
 );
@@ -1050,7 +1050,7 @@ ACTION::01
 Description:- Log actual positive pressure.
 Open Mx SIP condensate drain valve and vent filter drain valve.
 Action:- //Log actual positive pressure.
-L #_emc_gas_pv;
+L #_emc_gas_pi_vessel_pv;
 T #_real_positive_pressure;
 
 SET;
@@ -1102,13 +1102,13 @@ ACTION::01
 Description:- Start timer TIME_STM_DRAIN_Mx
 Action:- //Start Timer for steaming
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_stm_drain_mx;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1231,7 +1231,7 @@ L #_emg_filter_pv_vent;
 T #_real_emg_ti_vent_pv;
 L #_emg_filter_pv_drain;
 T #_real_emg_ti_drain_pv;
-L #_emv_vessel_pv;
+L #_emv_vessel_ti_vessel_pv;
 T #_real_emv_ti_vessel_pv;
 L #_emx_drain_pv;
 T #_real_emx_ti_drain_pv;
@@ -1272,7 +1272,7 @@ L 	#_r_temp_sip_vent;
 );
 //TIn105
 O(;
-L              #_emv_vessel_pv;
+L              #_emv_vessel_ti_vessel_pv;
 L 	#_r_temp_sip;
 <R;
 );
@@ -1311,7 +1311,7 @@ L 	#_r_temp_sip_vent;
 );
 //TIn105
 A(;
-L              #_emv_vessel_pv;
+L              #_emv_vessel_ti_vessel_pv;
 L 	#_r_temp_sip;
 >R;
 );
@@ -1370,10 +1370,10 @@ ACTION::01
 Description:- Start SIP timer TIME_SIP.
 Log SIP start time and Set sip_timer_started.
 Action:- A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_sip;
 T #SQ_TIMER.PT;
 
@@ -1385,7 +1385,7 @@ T #_time_sip_start;
 SET;
 S #_log_time_sip_start;
 S #_sip_timer_started;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1401,7 +1401,7 @@ Condition:- AN #SQ_TIMER.Q;
 --------------------------------------------------
 STEP::15
 --------------------------------------------------
-StepNo:- 15.0000
+StepNo:- 15
 Title:- UO_MX_SIP : Low MX temperature during SIP
 Description:- Reset sip_timer_started and log timer RESET.
 Increase counter.
@@ -1412,7 +1412,7 @@ ACTION::01
 Description:- Reset sip_timer_started and log timer RESET.
 Increase counter.
 Action:- A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 //Reset flag.
 SET;
@@ -1499,7 +1499,7 @@ L #_emg_filter_pv_vent;
 T #_real_emg_ti_vent_pv;
 L #_emg_filter_pv_drain;
 T #_real_emg_ti_drain_pv;
-L #_emv_vessel_pv;
+L #_emv_vessel_ti_vessel_pv;
 T #_real_emv_ti_vessel_pv;
 L #_emx_drain_pv;
 T #_real_emx_ti_drain_pv;
@@ -1524,7 +1524,7 @@ Title:- Pressure dopped below PRES_HPCA_BLOW.
 EmptyTransition:- False
 Description:- Pressure dropped to PRES_HPCA_BLOW. PIC-x103 <= PRES_HPCA_BLOW
 Condition:- A(;
-L 	#_emc_gas_pv;
+L 	#_emc_gas_pi_vessel_pv;
 L 	#_r_pres_hpca_blow;
 <=R;
 );
@@ -1613,13 +1613,13 @@ ACTION::01
 Description:- Start MX Drain valve pulse timer.
 Action:- // Start vacuum timer
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_drain_pulse;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1685,13 +1685,13 @@ ACTION::02
 Description:- Timer
 Action:- //Start Timer
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_drain_pulse;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1769,13 +1769,13 @@ ACTION::03
 Description:- Timer
 Action:- //Start Timer
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_drain_pulse;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1826,7 +1826,7 @@ Title:- HPCA pressure below PRES_HPCA_LEAVE.
 EmptyTransition:- False
 Description:- Pressure below PRES_HPCA_LEAVE. PIC_x103 <= PRES_HPCA_LEAVE
 Condition:- A(;
-L 	#_emc_gas_pv;
+L 	#_emc_gas_pi_vessel_pv;
 L 	#_r_pres_hpca_leave;
 <=R;
 );

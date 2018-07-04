@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 28/06/2018 4:44:22 PM by David Paspa
+generated on 29/06/2018 3:00:15 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -230,16 +230,16 @@ ACTION::02
 Description:- Start DRAIN_TIMER.
 Action:- // Start Timer.
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 
 //Load the drain time setpoint.
 L #_drain_time;
 T #SQ_TIMER.PT;
 
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -267,7 +267,7 @@ Description:- Close all valves.
 Log DRAIN operation end time.
 Action:- //Disable the timer.
 SET;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 //Open Supply Drain valve.
 L "dbCONST".BLK.POSx.CMD.CLOSE;

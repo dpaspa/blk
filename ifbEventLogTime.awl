@@ -1,0 +1,96 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable event flags and data. The function //
+// traverses the event datablock UDT structures to see if any event bits have //
+// been raised. This is called each scan from the main program block OB1      //
+// which therefore takes care of the looping required.                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      16-May-2018 NA        Reboot design for S7-1500 not   //
+//                                            using ALARM_D etc.              //
+// 1.0 David Paspa      11-Apr-2018 NA        Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbEventLogTime"
+TITLE = S7 Alarms for SFC log time data
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifbEventLogTime
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+@@TEMPLATE_BEGIN@@
+VAR_IN_OUT
+@@ATTR_BEGIN|pEventLogTimeNum@@
+    eventLogTime : Array[0..@@IDXEVENTMAX@@] of "udtEventLogTime";   // SFC events for logging time data
+@@ATTR_END|pEventLogTimeNum@@
+END_VAR
+
+VAR
+@@ATTR_BEGIN|pEventLogTimeList@@
+    Program_Alarm_@@IDXEVENT@@ : Program_Alarm;
+@@ATTR_END|pEventLogTimeList@@
+@@ATTR_BEGIN|pEventLogTimeList@@
+    Alarm@@IDXEVENT@@_ErrorBit1 : Bool;
+    Alarm@@IDXEVENT@@_ErrorBit2 : Bool;
+    Alarm@@IDXEVENT@@_StatusWord1 : Word;
+    Alarm@@IDXEVENT@@_StatusWord2 : Word;
+    Alarm@@IDXEVENT@@_StateByte : Byte;
+@@ATTR_END|pEventLogTimeList@@
+	SourceData : Word;
+END_VAR
+
+VAR_TEMP
+    almError : Bool;
+    almState : Byte;
+    almStatus : Word;
+    raiseEvent : Bool;
+END_VAR
+
+BEGIN
+@@ATTR_BEGIN|pEventLogTimeList@@
+NETWORK
+TITLE = Check if message event needs to be raised
+    //------------------------------------------------------------------------//
+    // Check if real message event or test signal number requested:           //
+    //------------------------------------------------------------------------//
+    A #eventLogTime[@@IDXEVENT@@].trigger;
+    O(;
+    L "testEventLogTime";
+    L #eventLogTime[@@IDXEVENT@@].idxMessage;
+    ==I;
+    );
+    = #raiseEvent;
+
+NETWORK
+TITLE = Set the message number
+    //------------------------------------------------------------------------//
+    // Set the alarm list message number:                                     //
+    //------------------------------------------------------------------------//
+    L @@IDXEVENT@@;
+    T #SourceData;
+
+NETWORK
+TITLE = Raise message event if required
+    //------------------------------------------------------------------------//
+    // Raise the log message event if requested. No acknowledge required:     //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    JCN _evCall_@@IDXEVENT@@;
+    CALL #Program_Alarm_@@IDXEVENT@@
+    (   SIG       := #eventLogTime[@@IDXEVENT@@].trigger ,
+		SD_1      := #SourceData ,
+		SD_2      := #eventLogTime[@@IDXEVENT@@].dataValue ,
+        Error     := #Alarm@@IDXEVENT@@_ErrorBit1 ,
+        Status    := #Alarm@@IDXEVENT@@_StatusWord1
+    );
+_evCall_@@IDXEVENT@@:   NOP 0;
+
+@@ATTR_END|pEventLogTimeList@@
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

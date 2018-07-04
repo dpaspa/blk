@@ -96,7 +96,7 @@ TITLE = Call Mode and Command handling function
     //                                                                        //
     // Set the safe command to CLOSE if normally closed valve:                //
     //------------------------------------------------------------------------//
-    AN #p.origin.NC;
+    A #p.origin.NC;
     JCN _a;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
     T #p.origin.mc.CMD_SAFE;
@@ -105,7 +105,7 @@ _a:   NOP 0;
     //------------------------------------------------------------------------//
     // Set the safe command to OPEN if normally opened valve:                 //
     //------------------------------------------------------------------------//
-    A #p.origin.NC;
+    AN #p.origin.NC;
     JCN _b;
     L "dbCONST".BLK.POSx.CMD.OPEN;
     T #p.origin.mc.CMD_SAFE;
@@ -157,9 +157,9 @@ TITLE = Valve Command open
     // state. The opposite is the case for Normally Opened valve.             //
     //------------------------------------------------------------------------//
     A #p.origin.NC;
-    = #OUT_Q_Open;
-    NOT;
     = #OUT_Q_Close;
+    NOT;
+    = #OUT_Q_Open;
 
 NETWORK
 TITLE = Open command is alowable if normal operation

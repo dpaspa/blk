@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 28/06/2018 4:47:30 PM by David Paspa
+generated on 29/06/2018 2:57:18 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -894,10 +894,10 @@ T #_emc_gas_cmd;
 
 // Start vacuum timer
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_eject;
 T #SQ_TIMER.PT;
 
@@ -907,7 +907,7 @@ T #_time_vacuum_begin;
 
 SET;
 S #_log_time_vacuum_begin;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1011,7 +1011,7 @@ Condition:- A "uncondJump";
 --------------------------------------------------
 STEP::06
 --------------------------------------------------
-StepNo:- 6.0000
+StepNo:- 06
 Title:- UO_SY_SIP : Sy evacuation finished
 Description:- Vacuum finished.
 Close Sy Vacuum Valve.
@@ -1025,7 +1025,7 @@ Close Sy Vacuum Valve.
 Reset Flags.
 Action:- // Stop timer
 SET;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 L "dbCONST".BLK.CMD.STOP;
 T #_emc_gas_cmd;
@@ -1174,10 +1174,10 @@ T #_emg_filter_cmd;
 
 //Start Timer for venting
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_stm_drain_sy;
 T #SQ_TIMER.PT;
 
@@ -1191,7 +1191,7 @@ L #_emg_filter_state;
 L "dbCONST".BLK.EMG1.SUBS.SIP;
 ==I;
 );
-A #SQ_TIMER.IN;
+A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1216,7 +1216,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Reset timer
 Action:- A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 Verification:- A "uncondJump";
 
 
@@ -1397,7 +1397,7 @@ T #_time_steam_closed;
 SET;
 S #_log_time_steam_closed;
 
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 --------------------------------------------------
 ACTION::02
@@ -1626,10 +1626,10 @@ ACTION::01
 Description:- Start SIP timer TIME_SIP.
 Set sip_timer_started flag.
 Action:- A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_sip;
 T #SQ_TIMER.PT;
 
@@ -1641,7 +1641,7 @@ T #_time_sip_start;
 SET;
 S #_log_time_sip_start;
 S #_sip_timer_started;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -1657,7 +1657,7 @@ Condition:- AN #SQ_TIMER.Q;
 --------------------------------------------------
 STEP::18
 --------------------------------------------------
-StepNo:- 18.0000
+StepNo:- 18
 Title:- UO_SY_SIP : Low Sy temperature during SIP
 Description:- Reset sip_timer_started and log timer RESET.
 Increase counter.
@@ -1668,7 +1668,7 @@ ACTION::01
 Description:- Reset sip_timer_started and log timer RESET.
 Increase counter.
 Action:- A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 //Reset flag.
 SET;
@@ -1956,13 +1956,13 @@ ACTION::01
 Description:- Start timer
 Action:- // Start vacuum timer
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_drain_pulse;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -2022,13 +2022,13 @@ ACTION::02
 Description:- Timer
 Action:- //Start Timer
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_drain_pulse;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -2128,13 +2128,13 @@ ACTION::03
 Description:- Timer
 Action:- //Start Timer
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_drain_pulse;
 T #SQ_TIMER.PT;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------

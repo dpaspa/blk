@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 28/06/2018 4:45:49 PM by David Paspa
+generated on 2/07/2018 12:19:47 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -30,7 +30,7 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- emv_vessel_mass
+Name:- emm_vessel_mass_nett
 Type:- REAL
 Description:- Mx vessel mass
 ParameterInOut:- IN
@@ -86,7 +86,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::8
 --------------------------------------------------
-Name:- emc_gas_pc_vessel_setpoint
+Name:- emc_gas_setpoint
 Type:- REAL
 Description:- Description
 ParameterInOut:- OUT
@@ -374,7 +374,7 @@ ParameterInOut:- IN_OUT
 --------------------------------------------------
 PARAMETER::44
 --------------------------------------------------
-Name:- ema_vessel_sic_agit_runtime_h
+Name:- ema_vessel_runtime_h
 Type:- INT
 Description:- Agitator run time Hours for ema_vessel
 ParameterInOut:- OUT
@@ -382,7 +382,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::45
 --------------------------------------------------
-Name:- ema_vessel_sic_agit_runtime_s
+Name:- ema_vessel_runtime_s
 Type:- INT
 Description:- Agitator run time Seconds for ema_vessel
 ParameterInOut:- OUT
@@ -390,7 +390,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::46
 --------------------------------------------------
-Name:- ema_vessel_sic_agit_runtime_m
+Name:- ema_vessel_runtime_m
 Type:- INT
 Description:- Agitator run time Minutes for ema_vessel
 ParameterInOut:- OUT
@@ -398,7 +398,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::47
 --------------------------------------------------
-Name:- ema_vessel_sic_agit_setpoint
+Name:- ema_vessel_agit_setpoint
 Type:- REAL
 Description:- Agitator speed setpoint
 ParameterInOut:- OUT
@@ -414,7 +414,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::49
 --------------------------------------------------
-Name:- emc_water_mass
+Name:- emc_water_mass_charge
 Type:- REAL
 Description:- Mass to charge emc_water
 ParameterInOut:- OUT
@@ -462,7 +462,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::55
 --------------------------------------------------
-Name:- emc_gas_pc_vessel_medium_gas
+Name:- emc_gas_medium_gas
 Type:- INT
 Description:- Medium selection of emc_gas
 ParameterInOut:- OUT
@@ -635,7 +635,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Log Mx vessel weight.
 Action:- //Log Mx vessel weight.
-L #_emv_vessel_mass;
+L #_emm_vessel_mass_nett;
 T #_real_vessel_mass;
 
 SET;
@@ -847,7 +847,7 @@ T #_emc_water_timeout;
 
 //Load Mass to charge Mx.
 L #_r_charge_wfi_make;
-T #_emc_water_mass;
+T #_emc_water_mass_charge;
 
 //Select WFI medium.
 L "dbCONST".SEL.LIQUID.WFI;
@@ -910,7 +910,7 @@ SET;
 S #_Report_Evnt_028;
 
 //Log Mx vessel weight.
-L #_emv_vessel_mass;
+L #_emm_vessel_mass_nett;
 T #_real_vessel_mass;
 
 SET;
@@ -957,7 +957,7 @@ Description:- Set ema_vessel to substate MIX with pre-selected timeout and speed
 Action:- //Transfer input parameter from HMI to EM
 //Load Agitator speed setpoint.
 L #_r_speed_setpoint;
-T #_ema_vessel_setpoint;
+T #_ema_vessel_agit_setpoint;
 //Load Agitator runtime.
 L #_r_time_make_agit_h;
 T #_ema_vessel_runtime_h;
@@ -1103,7 +1103,7 @@ R #_prompt_manway_complete_confirm_yes;
 
 
 //Log Mx vessel mass.
-L #_emv_vessel_mass;
+L #_emm_vessel_mass_nett;
 T #_real_vessel_mass;
 
 SET;
@@ -1151,7 +1151,6 @@ L #_emc_water_state;
 L "dbCONST".BLK.EMC2.SUBS.ISOLATE;
 ==I;
 );
-A #SQ_TIMER.IN;
 
 --------------------------------------------------
 ACTION::02

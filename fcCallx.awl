@@ -1,0 +1,32 @@
+@@TEMPLATE_BEGIN|createLevel@@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Calls all @@LEVEL@@ communication instances.                          //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      09-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION "fcCallx@@LEVEL@@s" : Void
+TITLE = Call all @@LEVEL@@ Instances
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fcCallx@@LEVEL@@s
+VERSION : 2.0
+
+BEGIN
+
+@@ATTR_BEGIN|callList@@
+@@ATTR_BEGIN|callListExists@@
+NETWORK
+TITLE = Calling @@LEVEL@@ instances for class @@CLASS@@
+      CALL "fbx@@NAMEINSTANCE@@", "dbx@@NAMEINSTANCE@@";
+      NOP 0;
+
+@@ATTR_END|callListExists@@
+@@ATTR_END|callList@@
+@@TEMPLATE_END@@
+END_FUNCTION

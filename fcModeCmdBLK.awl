@@ -70,33 +70,12 @@ TITLE = Flag if a new block running substate command issued
     //------------------------------------------------------------------------//
     A #bmc.permitStart;
     A(;
-    O(;
     L #mcOwner.CMD;
     L "dbCONST".BLK.CMD.START;
     ==I;
     );
-    O(;
-    L #bmc.SUBS;
-    L #bmc.SUBLast;
-    <>I;
-    );
-    );
     FP #bmc.edgeCommandStart;
     = #bmc.eventCmdStart;
-
-NETWORK
-TITLE = Save last running substate if starting
-    //------------------------------------------------------------------------//
-    // SAVE SUBSTATE    SAVE SUBSTATE    SAVE SUBSTATE    SAVE SUBSTATE       //
-    //                                                                        //
-    // Save the running substate for next scan check if starting. It may have //
-    // changed:                                                               //
-    //------------------------------------------------------------------------//
-    A #bmc.eventCmdStart;
-    JCN _b;
-    L #bmc.SUBS;
-    T #bmc.SUBLast;
-_b:   NOP 0;
 
 NETWORK
 TITLE = Flag if block stop command issued

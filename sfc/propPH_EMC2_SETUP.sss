@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 28/06/2018 4:44:13 PM by David Paspa
+generated on 3/07/2018 11:40:24 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -161,20 +161,29 @@ Condition:- A "uncondJump";
 STEP::02
 --------------------------------------------------
 StepNo:- 02
-Title:- PH_EMC2_SETUP : Prompt to connect WFI or PW supply path
-Description:- Prompt operator to connect WFI or PW supply to the vessel Mx, Sy or FLz inlet line, based on selected medium
+Title:- PH_EMC2_SETUP : Reset prompt.
+Description:- Reset prompt.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Prompt operator to connect WFI or PW supply to the vessel Mx inlet line, based on selected medium.
-Action:- //Reset Old Bits
+Description:- Reset prompt.
+Action:- //Reset prompt.
 SET;
-R #_prompt_wfi_confirm_yes;
-R #_prompt_pw_confirm_yes;
+R #_prompt_wfi;
+R #_prompt_pw;
 
-//Check if WFI or PS_WFI medium selected, then prompt to connect WFI.
-O(     ;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- Continue if WFI or PS_WFI medium selected
+EmptyTransition:- False
+Description:- Continue if WFI or PS_WFI medium selected
+Condition:- O(     ;
 L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.WFI;
 ==I;
@@ -184,12 +193,17 @@ L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSWFI;
 ==I;
 );
-SET;
-S #_prompt_wfi;
-CLR;
 
-// Check if PW or PS_PW selected, then prompt to connect PW.
-O(;
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 3.0000
+Title:- Continue if PW or PS_PW medium selected
+EmptyTransition:- False
+Description:- Continue if PW or PS_PW medium selected
+Condition:- O(;
 L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PW;
 ==I;
@@ -199,6 +213,50 @@ L #_medium_liquid;
 L "dbCONST".SEL.LIQUID.PSPW;
 ==I;
 );
+
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 03
+Title:- PH_EMC2_SETUP : Prompt to connect WFI path
+Description:- Prompt operator to connect WFI supply to the vessel Mx, Sy or FLz inlet line, based on selected medium
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt operator to connect WFI supply to the vessel Mx, Sy or FLz inlet line, based on selected medium
+Action:- //Prompt to connect WFI.
+SET;
+S #_prompt_wfi;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 4.0000
+Title:- Operator confirmation
+EmptyTransition:- False
+Description:- Wait for operator to confirm connections have been made.
+Condition:- A(;
+O #_prompt_wfi_confirm_yes;
+);
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 04
+Title:- PH_EMC2_SETUP : Prompt to connect PW supply path
+Description:- Prompt operator to connect PW supply to the vessel Mx, Sy or FLz inlet line, based on selected medium
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt operator to connect PW supply to the vessel Mx inlet line, based on selected medium.
+Action:- //Prompt to connect PW.
 SET;
 S #_prompt_pw;
 
@@ -206,22 +264,21 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::02
+TRANSITION::05
 --------------------------------------------------
-TRNNo:- 02
+TRNNo:- 05
 Title:- Operator confirmation
 EmptyTransition:- False
 Description:- Wait for operator to confirm connections have been made.
 Condition:- A(;
-O #_prompt_wfi_confirm_yes;
 O #_prompt_pw_confirm_yes;
 );
 
 
 --------------------------------------------------
-STEP::03
+STEP::05
 --------------------------------------------------
-StepNo:- 03
+StepNo:- 05
 Title:- PH_EMC2_SETUP : Check connection
 Description:- Log operator confirmation and continue to check connection.
 
@@ -237,14 +294,13 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::03
+TRANSITION::06
 --------------------------------------------------
-TRNNo:- 03
+TRNNo:- 06
 Title:- WFI/PW/PS connections made
 EmptyTransition:- False
 Description:- Jump if correct switch ZSCx103 or ZSCx105 are made to ZSCx107
-Condition:- //Check PW connection confirmation, PW or PS_PW medium selected and the line connection status.
-A #_prompt_pw_confirm_yes;
+Condition:- //Check connection PW or PS_PW medium selected.
 A(;
 O(     ;
 L #_medium_liquid;
@@ -263,9 +319,8 @@ A(    ;
       ==I ;  
    )    ;
 
-//Or Check WFI connection confirmation, WFI or PS_WFI medium selected and the line connection status.
-O;
-A #_prompt_wfi_confirm_yes;
+//Or Check connection WFI or PS_WFI medium selected.
+O(;
 A(;
 O(     ;
 L #_medium_liquid;
@@ -283,12 +338,13 @@ A(;
    L "dbCONST".BLK.ZSC2.STATE.IN;
    ==I ;  
    );
+);
 
 
 --------------------------------------------------
-TRANSITION::04
+TRANSITION::07
 --------------------------------------------------
-TRNNo:- 04
+TRNNo:- 07
 Title:- Operator not setup correctly
 EmptyTransition:- False
 Description:- Jump unconditionally, the connections are not made correctly
@@ -296,9 +352,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::04
+STEP::06
 --------------------------------------------------
-StepNo:- 4.0000
+StepNo:- 06
 Title:- PH_EMC2_SETUP : Last Step
 Description:- Log SETUP operation end time.
 

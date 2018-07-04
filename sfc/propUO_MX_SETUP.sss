@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 28/06/2018 4:45:58 PM by David Paspa
+generated on 2/07/2018 12:19:56 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -703,10 +703,10 @@ T #_emc_gas_cmd;
 
 // Start vacuum timer
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_eject;
 T #SQ_TIMER.PT;
 
@@ -715,7 +715,7 @@ L "dbCONST".CHRONO.CPU_TIME;
 T #_time_vacuum_begin;
 SET;
 S #_log_time_vacuum_begin;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -815,10 +815,10 @@ T #_emc_gas_subs;
 // Start vacuum hold timer
 SET;
 A #SQ_TIMER.Q;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
-S #SQ_TIMER.IN;
+S #sqSeqTimerStart;
 L #_r_time_vac_hold;
 T #SQ_TIMER.PT;
 
@@ -826,7 +826,7 @@ T #SQ_TIMER.PT;
 //Store Vacuum Hold test begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_vacuum_held_begin_time;
-Verification:- A #SQ_TIMER.IN;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -853,7 +853,7 @@ Description:- Log operator repeat.
 Action:- //Log operator repeat.
 SET;
 S #_log_msg_not_reach_repeat;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 Verification:- A "uncondJump";
 
 
@@ -881,7 +881,7 @@ Description:- Log operator ABORT.
 Action:- //Log operator abort.
 SET;
 S #_log_msg_not_reach_abort;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 Verification:- A "uncondJump";
 
 
@@ -1044,7 +1044,7 @@ S #_prompt_not_held;
 
 // Stop timer
 SET;
-R #SQ_TIMER.IN;
+R #sqSeqTimerStart;
 
 //Report Evnt Reset
 SET;

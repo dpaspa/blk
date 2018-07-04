@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 28/06/2018 4:44:33 PM by David Paspa
+generated on 29/06/2018 3:00:25 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -33,13 +33,45 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- zsc_smfl1_cmd
+Type:- INT
+Description:- Command to zsc_smfl1
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- zsc_smfl2_cmd
+Type:- INT
+Description:- Command to zsc_smfl2
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- zsc_bfs1_cmd
+Type:- INT
+Description:- Command to zsc_smfl2
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- zsc_bfs2_cmd
+Type:- INT
+Description:- Command to zsc_smfl2
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
 Name:- log_msg_isolate_confirm
 Type:- BOOL
 Description:- Operator confirmed that filling machine is disconnected.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::6
 --------------------------------------------------
 Name:- time_isolate_begin
 Type:- TOD
@@ -47,7 +79,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::7
 --------------------------------------------------
 Name:- log_time_isolate_begin
 Type:- BOOL
@@ -55,7 +87,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::8
 --------------------------------------------------
 Name:- time_isolate_end
 Type:- TOD
@@ -63,7 +95,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::9
 --------------------------------------------------
 Name:- log_time_isolate_end
 Type:- BOOL
@@ -71,7 +103,7 @@ Description:- Description
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::10
 --------------------------------------------------
 Name:- zsc_bfs1_state
 Type:- INT
@@ -79,7 +111,7 @@ Description:- S1 to F1P1 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::11
 --------------------------------------------------
 Name:- zsc_smfl2_state
 Type:- INT
@@ -87,7 +119,7 @@ Description:- VTL1 to M2 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::12
 --------------------------------------------------
 Name:- zsc_bfs2_state
 Type:- INT
@@ -95,7 +127,7 @@ Description:- S1 to F2P1 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::13
 --------------------------------------------------
 Name:- zsc_smfl1_state
 Type:- INT
@@ -103,7 +135,7 @@ Description:- VTL1 to M1 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::14
 --------------------------------------------------
 Name:- prompt_isolate_confirm_yes
 Type:- BOOL
@@ -111,7 +143,7 @@ Description:- Operator confirmed that filling machine is disconnected.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::15
 --------------------------------------------------
 Name:- prompt_isolate
 Type:- BOOL
@@ -125,17 +157,26 @@ STEP::01
 StepNo:- 01
 Title:- PH_EMX2_ISOLATE : Isolate begin.
 Description:- Log Isolate begin time.
+Send OUT command to zsc.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Log ISOLATE operation begin time.
+Send OUT command to zsc.
 Action:- //Log ISOLATE operation begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_time_isolate_begin;
 
 SET;
 S #_log_time_isolate_begin;
+
+// Send OUT command to zsc.
+L "dbCONST".BLK.ZSC2.CMD.OUT;
+T  #_zsc_smfl1_cmd;
+T  #_zsc_smfl2_cmd;
+T  #_zsc_bfs1_cmd;
+T  #_zsc_bfs2_cmd;
 
 Verification:- A "uncondJump";
 

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 28/06/2018 4:44:11 PM by David Paspa
+generated on 29/06/2018 3:00:04 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -32,13 +32,29 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- zsc_fpwfi_cmd
+Type:- INT
+Description:- Command to zsc_fpwfi
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- zsc_fppw_cmd
+Type:- INT
+Description:- Command to zsc_fppw
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
 Name:- log_msg_isolate_confirm
 Type:- BOOL
 Description:- Operator confirmed that WFI and PW line is disconnected.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::4
 --------------------------------------------------
 Name:- time_isolate_begin
 Type:- TOD
@@ -46,7 +62,7 @@ Description:- Logging ISOLATE operation start time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::5
 --------------------------------------------------
 Name:- log_time_isolate_begin
 Type:- BOOL
@@ -54,7 +70,7 @@ Description:- Flags the HMI that ISOLATE started
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::6
 --------------------------------------------------
 Name:- time_isolate_end
 Type:- TOD
@@ -62,7 +78,7 @@ Description:- Logging ISOLATE operation end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::7
 --------------------------------------------------
 Name:- log_time_isolate_end
 Type:- BOOL
@@ -70,7 +86,7 @@ Description:- Flags the HMI that ISOLATE ended
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::8
 --------------------------------------------------
 Name:- zsc_fpwfi_state
 Type:- INT
@@ -78,7 +94,7 @@ Description:- WFI line connection sensor switch
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::9
 --------------------------------------------------
 Name:- zsc_fppw_state
 Type:- INT
@@ -86,7 +102,7 @@ Description:- PW line connection sensor switch
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::10
 --------------------------------------------------
 Name:- prompt_isolate_confirm_yes
 Type:- BOOL
@@ -94,7 +110,7 @@ Description:- Operator confirmed that WFI and PW line is disconnected.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::11
 --------------------------------------------------
 Name:- prompt_isolate
 Type:- BOOL
@@ -108,17 +124,25 @@ STEP::01
 StepNo:- 01
 Title:- PH_EMC2_ISOLATE : Isolate begin.
 Description:- Log Isolate begin time.
+Send OUT command to zsc.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Flow path of WFI line and PW line is isolated.
+Send OUT command to zsc.
 Action:- //Log ISOLATE operation begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_time_isolate_begin;
 
 SET;
 S #_log_time_isolate_begin;
+
+
+// Send OUT command to zsc.
+L "dbCONST".BLK.ZSC2.CMD.OUT;
+T  #_zsc_fpwfi_cmd;
+T  #_zsc_fppw_cmd;
 
 Verification:- A "uncondJump";
 

@@ -15,9 +15,12 @@ VERSION : 1.0
     STRUCT
         mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
         bmc : "udtModeCommandBLK";         // Block mode and command
-@@ATTR_BEGIN|LINK_BLK@@
-        @@BLOCKPARAMETER@@ : @@LINKDATATYPE@@;
-@@ATTR_END|LINK_BLK@@
+@@ATTR_BEGIN|pClassBlockOrigin@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+@@ATTR_END|pClassBlockOrigin@@
+@@ATTR_BEGIN|LINK_BLK_Define@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+@@ATTR_END|LINK_BLK_Define@@
 @@ATTR_BEGIN|pEventPromptExists@@
 @@ATTR_BEGIN|pEventPromptNum@@
         eventPrompt : Array[0..@@IDXEVENTMAX@@] of "udtEventPrompt";   // SFC events for operator prompts
@@ -49,18 +52,9 @@ VERSION : 1.0
     STRUCT
         mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
         CHILD_RELEASE : Bool;              // Request to release children when complete
-@@ATTR_BEGIN|pClassSFC@@
+@@ATTR_BEGIN|pClassBlockOwner@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
-@@ATTR_END|pClassSFC@@
-@@ATTR_BEGIN|PARAMETER_CLASS@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
-@@ATTR_END|PARAMETER_CLASS@@
-@@ATTR_BEGIN|pChildDefine@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
-@@ATTR_END|pChildDefine@@
-@@ATTR_BEGIN|pBLOCK_RECIPE@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;    // @@PARAMETERDESCRIPTION@@
-@@ATTR_END|pBLOCK_RECIPE@@
+@@ATTR_END|pClassBlockOwner@@
     END_STRUCT;
 END_TYPE
 
