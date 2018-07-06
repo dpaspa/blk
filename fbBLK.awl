@@ -143,12 +143,8 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 // Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_IN_OUT
-    p : "udt@@CLASS@@";            // Block data interface
-    c : "udt@@CLASS@@children";    // Block child interface
-END_VAR
-
 VAR
+    p : "udt@@CLASS@@";            // Block data interface
     RUNTMR : "fbRunTimer";
 @@ATTR_BEGIN|SFC@@
     @@SFC@@ : "fb@@SFC@@";       // @@STATEDESCRIPTION@@
@@ -228,9 +224,12 @@ TITLE = Check if any child is not in AUTO mode
     //                                                                        //
     // Check the child devices to see if any is not in Auto mode:             //
     //------------------------------------------------------------------------//
-@@ATTR_BEGIN|CHILD@@
-    ON #c.@@CHILDPARAMETERALIAS@@.origin.mc.modeAUTO;
-@@ATTR_END|CHILD@@
+@@ATTR_BEGIN|CHILD_INIT_COMMAND_TRUE@@
+    O(;
+    @@CONDITIONSTATEMENT@@
+    AN "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.modeAUTO;
+    );
+@@ATTR_END|CHILD_INIT_COMMAND_TRUE@@
     = #flags.childNotAuto;
 
 NETWORK
@@ -240,9 +239,12 @@ TITLE = Check if any child is Interlocked
     //                                                                        //
     // Check the child devices to see if any is in the INTERLOCK state:       //
     //------------------------------------------------------------------------//
-@@ATTR_BEGIN|CHILD@@
-    O #c.@@CHILDPARAMETERALIAS@@.origin.mc.INTERLOCK;
-@@ATTR_END|CHILD@@
+@@ATTR_BEGIN|CHILD_INIT_COMMAND_TRUE@@
+    O(;
+    @@CONDITIONSTATEMENT@@
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.INTERLOCK;
+    );
+@@ATTR_END|CHILD_INIT_COMMAND_TRUE@@
     = #flags.childInterlocked;
 
 NETWORK
@@ -254,16 +256,17 @@ TITLE = Check if any Child is not already Owned or not Available
     // or else if it is Available. If Available it will be acquired if needed //
     // later to execute a command:                                            //
     //------------------------------------------------------------------------//
-@@ATTR_BEGIN|CHILD@@
+@@ATTR_BEGIN|CHILD_INIT_COMMAND_TRUE@@
     O(;
-    AN #c.@@CHILDPARAMETERALIAS@@.owner.mc.isAvailable;
+    @@CONDITIONSTATEMENT@@
+    AN "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.isAvailable;
     AN(;
-    L #c.@@CHILDPARAMETERALIAS@@.owner.mc.OWNER;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.OWNER;
     L #p.origin.mc.ME;
     ==I;
     );
     );
-@@ATTR_END|CHILD@@
+@@ATTR_END|CHILD_INIT_COMMAND_TRUE@@
     = #flags.childUnavailable;
 
 NETWORK
@@ -412,7 +415,7 @@ TITLE = Acquire child @@CHILDPARAMETERALIAS@@ for new command if required for th
     //------------------------------------------------------------------------//
     A #subsStart.@@STATE@@;
     @@CHILDACQUIRESTATEMENT@@
-    A #c.@@CHILDPARAMETERALIAS@@.owner.mc.isAvailable;
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.isAvailable;
     S #acquire.@@CHILDPARAMETERALIAS@@;
 
 NETWORK
@@ -424,14 +427,13 @@ TITLE = Acquire child @@CHILDPARAMETERALIAS@@ for new command
     A #acquire.@@CHILDPARAMETERALIAS@@;
     JCN _childAvail_@@COUNTERATTR|1@@_@@STATE@@;
     L #p.origin.mc.ME;
-    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.OWNER;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.OWNER;
 
 _childAvail_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|CHILD_ACQUIRE_REQ@@
 @@ATTR_END|STATE@@
 
-@@ATTR_BEGIN|CHILD@@
 NETWORK
 TITLE = Cascade Batch Serial Number to all children
     //------------------------------------------------------------------------//
@@ -440,20 +442,22 @@ TITLE = Cascade Batch Serial Number to all children
     // Cascade this block's Batch Number and Recipe ID to all child devices:  //
     //------------------------------------------------------------------------//
     A #p.origin.bmc.eventCmdStart;
-    JCN _childBatch_@@COUNTERATTR|1@@;
+    JCN _childBatchRecipe;
+@@ATTR_BEGIN|CHILD@@
     L #p.owner.mc.SERIALNUM;
-    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.SERIALNUM;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.SERIALNUM;
     L #p.owner.mc.RECIPE;
-    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.RECIPE;
-
-_childBatch_@@COUNTERATTR@@:   NOP 0;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.RECIPE;
 
 @@ATTR_END|CHILD@@
+
+_childBatchRecipe:   NOP 0;
+
 
 @@ATTR_BEGIN|CHILD@@
 @@ATTR_BEGIN|pPairInput@@
 NETWORK
-TITLE = Upload calling parameter @@CHILDPAIRPARAMETER@@ value to child device @@CHILDPAIRALIAS@@
+TITLE = Upload parameter @@CHILDPAIRPARAMETER@@ value from child device @@CHILDPAIRALIAS@@
     //------------------------------------------------------------------------//
     // CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER  //
     //                                                                        //
@@ -461,8 +465,8 @@ TITLE = Upload calling parameter @@CHILDPAIRPARAMETER@@ value to child device @@
     //------------------------------------------------------------------------//
     A #p.origin.bmc.eventCmdStart;
     JCN _pairInput_@@COUNTERATTR|1@@_@@CHILDPAIRALIAS@@;
-    L #c.@@CHILDPAIRALIAS@@.origin.@@CHILDPAIRPARAMETER@@;
-    T #p.owner.@@CHILDPAIRPARAMETER@@;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.@@CHILDPAIRPARAMETER@@;
+    T #p.origin.@@CHILDPARAMETERALIAS@@_@@CHILDPAIRPARAMETER@@;
 
 _pairInput_@@COUNTERATTR@@_@@CHILDPAIRALIAS@@:   NOP 0;
 
@@ -470,7 +474,7 @@ _pairInput_@@COUNTERATTR@@_@@CHILDPAIRALIAS@@:   NOP 0;
 @@ATTR_END|CHILD@@
 
 @@ATTR_BEGIN|CHILD@@
-@@ATTR_BEGIN|pPairOutput@@
+@@ATTR_BEGIN|pPairOutputWrite@@
 NETWORK
 TITLE = Download calling parameter @@CHILDPAIRPARAMETER@@ value to child device @@CHILDPAIRALIAS@@
     //------------------------------------------------------------------------//
@@ -479,13 +483,32 @@ TITLE = Download calling parameter @@CHILDPAIRPARAMETER@@ value to child device 
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
     A #p.origin.bmc.eventCmdStart;
-    JCN _pairOutput_@@COUNTERATTR|1@@_@@CHILDPAIRALIAS@@;
+    JCN _pairOutputWrite_@@COUNTERATTR|1@@_@@CHILDPAIRALIAS@@;
     L #p.owner.@@CHILDPAIRPARAMETER@@;
-    T #c.@@CHILDPAIRALIAS@@.owner.@@CHILDPAIRPARAMETER@@;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.@@CHILDPAIRPARAMETER@@;
 
-_pairOutput_@@COUNTERATTR@@_@@CHILDPAIRALIAS@@:   NOP 0;
+_pairOutputWrite_@@COUNTERATTR@@_@@CHILDPAIRALIAS@@:   NOP 0;
 
-@@ATTR_END|pPairOutput@@
+@@ATTR_END|pPairOutputWrite@@
+@@ATTR_END|CHILD@@
+
+@@ATTR_BEGIN|CHILD@@
+@@ATTR_BEGIN|pPairOutputRead@@
+NETWORK
+TITLE = Upload parameter @@CHILDPAIRPARAMETER@@ value from child device @@CHILDPAIRALIAS@@
+    //------------------------------------------------------------------------//
+    // CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER  //
+    //                                                                        //
+    // Set the initial input value for the child calling parameter:           //
+    //------------------------------------------------------------------------//
+    A #p.origin.bmc.eventCmdStart;
+    JCN _pairOutputRead_@@COUNTERATTR|1@@_@@CHILDPAIRALIAS@@;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.@@CHILDPAIRPARAMETER@@;
+    T #p.owner.@@CHILDPARAMETERALIAS@@_@@CHILDPAIRPARAMETER@@;
+
+_pairOutputRead_@@COUNTERATTR@@_@@CHILDPAIRALIAS@@:   NOP 0;
+
+@@ATTR_END|pPairOutputRead@@
 @@ATTR_END|CHILD@@
 
 @@ATTR_BEGIN|STATE@@
@@ -498,6 +521,7 @@ TITLE = Command child device @@CHILDPARAMETERALIAS@@ for state @@STATE@@ to its 
     // Set the initial command values for the child devices.                  //
     // Command the child device to its initial command if condition is true:  //
     //------------------------------------------------------------------------//
+    A #p.origin.bmc.eventCmdStart;
     A #subsStart.@@STATE@@;
     A(;
     @@CONDITIONSTATEMENT@@
@@ -520,6 +544,7 @@ TITLE = Command child device @@CHILDPARAMETERALIAS@@ for state @@STATE@@ to its 
     // Set the initial command values for the child devices.                  //
     // Command the child device to its initial command:                       //
     //------------------------------------------------------------------------//
+    A #p.origin.bmc.eventCmdStart;
     A #subsStart.@@STATE@@;
     AN(;
     @@CONDITIONSTATEMENT@@
@@ -532,26 +557,27 @@ _childInitFalse_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 @@ATTR_END|CHILD_INIT_COMMAND_FALSE@@
 @@ATTR_END|STATE@@
 
-@@ATTR_BEGIN|pEventPrompt@@
+@@ATTR_BEGIN|pEventPromptExists@@
 NETWORK
-TITLE = Clear the operator prompt flag for event @@PARAMETERDESCRIPTION@@
+TITLE = Clear the operator prompt flag
     //------------------------------------------------------------------------//
     // CLEAR OPERATOR PROMPT   CLEAR OPERATOR PROMPT   CLEAR OPERATOR PROMPT  //
     //                                                                        //
-    // Clear the SFC prompt and confirm bits and the global shared event bits //
-    // for event @@PARAMETERDESCRIPTION@@
+    // Clear the SFC prompt and confirm bits and the global shared event bits://
     //------------------------------------------------------------------------//
     A #p.origin.bmc.eventCmdStart;
-    JCN _evPrompt_@@COUNTERATTR|1@@;
+    JCN _clrPrompt;
+@@ATTR_BEGIN|pEventPrompt@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    R #p.origin.eventPrompt[@@IDXEVENT@@].trigger;
-    R #p.origin.eventPrompt[@@IDXEVENT@@].confirmYes;
-    R #p.origin.eventPrompt[@@IDXEVENT@@].confirmNo;
-_evPrompt_@@COUNTERATTR@@:   NOP 0;
-
+    R "idbEventPrompt".eventPrompt[@@IDXEVENT@@].trigger;
+    R "idbEventPrompt".eventPrompt[@@IDXEVENT@@].confirmYes;
+    R "idbEventPrompt".eventPrompt[@@IDXEVENT@@].confirmNo;
 @@ATTR_END|pEventPrompt@@
 
-@@ATTR_BEGIN|pEventConfirm@@
+_clrPrompt:   NOP 0;
+@@ATTR_END|pEventPromptExists@@
+
+@@ATTR_BEGIN|pEventConfirmExists@@
 NETWORK
 TITLE = Clear the operator confirm flag
     //------------------------------------------------------------------------//
@@ -560,13 +586,15 @@ TITLE = Clear the operator confirm flag
     // Clear the SFC confirm bit and the global shared event DB bit:          //
     //------------------------------------------------------------------------//
     A #p.origin.bmc.eventCmdStart;
-    JCN _evConfirm_@@COUNTERATTR|1@@;
+    JCN _clrConfirm;
+@@ATTR_BEGIN|pEventConfirm@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-_evConfirm_@@COUNTERATTR@@:   NOP 0;
-
 @@ATTR_END|pEventConfirm@@
 
-@@ATTR_BEGIN|pEventLogMsg@@
+_clrConfirm:   NOP 0;
+@@ATTR_END|pEventConfirmExists@@
+
+@@ATTR_BEGIN|pEventLogMsgExists@@
 NETWORK
 TITLE = Clear the log message flag
     //------------------------------------------------------------------------//
@@ -575,14 +603,16 @@ TITLE = Clear the log message flag
     // Clear the SFC log message bit and the global shared event DB bit:      //
     //------------------------------------------------------------------------//
     A #p.origin.bmc.eventCmdStart;
-    JCN _evLogMsg_@@COUNTERATTR|1@@;
+    JCN _clrLogMsg;
+@@ATTR_BEGIN|pEventLogMsg@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    R #p.origin.eventLogMsg[@@IDXEVENT@@].trigger;
-_evLogMsg_@@COUNTERATTR@@:   NOP 0;
-
+    R "idbEventLogMsg".eventLogMsg[@@IDXEVENT@@].trigger;
 @@ATTR_END|pEventLogMsg@@
 
-@@ATTR_BEGIN|pEventLogReal@@
+_clrLogMsg:   NOP 0;
+@@ATTR_END|pEventLogMsgExists@@
+
+@@ATTR_BEGIN|pEventLogRealExists@@
 NETWORK
 TITLE = Clear the log real data flag
     //------------------------------------------------------------------------//
@@ -592,16 +622,18 @@ TITLE = Clear the log real data flag
     // zero the global data:                                                  //
     //------------------------------------------------------------------------//
     A #p.origin.bmc.eventCmdStart;
-    JCN _evLogReal_@@COUNTERATTR|1@@;
+    JCN _clrLogReal;
+@@ATTR_BEGIN|pEventLogReal@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    R #p.origin.eventLogReal[@@IDXEVENT@@].trigger;
+    R "idbEventLogReal".eventLogReal[@@IDXEVENT@@].trigger;
     L 0;
-    T #p.origin.eventLogReal[@@IDXEVENT@@].dataValue;
-_evLogReal_@@COUNTERATTR@@:   NOP 0;
-
+    T "idbEventLogReal".eventLogReal[@@IDXEVENT@@].dataValue;
 @@ATTR_END|pEventLogReal@@
 
-@@ATTR_BEGIN|pEventLogTime@@
+_clrLogReal:   NOP 0;
+@@ATTR_END|pEventLogRealExists@@
+
+@@ATTR_BEGIN|pEventLogTimeExists@@
 NETWORK
 TITLE = Clear the log time data flag
     //------------------------------------------------------------------------//
@@ -611,16 +643,18 @@ TITLE = Clear the log time data flag
     // zero the global data:                                                  //
     //------------------------------------------------------------------------//
     A #p.origin.bmc.eventCmdStart;
-    JCN _evLogTime_@@COUNTERATTR|1@@;
+    JCN _clrLogTime;
+@@ATTR_BEGIN|pEventLogTime@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    R #p.origin.eventLogTime[@@IDXEVENT@@].trigger;
+    R "idbEventLogTime".eventLogTime[@@IDXEVENT@@].trigger;
     L 0;
-    T #p.origin.eventLogTime[@@IDXEVENT@@].dataValue;
-_evLogTime_@@COUNTERATTR@@:   NOP 0;
-
+    T "idbEventLogTime".eventLogTime[@@IDXEVENT@@].dataValue;
 @@ATTR_END|pEventLogTime@@
 
-@@ATTR_BEGIN|pEventDataReal@@
+_clrLogTime:   NOP 0;
+@@ATTR_END|pEventLogTimeExists@@
+
+@@ATTR_BEGIN|pEventDataRealExists@@
 NETWORK
 TITLE = Zero the real data value
     //------------------------------------------------------------------------//
@@ -629,14 +663,16 @@ TITLE = Zero the real data value
     // Zero the SFC log real data parameter:                                  //
     //------------------------------------------------------------------------//
     A #p.origin.bmc.eventCmdStart;
-    JCN _evDataReal_@@COUNTERATTR|1@@;
+    JCN _clrDataReal;
+@@ATTR_BEGIN|pEventDataReal@@
     L 0;
     T #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-_evDataReal_@@COUNTERATTR@@:   NOP 0;
-
 @@ATTR_END|pEventDataReal@@
 
-@@ATTR_BEGIN|pEventDataTime@@
+_clrDataReal:   NOP 0;
+@@ATTR_END|pEventDataRealExists@@
+
+@@ATTR_BEGIN|pEventDataTimeExists@@
 NETWORK
 TITLE = Zero the log time data
     //------------------------------------------------------------------------//
@@ -645,14 +681,16 @@ TITLE = Zero the log time data
     // Zero the SFC log time data and the global shared event DB data:        //
     //------------------------------------------------------------------------//
     A #p.origin.bmc.eventCmdStart;
-    JCN _evDataTime_@@COUNTERATTR|1@@;
+    JCN _clrDataTime;
+@@ATTR_BEGIN|pEventDataTime@@
     L 0;
     T #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-_evDataTime_@@COUNTERATTR@@:   NOP 0;
-
 @@ATTR_END|pEventDataTime@@
 
-@@ATTR_BEGIN|SFC@@
+_clrDataTime:   NOP 0;
+@@ATTR_END|pEventDataTimeExists@@
+
+@@ATTR_BEGIN|SFCExists@@
 NETWORK
 TITLE = Make sure all SFCs are stopped if stop command or new start command
     //------------------------------------------------------------------------//
@@ -664,16 +702,17 @@ TITLE = Make sure all SFCs are stopped if stop command or new start command
     //------------------------------------------------------------------------//
     O #p.origin.bmc.eventCmdStop;
     O #p.origin.bmc.eventCmdStart;
-    JCN _notRestartSFC_@@COUNTERATTR|1@@_@@STATE@@;
+    JCN _notRestartSFC;
     L "dbCONST".SEQ.CMD.STOP;
+@@ATTR_BEGIN|SFC@@
     T #@@SFC@@.smc.SQ_CMD;
-
-_notRestartSFC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
 @@ATTR_END|SFC@@
 
+_notRestartSFC:   NOP 0;
+@@ATTR_END|SFCExists@@
+
 @@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|CHILD_INSTANCE_BIND@@
+@@ATTR_BEGIN|CHILD_BIND@@
 NETWORK
 TITLE = Bind the selected child to the called child device
     //------------------------------------------------------------------------//
@@ -684,21 +723,18 @@ TITLE = Bind the selected child to the called child device
     @@CONDITIONSTATEMENT@@
     );
     JCN _childBind_@@COUNTERATTR|1@@_@@STATE@@;
-    CALL MOVE
-    {value_type := 'Variant'}
-    (   IN                   := #c.@@CHILDPARAMETERALIAS@@ ,
-        OUT                  := #c.@@CHILDPARAMETERALIASBIND@@
-    );
+    L #p.child.@@CHILDPARAMETERALIAS@@;
+    T #p.child.@@CHILDPARAMETERALIASBIND@@;
 
 _childBind_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
-@@ATTR_END|CHILD_INSTANCE_BIND@@
+@@ATTR_END|CHILD_BIND@@
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|pSFCChildMC@@
+@@ATTR_BEGIN|pSFCChildMCExists@@
 NETWORK
-TITLE = Synchronise SFC @@SFC@@ child state for child @@CHILDPARAMETER@@
+TITLE = Synchronise SFC @@SFC@@ child states
     //------------------------------------------------------------------------//
     // SYNC SFC CHILD STATE    SYNC SFC CHILD STATE    SYNC SFC CHILD STATE   //
     //                                                                        //
@@ -707,16 +743,17 @@ TITLE = Synchronise SFC @@SFC@@ child state for child @@CHILDPARAMETER@@
     //------------------------------------------------------------------------//
     A #subsRunning.@@STATE@@;
     JCN _cMC_@@COUNTERATTR|1@@_@@STATE@@;
-    L #c.@@CHILDPARAMETERALIAS@@.origin.mc.@@CHILDPARAMETERATTRIBUTE@@;
+@@ATTR_BEGIN|pSFCChildMC@@
+    L "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.@@CHILDPARAMETERATTRIBUTE@@;
     T #@@SFC@@.@@CHILDPARAMETER@@;
-
-_cMC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
 @@ATTR_END|pSFCChildMC@@
 
-@@ATTR_BEGIN|pSFCChildMCO@@
+_cMC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+@@ATTR_END|pSFCChildMCExists@@
+
+@@ATTR_BEGIN|pSFCChildMCOExists@@
 NETWORK
-TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
+TITLE = Synchronise SFC @@SFC@@ child Owner commands
     //------------------------------------------------------------------------//
     // SYNC SFC CHILD COMMANDS    SYNC SFC CHILD COMMANDS    SYNC SFC CHILD   //
     //                                                                        //
@@ -725,66 +762,67 @@ TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
     //------------------------------------------------------------------------//
     A #subsStart.@@STATE@@;
     JCN _cMCO_@@COUNTERATTR|1@@_@@STATE@@;
-    L #c.@@CHILDPARAMETERALIAS@@.owner.mc.@@CHILDPARAMETERATTRIBUTE@@;
+@@ATTR_BEGIN|pSFCChildMCO@@
+    L "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.@@CHILDPARAMETERATTRIBUTE@@;
     T #@@SFC@@.@@CHILDPARAMETER@@;
-
-_cMCO_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
 @@ATTR_END|pSFCChildMCO@@
 
-@@ATTR_BEGIN|pSFCChildOrigin@@
+_cMCO_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+@@ATTR_END|pSFCChildMCOExists@@
+
+@@ATTR_BEGIN|pSFCChildOriginExists@@
 NETWORK
-TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
+TITLE = Synchronise SFC @@SFC@@ child Origin states
     //------------------------------------------------------------------------//
     // SYNC SFC CHILD ORIGIN PARAMETERS    SYNC SFC CHILD ORIGIN PARAMETERS   //
     //                                                                        //
-    // Write the initial value to any SFC child parameters to synchronise     //
-    // them at the start of the SFC:                                          //
+    // Get the child parameter:                                               //
     //------------------------------------------------------------------------//
     A #subsStart.@@STATE@@;
     JCN _cOrigin_@@COUNTERATTR|1@@_@@STATE@@;
-    L #c.@@CHILDPARAMETERALIAS@@.origin.@@CHILDPARAMETERATTRIBUTE@@;
+@@ATTR_BEGIN|pSFCChildOrigin@@
+    L "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.@@CHILDPARAMETERATTRIBUTE@@;
     T #@@SFC@@.@@CHILDPARAMETER@@;
-
-_cOrigin_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
 @@ATTR_END|pSFCChildOrigin@@
 
-@@ATTR_BEGIN|pSFCChildOwner@@
+_cOrigin_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+@@ATTR_END|pSFCChildOriginExists@@
+
+@@ATTR_BEGIN|pSFCChildOwnerExists@@
 NETWORK
-TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
+TITLE = Synchronise SFC @@SFC@@ child Owner commands
     //------------------------------------------------------------------------//
     // SYNC SFC CHILD OWNER PARAMETERS    SYNC SFC CHILD OWNER PARAMETERS     //
     //                                                                        //
-    // Write the initial command to any SFC child parameters to synchronise   //
-    // them at the start of the SFC:                                          //
+    // Get the child parameter:                                               //
     //------------------------------------------------------------------------//
     A #subsStart.@@STATE@@;
-    JCN _cOwner_@@COUNTERATTR|1@@_@@STATE@@;
-    L #c.@@CHILDPARAMETERALIAS@@.owner.@@CHILDPARAMETERATTRIBUTE@@;
+    JCN _cOwnChild_@@COUNTERATTR|1@@_@@STATE@@;
+@@ATTR_BEGIN|pSFCChildOwner@@
+    L "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.@@CHILDPARAMETERATTRIBUTE@@;
     T #@@SFC@@.@@CHILDPARAMETER@@;
-
-_cOwner_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
 @@ATTR_END|pSFCChildOwner@@
 
-@@ATTR_BEGIN|pSFCGrandChildOwner@@
+_cOwnChild_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+@@ATTR_END|pSFCChildOwnerExists@@
+
+@@ATTR_BEGIN|pSFCGrandChildOwnerExists@@
 NETWORK
-TITLE = Synchronise SFC @@SFC@@ child command for child @@CHILDPARAMETER@@
+TITLE = Synchronise SFC @@SFC@@ grandchild states
     //------------------------------------------------------------------------//
-    // SYNC SFC GRANDCHILD OWNER PARAMETERS    SYNC SFC GRANDCHILD OWNER PARM //
+    // SYNC SFC GRANDCHILD ORIGIN PARAMETERS    SYNC SFC GRANDCHILD ORIGIN    //
     //                                                                        //
-    // Write the initial command to any SFC child parameters to synchronise   //
-    // them at the start of the SFC:                                          //
+    // Get the grandchild parameter:                                          //
     //------------------------------------------------------------------------//
     A #subsStart.@@STATE@@;
-    JCN _cOwner_@@COUNTERATTR|1@@_@@STATE@@;
-    L #c.@@CHILDPARAMETERALIAS@@.owner.@@GRANDCHILDPARAMETERALIAS@@.@@GRANDCHILDPARAMETERATTRIBUTE@@;
+    JCN _cOwnGrandchild_@@COUNTERATTR|1@@_@@STATE@@;
+@@ATTR_BEGIN|pSFCGrandChildOwner@@
+    L "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.@@GRANDCHILDPARAMETERALIAS@@_@@GRANDCHILDPARAMETERATTRIBUTE@@;
     T #@@SFC@@.@@CHILDPARAMETER@@;
-
-_cOwner_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
 @@ATTR_END|pSFCGrandChildOwner@@
+
+_cOwnGrandchild_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
+@@ATTR_END|pSFCGrandChildOwnerExists@@
 
 @@ATTR_END|SFC@@
 
@@ -807,44 +845,21 @@ TITLE = If substate @@STATE@@ is running then set the SFC calling parameters
         @@CHILDPARAMETER@@   := #p.origin.@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pSFCLink@@
 @@ATTR_BEGIN|pSFCChildMC@@
-        @@CHILDPARAMETER@@   := #c.@@CHILDPARAMETERALIAS@@.origin.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pSFCChildMC@@
 @@ATTR_BEGIN|pSFCChildOrigin@@
-        @@CHILDPARAMETER@@   := #c.@@CHILDPARAMETERALIAS@@.origin.@@CHILDPARAMETERATTRIBUTE@@ ,
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pSFCChildOrigin@@
 @@ATTR_BEGIN|pSFCChildMCO@@
-        @@CHILDPARAMETER@@   := #c.@@CHILDPARAMETERALIAS@@.owner.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pSFCChildMCO@@
 @@ATTR_BEGIN|pSFCChildOwner@@
-        @@CHILDPARAMETER@@   := #c.@@CHILDPARAMETERALIAS@@.owner.@@CHILDPARAMETERATTRIBUTE@@ ,
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pSFCChildOwner@@
         dummy                := #dummy
     );
 _notSFC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
-@@ATTR_END|SFC@@
-
-@@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|CHILD_INSTANCE_BIND@@
-NETWORK
-TITLE = Return the bound child to the selected child device
-    //------------------------------------------------------------------------//
-    // Copy the selected child to the called child device:                    //
-    //------------------------------------------------------------------------//
-    A #subsRunning.@@STATE@@;
-    A(;
-    @@CONDITIONSTATEMENT@@
-    );
-    JCN _childBound_@@COUNTERATTR|1@@_@@STATE@@;
-    CALL MOVE
-    {value_type := 'Variant'}
-    (   IN                   := #c.@@CHILDPARAMETERALIASBIND@@ ,
-        OUT                  := #c.@@CHILDPARAMETERALIAS@@
-    );
-
-_childBound_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
-@@ATTR_END|CHILD_INSTANCE_BIND@@
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
@@ -858,11 +873,11 @@ TITLE = Start the SFC sequence @@SFC@@ for running substate @@STATE@@
     // Start the SFC for the running substate:                                //
     //------------------------------------------------------------------------//
     A #subsStart.@@STATE@@;
-    JCN _notSFCStarting_2_@@STATE@@;
+    JCN _notSFCStarting_@@STATE@@;
     L "dbCONST".SEQ.CMD.START;
     T #@@SFC@@.smc.SQ_CMD;
 
-_notSFCStarting_2_@@STATE@@:      NOP 0;
+_notSFCStarting_@@STATE@@:      NOP 0;
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
@@ -881,20 +896,17 @@ TITLE = Check if any new Child command if SFC @@SFC@@ is running
 
 @@ATTR_BEGIN|pSFCChildMCO@@
     //------------------------------------------------------------------------//
-    // Check if the running SFC requests to change this child command:        //
+    // Check if the running SFC requests to change this child command. Send   //
+    // the udpated SFC child command to the child if it changed:              //
     //------------------------------------------------------------------------//
     A(;
-    L #c.@@CHILDPARAMETERALIAS@@.owner.mc.@@CHILDPARAMETERATTRIBUTE@@;
+    L "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.@@CHILDPARAMETERATTRIBUTE@@;
     L #@@SFC@@.@@CHILDPARAMETER@@;
     <>I;
     );
     JCN _noCmdChange_@@COUNTERATTR|1@@_@@STATE@@;
-
-    //------------------------------------------------------------------------//
-    // Send the udpated SFC child command to the child:                       //
-    //------------------------------------------------------------------------//
     L #@@SFC@@.@@CHILDPARAMETER@@;
-    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.@@CHILDPARAMETERATTRIBUTE@@;
+    T "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.@@CHILDPARAMETERATTRIBUTE@@;
     S #flags.childCommandChange;
 
 _noCmdChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
@@ -903,20 +915,17 @@ _noCmdChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
 
 @@ATTR_BEGIN|pSFCChildOwner@@
     //------------------------------------------------------------------------//
-    // Check if the running SFC requests to change this child parameter:      //
+    // Check if the running SFC requests to change this child parameter. Send //
+    // the udpated SFC child parameter to the child if it changed:            //
     //------------------------------------------------------------------------//
     A(;
-    L #c.@@CHILDPARAMETERALIAS@@.owner.@@CHILDPARAMETERATTRIBUTE@@;
+    L "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.@@CHILDPARAMETERATTRIBUTE@@;
     L #@@SFC@@.@@CHILDPARAMETER@@;
     <>I;
     );
     JCN _noParmChange_@@COUNTERATTR|1@@_@@STATE@@;
-
-    //------------------------------------------------------------------------//
-    // Send the udpated SFC child parameter to the child:                     //
-    //------------------------------------------------------------------------//
     L #@@SFC@@.@@CHILDPARAMETER@@;
-    T #c.@@CHILDPARAMETERALIAS@@.owner.@@CHILDPARAMETERATTRIBUTE@@;
+    T "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.@@CHILDPARAMETERATTRIBUTE@@;
     S #flags.childCommandChange;
 
 _noParmChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
@@ -928,16 +937,12 @@ _noParmChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
     // Check if any child parameter changed and need to update the SFC:       //
     //------------------------------------------------------------------------//
     A(;
-    L #c.@@CHILDPARAMETERALIAS@@.origin.@@CHILDPARAMETERATTRIBUTE@@;
+    L "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.@@CHILDPARAMETERATTRIBUTE@@;
     L #@@SFC@@.@@CHILDPARAMETER@@;
     <>I;
     );
     JCN _noOriginChange_@@COUNTERATTR|1@@_@@STATE@@;
-
-    //------------------------------------------------------------------------//
-    // Send the udpated SFC child parameter to the child:                     //
-    //------------------------------------------------------------------------//
-    L #c.@@CHILDPARAMETERALIAS@@.origin.@@CHILDPARAMETERATTRIBUTE@@;
+    L "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.@@CHILDPARAMETERATTRIBUTE@@;
     T #@@SFC@@.@@CHILDPARAMETER@@;
 
 _noOriginChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
@@ -967,8 +972,6 @@ TITLE = If child command changed, start timer to wait for child state
     );
     NOP 0;
 
-@@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|CHILD_ACQUIRED@@
 NETWORK
 TITLE = Check if any Child state does not match the command
     //------------------------------------------------------------------------//
@@ -980,17 +983,18 @@ TITLE = Check if any Child state does not match the command
     //------------------------------------------------------------------------//
     A #timeCheckChildStateExpired;
     A(;
-    L #c.@@CHILDPARAMETERALIAS@@.origin.mc.STATE;
-    L #c.@@CHILDPARAMETERALIAS@@.owner.mc.CMD;
+@@ATTR_BEGIN|CHILD@@
+    O(;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.STATE;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.CMD;
     <>I;
     );
-    JCN _cNoMismatch_@@COUNTERATTR|1@@_@@STATE@@;
+@@ATTR_END|CHILD@@
+    );
+    JCN _cNoMismatch;
     S #flags.childMismatch;
 
-_cNoMismatch_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
-
-@@ATTR_END|CHILD_ACQUIRED@@
-@@ATTR_END|STATE@@
+_cNoMismatch:   NOP 0;
 
 NETWORK
 TITLE = Reset the new child command flag if timer expired
@@ -1002,39 +1006,42 @@ TITLE = Reset the new child command flag if timer expired
     R #flags.childCommandChange;
 _ccstate:   NOP 0;
 
-@@ATTR_BEGIN|pEventPrompt@@
+@@ATTR_BEGIN|pEventPromptExists@@
 NETWORK
-TITLE = Raise operator prompt if required for event @@PARAMETERDESCRIPTION@@
+TITLE = Raise operator prompt if required
     //------------------------------------------------------------------------//
     // OPERATOR PROMPT   OPERATOR PROMPT   OPERATOR PROMPT   OPERATOR PROMPT  //
     //                                                                        //
-    // Transfer the SFC prompt bit to the global event datablock for event    //
-    // @@PARAMETERDESCRIPTION@@
+    // Transfer the SFC prompt bit to the global event datablock:             //
     //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventPrompt@@
     A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = #p.origin.eventPrompt[@@IDXEVENT@@].trigger;
-
+    = "idbEventPrompt".eventPrompt[@@IDXEVENT@@].trigger;
 @@ATTR_END|pEventPrompt@@
 
-@@ATTR_BEGIN|pEventPrompt@@
+@@ATTR_END|pEventPromptExists@@
+
+@@ATTR_BEGIN|pEventPromptExists@@
 NETWORK
-TITLE = Return operator confirm bits if made for event @@PARAMETERDESCRIPTION@@
+TITLE = Return operator confirm bits if made
     //------------------------------------------------------------------------//
     // OPERATOR CONFIRM   OPERATOR CONFIRM   OPERATOR CONFIRM   OPERATOR CONF //
     //                                                                        //
-    // Receive the SFC confirm bits from the global event datablock for event //
-    // @@PARAMETERDESCRIPTION@@
+    // Receive the SFC confirm bits from the global event datablock:          //
     //------------------------------------------------------------------------//
-    A #p.origin.eventPrompt[@@IDXEVENT@@].confirmYes;
+@@ATTR_BEGIN|pEventPrompt@@
+    A "idbEventPrompt".eventPrompt[@@IDXEVENT@@].confirmYes;
     = #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_yes;
 @@ATTR_BEGIN|pEventConfirmNoExists@@
-    A #p.origin.eventPrompt[@@IDXEVENT@@].confirmNo;
+    A "idbEventPrompt".eventPrompt[@@IDXEVENT@@].confirmNo;
     = #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_no;
 @@ATTR_END|pEventConfirmNoExists@@
 
 @@ATTR_END|pEventPrompt@@
 
-@@ATTR_BEGIN|pEventLogMsg@@
+@@ATTR_END|pEventPromptExists@@
+
+@@ATTR_BEGIN|pEventLogMsgExists@@
 NETWORK
 TITLE = Log message if required
     //------------------------------------------------------------------------//
@@ -1042,12 +1049,14 @@ TITLE = Log message if required
     //                                                                        //
     // Transfer the SFC log data to the global event datablock:               //
     //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventLogMsg@@
     A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = #p.origin.eventLogMsg[@@IDXEVENT@@].trigger;
-
+    = "idbEventLogMsg".eventLogMsg[@@IDXEVENT@@].trigger;
 @@ATTR_END|pEventLogMsg@@
 
-@@ATTR_BEGIN|pEventDataReal@@
+@@ATTR_END|pEventLogMsgExists@@
+
+@@ATTR_BEGIN|pEventDataRealExists@@
 NETWORK
 TITLE = Real data
     //------------------------------------------------------------------------//
@@ -1055,12 +1064,14 @@ TITLE = Real data
     //                                                                        //
     // Transfer the SFC log data to the global event datablock:               //
     //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventDataReal@@
     L #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    T #p.origin.eventLogReal[@@IDXEVENT@@].dataValue;
-
+    T "idbEventLogReal".eventLogReal[@@IDXEVENT@@].dataValue;
 @@ATTR_END|pEventDataReal@@
 
-@@ATTR_BEGIN|pEventLogReal@@
+@@ATTR_END|pEventDataRealExists@@
+
+@@ATTR_BEGIN|pEventLogRealExists@@
 NETWORK
 TITLE = Log real data if required
     //------------------------------------------------------------------------//
@@ -1068,12 +1079,14 @@ TITLE = Log real data if required
     //                                                                        //
     // Transfer the SFC log data to the global event datablock:               //
     //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventLogReal@@
     A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = #p.origin.eventLogReal[@@IDXEVENT@@].trigger;
-
+    = "idbEventLogReal".eventLogReal[@@IDXEVENT@@].trigger;
 @@ATTR_END|pEventLogReal@@
 
-@@ATTR_BEGIN|pEventDataTime@@
+@@ATTR_END|pEventLogRealExists@@
+
+@@ATTR_BEGIN|pEventDataTimeExists@@
 NETWORK
 TITLE = Time data
     //------------------------------------------------------------------------//
@@ -1081,12 +1094,14 @@ TITLE = Time data
     //                                                                        //
     // Transfer the SFC log data to the global event datablock:               //
     //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventDataTime@@
     L #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    T #p.origin.eventLogTime[@@IDXEVENT@@].dataValue;
-
+    T "idbEventLogTime".eventLogTime[@@IDXEVENT@@].dataValue;
 @@ATTR_END|pEventDataTime@@
 
-@@ATTR_BEGIN|pEventLogTime@@
+@@ATTR_END|pEventDataTimeExists@@
+
+@@ATTR_BEGIN|pEventLogTimeExists@@
 NETWORK
 TITLE = Log time data if required
     //------------------------------------------------------------------------//
@@ -1094,10 +1109,12 @@ TITLE = Log time data if required
     //                                                                        //
     // Transfer the SFC log data to the global event datablock:               //
     //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventLogTime@@
     A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = #p.origin.eventLogTime[@@IDXEVENT@@].trigger;
-
+    = "idbEventLogTime".eventLogTime[@@IDXEVENT@@].trigger;
 @@ATTR_END|pEventLogTime@@
+
+@@ATTR_END|pEventLogTimeExists@@
 
 @@ATTR_BEGIN|SFC@@
 NETWORK
@@ -1136,47 +1153,63 @@ TITLE = Set child devices to safe state if any interlock or child failure
     // Set the child device to the safe state on any interlock condition or   //
     // child failure:                                                         //
     //------------------------------------------------------------------------//
+    O #p.origin.bmc.eventCmdStop;
     O #p.origin.mc.INTERLOCK;
     ON #p.origin.bmc.permitStart;
     JCN _childSafe;
     R #flags.childMismatch;
+
+    //------------------------------------------------------------------------//
+    // Set all child devices to safe state due to block stop or problem:      //
+    //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD@@
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.modeAUTO;
+    JCN _blkSafe_@@CHILDPARAMETERALIAS@@;
     L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
-    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.CMD;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.CMD;
+_blkSafe_@@CHILDPARAMETERALIAS@@:   NOP 0;
+
 @@ATTR_END|CHILD@@
 
 _childSafe:   NOP 0;
 
-@@ATTR_BEGIN|SFC@@
+@@ATTR_BEGIN|SFCExists@@
 NETWORK
-TITLE = Set child devices to safe state if SFC @@SFC@@ Paused or Error
+TITLE = Set child devices to safe state if SFC Paused or Error
     //------------------------------------------------------------------------//
     // SAFE STATE ON SFC ERROR   SAFE STATE ON SFC ERROR   SAFE STATE ON SFC  //
     //                                                                        //
-    // Bypass if the current SFC is running okay:                             //
+    // Check if the running SFC has a problem:                                //
     //------------------------------------------------------------------------//
     A #p.origin.bmc.permitStart;
+    A(;
+@@ATTR_BEGIN|SFC@@
+    O(;
     A #subsRunning.@@STATE@@;
     A(;
     O #@@SFC@@.smc.PAUSED;
     O #@@SFC@@.smc.ERR_FAULT;
     );
-@@COUNTERTEMPLATEINCR@@
-    JCN _safeSFC_@@COUNTERTEMPLATE@@_@@SFC@@;
+    );
+@@ATTR_END|SFC@@
+    );
+    JCN _safeSFC;
+    R #flags.childMismatch;
 
     //------------------------------------------------------------------------//
     // Set all child devices to safe state due to sequence problem:           //
     //------------------------------------------------------------------------//
-    R #flags.childMismatch;
 @@ATTR_BEGIN|CHILD@@
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.modeAUTO;
+    JCN _sfcSafe_@@CHILDPARAMETERALIAS@@;
     L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
-    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.CMD;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.CMD;
+_sfcSafe_@@CHILDPARAMETERALIAS@@:   NOP 0;
+
 @@ATTR_END|CHILD@@
 
-_safeSFC_@@COUNTERTEMPLATE@@_@@SFC@@:   NOP 0;
-
-
-@@ATTR_END|SFC@@
+_safeSFC:   NOP 0;
+@@ATTR_END|SFCExists@@
 
 @@ATTR_BEGIN|SFC@@
 NETWORK
@@ -1275,6 +1308,16 @@ _notFin@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|SFC@@
 
+NETWORK
+TITLE = Flag SFC finished if none exist
+    //------------------------------------------------------------------------//
+    // Flag SFC completed if there aren't any:                                //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|STATE@@
+    AN subsHasSFC.@@STATE@@;
+@@ATTR_END|STATE@@
+    S #flags.sfcCompleted;
+
 @@ATTR_BEGIN|STATE@@
 @@ATTR_BEGIN|CHILD_ACQUIRED@@
 NETWORK
@@ -1293,7 +1336,7 @@ TITLE = Release child @@CHILDPARAMETERALIAS@@ if acquired and command completed
     A #p.owner.CHILD_RELEASE;
     JCN _notOwn@@COUNTERATTR|1@@_@@STATE@@;
     L "dbCONST".BLK.ID.AVAILABLE;
-    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.OWNER;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.OWNER;
     R #acquire.@@CHILDPARAMETERALIAS@@;
 _notOwn@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
@@ -1371,10 +1414,8 @@ sfcd@@COUNTERATTR@@:      NOP 0;
 
 @@ATTR_END|SFC@@
 
-@@ATTR_BEGIN|STATE@@
-@@ATTR_BEGIN|CHILD_ACQUIRED@@
 NETWORK
-TITLE = Cascade Auto or OOS Mode to child @@CHILDPARAMETERALIAS@@
+TITLE = Cascade Auto or OOS Mode to children
     //------------------------------------------------------------------------//
     // MODE CASCADE   MODE CASCADE   MODE CASCADE   MODE CASCADE   MODE CASC  //
     //                                                                        //
@@ -1382,13 +1423,13 @@ TITLE = Cascade Auto or OOS Mode to child @@CHILDPARAMETERALIAS@@
     //------------------------------------------------------------------------//
     O #p.origin.bmc.eventModeAUTO;
     O #p.origin.bmc.eventModeOOS;
-    JCN _cascMode@@COUNTERATTR|1@@_@@STATE@@;
+    JCN _cascMode;
+@@ATTR_BEGIN|CHILD@@
     L #p.owner.mc.MODE;
-    T #c.@@CHILDPARAMETERALIAS@@.owner.mc.MODE;
-_cascMode@@COUNTERATTR|1@@_@@STATE@@:   NOP 0;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.MODE;
+@@ATTR_END|CHILD@@
 
-@@ATTR_END|CHILD_ACQUIRED@@
-@@ATTR_END|STATE@@
+_cascMode:   NOP 0;
 
 @@ATTR_BEGIN|HYGIENE@@
 NETWORK

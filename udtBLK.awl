@@ -18,6 +18,9 @@ VERSION : 1.0
 @@ATTR_BEGIN|pClassBlockOrigin@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
 @@ATTR_END|pClassBlockOrigin@@
+@@ATTR_BEGIN|pPairInputDefine@@
+        @@CHILDPAIRALIAS@@_@@CHILDPAIRPARAMETER@@ : @@PARAMETERPAIRDATATYPE@@;
+@@ATTR_END|pPairInputDefine@@
 @@ATTR_BEGIN|LINK_BLK_Define@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
 @@ATTR_END|LINK_BLK_Define@@
@@ -55,6 +58,9 @@ VERSION : 1.0
 @@ATTR_BEGIN|pClassBlockOwner@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
 @@ATTR_END|pClassBlockOwner@@
+@@ATTR_BEGIN|pPairOutputDefine@@
+        @@CHILDPAIRALIAS@@_@@CHILDPAIRPARAMETER@@ : @@PARAMETERPAIRDATATYPE@@;
+@@ATTR_END|pPairOutputDefine@@
     END_STRUCT;
 END_TYPE
 
@@ -62,7 +68,7 @@ TYPE "udt@@CLASS@@children"
 VERSION : 1.0
     STRUCT
 @@ATTR_BEGIN|CHILD@@
-        @@CHILDPARAMETERALIAS@@ : "udt@@CHILDALIASCLASS@@";          // @@CHILDALIASCLASS@@ @@CHILDPARAMETERALIAS@@ @@CHILDALIASDESCRIPTION@@
+        @@CHILDPARAMETERALIAS@@ : Int;          // @@CHILDALIASCLASS@@ @@CHILDPARAMETERALIAS@@ @@CHILDALIASDESCRIPTION@@ Instance DB Index
 @@ATTR_END|CHILD@@
     END_STRUCT;
 END_TYPE
@@ -70,6 +76,7 @@ END_TYPE
 TYPE "udt@@CLASS@@"
 VERSION : 1.0
     STRUCT
+        child : "udt@@CLASS@@children";      // Child index to access child instance DB
         origin : "udt@@CLASS@@origin";       // Calculated data on origin CPU
         owner : "udt@@CLASS@@owner";         // Directives from owner CPU
     END_STRUCT;

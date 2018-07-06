@@ -35,11 +35,8 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 // Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_IN_OUT
-    p : "udtTC1";            // Block data interface
-END_VAR
-
 VAR
+    p : "udtTC1";            // Block data interface
     PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
 END_VAR
 
@@ -70,8 +67,8 @@ TITLE = Check if the TCV is not in AUTO
     // Check if the TCV cannot be controlled if not in AUTO:                  //
     //------------------------------------------------------------------------//
     O #p.origin.mc.INTERLOCK;
-    O #p.origin.mcTCV.INTERLOCK;
-    ON #p.origin.mcTCV.modeAUTO;
+    O "idbMOD1".f[#p.child.MOD_TCV].p.origin.mc.INTERLOCK;
+    ON "idbMOD1".f[#p.child.MOD_TCV].p.origin.mc.modeAUTO;
     = #p.origin.mc.INTERLOCK;
 
 NETWORK
@@ -169,7 +166,7 @@ TITLE = PID Controller
         D_SEL                := #p.origin.D_SEL ,
         CYCLE                := #p.origin.CYCLE ,
         SP_INT               := #tSetpoint ,
-        PV_IN                := #p.origin.TI1_PV ,
+        PV_IN                := "idbPI1".f[#p.child.TI_HEX].p.origin.PV ,
         MAN                  := #tSetpoint ,
         GAIN                 := #p.origin.GAIN ,
         TI                   := #p.origin.TI ,
@@ -201,13 +198,13 @@ TITLE = Output if Disabled
 _d:   NOP 0;
 
 NETWORK
-TITLE = Transfer PID output to TCV
+TITLE = Transfer PID output to MOD1 TC Valve
     //------------------------------------------------------------------------//
     // Write the PID controller output to the temperature control valve (TCV) //
     // remote position setpoint:                                              //
     //------------------------------------------------------------------------//
     L #p.origin.LMN;
-    T #p.origin.TCVPOS;
+    T "idbMOD1".f[#p.child.MOD_TCV].p.owner.POS_REMOTE;
 
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //

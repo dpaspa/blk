@@ -20,7 +20,7 @@
 //                                            OUT_Q=1(Nw2,3 & 5).             //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-FUNCTION "fcMOD1" : Void
+FUNCTION_BLOCK "fbMOD1"
 TITLE = MOD1 : Modulating control valve
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
@@ -30,7 +30,7 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 // Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_IN_OUT
+VAR
     p : "udtMOD1";           // Block data interface
 END_VAR
 
@@ -203,4 +203,4 @@ TITLE = State REMOTE if commanded
     L "dbCONST".BLK.MOD1.STATE.REMOTE;
     T #p.origin.mc.STATE;
 _h:   NOP 0;
-END_FUNCTION
+END_FUNCTION_BLOCK

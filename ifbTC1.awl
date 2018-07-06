@@ -48,9 +48,8 @@ VERSION : 2.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
-    p : Array[0..@@MAXITEM@@] of "udtTC1";
+    f : Array[0..@@MAXITEM@@] of "fbTC1";
 @@ATTR_END|numInstances@@
-    f : "fb@@CLASS@@";
 @@TEMPLATE_END@@
 END_VAR
 
@@ -72,7 +71,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #p[@@IDX@@].origin.mc.CRIL;
+    = #f[@@IDX@@].p.origin.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -87,7 +86,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #p[@@IDX@@].origin.mc.NCRIL;
+    = #f[@@IDX@@].p.origin.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -95,7 +94,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #p[@@IDX@@].origin.mc.ME;
+    T #f[@@IDX@@].p.origin.mc.ME;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
@@ -103,7 +102,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #p[@@IDX@@].owner.mc.OWNER;
+    T #f[@@IDX@@].p.owner.mc.OWNER;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
@@ -111,7 +110,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
     // This block can only reside within this CPU:                            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #p[@@IDX@@].origin.mc.isOriginBlock;
+    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
@@ -119,7 +118,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
     // This block can only be owned by a parent block in this CPU:            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #p[@@IDX@@].owner.mc.isOriginOwner;
+    = #f[@@IDX@@].p.owner.mc.isOriginOwner;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -129,7 +128,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.TC1.SAFE.CMD;
-    T #p[@@IDX@@].origin.mc.CMD_SAFE;
+    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
 _notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
@@ -138,9 +137,9 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Remote position setpoint
     // Set the instance remote position setpoint:                             //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|LINK@@
-    L "idb@@TCVLINKCLASS@@".p[@@TCVLINKIDX@@].owner.POS_REMOTE;
+    L @@TCVLINKIDX@@;        // @@TCVLINKCLASS@@
+    T #f[@@IDX@@].p.child.MOD_TCV;
 @@ATTR_END|LINK@@
-    T #p[@@IDX@@].origin.TCVPOS;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Temperature measured value
@@ -148,18 +147,16 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Temperature measured value
     // Set the instance temperature measured value from the TI1:              //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|LINK@@
-    L "idb@@TILINKCLASS@@".p[@@TILINKIDX@@].origin.PV;
+    L @@TILINKIDX@@;         // @@TILINKCLASS@@
+    T #f[@@IDX@@].p.child.TI_HEX;
 @@ATTR_END|LINK@@
-    T #p[@@IDX@@].origin.TI1_PV;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL #f
-    (   p                    := #p[@@IDX@@]
-    );
+    CALL #f[@@IDX@@];
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

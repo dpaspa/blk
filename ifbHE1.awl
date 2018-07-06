@@ -41,7 +41,7 @@ VERSION : 2.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
-    p : Array[0..@@MAXITEM@@] of "udt@@CLASS@@";
+    f : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
 @@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
@@ -64,7 +64,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #p[@@IDX@@].origin.mc.CRIL;
+    = #f[@@IDX@@].p.origin.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -79,7 +79,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #p[@@IDX@@].origin.mc.NCRIL;
+    = #f[@@IDX@@].p.origin.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -87,7 +87,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #p[@@IDX@@].origin.mc.ME;
+    T #f[@@IDX@@].p.origin.mc.ME;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
@@ -95,7 +95,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #p[@@IDX@@].owner.mc.OWNER;
+    T #f[@@IDX@@].p.owner.mc.OWNER;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
@@ -103,7 +103,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
     // This block can only reside within this CPU:                            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #p[@@IDX@@].origin.mc.isOriginBlock;
+    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
@@ -111,7 +111,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
     // This block can only be owned by a parent block in this CPU:            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #p[@@IDX@@].owner.mc.isOriginOwner;
+    = #f[@@IDX@@].p.owner.mc.isOriginOwner;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -121,7 +121,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.HE1.SAFE.CMD;
-    T #p[@@IDX@@].origin.mc.CMD_SAFE;
+    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
 _notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
@@ -130,23 +130,21 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Fault Input
     // Set the instance fault input valve:                                    //
     //------------------------------------------------------------------------//
     A "@@INSTANCE@@-FLT";
-    = #p[@@IDX@@].origin.FAULT;
+    = #f[@@IDX@@].p.origin.FAULT;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL "fc@@CLASS@@"
-    (   p                    := #p[@@IDX@@]
-    );
+    CALL #f[@@IDX@@];
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
     //------------------------------------------------------------------------//
     // Set the instance output command to the field:                          //
     //------------------------------------------------------------------------//
-    A #p[@@IDX@@].origin.DO;
+    A #f[@@IDX@@].p.origin.DO;
     = "@@INSTANCE@@-CMD";
 
 @@TEMPLATE_END@@

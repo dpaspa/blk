@@ -14,7 +14,7 @@
 // 1.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
 //----------------------------------------------------------------------------//
 // Index   Instance    Description                                            //
-@@TEMPLATE_BEGIN|createInstancesGlobal@@
+@@TEMPLATE_BEGIN|xferInstancesGlobal@@
 // @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
 @@TEMPLATE_END@@
 //----------------------------------------------------------------------------//
@@ -29,7 +29,7 @@ VERSION : 1.0
 // Declare the instance objects of the class:                                 //
 //----------------------------------------------------------------------------//
 VAR
-@@TEMPLATE_BEGIN|createInstancesGlobal@@
+@@TEMPLATE_BEGIN|xferInstancesGlobal@@
     BSENDOrigin_@@IDX@@ {OriginalPartName := 'BSEND_SFB_PART'; LibVersion := '1.2'} : BSEND;
     BSENDOwner_@@IDX@@ {OriginalPartName := 'BSEND_SFB_PART'; LibVersion := '1.2'} : BSEND;
     BRCVOrigin_@@IDX@@ {OriginalPartName := 'BRCV_SFB_PART'; LibVersion := '1.2'} : BRCV;
@@ -63,14 +63,14 @@ TITLE = COMMS Counter
     T #CTR;
 _commsTimerNotExpired:   NOP 0;
 
-@@TEMPLATE_BEGIN|createInstancesGlobal@@
+@@TEMPLATE_BEGIN|xferInstancesGlobal@@
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ if send Origin to partner CPU
     //------------------------------------------------------------------------//
     // If this is the Block origin then set the transaction send and receive  //
     // IDs and transfer the calculated parameters:                            //
     //------------------------------------------------------------------------//
-    A "idb@@CLASS@@".p[@@IDX@@].origin.mc.isOriginBlock;
+    A "idb@@CLASS@@".f[@@IDX@@].p.origin.mc.isOriginBlock;
     A(;
     L #CTR;
     L @@COUNTERTEMPLATE|1@@;
@@ -90,7 +90,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if receive Origin from partner CPU
     // If this is not the Block origin then set the transaction send and      //
     // receive  IDs to receive the calculated parameters:                     //
     //------------------------------------------------------------------------//
-    AN "idb@@CLASS@@".p[@@IDX@@].origin.mc.isOriginBlock;
+    AN "idb@@CLASS@@".f[@@IDX@@].p.origin.mc.isOriginBlock;
     O(;
     L #CTR;
     L @@COUNTERTEMPLATE@@;
@@ -118,7 +118,7 @@ TITLE = Transfer item @@IDX@@ @@INSTANCE@@ Origin Block data to partner CPU
         DONE                 := #BSENDOrigin_@@IDX@@.DONE ,
         ERROR                := #BSENDOrigin_@@IDX@@.ERROR ,
         STATUS               := #BSENDOrigin_@@IDX@@.STATUS ,
-        SD_1                 := "idb@@CLASS@@".p[@@IDX@@].origin ,
+        SD_1                 := "idb@@CLASS@@".f[@@IDX@@].p.origin ,
         LEN                  := #BSENDOrigin_@@IDX@@.LEN
     );
 
@@ -137,7 +137,7 @@ TITLE = Check item @@IDX@@ @@INSTANCE@@ if receive Origin from partner CPU
     //------------------------------------------------------------------------//
     // If not origin then receive the calculated parameters:                  //
     //------------------------------------------------------------------------//
-    AN "idb@@CLASS@@".p[@@IDX@@].origin.mc.isOriginBlock;
+    AN "idb@@CLASS@@".f[@@IDX@@].p.origin.mc.isOriginBlock;
     = #BRCVOrigin_@@IDX@@.EN_R;
 
 NETWORK
@@ -153,7 +153,7 @@ TITLE = Receive item @@IDX@@ @@INSTANCE@@ Origin Block data from partner CPU
         NDR                  := #BRCVOrigin_@@IDX@@.NDR ,
         ERROR                := #BRCVOrigin_@@IDX@@.ERROR ,
         STATUS               := #BRCVOrigin_@@IDX@@.STATUS ,
-        RD_1                 := "idb@@CLASS@@".p[@@IDX@@].origin ,
+        RD_1                 := "idb@@CLASS@@".f[@@IDX@@].p.origin ,
         LEN                  := #BRCVOrigin_@@IDX@@.LEN
     );
 
@@ -173,7 +173,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if send Owner to partner CPU
     // send the owner parameters:                                             //
     //------------------------------------------------------------------------//
 @@COUNTERTEMPLATEINCR@@
-    A "idb@@CLASS@@".p[@@IDX@@].owner.mc.isOriginOwner;
+    A "idb@@CLASS@@".f[@@IDX@@].p.owner.mc.isOriginOwner;
     A(;
     L #CTR;
     L @@COUNTERTEMPLATE@@;
@@ -197,7 +197,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if receive Owner from partner CPU
     // If this is not the Owner then set the transaction send and receive IDs //
     // and receive the owner parameters:                                      //
     //------------------------------------------------------------------------//
-    AN "idb@@CLASS@@".p[@@IDX@@].owner.mc.isOriginOwner;
+    AN "idb@@CLASS@@".f[@@IDX@@].p.owner.mc.isOriginOwner;
     O(;
     L #CTR;
     L @@COUNTERTEMPLATE@@;
@@ -225,7 +225,7 @@ TITLE = Transfer item @@IDX@@ @@INSTANCE@@ Owner data to partner CPU
         DONE                 := #BSENDOwner_@@IDX@@.DONE ,
         ERROR                := #BSENDOwner_@@IDX@@.ERROR ,
         STATUS               := #BSENDOwner_@@IDX@@.STATUS ,
-        SD_1                 := "idb@@CLASS@@".p[@@IDX@@].owner ,
+        SD_1                 := "idb@@CLASS@@".f[@@IDX@@].p.owner ,
         LEN                  := #BSENDOwner_@@IDX@@.LEN
       );
 
@@ -244,7 +244,7 @@ TITLE = Check item @@IDX@@ @@INSTANCE@@ if receive Owner data from partner CPU
     //------------------------------------------------------------------------//
     // If not the Owner origin then receive the owner parameters:             //
     //------------------------------------------------------------------------//
-    AN "idb@@CLASS@@".p[@@IDX@@].owner.mc.isOriginOwner;
+    AN "idb@@CLASS@@".f[@@IDX@@].p.owner.mc.isOriginOwner;
     = #BRCVOwner_@@IDX@@.EN_R;
 
 NETWORK
@@ -260,7 +260,7 @@ TITLE = Receive item @@IDX@@ @@INSTANCE@@ Owner data from partner CPU
         NDR                  := #BRCVOwner_@@IDX@@.NDR ,
         ERROR                := #BRCVOwner_@@IDX@@.ERROR ,
         STATUS               := #BRCVOwner_@@IDX@@.STATUS ,
-        RD_1                 := "idb@@CLASS@@".p[@@IDX@@].owner ,
+        RD_1                 := "idb@@CLASS@@".f[@@IDX@@].p.owner ,
         LEN                  := #BRCVOwner_@@IDX@@.LEN
     );
 

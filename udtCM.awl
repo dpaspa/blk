@@ -265,7 +265,7 @@ TYPE "udtPOSxorigin"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
-        TMR_TRANS : Timer;             // Transition timer
+        TMR : Time := T#5S;            // Transition timer
         FB_C : Bool;                   // Close feedback signal from field
         FB_O : Bool;                   // Open feedback signal from field
         NC : Bool;                     // Set if Normally Close valve
@@ -294,6 +294,7 @@ TYPE "udtPOS1origin"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        TMR : Time := T#5S;            // Transition timer
         FB_C : Bool;                   // Close feedback signal from field
         FB_O : Bool;                   // Open feedback signal from field
         NC : Bool;                     // Set if Normally Close valve
@@ -322,6 +323,7 @@ TYPE "udtPOS2origin"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        TMR : Time := T#5S;            // Transition timer
         FB_C : Bool;                   // Close feedback signal from field
         FB_O : Bool;                   // Open feedback signal from field
         NC : Bool;                     // Set if Normally Close valve
@@ -350,6 +352,7 @@ TYPE "udtPOS3origin"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        TMR : Time := T#5S;            // Transition timer
         FB_C : Bool;                   // Close feedback signal from field
         FB_O : Bool;                   // Open feedback signal from field
         NC : Bool;                     // Set if Normally Close valve
@@ -378,6 +381,7 @@ TYPE "udtPOS4origin"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+        TMR : Time := T#5S;            // Transition timer
         FB_C : Bool;                   // Close feedback signal from field
         FB_O : Bool;                   // Open feedback signal from field
         NC : Bool;                     // Set if Normally Close valve
@@ -471,8 +475,6 @@ TYPE "udtTC1origin"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
-        mcTCV : "udtMCOrigin";         // TCV Block mode and command origin
-        mcoTCV : "udtMCOwner";         // TCV Block mode and command owner
         GAIN : Real := 1.0;            // Proportional Gain
         TI : Time := T#20S;            // Integral Time
         TD : Time := T#10S;            // Derivative Time
@@ -480,9 +482,7 @@ VERSION : 1.0
         P_SEL : Bool := TRUE;          // Proportional Action ON/OFF
         I_SEL : Bool := TRUE;          // Integral Action ON/OFF
         D_SEL : Bool := TRUE;          // Derivative Action ON/OFF
-        TI1_PV : Real;                 // Measured Value from TI
         LMN : Real;                    // PID controller output (0-100%)
-        TCVPOS : Real;                 // Output (0-100%) to TCV remote setpoint
     END_STRUCT;
 END_TYPE
 
@@ -495,9 +495,18 @@ VERSION : 1.0
     END_STRUCT;
 END_TYPE
 
+TYPE "udtTC1children"
+VERSION : 1.0
+    STRUCT
+        MOD_TCV : Int;                 // Temperature control valve instance DB index
+        TI_HEX : Int;                  // Temperature indicator
+    END_STRUCT;
+END_TYPE
+
 TYPE "udtTC1"
 VERSION : 1.0
     STRUCT
+        child : "udtTC1children";      // Child index to access child instance DB
         origin : "udtTC1origin";       // Calculated data on origin CPU
         owner : "udtTC1owner";         // Directives from owner CPU
     END_STRUCT;
@@ -571,10 +580,6 @@ TYPE "udtVS1origin"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
-        PUMP1 : "udtMOT1";             // Vacuum Pump 1
-        PUMP2 : "udtMOT1";             // Vacuum Pump 2
-        VALVE1 : "udtPOS2";            // State of the user 1 valve
-        VALVE2 : "udtPOS2";            // State of the user 1 valve
         FAULT : Bool;
     END_STRUCT;
 END_TYPE
@@ -586,9 +591,20 @@ VERSION : 1.0
     END_STRUCT;
 END_TYPE
 
+TYPE "udtVS1children"
+VERSION : 1.0
+    STRUCT
+        PUMP1 : Int;                   // Vacuum Pump 1 instance DB index
+        PUMP2 : Int;                   // Vacuum Pump 2 instance DB index
+        VALVE1 : Int;                  // State of the user 1 valve instance DB index
+        VALVE2 : Int;                  // State of the user 1 valve instance DB index
+    END_STRUCT;
+END_TYPE
+
 TYPE "udtVS1"
 VERSION : 1.0
     STRUCT
+        child : "udtVS1children";      // Child index to access child instance DB
         origin : "udtVS1origin";       // Calculated data on origin CPU
         owner : "udtVS1owner";         // Directives from owner CPU
     END_STRUCT;
@@ -654,11 +670,6 @@ TYPE "udtPC1origin"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
-        DRAIN : "udtPOS4";             // Drain valve
-        HPCA : "udtPOS2";              // HPCA valve
-        LPCA : "udtPOS2";              // LPCA valve
-        VACUUM : "udtPOS2";            // Vacuum valve
-        VENT : "udtPOS2";              // Vent valve
         PI1_PV : Real;                 // Pressure measured process value (after scaling)
         PI1_INTERLOCK : Bool;          // Pressure indicator interlock
     END_STRUCT;
@@ -670,42 +681,27 @@ VERSION : 1.0
         mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
         SETPOINT : Real;               // Pressure setpoint
         MEDIUM_GAS : Int;              // Select medium valve to be operated
-        DB_L : Real;                   // Deadband LOW differential
-        DB_H : Real;                   // Deadband HIGH differential
+        DB_L : Real := 0.1;            // Deadband LOW differential
+        DB_H : Real := 0.1;            // Deadband HIGH differential
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtPC1children"
+VERSION : 1.0
+    STRUCT
+        DRAIN : Int;                   // Drain valve instance DB index
+        HPCA : Int;                    // HPCA valve instance DB index
+        LPCA : Int;                    // LPCA valve instance DB index
+        VACUUM : Int;                  // Vacuum valve instance DB index
+        VENT : Int;                    // Vent valve instance DB index
     END_STRUCT;
 END_TYPE
 
 TYPE "udtPC1"
 VERSION : 1.0
     STRUCT
+        child : "udtPC1children";      // Child index to access child instance DB
         origin : "udtPC1origin";       // Calculated data on origin CPU
         owner : "udtPC1owner";         // Directives from owner CPU
-    END_STRUCT;
-END_TYPE
-
-//----------------------------------------------------------------------------//
-// Child structures:                                                          //
-//----------------------------------------------------------------------------//
-TYPE "udtcDI1"
-VERSION : 1.0
-    STRUCT
-        origin : "udtDI1origin";       // Calculated data on origin CPU
-        owner : "udtDI1owner";         // Directives from owner CPU
-    END_STRUCT;
-END_TYPE
-
-TYPE "udtcDI2"
-VERSION : 1.0
-    STRUCT
-        origin : "udtDI2origin";       // Calculated data on origin CPU
-        owner : "udtDI2owner";         // Directives from owner CPU
-    END_STRUCT;
-END_TYPE
-
-TYPE "udtcVS1"
-VERSION : 1.0
-    STRUCT
-        origin : "udtVS1origin";       // Calculated data on origin CPU
-        owner : "udtVS1owner";         // Directives from owner CPU
     END_STRUCT;
 END_TYPE

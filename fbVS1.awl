@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fcVS1                                                         //
+// Class:       fbVS1                                                         //
 // Description:                                                               //
 // Grouped CM for the two vacuum pumps to comprise one vacuum system which    //
 // starts sucking if any user vacuum valve opens indicating a call for the    //
@@ -11,17 +11,17 @@
 // Rev By               Date        CC        Note                            //
 // 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
 //----------------------------------------------------------------------------//
-FUNCTION "fcVS1" : Void
+FUNCTION_BLOCK "fbVS1"
 TITLE = VS1 : VS1 Vacuum System grouped CM
 { S7_Optimized_Access := 'TRUE' }
-NAME : fcVS1
+NAME : fbVS1
 AUTHOR : REO
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
 // Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_IN_OUT
+VAR
     p : "udtVS1";            // Block data interface
 END_VAR
 
@@ -83,10 +83,10 @@ TITLE = Check vacuum pumps are available
     //------------------------------------------------------------------------//
     AN #p.origin.mc.modeOOS;
     A(;
-    O #p.origin.PUMP1.origin.mc.INTERLOCK;
-    O #p.origin.PUMP2.origin.mc.INTERLOCK;
-    ON #p.origin.PUMP1.origin.mc.modeAUTO;
-    ON #p.origin.PUMP2.origin.mc.modeAUTO;
+    O "idbMOT1".f[#p.child.PUMP1].p.origin.mc.INTERLOCK;
+    O "idbMOT1".f[#p.child.PUMP2].p.origin.mc.INTERLOCK;
+    ON "idbMOT1".f[#p.child.PUMP1].p.origin.mc.modeAUTO;
+    ON "idbMOT1".f[#p.child.PUMP2].p.origin.mc.modeAUTO;
     );
     = #p.origin.FAULT;
 
@@ -97,13 +97,13 @@ TITLE = Check vacuum pumps are available
     AN #p.origin.FAULT;
     A(;
     O(;
-    L #p.origin.VALVE1.origin.mc.STATE;
-    L "dbCONST".BLK.POSx.STATE.OPENED;
+    L "idbPOS2".f[#p.child.VALVE1].p.origin.mc.STATE;
+    T "dbCONST".BLK.POSx.STATE.OPENED;
     ==I;
     );
     O(;
-    L #p.origin.VALVE2.origin.mc.STATE;
-    L "dbCONST".BLK.POSx.STATE.OPENED;
+    L "idbPOS2".f[#p.child.VALVE2].p.origin.mc.STATE;
+    T "dbCONST".BLK.POSx.STATE.OPENED;
     ==I;
     );
     );
@@ -120,7 +120,7 @@ TITLE = Check vacuum pumps are available
     A #tDO;
     JCN _a;
     L "dbCONST".BLK.MOT1.CMD.START;
-    T #p.origin.PUMP1.owner.mc.CMD;
+    T "idbMOT1".f[#p.child.PUMP1].p.owner.mc.CMD;
 _a:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -129,7 +129,7 @@ _a:   NOP 0;
     A #tDO;
     JCN _b;
     L "dbCONST".BLK.MOT1.CMD.START;
-    T #p.origin.PUMP2.owner.mc.CMD;
+    T "idbMOT1".f[#p.child.PUMP2].p.owner.mc.CMD;
 _b:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -138,7 +138,7 @@ _b:   NOP 0;
     AN #tDO;
     JCN _c;
     L "dbCONST".BLK.MOT1.CMD.STOP;
-    T #p.origin.PUMP1.owner.mc.CMD;
+    T "idbMOT1".f[#p.child.PUMP1].p.owner.mc.CMD;
 _c:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -147,7 +147,7 @@ _c:   NOP 0;
     AN #tDO;
     JCN _d;
     L "dbCONST".BLK.MOT1.CMD.STOP;
-    T #p.origin.PUMP2.owner.mc.CMD;
+    T "idbMOT1".f[#p.child.PUMP2].p.owner.mc.CMD;
 _d:   NOP 0;
 
 NETWORK
@@ -186,4 +186,4 @@ TITLE = Setting Device State to FAULT
     L "dbCONST".BLK.VS1.STATE.FAULT;
     T #p.origin.mc.STATE;
 _g:   NOP 0;
-END_FUNCTION
+END_FUNCTION_BLOCK

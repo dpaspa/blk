@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fcAL1                                                         //
+// Class:       fbAL1                                                         //
 // Description:                                                               //
 // Load Cell mass indicator.                                                  //
 //----------------------------------------------------------------------------//
@@ -16,17 +16,17 @@
 //                                            mode simulation.                //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-FUNCTION "fcAL1" : Void
+FUNCTION_BLOCK "fbAL1"
 TITLE = AL1 : Generic analog indicator
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
-NAME : fcAL1
+NAME : fbAL1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
 // Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_IN_OUT
+VAR
     p : "udtAL1";            // Block data interface
 END_VAR
 
@@ -136,4 +136,4 @@ TITLE = Set Device State to Fault if any field signal error
     L #p.origin.STATE_FAULT;
     T #p.origin.mc.STATE;
 _b: NOP 0;
-END_FUNCTION
+END_FUNCTION_BLOCK

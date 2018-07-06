@@ -164,51 +164,33 @@ TITLE = Call UN communications between PLCs if enabled
 _xUN:   NOP 0;
 
 NETWORK
-TITLE = Call PC communications between PLCs if enabled
-    //------------------------------------------------------------------------//
-    // Call the communications functions if comms is enabled:                 //
-    //------------------------------------------------------------------------//
-    A "commsEnable";
-    JCN _xPC;
-    CALL "fcCallxPCs";
-_xPC:   NOP 0;
-
-NETWORK
 TITLE = Calling all SFC operator prompts
     //------------------------------------------------------------------------//
     // Call the message function to interface the PLC to the HMI. Messages    //
     // have prompt and confirm handshake:                                     //
     //------------------------------------------------------------------------//
-    CALL "ifbEventPrompt", "idbEventPrompt"
-    (   eventPrompt          := "dbEVENTPrompt".eventPrompt
-    );
+    CALL "ifbEventPrompt", "idbEventPrompt";
 
 NETWORK
 TITLE = Calling all SFC log messages
     //------------------------------------------------------------------------//
     // Call the message function to interface the PLC to the HMI:             //
     //------------------------------------------------------------------------//
-    CALL "ifbEventLogMsg", "idbEventLogMsg"
-    (   eventLogMsg          := "dbEVENTLogMsg".eventLogMsg
-    );
+    CALL "ifbEventLogMsg", "idbEventLogMsg";
 
 NETWORK
 TITLE = Calling all SFC log real data messages
     //------------------------------------------------------------------------//
     // Call the message function to interface the PLC to the HMI:             //
     //------------------------------------------------------------------------//
-    CALL "ifbEventLogReal", "idbEventLogReal"
-    (   eventLogReal          := "dbEVENTLogReal".eventLogReal
-    );
+    CALL "ifbEventLogReal", "idbEventLogReal";
 
 NETWORK
 TITLE = Calling all SFC log time data messages
     //------------------------------------------------------------------------//
     // Call the message function to interface the PLC to the HMI:             //
     //------------------------------------------------------------------------//
-    CALL "ifbEventLogTime", "idbEventLogTime"
-    (   eventLogTime          := "dbEVENTLogTime".eventLogTime
-    );
+    CALL "ifbEventLogTime", "idbEventLogTime";
 
 //NETWORK
 //TITLE = Calling all sequence message events

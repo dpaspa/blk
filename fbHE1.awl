@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fcHE1                                                         //
+// Class:       fbHE1                                                         //
 // Description:                                                               //
 // Vessel vent filter Electric heater element.                                //
 //----------------------------------------------------------------------------//
@@ -20,17 +20,17 @@
 // Ref1.Cutout ON when key switch is OFF and Command is ON or OFF.When Key    //
 // switch is ON cutout can be ON or OFF by using user ON/OFF command.         //
 //----------------------------------------------------------------------------//
-FUNCTION "fcHE1" : Void
+FUNCTION_BLOCK "fbHE1"
 TITLE = HE1 : Vessel vent filter Electric heater element
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
-NAME : fcHE1
+NAME : fbHE1
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
 // Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_IN_OUT
+VAR
     p : "udtHE1";            // Block data interface
 END_VAR
 
@@ -164,4 +164,4 @@ TITLE = Set Device State to Fault if field fault signal is on
     L "dbCONST".BLK.HE1.STATE.FAULT;
     T #p.origin.mc.STATE;
 _d:   NOP 0;
-END_FUNCTION
+END_FUNCTION_BLOCK

@@ -59,11 +59,8 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 // Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_IN_OUT
-    p : "udtPOSx";           // Block data interface
-END_VAR
-
 VAR
+    p : "udtPOSx";           // Block data interface
     openTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
     closeTMR {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
 END_VAR
@@ -80,7 +77,6 @@ VAR_TEMP
     feedbackFAULT : Bool;
     OUT_Q_Close : Bool;
     OUT_Q_Open : Bool;
-    TMR : Time := T#3S;      // Close/Open feedback delay limit
     openTMRElapsed : Time;
     closeTMRElapsed : Time;
     openTMRExpired : Bool;
@@ -251,7 +247,7 @@ TITLE = Start opening travel timer
     CALL #openTMR
     {time_type := 'Time'}
     (   IN                   := #cmdOPEN ,
-        PT                   := #TMR ,
+        PT                   := #p.origin.TMR ,
         Q                    := #openTMRExpired ,
         ET                   := #openTMRElapsed
     );
@@ -265,7 +261,7 @@ TITLE = Start closing travel timer
     CALL #closeTMR
     {time_type := 'Time'}
     (   IN                   := #cmdCLOSE ,
-        PT                   := #TMR ,
+        PT                   := #p.origin.TMR ,
         Q                    := #closeTMRExpired ,
         ET                   := #closeTMRElapsed
     );

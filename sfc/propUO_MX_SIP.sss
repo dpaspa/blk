@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/07/2018 1:45:19 PM by David Paspa
+generated on 5/07/2018 11:10:47 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -503,7 +503,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::60
 --------------------------------------------------
-Name:- emg_filter_pv_drain
+Name:- emg_filter_ti_drain_pv
 Type:- REAL
 Description:- TIn103 Vent Filter Top Outlet Temperature
 ParameterInOut:- IN
@@ -511,7 +511,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::61
 --------------------------------------------------
-Name:- emg_filter_pv_vent
+Name:- emg_filter_ti_vent_pv
 Type:- REAL
 Description:- TIn101 Vent Filter Temperature
 ParameterInOut:- IN
@@ -519,7 +519,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::62
 --------------------------------------------------
-Name:- emx_drain_pv
+Name:- emx_drain_ti_drain_pv
 Type:- REAL
 Description:- TIn107 Drain Temperature
 ParameterInOut:- IN
@@ -1227,13 +1227,13 @@ Description:- Log all Mx vessel temperatures  every 30sec.
 Action:- //Log all temperatures
 SET;
 R #_TEMP_TIMER.IN;
-L #_emg_filter_pv_vent;
+L #_emg_filter_ti_vent_pv;
 T #_real_emg_ti_vent_pv;
-L #_emg_filter_pv_drain;
+L #_emg_filter_ti_drain_pv;
 T #_real_emg_ti_drain_pv;
 L #_emv_vessel_ti_vessel_pv;
 T #_real_emv_ti_vessel_pv;
-L #_emx_drain_pv;
+L #_emx_drain_ti_drain_pv;
 T #_real_emx_ti_drain_pv;
 
 SET;
@@ -1260,13 +1260,13 @@ Condition:- A #_sip_timer_started;
 A(;
 //TIn101
 O(;
-L 	#_emg_filter_pv_vent;
+L 	#_emg_filter_ti_vent_pv;
 L 	#_r_temp_sip_vent;
 <R;
 );
 //TIn103
 O(;
-L              #_emg_filter_pv_drain;
+L              #_emg_filter_ti_drain_pv;
 L 	#_r_temp_sip_vent;
 <R;
 );
@@ -1278,7 +1278,7 @@ L 	#_r_temp_sip;
 );
 //TIn107.
 O(;
-L              #_emx_drain_pv;
+L              #_emx_drain_ti_drain_pv;
 L 	#_r_temp_sip;
 <R;
 );
@@ -1299,13 +1299,13 @@ AN #SQ_TIMER.Q;
 
 //TIn101
 A(;
-L 	#_emg_filter_pv_vent;
+L 	#_emg_filter_ti_vent_pv;
 L 	#_r_temp_sip_vent;
 >R;
 );
 //TIn103
 A(;
-L              #_emg_filter_pv_drain;
+L              #_emg_filter_ti_drain_pv;
 L 	#_r_temp_sip_vent;
 >R;
 );
@@ -1317,7 +1317,7 @@ L 	#_r_temp_sip;
 );
 //TIn107.
 A(;
-L              #_emx_drain_pv;
+L              #_emx_drain_ti_drain_pv;
 L 	#_r_temp_sip;
 >R;
 );
@@ -1495,13 +1495,13 @@ T  #_emc_water_cmd;
 //Log all temperatures.
 SET;
 R #_TEMP_TIMER.IN;
-L #_emg_filter_pv_vent;
+L #_emg_filter_ti_vent_pv;
 T #_real_emg_ti_vent_pv;
-L #_emg_filter_pv_drain;
+L #_emg_filter_ti_drain_pv;
 T #_real_emg_ti_drain_pv;
 L #_emv_vessel_ti_vessel_pv;
 T #_real_emv_ti_vessel_pv;
-L #_emx_drain_pv;
+L #_emx_drain_ti_drain_pv;
 T #_real_emx_ti_drain_pv;
 
 SET;

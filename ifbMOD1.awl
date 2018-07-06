@@ -37,7 +37,7 @@ VERSION : 2.0
 VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
-    p : Array[0..@@MAXITEM@@] of "udt@@CLASS@@";
+    f : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
 @@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
@@ -60,7 +60,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #p[@@IDX@@].origin.mc.CRIL;
+    = #f[@@IDX@@].p.origin.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -75,7 +75,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #p[@@IDX@@].origin.mc.NCRIL;
+    = #f[@@IDX@@].p.origin.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -83,7 +83,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #p[@@IDX@@].origin.mc.ME;
+    T #f[@@IDX@@].p.origin.mc.ME;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
@@ -91,7 +91,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
     // Set the instance owner:                                                //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #p[@@IDX@@].owner.mc.OWNER;
+    T #f[@@IDX@@].p.owner.mc.OWNER;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
@@ -99,7 +99,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
     // This block can only reside within this CPU:                            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #p[@@IDX@@].origin.mc.isOriginBlock;
+    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
@@ -107,7 +107,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
     // This block can only be owned by a parent block in this CPU:            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #p[@@IDX@@].owner.mc.isOriginOwner;
+    = #f[@@IDX@@].p.owner.mc.isOriginOwner;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -117,7 +117,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     A "flagFirstScanRestart";
     JCN _a_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.MOD1.SAFE.CMD;
-    T #p[@@IDX@@].origin.mc.CMD_SAFE;
+    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
 _a_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
@@ -128,7 +128,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Initial remote position is closed
     A "flagFirstScanRestart";
     JCN _b_@@COUNTERTEMPLATE@@;
     L 0.0;
-    T #p[@@IDX@@].owner.POS_REMOTE;
+    T #f[@@IDX@@].p.owner.POS_REMOTE;
 _b_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
@@ -139,7 +139,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Initial local position is closed
     A "flagFirstScanRestart";
     JCN _c_@@COUNTERTEMPLATE@@;
     L 0.0;
-    T #p[@@IDX@@].owner.POS_LOCAL;
+    T #f[@@IDX@@].p.owner.POS_LOCAL;
 _c_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
@@ -147,16 +147,14 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
-    CALL "fc@@CLASS@@"
-    (   p                    := #p[@@IDX@@]
-    );
+    CALL #f[@@IDX@@];
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Output valve position
     //------------------------------------------------------------------------//
     // Set the instance output valve position to the field:                   //
     //------------------------------------------------------------------------//
-    L #p[@@IDX@@].origin.RAW_OUTPUT;
+    L #f[@@IDX@@].p.origin.RAW_OUTPUT;
     T "@@INSTANCE@@-MOD";
 
 @@TEMPLATE_END@@

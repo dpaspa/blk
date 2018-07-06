@@ -66,7 +66,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if send Origin to partner CPU
     // If this is the Block origin then set the transaction send and receive  //
     // IDs and transfer the calculated parameters:                            //
     //------------------------------------------------------------------------//
-    A "idbNCRIL".p[@@IDX@@].isOrigin;
+    A "idbNCRIL".f[@@IDX@@].p.isOrigin;
     A(;
     L #CTR;
     L @@COUNTERTEMPLATE|1@@;
@@ -86,7 +86,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if receive Origin from partner CPU
     // If this is not the Block origin then set the transaction send and      //
     // receive  IDs to receive the calculated parameters:                     //
     //------------------------------------------------------------------------//
-    AN "idbNCRIL".p[@@IDX@@].isOrigin;
+    AN "idbNCRIL".f[@@IDX@@].p.isOrigin;
     O(;
     L #CTR;
     L @@COUNTERTEMPLATE@@;
@@ -114,7 +114,7 @@ TITLE = Transfer item @@IDX@@ @@INSTANCE@@ Origin Block data to partner CPU
         DONE                 := #BSENDOrigin_@@IDX@@.DONE ,
         ERROR                := #BSENDOrigin_@@IDX@@.ERROR ,
         STATUS               := #BSENDOrigin_@@IDX@@.STATUS ,
-        SD_1                 := "idbNCRIL".p[@@IDX@@] ,
+        SD_1                 := "idbNCRIL".f[@@IDX@@].p ,
         LEN                  := #BSENDOrigin_@@IDX@@.LEN
     );
 
@@ -133,7 +133,7 @@ TITLE = Check item @@IDX@@ @@INSTANCE@@ if receive Origin from partner CPU
     //------------------------------------------------------------------------//
     // If not origin then receive the calculated parameters:                  //
     //------------------------------------------------------------------------//
-    AN "idbNCRIL".p[@@IDX@@].isOrigin;
+    AN "idbNCRIL".f[@@IDX@@].p.isOrigin;
     = #BRCVOrigin_@@IDX@@.EN_R;
 
 NETWORK
@@ -149,7 +149,7 @@ TITLE = Receive item @@IDX@@ @@INSTANCE@@ Origin Block data from partner CPU
         NDR                  := #BRCVOrigin_@@IDX@@.NDR ,
         ERROR                := #BRCVOrigin_@@IDX@@.ERROR ,
         STATUS               := #BRCVOrigin_@@IDX@@.STATUS ,
-        RD_1                 := "idbNCRIL".p[@@IDX@@] ,
+        RD_1                 := "idbNCRIL".f[@@IDX@@].p ,
         LEN                  := #BRCVOrigin_@@IDX@@.LEN
     );
 
