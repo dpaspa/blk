@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 5/07/2018 10:42:58 AM by David Paspa
+generated on 24/07/2018 11:25:44 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -55,7 +55,7 @@ PARAMETER::4
 --------------------------------------------------
 Name:- log_msg_temperature_abort
 Type:- BOOL
-Description:- Operation aborted due to HiHi temperature
+Description:- UO_MX_FILTER Operation aborted due to HiHi temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -63,7 +63,7 @@ PARAMETER::5
 --------------------------------------------------
 Name:- log_msg_hihi_temperature
 Type:- BOOL
-Description:- HMI message: Vessel temperature reached High High setpoint
+Description:- UO_MX_FILTER Vessel temperature reached High High setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -143,7 +143,7 @@ PARAMETER::15
 --------------------------------------------------
 Name:- log_msg_vessel_mass
 Type:- BOOL
-Description:- HMI message: Vessel mass not reduced enough in spec. time
+Description:- UO_MX_FILTER Vessel mass not reduced enough in time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -151,7 +151,7 @@ PARAMETER::16
 --------------------------------------------------
 Name:- log_msg_hi_temperature
 Type:- BOOL
-Description:- HMI message: Vessel temperature reached High setpoint
+Description:- UO_MX_FILTER Vessel temperature reached High setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -159,7 +159,7 @@ PARAMETER::17
 --------------------------------------------------
 Name:- log_time_filtration_end
 Type:- BOOL
-Description:- Flags the HMI that filtration operation ended
+Description:- UO_MX_FILTER Filtration end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -167,7 +167,7 @@ PARAMETER::18
 --------------------------------------------------
 Name:- time_filter_end
 Type:- TIME
-Description:- Flags the HMI that Mx filter operation ended
+Description:- UO_MX_FILTER end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -175,7 +175,7 @@ PARAMETER::19
 --------------------------------------------------
 Name:- log_time_filter_end
 Type:- BOOL
-Description:- Logging Mx filter operation end time
+Description:- UO_MX_FILTER end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -183,7 +183,7 @@ PARAMETER::20
 --------------------------------------------------
 Name:- time_filter_begin
 Type:- TIME
-Description:- Logging Mx filter operation start time
+Description:- UO_MX_FILTER begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -191,7 +191,7 @@ PARAMETER::21
 --------------------------------------------------
 Name:- log_time_filter_begin
 Type:- BOOL
-Description:- Flags the HMI that Mx filter started
+Description:- UO_MX_FILTER begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -255,7 +255,7 @@ PARAMETER::29
 --------------------------------------------------
 Name:- prompt_filtration
 Type:- BOOL
-Description:- Prompt operator to start filtration
+Description:- UO_MX_FILTER Operator to confirm to start filtration
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -263,7 +263,7 @@ PARAMETER::30
 --------------------------------------------------
 Name:- prompt_filtration_confirm_yes
 Type:- BOOL
-Description:- operator confirms to start filtration
+Description:- UO_MX_FILTER Operator to confirm to start filtration confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -327,7 +327,7 @@ PARAMETER::38
 --------------------------------------------------
 Name:- log_msg_filtration_complete
 Type:- BOOL
-Description:- Logging operator confirmation transfer complete 
+Description:- UO_MX_FILTER Operator confirmed filtration complete 
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -335,7 +335,7 @@ PARAMETER::39
 --------------------------------------------------
 Name:- confirm_complete
 Type:- BOOL
-Description:- Operator confirms filtration is complete
+Description:- UO_MX_FILTER Sync flag to confirm filtration complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -359,7 +359,7 @@ PARAMETER::42
 --------------------------------------------------
 Name:- start_hpca
 Type:- BOOL
-Description:- Synchronisation flag to start HPN2 supply
+Description:- UO_MX_FILTER Sync flag to start HPN2 supply
 ParameterInOut:- IN
 
 --------------------------------------------------
@@ -367,7 +367,7 @@ PARAMETER::43
 --------------------------------------------------
 Name:- time_filtration_end
 Type:- TOD
-Description:- Logging filtration operation end time
+Description:- UO_MX_FILTER Filtration end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -487,7 +487,7 @@ PARAMETER::58
 --------------------------------------------------
 Name:- ready_hpca
 Type:- BOOL
-Description:- Synchronisation flag ready to start HPN2 supply
+Description:- UO_MX_FILTER Sync flag ready to start HPN2 supply
 ParameterInOut:- OUT
 
 --------------------------------------------------
@@ -495,7 +495,7 @@ PARAMETER::59
 --------------------------------------------------
 Name:- filtration_complete
 Type:- BOOL
-Description:- Synchronisation flag to start transfer
+Description:- UO_MX_FILTER Sync flag to start transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
@@ -533,7 +533,7 @@ T #_emx_mmfl_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emx_mmfl_cmd;
 Verification:- A(;
-L #_emx_mmfl_state;
+L #_emx_mmfl_subs;
 L "dbCONST".BLK.EMX1.SUBS.SETUP_FILTER;
 ==I;
 );
@@ -593,7 +593,7 @@ T  #_emv_vessel_cmd;
 L "dbCONST".BLK.SAFE.CMD;
 T  #_emv_vessel_subs;
 Verification:- A(;
-L #_emc_gas_state;
+L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;  
 ==I;
 );
@@ -668,7 +668,7 @@ SET;
 R #_prompt_filtration_confirm_yes;
 Verification:- //Verify if emt_hex changed to substate PREEMPT.
 A(;
-L #_emt_hex_state;
+L #_emt_hex_subs;
 L  "dbCONST".BLK.EMT1.SUBS.PREEMPT;
 ==I;
 );
@@ -708,27 +708,27 @@ T #_emx_smfl_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emx_smfl_cmd;
 Verification:- A(;
-L #_emv_vessel_state;
+L #_emv_vessel_subs;
 L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
 ==I;
 );
 A(;
-L #_emc_gas_state;
+L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;
 ==I;
 );
 A(;
-L #_emx_mmfl_state;
+L #_emx_mmfl_subs;
 L  "dbCONST".BLK.EMX1.SUBS.FILTER;
 ==I;
 );
 A(;
-L #_emx_transfer_state;
+L #_emx_transfer_subs;
 L  "dbCONST".BLK.EMX2.SUBS.FILTER;
 ==I;
 );
 A(;
-L #_emx_smfl_state;
+L #_emx_smfl_subs;
 L  "dbCONST".BLK.EMX6.SUBS.FILTER_BLEED;
 ==I;
 );
@@ -774,13 +774,13 @@ L  "dbCONST".BLK.CMD.START;
 T  #_emt_hex_cmd;
 Verification:- //Verify if Emx_smfl changed to substate FILTER.
 A(;
-L  #_emx_smfl_state;
+L  #_emx_smfl_subs;
 L  "dbCONST".BLK.EMX6.SUBS.FILTER;
 ==I;
 );
 //Verify if emt_hex changed to substate COOL
 A(;
-L  #_emt_hex_state;
+L  #_emt_hex_subs;
 L  "dbCONST".BLK.EMT1.SUBS.COOL;
 ==I;
 );
@@ -825,7 +825,7 @@ T  #_emc_gas_subs;
 L  "dbCONST".BLK.CMD.START;
 T  #_emc_gas_cmd;
 Verification:- A(;
-L #_emc_gas_state;
+L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ==I;
 );
@@ -1147,7 +1147,7 @@ T #_time_filter_end;
 SET;
 S #_log_time_filter_end;
 Verification:- A(;
-L #_emv_vessel_state;
+L #_emv_vessel_subs;
 L "dbCONST".BLK.EMV1.SUBS.MANWAY;
 ==I;
 );

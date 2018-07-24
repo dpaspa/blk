@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/06/2018 2:54:19 PM by David Paspa
+generated on 24/07/2018 11:30:40 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -48,7 +48,7 @@ PARAMETER::3
 --------------------------------------------------
 Name:- log_time_fill_end
 Type:- BOOL
-Description:- Flags the HMI that FILL operation ended
+Description:- RP_PCSY_FILL end time
 
 ParameterInOut:- VAR
 
@@ -57,7 +57,7 @@ PARAMETER::4
 --------------------------------------------------
 Name:- log_time_fill_begin
 Type:- BOOL
-Description:- Flags the HMI that FILL operation started
+Description:- RP_PCSY_FILL begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -65,7 +65,7 @@ PARAMETER::5
 --------------------------------------------------
 Name:- log_time_wrong_hygiene
 Type:- BOOL
-Description:- Flags the HMI that wrong hygiene status detected
+Description:- RP_PCSY_FILL Storage vessel unit has has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -81,7 +81,7 @@ PARAMETER::7
 --------------------------------------------------
 Name:- prompt_abort_confirm_yes
 Type:- BOOL
-Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+Description:- RP_PCSY_FILL Operator confirmed to abort due to invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -89,7 +89,7 @@ PARAMETER::8
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
-Description:- Prompt operator abort due to Invalid Hygiene Status
+Description:- RP_PCSY_FILL Operator to confirm to abort due to invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -97,7 +97,7 @@ PARAMETER::9
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
-Description:- HMI message: Sy has incorrect Hygiene Status
+Description:- RP_PCSY_FILL Storage vessel unit has has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -121,7 +121,7 @@ PARAMETER::12
 --------------------------------------------------
 Name:- time_wrong_hygiene
 Type:- TOD
-Description:- Logging that Sy has incorrect Hygiene Status
+Description:- RP_PCSY_FILL Storage vessel unit has has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -129,7 +129,7 @@ PARAMETER::13
 --------------------------------------------------
 Name:- time_fill_end
 Type:- TOD
-Description:- Logging FILL operation end time
+Description:- RP_PCSY_FILL end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -137,7 +137,7 @@ PARAMETER::14
 --------------------------------------------------
 Name:- time_fill_begin
 Type:- TOD
-Description:- Logging FILL operation start time
+Description:- RP_PCSY_FILL begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -270,7 +270,7 @@ T #_sy_vessel_subs;
 L "dbCONST".BLK.CMD.START;
 T #_sy_vessel_cmd;
 Verification:- A(;
-L #_sy_vessel_state;
+L #_sy_vessel_subs;
 L "dbCONST".BLK.SY.SUBS.FILL;
 ==I;
 );

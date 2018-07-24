@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 5/07/2018 10:42:53 AM by David Paspa
+generated on 24/07/2018 11:25:39 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -79,7 +79,7 @@ PARAMETER::5
 --------------------------------------------------
 Name:- log_time_filtration_end
 Type:- BOOL
-Description:- Flags the HMI to log filtration operation end time
+Description:- UO_MX_FILL Filtration end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -87,7 +87,7 @@ PARAMETER::6
 --------------------------------------------------
 Name:- log_time_filtration_start
 Type:- BOOL
-Description:- Flags the HMI to log Filtration start time
+Description:- UO_MX_FILL Filtration begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -95,7 +95,7 @@ PARAMETER::7
 --------------------------------------------------
 Name:- time_filtration_start
 Type:- TIME
-Description:- Filtration start time
+Description:- UO_MX_FILL Filtration begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -103,7 +103,7 @@ PARAMETER::8
 --------------------------------------------------
 Name:- log_time_fill_begin
 Type:- BOOL
-Description:- Flags the HMI that Mx filtration to FLz started
+Description:- UO_MX_FILL begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -111,7 +111,7 @@ PARAMETER::9
 --------------------------------------------------
 Name:- time_fill_begin
 Type:- TOD
-Description:- Logging that Mx filtration to FLz operation start time
+Description:- UO_MX_FILL begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -119,7 +119,7 @@ PARAMETER::10
 --------------------------------------------------
 Name:- log_time_fill_end
 Type:- BOOL
-Description:- Flags the HMI that that Mx filtration to FLz ended
+Description:- UO_MX_FILL end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -127,7 +127,7 @@ PARAMETER::11
 --------------------------------------------------
 Name:- time_fill_end
 Type:- TOD
-Description:- Logging that Mx filtration to FLz operation end time
+Description:- UO_MX_FILL end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -191,7 +191,7 @@ PARAMETER::19
 --------------------------------------------------
 Name:- prompt_filtration
 Type:- BOOL
-Description:- Prompt operator to start filtration
+Description:- UO_MX_FILL Operator to confirm when ready to start filtration
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -199,7 +199,7 @@ PARAMETER::20
 --------------------------------------------------
 Name:- prompt_filtration_confirm_yes
 Type:- BOOL
-Description:- operator confirms to start filtration
+Description:- UO_MX_FILL Operator to confirm when ready to start filtration confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -263,7 +263,7 @@ PARAMETER::28
 --------------------------------------------------
 Name:- log_msg_filtration_complete
 Type:- BOOL
-Description:- Logging operator confirmation transfer complete 
+Description:- UO_MX_FILL Filtration is complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -271,7 +271,7 @@ PARAMETER::29
 --------------------------------------------------
 Name:- confirm_complete
 Type:- BOOL
-Description:- Operator confirms filtration is complete
+Description:- UO_MX_FILL Operator to confirm when filtration is complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -295,7 +295,7 @@ PARAMETER::32
 --------------------------------------------------
 Name:- time_filtration_end
 Type:- TOD
-Description:- Logging filtration operation end time
+Description:- UO_MX_FILL Filtration end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -445,7 +445,7 @@ T #_emx_mmfl_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emx_mmfl_cmd;
 Verification:- A(;
-L #_emx_mmfl_state;
+L #_emx_mmfl_subs;
 L "dbCONST".BLK.EMX1.SUBS.SETUP_FILTER;
 ==I;
 );
@@ -510,7 +510,7 @@ L "dbCONST".BLK.SAFE.CMD;
 T  #_emx_transfer_subs;
 
 Verification:- A(;
-L #_emc_gas_state;
+L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ==I;
 );
@@ -585,7 +585,7 @@ L  "dbCONST".BLK.CMD.START;
 T  #_emt_hex_cmd;
 Verification:- //Verify if emt_hex changed to substate PREEMPT.
 A(;
-L #_emt_hex_state;
+L #_emt_hex_subs;
 L  "dbCONST".BLK.EMT1.SUBS.PREEMPT;
 ==I;
 );
@@ -625,27 +625,27 @@ T #_emx_transfer_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emx_transfer_cmd;
 Verification:- A(;
-L #_emv_vessel_state;
+L #_emv_vessel_subs;
 L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
 ==I;
 );
 A(;
-L #_emc_gas_state;
+L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;
 ==I;
 );
 A(;
-L #_emx_mmfl_state;
+L #_emx_mmfl_subs;
 L  "dbCONST".BLK.EMX1.SUBS.FILTER;
 ==I;
 );
 A(;
-L #_emx_transfer_state;
+L #_emx_transfer_subs;
 L  "dbCONST".BLK.EMX2.SUBS.FILL_MX;
 ==I;
 );
 A(;
-L #_emx_smfl_state;
+L #_emx_smfl_subs;
 L  "dbCONST".BLK.EMX6.SUBS.FILTER_BLEED;
 ==I;
 );
@@ -691,13 +691,13 @@ L  "dbCONST".BLK.CMD.START;
 T  #_emt_hex_cmd;
 Verification:- //Verify if Emx_smfl changed to substate FILTER.
 A(;
-L  #_emx_smfl_state;
+L  #_emx_smfl_subs;
 L  "dbCONST".BLK.EMX6.SUBS.FILTER;
 ==I;
 );
 //Verify if emt_hex changed to substate COOL
 A(;
-L  #_emt_hex_state;
+L  #_emt_hex_subs;
 L  "dbCONST".BLK.EMT1.SUBS.COOL;
 ==I;
 );
@@ -748,7 +748,7 @@ T  #_emc_gas_subs;
 L  "dbCONST".BLK.CMD.START;
 T  #_emc_gas_cmd;
 Verification:- A(;
-L #_emc_gas_state;
+L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ==I;
 );
@@ -933,7 +933,7 @@ T #_time_fill_end;
 SET;
 S #_log_time_fill_end;
 Verification:- A(;
-L #_emv_vessel_state;
+L #_emv_vessel_subs;
 L "dbCONST".BLK.EMV1.SUBS.MANWAY;
 ==I;
 );

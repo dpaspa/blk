@@ -457,9 +457,10 @@ TYPE "udtSIC1owner"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
-        SETPOINT : Real;          // Agitator speed setpoint
+        SETPOINT : Real;               // Agitator speed setpoint
         USER_INPUT : Word;             // Manual mode, equivallent of Analog input, to be entered by Operator
         MAN_PID : Bool;                // Manual non pid selection
+        REQ_STOP : Bool := FALSE;      // Stop request for agitator motor from other modules
     END_STRUCT;
 END_TYPE
 

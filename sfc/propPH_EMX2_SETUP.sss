@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/06/2018 3:00:29 PM by David Paspa
+generated on 24/07/2018 11:55:33 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -35,7 +35,7 @@ PARAMETER::1
 --------------------------------------------------
 Name:- log_msg_confirm_connect
 Type:- BOOL
-Description:- Operator confirms connections have been made.
+Description:- PH_EMX2 SETUP Operator confirm filling machine line connected confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -43,7 +43,7 @@ PARAMETER::2
 --------------------------------------------------
 Name:- time_setup_begin
 Type:- TOD
-Description:- Logging SETUP operation start time
+Description:- PH_EMX2 SETUP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -51,7 +51,7 @@ PARAMETER::3
 --------------------------------------------------
 Name:- log_time_setup_begin
 Type:- BOOL
-Description:- Flags the HMI that SETUP started
+Description:- PH_EMX2 SETUP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -59,7 +59,7 @@ PARAMETER::4
 --------------------------------------------------
 Name:- time_setup_end
 Type:- TOD
-Description:- Description
+Description:- PH_EMX2 SETUP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -67,7 +67,7 @@ PARAMETER::5
 --------------------------------------------------
 Name:- log_time_setup_end
 Type:- BOOL
-Description:- Description
+Description:- PH_EMX2 SETUP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -123,7 +123,7 @@ PARAMETER::12
 --------------------------------------------------
 Name:- prompt_connect_confirm_yes
 Type:- BOOL
-Description:- confirm that filling machine line connected
+Description:- PH_EMX2 SETUP Operator confirm filling machine line connected confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -131,7 +131,7 @@ PARAMETER::13
 --------------------------------------------------
 Name:- prompt_connect
 Type:- BOOL
-Description:- Prompt to connect filling machine line
+Description:- PH_EMX2 SETUP Operator to confirm filling machine line connected
 ParameterInOut:- VAR
 
 
@@ -218,7 +218,7 @@ Description:- Jump if correct switch conection has been made.
 Condition:- //Check switch status for respective connection.
 
 A(;
-	A(;
+	O(;
 	//If M1 selected, then check the resp. flowpath status.
 		A(;
 		L #_vessel_mx;
@@ -247,7 +247,7 @@ A(;
 );
 
 A(;
-	A(;
+	O(;
 	//If F1P1 selected, then check the resp. flowpath status.
 		A(;
 		L #_fill_flz;

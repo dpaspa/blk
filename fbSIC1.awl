@@ -335,11 +335,13 @@ NETWORK
 TITLE = Flag output should be on if command is ENABLE and mass is enough
     //------------------------------------------------------------------------//
     // Flag output to be set on if command is enable and no interlock and     //
-    // mass in the vessel is high enough to permit agiator operation:         //
+    // mass in the vessel is high enough to permit agiator operation and      //
+    // no stop request from another interested party (i.e. module, such EMM1)://
     //------------------------------------------------------------------------//
     A #cmdEnable;
     A #permitMass;
     AN #p.origin.mc.modeOOS;
+    AN #p.owner.REQ_STOP;
     = #tDO;
 
 NETWORK

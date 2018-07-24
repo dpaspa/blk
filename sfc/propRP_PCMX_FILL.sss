@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/06/2018 2:54:10 PM by David Paspa
+generated on 24/07/2018 11:30:31 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -63,7 +63,7 @@ PARAMETER::5
 --------------------------------------------------
 Name:- log_time_wrong_hygiene
 Type:- BOOL
-Description:- Description
+Description:- RP_PCMX_FILL Mixing Vessel Unit has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -71,7 +71,7 @@ PARAMETER::6
 --------------------------------------------------
 Name:- log_time_fill_end
 Type:- BOOL
-Description:- Flags the HMI that FILL ended
+Description:- RP_PCMX_FILL end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -79,7 +79,7 @@ PARAMETER::7
 --------------------------------------------------
 Name:- log_time_fill_begin
 Type:- BOOL
-Description:- Flags the HMI that FILL started
+Description:- RP_PCMX_FILL begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -95,7 +95,7 @@ PARAMETER::9
 --------------------------------------------------
 Name:- prompt_abort_confirm_yes
 Type:- BOOL
-Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+Description:- RP_PCMX_FILL Operator confirmed to abort due to invalid MX Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -103,7 +103,7 @@ PARAMETER::10
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
-Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+Description:- RP_PCMX_FILL Operator to confirm to abort due to invalid MX Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -111,7 +111,7 @@ PARAMETER::11
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
-Description:- HMI message: Mx has incorrect Hygiene Status
+Description:- RP_PCMX_FILL Mixing Vessel Unit has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -119,7 +119,7 @@ PARAMETER::12
 --------------------------------------------------
 Name:- time_wrong_hygiene
 Type:- TOD
-Description:- Logging that Mx, MFL and/orSy have incorrect Hygiene Status
+Description:- RP_PCMX_FILL Mixing Vessel Unit has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -135,7 +135,7 @@ PARAMETER::14
 --------------------------------------------------
 Name:- time_fill_end
 Type:- TOD
-Description:- Logging FILL operation end time
+Description:- RP_PCMX_FILL end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -143,7 +143,7 @@ PARAMETER::15
 --------------------------------------------------
 Name:- time_fill_begin
 Type:- TOD
-Description:- Logging FILL operation start time
+Description:- RP_PCMX_FILL begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -286,7 +286,7 @@ T #_mx_vessel_subs;
 L "dbCONST".BLK.CMD.START;
 T #_mx_vessel_cmd;
 Verification:- A(;
-L #_mx_vessel_state;
+L #_mx_vessel_subs;
 L "dbCONST".BLK.MX.SUBS.FILL;
 ==I;
 );

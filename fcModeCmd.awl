@@ -91,6 +91,18 @@ TITLE = Interlock Flag
     = #mcOrigin.INTERLOCK;
 
 NETWORK
+TITLE = Availability Flag
+    //------------------------------------------------------------------------//
+    // Set boolean available flag if the OWNER ID is zero:                    //
+    //------------------------------------------------------------------------//
+    A(;
+    L #mcOwner.OWNER;
+    L 0;
+    ==I;
+    );
+    = #mcOwner.isAvailable;
+
+NETWORK
 TITLE = Send safe command in case of any interlock or failure
     //------------------------------------------------------------------------//
     // Send safe command if any interlock or startup:                         //

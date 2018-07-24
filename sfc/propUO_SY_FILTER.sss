@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 5/07/2018 10:43:59 AM by David Paspa
+generated on 24/07/2018 11:26:48 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -47,7 +47,7 @@ PARAMETER::3
 --------------------------------------------------
 Name:- log_time_filter_begin
 Type:- BOOL
-Description:- Flags the HMI that SY filter operation started
+Description:- UO_SY_FILTER begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -55,7 +55,7 @@ PARAMETER::4
 --------------------------------------------------
 Name:- time_filter_begin
 Type:- TOD
-Description:- Logging SY filter operation start time
+Description:- UO_SY_FILTER begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -63,7 +63,7 @@ PARAMETER::5
 --------------------------------------------------
 Name:- log_time_filter_end
 Type:- BOOL
-Description:- Flags the HMI that SY filter operation ended
+Description:- UO_SY_FILTER end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -71,7 +71,7 @@ PARAMETER::6
 --------------------------------------------------
 Name:- time_filter_end
 Type:- TOD
-Description:- Logging SY filter operation end time
+Description:- UO_SY_FILTER end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -254,7 +254,7 @@ L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 A(;
-L #_emv_vessel_state;
+L #_emv_vessel_subs;
 L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
 ==I;
 );
@@ -320,7 +320,7 @@ L #_r_time_lpca_purge;
 T #SQ_TIMER.PT;
 R #_path_ready;
 Verification:- A(;
-L #_emc_gas_state;
+L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ==I;
 );
@@ -382,7 +382,7 @@ S #_log_time_filter_end;
 R #_path_ready;
 
 Verification:- A(;
-L #_emc_gas_state;
+L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ==I;
 );

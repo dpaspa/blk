@@ -88,14 +88,15 @@ END_TYPE
 TYPE "udtModeCommandBLK"
 VERSION : 1.0
     STRUCT
+        SUBS : Int;                    // Selected substate for Block level modules
+        SUBLast : Int;
+        idle: Bool;
         permitStart: Bool;
         eventModeAuto : Bool;
         eventModeManual : Bool;
         eventModeOOS : Bool;
         eventCmdStart : Bool;
         eventCmdStop : Bool;
-        SUBS : Int;                    // Selected substate for Block level modules
-        SUBLast : Int;
         CHILD_FAIL : Bool;
         BAD_PARAM : Bool;
         edgeCommandStart : Bool;

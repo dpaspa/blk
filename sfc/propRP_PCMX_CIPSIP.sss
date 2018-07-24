@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/06/2018 2:54:08 PM by David Paspa
+generated on 24/07/2018 11:30:29 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -51,7 +51,7 @@ PARAMETER::3
 --------------------------------------------------
 Name:- log_time_cipsip_begin
 Type:- BOOL
-Description:- Flags the HMI that CIPSIP started
+Description:- RP_PCMX_CIPSIP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -59,87 +59,87 @@ PARAMETER::4
 --------------------------------------------------
 Name:- log_time_cipsip_end
 Type:- BOOL
-Description:- Flags the HMI that CIPSIP ended
+Description:- RP_PCMX_CIPSIP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- Report_Evnt_025
+Name:- log_msg_sip_sy_end
 Type:- BOOL
-Description:- SIP end SY for batch report
+Description:- RP_PCMX_CIPSIP Sterilisation SY end
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- Report_Evnt_024
+Name:- log_msg_sip_sy_begin
 Type:- BOOL
-Description:- SIP Start SY for batch report
+Description:- RP_PCMX_CIPSIP Sterilisation SY begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- Report_Evnt_023
+Name:- log_msg_vacuum_sy_end
 Type:- BOOL
-Description:- Vacuum end SY for batch report
+Description:- RP_PCMX_CIPSIP Vacuum SY end
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::8
 --------------------------------------------------
-Name:- Report_Evnt_022
+Name:- log_msg_vacuum_sy_begin
 Type:- BOOL
-Description:- Vacuum Start Sy for batch report
+Description:- RP_PCMX_CIPSIP Vacuum SY begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::9
 --------------------------------------------------
-Name:- Report_Evnt_020
+Name:- log_msg_sip_mx_end
 Type:- BOOL
-Description:- SIP end Mx for batch report
+Description:- RP_PCMX_CIPSIP Sterilisation MX end
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::10
 --------------------------------------------------
-Name:- Report_Evnt_019
+Name:- log_msg_sip_mx_begin
 Type:- BOOL
-Description:- SIP Start MX for batch Report
+Description:- RP_PCMX_CIPSIP Sterilisation MX begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::11
 --------------------------------------------------
-Name:- Report_Evnt_018
+Name:- log_msg_vacuum_mx_end
 Type:- BOOL
-Description:- Vacuum end Mx for Sip for batch report
+Description:- RP_PCMX_CIPSIP Vacuum MX end
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::12
 --------------------------------------------------
-Name:- Report_Evnt_017
+Name:- log_msg_vacuum_mx_begin
 Type:- BOOL
-Description:- Vacuum Start Mx Sip for batch report
+Description:- RP_PCMX_CIPSIP Vacuum MX begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::13
 --------------------------------------------------
-Name:- Report_Evnt_002
+Name:- log_msg_vacuum_hold_end
 Type:- BOOL
-Description:- Vacuum Hold Test End for the batch report
+Description:- RP_PCMX_CIPSIP Vacuum Hold Test end
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::14
 --------------------------------------------------
-Name:- Report_Evnt_001
+Name:- log_msg_vacuum_hold_begin
 Type:- BOOL
-Description:- Vacuum Hold Test Start for Batch Report
+Description:- RP_PCMX_CIPSIP Vacuum Hold Test begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -147,7 +147,7 @@ PARAMETER::15
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
-Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+Description:- RP_PCMX_CIPSIP Operator to confirm abort due to invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -155,7 +155,7 @@ PARAMETER::16
 --------------------------------------------------
 Name:- prompt_abort_confirm_yes
 Type:- BOOL
-Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+Description:- RP_PCMX_CIPSIP Operator confirmed to abort due to invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -163,7 +163,7 @@ PARAMETER::17
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
-Description:- HMI message: wrong hygiene status of unit Mx
+Description:- RP_PCMX_CIPSIP Mixing Vessel Unit has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -179,7 +179,7 @@ PARAMETER::19
 --------------------------------------------------
 Name:- log_time_wrong_hygiene
 Type:- BOOL
-Description:- Logging wrong hygiene status of unit Mx
+Description:- RP_PCMX_CIPSIP Mixing Vessel Unit has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -187,7 +187,7 @@ PARAMETER::20
 --------------------------------------------------
 Name:- time_wrong_hygiene
 Type:- TOD
-Description:- Logging time wrong hygiene status detected
+Description:- RP_PCMX_CIPSIP Mixing Vessel Unit has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -195,7 +195,7 @@ PARAMETER::21
 --------------------------------------------------
 Name:- time_cipsip_end
 Type:- TOD
-Description:- Logging CIP/SIP operation end time
+Description:- RP_PCMX_CIPSIP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -203,7 +203,7 @@ PARAMETER::22
 --------------------------------------------------
 Name:- time_cipsip_begin
 Type:- TOD
-Description:- Logging CIP/SIP operation start time
+Description:- RP_PCMX_CIPSIP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -256,19 +256,6 @@ T #_time_cipsip_begin;
 
 SET;
 S #_log_time_cipsip_begin;
-
-//Report Event Reset
-SET;
-R #_Report_Evnt_001;
-R #_Report_Evnt_002;
-R #_Report_Evnt_017;
-R #_Report_Evnt_018;
-R #_Report_Evnt_019;
-R #_Report_Evnt_020;
-R #_Report_Evnt_022;
-R #_Report_Evnt_023;
-R #_Report_Evnt_024;
-R #_Report_Evnt_025;
 Verification:- A "uncondJump";
 
 
@@ -349,7 +336,7 @@ T #_mx_vessel_subs;
 L "dbCONST".BLK.CMD.START;
 T #_mx_vessel_cmd;
 Verification:- A(;
-L #_mx_vessel_state;
+L #_mx_vessel_subs;
 L "dbCONST".BLK.MX.SUBS.SETUP;
 ==I;
 );
@@ -391,7 +378,7 @@ T #_mx_vessel_subs;
 L "dbCONST".BLK.CMD.START;
 T #_mx_vessel_cmd;
 Verification:- A(;
-L #_mx_vessel_state;
+L #_mx_vessel_subs;
 L "dbCONST".BLK.MX.SUBS.CIP;
 ==I;
 );
@@ -467,7 +454,7 @@ L "dbCONST".BLK.HYGIENE.SIP;
 T #_mx_vessel_hygiene;
 
 Verification:- A(;
-L #_mx_vessel_state;
+L #_mx_vessel_subs;
 L "dbCONST".BLK.MX.SUBS.SIP;
 ==I;
 );
@@ -515,7 +502,7 @@ S #_release_mx;
 
 //Report Event Set
 SET;
-S #_Report_Evnt_020;
+S #_log_msg_sip_mx_end;
 Verification:- A "uncondJump";
 
 
@@ -561,19 +548,6 @@ SET;
 R #_toggle_mode;
 R #_prompt_abort;
 R #_prompt_abort_confirm_yes;
-
-//Repor Event Reset
-SET;
-R #_Report_Evnt_001;
-R #_Report_Evnt_002;
-R #_Report_Evnt_017;
-R #_Report_Evnt_018;
-R #_Report_Evnt_019;
-R #_Report_Evnt_020;
-R #_Report_Evnt_022;
-R #_Report_Evnt_023;
-R #_Report_Evnt_024;
-R #_Report_Evnt_025;
 Verification:- A "uncondJump";
 
 ****************************************************************************************************

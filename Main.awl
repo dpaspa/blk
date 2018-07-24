@@ -30,7 +30,7 @@ VAR_TEMP
     OB1_MIN_CYCLE : Int;     // Minimum cycle time of OB1 (milliseconds)
     OB1_MAX_CYCLE : Int;     // Maximum cycle time of OB1 (milliseconds)
     OB1_DATE_TIME : Date_And_Time;  // Date and time OB1 started
-    TmRetVal : Int;
+    tmpRetVal : Int;
     wabc : Int;
     wmode : Int;
 END_VAR
@@ -51,12 +51,12 @@ TITLE = CPU to CPU Communication timer and pulse bit
 NETWORK
 TITLE = Time Management
     CALL "fcTimeManagement"
-    (   SET                         := "timeManagement" ,
-        NEW_DATE                    := "dbCONST".CHRONO.NEW_DATE ,
-        NEW_TIME                    := "dbCONST".CHRONO.NEW_TIME ,
-        Ret_Val                     := #TmRetVal ,
-        CPU_TIME                    := "dbCONST".CHRONO.CPU_TIME ,
-        CPU_DATE                    := "dbCONST".CHRONO.CPU_DATE
+    (   SET                  := "timeManagement" ,
+        NEW_DATE             := "dbCONST".CHRONO.NEW_DATE ,
+        NEW_TIME             := "dbCONST".CHRONO.NEW_TIME ,
+        CPU_DATE             := "dbCONST".CHRONO.CPU_DATE ,
+        CPU_TIME             := "dbCONST".CHRONO.CPU_TIME ,
+        retVal               := #tmpRetVal
     );
 
 NETWORK

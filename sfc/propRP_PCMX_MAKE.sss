@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/06/2018 2:54:14 PM by David Paspa
+generated on 24/07/2018 11:30:35 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -39,7 +39,7 @@ PARAMETER::2
 --------------------------------------------------
 Name:- log_time_wrong_hygiene
 Type:- BOOL
-Description:- Flags the HMI that wrong hygiene status detected
+Description:- RP_PCMX_MAKE Mixing vessel unit has wrong Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -47,7 +47,7 @@ PARAMETER::3
 --------------------------------------------------
 Name:- log_time_make_end
 Type:- BOOL
-Description:- Flags the HMI that Mx recipe MAKE ended
+Description:- RP_PCMX_MAKE end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -55,7 +55,7 @@ PARAMETER::4
 --------------------------------------------------
 Name:- log_time_make_begin
 Type:- BOOL
-Description:- Flags the HMI that Mx recipe MAKE operation started
+Description:- RP_PCMX_MAKE begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -71,7 +71,7 @@ PARAMETER::6
 --------------------------------------------------
 Name:- prompt_abort_confirm_yes
 Type:- BOOL
-Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+Description:- RP_PCMX_MAKE Operator confirmed to abort due to invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -79,7 +79,7 @@ PARAMETER::7
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
-Description:- Operator Acknowledge Abort Due to Invalid Hygiene Status
+Description:- RP_PCMX_MAKE Operator to confirm to abort due to invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -87,7 +87,7 @@ PARAMETER::8
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
-Description:- HMI message: Mx is in the wrong Hygiene Status
+Description:- RP_PCMX_MAKE Mixing vessel unit has wrong Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -111,7 +111,7 @@ PARAMETER::11
 --------------------------------------------------
 Name:- time_make_end
 Type:- TOD
-Description:- Logging Mx recipe MAKE operation end time
+Description:- RP_PCMX_MAKE end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -119,7 +119,7 @@ PARAMETER::12
 --------------------------------------------------
 Name:- time_make_begin
 Type:- TOD
-Description:- Logging Mx recipe MAKE operation start time
+Description:- RP_PCMX_MAKE begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -127,7 +127,7 @@ PARAMETER::13
 --------------------------------------------------
 Name:- time_wrong_hygiene
 Type:- TOD
-Description:- Logging that Mx is in the wrong Hygiene Status
+Description:- RP_PCMX_MAKE Mixing vessel unit has wrong Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -270,7 +270,7 @@ T #_mx_vessel_subs;
 L "dbCONST".BLK.MX.CMD.START;
 T #_mx_vessel_cmd;
 Verification:- A(;
-L #_mx_vessel_state;
+L #_mx_vessel_subs;
 L "dbCONST".BLK.MX.SUBS.MAKE;
 ==I;
 );

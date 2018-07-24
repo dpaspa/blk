@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/06/2018 3:00:32 PM by David Paspa
+generated on 24/07/2018 11:55:36 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -30,7 +30,7 @@ PARAMETER::1
 --------------------------------------------------
 Name:- time_pulse_begin
 Type:- TOD
-Description:- Description
+Description:- PH_EMX4_SIP_PULSE begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -38,7 +38,7 @@ PARAMETER::2
 --------------------------------------------------
 Name:- log_time_pulse_begin
 Type:- BOOL
-Description:- Description
+Description:- PH_EMX4_SIP_PULSE begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -46,7 +46,7 @@ PARAMETER::3
 --------------------------------------------------
 Name:- time_pulse_end
 Type:- TOD
-Description:- Description
+Description:- PH_EMX4_SIP_PULSE end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -54,7 +54,7 @@ PARAMETER::4
 --------------------------------------------------
 Name:- log_time_pulse_end
 Type:- BOOL
-Description:- Description
+Description:- PH_EMX4_SIP_PULSE end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -269,14 +269,20 @@ STEP::06
 --------------------------------------------------
 StepNo:- 06
 Title:- PH_EMX4_SIP_PULSE : Last Step
-Description:- Log PULSE operation end time.
+Description:- Close SIP drain valve.
+Log PULSE operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log PULSE operation end time.
+Description:- Close SIP drain valve.
+Log PULSE operation end time.
 Action:- SET;
 R #sqSeqTimerStart;
+
+//Close SIP drain valve.
+L "dbCONST".BLK.POSx.CMD.CLOSE;
+T  #_pos_sip_cmd;
 
 //Log PULSE operation end time.
 L "dbCONST".CHRONO.CPU_TIME;

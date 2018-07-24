@@ -1,9 +1,19 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description: Generic block hygiene status calculation.                     //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      09-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
 FUNCTION "fcTimeManagement" : Void
 TITLE = TIME MANAGEMENT
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
 NAME : fcTimeManagement
-VERSION : 0.1
+VERSION : 2.0
 
    VAR_INPUT
       SET : Bool;
@@ -12,9 +22,9 @@ VERSION : 0.1
    END_VAR
 
    VAR_OUTPUT
-      Ret_Val : Int;
-      CPU_TIME : Time_Of_Day;
       CPU_DATE : Date;
+      CPU_TIME : Time_Of_Day;
+      retVal : Int;
    END_VAR
 
    VAR_TEMP
@@ -31,53 +41,43 @@ VERSION : 0.1
 BEGIN
 NETWORK
 TITLE = SET NEW DATE AND TIME
-      A(;
-      A #SET;
-      JNB Label_0;
       CALL T_COMBINE
       {time_type := 'Time_Of_Day', date_type := 'Date_And_Time'}
       (  IN1                         := #NEW_DATE ,
          IN2                         := #NEW_TIME ,
          OUT                         := #DAT_TIM
       );
-Label_0:      A BR;
-      );
-      JNB Label_1;
+
       CALL WR_SYS_T
       {date_type := 'Date_And_Time'}
       (  IN                          := #DAT_TIM ,
-         RET_VAL                     := #Ret_Val
+         RET_VAL                     := #retVal
       );
-Label_1:      NOP 0;
+
 NETWORK
 TITLE = DT TO TOD
-//READ PLC CPU DATE AND TIME
-      AN #SET;
-      JNB Label_2;
-      CALL RD_SYS_T
-      {date_type := 'Date_And_Time'}
-      (  RET_VAL                     := "timePLCStatus" ,
-         OUT                         := #DAT_TIM
-      );
-Label_2:      NOP 0;
+    //------------------------------------------------------------------------//
+    // Read PLC CPU date and time:                                            //
+    //------------------------------------------------------------------------//
+    CALL RD_SYS_T
+    {date_type := 'Date_And_Time'}
+    (   RET_VAL              := "timePLCStatus" ,
+        OUT                  := #DAT_TIM
+    );
+
 NETWORK
 TITLE = EXTRACT TIME OF THE DAY FROM DATE & TIME
-      AN #SET;
-      JNB Label_3;
       CALL T_CONV
       {src_type := 'Date_And_Time', dest_type := 'Time_Of_Day'}
       (  IN                          := #DAT_TIM ,
          OUT                         := #CPU_TIME
       );
-Label_3:      NOP 0;
+
 NETWORK
 TITLE = EXTRACT DATE
-      AN #SET;
-      JNB Label_4;
       CALL T_CONV
       {src_type := 'Date_And_Time', dest_type := 'Date'}
       (  IN                          := #DAT_TIM ,
          OUT                         := #CPU_DATE
       );
-Label_4:      NOP 0;
 END_FUNCTION
