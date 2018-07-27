@@ -21,9 +21,6 @@ VERSION : 1.0
 @@ATTR_BEGIN|pPairInputDefine@@
         @@CHILDPAIRALIAS@@_@@CHILDPAIRPARAMETER@@ : @@PARAMETERPAIRDATATYPE@@;
 @@ATTR_END|pPairInputDefine@@
-@@ATTR_BEGIN|LINK_BLK_Define@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
-@@ATTR_END|LINK_BLK_Define@@
 @@ATTR_BEGIN|pEventPromptExists@@
 @@ATTR_BEGIN|pEventPromptNum@@
         eventPrompt : Array[0..@@IDXEVENTMAX@@] of "udtEventPrompt";   // SFC events for operator prompts
@@ -54,7 +51,7 @@ TYPE "udt@@CLASS@@owner"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
-        CHILD_RELEASE : Bool;              // Request to release children when complete
+        CHILD_RELEASE : Bool;          // Request to release children when complete
 @@ATTR_BEGIN|pClassBlockOwner@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
 @@ATTR_END|pClassBlockOwner@@
@@ -68,15 +65,43 @@ TYPE "udt@@CLASS@@children"
 VERSION : 1.0
     STRUCT
 @@ATTR_BEGIN|CHILD@@
-        @@CHILDPARAMETERALIAS@@ : Int;          // @@CHILDALIASCLASS@@ @@CHILDPARAMETERALIAS@@ @@CHILDALIASDESCRIPTION@@ Instance DB Index
+        @@CHILDPARAMETERALIAS@@ : Int; // @@CHILDALIASCLASS@@ @@CHILDPARAMETERALIAS@@ @@CHILDALIASDESCRIPTION@@ Instance DB Index
 @@ATTR_END|CHILD@@
     END_STRUCT;
 END_TYPE
+
+@@ATTR_BEGIN|pLinkExists@@
+TYPE "udt@@CLASS@@link"
+VERSION : 1.0
+    STRUCT
+@@ATTR_BEGIN|pLink@@
+        @@CHILDPARAMETERALIAS@@ : Int;      // @@CHILDPARAMETERCLASS@@ Instance DB Index
+@@ATTR_END|pLink@@
+    END_STRUCT;
+END_TYPE
+@@ATTR_END|pLinkExists@@
+
+@@ATTR_BEGIN|pChildSelectExists@@
+TYPE "udt@@CLASS@@select"
+VERSION : 1.0
+    STRUCT
+@@ATTR_BEGIN|pChildSelect@@
+        @@LINKPARAMETERALIAS@@ : Int;      // @@CHILDCLASS@@ Instance DB Index
+@@ATTR_END|pChildSelect@@
+    END_STRUCT;
+END_TYPE
+@@ATTR_END|pChildSelectExists@@
 
 TYPE "udt@@CLASS@@"
 VERSION : 1.0
     STRUCT
         child : "udt@@CLASS@@children";      // Child index to access child instance DB
+@@ATTR_BEGIN|pLinkExists@@
+        link : "udt@@CLASS@@link";           // Link index to access link instance DB
+@@ATTR_END|pLinkExists@@
+@@ATTR_BEGIN|pChildSelectExists@@
+        select : "udt@@CLASS@@select";       // Select index to access selection instance DB
+@@ATTR_END|pChildSelectExists@@
         origin : "udt@@CLASS@@origin";       // Calculated data on origin CPU
         owner : "udt@@CLASS@@owner";         // Directives from owner CPU
     END_STRUCT;

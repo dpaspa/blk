@@ -46,7 +46,7 @@ VAR
 END_VAR
 
 VAR_TEMP
-    ackComplete : Bool;
+    ackPending : Bool;
     almError : Bool;
     almState : Byte;
     almStatus : Word;
@@ -61,9 +61,10 @@ TITLE = Check if message event needs to be raised
     // Check if real message event or test signal number requested:           //
     //------------------------------------------------------------------------//
     A #eventPrompt[@@IDXEVENT@@].trigger;
+    FP #eventPrompt[@@IDXEVENT@@].edgeTrigger;
     O(;
     L "testEventPrompt";
-    L #eventPrompt[@@IDXEVENT@@].idxMessage;
+    L @@IDXEVENT@@;
     ==I;
     );
     = #raiseEvent;
@@ -77,7 +78,6 @@ TITLE = Clear response flags if message event needs to be raised
     JCN _evRaise_@@IDXEVENT@@;
     R #eventPrompt[@@IDXEVENT@@].confirmYes;
     R #eventPrompt[@@IDXEVENT@@].confirmNo;
-    R #eventPrompt[@@IDXEVENT@@].ackPending;
 _evRaise_@@IDXEVENT@@:   NOP 0;
 
 NETWORK
@@ -85,6 +85,7 @@ TITLE = Set the message number
     //------------------------------------------------------------------------//
     // Set the alarm list message number:                                     //
     //------------------------------------------------------------------------//
+    A #raiseEvent;
     L @@IDXEVENT@@;
     T #SourceData;
 
@@ -104,33 +105,18 @@ TITLE = Raise message event without acknowledgement if required
 _evCall_@@IDXEVENT@@:   NOP 0;
 
 NETWORK
-TITLE = Flag acknowledgement will be pending
-    //------------------------------------------------------------------------//
-    // Flag that an acknowledge event has been raised. In that case the       //
-    // acknowledgement response is pending. Raise the event next:             //
-    //------------------------------------------------------------------------//
-    A #raiseEvent;
-    R #eventPrompt[@@IDXEVENT@@].ackRequired;
-    JCN _evPending_@@IDXEVENT@@;
-    S #eventPrompt[@@IDXEVENT@@].ackPending;
-_evPending_@@IDXEVENT@@:   NOP 0;
-
-NETWORK
-TITLE = Get acknowledgement if pending
+TITLE = Get alarm state and acknowledgement
     //------------------------------------------------------------------------//
     // Get the acknowledgement response if it was still pending. Response is  //
     // asynchronous and it may take a long time for the operator to attend to //
     // the event message:                                                     //
     //------------------------------------------------------------------------//
-    A #eventPrompt[@@IDXEVENT@@].ackPending;
-    JCN _ackNone_@@IDXEVENT@@;
     CALL  Get_AlarmState
     (   Alarm      := #Program_Alarm_@@IDXEVENT@@ ,
         AlarmState := #Alarm@@IDXEVENT@@_StateByte  ,
         Error      := #Alarm@@IDXEVENT@@_ErrorBit2 ,
         STATUS     := #Alarm@@IDXEVENT@@_StatusWord2
     );
-_ackNone_@@IDXEVENT@@:   NOP 0;
 
 NETWORK
 TITLE = Alarm status
@@ -175,26 +161,20 @@ TITLE = Alarm status
     = #Alarm@@IDXEVENT@@_Active_Acknowledged;
 
 NETWORK
-TITLE = Flag acknowledge response received if so
+TITLE = Return the Yes confirmation if still active when acknowledged
     //------------------------------------------------------------------------//
-    // Flag acknowledgement no longer pending if finally received:            //
+    // HMI will leave the alarm active when acknowledging if confirm yes:     //
     //------------------------------------------------------------------------//
-    A #eventPrompt[@@IDXEVENT@@].ackPending;
     A #Alarm@@IDXEVENT@@_Active_Acknowledged;
-    = #ackComplete;
-    JCN _ackDone_@@IDXEVENT@@;
-    R #eventPrompt[@@IDXEVENT@@].ackPending;
-_ackDone_@@IDXEVENT@@:   NOP 0;
+    S #eventPrompt[@@IDXEVENT@@].confirmYes;
 
 NETWORK
-TITLE = Only Acknowledge or Ack plus Cancel
+TITLE = Return the No confirmation if inactive when acknowledged
     //------------------------------------------------------------------------//
-    // Check if the operator did not cancel. If not then it must have been a  //
-    // confirm yes event:                                                     //
+    // HMI will clear the alarm trigger when acknowledging if confirm no:     //
     //------------------------------------------------------------------------//
-    A #ackComplete;
-    AN #eventPrompt[@@IDXEVENT@@].confirmNo;
-    = #eventPrompt[@@IDXEVENT@@].confirmYes;
+    A #Alarm@@IDXEVENT@@_Inactive_Acknowledged;
+    S #eventPrompt[@@IDXEVENT@@].confirmNo;
 
 @@ATTR_END|pEventPromptList@@
 

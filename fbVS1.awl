@@ -83,10 +83,10 @@ TITLE = Check vacuum pumps are available
     //------------------------------------------------------------------------//
     AN #p.origin.mc.modeOOS;
     A(;
-    O "idbMOT1".f[#p.child.PUMP1].p.origin.mc.INTERLOCK;
-    O "idbMOT1".f[#p.child.PUMP2].p.origin.mc.INTERLOCK;
-    ON "idbMOT1".f[#p.child.PUMP1].p.origin.mc.modeAUTO;
-    ON "idbMOT1".f[#p.child.PUMP2].p.origin.mc.modeAUTO;
+    O "idbMOT1".f[#p.link.PUMP1].p.origin.mc.INTERLOCK;
+    O "idbMOT1".f[#p.link.PUMP2].p.origin.mc.INTERLOCK;
+    ON "idbMOT1".f[#p.link.PUMP1].p.origin.mc.modeAUTO;
+    ON "idbMOT1".f[#p.link.PUMP2].p.origin.mc.modeAUTO;
     );
     = #p.origin.FAULT;
 
@@ -97,12 +97,12 @@ TITLE = Check vacuum pumps are available
     AN #p.origin.FAULT;
     A(;
     O(;
-    L "idbPOS2".f[#p.child.VALVE1].p.origin.mc.STATE;
+    L "idbPOS2".f[#p.link.VALVE1].p.origin.mc.STATE;
     L "dbCONST".BLK.POSx.STATE.OPENED;
     ==I;
     );
     O(;
-    L "idbPOS2".f[#p.child.VALVE2].p.origin.mc.STATE;
+    L "idbPOS2".f[#p.link.VALVE2].p.origin.mc.STATE;
     L "dbCONST".BLK.POSx.STATE.OPENED;
     ==I;
     );
@@ -120,7 +120,7 @@ TITLE = Check vacuum pumps are available
     A #tDO;
     JCN _a;
     L "dbCONST".BLK.MOT1.CMD.START;
-    T "idbMOT1".f[#p.child.PUMP1].p.owner.mc.CMD;
+    T "idbMOT1".f[#p.link.PUMP1].p.owner.mc.CMD;
 _a:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -129,7 +129,7 @@ _a:   NOP 0;
     A #tDO;
     JCN _b;
     L "dbCONST".BLK.MOT1.CMD.START;
-    T "idbMOT1".f[#p.child.PUMP2].p.owner.mc.CMD;
+    T "idbMOT1".f[#p.link.PUMP2].p.owner.mc.CMD;
 _b:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -138,7 +138,7 @@ _b:   NOP 0;
     AN #tDO;
     JCN _c;
     L "dbCONST".BLK.MOT1.CMD.STOP;
-    T "idbMOT1".f[#p.child.PUMP1].p.owner.mc.CMD;
+    T "idbMOT1".f[#p.link.PUMP1].p.owner.mc.CMD;
 _c:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -147,7 +147,7 @@ _c:   NOP 0;
     AN #tDO;
     JCN _d;
     L "dbCONST".BLK.MOT1.CMD.STOP;
-    T "idbMOT1".f[#p.child.PUMP2].p.owner.mc.CMD;
+    T "idbMOT1".f[#p.link.PUMP2].p.owner.mc.CMD;
 _d:   NOP 0;
 
 NETWORK

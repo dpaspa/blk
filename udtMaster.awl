@@ -68,7 +68,7 @@ VERSION : 1.0
         OWNER : Int;                   // Value to be set or reset by Parent
         RECIPE : Int;                  // Recipe ID of owning Process Cell
         SERIALNUM : Int;               // Unique batch or CIPSIP serial number
-        SUBS : Int;                    // Selected substate for Block level modules
+        SUBS : Int := 0;               // Selected substate for Block level modules
         HYGIENE : Int;                 // Hygiene status
         MAN_OVERRIDE : Bool;           // Manual override to bypass NCRIL
         isAvailable : Bool;            // True if block has no owner
@@ -88,9 +88,8 @@ END_TYPE
 TYPE "udtModeCommandBLK"
 VERSION : 1.0
     STRUCT
-        SUBS : Int;                    // Selected substate for Block level modules
-        SUBLast : Int;
-        idle: Bool;
+        SUBS : Int := 0;               // Selected substate for Block level modules
+        SUBLast : Int := 0;
         permitStart: Bool;
         eventModeAuto : Bool;
         eventModeManual : Bool;
@@ -122,6 +121,7 @@ VERSION : 1.0
         OFF_IDLE : BOOL;
         PAUSED : BOOL;
         RUNNING : Bool;
+        ABORTED : Bool;
         S_ACTIVE : BOOL;
         SQ_ACK : Bool;
         SQ_ERROR : Bool;
@@ -204,14 +204,9 @@ TYPE "udtEventPrompt"
 VERSION : 0.1
     STRUCT
         trigger : Bool;
+        edgeTrigger : Bool;
         confirmYes : Bool;
         confirmNo : Bool;
-        ackPending : Bool;
-        ackRequired : Bool;
-        eventID : DWord;
-        idxMessage : Byte;
-        isBatch : Bool;
-        numSerial : Int;               // Unique batch or CIPSIP serial number
     END_STRUCT;
 END_TYPE
 

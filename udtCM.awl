@@ -411,6 +411,7 @@ VERSION : 1.0
     STRUCT
         mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
         ai : "udtAnalog";              // Analog input structure
+        STATE_PEER : Int := 0;         // State check for agitator motor from other modules
         RAW_INPUT : Int;               // Raw input from the field
         BRK	: Bool;                    // Motor breaker fault
         PHR : Bool;                    // Three-phase relay alarm
@@ -457,10 +458,10 @@ TYPE "udtSIC1owner"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
+        CMD_PEER : Int := 0;           // Command request for agitator motor from other modules
         SETPOINT : Real;               // Agitator speed setpoint
         USER_INPUT : Word;             // Manual mode, equivallent of Analog input, to be entered by Operator
         MAN_PID : Bool;                // Manual non pid selection
-        REQ_STOP : Bool := FALSE;      // Stop request for agitator motor from other modules
     END_STRUCT;
 END_TYPE
 
@@ -496,7 +497,7 @@ VERSION : 1.0
     END_STRUCT;
 END_TYPE
 
-TYPE "udtTC1children"
+TYPE "udtTC1link"
 VERSION : 1.0
     STRUCT
         MOD_TCV : Int;                 // Temperature control valve instance DB index
@@ -507,7 +508,7 @@ END_TYPE
 TYPE "udtTC1"
 VERSION : 1.0
     STRUCT
-        child : "udtTC1children";      // Child index to access child instance DB
+        link : "udtTC1link";           // Link index to access link instance DB
         origin : "udtTC1origin";       // Calculated data on origin CPU
         owner : "udtTC1owner";         // Directives from owner CPU
     END_STRUCT;
@@ -592,7 +593,7 @@ VERSION : 1.0
     END_STRUCT;
 END_TYPE
 
-TYPE "udtVS1children"
+TYPE "udtVS1link"
 VERSION : 1.0
     STRUCT
         PUMP1 : Int;                   // Vacuum Pump 1 instance DB index
@@ -605,7 +606,7 @@ END_TYPE
 TYPE "udtVS1"
 VERSION : 1.0
     STRUCT
-        child : "udtVS1children";      // Child index to access child instance DB
+        link : "udtVS1link";           // Link index to access link instance DB
         origin : "udtVS1origin";       // Calculated data on origin CPU
         owner : "udtVS1owner";         // Directives from owner CPU
     END_STRUCT;
@@ -665,7 +666,7 @@ VERSION : 1.0
 END_TYPE
 
 //----------------------------------------------------------------------------//
-// Has to be at the end after the child UDTs are compiled:                    //
+// Has to be at the end after the link UDTs are compiled:                     //
 //----------------------------------------------------------------------------//
 TYPE "udtPC1origin"
 VERSION : 1.0
@@ -687,7 +688,7 @@ VERSION : 1.0
     END_STRUCT;
 END_TYPE
 
-TYPE "udtPC1children"
+TYPE "udtPC1link"
 VERSION : 1.0
     STRUCT
         DRAIN : Int;                   // Drain valve instance DB index
@@ -701,7 +702,7 @@ END_TYPE
 TYPE "udtPC1"
 VERSION : 1.0
     STRUCT
-        child : "udtPC1children";      // Child index to access child instance DB
+        link : "udtPC1link";           // Link index to access link instance DB
         origin : "udtPC1origin";       // Calculated data on origin CPU
         owner : "udtPC1owner";         // Directives from owner CPU
     END_STRUCT;

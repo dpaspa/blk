@@ -67,8 +67,8 @@ TITLE = Check if the TCV is not in AUTO
     // Check if the TCV cannot be controlled if not in AUTO:                  //
     //------------------------------------------------------------------------//
     O #p.origin.mc.INTERLOCK;
-    O "idbMOD1".f[#p.child.MOD_TCV].p.origin.mc.INTERLOCK;
-    ON "idbMOD1".f[#p.child.MOD_TCV].p.origin.mc.modeAUTO;
+    O "idbMOD1".f[#p.link.MOD_TCV].p.origin.mc.INTERLOCK;
+    ON "idbMOD1".f[#p.link.MOD_TCV].p.origin.mc.modeAUTO;
     = #p.origin.mc.INTERLOCK;
 
 NETWORK
@@ -166,7 +166,7 @@ TITLE = PID Controller
         D_SEL                := #p.origin.D_SEL ,
         CYCLE                := #p.origin.CYCLE ,
         SP_INT               := #tSetpoint ,
-        PV_IN                := "idbPI1".f[#p.child.TI_HEX].p.origin.PV ,
+        PV_IN                := "idbPI1".f[#p.link.TI_HEX].p.origin.PV ,
         MAN                  := #tSetpoint ,
         GAIN                 := #p.origin.GAIN ,
         TI                   := #p.origin.TI ,
@@ -204,7 +204,7 @@ TITLE = Transfer PID output to MOD1 TC Valve
     // remote position setpoint:                                              //
     //------------------------------------------------------------------------//
     L #p.origin.LMN;
-    T "idbMOD1".f[#p.child.MOD_TCV].p.owner.POS_REMOTE;
+    T "idbMOD1".f[#p.link.MOD_TCV].p.owner.POS_REMOTE;
 
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //

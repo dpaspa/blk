@@ -803,6 +803,20 @@ _cOwnGrandchild_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|SFC@@
 
+@@ATTR_BEGIN|CHILD_SELECT@@
+NETWORK
+TITLE = Set selected child index value
+    //------------------------------------------------------------------------//
+    // Set the index value for the selected child:                            //
+    //------------------------------------------------------------------------//
+    @@CONDITIONSTATEMENT@@
+    JCN _childSelect_@@COUNTERATTR|1@@;
+    L #p.child.@@CHILDPARAMETERALIAS@@;
+    T #p.select.@@LINKPARAMETERALIAS@@;
+_childSelect_@@COUNTERATTR|1@@:   NOP 0;
+
+@@ATTR_END|CHILD_SELECT@@
+
 @@ATTR_BEGIN|SFC@@
 NETWORK
 TITLE = If substate @@STATE@@ is running then call the SFC function block
@@ -818,9 +832,12 @@ TITLE = If substate @@STATE@@ is running then call the SFC function block
 @@ATTR_BEGIN|pSFC@@
         @@CHILDPARAMETER@@   := #p.owner.@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pSFC@@
-@@ATTR_BEGIN|pSFCLink@@
-        @@CHILDPARAMETER@@   := #p.origin.@@BLOCKPARAMETER@@ ,
-@@ATTR_END|pSFCLink@@
+@@ATTR_BEGIN|pSFCLinkOutput@@
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.link.@@CHILDPARAMETERALIAS@@].p.owner.@@CHILDPARAMETERATTRIBUTE@@ ,
+@@ATTR_END|pSFCLinkOutput@@
+@@ATTR_BEGIN|pSFCLinkInput@@
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.link.@@CHILDPARAMETERALIAS@@].p.origin.@@CHILDPARAMETERATTRIBUTE@@ ,
+@@ATTR_END|pSFCLinkInput@@
 @@ATTR_BEGIN|pSFCChildMC@@
         @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pSFCChildMC@@
@@ -833,6 +850,12 @@ TITLE = If substate @@STATE@@ is running then call the SFC function block
 @@ATTR_BEGIN|pSFCChildOwner@@
         @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pSFCChildOwner@@
+@@ATTR_BEGIN|pSFCSelectMC@@
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.select.@@CHILDPARAMETERALIAS@@].p.origin.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
+@@ATTR_END|pSFCSelectMC@@
+@@ATTR_BEGIN|pSFCSelectMCO@@
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.select.@@CHILDPARAMETERALIAS@@].p.owner.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
+@@ATTR_END|pSFCSelectMCO@@
         dummy                := #dummy
     );
 _notSFC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
@@ -925,6 +948,78 @@ _noParmChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
 _noOriginChange_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
 
 @@ATTR_END|pSFCChildOrigin@@
+
+@@ATTR_BEGIN|pLinkOutput@@
+    //------------------------------------------------------------------------//
+    // Check if the running SFC requests to change this peer parameter. Send  //
+    // the udpated SFC peer parameter to the peer if it changed:              //
+    //------------------------------------------------------------------------//
+    A(;
+    L "idb@@LINKCLASS@@".f[#p.link.@@LINKALIAS@@].p.owner.@@LINKATTRIBUTE@@;
+    L #@@SFC@@.@@SFCPARAMETER@@;
+    <>I;
+    );
+    JCN _noLinkWrite_@@COUNTERATTR|1@@_@@STATE@@;
+    L #@@SFC@@.@@SFCPARAMETER@@;
+    T "idb@@LINKCLASS@@".f[#p.link.@@LINKALIAS@@].p.owner.@@LINKATTRIBUTE@@;
+    S #flags.childCommandChange;
+
+_noLinkWrite_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
+
+@@ATTR_END|pLinkOutput@@
+
+@@ATTR_BEGIN|pLinkOutputMC@@
+    //------------------------------------------------------------------------//
+    // Check if the running SFC requests to change this peer parameter. Send  //
+    // the udpated SFC peer parameter to the peer if it changed:              //
+    //------------------------------------------------------------------------//
+    A(;
+    L "idb@@LINKCLASS@@".f[#p.link.@@LINKALIAS@@].p.owner.mc.@@LINKATTRIBUTE@@;
+    L #@@SFC@@.@@SFCPARAMETER@@;
+    <>I;
+    );
+    JCN _noLinkWriteMC_@@COUNTERATTR|1@@_@@STATE@@;
+    L #@@SFC@@.@@SFCPARAMETER@@;
+    T "idb@@LINKCLASS@@".f[#p.link.@@LINKALIAS@@].p.owner.mc.@@LINKATTRIBUTE@@;
+    S #flags.childCommandChange;
+
+_noLinkWriteMC_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
+
+@@ATTR_END|pLinkOutputMC@@
+
+@@ATTR_BEGIN|pLinkInput@@
+    //------------------------------------------------------------------------//
+    // Check if any peer parameter changed and need to update the SFC:        //
+    //------------------------------------------------------------------------//
+    A(;
+    L "idb@@LINKCLASS@@".f[#p.link.@@LINKALIAS@@].p.origin.@@LINKATTRIBUTE@@;
+    L #@@SFC@@.@@SFCPARAMETER@@;
+    <>I;
+    );
+    JCN _noLinkRead_@@COUNTERATTR|1@@_@@STATE@@;
+    L "idb@@LINKCLASS@@".f[#p.link.@@LINKALIAS@@].p.origin.@@LINKATTRIBUTE@@;
+    T #@@SFC@@.@@SFCPARAMETER@@;
+
+_noLinkRead_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
+
+@@ATTR_END|pLinkInput@@
+
+@@ATTR_BEGIN|pLinkInputMC@@
+    //------------------------------------------------------------------------//
+    // Check if any peer parameter changed and need to update the SFC:        //
+    //------------------------------------------------------------------------//
+    A(;
+    L "idb@@LINKCLASS@@".f[#p.link.@@LINKALIAS@@].p.origin.mc.@@LINKATTRIBUTE@@;
+    L #@@SFC@@.@@SFCPARAMETER@@;
+    <>I;
+    );
+    JCN _noLinkReadMC_@@COUNTERATTR|1@@_@@STATE@@;
+    L "idb@@LINKCLASS@@".f[#p.link.@@LINKALIAS@@].p.origin.mc.@@LINKATTRIBUTE@@;
+    T #@@SFC@@.@@SFCPARAMETER@@;
+
+_noLinkReadMC_@@COUNTERATTR@@_@@STATE@@:      NOP 0;
+
+@@ATTR_END|pLinkInputMC@@
 
 _notSFCRunning_1_@@STATE@@:      NOP 0;
 
@@ -1323,16 +1418,57 @@ _nomc@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_BEGIN|SFC@@
 NETWORK
-TITLE = Flag SFC finished if completed execution
+TITLE = Send SFC STOP command if block stop command given
+    //------------------------------------------------------------------------//
+    // If commanded to Stop then tell the SFC to go to the last step:         //
+    //------------------------------------------------------------------------//
+    A #subsRunning.@@STATE@@;
+    A #p.origin.bmc.eventCmdStop;
+    JCN _noAbort_@@STATE@@;
+    L "dbCONST".SEQ.CMD.STOP;
+    T #@@SFC@@.smc.SQ_CMD;
+_noAbort_@@STATE@@:   NOP 0;
+
+@@ATTR_END|SFC@@
+
+@@ATTR_BEGIN|SFC@@
+NETWORK
+TITLE = Flag SFC finished if successfully completed execution
     //------------------------------------------------------------------------//
     // SFC COMPLETE   SFC COMPLETE   SFC COMPLETE   SFC COMPLETE   SFC COMPL  //
     //                                                                        //
     // Flag SFC completed if the sequence has finished executing:             //
     //------------------------------------------------------------------------//
     A #subsRunning.@@STATE@@;
-    A #@@SFC@@.smc.SQ_FINISHED;
+    A(;
+    L #@@SFC@@.smc.SQ_STATE;
+    L "dbCONST".SEQ.STATE.COMPLETED;
+    ==I;
+    );
+    JCN _notFinSuc@@COUNTERATTR|1@@;
+    S #flags.sfcCompleted;
+    L "dbCONST".BLK.@@CLASS@@.STATE.COMPLETED;
+    T #p.origin.mc.STATE;
+_notFinSuc@@COUNTERATTR@@:   NOP 0;
+
+@@ATTR_END|SFC@@
+
+@@ATTR_BEGIN|SFC@@
+NETWORK
+TITLE = Flag SFC finished if unsuccessfully completed execution
+    //------------------------------------------------------------------------//
+    // Flag SFC completed if the sequence has been aborted:                   //
+    //------------------------------------------------------------------------//
+    A #subsRunning.@@STATE@@;
+    A(;
+    L #@@SFC@@.smc.SQ_STATE;
+    L "dbCONST".SEQ.STATE.ABORTED;
+    ==I;
+    );
     JCN _notFin@@COUNTERATTR|1@@;
     S #flags.sfcCompleted;
+    L "dbCONST".BLK.@@CLASS@@.STATE.ABORTED;
+    T #p.origin.mc.STATE;
 _notFin@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|SFC@@
@@ -1355,13 +1491,8 @@ TITLE = Release child @@CHILDPARAMETERALIAS@@ if acquired and command completed
     //                                                                        //
     // Release the child device if acquired earlier to run the command:       //
     //------------------------------------------------------------------------//
-    A(;
-    O #flags.sfcCompleted;
-    O #p.origin.bmc.eventCmdStart;
-    O #p.origin.bmc.eventCmdStop;
-    );
+    A #flags.sfcCompleted;
     A #acquire.@@CHILDPARAMETERALIAS@@;
-    A #p.owner.CHILD_RELEASE;
     JCN _notOwn@@COUNTERATTR|1@@;
     L "dbCONST".BLK.ID.AVAILABLE;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.owner.mc.OWNER;
@@ -1369,53 +1500,6 @@ TITLE = Release child @@CHILDPARAMETERALIAS@@ if acquired and command completed
 _notOwn@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|CHILD_ACQUIRE@@
-
-@@ATTR_BEGIN|SFC@@
-NETWORK
-TITLE = Clean up if SFC no longer running
-    //------------------------------------------------------------------------//
-    // SFC RESET   SFC RESET   SFC RESET   SFC RESET   SFC RESET   SFC RESET  //
-    //                                                                        //
-    // Clean up all flags if SFC is no longer running.                        //
-    // Check if current SFC is aborted or completed successfully:             //
-    //------------------------------------------------------------------------//
-    A #subsRunning.@@STATE@@;
-    A(;
-    O(;
-    L #p.owner.mc.SUBS;
-    L "dbCONST".BLK.@@CLASS@@.SAFE.CMD;
-    ==I;
-    );
-    O(;
-    L #@@SFC@@.smc.SQ_STATE;
-    L "dbCONST".SEQ.STATE.ABORTED;
-    ==I;
-    );
-    O(;
-    L #@@SFC@@.smc.SQ_STATE;
-    L "dbCONST".SEQ.STATE.COMPLETED;
-    ==I;
-    );
-    );
-    JCN sfcd@@COUNTERATTR|1@@;
-
-    //------------------------------------------------------------------------//
-    // SFC is no longer running:                                              //
-    //------------------------------------------------------------------------//
-    L "dbCONST".SEQ.SAFE.CMD;
-    T #@@SFC@@.smc.SQ_STATE;
-
-//    L 0;
-//    T #@@SFC@@.smc.CURSTEP;
-//    T #@@SFC@@.smc.SQ_STATE;
-
-//    R #@@SFC@@.smc.SQ_ERROR;
-//    R #@@SFC@@.smc.ERR_FAULT;
-//    R #@@SFC@@.smc.PAUSED;
-
-sfcd@@COUNTERATTR@@:      NOP 0;
-
-@@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|STATE@@
 NETWORK
@@ -1425,14 +1509,15 @@ TITLE = Set block running substate completed if finished
     //                                                                        //
     // Set the block state to COMPLETED if no SFC or SFC completed:           //
     //------------------------------------------------------------------------//
+    A #subsRunning.@@STATE@@;
+    A(;
     O(;
     A subsHasSFC.@@STATE@@;
     A #flags.sfcCompleted;
     );
     ON subsHasSFC.@@STATE@@;
+    );
     JCN _blkComplete@@COUNTERATTR|1@@;
-    L "dbCONST".BLK.@@CLASS@@.STATE.COMPLETED;
-    T #p.origin.mc.STATE;
     L #p.origin.bmc.SUBS;
     T #p.origin.bmc.SUBLast;
     R #flags.sfcCompleted;
@@ -1440,6 +1525,21 @@ TITLE = Set block running substate completed if finished
 _blkComplete@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|STATE@@
+
+NETWORK
+TITLE = Stop block if command given and previous command completed
+    //------------------------------------------------------------------------//
+    // Stop block if stop command and completed previous command:             //
+    //------------------------------------------------------------------------//
+    A #p.origin.bmc.eventCmdStop;
+    JCN _notYetComplete;
+    L "dbCONST".BLK.@@CLASS@@.STATE.STOPPED;
+    T #p.origin.mc.STATE;
+    L "dbCONST".SEQ.CMD.STOP;
+@@ATTR_BEGIN|SFC@@
+    T #@@SFC@@.smc.SQ_CMD;
+@@ATTR_END|SFC@@
+_notYetComplete:   NOP 0;
 
 NETWORK
 TITLE = Cascade Auto or OOS Mode to children

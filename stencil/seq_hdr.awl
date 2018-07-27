@@ -317,6 +317,7 @@ TITLE =Comand -Start/Initiate action function
 
 STRT: NOP   0;
       R     #smc.OFF_IDLE;
+      R     #smc.ABORTED;
       R     #smc.PAUSED;
       R     #sqSequencer.STEP.Active;
       R     #sqSequencer.STEP.Finished;
@@ -384,15 +385,13 @@ STOP: NOP   0;
       R     #sqStepTimer.IN;
       R     #sqSeqTimerStart;
       R     #smc.PAUSED;
+      R     #smc.ABORTED;
 
 
 //Go to last step
       L     @@LAST_STEP_NUM@@;
       T     #sqSequencer.FinalStep;
-      L     #sqSequencer.FinalStep;
       T     #sqSequencer.STEP.NumberNext;
-      L     "dbCONST".SEQ.STATE.OFF_IDLE;
-      T     #smc.SQ_STATE;
 
       JU    ECMD; //End Function
 
@@ -432,10 +431,28 @@ NETWORK
 TITLE =Comand -Abort action function
 
 _abrt_begin: NOP   0;
-      L     "dbCONST".SEQ.STATE.ABORTED;
-      T     #smc.SQ_STATE;
 
-      JC    STOP; //Stop & Abort same
+      S     #smc.ABORTED;
+      R     #sqSequencer.STEP.Active;
+      R     #sqSequencer.STEP.Finished;
+      R     #sqSequencer.STEP.ActionFinished;
+      R     #sqSequencer.STEP.Jump;
+      R     #sqSequencer.STEP.TimerExpired;
+      R     #sqSequencer.STEP.Error_Fault;
+      R     #sqSequencer.Error_Fault;
+      R     #sqSequencer.STEP.ActionVerified;
+      R     #sqRunTimer.ENABLE;
+      R     #sqStepTimer.IN;
+      R     #sqSeqTimerStart;
+      R     #smc.PAUSED;
+      R     #smc.OFF_IDLE;
+
+
+//Go to last step
+      L     @@LAST_STEP_NUM@@;
+      T     #sqSequencer.FinalStep;
+      T     #sqSequencer.STEP.NumberNext;
+
       JU    ECMD;
 
 NETWORK

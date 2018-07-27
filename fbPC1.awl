@@ -92,21 +92,21 @@ TITLE = Call Mode and Command handling block
     );
 
 NETWORK
-TITLE = Check any child device is not in AUTO
+TITLE = Check any link device is not in AUTO
     //------------------------------------------------------------------------//
-    // Check if any child cannot be controlled if not in AUTO:                //
+    // Check if any link cannot be controlled if not in AUTO:                 //
     //------------------------------------------------------------------------//
     O #p.origin.mc.INTERLOCK;
-    O "idbPOS4".f[#p.child.DRAIN].p.origin.mc.INTERLOCK;
-    O "idbPOS4".f[#p.child.HPCA].p.origin.mc.INTERLOCK;
-    O "idbPOS4".f[#p.child.LPCA].p.origin.mc.INTERLOCK;
-    O "idbPOS4".f[#p.child.VACUUM].p.origin.mc.INTERLOCK;
-    O "idbPOS2".f[#p.child.VENT].p.origin.mc.INTERLOCK;
-    ON "idbPOS4".f[#p.child.DRAIN].p.origin.mc.modeAUTO;
-    ON "idbPOS4".f[#p.child.HPCA].p.origin.mc.modeAUTO;
-    ON "idbPOS4".f[#p.child.LPCA].p.origin.mc.modeAUTO;
-    ON "idbPOS4".f[#p.child.VACUUM].p.origin.mc.modeAUTO;
-    ON "idbPOS2".f[#p.child.VENT].p.origin.mc.modeAUTO;
+    O "idbPOS4".f[#p.link.DRAIN].p.origin.mc.INTERLOCK;
+    O "idbPOS4".f[#p.link.HPCA].p.origin.mc.INTERLOCK;
+    O "idbPOS4".f[#p.link.LPCA].p.origin.mc.INTERLOCK;
+    O "idbPOS4".f[#p.link.VACUUM].p.origin.mc.INTERLOCK;
+    O "idbPOS2".f[#p.link.VENT].p.origin.mc.INTERLOCK;
+    ON "idbPOS4".f[#p.link.DRAIN].p.origin.mc.modeAUTO;
+    ON "idbPOS4".f[#p.link.HPCA].p.origin.mc.modeAUTO;
+    ON "idbPOS4".f[#p.link.LPCA].p.origin.mc.modeAUTO;
+    ON "idbPOS4".f[#p.link.VACUUM].p.origin.mc.modeAUTO;
+    ON "idbPOS2".f[#p.link.VENT].p.origin.mc.modeAUTO;
     = #p.origin.mc.INTERLOCK;
 
 NETWORK
@@ -344,7 +344,7 @@ TITLE = Open DRAIN valve if required
     A #selectDRAIN;
     JCN _h;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T "idbPOS4".f[#p.child.DRAIN].p.owner.mc.CMD;
+    T "idbPOS4".f[#p.link.DRAIN].p.owner.mc.CMD;
 _h:   NOP 0;
 
 NETWORK
@@ -356,7 +356,7 @@ TITLE = Open HPCA valve if required
     A #selectHPCA;
     JCN _i;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T "idbPOS2".f[#p.child.HPCA].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.HPCA].p.owner.mc.CMD;
 _i:   NOP 0;
 
 NETWORK
@@ -368,7 +368,7 @@ TITLE = Open LPCA valve if required
     A #selectLPCA;
     JCN _j;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T "idbPOS2".f[#p.child.LPCA].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.LPCA].p.owner.mc.CMD;
 _j:   NOP 0;
 
 NETWORK
@@ -380,7 +380,7 @@ TITLE = Open VACUUM valve if required
     A #selectVACUUM;
     JCN _k;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T "idbPOS2".f[#p.child.VACUUM].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.VACUUM].p.owner.mc.CMD;
 _k:   NOP 0;
 
 NETWORK
@@ -398,7 +398,7 @@ TITLE = Open VENT valve if required
     );
     JCN _l;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T "idbPOS2".f[#p.child.VENT].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.VENT].p.owner.mc.CMD;
 _l:   NOP 0;
 
 NETWORK
@@ -412,7 +412,7 @@ TITLE = Close DRAIN valve if required
     ON #selectDRAIN;
     JCN _m;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T "idbPOS4".f[#p.child.DRAIN].p.owner.mc.CMD;
+    T "idbPOS4".f[#p.link.DRAIN].p.owner.mc.CMD;
 _m:   NOP 0;
 
 NETWORK
@@ -424,7 +424,7 @@ TITLE = Close HPCA valve if required
     ON #selectHPCA;
     JCN _n;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T "idbPOS2".f[#p.child.HPCA].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.HPCA].p.owner.mc.CMD;
 _n:   NOP 0;
 
 NETWORK
@@ -436,7 +436,7 @@ TITLE = Close LPCA valve if required
     ON #selectLPCA;
     JCN _o;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T "idbPOS2".f[#p.child.LPCA].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.LPCA].p.owner.mc.CMD;
 _o:   NOP 0;
 
 NETWORK
@@ -448,7 +448,7 @@ TITLE = Close VACUUM valve if required
     ON #selectVACUUM;
     JCN _p;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T "idbPOS2".f[#p.child.VACUUM].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.VACUUM].p.owner.mc.CMD;
 _p:   NOP 0;
 
 NETWORK
@@ -466,7 +466,7 @@ TITLE = Close VENT valve if required
     );
     JCN _q;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T "idbPOS2".f[#p.child.VENT].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.VENT].p.owner.mc.CMD;
 _q:   NOP 0;
 
 NETWORK

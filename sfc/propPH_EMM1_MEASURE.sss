@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 24/07/2018 11:55:17 AM by David Paspa
+generated on 26/07/2018 5:14:57 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -36,29 +36,21 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- sic_agit_req_stop
-Type:- BOOL
-Description:- Agitator stop request
-ParameterInOut:- VAR
+Name:- sic_agit_state_peer
+Type:- INT
+Description:- Agitator peer running status
+ParameterInOut:- IN
 
 --------------------------------------------------
 PARAMETER::2
 --------------------------------------------------
-Name:- sic_agit_state
+Name:- sic_agit_cmd_peer
 Type:- INT
-Description:- Agitator running status
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::3
---------------------------------------------------
-Name:- sic_agit_cmd
-Type:- INT
-Description:- Command to agitator
+Description:- Peer command to agitator
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::3
 --------------------------------------------------
 Name:- mi_vessel_pv
 Type:- REAL
@@ -66,7 +58,7 @@ Description:- Current mass
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::4
 --------------------------------------------------
 Name:- time_measure_begin
 Type:- TOD
@@ -74,7 +66,7 @@ Description:- PH_EMM1_MEASURE begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::5
 --------------------------------------------------
 Name:- log_time_measure_begin
 Type:- BOOL
@@ -82,7 +74,7 @@ Description:- PH_EMM1_MEASURE begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::6
 --------------------------------------------------
 Name:- time_measure_end
 Type:- TOD
@@ -90,7 +82,7 @@ Description:- PH_EMM1_MEASURE end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::7
 --------------------------------------------------
 Name:- log_time_measure_end
 Type:- BOOL
@@ -98,7 +90,7 @@ Description:- PH_EMM1_MEASURE end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::8
 --------------------------------------------------
 Name:- mass_tare
 Type:- REAL
@@ -106,7 +98,7 @@ Description:- Tare mass
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::9
 --------------------------------------------------
 Name:- mass_nett
 Type:- REAL
@@ -114,7 +106,7 @@ Description:- Nett Mass
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::10
 --------------------------------------------------
 Name:- settling_time
 Type:- TIME
@@ -142,8 +134,9 @@ T #_time_measure_begin;
 SET;
 S #_log_time_measure_begin;
 
-//Request agitator to stop.
-S #_sic_agit_req_stop;
+//Request agitator state to be stopped.
+L "dbCONST".BLK.SIC1.STATE.STOPPED;
+T #_sic_agit_cmd_peer;
 Verification:- A "uncondJump";
 
 
@@ -156,9 +149,9 @@ EmptyTransition:- False
 Description:- Proceed if agitator stopped.
 Condition:- A(;
 L "dbCONST".BLK.SIC1.STATE.STOPPED;
-L #_sic_agit_state;
+L #_sic_agit_state_peer;
 ==I;
-); 
+);
 
 
 --------------------------------------------------
@@ -237,7 +230,10 @@ Description:- Reset request agitator to stop and the timer input.
 Log MEASURE operation end time.
 Action:- SET;
 R #sqSeqTimerStart;
-R #_sic_agit_req_stop;
+
+// Advise agitator state may run
+L "dbCONST".BLK.SIC1.STATE.RUNNING;
+T #_sic_agit_cmd_peer;
 
 //Log MEASURE operation end time.
 L "dbCONST".CHRONO.CPU_TIME;

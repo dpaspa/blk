@@ -74,6 +74,11 @@ TITLE = Flag if a new block running substate command issued
     L "dbCONST".BLK.CMD.START;
     ==I;
     );
+    A(;
+    L #mcOrigin.STATE;
+    L "dbCONST".BLK.STATE.STOPPED;
+    ==I;
+    );
     FP #bmc.edgeCommandStart;
     = #bmc.eventCmdStart;
 
@@ -92,15 +97,6 @@ TITLE = Flag if block stop command issued
     );
     FP #bmc.edgeCommandStop;
     = #bmc.eventCmdStop;
-
-NETWORK
-TITLE = Set the stopped state if stop command given
-    //------------------------------------------------------------------------//
-    // If commanded to Stop then set the state to match:                      //
-    //------------------------------------------------------------------------//
-    A #bmc.eventCmdStop;
-    L "dbCONST".BLK.STATE.STOPPED;
-    T #mcOrigin.STATE;
 
 NETWORK
 TITLE = Stop command takes precedence over Start command

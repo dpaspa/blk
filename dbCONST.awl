@@ -126,7 +126,8 @@ STRUCT
             STOPPED : INT  := 0;       // Block stopped
             PAUSED : INT  := 50;       // Block paused
             INTERLOCKED : INT  := 51;  // Block interlocked
-            COMPLETED : INT  := 99;    // Block substate finished, Finished after SFC (if any) is complete.
+            ABORTED : INT  := 98;      // Block substate unsucessfully finished,
+            COMPLETED : INT  := 99;    // Block substate successfully finished, Finished after SFC (if any) is complete.
         END_STRUCT ;
         HYGIENE : STRUCT               // Hygiene Status
             USED : INT  := 1;
@@ -464,7 +465,8 @@ STRUCT
                 STOPPED : INT  := 0;       // Block stopped
                 PAUSED : INT  := 50;       // Block paused
                 INTERLOCKED : INT  := 51;  // Block interlocked
-                COMPLETED : INT  := 99;    // Block substate finished, Finished after SFC (if any) is complete.
+                ABORTED : INT  := 98;      // Block substate unsucessfully finished,
+                COMPLETED : INT  := 99;    // Block substate successfully finished, Finished after SFC (if any) is complete.
             END_STRUCT ;
             SUBS : STRUCT
 @@ATTR_BEGIN|STATE@@

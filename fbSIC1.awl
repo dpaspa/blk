@@ -341,8 +341,34 @@ TITLE = Flag output should be on if command is ENABLE and mass is enough
     A #cmdEnable;
     A #permitMass;
     AN #p.origin.mc.modeOOS;
-    AN #p.owner.REQ_STOP;
+    AN(;
+    L #p.owner.CMD_PEER;
+    L "dbCONST".BLK.SIC1.STATE.STOPPED;
+    ==I;
+    );
     = #tDO;
+
+NETWORK
+TITLE = Set the peer state running if so
+    //------------------------------------------------------------------------//
+    // If agitator might run then the peer state is running:                  //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    JCN _peerRunning;
+    L "dbCONST".BLK.SIC1.STATE.RUNNING;
+    T #p.origin.STATE_PEER;
+_peerRunning:   NOP 0;
+
+NETWORK
+TITLE = Set the peer state stopped if so
+    //------------------------------------------------------------------------//
+    // If agitator is stopped then the peer state is stopped:                 //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    JCN _peerStopped;
+    L "dbCONST".BLK.SIC1.STATE.STOPPED;
+    T #p.origin.STATE_PEER;
+_peerStopped:   NOP 0;
 
 NETWORK
 TITLE = Drive the agitator output on if commanded and safe to run

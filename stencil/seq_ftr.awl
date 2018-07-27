@@ -56,6 +56,19 @@ TITLE =General Assignments
     =     #smc.ERR_FAULT;
 
 NETWORK
+TITLE = Stop command completion
+    A    #smc.OFF_IDLE;
+    A    #sqSequencer.STEP.Done[@@LAST_STEP_NUM@@];
+    AN   #sqSequencer.STEP.WithError[@@LAST_STEP_NUM@@];
+    JCN NotStopCmd;
+    R    #smc.PAUSED;
+    R    #sqSequencer.STEP.Error_Fault;
+    R    #sqSequencer.Error_Fault;
+    L    "dbCONST".SEQ.STATE.OFF_IDLE;
+    T    #smc.SQ_STATE;
+NotStopCmd:   NOP 0;
+
+NETWORK
 TITLE =Sequencer Finished
 
     AN    #smc.OFF_IDLE;
@@ -74,18 +87,16 @@ fnsd: NOP   0;
     //------------------------------------------------------------------------//
     // Reset Finished flag if SQ OFF for Last step to scan:                   //
     //------------------------------------------------------------------------//
-    A     #smc.OFF_IDLE;
+    A     #smc.ABORTED;
     AN    #sqSequencer.STEP.Done[@@LAST_STEP_NUM@@];
     AN    #sqSequencer.STEP.WithError[@@LAST_STEP_NUM@@];
     JCN   _abrt_end;
     R     #sqSequencer.STEP.Finished;
-    L     "dbCONST".SEQ.STATE.ABORTED;
-    T     #smc.SQ_STATE;
-    S     #smc.OFF_IDLE;
     R     #smc.PAUSED;
     R     #sqSequencer.STEP.Error_Fault;
     R     #sqSequencer.Error_Fault;
-    R     #smc.PAUSED;
+    L     "dbCONST".SEQ.STATE.ABORTED;
+    T     #smc.SQ_STATE;
 _abrt_end: NOP   0;
 
     //------------------------------------------------------------------------//
