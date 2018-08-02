@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 26/07/2018 5:16:59 PM by David Paspa
+generated on 31/07/2018 5:56:50 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -61,7 +61,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- emc_gas_pv
+Name:- emc_gas_pi_vessel_pv
 Type:- REAL
 Description:- Vessel pressure
 ParameterInOut:- IN
@@ -264,7 +264,7 @@ PARAMETER::30
 Name:- r_pres_vac_fail
 Type:- REAL
 Description:- Vacuum hold fail pressure
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::31
@@ -272,7 +272,7 @@ PARAMETER::31
 Name:- r_pres_stm_pos
 Type:- REAL
 Description:- Positive steam pressure threshold setpoint
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::32
@@ -280,7 +280,7 @@ PARAMETER::32
 Name:- r_pres_vac
 Type:- REAL
 Description:- Setpoint for vacuum pressure
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::33
@@ -288,7 +288,7 @@ PARAMETER::33
 Name:- r_time_vac_hold
 Type:- TIME
 Description:- Vacuum Hold Timer
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::34
@@ -296,7 +296,7 @@ PARAMETER::34
 Name:- r_time_eject
 Type:- TIME
 Description:- Vacuum time
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::35
@@ -720,7 +720,7 @@ Title:- Pressure below setpoint?
 EmptyTransition:- False
 Description:- Pressure reduced below PRES_VAC.
 Condition:- A(;
-L #_emc_gas_pv;
+L #_emc_gas_pi_vessel_pv;
 L #_r_pres_vac;
 <R;
 );
@@ -911,7 +911,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Set flags to log Sy vessel pressure.
 Action:- //Log Mx vessel pressure.
-L #_emc_gas_pv;
+L #_emc_gas_pi_vessel_pv;
 T #_real_pressure_mx;
 
 SET;
@@ -944,7 +944,7 @@ Title:- Pressure above setpoint
 EmptyTransition:- False
 Description:- Pressure increased above PRES_VAC_FAIL
 Condition:- O(;
-L #_emc_gas_pv;
+L #_emc_gas_pi_vessel_pv;
 L #_r_pres_vac_fail;
 >R;
 );
@@ -989,7 +989,7 @@ S #_log_time_act_vacuum_held;
 R #_PRES_TIMER.IN;
 
 //Log Mx vessel pressure.
-L #_emc_gas_pv;
+L #_emc_gas_pi_vessel_pv;
 T #_real_pressure_mx;
 
 SET;
@@ -1031,7 +1031,7 @@ SET;
 R #sqSeqTimerStart;
 
 //Log Mx vessel pressure.
-L #_emc_gas_pv;
+L #_emc_gas_pi_vessel_pv;
 T #_real_pressure_mx;
 
 SET;

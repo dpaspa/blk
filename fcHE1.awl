@@ -1,0 +1,167 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcHE1                                                         //
+// Description:                                                               //
+// Vessel vent filter Electric heater element.                                //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.5 Khairul Basar    09-Oct-2009 CC-09/016 NW4, CMD & IL then Failed.      //
+// 0.4 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic.             //
+// 0.3 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Input Parameter       //
+//                                            deleted auto/manual both now    //
+//                                            using same parameter.           //
+// 0.2 Khairul Basar    28-Aug-2009 CC-09/016 Ref1.Cutout can be ON/OFF when  //
+//                                            key switch is ON.               //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//                                                                            //
+// Ref1.Cutout ON when key switch is OFF and Command is ON or OFF.When Key    //
+// switch is ON cutout can be ON or OFF by using user ON/OFF command.         //
+//----------------------------------------------------------------------------//
+FUNCTION "fcHE1" : Void
+TITLE = HE1 : Vessel vent filter Electric heater element
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fcHE1
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR_IN_OUT
+    p : "udtHE1";            // Block data interface
+END_VAR
+
+VAR_TEMP
+    tDO : Bool;              // Temporary processed DO signal
+    tFault : Bool;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Call Mode and Command handling block
+    //------------------------------------------------------------------------//
+    // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
+    );
+
+NETWORK
+TITLE = Process Fault Digital Input Signal
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Check if the field indicates there is a fault:                         //
+    //------------------------------------------------------------------------//
+    A #p.origin.FAULT;
+    = #tFault;
+
+NETWORK
+TITLE = Interlock if any fault or external interlock
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Interlock also the field indicates a fault:                            //
+    //------------------------------------------------------------------------//
+    O #p.origin.mc.INTERLOCK;
+    O #p.origin.FAULT;
+    = #p.origin.mc.INTERLOCK;
+
+NETWORK
+TITLE = Device command ENABLE
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is ENABLE if no fault or interlock, otherwise DISABLE:             //
+    //------------------------------------------------------------------------//
+    AN #tFault;
+    AN #p.origin.mc.INTERLOCK;
+    A(;
+    L #p.owner.mc.CMD;
+    L "dbCONST".BLK.HE1.CMD.ENABLE;
+    ==I;
+    );
+    = #tDO;
+
+NETWORK
+TITLE = Device command DISABLE
+    //------------------------------------------------------------------------//
+    // CMD is DISABLE then switch off regardless of any fault or interlock:   //
+    //------------------------------------------------------------------------//
+    O #p.origin.mc.INTERLOCK;
+    O(;
+    L #p.owner.mc.CMD;
+    L "dbCONST".BLK.HE1.CMD.DISABLE;
+    ==I;
+    );
+    JCN _a;
+    R #tDO;
+_a:   NOP 0;
+
+NETWORK
+TITLE = Set CUTOUT Flag if output is off
+    //------------------------------------------------------------------------//
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    //                                                                        //
+    // Flag indicating if TI alarm is to be cutout (i.e. disabled) whenever   //
+    // HE is OFF:                                                             //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    = #p.owner.CUTOUT;
+
+NETWORK
+TITLE = Set Digital Output Signal
+    //------------------------------------------------------------------------//
+    // Set the output ON or OFF as required:                                  //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    = #p.origin.DO;
+
+NETWORK
+TITLE = Set Device State to Enabled if output is on
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // ENABLED if output is on:                                               //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    JCN _b;
+    L "dbCONST".BLK.HE1.STATE.ENABLED;
+    T #p.origin.mc.STATE;
+_b:   NOP 0;
+
+NETWORK
+TITLE = Set Device State to Disabled if output is off
+    //------------------------------------------------------------------------//
+    // DISABLED if output is off:                                             //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    AN #tFault;
+    JCN _c;
+    L "dbCONST".BLK.HE1.STATE.DISABLED;
+    T #p.origin.mc.STATE;
+_c:   NOP 0;
+
+NETWORK
+TITLE = Set Device State to Fault if field fault signal is on
+    //------------------------------------------------------------------------//
+    // FAULT if fault signal is on:                                           //
+    //------------------------------------------------------------------------//
+    A #tFault;
+    JCN _d;
+    L "dbCONST".BLK.HE1.STATE.FAULT;
+    T #p.origin.mc.STATE;
+_d:   NOP 0;
+END_FUNCTION

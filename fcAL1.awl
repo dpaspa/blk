@@ -1,0 +1,139 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcAL1                                                         //
+// Description:                                                               //
+// Load Cell mass indicator.                                                  //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      19-Apr-2018 NA        Reboot for S7-1500 consolidated //
+//                                            into fcAL1 from all analog      //
+//                                            classes.                        //
+// 0.3 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Upper/Lower range hardcoded.    //
+//                                            USER_INPUT added for manual     //
+//                                            mode simulation.                //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION "fcAL1" : Void
+TITLE = AL1 : Generic analog indicator
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fcAL1
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR_IN_OUT
+    p : "udtAL1";            // Block data interface
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Call Mode and Command handling function
+    //------------------------------------------------------------------------//
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
+    );
+
+NETWORK
+TITLE = Cascade the MODE flags
+    //------------------------------------------------------------------------//
+    // Set the ai MODE flags based on the mc calculated values:               //
+    //------------------------------------------------------------------------//
+    A #p.origin.mc.modeAUTO;
+    = #p.origin.ai.modeAUTO;
+    A #p.origin.mc.modeMANUAL;
+    = #p.origin.ai.modeMANUAL;
+    A #p.origin.mc.modeOOS;
+    = #p.origin.ai.modeOOS;
+
+NETWORK
+TITLE = Call Analog Input handling function
+    //------------------------------------------------------------------------//
+    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
+    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
+    //                                                                        //
+    // Scale the analog input value and check it is healty:                   //
+    //------------------------------------------------------------------------//
+    CALL "fcAnalog"
+    (   ai                   := #p.origin.ai
+    );
+
+NETWORK
+TITLE = Set Device command which can only be ENABLE.
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is always ENABLE:                                                  //
+    //------------------------------------------------------------------------//
+    L #p.origin.CMD_ENABLE;
+    T #p.owner.mc.CMD;
+
+NETWORK
+TITLE = Promote the analog input attributes
+    //------------------------------------------------------------------------//
+    // Promote the analog input attributes to module level:                   //
+    //------------------------------------------------------------------------//
+    L #p.origin.ai.PV;
+    T #p.origin.PV;
+    A #p.origin.ai.DQ;
+    = #p.origin.DQ;
+    A #p.origin.ai.ALARM_LL;
+    = #p.origin.ALARM_LL;
+    A #p.origin.ai.ALARM_L;
+    = #p.origin.ALARM_L;
+    A #p.origin.ai.ALARM_H;
+    = #p.origin.ALARM_H;
+    A #p.origin.ai.ALARM_HH;
+    = #p.origin.ALARM_HH;
+
+NETWORK
+TITLE = Set INTERLOCK Flag
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Set interlock if any external or any problem with the measurement:     //
+    //------------------------------------------------------------------------//
+    O #p.origin.mc.INTERLOCK;
+    O #p.origin.ai.ALARM_HH;
+    ON #p.origin.ai.DQ;
+    = #p.origin.mc.INTERLOCK;
+
+NETWORK
+TITLE = Set Device State to Enabled if healthy
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // ENABLED if input signal is healthy:                                    //
+    //------------------------------------------------------------------------//
+    A #p.origin.ai.DQ;
+    JCN _a;
+    L #p.origin.STATE_ENABLED;
+    T #p.origin.mc.STATE;
+_a:   NOP 0;
+
+NETWORK
+TITLE = Set Device State to Fault if any field signal error
+    //------------------------------------------------------------------------//
+    // FAULT if any input error:                                              //
+    //------------------------------------------------------------------------//
+    AN #p.origin.ai.DQ;
+    AN #p.origin.mc.modeOOS;
+    JCN _b;
+    L #p.origin.STATE_FAULT;
+    T #p.origin.mc.STATE;
+_b: NOP 0;
+END_FUNCTION

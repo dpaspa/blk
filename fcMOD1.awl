@@ -1,0 +1,206 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbMOD1                                                        //
+// Description:                                                               //
+// Modulating control valve.                                                  //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      24-Apr-2018 NA        Reboot for S7-1500.             //
+// 0.4 Khairul Basar    17-Sep-2009 CC-09/016 RAW_OUTPUT only when Valve      //
+//                                            Opened.                         //
+// 0.3 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Input Parameters      //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters,Interface //
+//                                            FC used for Bumpless changeover.//
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 MODE initialize to Manual=1     //
+//                                            Reset POSN to zero if OUT_Q=0   //
+//                                            Setpoint moved to POSN only when//
+//                                            OUT_Q=1(Nw2,3 & 5).             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION "fcMOD1" : Void
+TITLE = MOD1 : Modulating control valve
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fbMOD1
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR_IN_OUT
+    p : "udtMOD1";           // Block data interface
+END_VAR
+
+VAR_TEMP
+    cmdLocal : Bool;
+    cmdRemote : Bool;
+    tRetVal : Word;          // Returns a value of W#16#0000 if the instruction executes without error.
+    tDO : Bool;              // Flag indicating whether to drive output
+    tPOS : Real;             // Output position of the valve
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Call Mode and Command handling block
+    //------------------------------------------------------------------------//
+    // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
+    );
+
+NETWORK
+TITLE = Device command LOCAL
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is LOCAL:                                                          //
+    //------------------------------------------------------------------------//
+    A(;
+    L #p.owner.mc.CMD;
+    L "dbCONST".BLK.MOD1.CMD.LOCAL;
+    ==I;
+    );
+    = #cmdLocal;
+
+NETWORK
+TITLE = Device command REMOTE
+    //------------------------------------------------------------------------//
+    // CMD is REMOTE:                                                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #p.owner.mc.CMD;
+    L "dbCONST".BLK.MOD1.CMD.REMOTE;
+    ==I;
+    );
+    = #cmdRemote;
+
+NETWORK
+TITLE = Valve should OPEN in LOCAL or REMOTE
+    //------------------------------------------------------------------------//
+    // Valve should be at setpoint value in LOCAL or REMOTE:                  //
+    //------------------------------------------------------------------------//
+    O #cmdLocal;
+    O #cmdRemote;
+    = #tDO;
+
+NETWORK
+TITLE = Device command DISABLE
+    //------------------------------------------------------------------------//
+    // CMD is DISABLE then close regardless of any interlock:                 //
+    //------------------------------------------------------------------------//
+    O #p.origin.mc.INTERLOCK;
+    O(;
+    L #p.owner.mc.CMD;
+    L "dbCONST".BLK.HE1.CMD.DISABLE;
+    ==I;
+    );
+    JCN _a;
+    R #tDO;
+_a:   NOP 0;
+
+NETWORK
+TITLE = LOCAL valve position setpoint
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Set valve position if LOCAL:                                           //
+    //------------------------------------------------------------------------//
+    A #cmdLocal;
+    JCN _b;
+    L #p.owner.POS_LOCAL;
+    T #tPOS;
+_b:   NOP 0;
+
+NETWORK
+TITLE = REMOTE valve position setpoint
+    //------------------------------------------------------------------------//
+    // Set valve position if REMOTE:                                          //
+    //------------------------------------------------------------------------//
+    A #cmdRemote;
+    JCN _c;
+    L #p.owner.POS_REMOTE;
+    T #tPOS;
+_c:   NOP 0;
+
+NETWORK
+TITLE = Unscaling of Control Valve Position
+    //------------------------------------------------------------------------//
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    //                                                                        //
+    // Unscale the control valve position to derive the raw counts output     //
+    // value:                                                                 //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    JCN _d;
+    CALL UNSCALE
+    (   IN                   := #tPOS ,
+        HI_LIM               := 100.0 ,
+        LO_LIM               := 0.0 ,
+        BIPOLAR              := 0 ,
+        RET_VAL              := #tRetVal ,
+        OUT                  := #p.origin.RAW_OUTPUT
+    );
+_d:   NOP 0;
+
+NETWORK
+TITLE = Device State DISABLED if valve not operating
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // DISABLED if valve output is to be off:                                 //
+    //------------------------------------------------------------------------//
+    ON #tDO;
+    O #p.origin.mc.INTERLOCK;
+    JCN _e;
+    L "dbCONST".BLK.MOD1.STATE.DISABLED;
+    T #p.origin.mc.STATE;
+_e:   NOP 0;
+
+NETWORK
+TITLE = Valve close if Device State DISABLED
+    //------------------------------------------------------------------------//
+    // If valve DISABLED then analog output setpoint value should be 0:       //
+    //------------------------------------------------------------------------//
+    ON #tDO;
+    O #p.origin.mc.INTERLOCK;
+    JCN _f;
+    L 0;
+    T #p.origin.RAW_OUTPUT;
+_f:   NOP 0;
+
+NETWORK
+TITLE = State LOCAL if commanded
+    //------------------------------------------------------------------------//
+    // LOCAL if valve enabled in Local:                                       //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    A #cmdLocal;
+    JCN _g;
+    L "dbCONST".BLK.MOD1.STATE.LOCAL;
+    T #p.origin.mc.STATE;
+_g:   NOP 0;
+
+NETWORK
+TITLE = State REMOTE if commanded
+    //------------------------------------------------------------------------//
+    // REMOTE if valve enabled in Remote:                                     //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    A #cmdRemote;
+    JCN _h;
+    L "dbCONST".BLK.MOD1.STATE.REMOTE;
+    T #p.origin.mc.STATE;
+_h:   NOP 0;
+END_FUNCTION

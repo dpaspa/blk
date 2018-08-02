@@ -29,6 +29,10 @@ VAR_IN_OUT
     bmc : "udtModeCommandBLK";         // Block mode and command
 END_VAR
 
+VAR_TEMP
+    edgeInterlock : Bool;
+END_VAR
+
 BEGIN
 NETWORK
 TITLE = Flag if block Mode just changed to Auto
@@ -99,98 +103,51 @@ TITLE = Flag if block stop command issued
     = #bmc.eventCmdStop;
 
 NETWORK
-TITLE = Stop command takes precedence over Start command
+TITLE = Stopped flag if in STOPPED state
     //------------------------------------------------------------------------//
-    // If commanded to Stop then reset any Start command:                     //
+    // STOPPED state flag for convenience:                                    //
     //------------------------------------------------------------------------//
-    A #bmc.eventCmdStop;
-    JCN _c;
-    R #bmc.eventCmdStart;
-_c:   NOP 0;
+    A(;
+	L "dbCONST".BLK.STATE.STOPPED;
+    L #mcOrigin.STATE;
+    ==I;
+	);
+    = #bmc.stateSTOPPED;
 
 NETWORK
-TITLE = Interlocked State if Stopped
+TITLE = Running flag if in a RUNNING substate
+    //------------------------------------------------------------------------//
+    // STOPPED state flag for convenience:                                    //
+    //------------------------------------------------------------------------//
+    A(;
+    L #mcOrigin.STATE;
+    L "dbCONST".BLK.STATE.STOPPED;
+    >I;
+    );
+    A(;
+    L #mcOrigin.STATE;
+    L "dbCONST".BLK.STATE.INTERLOCKED;
+    <I;
+    );
+    = #bmc.stateRUNNING;
+
+NETWORK
+TITLE = Interlocked State. Send safe command in case of any interlock or failure
     //------------------------------------------------------------------------//
     // Block should be interlocked state if STOPPED and interlock active or   //
     // child failed:                                                          //
     //------------------------------------------------------------------------//
-    A(;
-    L #mcOrigin.STATE;
-    L "dbCONST".BLK.STATE.STOPPED;
-    ==I;
-    );
-    A(;
     O #mcOrigin.INTERLOCK;
     ON #bmc.permitStart;
-    );
-    JCN _d;
+    FP #bmc.stateINTERLOCKED;
+    = #edgeInterlock;
+    JCN _noInterlock;
+    L #mcOrigin.STATE;
+    T #bmc.lastSTATE;
     L "dbCONST".BLK.STATE.INTERLOCKED;
     T #mcOrigin.STATE;
-_d:   NOP 0;
 
-NETWORK
-TITLE = Paused State if Running
-    //------------------------------------------------------------------------//
-    // Block should be paused state if RUNNING and interlock active or child  //
-    // failed:                                                                //
-    //------------------------------------------------------------------------//
-    A(;
-    L #mcOrigin.STATE;
-    L "dbCONST".BLK.STATE.INTERLOCKED;
-    <>I;
-    );
-    A(;
-    L #mcOrigin.STATE;
-    L "dbCONST".BLK.STATE.PAUSED;
-    <>I;
-    );
-    A(;
-    L #mcOrigin.STATE;
-    L "dbCONST".BLK.STATE.STOPPED;
-    <>I;
-    );
-    A(;
-    O #mcOrigin.INTERLOCK;
-    ON #bmc.permitStart;
-    );
-    JCN _e;
-    L "dbCONST".BLK.STATE.PAUSED;
-    T #mcOrigin.STATE;
-_e:   NOP 0;
+_noInterlock:   NOP 0;
 
-    //------------------------------------------------------------------------//
-    // Set the substate safe if any interlock:                                //
-    //------------------------------------------------------------------------//
-    A(;
-    L #mcOrigin.STATE;
-    L "dbCONST".BLK.STATE.INTERLOCKED;
-    ==I;
-    );
-    JCN _f;
-    L "dbCONST".BLK.SAFE.CMD;
-    T #bmc.SUBS;
-_f:   NOP 0;
 
-NETWORK
-TITLE = Send safe command in case of any interlock or failure
-    //------------------------------------------------------------------------//
-    // Send safe command if any interlock:                                    //
-    //------------------------------------------------------------------------//
-    AN #bmc.permitStart;
-    JCN _g;
-    L "dbCONST".BLK.SAFE.CMD;
-    T #mcOwner.CMD;
-_g:   NOP 0;
-
-NETWORK
-TITLE = Set the safe state in case of any interlock or failure
-    //------------------------------------------------------------------------//
-    // Set safe state to match command if any interlock. The safe command     //
-    // must match the safe state index number in dbCONST.                     //
-    //------------------------------------------------------------------------//
-    AN #bmc.permitStart;
-    JCN _h;
-    L "dbCONST".BLK.SAFE.CMD;
-    T #mcOrigin.STATE;
-_h:   NOP 0;
 END_FUNCTION

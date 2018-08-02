@@ -164,6 +164,17 @@ TITLE = Call UN communications between PLCs if enabled
 _xUN:   NOP 0;
 
 NETWORK
+TITLE = Initialise the alarms with a one shot
+    //------------------------------------------------------------------------//
+    // Call the Program_Alarm initialisation function to toggle the trigger   //
+    // bits high as a one shot to reset each alarm status:                    //
+    //------------------------------------------------------------------------//
+    AN "alarmsEnabled";
+    JCN _alarmsInitialised;
+    CALL "fcInitAlarm";
+_alarmsInitialised:   NOP 0;
+
+NETWORK
 TITLE = Calling all SFC operator prompts
     //------------------------------------------------------------------------//
     // Call the message function to interface the PLC to the HMI. Messages    //
@@ -210,11 +221,11 @@ TITLE = Calling all SFC log time data messages
 //    NOP 0;
 
 NETWORK
-TITLE = HMI Sequence animation and control
+TITLE = HMI Sequence animation
     //------------------------------------------------------------------------//
-    // Call the sequence control function for the HMI sequence interface:     //
+    // Call the sequence select function for the HMI sequence interface:      //
     //------------------------------------------------------------------------//
-    CALL "ifcHMISFCControl";
+    CALL "ifcHMISelectSFC";
     NOP 0;
 
 //NETWORK

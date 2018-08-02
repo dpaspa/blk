@@ -1,0 +1,54 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Handles the HMI interface for operator control of each SFC.   //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      29-Mar-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+FUNCTION "ifcHMISelectSFC" : Void
+TITLE = SFC Selection
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifcHMISelectSFC
+VERSION : 2.0
+
+VAR_TEMP
+    sfcSelected : Int;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Get the selected SFC
+    //------------------------------------------------------------------------//
+    // Get the SFC index number selected by the user when they clicked the    //
+    // faceplate SFC target:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbHMIInterfaceSFC".sfcSelected;
+    T #sfcSelected;
+
+@@TEMPLATE_BEGIN|INSTANCE_SFC@@
+NETWORK
+TITLE = @@INSTANCE@@ @@DESCRIPTION@@ : @@STATEDESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Check if this SFC is selected:                                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #sfcSelected;
+    L 1@@IDX@@@@SFCIDX@@@@IDX@@;
+    ==I;
+    );
+    JCN _not_@@SFC@@_@@IDX@@;
+
+    CALL "fcHMIInterfaceSFC"
+    (   smc                  := "idb@@CLASS@@".f[@@IDX@@].@@SFC@@.smc ,
+        sqSequencer          := "idb@@CLASS@@".f[@@IDX@@].@@SFC@@.sqSequencer
+    );
+
+_not_@@SFC@@_@@IDX@@:   NOP 0;
+
+@@TEMPLATE_END@@
+END_FUNCTION

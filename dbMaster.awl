@@ -74,27 +74,31 @@ BEGIN
 
 END_DATA_BLOCK
 
-DATA_BLOCK "dbHMISFCControl"
+DATA_BLOCK "dbHMIInterfaceSFC"
 { S7_Optimized_Access := 'TRUE' }
 VERSION : 0.1
     STRUCT
-        HMI_SEQ_SELECTION : Int;
-        HMI_SEQ_OFFSET : Int;
-        HMI_CB_OFFSET : Int;
+        smc : "udtModeCommandSFC";
+        sqSequencer : "udtSFCSequence32";
+        sfcSelected : Int;
+        CMD_MODE : Int;
+        CMD_SQ_CMD : Int;
+        CMD_STEPNO_JUMP : Int;
+        CMD_MAN_JUMP : Bool;
+        HMI_SEQ_DONE_SA : Int;
+        HMI_SEQ_WITHERROR_SA : Int;
+        HMI_SEQ_LENGTH : Int;
+        HMI_SEQ_SA : Int;
+        HMI_Common_Buffer_OFFSET : Int;
+        HMI_TextField_Anim : Array[1..10] of Int;
+        HMI_TextField_Anim_SA : Int;
+        HMI_Common_Buffer : Array[1..104] of Int;
+        HMI_Common_Buffer_SA : Int;
         HMI_TEXT_LENGTH : Int;
-        HMI_SEQ_MODE : Int;
-        HMI_SEQ_MODE_CMD : Int;
-        HMI_SEQ_SQ_CMD : Int;
-        HMI_SEQ_STEPNO_JUMP : Int;
-        HMI_SEQ_MAN_JUMP : Bool;
-        HMI_SEQ_NO_VERIFIC : Bool;
-        HMI_SEQ_TRN_AND_JUMP : Bool;
-        HMI_SEQ_PAUSED : Bool;
-        HMI_SEQ_CUR : Int;
-    END_STRUCT;
+   END_STRUCT;
 
-    BEGIN
-        HMI_TEXT_LENGTH := 10;
+BEGIN
+    HMI_TEXT_LENGTH := 10;
 END_DATA_BLOCK
 
 DATA_BLOCK "TimeSyncBlock"
@@ -111,7 +115,7 @@ VERSION : 0.1
         HMI_PLC_DateAndTime : Date_And_Time;
     END_STRUCT;
 
-    BEGIN
+BEGIN
 END_DATA_BLOCK
 
 DATA_BLOCK "HMIDateTime"

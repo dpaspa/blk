@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 26/07/2018 5:18:29 PM by David Paspa
+generated on 31/07/2018 5:58:31 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -378,7 +378,7 @@ PARAMETER::44
 Name:- r_temp_sip_vent
 Type:- REAL
 Description:- VENT valve SIP temperature
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::45
@@ -386,7 +386,7 @@ PARAMETER::45
 Name:- r_temp_sip
 Type:- REAL
 Description:- SIP temperature
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::46
@@ -431,7 +431,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::51
 --------------------------------------------------
-Name:- emc_gas_pv
+Name:- emc_gas_pi_vessel_pv
 Type:- REAL
 Description:- Sy vessel pressure
 ParameterInOut:- IN
@@ -442,7 +442,7 @@ PARAMETER::52
 Name:- r_pres_vac
 Type:- REAL
 Description:- Setpoint for vacuum pressure
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::53
@@ -458,7 +458,7 @@ PARAMETER::54
 Name:- r_pulse_number
 Type:- INT
 Description:- Number of pulse times
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::55
@@ -474,7 +474,7 @@ PARAMETER::56
 Name:- r_num_sip_abort
 Type:- INT
 Description:- number of SIP abort times
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::57
@@ -490,7 +490,7 @@ PARAMETER::58
 Name:- r_time_sip_abort
 Type:- TIME
 Description:- Time to abort SIP
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::59
@@ -514,7 +514,7 @@ PARAMETER::61
 Name:- r_time_eject
 Type:- TIME
 Description:- Vacuum eject timer
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::62
@@ -722,7 +722,7 @@ PARAMETER::87
 Name:- r_time_drain_pulse
 Type:- TIME
 Description:- Time for drain pulsing.
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::88
@@ -738,7 +738,7 @@ PARAMETER::89
 Name:- r_pres_hpca_leave
 Type:- REAL
 Description:- HPCA pressure to leave 
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::90
@@ -754,7 +754,7 @@ PARAMETER::91
 Name:- r_time_stm_drain_sy
 Type:- TIME
 Description:- Time to steam the vent line
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::92
@@ -762,7 +762,7 @@ PARAMETER::92
 Name:- r_pres_hpca_blow
 Type:- REAL
 Description:- Pressure
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::93
@@ -770,7 +770,7 @@ PARAMETER::93
 Name:- r_pres_lpca_blank
 Type:- REAL
 Description:- lpca blanket pressure
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::94
@@ -778,7 +778,7 @@ PARAMETER::94
 Name:- r_pres_stm_pos
 Type:- REAL
 Description:- Positive steam pressure threshold
-ParameterInOut:- IN
+ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::95
@@ -918,7 +918,7 @@ Title:- Pressure below setpoint?
 EmptyTransition:- False
 Description:- Pressure reduced below PRES_VAC.
 Condition:- A(;
-L #_emc_gas_pv;
+L #_emc_gas_pi_vessel_pv;
 L #_r_pres_vac;
 <R;
 );
@@ -1121,7 +1121,7 @@ Description:- Pressure increased above PRES_STM_POS.
 PI_y103 > PRES_STM_POS
 
 Condition:- A(;
-L 	#_emc_gas_pv;
+L 	#_emc_gas_pi_vessel_pv;
 L 	#_r_pres_stm_pos;
 >R;
 );
@@ -1149,7 +1149,7 @@ Action:- SET;
 S #_positive_pressure;
 
 //Log actual positive pressure
-L #_emc_gas_pv;
+L #_emc_gas_pi_vessel_pv;
 T #_real_positive_pressure;
 
 SET;
@@ -1879,7 +1879,7 @@ Title:- Pressure below PRES_HPCA_BLOW?
 EmptyTransition:- False
 Description:- Pressure dropped to PRES_HPCA_BLOW. PI-xy10 <= PRES_HPCA_BLOW
 Condition:- A(;
-L 	#_emc_gas_pv;
+L 	#_emc_gas_pi_vessel_pv;
 L 	#_r_pres_hpca_blow;
 <=R;
 );
@@ -2185,7 +2185,7 @@ Title:- Pressure below PRES_HPCA_LEAVE
 EmptyTransition:- False
 Description:- Pressure below PRES_HPCA_LEAVE. PI_xy10 <= PRES_HPCA_LEAVE
 Condition:- A(;
-L 	#_emc_gas_pv;
+L 	#_emc_gas_pi_vessel_pv;
 L 	#_r_pres_hpca_leave;
 <=R;
 );

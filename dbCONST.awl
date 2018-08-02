@@ -100,8 +100,8 @@ STRUCT
     END_STRUCT ;
     BLK : STRUCT                       // Generic block structure
         CMD : STRUCT
-            STOP : INT  := 1;
-            START : INT  := 2;
+            STOP : INT  := 0;
+            START : INT  := 1;
         END_STRUCT ;
         ERR : STRUCT
             NO_ERROR : INT  := 0;
@@ -120,11 +120,10 @@ STRUCT
             OOS : INT  := 3;
         END_STRUCT ;
         SAFE : STRUCT
-            CMD : INT  := 1;           // Substate for safe state
+            CMD : INT  := 0;           // Substate for safe state
         END_STRUCT ;
         STATE : STRUCT
             STOPPED : INT  := 0;       // Block stopped
-            PAUSED : INT  := 50;       // Block paused
             INTERLOCKED : INT  := 51;  // Block interlocked
             ABORTED : INT  := 98;      // Block substate unsucessfully finished,
             COMPLETED : INT  := 99;    // Block substate successfully finished, Finished after SFC (if any) is complete.
@@ -455,15 +454,14 @@ STRUCT
 @@TEMPLATE_BEGIN|PARENT@@
         @@CLASS@@ : STRUCT             // @@DESCRIPTION@@
             CMD : STRUCT
-                STOP : INT  := 1;
-                START : INT  := 2;
+                STOP : INT  := 0;
+                START : INT  := 1;
             END_STRUCT ;
             SAFE : STRUCT
                 CMD : INT  := 0;       // Substate for safe state
             END_STRUCT ;
             STATE : STRUCT
                 STOPPED : INT  := 0;       // Block stopped
-                PAUSED : INT  := 50;       // Block paused
                 INTERLOCKED : INT  := 51;  // Block interlocked
                 ABORTED : INT  := 98;      // Block substate unsucessfully finished,
                 COMPLETED : INT  := 99;    // Block substate successfully finished, Finished after SFC (if any) is complete.

@@ -68,6 +68,16 @@ TITLE = Stop command completion
     T    #smc.SQ_STATE;
 NotStopCmd:   NOP 0;
 
+    A    #smc.OFF_IDLE;
+    AN    #sqSequencer.STEP.Done[@@LAST_STEP_NUM@@];
+    AN    #sqSequencer.STEP.WithError[@@LAST_STEP_NUM@@];
+    JCN   _stopAction;
+    R     #sqSequencer.STEP.Finished;
+    R     #smc.PAUSED;
+    R     #sqSequencer.STEP.Error_Fault;
+    R     #sqSequencer.Error_Fault;
+_stopAction:   NOP 0;
+    
 NETWORK
 TITLE =Sequencer Finished
 

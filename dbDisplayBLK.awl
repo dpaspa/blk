@@ -1,0 +1,36 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file defines the Display Interface structure for the HMI.             //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      01-Aug-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+DATA_BLOCK "dbDisplayBLK"
+TITLE = Display interface for block faceplate on the HMI
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : dbDisplayBLK
+VERSION : 1.0
+
+STRUCT
+@@TEMPLATE_BEGIN|createClassesGlobal@@
+    @@CLASS@@ : STRUCT
+        idxInstance : Int;
+        class : "udtClass";
+        origin : "udt@@CLASS@@Origin";
+        owner : "udt@@CLASS@@Owner";
+    END_STRUCT ;
+@@TEMPLATE_END@@
+END_STRUCT;
+
+BEGIN
+@@TEMPLATE_BEGIN|PARENTDATA@@
+    @@CLASS@@.class.idxClass := @@IDX@@;
+    @@CLASS@@.class.cntChildren := @@CNTCHILDREN@@;
+    @@CLASS@@.class.cntParameters := @@CNTPARAMETERS@@;
+@@TEMPLATE_END@@
+END_DATA_BLOCK

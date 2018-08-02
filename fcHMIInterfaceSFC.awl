@@ -1,0 +1,80 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcHMIInterfaceSFC                                             //
+// Description:                                                               //
+// Manages the data interface for the HMI SFC faceplate.                      //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      02-Aug-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION "fcHMIInterfaceSFC" : Void
+TITLE = HMI SFC Faceplate interface
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcHMIInterfaceSFC
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR_IN_OUT
+    smc : "udtModeCommandSFC";         // SFC mode and command
+    sqSequencer : "udtSFCSequence32";  // Sequencer runtime
+END_VAR
+
+VAR_TEMP
+    retVal : Int;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Copy the SFC mode and command data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy mode and command data:                                            //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #smc ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMIInterfaceSFC".smc
+    );
+
+NETWORK
+TITLE = Copy the SFC runtime data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy runtime data:                                                     //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #sqSequencer ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMIInterfaceSFC".sqSequencer
+    );
+
+NETWORK
+TITLE = Send the user output commands if in Manual mode
+    //------------------------------------------------------------------------//
+    // Send the user command to the SFC if in MANUAL:                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #smc.MODE;
+    L "dbCONST".SEQ.MODE.MANUAL;
+    ==I;
+    );
+    JCN _notManual;
+
+    L "dbHMIInterfaceSFC".CMD_MODE;
+    T #smc.MODE;
+    L "dbHMIInterfaceSFC".CMD_SQ_CMD;
+    T #smc.SQ_CMD;
+    L "dbHMIInterfaceSFC".CMD_STEPNO_JUMP;
+    T #smc.STEPNO_JUMP;
+    L "dbHMIInterfaceSFC".CMD_MAN_JUMP;
+    T #smc.MAN_JUMP;
+
+_notManual:   NOP 0;
+
+END_FUNCTION

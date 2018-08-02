@@ -1,0 +1,189 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcVS1                                                         //
+// Description:                                                               //
+// Grouped CM for the two vacuum pumps to comprise one vacuum system which    //
+// starts sucking if any user vacuum valve opens indicating a call for the    //
+// vacuum service.                                                            //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+FUNCTION "fcVS1" : Void
+TITLE = VS1 : VS1 Vacuum System grouped CM
+{ S7_Optimized_Access := 'TRUE' }
+NAME : fcVS1
+AUTHOR : REO
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR_IN_OUT
+    p : "udtVS1";            // Block data interface
+END_VAR
+
+VAR_TEMP
+    cmdDISABLE : Bool;
+    cmdENABLE : Bool;
+    tDO : Bool;              // Temporary processed output signal
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Call Mode and Command handling function
+    //------------------------------------------------------------------------//
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
+    );
+
+NETWORK
+TITLE = DISABLE command
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is DISABLE:                                                        //
+    //------------------------------------------------------------------------//
+    A(;
+    L #p.owner.mc.CMD;
+    L "dbCONST".BLK.VS1.CMD.DISABLE;
+    ==I;
+    );
+    = #cmdDISABLE;
+
+    //------------------------------------------------------------------------//
+    // CMD is ENABLE:                                                         //
+    //------------------------------------------------------------------------//
+    AN #p.origin.mc.modeOOS;
+    AN #p.origin.mc.INTERLOCK;
+    A(;
+    L #p.owner.mc.CMD;
+    L "dbCONST".BLK.VS1.CMD.ENABLE;
+    ==I;
+    );
+    = #cmdENABLE;
+
+NETWORK
+TITLE = Check vacuum pumps are available
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Check vacuum pumps are not interlocked:                                //
+    //------------------------------------------------------------------------//
+    AN #p.origin.mc.modeOOS;
+    A(;
+    O #p.origin.PUMP1.origin.mc.INTERLOCK;
+    O #p.origin.PUMP2.origin.mc.INTERLOCK;
+    ON #p.origin.PUMP1.origin.mc.modeAUTO;
+    ON #p.origin.PUMP2.origin.mc.modeAUTO;
+    );
+    = #p.origin.FAULT;
+
+    //------------------------------------------------------------------------//
+    // Check if any user valve is open which is a call for vacuum:            //
+    //------------------------------------------------------------------------//
+    A #cmdENABLE;
+    AN #p.origin.FAULT;
+    A(;
+    O(;
+    L #p.origin.VALVE1.origin.mc.STATE;
+    L "dbCONST".BLK.POSx.STATE.OPENED;
+    ==I;
+    );
+    O(;
+    L #p.origin.VALVE2.origin.mc.STATE;
+    L "dbCONST".BLK.POSx.STATE.OPENED;
+    ==I;
+    );
+    );
+    = #tDO;
+
+NETWORK
+TITLE = Check vacuum pumps are available
+    //------------------------------------------------------------------------//
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    //                                                                        //
+    // Start vacuum pump 1 if a call for vacuum and all okay:                 //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    JCN _a;
+    L "dbCONST".BLK.MOT1.CMD.START;
+    T #p.origin.PUMP1.owner.mc.CMD;
+_a:   NOP 0;
+
+    //------------------------------------------------------------------------//
+    // Start vacuum pump 2 if a call for vacuum and all okay:                 //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    JCN _b;
+    L "dbCONST".BLK.MOT1.CMD.START;
+    T #p.origin.PUMP2.owner.mc.CMD;
+_b:   NOP 0;
+
+    //------------------------------------------------------------------------//
+    // Stop vacuum pump 1 if not required to run:                             //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    JCN _c;
+    L "dbCONST".BLK.MOT1.CMD.STOP;
+    T #p.origin.PUMP1.owner.mc.CMD;
+_c:   NOP 0;
+
+    //------------------------------------------------------------------------//
+    // Stop vacuum pump 2 if not required to run:                             //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    JCN _d;
+    L "dbCONST".BLK.MOT1.CMD.STOP;
+    T #p.origin.PUMP2.owner.mc.CMD;
+_d:   NOP 0;
+
+NETWORK
+TITLE = Set Device State to DISABLED if commanded or cannot ENABLE
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // DISABLED if commanded or any ENABLE problem:                           //
+    //------------------------------------------------------------------------//
+    O #cmdDISABLE;
+    ON #cmdENABLE;
+    JCN _e;
+    L "dbCONST".BLK.VS1.STATE.DISABLED;
+    T #p.origin.mc.STATE;
+_e:   NOP 0;
+
+NETWORK
+TITLE = Set Device State to ENABLED if commanded
+    //------------------------------------------------------------------------//
+    // ENABLED if commanded:                                                  //
+    //------------------------------------------------------------------------//
+    A #cmdENABLE;
+    JCN _f;
+    L "dbCONST".BLK.VS1.STATE.ENABLED;
+    T #p.origin.mc.STATE;
+_f:   NOP 0;
+
+NETWORK
+TITLE = Setting Device State to FAULT
+    //------------------------------------------------------------------------//
+    // FAULT if problem with either vacuum pump:                              //
+    //------------------------------------------------------------------------//
+    A #p.origin.FAULT;
+    JCN _g;
+    L "dbCONST".BLK.VS1.STATE.FAULT;
+    T #p.origin.mc.STATE;
+_g:   NOP 0;
+END_FUNCTION

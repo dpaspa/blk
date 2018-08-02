@@ -1,0 +1,129 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcDI2                                                         //
+// Description:                                                               //
+// Normally OFF general alarm single digital input.                           //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.5 Khairul Basar    02-Oct-2009 CC-09/016 NW4 DI changed from NC to NO.   //
+// 0.4 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.3 Khairul Basar    30-Sep-2009           Mode=2 initialized and Out of   //
+//                                            Service without Alarm.          //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Mode=1 initialized.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION "fcDI2" : Void
+TITLE = DI2 : General alarm single digital input Normally OFF
+{ S7_Optimized_Access := 'TRUE' }
+NAME : fcDI2
+AUTHOR : REO
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR_IN_OUT
+    p : "udtDI2";            // Block data interface
+END_VAR
+
+VAR_TEMP
+    tPV : Bool;              // Temporary processed DI signal
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Call Mode and Command handling function
+    //------------------------------------------------------------------------//
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
+    );
+
+NETWORK
+TITLE = Set Device command which can only be ENABLE.
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is always ENABLE:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.DI2.CMD.ENABLE;
+    T #p.owner.mc.CMD;
+
+NETWORK
+TITLE = Process Digital Input Signal
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Calculate the process value based on the mode:                         //
+    //------------------------------------------------------------------------//
+    O(;
+    A #p.origin.mc.modeAUTO;
+    A #p.origin.DI_Auto;
+    );
+    O(;
+    A #p.origin.mc.modeMANUAL;
+    A #p.owner.DI_Manual;
+    );
+    = #tPV;
+    = #p.origin.PV;
+
+NETWORK
+TITLE = Set ALARM Flag
+    //------------------------------------------------------------------------//
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    //                                                                        //
+    // Set alarms:                                                            //
+    //------------------------------------------------------------------------//
+    A #tPV;
+    AN #p.origin.mc.modeOOS;
+    = #p.origin.ALARM;
+
+NETWORK
+TITLE = Set INTERLOCK Flag
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Set interlocks:                                                        //
+    //------------------------------------------------------------------------//
+    A #tPV;
+    = #p.origin.mc.INTERLOCK;
+
+NETWORK
+TITLE = Set Device State to Enabled if switch is off
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // ENABLED if switch is off:                                              //
+    //------------------------------------------------------------------------//
+    AN #tPV;
+    JCN _a;
+    L "dbCONST".BLK.DI2.STATE.ENABLED;
+    T #p.origin.mc.STATE;
+_a:   NOP 0;
+
+NETWORK
+TITLE = Setting Device State to ALARM
+    //------------------------------------------------------------------------//
+    // ALARM if switch is on and not OOS:                                     //
+    //------------------------------------------------------------------------//
+    A #tPV;
+    AN #p.origin.mc.modeOOS;
+    JCN _b;
+    L "dbCONST".BLK.DI2.STATE.ALARM;
+    T #p.origin.mc.STATE;
+_b:   NOP 0;
+END_FUNCTION

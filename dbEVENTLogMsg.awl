@@ -1,0 +1,35 @@
+@@TEMPLATE_BEGIN|createClassNone@@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable event flags and data for process   //
+// messages to be logged. Events are indexed as follows:                      //
+@@ATTR_BEGIN|pEventLogMsgList@@
+// @@IDXEVENT@@   @@PARAMETERSOURCE@@   @@CHILDPARAMETER@@   @@PARAMETERDESCRIPTION@@
+@@ATTR_END|pEventLogMsgList@@
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      14-May-2018 NA        Initial design for S7-1500.     //
+//----------------------------------------------------------------------------//
+DATA_BLOCK "dbEVENTLogMsg"
+TITLE = Global process log messages
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : dbEVENTLogMsg
+VERSION : 1.0
+
+STRUCT
+@@ATTR_BEGIN|pEventLogMsgNum@@
+    eventLogMsg : Array[0..@@IDXEVENTMAX@@] of "udtEventLogMsg";
+@@ATTR_END|pEventLogMsgNum@@
+END_STRUCT;
+
+BEGIN
+@@ATTR_BEGIN|pEventLogMsgList@@
+    eventLogMsg[@@IDXEVENT@@].idxMessage := @@IDXEVENT@@;
+@@ATTR_END|pEventLogMsgList@@
+@@TEMPLATE_END@@
+END_DATA_BLOCK

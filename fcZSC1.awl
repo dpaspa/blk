@@ -1,0 +1,168 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcZSC1                                                        //
+// Description:                                                               //
+// Manway closed Indication and Alarm.                                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.5 Khairul Basar    02-Oct-2009 CC-09/016 NW4/5 DI changed from NC to NO. //
+// 0.4 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.3 Khairul Basar    30-Sep-2009           Mode=3 ignored Alarm.           //
+// 0.2 Khairul Basar    04-Sep-2009 CC-09/016 Mode=1 initialized, ALARM       //
+//                                            renamed as ZSCA.                //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION "fcZSC1" : Void
+TITLE = ZSC1 : Manway closed Indication and Alarm
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fcZSC1
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR_IN_OUT
+    p : "udtZSC1";           // Block data interface
+END_VAR
+
+VAR_TEMP
+    cmdCLOSE : Bool;
+    cmdOPEN : Bool;
+    tPV : Bool;              // Temporary processed DI signal
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Call Mode and Command handling function
+    //------------------------------------------------------------------------//
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (   mcOrigin             := #p.origin.mc ,
+        mcOwner              := #p.owner.mc
+    );
+
+NETWORK
+TITLE = Get Device command if CLOSE
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is CLOSE
+    //------------------------------------------------------------------------//
+    A(;
+    L "dbCONST".BLK.ZSC1.CMD.CLOSE;
+    L #p.owner.mc.CMD;
+    ==I;
+    );
+    = #cmdCLOSE;
+
+NETWORK
+TITLE = Get Device command if OPEN
+    //------------------------------------------------------------------------//
+    // CMD is OPEN:                                                           //
+    //------------------------------------------------------------------------//
+    A(;
+    L "dbCONST".BLK.ZSC1.CMD.OPEN;
+    L #p.owner.mc.CMD;
+    ==I;
+    );
+    = #cmdOPEN;
+
+NETWORK
+TITLE = Process Digital Input Signal
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Calculate the process value based on the mode:                         //
+    //------------------------------------------------------------------------//
+    O(;
+    A #p.origin.DI_Auto;
+    A #p.origin.mc.modeAUTO;
+    );
+    O(;
+    A #p.owner.DI_Manual;
+    A #p.origin.mc.modeMANUAL;
+    );
+    = #tPV;
+    = #p.origin.PV;
+
+NETWORK
+TITLE = Set ALARM Flag
+    //------------------------------------------------------------------------//
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
+    //                                                                        //
+    // When the alarm cutout flag is set the alarm message is not raised:     //
+    //------------------------------------------------------------------------//
+    AN #tPV;
+    AN #p.owner.CUTOUT;
+    AN #p.origin.mc.modeOOS;
+    AN #cmdOPEN;
+    = #p.origin.ALARM;
+
+NETWORK
+TITLE = Set INTERLOCK Flag if OPENED
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Set interlock if manway is opened:                                     //
+    //------------------------------------------------------------------------//
+    AN #tPV;
+    = #p.origin.mc.INTERLOCK;
+
+NETWORK
+TITLE = Set Device State to CLOSED if switch is on
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // CLOSED if switch is on:                                                //
+    //------------------------------------------------------------------------//
+    A #tPV;
+    JCN _a;
+    L "dbCONST".BLK.ZSC1.STATE.CLOSED;
+    T #p.origin.mc.STATE;
+_a:   NOP 0;
+
+NETWORK
+TITLE = Set Device State to MISMATCH if CLOSED state does not follow command
+    //------------------------------------------------------------------------//
+    // If commanded to CLOSE and not closed then its a problem. If commanded  //
+    // to OPEN then actually we don't care if OPENED or CLOSED:               //
+    //------------------------------------------------------------------------//
+    O(;
+    A #cmdCLOSE;
+    AN #tPV;
+    );
+    O(;
+    A #cmdOPEN;
+    A #tPV;
+    );
+    JCN _b;
+    L "dbCONST".BLK.ZSC1.STATE.MISMATCH;
+    T #p.origin.mc.STATE;
+_b:   NOP 0;
+
+NETWORK
+TITLE = Set Device State to OPENED if switch is off and command is OPEN
+    //------------------------------------------------------------------------//
+    // OPENED if switch is on:                                                //
+    //------------------------------------------------------------------------//
+    A #cmdOPEN;
+    AN #tPV;
+    JCN _c;
+    L "dbCONST".BLK.ZSC1.STATE.OPENED;
+    T #p.origin.mc.STATE;
+_c:   NOP 0;
+END_FUNCTION
