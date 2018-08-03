@@ -26,12 +26,12 @@ VERSION : 2.0
 @@TEMPLATE_BEGIN@@
 VAR
 @@ATTR_BEGIN|pEventPromptNum@@
-    eventPrompt : Array[0..@@IDXEVENTMAX@@] of "udtEventPrompt";   // SFC events for operator prompts
+    eventPrompt : Array[1..@@IDXEVENTMAX@@] of "udtEventPrompt";   // SFC events for operator prompts
 @@ATTR_END|pEventPromptNum@@
-@@ATTR_BEGIN|pEventPromptList@@
+@@ATTR_BEGIN|pEventPromptAll@@
     Program_Alarm_@@IDXEVENT@@ : Program_Alarm;
-@@ATTR_END|pEventPromptList@@
-@@ATTR_BEGIN|pEventPromptList@@
+@@ATTR_END|pEventPromptAll@@
+@@ATTR_BEGIN|pEventPromptAll@@
 	Alarm@@IDXEVENT@@_Inactive_Acknowledged : Bool;   // Alarm inactive
     Alarm@@IDXEVENT@@_Inactive_Unacknowledged : Bool;   // Alarm was active & no acknowledgement
     Alarm@@IDXEVENT@@_Active_Acknowledged : Bool;   // Alarm active & acknowledged
@@ -41,7 +41,7 @@ VAR
     Alarm@@IDXEVENT@@_StatusWord1 : Word;
     Alarm@@IDXEVENT@@_StatusWord2 : Word;
     Alarm@@IDXEVENT@@_StateByte : Byte;
-@@ATTR_END|pEventPromptList@@
+@@ATTR_END|pEventPromptAll@@
 	SourceData : Word;
 END_VAR
 
@@ -54,7 +54,7 @@ VAR_TEMP
 END_VAR
 
 BEGIN
-@@ATTR_BEGIN|pEventPromptList@@
+@@ATTR_BEGIN|pEventPromptAll@@
 NETWORK
 TITLE = Check if message event needs to be raised
     //------------------------------------------------------------------------//
@@ -72,45 +72,31 @@ TITLE = Check if message event needs to be raised
 NETWORK
 TITLE = Clear response flags if message event needs to be raised
     //------------------------------------------------------------------------//
-    // Clear the alarm request and response flags if raising a new event:     //
+    // Clear the alarm request and response flags if raising a new event and  //
+    // set the alarm list message number:                                     //
     //------------------------------------------------------------------------//
     A #raiseEvent;
     JCN _evRaise_@@IDXEVENT@@;
+    L @@IDXEVENT@@;
+    T #SourceData;
     R #eventPrompt[@@IDXEVENT@@].confirmYes;
     R #eventPrompt[@@IDXEVENT@@].confirmNo;
 _evRaise_@@IDXEVENT@@:   NOP 0;
 
 NETWORK
-TITLE = Set the message number
+TITLE = Raise message event and get alarm state and acknowledgement
     //------------------------------------------------------------------------//
-    // Set the alarm list message number:                                     //
+    // Raise the message event if requested by the trigger bit.               //
+    // Get the acknowledgement response. Response is asynchronous and it may  //
+    // take a long time for the operator to attend to the event message:      //
     //------------------------------------------------------------------------//
-    A #raiseEvent;
-    L @@IDXEVENT@@;
-    T #SourceData;
-
-NETWORK
-TITLE = Raise message event without acknowledgement if required
-    //------------------------------------------------------------------------//
-    // Raise the simple message event if requested. No acknowledge required:  //
-    //------------------------------------------------------------------------//
-    A #raiseEvent;
-    JCN _evCall_@@IDXEVENT@@;
     CALL #Program_Alarm_@@IDXEVENT@@
     (   SIG       := #eventPrompt[@@IDXEVENT@@].trigger ,
 		SD_1      := #SourceData ,
         Error     := #Alarm@@IDXEVENT@@_ErrorBit1 ,
         Status    := #Alarm@@IDXEVENT@@_StatusWord1
     );
-_evCall_@@IDXEVENT@@:   NOP 0;
 
-NETWORK
-TITLE = Get alarm state and acknowledgement
-    //------------------------------------------------------------------------//
-    // Get the acknowledgement response if it was still pending. Response is  //
-    // asynchronous and it may take a long time for the operator to attend to //
-    // the event message:                                                     //
-    //------------------------------------------------------------------------//
     CALL  Get_AlarmState
     (   Alarm      := #Program_Alarm_@@IDXEVENT@@ ,
         AlarmState := #Alarm@@IDXEVENT@@_StateByte  ,
@@ -161,24 +147,30 @@ TITLE = Alarm status
     = #Alarm@@IDXEVENT@@_Active_Acknowledged;
 
 NETWORK
-TITLE = Return the Yes confirmation if still active when acknowledged
+TITLE = Return the confirmation
     //------------------------------------------------------------------------//
-    // HMI will leave the alarm active when acknowledging if confirm yes:     //
+    // HMI will leave the alarm active when acknowledging if confirm yes but  //
+    // clear the alarm trigger when acknowledging if confirm no.              //
+    // Reset the trigger bit if the alarm is acknowledged yes:                //
     //------------------------------------------------------------------------//
     A "alarmsEnabled";
     A #Alarm@@IDXEVENT@@_Active_Acknowledged;
+    JCN _a;
     S #eventPrompt[@@IDXEVENT@@].confirmYes;
+_a:   NOP 0;
 
-NETWORK
-TITLE = Return the No confirmation if inactive when acknowledged
-    //------------------------------------------------------------------------//
-    // HMI will clear the alarm trigger when acknowledging if confirm no:     //
-    //------------------------------------------------------------------------//
     A "alarmsEnabled";
     A #Alarm@@IDXEVENT@@_Inactive_Acknowledged;
+    JCN _b;
     S #eventPrompt[@@IDXEVENT@@].confirmNo;
+_b:   NOP 0;
 
-@@ATTR_END|pEventPromptList@@
+    A "alarmsEnabled";
+    A #Alarm@@IDXEVENT@@_Active_Acknowledged;
+    JCN _c;
+    R #eventPrompt[@@IDXEVENT@@].trigger;
+_c:   NOP 0;
 
+@@ATTR_END|pEventPromptAll@@
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

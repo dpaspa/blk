@@ -27,16 +27,16 @@ VAR
 @@ATTR_BEGIN|pEventLogMsgNum@@
     eventLogMsg : Array[0..@@IDXEVENTMAX@@] of "udtEventLogMsg";   // SFC events for logging messages
 @@ATTR_END|pEventLogMsgNum@@
-@@ATTR_BEGIN|pEventLogMsgList@@
+@@ATTR_BEGIN|pEventLogMsgAll@@
     Program_Alarm_@@IDXEVENT@@ : Program_Alarm;
-@@ATTR_END|pEventLogMsgList@@
-@@ATTR_BEGIN|pEventLogMsgList@@
+@@ATTR_END|pEventLogMsgAll@@
+@@ATTR_BEGIN|pEventLogMsgAll@@
     Alarm@@IDXEVENT@@_ErrorBit1 : Bool;
     Alarm@@IDXEVENT@@_ErrorBit2 : Bool;
     Alarm@@IDXEVENT@@_StatusWord1 : Word;
     Alarm@@IDXEVENT@@_StatusWord2 : Word;
     Alarm@@IDXEVENT@@_StateByte : Byte;
-@@ATTR_END|pEventLogMsgList@@
+@@ATTR_END|pEventLogMsgAll@@
 	SourceData : Word;
 END_VAR
 
@@ -48,7 +48,7 @@ VAR_TEMP
 END_VAR
 
 BEGIN
-@@ATTR_BEGIN|pEventLogMsgList@@
+@@ATTR_BEGIN|pEventLogMsgAll@@
 NETWORK
 TITLE = Check if message event needs to be raised
     //------------------------------------------------------------------------//
@@ -85,7 +85,7 @@ TITLE = Raise message event if required
     );
 _evCall_@@IDXEVENT@@:   NOP 0;
 
-@@ATTR_END|pEventLogMsgList@@
+@@ATTR_END|pEventLogMsgAll@@
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

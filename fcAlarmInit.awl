@@ -1,0 +1,53 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Initialises the Program_Alarm trigger bits with a pulse to    //
+//              clear the Program_Alarms.                                     //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      02-Aug-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+FUNCTION "fcAlarmInit" : Void
+TITLE = Program_Alarm initialisation
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifcHMISelectSFC
+VERSION : 1.0
+
+BEGIN
+NETWORK
+TITLE = Pulse bit on PLC restart
+    //------------------------------------------------------------------------//
+    // Off delay pulse on PLC restart pulses every Program_Alarm trigger bit: //
+    //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    L s5t#100ms;
+    SF "timePulseAlarmInit";
+
+@@TEMPLATE_BEGIN|createClassNone@@
+    A "timePulseAlarmInit";
+@@ATTR_BEGIN|pEventLogMsgAll@@
+    = "idbEventLogMsg".eventLogMsg[@@IDXEVENT@@].trigger;
+@@ATTR_END|pEventLogMsgAll@@
+@@ATTR_BEGIN|pEventLogRealAll@@
+    = "idbEventLogReal".eventLogReal[@@IDXEVENT@@].trigger;
+@@ATTR_END|pEventLogRealAll@@
+@@ATTR_BEGIN|pEventLogTimeAll@@
+    = "idbEventLogTime".eventLogTime[@@IDXEVENT@@].trigger;
+@@ATTR_END|pEventLogTimeAll@@
+@@ATTR_BEGIN|pEventPromptAll@@
+    = "idbEventPrompt".eventPrompt[@@IDXEVENT@@].trigger;
+@@ATTR_END|pEventPromptAll@@
+
+NETWORK
+TITLE =
+    //------------------------------------------------------------------------//
+    // Flag alarms now enabled:                                               //
+    //------------------------------------------------------------------------//
+    AN "flagFirstScanRestart";
+    AN "timePulseAlarmInit";
+    S "alarmsEnabled";
+@@TEMPLATE_END@@
+END_FUNCTION

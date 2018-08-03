@@ -152,7 +152,7 @@ VAR
     smc : "udtModeCommandSFC";         // SFC mode and command
     sqStepTimer : "TON";
     sqRunTimer : "fbRunTimer";
-    sqSequencer : "udtSFCSequence@@PARAMETER_UPPER_ARRAY@@";
+    sqSequencer : "udtSFCSequence32";
     SQ_TIMER: "TON";
     sqSeqTimerStart : Bool;
 @@PARAMETER_LIST_VAR@@
@@ -350,7 +350,7 @@ TITLE = Reset sequence Done bits
     CALL FILL_BLK
     {value_type := 'Bool', count_type := 'UInt'}
     (   IN                   := 0 ,
-        COUNT                := @@PARAMETER_UPPER_ARRAY@@ ,
+        COUNT                := 32 ,
         OUT                  := #sqSequencer.STEP.Done[1]
     );
 
@@ -362,7 +362,7 @@ TITLE = Reset sequence Error bits
     CALL FILL_BLK
     {value_type := 'Bool', count_type := 'UInt'}
     (   IN                   := 0 ,
-        COUNT                := @@PARAMETER_UPPER_ARRAY@@ ,
+        COUNT                := 32 ,
         OUT                  := #sqSequencer.STEP.WithError[1]
     );
 

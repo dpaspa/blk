@@ -74,8 +74,33 @@ BEGIN
 
 END_DATA_BLOCK
 
+DATA_BLOCK "dbHMIInterfaceBLK"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+    STRUCT
+        mc : "udtMCOrigin";
+        mco : "udtMCOwner";
+        bmc : "udtModeCommandBLK";
+        pReal : Array[1..50] of pReal;
+        child : Array[1..50] of Int;
+        pInt : Array[1..50] of Int;
+        pBool : Array[1..50] of Bool;
+        blkSelected : Int;
+        numBool : Int;
+        numChildren : Int;
+        numInt : Int;
+        numReal : Int;
+        CMD_MODE : Int;
+        CMD_CMD : Int;
+        CMD_SUBS : Int;
+   END_STRUCT;
+
+BEGIN
+    HMI_TEXT_LENGTH := 10;
+END_DATA_BLOCK
+
 DATA_BLOCK "dbHMIInterfaceSFC"
-{ S7_Optimized_Access := 'TRUE' }
+{ S7_Optimized_Access := 'FALSE' }
 VERSION : 0.1
     STRUCT
         smc : "udtModeCommandSFC";

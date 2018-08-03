@@ -22,14 +22,14 @@ NAME : dbEVENTPrompt
 VERSION : 1.0
 
 STRUCT
-@@ATTR_BEGIN|pEventPromptNum@@
+@@ATTR_BEGIN|pEventPromptInstanceNum@@
     eventPrompt : Array[0..@@IDXEVENTMAX@@] of "udtEventPrompt";
-@@ATTR_END|pEventPromptNum@@
+@@ATTR_END|pEventPromptInstanceNum@@
 END_STRUCT;
 
 BEGIN
-@@ATTR_BEGIN|pEventPromptList@@
-    eventPrompt[@@IDXEVENT@@].idxMessage := @@IDXEVENT@@;
-@@ATTR_END|pEventPromptList@@
+@@ATTR_BEGIN|pEventPromptInstance@@
+    eventPrompt[@@COUNTERATTR|0@@].idxMessage := @@IDXEVENT@@;
+@@ATTR_END|pEventPromptInstance@@
 @@TEMPLATE_END@@
 END_DATA_BLOCK

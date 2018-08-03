@@ -1,0 +1,108 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcHMIInterfaceBLK                                             //
+// Description:                                                               //
+// Manages the data interface for the HMI BLK faceplate.                      //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      03-Aug-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION "fcHMIInterfaceBLK" : Void
+TITLE = HMI BLK Faceplate interface
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcHMIInterfaceBLK
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR_INPUT
+    numBool : Int;
+    numChildren : Int;
+    numInt : Int;
+    numReal : Int;
+END_VAR
+
+VAR_IN_OUT
+    mc : "udtMCOrigin";      // Block origin mode and command
+    mco : "udtMCOwner";      // Block owner mode and command
+    bmc : "udtModeCommandBLK"; // Block events
+END_VAR
+
+VAR_TEMP
+    retVal : Int;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Copy the BLK origin mode and command data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy origin mode and command data:                                     //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #mc ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMIInterfaceBLK".mc
+    );
+
+NETWORK
+TITLE = Copy the BLK owner mode and command data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy owner mode and command data:                                      //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #mco ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMIInterfaceBLK".mco
+    );
+
+NETWORK
+TITLE = Copy the BLK event data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy BLK event data:                                                   //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #bmc ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMIInterfaceBLK".bmc
+    );
+
+NETWORK
+TITLE = Set the number of children and parameters
+    //------------------------------------------------------------------------//
+    // Set the number of children and parameters:                             //
+    //------------------------------------------------------------------------//
+    L #numBool;
+    T "dbHMIInterfaceBLK".numBool;
+    L #numChildren;
+    T "dbHMIInterfaceBLK".numChildren;
+    L #numInt;
+    T "dbHMIInterfaceBLK".numInt;
+    L #numReal;
+    T "dbHMIInterfaceBLK".numReal;
+
+NETWORK
+TITLE = Send the user output commands if in Manual mode
+    //------------------------------------------------------------------------//
+    // Send the user command to the BLK if in MANUAL:                         //
+    //------------------------------------------------------------------------//
+    A #mc.modeMANUAL;
+    JCN _notManual;
+
+    L "dbHMIInterfaceBLK".CMD_MODE;
+    T #mco.MODE;
+    L "dbHMIInterfaceBLK".CMD_CMD;
+    T #mco.CMD;
+    L "dbHMIInterfaceBLK".CMD_SUBS;
+    T #mco.SUBS;
+
+_notManual:   NOP 0;
+
+END_FUNCTION

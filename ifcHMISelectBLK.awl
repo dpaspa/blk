@@ -1,0 +1,72 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Handles the HMI interface for operator control of each BLK.   //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      03-Aug-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+FUNCTION "ifcHMISelectBLK" : Void
+TITLE = BLK Selection
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifcHMISelectBLK
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare local variables:                                                   //
+//----------------------------------------------------------------------------//
+VAR_TEMP
+    blkSelected : Int;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Get the selected BLK
+    //------------------------------------------------------------------------//
+    // Get the BLK index number selected by the user when they clicked the    //
+    // faceplate BLK target:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbHMIInterfaceBLK".blkSelected;
+    T #blkSelected;
+
+@@TEMPLATE_BEGIN|INSTANCE_BLK@@
+NETWORK
+TITLE = @@INSTANCE@@ @@DESCRIPTION@@ : @@STATEDESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Check if this BLK is selected:                                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #blkSelected;
+    L 1@@IDX@@@@BLKIDX@@@@IDX@@;
+    ==I;
+    );
+    JCN _not_@@BLK@@_@@IDX@@;
+
+    CALL "fcHMIInterfaceBLK"
+    (   numBool              := @@NUMBOOL@@ ,
+        numChildren          := @@NUMCHILDREN@@ ,
+        numInt               := @@NUMINT@@ ,
+        numReal              := @@NUMREAL@@ ,
+        bmc                  := "idb@@CLASS@@".f[@@IDX@@].p.origin.bmc ,
+        mc                   := "idb@@CLASS@@".f[@@IDX@@].p.origin.mc ,
+        mco                  := "idb@@CLASS@@".f[@@IDX@@].p.owner.mc
+    );
+
+NETWORK
+TITLE = Transfer the real parameter values to the interface arrays
+    //------------------------------------------------------------------------//
+    // Transfer the real parameter values:                                    //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pReal@@
+    L "idb@@CLASS@@".f[@@IDX@@].p.origin.@@PARAMETERALIAS@@;
+    T "dbHMIInterfaceBLK".pReal[@@PIDX@@];
+@@ATTR_END|pReal@@
+
+_not_@@BLK@@_@@IDX@@:   NOP 0;
+
+@@TEMPLATE_END@@
+END_FUNCTION
