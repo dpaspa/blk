@@ -26,7 +26,7 @@ VERSION : 2.0
 @@TEMPLATE_BEGIN@@
 VAR
 @@ATTR_BEGIN|pEventLogRealNum@@
-    eventLogReal : Array[0..@@IDXEVENTMAX@@] of "udtEventLogReal";   // SFC events for logging real data
+    eventLogReal : Array[1..@@IDXEVENTMAX@@] of "udtEventLogReal";   // SFC events for logging real data
 @@ATTR_END|pEventLogRealNum@@
 @@ATTR_BEGIN|pEventLogRealAll@@
     Program_Alarm_@@IDXEVENT@@ : Program_Alarm;
@@ -53,39 +53,35 @@ BEGIN
 NETWORK
 TITLE = Check if message event needs to be raised
     //------------------------------------------------------------------------//
+    // EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT  //
+    // EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT  //
+    //                                                                        //
     // Check if real message event or test signal number requested:           //
-    //------------------------------------------------------------------------//
-    A #eventLogReal[@@IDXEVENT@@].trigger;
-    O(;
-    L "testEventLogReal";
-    L #eventLogReal[@@IDXEVENT@@].idxMessage;
-    ==I;
-    );
-    = #raiseEvent;
-
-NETWORK
-TITLE = Set the message number
-    //------------------------------------------------------------------------//
-    // Set the alarm list message number:                                     //
     //------------------------------------------------------------------------//
     L @@IDXEVENT@@;
     T #SourceData;
+
+    A #eventLogReal[@@IDXEVENT@@].trigger;
+    FP #eventLogReal[@@IDXEVENT@@].edgeTrigger;
+    O(;
+    L "testEventLogReal";
+    L #SourceData;
+    ==I;
+    );
+    = #raiseEvent;
 
 NETWORK
 TITLE = Raise message event if required
     //------------------------------------------------------------------------//
     // Raise the log message event if requested. No acknowledge required:     //
     //------------------------------------------------------------------------//
-    A #raiseEvent;
-    JCN _evCall_@@IDXEVENT@@;
     CALL #Program_Alarm_@@IDXEVENT@@
-    (   SIG       := #eventLogReal[@@IDXEVENT@@].trigger ,
+    (   SIG       := #raiseEvent ,
 		SD_1      := #SourceData ,
 		SD_2      := #eventLogReal[@@IDXEVENT@@].dataValue ,
         Error     := #Alarm@@IDXEVENT@@_ErrorBit1 ,
         Status    := #Alarm@@IDXEVENT@@_StatusWord1
     );
-_evCall_@@IDXEVENT@@:   NOP 0;
 
 @@ATTR_END|pEventLogRealAll@@
 

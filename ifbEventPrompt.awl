@@ -58,13 +58,19 @@ BEGIN
 NETWORK
 TITLE = Check if message event needs to be raised
     //------------------------------------------------------------------------//
+    // EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT  //
+    // EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT  //
+    //                                                                        //
     // Check if real message event or test signal number requested:           //
     //------------------------------------------------------------------------//
+    L @@IDXEVENT@@;
+    T #SourceData;
+
     A #eventPrompt[@@IDXEVENT@@].trigger;
     FP #eventPrompt[@@IDXEVENT@@].edgeTrigger;
     O(;
     L "testEventPrompt";
-    L @@IDXEVENT@@;
+    L #SourceData;
     ==I;
     );
     = #raiseEvent;
@@ -77,8 +83,6 @@ TITLE = Clear response flags if message event needs to be raised
     //------------------------------------------------------------------------//
     A #raiseEvent;
     JCN _evRaise_@@IDXEVENT@@;
-    L @@IDXEVENT@@;
-    T #SourceData;
     R #eventPrompt[@@IDXEVENT@@].confirmYes;
     R #eventPrompt[@@IDXEVENT@@].confirmNo;
 _evRaise_@@IDXEVENT@@:   NOP 0;
@@ -91,7 +95,7 @@ TITLE = Raise message event and get alarm state and acknowledgement
     // take a long time for the operator to attend to the event message:      //
     //------------------------------------------------------------------------//
     CALL #Program_Alarm_@@IDXEVENT@@
-    (   SIG       := #eventPrompt[@@IDXEVENT@@].trigger ,
+    (   SIG       := #raiseEvent ,
 		SD_1      := #SourceData ,
         Error     := #Alarm@@IDXEVENT@@_ErrorBit1 ,
         Status    := #Alarm@@IDXEVENT@@_StatusWord1
@@ -155,21 +159,21 @@ TITLE = Return the confirmation
     //------------------------------------------------------------------------//
     A "alarmsEnabled";
     A #Alarm@@IDXEVENT@@_Active_Acknowledged;
-    JCN _a;
+    JCN _a@@IDXEVENT@@;
     S #eventPrompt[@@IDXEVENT@@].confirmYes;
-_a:   NOP 0;
+_a@@IDXEVENT@@:   NOP 0;
 
     A "alarmsEnabled";
     A #Alarm@@IDXEVENT@@_Inactive_Acknowledged;
-    JCN _b;
+    JCN _b@@IDXEVENT@@;
     S #eventPrompt[@@IDXEVENT@@].confirmNo;
-_b:   NOP 0;
+_b@@IDXEVENT@@:   NOP 0;
 
     A "alarmsEnabled";
     A #Alarm@@IDXEVENT@@_Active_Acknowledged;
-    JCN _c;
+    JCN _c@@IDXEVENT@@;
     R #eventPrompt[@@IDXEVENT@@].trigger;
-_c:   NOP 0;
+_c@@IDXEVENT@@:   NOP 0;
 
 @@ATTR_END|pEventPromptAll@@
 @@TEMPLATE_END@@

@@ -27,19 +27,19 @@ VERSION : 1.0
 @@ATTR_END|pEventPromptNum@@
 @@ATTR_END|pEventPromptExists@@
 @@ATTR_BEGIN|pEventLogMsgExists@@
-@@ATTR_BEGIN|pEventLogMsgInstanceNum@@
+@@ATTR_BEGIN|pEventLogMsgNum@@
         eventLogMsg : Array[1..@@IDXEVENTMAX@@] of "udtEventLogMsg";   // SFC events for logging messages
-@@ATTR_END|pEventLogMsgInstanceNum@@
+@@ATTR_END|pEventLogMsgNum@@
 @@ATTR_END|pEventLogMsgExists@@
 @@ATTR_BEGIN|pEventLogRealExists@@
-@@ATTR_BEGIN|pEventLogRealInstanceNum@@
+@@ATTR_BEGIN|pEventLogRealNum@@
         eventLogReal : Array[1..@@IDXEVENTMAX@@] of "udtEventLogReal";   // SFC events for logging real data
-@@ATTR_END|pEventLogRealInstanceNum@@
+@@ATTR_END|pEventLogRealNum@@
 @@ATTR_END|pEventLogRealExists@@
 @@ATTR_BEGIN|pEventLogTimeExists@@
-@@ATTR_BEGIN|pEventLogTimeInstanceNum@@
+@@ATTR_BEGIN|pEventLogTimeNum@@
         eventLogTime : Array[1..@@IDXEVENTMAX@@] of "udtEventLogTime";   // SFC events for logging time data
-@@ATTR_END|pEventLogTimeInstanceNum@@
+@@ATTR_END|pEventLogTimeNum@@
 @@ATTR_END|pEventLogTimeExists@@
 @@ATTR_BEGIN|HYGIENE@@
         hs : "udtHygiene";
@@ -51,7 +51,6 @@ TYPE "udt@@CLASS@@owner"
 VERSION : 1.0
     STRUCT
         mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
-        CHILD_RELEASE : Bool;          // Request to release children when complete
 @@ATTR_BEGIN|pClassBlockOwner@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
 @@ATTR_END|pClassBlockOwner@@

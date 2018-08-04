@@ -37,36 +37,87 @@ TITLE = Get the selected BLK
 NETWORK
 TITLE = @@INSTANCE@@ @@DESCRIPTION@@ : @@STATEDESCRIPTION@@
     //------------------------------------------------------------------------//
-    // Check if this BLK is selected:                                         //
+    // Check if this BLK instance is selected:                                //
     //------------------------------------------------------------------------//
     A(;
     L #blkSelected;
-    L 1@@IDX@@@@BLKIDX@@@@IDX@@;
+    L 1@@ID@@;
     ==I;
     );
-    JCN _not_@@BLK@@_@@IDX@@;
+    JCN _not_@@INSTANCE@@;
 
     CALL "fcHMIInterfaceBLK"
-    (   numBool              := @@NUMBOOL@@ ,
-        numChildren          := @@NUMCHILDREN@@ ,
-        numInt               := @@NUMINT@@ ,
-        numReal              := @@NUMREAL@@ ,
+@@ATTR_BEGIN|numChildren@@
+    (   numChildren          := @@NUM@@ ,
+@@ATTR_END|numChildren@@
+@@ATTR_BEGIN|numReadBool@@
+        numReadBool          := @@NUM@@ ,
+@@ATTR_END|numReadBool@@
+@@ATTR_BEGIN|numReadInt@@
+        numReadInt           := @@NUM@@ ,
+@@ATTR_END|numReadInt@@
+@@ATTR_BEGIN|numReadReal@@
+        numReadReal          := @@NUM@@ ,
+@@ATTR_END|numReadReal@@
+@@ATTR_BEGIN|numReadTime@@
+        numReadTime          := @@NUM@@ ,
+@@ATTR_END|numReadTime@@
+@@ATTR_BEGIN|numWriteBool@@
+        numWriteBool         := @@NUM@@ ,
+@@ATTR_END|numWriteBool@@
+@@ATTR_BEGIN|numWriteInt@@
+        numWriteInt          := @@NUM@@ ,
+@@ATTR_END|numWriteInt@@
+@@ATTR_BEGIN|numWriteReal@@
+        numWriteReal         := @@NUM@@ ,
+@@ATTR_END|numWriteReal@@
+@@ATTR_BEGIN|numWriteTime@@
+        numWriteTime         := @@NUM@@ ,
+@@ATTR_END|numWriteTime@@
         bmc                  := "idb@@CLASS@@".f[@@IDX@@].p.origin.bmc ,
         mc                   := "idb@@CLASS@@".f[@@IDX@@].p.origin.mc ,
         mco                  := "idb@@CLASS@@".f[@@IDX@@].p.owner.mc
     );
 
 NETWORK
-TITLE = Transfer the real parameter values to the interface arrays
+TITLE = Transfer the parameter values to the interface arrays
     //------------------------------------------------------------------------//
-    // Transfer the real parameter values:                                    //
+    // Transfer the parameter values:                                         //
     //------------------------------------------------------------------------//
-@@ATTR_BEGIN|pReal@@
-    L "idb@@CLASS@@".f[@@IDX@@].p.origin.@@PARAMETERALIAS@@;
+@@ATTR_BEGIN|pReadBool@@
+    A "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
+    = "dbHMIInterfaceBLK".pBool[@@PIDX@@];
+@@ATTR_END|pReadBool@@
+@@ATTR_BEGIN|pReadInt@@
+    L "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".pInt[@@PIDX@@];
+@@ATTR_END|pReadInt@@
+@@ATTR_BEGIN|pReadReal@@
+    L "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
     T "dbHMIInterfaceBLK".pReal[@@PIDX@@];
-@@ATTR_END|pReal@@
+@@ATTR_END|pReadReal@@
+@@ATTR_BEGIN|pReadTime@@
+    L "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".pTime[@@PIDX@@];
+@@ATTR_END|pReadTime@@
+@@ATTR_BEGIN|pWriteBool@@
+    A "idb@@CLASS@@".f[@@IDX@@].p.owner.@@BLOCKPARAMETER@@;
+    = "dbHMIInterfaceBLK".pBool[@@PIDX@@];
+@@ATTR_END|pWriteBool@@
+@@ATTR_BEGIN|pWriteInt@@
+    L "idb@@CLASS@@".f[@@IDX@@].p.owner.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".pInt[@@PIDX@@];
+@@ATTR_END|pWriteInt@@
+@@ATTR_BEGIN|pWriteReal@@
+    L "idb@@CLASS@@".f[@@IDX@@].p.owner.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".pReal[@@PIDX@@];
+@@ATTR_END|pWriteReal@@
+@@ATTR_BEGIN|pWriteTime@@
+    L "idb@@CLASS@@".f[@@IDX@@].p.owner.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".pTime[@@PIDX@@];
+@@ATTR_END|pWriteTime@@
 
-_not_@@BLK@@_@@IDX@@:   NOP 0;
+_not_@@INSTANCE@@:   NOP 0;
 
 @@TEMPLATE_END@@
 END_FUNCTION
