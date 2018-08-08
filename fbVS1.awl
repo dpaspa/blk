@@ -42,8 +42,8 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcOrigin             := #p.origin.mc ,
-        mcOwner              := #p.owner.mc
+    (   mcRead             := #p.read.mc ,
+        mcWrite              := #p.write.mc
     );
 
 NETWORK
@@ -55,7 +55,7 @@ TITLE = DISABLE command
     // CMD is DISABLE:                                                        //
     //------------------------------------------------------------------------//
     A(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.VS1.CMD.DISABLE;
     ==I;
     );
@@ -64,10 +64,10 @@ TITLE = DISABLE command
     //------------------------------------------------------------------------//
     // CMD is ENABLE:                                                         //
     //------------------------------------------------------------------------//
-    AN #p.origin.mc.modeOOS;
-    AN #p.origin.mc.INTERLOCK;
+    AN #p.read.mc.modeOOS;
+    AN #p.read.mc.INTERLOCK;
     A(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.VS1.CMD.ENABLE;
     ==I;
     );
@@ -81,28 +81,28 @@ TITLE = Check vacuum pumps are available
     //                                                                        //
     // Check vacuum pumps are not interlocked:                                //
     //------------------------------------------------------------------------//
-    AN #p.origin.mc.modeOOS;
+    AN #p.read.mc.modeOOS;
     A(;
-    O "idbMOT1".f[#p.link.PUMP1].p.origin.mc.INTERLOCK;
-    O "idbMOT1".f[#p.link.PUMP2].p.origin.mc.INTERLOCK;
-    ON "idbMOT1".f[#p.link.PUMP1].p.origin.mc.modeAUTO;
-    ON "idbMOT1".f[#p.link.PUMP2].p.origin.mc.modeAUTO;
+    O "idbMOT1".f[#p.link.PUMP1].p.read.mc.INTERLOCK;
+    O "idbMOT1".f[#p.link.PUMP2].p.read.mc.INTERLOCK;
+    ON "idbMOT1".f[#p.link.PUMP1].p.read.mc.modeAUTO;
+    ON "idbMOT1".f[#p.link.PUMP2].p.read.mc.modeAUTO;
     );
-    = #p.origin.FAULT;
+    = #p.read.FAULT;
 
     //------------------------------------------------------------------------//
     // Check if any user valve is open which is a call for vacuum:            //
     //------------------------------------------------------------------------//
     A #cmdENABLE;
-    AN #p.origin.FAULT;
+    AN #p.read.FAULT;
     A(;
     O(;
-    L "idbPOS2".f[#p.link.VALVE1].p.origin.mc.STATE;
+    L "idbPOS2".f[#p.link.VALVE1].p.read.mc.STATE;
     L "dbCONST".BLK.POSx.STATE.OPENED;
     ==I;
     );
     O(;
-    L "idbPOS2".f[#p.link.VALVE2].p.origin.mc.STATE;
+    L "idbPOS2".f[#p.link.VALVE2].p.read.mc.STATE;
     L "dbCONST".BLK.POSx.STATE.OPENED;
     ==I;
     );
@@ -120,7 +120,7 @@ TITLE = Check vacuum pumps are available
     A #tDO;
     JCN _a;
     L "dbCONST".BLK.MOT1.CMD.START;
-    T "idbMOT1".f[#p.link.PUMP1].p.owner.mc.CMD;
+    T "idbMOT1".f[#p.link.PUMP1].p.write.mc.CMD;
 _a:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -129,7 +129,7 @@ _a:   NOP 0;
     A #tDO;
     JCN _b;
     L "dbCONST".BLK.MOT1.CMD.START;
-    T "idbMOT1".f[#p.link.PUMP2].p.owner.mc.CMD;
+    T "idbMOT1".f[#p.link.PUMP2].p.write.mc.CMD;
 _b:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -138,7 +138,7 @@ _b:   NOP 0;
     AN #tDO;
     JCN _c;
     L "dbCONST".BLK.MOT1.CMD.STOP;
-    T "idbMOT1".f[#p.link.PUMP1].p.owner.mc.CMD;
+    T "idbMOT1".f[#p.link.PUMP1].p.write.mc.CMD;
 _c:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -147,7 +147,7 @@ _c:   NOP 0;
     AN #tDO;
     JCN _d;
     L "dbCONST".BLK.MOT1.CMD.STOP;
-    T "idbMOT1".f[#p.link.PUMP2].p.owner.mc.CMD;
+    T "idbMOT1".f[#p.link.PUMP2].p.write.mc.CMD;
 _d:   NOP 0;
 
 NETWORK
@@ -162,7 +162,8 @@ TITLE = Set Device State to DISABLED if commanded or cannot ENABLE
     ON #cmdENABLE;
     JCN _e;
     L "dbCONST".BLK.VS1.STATE.DISABLED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
+    R #p.read.mc.ERROR;
 _e:   NOP 0;
 
 NETWORK
@@ -173,7 +174,8 @@ TITLE = Set Device State to ENABLED if commanded
     A #cmdENABLE;
     JCN _f;
     L "dbCONST".BLK.VS1.STATE.ENABLED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
+    R #p.read.mc.ERROR;
 _f:   NOP 0;
 
 NETWORK
@@ -181,9 +183,10 @@ TITLE = Setting Device State to FAULT
     //------------------------------------------------------------------------//
     // FAULT if problem with either vacuum pump:                              //
     //------------------------------------------------------------------------//
-    A #p.origin.FAULT;
+    A #p.read.FAULT;
     JCN _g;
     L "dbCONST".BLK.VS1.STATE.FAULT;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
+    S #p.read.mc.ERROR;
 _g:   NOP 0;
 END_FUNCTION_BLOCK

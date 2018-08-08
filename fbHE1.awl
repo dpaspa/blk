@@ -49,8 +49,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcOrigin             := #p.origin.mc ,
-        mcOwner              := #p.owner.mc
+    (   mcRead             := #p.read.mc ,
+        mcWrite            := #p.write.mc
     );
 
 NETWORK
@@ -61,7 +61,7 @@ TITLE = Process Fault Digital Input Signal
     //                                                                        //
     // Check if the field indicates there is a fault:                         //
     //------------------------------------------------------------------------//
-    A #p.origin.FAULT;
+    A #p.read.FAULT;
     = #tFault;
 
 NETWORK
@@ -72,9 +72,9 @@ TITLE = Interlock if any fault or external interlock
     //                                                                        //
     // Interlock also the field indicates a fault:                            //
     //------------------------------------------------------------------------//
-    O #p.origin.mc.INTERLOCK;
-    O #p.origin.FAULT;
-    = #p.origin.mc.INTERLOCK;
+    O #p.read.mc.INTERLOCK;
+    O #p.read.FAULT;
+    = #p.read.mc.INTERLOCK;
 
 NETWORK
 TITLE = Device command ENABLE
@@ -85,9 +85,9 @@ TITLE = Device command ENABLE
     // CMD is ENABLE if no fault or interlock, otherwise DISABLE:             //
     //------------------------------------------------------------------------//
     AN #tFault;
-    AN #p.origin.mc.INTERLOCK;
+    AN #p.read.mc.INTERLOCK;
     A(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.HE1.CMD.ENABLE;
     ==I;
     );
@@ -98,9 +98,9 @@ TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
     // CMD is DISABLE then switch off regardless of any fault or interlock:   //
     //------------------------------------------------------------------------//
-    O #p.origin.mc.INTERLOCK;
+    O #p.read.mc.INTERLOCK;
     O(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.HE1.CMD.DISABLE;
     ==I;
     );
@@ -118,7 +118,7 @@ TITLE = Set CUTOUT Flag if output is off
     // HE is OFF:                                                             //
     //------------------------------------------------------------------------//
     AN #tDO;
-    = #p.owner.CUTOUT;
+    = #p.write.CUTOUT;
 
 NETWORK
 TITLE = Set Digital Output Signal
@@ -126,7 +126,7 @@ TITLE = Set Digital Output Signal
     // Set the output ON or OFF as required:                                  //
     //------------------------------------------------------------------------//
     A #tDO;
-    = #p.origin.DO;
+    = #p.read.DO;
 
 NETWORK
 TITLE = Set Device State to Enabled if output is on
@@ -139,7 +139,8 @@ TITLE = Set Device State to Enabled if output is on
     A #tDO;
     JCN _b;
     L "dbCONST".BLK.HE1.STATE.ENABLED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
+    R #p.read.mc.ERROR;
 _b:   NOP 0;
 
 NETWORK
@@ -151,7 +152,8 @@ TITLE = Set Device State to Disabled if output is off
     AN #tFault;
     JCN _c;
     L "dbCONST".BLK.HE1.STATE.DISABLED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
+    R #p.read.mc.ERROR;
 _c:   NOP 0;
 
 NETWORK
@@ -162,6 +164,7 @@ TITLE = Set Device State to Fault if field fault signal is on
     A #tFault;
     JCN _d;
     L "dbCONST".BLK.HE1.STATE.FAULT;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
+    S #p.read.mc.ERROR;
 _d:   NOP 0;
 END_FUNCTION_BLOCK

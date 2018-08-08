@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:26:56 PM by David Paspa
+generated on 8/08/2018 8:15:22 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -39,37 +39,21 @@ SFCCommCode:- //comm from Visio
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
-Name:- time_flush_begin
-Type:- TOD
+Name:- log_msg_flush_begin
+Type:- BOOL
 Description:- PH_EMC3_FLUSH begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::2
 --------------------------------------------------
-Name:- log_time_flush_begin
+Name:- log_msg_flush_end
 Type:- BOOL
-Description:- PH_EMC3_FLUSH begin time
+Description:- PH_EMC3_FLUSH end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::3
---------------------------------------------------
-Name:- time_flush_end
-Type:- TOD
-Description:- PH_EMC3_FLUSH end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::4
---------------------------------------------------
-Name:- log_time_flush_end
-Type:- BOOL
-Description:- PH_EMC3_FLUSH end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::5
 --------------------------------------------------
 Name:- runtime
 Type:- TIME
@@ -77,7 +61,7 @@ Description:- Flushing run time
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::4
 --------------------------------------------------
 Name:- pos_pswfi_cmd
 Type:- INT
@@ -85,7 +69,7 @@ Description:- PS supply for WFI loop cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::5
 --------------------------------------------------
 Name:- pos_pspw_cmd
 Type:- INT
@@ -93,7 +77,7 @@ Description:- PS supply for PW loop valve cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::6
 --------------------------------------------------
 Name:- pos_pw_cmd
 Type:- INT
@@ -101,7 +85,7 @@ Description:- PW supply valve cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::7
 --------------------------------------------------
 Name:- pos_wfi_cmd
 Type:- INT
@@ -121,11 +105,8 @@ ACTION::01
 --------------------------------------------------
 Description:- Log FLUSH operation begin time.
 Action:- //Log FLUSH operation begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_flush_begin;
-
 SET;
-S #_log_time_flush_begin;
+S #_log_msg_flush_begin;
 
 //Start timer
 A #SQ_TIMER.Q;
@@ -170,11 +151,8 @@ T  #_pos_pspw_cmd;
 T  #_pos_pswfi_cmd;
 
 //Log FLUSH end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_flush_end;
-
 SET;
-S #_log_time_flush_end;
+S #_log_msg_flush_end;
 R #sqSeqTimerStart;
 
 Verification:- A "uncondJump";

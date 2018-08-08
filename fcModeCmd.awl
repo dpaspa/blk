@@ -24,8 +24,8 @@ NAME : fcModeCmd
 VERSION : 2.0
 
 VAR_IN_OUT
-    mcOrigin : "udtMCOrigin";   // Block mode and command from origin CPU
-    mcOwner : "udtMCOwner";     // Block mode and command directives from owner CPU
+    mcRead : "udtMCRead";    // Block mode and command from read CPU
+    mcWrite : "udtMCWrite";  // Block mode and command directives from write CPU
 END_VAR
 
 BEGIN
@@ -40,7 +40,7 @@ TITLE = Auto Mode on CPU startup
     A "flagFirstScanRestart";
     JCN _a;
     L "dbCONST".BLK.MODE.AUTO;
-    T #mcOwner.MODE;
+    T #mcWrite.MODE;
 _a:   NOP 0;
 
 NETWORK
@@ -52,29 +52,29 @@ TITLE = Mode Auto
     // Get the mode of the module:                                            //
     //------------------------------------------------------------------------//
     A(;
-    L #mcOwner.MODE;
+    L #mcWrite.MODE;
     L "dbCONST".BLK.MODE.AUTO;
     ==I;
     );
-    = #mcOrigin.modeAUTO;
+    = #mcRead.modeAUTO;
 
 NETWORK
 TITLE = Mode Manual
     A(;
-    L #mcOwner.MODE;
+    L #mcWrite.MODE;
     L "dbCONST".BLK.MODE.MANUAL;
     ==I;
     );
-    = #mcOrigin.modeMANUAL;
+    = #mcRead.modeMANUAL;
 
 NETWORK
 TITLE = Mode Out Of Service
     A(;
-    L #mcOwner.MODE;
+    L #mcWrite.MODE;
     L "dbCONST".BLK.MODE.OOS;
     ==I;
     );
-    = #mcOrigin.modeOOS;
+    = #mcRead.modeOOS;
 
 NETWORK
 TITLE = Interlock Flag
@@ -83,12 +83,12 @@ TITLE = Interlock Flag
     // Instance Specific Non-Critical Interlocks can be bypassed by Manual    //
     // Override command from Operator Station (HMI):                          //
     //------------------------------------------------------------------------//
-    O #mcOrigin.CRIL;
+    O #mcRead.CRIL;
     O(;
-    A #mcOrigin.NCRIL;
-    AN #mcOwner.MAN_OVERRIDE;
+    A #mcRead.NCRIL;
+    AN #mcWrite.MAN_OVERRIDE;
     );
-    = #mcOrigin.INTERLOCK;
+    = #mcRead.INTERLOCK;
 
 NETWORK
 TITLE = Availability Flag
@@ -96,11 +96,11 @@ TITLE = Availability Flag
     // Set boolean available flag if the OWNER ID is zero:                    //
     //------------------------------------------------------------------------//
     A(;
-    L #mcOwner.OWNER;
+    L #mcWrite.OWNER;
     L 0;
     ==I;
     );
-    = #mcOwner.isAvailable;
+    = #mcRead.isAvailable;
 
 NETWORK
 TITLE = Send safe command in case of any interlock or failure
@@ -108,9 +108,9 @@ TITLE = Send safe command in case of any interlock or failure
     // Send safe command if any interlock or startup:                         //
     //------------------------------------------------------------------------//
     O "flagFirstScanRestart";
-    O #mcOrigin.INTERLOCK;
+    O #mcRead.INTERLOCK;
     JCN _b;
-    L #mcOrigin.CMD_SAFE;
-    T #mcOwner.CMD;
+    L #mcRead.CMD_SAFE;
+    T #mcWrite.CMD;
 _b:   NOP 0;
 END_FUNCTION

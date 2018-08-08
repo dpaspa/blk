@@ -38,8 +38,8 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcOrigin             := #p.origin.mc ,
-        mcOwner              := #p.owner.mc
+    (   mcRead             := #p.read.mc ,
+        mcWrite              := #p.write.mc
     );
 
 NETWORK
@@ -51,7 +51,7 @@ TITLE = Set Device command which can only be ENABLE.
     // CMD is always ENABLE:                                                  //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.DI3.CMD.ENABLE;
-    T #p.owner.mc.CMD;
+    T #p.write.mc.CMD;
 
 NETWORK
 TITLE = Process user input signal
@@ -61,9 +61,9 @@ TITLE = Process user input signal
     //                                                                        //
     // Calculate the process value based on the software input:               //
     //------------------------------------------------------------------------//
-    A #p.owner.DI_Manual;
+    A #p.write.DI_Manual;
     = #tPV;
-    = #p.origin.PV;
+    = #p.read.PV;
 
 NETWORK
 TITLE = Set ALARM Flag
@@ -74,8 +74,8 @@ TITLE = Set ALARM Flag
     // Set alarms:                                                            //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #p.origin.mc.modeOOS;
-    = #p.origin.ALARM;
+    AN #p.read.mc.modeOOS;
+    = #p.read.ALARM;
 
 NETWORK
 TITLE = Set INTERLOCK Flag
@@ -85,9 +85,9 @@ TITLE = Set INTERLOCK Flag
     //                                                                        //
     // Set interlocks:                                                        //
     //------------------------------------------------------------------------//
-    O #p.origin.mc.INTERLOCK;
+    O #p.read.mc.INTERLOCK;
     O #tPV;
-    = #p.origin.mc.INTERLOCK;
+    = #p.read.mc.INTERLOCK;
 
 NETWORK
 TITLE = Set Device State to Enabled if user input is on
@@ -100,7 +100,7 @@ TITLE = Set Device State to Enabled if user input is on
     A #tPV;
     JCN _a;
     L "dbCONST".BLK.DI3.STATE.ENABLED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _a:   NOP 0;
 
 NETWORK
@@ -109,9 +109,9 @@ TITLE = Setting Device State to ALARM
     // ALARM if user input is off and not OOS:                                //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #p.origin.mc.modeOOS;
+    AN #p.read.mc.modeOOS;
     JCN _b;
     L "dbCONST".BLK.DI3.STATE.ALARM;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _b:   NOP 0;
 END_FUNCTION

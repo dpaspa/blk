@@ -72,7 +72,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #f[@@IDX@@].p.origin.mc.CRIL;
+    = #f[@@IDX@@].p.read.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -88,7 +88,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #f[@@IDX@@].p.origin.mc.NCRIL;
+    = #f[@@IDX@@].p.read.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -96,31 +96,42 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #f[@@IDX@@].p.origin.mc.ME;
+    T #f[@@IDX@@].p.read.mc.ME;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner ID
     //------------------------------------------------------------------------//
-    // Set the instance owner:                                                //
+    // Set the instance Owner ID:                                             //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #f[@@IDX@@].p.owner.mc.OWNER;
+    T #f[@@IDX@@].p.write.mc.OWNER;
+
+@@ATTR_BEGIN|FLOWPATH@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@CLASS@@ is a Flowpath device
+    //------------------------------------------------------------------------//
+    // This class of device is a FLOWPATH device where the state must equal   //
+    // the command once set by the parent:                                    //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #f[@@IDX@@].p.read.mc.FLOWPATH;
+@@ATTR_END|FLOWPATH@@
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
     //------------------------------------------------------------------------//
     // This block can only reside within this CPU:                            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+    = #f[@@IDX@@].p.read.mc.isMaster;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     //------------------------------------------------------------------------//
     // This block can only be owned by a parent block in this CPU:            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.owner.mc.isOriginOwner;
+    = #f[@@IDX@@].p.write.mc.isMaster;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -130,7 +141,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.PC1.SAFE.CMD;
-    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+    T #f[@@IDX@@].p.read.mc.CMD_SAFE;
 _notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
@@ -139,8 +150,8 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Deadband values
     // Set the instance pressure deadband values for valve open and close:    //
     //------------------------------------------------------------------------//
     L @@PC1DEADBAND@@;
-    T #f[@@IDX@@].p.owner.DB_L;
-    T #f[@@IDX@@].p.owner.DB_H;
+    T #f[@@IDX@@].p.write.DB_L;
+    T #f[@@IDX@@].p.write.DB_H;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Pressure interlock
@@ -148,9 +159,9 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Pressure interlock
     // Set the instance pressure interlock:                                   //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|LINK@@
-    A "idb@@PILINKCLASS@@".f[@@PILINKIDX@@].p.origin.mc.INTERLOCK;    // @@PILINKCLASS@@
+    A "idb@@PILINKCLASS@@".f[@@PILINKIDX@@].p.read.mc.INTERLOCK;    // @@PILINKCLASS@@
 @@ATTR_END|LINK@@
-    = #f[@@IDX@@].p.origin.PI1_INTERLOCK;
+    = #f[@@IDX@@].p.read.PI1_INTERLOCK;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Pressure measured value
@@ -158,9 +169,9 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Pressure measured value
     // Set the instance pressure measured value from the PI1:                 //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|LINK@@
-    L "idb@@PILINKCLASS@@".f[@@PILINKIDX@@].p.origin.ai.PV;    // @@PILINKCLASS@@
+    L "idb@@PILINKCLASS@@".f[@@PILINKIDX@@].p.read.ai.PV;    // @@PILINKCLASS@@
 @@ATTR_END|LINK@@
-    T #f[@@IDX@@].p.origin.PI1_PV;
+    T #f[@@IDX@@].p.read.PI1_PV;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : DRAIN valve mode and command

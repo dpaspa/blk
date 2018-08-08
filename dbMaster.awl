@@ -60,7 +60,7 @@ END_DATA_BLOCK
 //END_DATA_BLOCK
 
 DATA_BLOCK "dbTONR"
-{OriginalPartName := 'IEC_TIMER';
+{ReadalPartName := 'IEC_TIMER';
  VersionGUID := 'b68d17d6-3fcc-4468-818a-b36d847990bb';
  S7_Optimized_Access := 'TRUE' }
 AUTHOR : Simatic
@@ -78,61 +78,57 @@ DATA_BLOCK "dbHMIInterfaceBLK"
 { S7_Optimized_Access := 'FALSE' }
 VERSION : 0.1
     STRUCT
-        mc : "udtMCOrigin";
-        mco : "udtMCOwner";
-        bmc : "udtModeCommandBLK";
-        child : Array[1..50] of Int;
-        pReal : Array[1..50] of Real;
-        pTime : Array[1..50] of Time;
-        pInt : Array[1..50] of Int;
-        pBool : Array[1..50] of Bool;
-        blkSelected : Int;
-        numChildren : Int;
-        numReadBool : Int;
-        numReadInt : Int;
-        numReadReal : Int;
-        numReadTime : Int;
-        numWriteBool : Int;
-        numWriteInt : Int;
-        numWriteReal : Int;
-        numWriteTime : Int;
-        CMD_MODE : Int;
-        CMD_CMD : Int;
-        CMD_SUBS : Int;
-   END_STRUCT;
+        block : "udtHMIInterfaceBLK";
+    END_STRUCT;
 
 BEGIN
-    HMI_TEXT_LENGTH := 10;
 END_DATA_BLOCK
 
 DATA_BLOCK "dbHMIInterfaceSFC"
 { S7_Optimized_Access := 'FALSE' }
 VERSION : 0.1
     STRUCT
-        smc : "udtModeCommandSFC";
-        sqSequencer : "udtSFCSequence32";
-        sfcSelected : Int;
-        CMD_MODE : Int;
-        CMD_SQ_CMD : Int;
-        CMD_STEPNO_JUMP : Int;
-        CMD_MAN_JUMP : Bool;
-        HMI_SEQ_CURRENT : Int;
-        HMI_SEQ_DONE_SA : Int;
-        HMI_SEQ_WITHERROR_SA : Int;
-        HMI_SEQ_LENGTH : Int;
-        HMI_SEQ_SA : Int;
-        HMI_SEQ_OFFSET : Int;
-        HMI_Common_Buffer_OFFSET : Int;
-        HMI_TextField_Anim : Array[1..10] of Int;
-        HMI_TextField_Anim_SA : Int;
-        HMI_Common_Buffer : Array[1..104] of Int;
-        HMI_Common_Buffer_SA : Int;
-        HMI_TEXT_LENGTH : Int;
-   END_STRUCT;
+        sequence : "udtHMIInterfaceSFC";
+    END_STRUCT;
 
 BEGIN
-    HMI_TEXT_LENGTH := 10;
 END_DATA_BLOCK
+
+DATA_BLOCK "dbEventLogMsg"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+    STRUCT
+        events : "udtEventLogMsgs";
+    END_STRUCT;
+
+BEGIN
+END_DATA_BLOCK
+
+//        smc : "udtModeCommandSFC";
+//        sqStep : "udtSFCStep32";
+//        stepNumColour_1 : Int;
+//        stepNumColour_2 : Int;
+//        stepNumColour_3 : Int;
+//        stepNumColour_4 : Int;
+//        stepNumColour_5 : Int;
+//        stepNumColour_6 : Int;
+//        stepNumColour_7 : Int;
+//        stepNumColour_8 : Int;
+//        stepNumColour_9 : Int;
+//        stepNumColour_10 : Int;
+//        sfcNumPages : Int;
+//        sfcPage : Int;
+//        sfcSelected : Int;
+//        CMD_MODE : Int;
+//        CMD_SQ_CMD : Int;
+//        CMD_STEPNO_JUMP : Int;
+//        CMD_MAN_JUMP : Bool;
+//        enablePageForward : Bool;
+//        enablePageBackward : Bool;
+//   END_STRUCT;
+//
+//BEGIN
+//END_DATA_BLOCK
 
 DATA_BLOCK "TimeSyncBlock"
 { S7_Optimized_Access := 'TRUE' }

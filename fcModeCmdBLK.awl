@@ -24,8 +24,8 @@ NAME : fcModeCmdBLK
 VERSION : 2.0
 
 VAR_IN_OUT
-    mcOrigin : "udtMCOrigin";          // Block mode and command from origin CPU
-    mcOwner : "udtMCOwner";            // Block mode and command directives from owner CPU
+    mcRead : "udtMCRead";          // Block mode and command from read CPU
+    mcWrite : "udtMCWrite";            // Block mode and command directives from write CPU
     bmc : "udtModeCommandBLK";         // Block mode and command
 END_VAR
 
@@ -42,7 +42,7 @@ TITLE = Flag if block Mode just changed to Auto
     // Check if the mode has just been changed to Auto if the bit positive    //
     // edge. The result will only last for one scan after the positive edge:  //
     //------------------------------------------------------------------------//
-    A #mcOrigin.modeAUTO;
+    A #mcRead.modeAUTO;
     FP #bmc.edgeModeAuto;
     = #bmc.eventModeAuto;
 
@@ -51,7 +51,7 @@ TITLE = Flag if block Mode just changed to Manual
     //------------------------------------------------------------------------//
     // Check if the mode has just been changed to Manual:                     //
     //------------------------------------------------------------------------//
-    A #mcOrigin.modeMANUAL;
+    A #mcRead.modeMANUAL;
     FP #bmc.edgeModeManual;
     = #bmc.eventModeManual;
 
@@ -60,7 +60,7 @@ TITLE = Flag if block Mode just changed to Out Of Service
     //------------------------------------------------------------------------//
     // Check if the mode has just been changed to Out of Service:             //
     //------------------------------------------------------------------------//
-    A #mcOrigin.modeOOS;
+    A #mcRead.modeOOS;
     FP #bmc.edgeModeOOS;
     = #bmc.eventModeOOS;
 
@@ -74,12 +74,12 @@ TITLE = Flag if a new block running substate command issued
     //------------------------------------------------------------------------//
     A #bmc.permitStart;
     A(;
-    L #mcOwner.CMD;
+    L #mcWrite.CMD;
     L "dbCONST".BLK.CMD.START;
     ==I;
     );
     A(;
-    L #mcOrigin.STATE;
+    L #mcRead.STATE;
     L "dbCONST".BLK.STATE.STOPPED;
     ==I;
     );
@@ -95,7 +95,7 @@ TITLE = Flag if block stop command issued
     // edge. The result will only last for one scan after the positive edge:  //
     //------------------------------------------------------------------------//
     A(;
-    L #mcOwner.CMD;
+    L #mcWrite.CMD;
     L "dbCONST".BLK.CMD.STOP;
     ==I;
     );
@@ -109,7 +109,7 @@ TITLE = Stopped flag if in STOPPED state
     //------------------------------------------------------------------------//
     A(;
 	L "dbCONST".BLK.STATE.STOPPED;
-    L #mcOrigin.STATE;
+    L #mcRead.STATE;
     ==I;
 	);
     = #bmc.stateSTOPPED;
@@ -120,12 +120,12 @@ TITLE = Running flag if in a RUNNING substate
     // STOPPED state flag for convenience:                                    //
     //------------------------------------------------------------------------//
     A(;
-    L #mcOrigin.STATE;
+    L #mcRead.STATE;
     L "dbCONST".BLK.STATE.STOPPED;
     >I;
     );
     A(;
-    L #mcOrigin.STATE;
+    L #mcRead.STATE;
     L "dbCONST".BLK.STATE.INTERLOCKED;
     <I;
     );
@@ -137,15 +137,15 @@ TITLE = Interlocked State. Send safe command in case of any interlock or failure
     // Block should be interlocked state if STOPPED and interlock active or   //
     // child failed:                                                          //
     //------------------------------------------------------------------------//
-    O #mcOrigin.INTERLOCK;
+    O #mcRead.INTERLOCK;
     ON #bmc.permitStart;
     FP #bmc.stateINTERLOCKED;
     = #edgeInterlock;
     JCN _noInterlock;
-    L #mcOrigin.STATE;
+    L #mcRead.STATE;
     T #bmc.lastSTATE;
     L "dbCONST".BLK.STATE.INTERLOCKED;
-    T #mcOrigin.STATE;
+    T #mcRead.STATE;
 
 _noInterlock:   NOP 0;
 

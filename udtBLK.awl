@@ -10,17 +10,18 @@
 // 1.0 David Paspa      04-Jun-2018 NA        Reboot for S7-1500.             //
 //----------------------------------------------------------------------------//
 @@TEMPLATE_BEGIN|PARENT@@
-TYPE "udt@@CLASS@@origin"
+TYPE "udt@@CLASS@@read"
 VERSION : 1.0
     STRUCT
-        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
-        bmc : "udtModeCommandBLK";         // Block mode and command
-@@ATTR_BEGIN|pClassBlockOrigin@@
+        mc : "udtMCRead";            // Block mode and command for calculations on read CPU
+        bmc : "udtModeCommandBLK";   // Block mode and command
+        err : "udtBLKError";         // Block error
+@@ATTR_BEGIN|pClassBlockRead@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
-@@ATTR_END|pClassBlockOrigin@@
-@@ATTR_BEGIN|pPairInputDefine@@
-        @@CHILDPAIRALIAS@@_@@CHILDPAIRPARAMETER@@ : @@PARAMETERPAIRDATATYPE@@;
-@@ATTR_END|pPairInputDefine@@
+@@ATTR_END|pClassBlockRead@@
+@@ATTR_BEGIN|pChildReadDefine@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+@@ATTR_END|pChildReadDefine@@
 @@ATTR_BEGIN|pEventPromptExists@@
 @@ATTR_BEGIN|pEventPromptNum@@
         eventPrompt : Array[1..@@IDXEVENTMAX@@] of "udtEventPrompt";   // SFC events for operator prompts
@@ -47,16 +48,16 @@ VERSION : 1.0
     END_STRUCT;
 END_TYPE
 
-TYPE "udt@@CLASS@@owner"
+TYPE "udt@@CLASS@@write"
 VERSION : 1.0
     STRUCT
-        mc : "udtMCOwner";             // Block mode and command for directives from owner CPU
-@@ATTR_BEGIN|pClassBlockOwner@@
+        mc : "udtMCWrite";             // Block mode and command for directives from write CPU
+@@ATTR_BEGIN|pClassBlockWrite@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
-@@ATTR_END|pClassBlockOwner@@
-@@ATTR_BEGIN|pPairOutputDefine@@
-        @@CHILDPAIRALIAS@@_@@CHILDPAIRPARAMETER@@ : @@PARAMETERPAIRDATATYPE@@;
-@@ATTR_END|pPairOutputDefine@@
+@@ATTR_END|pClassBlockWrite@@
+@@ATTR_BEGIN|pChildWriteDefine@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+@@ATTR_END|pChildWriteDefine@@
     END_STRUCT;
 END_TYPE
 
@@ -101,9 +102,20 @@ VERSION : 1.0
 @@ATTR_BEGIN|pChildSelectExists@@
         select : "udt@@CLASS@@select";       // Select index to access selection instance DB
 @@ATTR_END|pChildSelectExists@@
-        origin : "udt@@CLASS@@origin";       // Calculated data on origin CPU
-        owner : "udt@@CLASS@@owner";         // Directives from owner CPU
+        read : "udt@@CLASS@@read";       // Calculated data on read CPU
+        write : "udt@@CLASS@@write";         // Directives from write CPU
     END_STRUCT;
 END_TYPE
 
+@@TEMPLATE_END@@
+
+@@TEMPLATE_BEGIN@@
+TYPE "udtEventLogMsgs"
+VERSION : 1.0
+    STRUCT
+@@ATTR_BEGIN|pEventLogMsgNum@@
+    eventLogMsg : Array[1..@@IDXEVENTMAX@@] of "udtEventLogMsg";   // SFC events for logging messages
+@@ATTR_END|pEventLogMsgNum@@
+    END_STRUCT;
+END_TYPE
 @@TEMPLATE_END@@

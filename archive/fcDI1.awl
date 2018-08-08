@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------------//
 //            Copyright 2018 Rieckermann Engineering Operations               //
 //----------------------------------------------------------------------------//
-// Class:       fcDI2                                                         //
+// Class:       fcDI1                                                         //
 // Description:                                                               //
-// Normally OFF general alarm single digital input.                           //
+// Normally ON general alarm single digital input.                            //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
@@ -15,10 +15,10 @@
 // 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Mode=1 initialized.             //
 // 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
 //----------------------------------------------------------------------------//
-FUNCTION "fcDI2" : Void
-TITLE = DI2 : General alarm single digital input Normally OFF
+FUNCTION "fcDI1" : Void
+TITLE = DI1 : General alarm single digital input Normally ON
 { S7_Optimized_Access := 'TRUE' }
-NAME : fcDI2
+NAME : fcDI1
 AUTHOR : REO
 VERSION : 2.0
 
@@ -26,7 +26,7 @@ VERSION : 2.0
 // Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
 VAR_IN_OUT
-    p : "udtDI2";            // Block data interface
+    p : "udtDI1";            // Block data interface
 END_VAR
 
 VAR_TEMP
@@ -44,8 +44,8 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcOrigin             := #p.origin.mc ,
-        mcOwner              := #p.owner.mc
+    (   mcRead             := #p.read.mc ,
+        mcWrite              := #p.write.mc
     );
 
 NETWORK
@@ -56,8 +56,8 @@ TITLE = Set Device command which can only be ENABLE.
     //                                                                        //
     // CMD is always ENABLE:                                                  //
     //------------------------------------------------------------------------//
-    L "dbCONST".BLK.DI2.CMD.ENABLE;
-    T #p.owner.mc.CMD;
+    L "dbCONST".BLK.DI1.CMD.ENABLE;
+    T #p.write.mc.CMD;
 
 NETWORK
 TITLE = Process Digital Input Signal
@@ -68,15 +68,15 @@ TITLE = Process Digital Input Signal
     // Calculate the process value based on the mode:                         //
     //------------------------------------------------------------------------//
     O(;
-    A #p.origin.mc.modeAUTO;
-    A #p.origin.DI_Auto;
+    A #p.read.mc.modeAUTO;
+    A #p.read.DI_Auto;
     );
     O(;
-    A #p.origin.mc.modeMANUAL;
-    A #p.owner.DI_Manual;
+    A #p.read.mc.modeMANUAL;
+    A #p.write.DI_Manual;
     );
     = #tPV;
-    = #p.origin.PV;
+    = #p.read.PV;
 
 NETWORK
 TITLE = Set ALARM Flag
@@ -86,9 +86,9 @@ TITLE = Set ALARM Flag
     //                                                                        //
     // Set alarms:                                                            //
     //------------------------------------------------------------------------//
-    A #tPV;
-    AN #p.origin.mc.modeOOS;
-    = #p.origin.ALARM;
+    AN #tPV;
+    AN #p.read.mc.modeOOS;
+    = #p.read.ALARM;
 
 NETWORK
 TITLE = Set INTERLOCK Flag
@@ -98,32 +98,32 @@ TITLE = Set INTERLOCK Flag
     //                                                                        //
     // Set interlocks:                                                        //
     //------------------------------------------------------------------------//
-    A #tPV;
-    = #p.origin.mc.INTERLOCK;
+    AN #tPV;
+    = #p.read.mc.INTERLOCK;
 
 NETWORK
-TITLE = Set Device State to Enabled if switch is off
+TITLE = Set Device State to Enabled if switch is on
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     //                                                                        //
-    // ENABLED if switch is off:                                              //
+    // ENABLED if switch is on:                                               //
     //------------------------------------------------------------------------//
-    AN #tPV;
+    A #tPV;
     JCN _a;
-    L "dbCONST".BLK.DI2.STATE.ENABLED;
-    T #p.origin.mc.STATE;
+    L "dbCONST".BLK.DI1.STATE.ENABLED;
+    T #p.read.mc.STATE;
 _a:   NOP 0;
 
 NETWORK
 TITLE = Setting Device State to ALARM
     //------------------------------------------------------------------------//
-    // ALARM if switch is on and not OOS:                                     //
+    // ALARM if switch is off and not OOS:                                    //
     //------------------------------------------------------------------------//
-    A #tPV;
-    AN #p.origin.mc.modeOOS;
+    AN #tPV;
+    AN #p.read.mc.modeOOS;
     JCN _b;
-    L "dbCONST".BLK.DI2.STATE.ALARM;
-    T #p.origin.mc.STATE;
+    L "dbCONST".BLK.DI1.STATE.ALARM;
+    T #p.read.mc.STATE;
 _b:   NOP 0;
 END_FUNCTION

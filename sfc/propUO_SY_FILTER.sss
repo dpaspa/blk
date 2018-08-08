@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:29:37 PM by David Paspa
+generated on 8/08/2018 12:18:38 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -45,7 +45,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::3
 --------------------------------------------------
-Name:- log_time_filter_begin
+Name:- log_msg_filter_begin
 Type:- BOOL
 Description:- UO_SY_FILTER begin time
 ParameterInOut:- VAR
@@ -53,29 +53,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- time_filter_begin
-Type:- TOD
-Description:- UO_SY_FILTER begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::5
---------------------------------------------------
-Name:- log_time_filter_end
+Name:- log_msg_filter_end
 Type:- BOOL
 Description:- UO_SY_FILTER end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
---------------------------------------------------
-Name:- time_filter_end
-Type:- TOD
-Description:- UO_SY_FILTER end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::7
+PARAMETER::5
 --------------------------------------------------
 Name:- r_pres_lpca_purge
 Type:- REAL
@@ -83,7 +67,7 @@ Description:- Pressure LPCA purge after filtration complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::6
 --------------------------------------------------
 Name:- emc_water_sy_state
 Type:- INT
@@ -91,7 +75,7 @@ Description:- Device state of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::7
 --------------------------------------------------
 Name:- emc_water_sy_subs
 Type:- INT
@@ -99,7 +83,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::8
 --------------------------------------------------
 Name:- emc_water_sy_cmd
 Type:- INT
@@ -107,7 +91,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::9
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -115,7 +99,7 @@ Description:- Device state of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::10
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -123,7 +107,7 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::11
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -131,7 +115,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::12
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -139,7 +123,7 @@ Description:- Setpoint to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::13
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -147,7 +131,7 @@ Description:- emc_gas medium
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::14
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -155,7 +139,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::15
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -163,7 +147,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::16
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -171,23 +155,23 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::17
 --------------------------------------------------
-Name:- filtration_complete
+Name:- sync_read_filtration_complete
 Type:- BOOL
 Description:- Filtration complete flag
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::18
 --------------------------------------------------
-Name:- path_ready
+Name:- sync_write_path_ready
 Type:- BOOL
 Description:- Indicates flow path has been opened
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::19
 --------------------------------------------------
 Name:- r_time_lpca_purge
 Type:- Time
@@ -195,7 +179,7 @@ Description:- Time setting for LPCA purging
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::20
 --------------------------------------------------
 Name:- r_pres_lpca_blanket
 Type:- REAL
@@ -224,11 +208,8 @@ Set Sy Outlet valve open (STATE=DISCHARGE).
 Set remaining Sy equipment to SAFE state:
 
 Action:- //Log Sy Filter operation begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_filter_begin;
-
 SET;
-S #_log_time_filter_begin;
+S #_log_msg_filter_begin;
 
 // Open Sy vent valve without LPCA control
 L "dbCONST".BLK.SAFE.CMD;
@@ -270,7 +251,7 @@ ACTION::02
 Description:- Set flag path_ready.
 Action:- // Set flag path_ready.
 SET;
-S #_path_ready;
+S #_sync_write_path_ready;
 Verification:- A "uncondJump";
 
 
@@ -281,7 +262,7 @@ TRNNo:- 01
 Title:- Filtration complete?
 EmptyTransition:- False
 Description:- Wait for parent to indicate filtration transfer is complete when flag filtration_complete is set by the parent.
-Condition:- A #_filtration_complete;
+Condition:- A #_sync_read_filtration_complete;
 
 
 --------------------------------------------------
@@ -318,7 +299,7 @@ AN #SQ_TIMER.Q;
 S #sqSeqTimerStart;
 L #_r_time_lpca_purge;
 T #SQ_TIMER.PT;
-R #_path_ready;
+R #_sync_write_path_ready;
 Verification:- A(;
 L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
@@ -374,13 +355,8 @@ L "dbCONST".BLK.CMD.STOP;
 T #_emv_vessel_cmd;
 
 //Log Sy Filter operation end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_filter_end;
-
 SET;
-S #_log_time_filter_end;
-R #_path_ready;
-
+S #_log_msg_filter_end;
 Verification:- A(;
 L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;

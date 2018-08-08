@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:26:47 PM by David Paspa
+generated on 8/08/2018 8:15:10 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -50,37 +50,21 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::2
 --------------------------------------------------
-Name:- time_mix_begin
-Type:- TOD
+Name:- log_msg_mix_begin
+Type:- BOOL
 Description:- PH_EMA1_MIX begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::3
 --------------------------------------------------
-Name:- log_time_mix_begin
+Name:- log_msg_mix_end
 Type:- BOOL
-Description:- PH_EMA1_MIX begin time
+Description:- PH_EMA1_MIX end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::4
---------------------------------------------------
-Name:- time_mix_end
-Type:- TOD
-Description:- PH_EMA1_MIX end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::5
---------------------------------------------------
-Name:- log_time_mix_end
-Type:- BOOL
-Description:- PH_EMA1_MIX end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::6
 --------------------------------------------------
 Name:- setpoint
 Type:- REAL
@@ -88,7 +72,7 @@ Description:- Required agitator speed for mixing
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::5
 --------------------------------------------------
 Name:- sic_agit_setpoint
 Type:- REAL
@@ -96,7 +80,7 @@ Description:- Agitator speed setpoint attribute
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::6
 --------------------------------------------------
 Name:- agit_running
 Type:- BOOL
@@ -104,7 +88,7 @@ Description:- Agitator running
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::7
 --------------------------------------------------
 Name:- ResetRunTimer
 Type:- BOOL
@@ -112,7 +96,7 @@ Description:- Reset Run timer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::8
 --------------------------------------------------
 Name:- runtime_s
 Type:- INT
@@ -120,7 +104,7 @@ Description:- RunTimeS
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::9
 --------------------------------------------------
 Name:- runtime_m
 Type:- INT
@@ -128,7 +112,7 @@ Description:- RunTimeM
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::10
 --------------------------------------------------
 Name:- runtime_h
 Type:- INT
@@ -136,7 +120,7 @@ Description:- RunTimeH
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::11
 --------------------------------------------------
 Name:- AcumTimeS
 Type:- INT
@@ -144,7 +128,7 @@ Description:- AcumTimeS
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::12
 --------------------------------------------------
 Name:- AcumTimeM
 Type:- INT
@@ -152,7 +136,7 @@ Description:- AcumTimeM
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::13
 --------------------------------------------------
 Name:- AcumTimeH
 Type:- INT
@@ -160,7 +144,7 @@ Description:- Total acumulated running time
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::14
 --------------------------------------------------
 Name:- agit_hist
 Type:- INT
@@ -168,7 +152,7 @@ Description:- Previous state of SIC
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::15
 --------------------------------------------------
 Name:- agit_stopped
 Type:- BOOL
@@ -176,7 +160,7 @@ Description:- Agitator stopped message to be logged
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::16
 --------------------------------------------------
 Name:- sic_agit_state
 Type:- INT
@@ -202,11 +186,8 @@ L #_setpoint;
 T #_sic_agit_setpoint;
 
 //Log EMA1_MIX begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_mix_begin;
-
 SET;
-S #_log_time_mix_begin;
+S #_log_msg_mix_begin;
 
 
 // Initialise the run timer
@@ -456,11 +437,8 @@ R #sqRunTimer.ENABLE;
       NOP   0;
 
 //Log EMA1_MIX end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_mix_end;
-
 SET;
-S #_log_time_mix_end;
+S #_log_msg_mix_end;
 Verification:- A "uncondJump";
 
 

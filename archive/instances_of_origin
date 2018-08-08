@@ -1,0 +1,804 @@
+fbAL1.awl:    (   mcOrigin             := #p.origin.mc ,
+fbAL1.awl:    A #p.origin.mc.modeAUTO;
+fbAL1.awl:    = #p.origin.ai.modeAUTO;
+fbAL1.awl:    A #p.origin.mc.modeMANUAL;
+fbAL1.awl:    = #p.origin.ai.modeMANUAL;
+fbAL1.awl:    A #p.origin.mc.modeOOS;
+fbAL1.awl:    = #p.origin.ai.modeOOS;
+fbAL1.awl:    (   ai                   := #p.origin.ai
+fbAL1.awl:    L #p.origin.CMD_ENABLE;
+fbAL1.awl:    L #p.origin.ai.PV;
+fbAL1.awl:    T #p.origin.PV;
+fbAL1.awl:    A #p.origin.ai.DQ;
+fbAL1.awl:    = #p.origin.DQ;
+fbAL1.awl:    A #p.origin.ai.ALARM_LL;
+fbAL1.awl:    = #p.origin.ALARM_LL;
+fbAL1.awl:    A #p.origin.ai.ALARM_L;
+fbAL1.awl:    = #p.origin.ALARM_L;
+fbAL1.awl:    A #p.origin.ai.ALARM_H;
+fbAL1.awl:    = #p.origin.ALARM_H;
+fbAL1.awl:    A #p.origin.ai.ALARM_HH;
+fbAL1.awl:    = #p.origin.ALARM_HH;
+fbAL1.awl:    O #p.origin.mc.INTERLOCK;
+fbAL1.awl:    O #p.origin.ai.ALARM_HH;
+fbAL1.awl:    ON #p.origin.ai.DQ;
+fbAL1.awl:    = #p.origin.mc.INTERLOCK;
+fbAL1.awl:    A #p.origin.ai.DQ;
+fbAL1.awl:    L #p.origin.STATE_ENABLED;
+fbAL1.awl:    T #p.origin.mc.STATE;
+fbAL1.awl:    AN #p.origin.ai.DQ;
+fbAL1.awl:    AN #p.origin.mc.modeOOS;
+fbAL1.awl:    L #p.origin.STATE_FAULT;
+fbAL1.awl:    T #p.origin.mc.STATE;
+fbBLK.awl:    = #p.origin.bmc.BAD_PARAM;
+fbBLK.awl:    AN "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.modeAUTO;
+fbBLK.awl:    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.INTERLOCK;
+fbBLK.awl:    L #p.origin.mc.ME;
+fbBLK.awl:    = #p.origin.bmc.CHILD_FAIL;
+fbBLK.awl:    (   mcOrigin             := #p.origin.mc ,
+fbBLK.awl:    AN #p.origin.mc.INTERLOCK;
+fbBLK.awl:    = #p.origin.bmc.permitStart;
+fbBLK.awl:    (   mcOrigin             := #p.origin.mc ,
+fbBLK.awl:        bmc                  := #p.origin.bmc
+fbBLK.awl:    O #p.origin.bmc.eventCmdStop;
+fbBLK.awl:    O #p.origin.mc.INTERLOCK;
+fbBLK.awl:    ON #p.origin.bmc.permitStart;
+fbBLK.awl:    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.modeAUTO;
+fbBLK.awl:    A #p.origin.bmc.eventModeAUTO;
+fbBLK.awl:    O #p.origin.bmc.eventModeAUTO;
+fbBLK.awl:    O #p.origin.bmc.eventModeOOS;
+fbBLK.awl:    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.@@CHILDPAIRPARAMETER@@;
+fbBLK.awl:    T #p.origin.@@CHILDPARAMETERALIAS@@_@@CHILDPAIRPARAMETER@@;
+fbBLK.awl:    (   hs                   := #p.origin.hs
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStop;
+fbBLK.awl:    A #p.origin.bmc.stateRUNNING;
+fbBLK.awl:    A #p.origin.bmc.stateSTOPPED;
+fbBLK.awl:    A #p.origin.bmc.stateINTERLOCKED;
+fbBLK.awl:    L #p.origin.mc.STATE;
+fbBLK.awl:    AN #p.origin.bmc.eventCmdStart;
+fbBLK.awl:	A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:	A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    T #p.origin.mc.STATE;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    L #p.origin.mc.ME;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStart;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStop;
+fbBLK.awl:    A #p.origin.bmc.eventCmdStop;
+fbBLK.awl:    T #p.origin.mc.STATE;
+fbBLK.awl:	AN #p.origin.bmc.permitStart;
+fbBLK.awl:    O #p.origin.mc.INTERLOCK;
+fbBLK.awl:    ON #p.origin.bmc.permitStart;
+fbBLK.awl:    A #p.origin.bmc.BAD_PARAM;
+fbBLK.awl:	AN #p.origin.bmc.stateINTERLOCKED;
+fbBLK.awl:    L #p.origin.mc.STATE;
+fbBLK.awl:    L #p.origin.bmc.lastSTATE;
+fbBLK.awl:    T #p.origin.mc.STATE;
+fbBLK.awl:    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.STATE;
+fbBLK.awl:    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.STATE;
+fbBLK.awl:        PT                          := #p.origin.bmc.transTime ,
+fbBLK.awl:        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.link.@@CHILDPARAMETERALIAS@@].p.origin.@@CHILDPARAMETERATTRIBUTE@@ ,
+fbBLK.awl:        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[@@CHILDIDX@@].p.origin.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
+fbBLK.awl:        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.@@CHILDPARAMETERATTRIBUTE@@ ,
+fbBLK.awl:        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.select.@@CHILDPARAMETERALIAS@@].p.origin.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
+fbBLK.awl:    A #p.origin.bmc.permitStart;
+fbBLK.awl:    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.origin.mc.modeAUTO;
+fbBLK.awl:    T #p.origin.mc.STATE;
+fbBLK.awl:    T #p.origin.mc.STATE;
+fbBLK.awl:    T #p.origin.bmc.lastSUBS;
+fbDI1.awl:    (   mcOrigin             := #p.origin.mc ,
+fbDI1.awl:    A #p.origin.mc.modeAUTO;
+fbDI1.awl:    A #p.origin.DI_Auto;
+fbDI1.awl:    A #p.origin.mc.modeMANUAL;
+fbDI1.awl:    = #p.origin.PV;
+fbDI1.awl:    AN #p.origin.mc.modeOOS;
+fbDI1.awl:    = #p.origin.ALARM;
+fbDI1.awl:    = #p.origin.mc.INTERLOCK;
+fbDI1.awl:    T #p.origin.mc.STATE;
+fbDI1.awl:    AN #p.origin.mc.modeOOS;
+fbDI1.awl:    T #p.origin.mc.STATE;
+fbDI2.awl:    (   mcOrigin             := #p.origin.mc ,
+fbDI2.awl:    A #p.origin.mc.modeAUTO;
+fbDI2.awl:    A #p.origin.DI_Auto;
+fbDI2.awl:    A #p.origin.mc.modeMANUAL;
+fbDI2.awl:    = #p.origin.PV;
+fbDI2.awl:    AN #p.origin.mc.modeOOS;
+fbDI2.awl:    = #p.origin.ALARM;
+fbDI2.awl:    = #p.origin.mc.INTERLOCK;
+fbDI2.awl:    T #p.origin.mc.STATE;
+fbDI2.awl:    AN #p.origin.mc.modeOOS;
+fbDI2.awl:    T #p.origin.mc.STATE;
+fbDI3.awl:    (   mcOrigin             := #p.origin.mc ,
+fbDI3.awl:    = #p.origin.PV;
+fbDI3.awl:    AN #p.origin.mc.modeOOS;
+fbDI3.awl:    = #p.origin.ALARM;
+fbDI3.awl:    O #p.origin.mc.INTERLOCK;
+fbDI3.awl:    = #p.origin.mc.INTERLOCK;
+fbDI3.awl:    T #p.origin.mc.STATE;
+fbDI3.awl:    AN #p.origin.mc.modeOOS;
+fbDI3.awl:    T #p.origin.mc.STATE;
+fbHE1.awl:    (   mcOrigin             := #p.origin.mc ,
+fbHE1.awl:    A #p.origin.FAULT;
+fbHE1.awl:    O #p.origin.mc.INTERLOCK;
+fbHE1.awl:    O #p.origin.FAULT;
+fbHE1.awl:    = #p.origin.mc.INTERLOCK;
+fbHE1.awl:    AN #p.origin.mc.INTERLOCK;
+fbHE1.awl:    O #p.origin.mc.INTERLOCK;
+fbHE1.awl:    = #p.origin.DO;
+fbHE1.awl:    T #p.origin.mc.STATE;
+fbHE1.awl:    T #p.origin.mc.STATE;
+fbHE1.awl:    T #p.origin.mc.STATE;
+fbMOD1.awl:    (   mcOrigin             := #p.origin.mc ,
+fbMOD1.awl:    O #p.origin.mc.INTERLOCK;
+fbMOD1.awl:        OUT                  := #p.origin.RAW_OUTPUT
+fbMOD1.awl:    O #p.origin.mc.INTERLOCK;
+fbMOD1.awl:    T #p.origin.mc.STATE;
+fbMOD1.awl:    O #p.origin.mc.INTERLOCK;
+fbMOD1.awl:    T #p.origin.RAW_OUTPUT;
+fbMOD1.awl:    T #p.origin.mc.STATE;
+fbMOD1.awl:    T #p.origin.mc.STATE;
+fbMOT1.awl:    (   mcOrigin             := #p.origin.mc ,
+fbMOT1.awl:    A #p.origin.PHR;
+fbMOT1.awl:    = #p.origin.ALM_PHR;
+fbMOT1.awl:    A #p.origin.BRK;
+fbMOT1.awl:    = #p.origin.ALM_BRK;
+fbMOT1.awl:    O #p.origin.mc.INTERLOCK;
+fbMOT1.awl:    O #p.origin.BRK;
+fbMOT1.awl:    O #p.origin.PHR;
+fbMOT1.awl:    = #p.origin.mc.INTERLOCK;
+fbMOT1.awl:    AN #p.origin.mc.modeOOS;
+fbMOT1.awl:    AN #p.origin.mc.INTERLOCK;
+fbMOT1.awl:    = #p.origin.OUT_Q;
+fbMOT1.awl:    AN #p.origin.FB_RUN;
+fbMOT1.awl:    T #p.origin.mc.STATE;
+fbMOT1.awl:    A #p.origin.FB_RUN;
+fbMOT1.awl:    AN #p.origin.FAIL_START;
+fbMOT1.awl:    T #p.origin.mc.STATE;
+fbMOT1.awl:    AN #p.origin.FB_RUN;
+fbMOT1.awl:    A #p.origin.FB_RUN;
+fbMOT1.awl:    T #p.origin.mc.STATE;
+fbMOT1.awl:    AN #p.origin.FB_RUN;
+fbMOT1.awl:    = #p.origin.FAIL_START;
+fbMOT1.awl:    A #p.origin.FB_RUN;
+fbMOT1.awl:    T #p.origin.mc.STATE;
+fbPC1.awl:    (   mcOrigin             := #p.origin.mc ,
+fbPC1.awl:    O #p.origin.mc.INTERLOCK;
+fbPC1.awl:    O "idbPOS4".f[#p.link.DRAIN].p.origin.mc.INTERLOCK;
+fbPC1.awl:    O "idbPOS4".f[#p.link.HPCA].p.origin.mc.INTERLOCK;
+fbPC1.awl:    O "idbPOS4".f[#p.link.LPCA].p.origin.mc.INTERLOCK;
+fbPC1.awl:    O "idbPOS4".f[#p.link.VACUUM].p.origin.mc.INTERLOCK;
+fbPC1.awl:    O "idbPOS2".f[#p.link.VENT].p.origin.mc.INTERLOCK;
+fbPC1.awl:    ON "idbPOS4".f[#p.link.DRAIN].p.origin.mc.modeAUTO;
+fbPC1.awl:    ON "idbPOS4".f[#p.link.HPCA].p.origin.mc.modeAUTO;
+fbPC1.awl:    ON "idbPOS4".f[#p.link.LPCA].p.origin.mc.modeAUTO;
+fbPC1.awl:    ON "idbPOS4".f[#p.link.VACUUM].p.origin.mc.modeAUTO;
+fbPC1.awl:    ON "idbPOS2".f[#p.link.VENT].p.origin.mc.modeAUTO;
+fbPC1.awl:    = #p.origin.mc.INTERLOCK;
+fbPC1.awl:    O #p.origin.mc.modeOOS;
+fbPC1.awl:    O #p.origin.mc.INTERLOCK;
+fbPC1.awl:    AN #p.origin.mc.modeOOS;
+fbPC1.awl:    AN #p.origin.mc.INTERLOCK;
+fbPC1.awl:    AN #p.origin.PI1_INTERLOCK;
+fbPC1.awl:    AN #p.origin.mc.modeOOS;
+fbPC1.awl:    AN #p.origin.mc.INTERLOCK;
+fbPC1.awl:    L #p.origin.PI1_PV;
+fbPC1.awl:    L #p.origin.PI1_PV;
+fbPC1.awl:    L #p.origin.PI1_PV;
+fbPC1.awl:    L #p.origin.PI1_PV;
+fbPC1.awl:    T #p.origin.mc.STATE;
+fbPC1.awl:    T #p.origin.mc.STATE;
+fbPC1.awl:    T #p.origin.mc.STATE;
+fbPOSx.awl:    A #p.origin.NC;
+fbPOSx.awl:    T #p.origin.mc.CMD_SAFE;
+fbPOSx.awl:    AN #p.origin.NC;
+fbPOSx.awl:    T #p.origin.mc.CMD_SAFE;
+fbPOSx.awl:    (   mcOrigin             := #p.origin.mc ,
+fbPOSx.awl:    A #p.origin.NC;
+fbPOSx.awl:    AN #p.origin.mc.INTERLOCK;
+fbPOSx.awl:    AN #p.origin.mc.modeOOS;
+fbPOSx.awl:    AN #p.origin.mc.INTERLOCK;
+fbPOSx.awl:    AN #p.origin.mc.modeOOS;
+fbPOSx.awl:    A #p.origin.FB_O;
+fbPOSx.awl:    AN #p.origin.FB_C;
+fbPOSx.awl:    AN #p.origin.FB_O;
+fbPOSx.awl:    A #p.origin.FB_C;
+fbPOSx.awl:    A #p.origin.FB_O;
+fbPOSx.awl:    A #p.origin.FB_C;
+fbPOSx.awl:    AN #p.origin.FB_O;
+fbPOSx.awl:    AN #p.origin.FB_C;
+fbPOSx.awl:    = #p.origin.OUT_Q;
+fbPOSx.awl:    = #p.origin.OUT_Q;
+fbPOSx.awl:        PT                   := #p.origin.TMR ,
+fbPOSx.awl:        PT                   := #p.origin.TMR ,
+fbPOSx.awl:    T #p.origin.mc.STATE;
+fbPOSx.awl:    T #p.origin.mc.STATE;
+fbPOSx.awl:    T #p.origin.mc.STATE;
+fbPOSx.awl:    = #p.origin.FAULT_C;
+fbPOSx.awl:    = #p.origin.FAULT_O;
+fbPOSx.awl:    O #p.origin.FAULT_C;
+fbPOSx.awl:    O #p.origin.FAULT_O;
+fbPOSx.awl:    T #p.origin.mc.STATE;
+fbSIC1.awl:    (   mcOrigin             := #p.origin.mc ,
+fbSIC1.awl:    A #p.origin.mc.modeAUTO;
+fbSIC1.awl:    = #p.origin.ai.modeAUTO;
+fbSIC1.awl:    A #p.origin.mc.modeMANUAL;
+fbSIC1.awl:    = #p.origin.ai.modeMANUAL;
+fbSIC1.awl:    A #p.origin.mc.modeOOS;
+fbSIC1.awl:    = #p.origin.ai.modeOOS;
+fbSIC1.awl:    L #p.origin.RANGE_LOWER;
+fbSIC1.awl:    T #p.origin.ai.RANGE_LOWER;
+fbSIC1.awl:    L #p.origin.RANGE_UPPER;
+fbSIC1.awl:    T #p.origin.ai.RANGE_UPPER;
+fbSIC1.awl:    L #p.origin.LIMIT_HH;
+fbSIC1.awl:    T #p.origin.ai.LIMIT_HH;
+fbSIC1.awl:    L #p.origin.LIMIT_H;
+fbSIC1.awl:    T #p.origin.ai.LIMIT_H;
+fbSIC1.awl:    T #p.origin.ai.LIMIT_L;
+fbSIC1.awl:    T #p.origin.ai.LIMIT_LL;
+fbSIC1.awl:    = #p.origin.ai.ENABLE_HH;
+fbSIC1.awl:    = #p.origin.ai.ENABLE_H;
+fbSIC1.awl:    = #p.origin.ai.ENABLE_L;
+fbSIC1.awl:    = #p.origin.ai.ENABLE_LL;
+fbSIC1.awl:    L #p.origin.RAW_INPUT;
+fbSIC1.awl:    T #p.origin.ai.RAW_INPUT;
+fbSIC1.awl:    (   ai                   := #p.origin.ai
+fbSIC1.awl:    A #p.origin.PHR;
+fbSIC1.awl:    = #p.origin.ALM_PHR;
+fbSIC1.awl:    A #p.origin.BRK;
+fbSIC1.awl:    = #p.origin.ALM_BRK;
+fbSIC1.awl:    A #p.origin.FLP;
+fbSIC1.awl:    = #p.origin.ALM_FLP;
+fbSIC1.awl:    A #p.origin.FLT;
+fbSIC1.awl:    = #p.origin.ALM_FLT;
+fbSIC1.awl:    A #p.origin.THM;
+fbSIC1.awl:    = #p.origin.ALM_THM;
+fbSIC1.awl:    O #p.origin.mc.INTERLOCK;
+fbSIC1.awl:    O #p.origin.BRK;
+fbSIC1.awl:    O #p.origin.THM;
+fbSIC1.awl:    O #p.origin.FLP;
+fbSIC1.awl:    O #p.origin.FLT;
+fbSIC1.awl:    ON #p.origin.MI1_DQ;
+fbSIC1.awl:    = #p.origin.mc.INTERLOCK;
+fbSIC1.awl:    AN #p.origin.mc.INTERLOCK;
+fbSIC1.awl:    L #p.origin.MI1_MASS;
+fbSIC1.awl:    L #p.origin.MASS_RUN;
+fbSIC1.awl:    L #p.origin.MASS_STOP;
+fbSIC1.awl:    A #p.origin.mc.modeMANUAL;
+fbSIC1.awl:    AN #p.origin.mc.modeOOS;
+fbSIC1.awl:    T #p.origin.STATE_PEER;
+fbSIC1.awl:    T #p.origin.STATE_PEER;
+fbSIC1.awl:    = #p.origin.OUT_Q;
+fbSIC1.awl:    T #p.origin.OUT_LMN;
+fbSIC1.awl:    T #p.origin.OUT_SETPOINT;
+fbSIC1.awl:        HI_LIM               := #p.origin.ai.RANGE_UPPER ,
+fbSIC1.awl:        LO_LIM               := #p.origin.ai.RANGE_LOWER ,
+fbSIC1.awl:    T #p.origin.OUT_LMN_PER;
+fbSIC1.awl:        P_SEL                := #p.origin.P_SEL ,
+fbSIC1.awl:        I_SEL                := #p.origin.I_SEL ,
+fbSIC1.awl:        D_SEL                := #p.origin.D_SEL ,
+fbSIC1.awl:        CYCLE                := #p.origin.CYCLE ,
+fbSIC1.awl:        PV_IN                := #p.origin.PV ,
+fbSIC1.awl:        GAIN                 := #p.origin.GAIN ,
+fbSIC1.awl:        TI                   := #p.origin.TI ,
+fbSIC1.awl:        TD                   := #p.origin.TD ,
+fbSIC1.awl:        LMN                  := #p.origin.LMN
+fbSIC1.awl:    T #p.origin.LMN;
+fbSIC1.awl:        PT                   := #p.origin.FB_TDELAY ,
+fbSIC1.awl:    AN #p.origin.RUNNING;
+fbSIC1.awl:    AN #p.origin.mc.modeOOS;
+fbSIC1.awl:    = #p.origin.RUN_FAULT;
+fbSIC1.awl:    = #p.origin.RUNNING;
+fbSIC1.awl:    = #p.origin.OUT_Q_F;
+fbSIC1.awl:    A #p.origin.OUT_Q_F;
+fbSIC1.awl:    R #p.origin.OUT_Q_F;
+fbSIC1.awl:    S #p.origin.OUT_Q_R;
+fbSIC1.awl:    A #p.origin.OUT_Q_R;
+fbSIC1.awl:    S #p.origin.OUT_Q_F;
+fbSIC1.awl:    R #p.origin.OUT_Q_R;
+fbSIC1.awl:    AN #p.origin.BRK;
+fbSIC1.awl:    AN #p.origin.THM;
+fbSIC1.awl:    AN #p.origin.FLP;
+fbSIC1.awl:    AN #p.origin.FLT;
+fbSIC1.awl:    T #p.origin.mc.STATE;
+fbSIC1.awl:    O #p.origin.BRK;
+fbSIC1.awl:    O #p.origin.THM;
+fbSIC1.awl:    O #p.origin.FLP;
+fbSIC1.awl:    O #p.origin.FLT;
+fbSIC1.awl:    T #p.origin.mc.STATE;
+fbSIC1.awl:    T #p.origin.mc.STATE;
+fbSIC1.awl:    T #p.origin.mc.STATE;
+fbTC1.awl:    (   mcOrigin             := #p.origin.mc ,
+fbTC1.awl:    O #p.origin.mc.INTERLOCK;
+fbTC1.awl:    O "idbMOD1".f[#p.link.MOD_TCV].p.origin.mc.INTERLOCK;
+fbTC1.awl:    ON "idbMOD1".f[#p.link.MOD_TCV].p.origin.mc.modeAUTO;
+fbTC1.awl:    = #p.origin.mc.INTERLOCK;
+fbTC1.awl:    AN #p.origin.mc.modeOOS;
+fbTC1.awl:    AN #p.origin.mc.INTERLOCK;
+fbTC1.awl:    A #p.origin.mc.modeMANUAL;
+fbTC1.awl:        P_SEL                := #p.origin.P_SEL ,
+fbTC1.awl:        I_SEL                := #p.origin.I_SEL ,
+fbTC1.awl:        D_SEL                := #p.origin.D_SEL ,
+fbTC1.awl:        CYCLE                := #p.origin.CYCLE ,
+fbTC1.awl:        PV_IN                := "idbPI1".f[#p.link.TI_HEX].p.origin.PV ,
+fbTC1.awl:        GAIN                 := #p.origin.GAIN ,
+fbTC1.awl:        TI                   := #p.origin.TI ,
+fbTC1.awl:        TD                   := #p.origin.TD ,
+fbTC1.awl:        LMN                  := #p.origin.LMN
+fbTC1.awl:    L #p.origin.LMN;
+fbTC1.awl:    T #p.origin.LMN;
+fbTC1.awl:    T #p.origin.LMN;
+fbTC1.awl:    L #p.origin.LMN;
+fbTC1.awl:    T #p.origin.mc.STATE;
+fbTC1.awl:    T #p.origin.mc.STATE;
+fbVS1.awl:    (   mcOrigin             := #p.origin.mc ,
+fbVS1.awl:    AN #p.origin.mc.modeOOS;
+fbVS1.awl:    AN #p.origin.mc.INTERLOCK;
+fbVS1.awl:    AN #p.origin.mc.modeOOS;
+fbVS1.awl:    O "idbMOT1".f[#p.link.PUMP1].p.origin.mc.INTERLOCK;
+fbVS1.awl:    O "idbMOT1".f[#p.link.PUMP2].p.origin.mc.INTERLOCK;
+fbVS1.awl:    ON "idbMOT1".f[#p.link.PUMP1].p.origin.mc.modeAUTO;
+fbVS1.awl:    ON "idbMOT1".f[#p.link.PUMP2].p.origin.mc.modeAUTO;
+fbVS1.awl:    = #p.origin.FAULT;
+fbVS1.awl:    AN #p.origin.FAULT;
+fbVS1.awl:    L "idbPOS2".f[#p.link.VALVE1].p.origin.mc.STATE;
+fbVS1.awl:    L "idbPOS2".f[#p.link.VALVE2].p.origin.mc.STATE;
+fbVS1.awl:    T #p.origin.mc.STATE;
+fbVS1.awl:    T #p.origin.mc.STATE;
+fbVS1.awl:    A #p.origin.FAULT;
+fbVS1.awl:    T #p.origin.mc.STATE;
+fbx.awl:    // If this is the Block origin then set the transaction send and receive  //
+fbx.awl:    A "idb@@CLASS@@".f[@@IDX@@].p.origin.mc.isOriginBlock;
+fbx.awl:    // If this is not the Block origin then set the transaction send and      //
+fbx.awl:    AN "idb@@CLASS@@".f[@@IDX@@].p.origin.mc.isOriginBlock;
+fbx.awl:    JCN _originBlock@@INSTANCE@@;
+fbx.awl:_originBlock@@INSTANCE@@:   NOP 0;
+fbx.awl:    // If this is the Block origin then transfer the calculated parameters:   //
+fbx.awl:        SD_1                 := "idb@@CLASS@@".f[@@IDX@@].p.origin ,
+fbx.awl:    // If not origin then receive the calculated parameters:                  //
+fbx.awl:    AN "idb@@CLASS@@".f[@@IDX@@].p.origin.mc.isOriginBlock;
+fbx.awl:    // If not origin then receive the calculated parameters:                  //
+fbx.awl:        RD_1                 := "idb@@CLASS@@".f[@@IDX@@].p.origin ,
+fbx.awl:    JCN _originOwner_@@IDX@@;
+fbx.awl:_originOwner_@@IDX@@:   NOP 0;
+fbx.awl:    // If this is the Owner origin then transfer the owner parameters:        //
+fbx.awl:    // If not the Owner origin then receive the owner parameters:             //
+fbx.awl:    // If not the Owner origin then receive the owner parameters:             //
+fbxILCR.awl:    // If this is the Block origin then set the transaction send and receive  //
+fbxILCR.awl:    // If this is not the Block origin then set the transaction send and      //
+fbxILCR.awl:    JCN _originBlock@@INSTANCE@@;
+fbxILCR.awl:_originBlock@@INSTANCE@@:   NOP 0;
+fbxILCR.awl:    // If this is the Block origin then transfer the calculated parameters:   //
+fbxILCR.awl:    // If not origin then receive the calculated parameters:                  //
+fbxILCR.awl:    // If not origin then receive the calculated parameters:                  //
+fbxILNCR.awl:    // If this is the Block origin then set the transaction send and receive  //
+fbxILNCR.awl:    // If this is not the Block origin then set the transaction send and      //
+fbxILNCR.awl:    JCN _originBlock@@INSTANCE@@;
+fbxILNCR.awl:_originBlock@@INSTANCE@@:   NOP 0;
+fbxILNCR.awl:    // If this is the Block origin then transfer the calculated parameters:   //
+fbxILNCR.awl:    // If not origin then receive the calculated parameters:                  //
+fbxILNCR.awl:    // If not origin then receive the calculated parameters:                  //
+fbZSC1.awl:    (   mcOrigin             := #p.origin.mc ,
+fbZSC1.awl:    A #p.origin.DI_Auto;
+fbZSC1.awl:    A #p.origin.mc.modeAUTO;
+fbZSC1.awl:    A #p.origin.mc.modeMANUAL;
+fbZSC1.awl:    = #p.origin.PV;
+fbZSC1.awl:    AN #p.origin.mc.modeOOS;
+fbZSC1.awl:    = #p.origin.ALARM;
+fbZSC1.awl:    T #p.origin.mc.STATE;
+fbZSC1.awl:    T #p.origin.mc.STATE;
+fbZSC1.awl:    T #p.origin.mc.STATE;
+fbZSC2.awl:    (   mcOrigin             := #p.origin.mc ,
+fbZSC2.awl:    A #p.origin.DI_Auto;
+fbZSC2.awl:    A #p.origin.mc.modeAUTO;
+fbZSC2.awl:    A #p.origin.mc.modeMANUAL;
+fbZSC2.awl:    = #p.origin.PV;
+fbZSC2.awl:    AN #p.origin.mc.modeOOS;
+fbZSC2.awl:    = #p.origin.ALARM;
+fbZSC2.awl:    T #p.origin.mc.STATE;
+fbZSC2.awl:    T #p.origin.mc.STATE;
+fbZSC2.awl:    T #p.origin.mc.STATE;
+fcAL1.awl:    (   mcOrigin             := #p.origin.mc ,
+fcAL1.awl:    A #p.origin.mc.modeAUTO;
+fcAL1.awl:    = #p.origin.ai.modeAUTO;
+fcAL1.awl:    A #p.origin.mc.modeMANUAL;
+fcAL1.awl:    = #p.origin.ai.modeMANUAL;
+fcAL1.awl:    A #p.origin.mc.modeOOS;
+fcAL1.awl:    = #p.origin.ai.modeOOS;
+fcAL1.awl:    (   ai                   := #p.origin.ai
+fcAL1.awl:    L #p.origin.CMD_ENABLE;
+fcAL1.awl:    L #p.origin.ai.PV;
+fcAL1.awl:    T #p.origin.PV;
+fcAL1.awl:    A #p.origin.ai.DQ;
+fcAL1.awl:    = #p.origin.DQ;
+fcAL1.awl:    A #p.origin.ai.ALARM_LL;
+fcAL1.awl:    = #p.origin.ALARM_LL;
+fcAL1.awl:    A #p.origin.ai.ALARM_L;
+fcAL1.awl:    = #p.origin.ALARM_L;
+fcAL1.awl:    A #p.origin.ai.ALARM_H;
+fcAL1.awl:    = #p.origin.ALARM_H;
+fcAL1.awl:    A #p.origin.ai.ALARM_HH;
+fcAL1.awl:    = #p.origin.ALARM_HH;
+fcAL1.awl:    O #p.origin.mc.INTERLOCK;
+fcAL1.awl:    O #p.origin.ai.ALARM_HH;
+fcAL1.awl:    ON #p.origin.ai.DQ;
+fcAL1.awl:    = #p.origin.mc.INTERLOCK;
+fcAL1.awl:    A #p.origin.ai.DQ;
+fcAL1.awl:    L #p.origin.STATE_ENABLED;
+fcAL1.awl:    T #p.origin.mc.STATE;
+fcAL1.awl:    AN #p.origin.ai.DQ;
+fcAL1.awl:    AN #p.origin.mc.modeOOS;
+fcAL1.awl:    L #p.origin.STATE_FAULT;
+fcAL1.awl:    T #p.origin.mc.STATE;
+fcDI1.awl:    (   mcOrigin             := #p.origin.mc ,
+fcDI1.awl:    A #p.origin.mc.modeAUTO;
+fcDI1.awl:    A #p.origin.DI_Auto;
+fcDI1.awl:    A #p.origin.mc.modeMANUAL;
+fcDI1.awl:    = #p.origin.PV;
+fcDI1.awl:    AN #p.origin.mc.modeOOS;
+fcDI1.awl:    = #p.origin.ALARM;
+fcDI1.awl:    = #p.origin.mc.INTERLOCK;
+fcDI1.awl:    T #p.origin.mc.STATE;
+fcDI1.awl:    AN #p.origin.mc.modeOOS;
+fcDI1.awl:    T #p.origin.mc.STATE;
+fcDI2.awl:    (   mcOrigin             := #p.origin.mc ,
+fcDI2.awl:    A #p.origin.mc.modeAUTO;
+fcDI2.awl:    A #p.origin.DI_Auto;
+fcDI2.awl:    A #p.origin.mc.modeMANUAL;
+fcDI2.awl:    = #p.origin.PV;
+fcDI2.awl:    AN #p.origin.mc.modeOOS;
+fcDI2.awl:    = #p.origin.ALARM;
+fcDI2.awl:    = #p.origin.mc.INTERLOCK;
+fcDI2.awl:    T #p.origin.mc.STATE;
+fcDI2.awl:    AN #p.origin.mc.modeOOS;
+fcDI2.awl:    T #p.origin.mc.STATE;
+fcDI3.awl:    (   mcOrigin             := #p.origin.mc ,
+fcDI3.awl:    = #p.origin.PV;
+fcDI3.awl:    AN #p.origin.mc.modeOOS;
+fcDI3.awl:    = #p.origin.ALARM;
+fcDI3.awl:    O #p.origin.mc.INTERLOCK;
+fcDI3.awl:    = #p.origin.mc.INTERLOCK;
+fcDI3.awl:    T #p.origin.mc.STATE;
+fcDI3.awl:    AN #p.origin.mc.modeOOS;
+fcDI3.awl:    T #p.origin.mc.STATE;
+fcHE1.awl:    (   mcOrigin             := #p.origin.mc ,
+fcHE1.awl:    A #p.origin.FAULT;
+fcHE1.awl:    O #p.origin.mc.INTERLOCK;
+fcHE1.awl:    O #p.origin.FAULT;
+fcHE1.awl:    = #p.origin.mc.INTERLOCK;
+fcHE1.awl:    AN #p.origin.mc.INTERLOCK;
+fcHE1.awl:    O #p.origin.mc.INTERLOCK;
+fcHE1.awl:    = #p.origin.DO;
+fcHE1.awl:    T #p.origin.mc.STATE;
+fcHE1.awl:    T #p.origin.mc.STATE;
+fcHE1.awl:    T #p.origin.mc.STATE;
+fcHMIInterfaceBLK.awl:    mc : "udtMCOrigin";      // Block origin mode and command
+fcHMIInterfaceBLK.awl:TITLE = Copy the BLK origin mode and command data to the HMI interface block
+fcHMIInterfaceBLK.awl:    // Copy origin mode and command data:                                     //
+fcMOD1.awl:    (   mcOrigin             := #p.origin.mc ,
+fcMOD1.awl:    O #p.origin.mc.INTERLOCK;
+fcMOD1.awl:        OUT                  := #p.origin.RAW_OUTPUT
+fcMOD1.awl:    O #p.origin.mc.INTERLOCK;
+fcMOD1.awl:    T #p.origin.mc.STATE;
+fcMOD1.awl:    O #p.origin.mc.INTERLOCK;
+fcMOD1.awl:    T #p.origin.RAW_OUTPUT;
+fcMOD1.awl:    T #p.origin.mc.STATE;
+fcMOD1.awl:    T #p.origin.mc.STATE;
+fcModeCmd.awl:    mcOrigin : "udtMCOrigin";   // Block mode and command from origin CPU
+fcModeCmdBLK.awl:    mcOrigin : "udtMCOrigin";          // Block mode and command from origin CPU
+fcPC1.awl:    (   mcOrigin             := #p.origin.mc ,
+fcPC1.awl:    O #p.origin.mc.INTERLOCK;
+fcPC1.awl:    O #p.origin.DRAIN.origin.mc.INTERLOCK;
+fcPC1.awl:    O #p.origin.HPCA.origin.mc.INTERLOCK;
+fcPC1.awl:    O #p.origin.LPCA.origin.mc.INTERLOCK;
+fcPC1.awl:    O #p.origin.VACUUM.origin.mc.INTERLOCK;
+fcPC1.awl:    O #p.origin.VENT.origin.mc.INTERLOCK;
+fcPC1.awl:    ON #p.origin.DRAIN.origin.mc.modeAUTO;
+fcPC1.awl:    ON #p.origin.HPCA.origin.mc.modeAUTO;
+fcPC1.awl:    ON #p.origin.LPCA.origin.mc.modeAUTO;
+fcPC1.awl:    ON #p.origin.VACUUM.origin.mc.modeAUTO;
+fcPC1.awl:    ON #p.origin.VENT.origin.mc.modeAUTO;
+fcPC1.awl:    = #p.origin.mc.INTERLOCK;
+fcPC1.awl:    O #p.origin.mc.modeOOS;
+fcPC1.awl:    O #p.origin.mc.INTERLOCK;
+fcPC1.awl:    AN #p.origin.mc.modeOOS;
+fcPC1.awl:    AN #p.origin.mc.INTERLOCK;
+fcPC1.awl:    AN #p.origin.PI1_INTERLOCK;
+fcPC1.awl:    AN #p.origin.mc.modeOOS;
+fcPC1.awl:    AN #p.origin.mc.INTERLOCK;
+fcPC1.awl:    L #p.origin.PI1_PV;
+fcPC1.awl:    L #p.origin.PI1_PV;
+fcPC1.awl:    L #p.origin.PI1_PV;
+fcPC1.awl:    L #p.origin.PI1_PV;
+fcPC1.awl:    T #p.origin.DRAIN.owner.mc.CMD;
+fcPC1.awl:    T #p.origin.HPCA.owner.mc.CMD;
+fcPC1.awl:    T #p.origin.LPCA.owner.mc.CMD;
+fcPC1.awl:    T #p.origin.VACUUM.owner.mc.CMD;
+fcPC1.awl:    T #p.origin.VENT.owner.mc.CMD;
+fcPC1.awl:    T #p.origin.DRAIN.owner.mc.CMD;
+fcPC1.awl:    T #p.origin.HPCA.owner.mc.CMD;
+fcPC1.awl:    T #p.origin.LPCA.owner.mc.CMD;
+fcPC1.awl:    T #p.origin.VACUUM.owner.mc.CMD;
+fcPC1.awl:    T #p.origin.VENT.owner.mc.CMD;
+fcPC1.awl:    T #p.origin.mc.STATE;
+fcPC1.awl:    T #p.origin.mc.STATE;
+fcPC1.awl:    T #p.origin.mc.STATE;
+fcVS1.awl:    (   mcOrigin             := #p.origin.mc ,
+fcVS1.awl:    AN #p.origin.mc.modeOOS;
+fcVS1.awl:    AN #p.origin.mc.INTERLOCK;
+fcVS1.awl:    AN #p.origin.mc.modeOOS;
+fcVS1.awl:    O #p.origin.PUMP1.origin.mc.INTERLOCK;
+fcVS1.awl:    O #p.origin.PUMP2.origin.mc.INTERLOCK;
+fcVS1.awl:    ON #p.origin.PUMP1.origin.mc.modeAUTO;
+fcVS1.awl:    ON #p.origin.PUMP2.origin.mc.modeAUTO;
+fcVS1.awl:    = #p.origin.FAULT;
+fcVS1.awl:    AN #p.origin.FAULT;
+fcVS1.awl:    L #p.origin.VALVE1.origin.mc.STATE;
+fcVS1.awl:    L #p.origin.VALVE2.origin.mc.STATE;
+fcVS1.awl:    T #p.origin.PUMP1.owner.mc.CMD;
+fcVS1.awl:    T #p.origin.PUMP2.owner.mc.CMD;
+fcVS1.awl:    T #p.origin.PUMP1.owner.mc.CMD;
+fcVS1.awl:    T #p.origin.PUMP2.owner.mc.CMD;
+fcVS1.awl:    T #p.origin.mc.STATE;
+fcVS1.awl:    T #p.origin.mc.STATE;
+fcVS1.awl:    A #p.origin.FAULT;
+fcVS1.awl:    T #p.origin.mc.STATE;
+fcZSC1.awl:    (   mcOrigin             := #p.origin.mc ,
+fcZSC1.awl:    A #p.origin.DI_Auto;
+fcZSC1.awl:    A #p.origin.mc.modeAUTO;
+fcZSC1.awl:    A #p.origin.mc.modeMANUAL;
+fcZSC1.awl:    = #p.origin.PV;
+fcZSC1.awl:    AN #p.origin.mc.modeOOS;
+fcZSC1.awl:    = #p.origin.ALARM;
+fcZSC1.awl:    = #p.origin.mc.INTERLOCK;
+fcZSC1.awl:    T #p.origin.mc.STATE;
+fcZSC1.awl:    T #p.origin.mc.STATE;
+fcZSC1.awl:    T #p.origin.mc.STATE;
+fcZSC2.awl:    (   mcOrigin             := #p.origin.mc ,
+fcZSC2.awl:    A #p.origin.DI_Auto;
+fcZSC2.awl:    A #p.origin.mc.modeAUTO;
+fcZSC2.awl:    A #p.origin.mc.modeMANUAL;
+fcZSC2.awl:    = #p.origin.PV;
+fcZSC2.awl:    AN #p.origin.mc.modeOOS;
+fcZSC2.awl:    = #p.origin.ALARM;
+fcZSC2.awl:    = #p.origin.mc.INTERLOCK;
+fcZSC2.awl:    T #p.origin.mc.STATE;
+fcZSC2.awl:    T #p.origin.mc.STATE;
+fcZSC2.awl:    T #p.origin.mc.STATE;
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_mc_STATE,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.origin.mc.STATE,Int,2,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_ai_PV,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.origin.ai.PV,Real,4,IEEE754,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_ai_ALARM_HH,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.ai.origin.ALARM_HH,Bool,1,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_ai_ALARM_H,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.ai.origin.ALARM_H,Bool,1,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_ai_ALARM_L,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.ai.origin.ALARM_L,Bool,1,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_ai_ALARM_LL,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.ai.origin.ALARM_LL,Bool,1,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_ai_PV,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.origin.ai.PV,Real,4,IEEE754,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_ai_ALARM_HH,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.ai.origin.ALARM_HH,Bool,1,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_ai_ALARM_H,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.ai.origin.ALARM_H,Bool,1,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_ai_ALARM_L,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.ai.origin.ALARM_L,Bool,1,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_ai_ALARM_LL,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.ai.origin.ALARM_LL,Bool,1,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+gTagHMI.awl:idb@@CLASS@@_@@INSTANCE@@_origin_RAW_OUTPUT,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.origin.RAW_OUTPUT,Int,2,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbAL1.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.ai.RANGE_LOWER;
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.ai.RANGE_UPPER;
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.ai.LIMIT_HH;
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.ai.LIMIT_H;
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.ai.LIMIT_L;
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.ai.LIMIT_LL;
+ifbAL1.awl:    = #f[@@IDX@@].p.origin.ai.ENABLE_HH;
+ifbAL1.awl:    = #f[@@IDX@@].p.origin.ai.ENABLE_H;
+ifbAL1.awl:    = #f[@@IDX@@].p.origin.ai.ENABLE_L;
+ifbAL1.awl:    = #f[@@IDX@@].p.origin.ai.ENABLE_LL;
+ifbAL1.awl:    = #f[@@IDX@@].p.origin.ai.POLARITY;
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.ai.RAW_INPUT;
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.CMD_ENABLE;
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.STATE_ENABLED;
+ifbAL1.awl:    T #f[@@IDX@@].p.origin.STATE_FAULT;
+ifbBLK.awl:    = #f[@@IDX@@].p.origin.mc.CRIL;
+ifbBLK.awl:    = #f[@@IDX@@].p.origin.mc.NCRIL;
+ifbBLK.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbBLK.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbBLK.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbDI1.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbDI1.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbDI1.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbDI1.awl:    = #f[@@IDX@@].p.origin.DI_Auto;
+ifbDI2.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbDI2.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbDI2.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbDI2.awl:    = #f[@@IDX@@].p.origin.DI_Auto;
+ifbDI3.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbDI3.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbDI3.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbHE1.awl:    = #f[@@IDX@@].p.origin.mc.CRIL;
+ifbHE1.awl:    = #f[@@IDX@@].p.origin.mc.NCRIL;
+ifbHE1.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbHE1.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbHE1.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbHE1.awl:    = #f[@@IDX@@].p.origin.FAULT;
+ifbHE1.awl:    A #f[@@IDX@@].p.origin.DO;
+ifbMOD1.awl:    = #f[@@IDX@@].p.origin.mc.CRIL;
+ifbMOD1.awl:    = #f[@@IDX@@].p.origin.mc.NCRIL;
+ifbMOD1.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbMOD1.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbMOD1.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbMOD1.awl:    L #f[@@IDX@@].p.origin.RAW_OUTPUT;
+ifbMOT1.awl:    = #f[@@IDX@@].p.origin.mc.CRIL;
+ifbMOT1.awl:    = #f[@@IDX@@].p.origin.mc.NCRIL;
+ifbMOT1.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbMOT1.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbMOT1.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbMOT1.awl:    = #f[@@IDX@@].p.origin.BRK;
+ifbMOT1.awl:    = #f[@@IDX@@].p.origin.FB_RUN;
+ifbMOT1.awl:    = #f[@@IDX@@].p.origin.PHR;
+ifbMOT1.awl:    A #f[@@IDX@@].p.origin.OUT_Q;
+ifbPC1.awl:    = #f[@@IDX@@].p.origin.mc.CRIL;
+ifbPC1.awl:    = #f[@@IDX@@].p.origin.mc.NCRIL;
+ifbPC1.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbPC1.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbPC1.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbPC1.awl:    A "idb@@PILINKCLASS@@".f[@@PILINKIDX@@].p.origin.mc.INTERLOCK;    // @@PILINKCLASS@@
+ifbPC1.awl:    = #f[@@IDX@@].p.origin.PI1_INTERLOCK;
+ifbPC1.awl:    L "idb@@PILINKCLASS@@".f[@@PILINKIDX@@].p.origin.ai.PV;    // @@PILINKCLASS@@
+ifbPC1.awl:    T #f[@@IDX@@].p.origin.PI1_PV;
+ifbPOS1.awl:    = #f[@@IDX@@].p.origin.mc.CRIL;
+ifbPOS1.awl:    = #f[@@IDX@@].p.origin.mc.NCRIL;
+ifbPOS1.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbPOS1.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbPOS1.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbPOS1.awl:    = #f[@@IDX@@].p.origin.FB_C;
+ifbPOS1.awl:    = #f[@@IDX@@].p.origin.FB_O;
+ifbPOS1.awl:    = #f[@@IDX@@].p.origin.NC;
+ifbPOS1.awl:    A #f[@@IDX@@].p.origin.OUT_Q;
+ifbPOS2.awl:    = #f[@@IDX@@].p.origin.mc.CRIL;
+ifbPOS2.awl:    = #f[@@IDX@@].p.origin.mc.NCRIL;
+ifbPOS2.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbPOS2.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbPOS2.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbPOS2.awl:    = #f[@@IDX@@].p.origin.FB_C;
+ifbPOS2.awl:    = #f[@@IDX@@].p.origin.FB_O;
+ifbPOS2.awl:    = #f[@@IDX@@].p.origin.NC;
+ifbPOS3.awl:    = #f[@@IDX@@].p.origin.mc.CRIL;
+ifbPOS3.awl:    = #f[@@IDX@@].p.origin.mc.NCRIL;
+ifbPOS3.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbPOS3.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbPOS3.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbPOS3.awl:    = #f[@@IDX@@].p.origin.FB_C;
+ifbPOS3.awl:    = #f[@@IDX@@].p.origin.FB_O;
+ifbPOS3.awl:    = #f[@@IDX@@].p.origin.NC;
+ifbPOS3.awl:    A #f[@@IDX@@].p.origin.OUT_Q;
+ifbPOS4.awl:    = #f[@@IDX@@].p.origin.mc.CRIL;
+ifbPOS4.awl:    = #f[@@IDX@@].p.origin.mc.NCRIL;
+ifbPOS4.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbPOS4.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbPOS4.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbPOS4.awl:    = #f[@@IDX@@].p.origin.FB_C;
+ifbPOS4.awl:    = #f[@@IDX@@].p.origin.FB_O;
+ifbPOS4.awl:    = #f[@@IDX@@].p.origin.NC;
+ifbSIC1.awl:    = #f[@@IDX@@].p.origin.mc.CRIL;
+ifbSIC1.awl:    = #f[@@IDX@@].p.origin.mc.NCRIL;
+ifbSIC1.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbSIC1.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbSIC1.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbSIC1.awl:    T #f[@@IDX@@].p.origin.RAW_INPUT;
+ifbSIC1.awl:    = #f[@@IDX@@].p.origin.BRK;
+ifbSIC1.awl:    = #f[@@IDX@@].p.origin.FLP;
+ifbSIC1.awl:    = #f[@@IDX@@].p.origin.FLT;
+ifbSIC1.awl:    = #f[@@IDX@@].p.origin.THM;
+ifbSIC1.awl:    = #f[@@IDX@@].p.origin.PHR;
+ifbSIC1.awl:    L "idb@@MASSLINKCLASS@@".f[@@MASSLINKIDX@@].p.origin.ai.PV;
+ifbSIC1.awl:    T #f[@@IDX@@].p.origin.MI1_MASS;
+ifbSIC1.awl:    A "idb@@MASSLINKCLASS@@".f[@@MASSLINKIDX@@].p.origin.ai.DQ;
+ifbSIC1.awl:    = #f[@@IDX@@].p.origin.MI1_DQ;
+ifbSIC1.awl:    T #f[@@IDX@@].p.origin.MASS_RUN;
+ifbSIC1.awl:    T #f[@@IDX@@].p.origin.MASS_STOP;
+ifbSIC1.awl:    T #f[@@IDX@@].p.origin.RANGE_UPPER;
+ifbSIC1.awl:    T #f[@@IDX@@].p.origin.RANGE_LOWER;
+ifbSIC1.awl:    = #f[@@IDX@@].p.origin.POLARITY;
+ifbSIC1.awl:    T #f[@@IDX@@].p.origin.LIMIT_HH;
+ifbSIC1.awl:    T #f[@@IDX@@].p.origin.LIMIT_H;
+ifbSIC1.awl:    L #f[@@IDX@@].p.origin.LMN;
+ifbSIC1.awl:    A #f[@@IDX@@].p.origin.OUT_Q;
+ifbSIC1.awl:    A #f[@@IDX@@].p.origin.OUT_Q_F;
+ifbSIC1.awl:    A #f[@@IDX@@].p.origin.OUT_Q_R;
+ifbTC1.awl:    = #f[@@IDX@@].p.origin.mc.CRIL;
+ifbTC1.awl:    = #f[@@IDX@@].p.origin.mc.NCRIL;
+ifbTC1.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbTC1.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbTC1.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbVS1.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbVS1.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbVS1.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbZSC1.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbZSC1.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbZSC1.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbZSC1.awl:    = #f[@@IDX@@].p.origin.DI_Auto;
+ifbZSC2.awl:    T #f[@@IDX@@].p.origin.mc.ME;
+ifbZSC2.awl:    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+ifbZSC2.awl:    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+ifbZSC2.awl:    = #f[@@IDX@@].p.origin.DI_Auto;
+ifcHMISelectBLK.awl:        bmc                  := "idb@@CLASS@@".f[@@IDX@@].p.origin.bmc ,
+ifcHMISelectBLK.awl:        mc                   := "idb@@CLASS@@".f[@@IDX@@].p.origin.mc ,
+ifcHMISelectBLK.awl:    A "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
+ifcHMISelectBLK.awl:    L "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
+ifcHMISelectBLK.awl:    L "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
+ifcHMISelectBLK.awl:    L "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
+udtBLK.awl:TYPE "udt@@CLASS@@origin"
+udtBLK.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtBLK.awl:        origin : "udt@@CLASS@@origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtAL1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtAL1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtDI1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtDI1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtDI2origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtDI2origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtDI3origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtDI3origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtHE1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtHE1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtMI1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtMI1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtMOD1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtMOD1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtMOT1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtMOT1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtPI1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtPI1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtPOSxorigin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtPOSxorigin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtPOS1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtPOS1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtPOS2origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtPOS2origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtPOS3origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtPOS3origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtPOS4origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtPOS4origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtSIC1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtSIC1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtTC1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtTC1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtTI1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtTI1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtTI2origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtTI2origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtVS1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtVS1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtZSC1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtZSC1origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtZSC2origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtZSC2origin";       // Calculated data on origin CPU
+udtCM.awl:TYPE "udtPC1origin"
+udtCM.awl:        mc : "udtMCOrigin";            // Block mode and command for calculations on origin CPU
+udtCM.awl:        origin : "udtPC1origin";       // Calculated data on origin CPU

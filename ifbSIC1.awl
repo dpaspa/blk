@@ -87,7 +87,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #f[@@IDX@@].p.origin.mc.CRIL;
+    = #f[@@IDX@@].p.read.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -102,7 +102,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #f[@@IDX@@].p.origin.mc.NCRIL;
+    = #f[@@IDX@@].p.read.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -110,31 +110,42 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #f[@@IDX@@].p.origin.mc.ME;
+    T #f[@@IDX@@].p.read.mc.ME;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner ID
     //------------------------------------------------------------------------//
-    // Set the instance owner:                                                //
+    // Set the instance Owner ID:                                             //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #f[@@IDX@@].p.owner.mc.OWNER;
+    T #f[@@IDX@@].p.write.mc.OWNER;
+
+@@ATTR_BEGIN|FLOWPATH@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@CLASS@@ is a Flowpath device
+    //------------------------------------------------------------------------//
+    // This class of device is a FLOWPATH device where the state must equal   //
+    // the command once set by the parent:                                    //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #f[@@IDX@@].p.read.mc.FLOWPATH;
+@@ATTR_END|FLOWPATH@@
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
     //------------------------------------------------------------------------//
     // This block can only reside within this CPU:                            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+    = #f[@@IDX@@].p.read.mc.isMaster;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     //------------------------------------------------------------------------//
     // This block can only be owned by a parent block in this CPU:            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.owner.mc.isOriginOwner;
+    = #f[@@IDX@@].p.write.mc.isMaster;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -144,7 +155,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.SIC1.SAFE.CMD;
-    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+    T #f[@@IDX@@].p.read.mc.CMD_SAFE;
 _notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
@@ -153,7 +164,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Speed measured value
     // Set the instance speed measured value from the field:                  //
     //------------------------------------------------------------------------//
     L "@@INSTANCE@@-RAW";
-    T #f[@@IDX@@].p.origin.RAW_INPUT;
+    T #f[@@IDX@@].p.read.RAW_INPUT;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Field Fault Inputs
@@ -161,16 +172,16 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Field Fault Inputs
     // Set the instance fault input values from the field:                    //
     //------------------------------------------------------------------------//
     A "@@INSTANCE@@-BRK";
-    = #f[@@IDX@@].p.origin.BRK;
+    = #f[@@IDX@@].p.read.BRK;
     A "@@INSTANCE@@-FLP";
-    = #f[@@IDX@@].p.origin.FLP;
+    = #f[@@IDX@@].p.read.FLP;
     A "@@INSTANCE@@-FLT";
-    = #f[@@IDX@@].p.origin.FLT;
+    = #f[@@IDX@@].p.read.FLT;
     A "@@INSTANCE@@-THM";
-    = #f[@@IDX@@].p.origin.THM;
+    = #f[@@IDX@@].p.read.THM;
 @@ATTR_BEGIN|LINK@@
     A "@@PHRLINKINSTANCE@@-DI";
-    = #f[@@IDX@@].p.origin.PHR;
+    = #f[@@IDX@@].p.read.PHR;
 @@ATTR_END|LINK@@
 
 NETWORK
@@ -179,10 +190,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Mass measured value
     // Set the instance mass measured value and data quality from the field:  //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|LINK@@
-    L "idb@@MASSLINKCLASS@@".f[@@MASSLINKIDX@@].p.origin.ai.PV;
-    T #f[@@IDX@@].p.origin.MI1_MASS;
-    A "idb@@MASSLINKCLASS@@".f[@@MASSLINKIDX@@].p.origin.ai.DQ;
-    = #f[@@IDX@@].p.origin.MI1_DQ;
+    L "idb@@MASSLINKCLASS@@".f[@@MASSLINKIDX@@].p.read.ai.PV;
+    T #f[@@IDX@@].p.read.MI1_MASS;
+    A "idb@@MASSLINKCLASS@@".f[@@MASSLINKIDX@@].p.read.ai.DQ;
+    = #f[@@IDX@@].p.read.MI1_DQ;
 @@ATTR_END|LINK@@
 
 NETWORK
@@ -191,9 +202,9 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Mass values to run and stop agitator
     // Set the instance mass measured value and data quality from the field:  //
     //------------------------------------------------------------------------//
     L @@MXMASSAGITRUN@@;
-    T #f[@@IDX@@].p.origin.MASS_RUN;
+    T #f[@@IDX@@].p.read.MASS_RUN;
     L @@MXMASSAGITSTOP@@;
-    T #f[@@IDX@@].p.origin.MASS_STOP;
+    T #f[@@IDX@@].p.read.MASS_STOP;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Speed measurement attributes
@@ -202,15 +213,15 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Speed measurement attributes
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|ANALOG_EMBED@@
     L @@RANGEHIGH@@;
-    T #f[@@IDX@@].p.origin.RANGE_UPPER;
+    T #f[@@IDX@@].p.read.RANGE_UPPER;
     L @@RANGELOW@@;
-    T #f[@@IDX@@].p.origin.RANGE_LOWER;
+    T #f[@@IDX@@].p.read.RANGE_LOWER;
     A @@POLARITY@@;
-    = #f[@@IDX@@].p.origin.POLARITY;
+    = #f[@@IDX@@].p.read.POLARITY;
     L @@LIMITHH@@;
-    T #f[@@IDX@@].p.origin.LIMIT_HH;
+    T #f[@@IDX@@].p.read.LIMIT_HH;
     L @@LIMITH@@;
-    T #f[@@IDX@@].p.origin.LIMIT_H;
+    T #f[@@IDX@@].p.read.LIMIT_H;
 @@ATTR_END|ANALOG_EMBED@@
 
 NETWORK
@@ -225,7 +236,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Speed Setpoint
     //------------------------------------------------------------------------//
     // Set the instance output speed setpoint to the field:                   //
     //------------------------------------------------------------------------//
-    L #f[@@IDX@@].p.origin.LMN;
+    L #f[@@IDX@@].p.read.LMN;
     T "@@INSTANCE@@-OUT";
 
 NETWORK
@@ -233,7 +244,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
     //------------------------------------------------------------------------//
     // Set the instance output command to the field:                          //
     //------------------------------------------------------------------------//
-    A #f[@@IDX@@].p.origin.OUT_Q;
+    A #f[@@IDX@@].p.read.OUT_Q;
     = "@@INSTANCE@@-CMD";
 
 NETWORK
@@ -241,9 +252,9 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Forward and Reverse direction
     //------------------------------------------------------------------------//
     // Set the instance output forward and reverse direction to the field:    //
     //------------------------------------------------------------------------//
-    A #f[@@IDX@@].p.origin.OUT_Q_F;
+    A #f[@@IDX@@].p.read.OUT_Q_F;
     = "@@INSTANCE@@-OUT_F";
-    A #f[@@IDX@@].p.origin.OUT_Q_R;
+    A #f[@@IDX@@].p.read.OUT_Q_R;
     = "@@INSTANCE@@-OUT_R";
 
 @@TEMPLATE_END@@

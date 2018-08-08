@@ -55,31 +55,42 @@ TITLE = @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #f[@@IDX@@].p.origin.mc.ME;
+    T #f[@@IDX@@].p.read.mc.ME;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Owner
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner ID
     //------------------------------------------------------------------------//
-    // Set the instance owner:                                                //
+    // Set the instance Owner ID:                                             //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #f[@@IDX@@].p.owner.mc.OWNER;
+    T #f[@@IDX@@].p.write.mc.OWNER;
+
+@@ATTR_BEGIN|FLOWPATH@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@CLASS@@ is a Flowpath device
+    //------------------------------------------------------------------------//
+    // This class of device is a FLOWPATH device where the state must equal   //
+    // the command once set by the parent:                                    //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #f[@@IDX@@].p.read.mc.FLOWPATH;
+@@ATTR_END|FLOWPATH@@
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
     //------------------------------------------------------------------------//
     // This block can only reside within this CPU:                            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+    = #f[@@IDX@@].p.read.mc.isMaster;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     //------------------------------------------------------------------------//
     // This block can only be owned by a parent block in this CPU:            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.owner.mc.isOriginOwner;
+    = #f[@@IDX@@].p.write.mc.isMaster;
 
 NETWORK
 TITLE = @@INSTANCE@@ : Safe Command
@@ -87,7 +98,7 @@ TITLE = @@INSTANCE@@ : Safe Command
     // Set the safe command:                                                  //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.AL1.SAFE.CMD;
-    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+    T #f[@@IDX@@].p.read.mc.CMD_SAFE;
 
 @@ATTR_BEGIN|ANALOG@@
 NETWORK
@@ -96,29 +107,29 @@ TITLE = @@INSTANCE@@ : Analog input attributes
     // Set the analog input attributes:                                       //
     //------------------------------------------------------------------------//
     L @@RANGELOW@@;
-    T #f[@@IDX@@].p.origin.ai.RANGE_LOWER;
+    T #f[@@IDX@@].p.read.ai.RANGE_LOWER;
     L @@RANGEHIGH@@;
-    T #f[@@IDX@@].p.origin.ai.RANGE_UPPER;
+    T #f[@@IDX@@].p.read.ai.RANGE_UPPER;
     L @@LIMITHH@@;
-    T #f[@@IDX@@].p.origin.ai.LIMIT_HH;
+    T #f[@@IDX@@].p.read.ai.LIMIT_HH;
     L @@LIMITH@@;
-    T #f[@@IDX@@].p.origin.ai.LIMIT_H;
+    T #f[@@IDX@@].p.read.ai.LIMIT_H;
     L @@LIMITL@@;
-    T #f[@@IDX@@].p.origin.ai.LIMIT_L;
+    T #f[@@IDX@@].p.read.ai.LIMIT_L;
     L @@LIMITLL@@;
-    T #f[@@IDX@@].p.origin.ai.LIMIT_LL;
+    T #f[@@IDX@@].p.read.ai.LIMIT_LL;
     A @@ENABLEHH@@;
-    = #f[@@IDX@@].p.origin.ai.ENABLE_HH;
+    = #f[@@IDX@@].p.read.ai.ENABLE_HH;
     A @@ENABLEH@@;
-    = #f[@@IDX@@].p.origin.ai.ENABLE_H;
+    = #f[@@IDX@@].p.read.ai.ENABLE_H;
     A @@ENABLEL@@;
-    = #f[@@IDX@@].p.origin.ai.ENABLE_L;
+    = #f[@@IDX@@].p.read.ai.ENABLE_L;
     A @@ENABLELL@@;
-    = #f[@@IDX@@].p.origin.ai.ENABLE_LL;
+    = #f[@@IDX@@].p.read.ai.ENABLE_LL;
     A @@POLARITY@@;
-    = #f[@@IDX@@].p.origin.ai.POLARITY;
+    = #f[@@IDX@@].p.read.ai.POLARITY;
     L "@@INSTANCE@@-RAW";
-    T #f[@@IDX@@].p.origin.ai.RAW_INPUT;
+    T #f[@@IDX@@].p.read.ai.RAW_INPUT;
 
 @@ATTR_END|ANALOG@@
 
@@ -128,11 +139,11 @@ TITLE = @@INSTANCE@@ : Command and state values
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.@@CLASS@@.CMD.ENABLE;
-    T #f[@@IDX@@].p.origin.CMD_ENABLE;
+    T #f[@@IDX@@].p.read.CMD_ENABLE;
     L "dbCONST".BLK.@@CLASS@@.STATE.ENABLED;
-    T #f[@@IDX@@].p.origin.STATE_ENABLED;
+    T #f[@@IDX@@].p.read.STATE_ENABLED;
     L "dbCONST".BLK.@@CLASS@@.STATE.FAULT;
-    T #f[@@IDX@@].p.origin.STATE_FAULT;
+    T #f[@@IDX@@].p.read.STATE_FAULT;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@

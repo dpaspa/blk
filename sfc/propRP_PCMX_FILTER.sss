@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:31:35 PM by David Paspa
+generated on 8/08/2018 12:22:36 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -45,37 +45,21 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::3
 --------------------------------------------------
-Name:- filt_comp_mx
-Type:- BOOL
-Description:- Mx filtration complete flag
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::4
---------------------------------------------------
-Name:- log_time_wrong_hygiene
-Type:- BOOL
-Description:- RP_PCMX_FILTER Mx or MFL or Sy have incorrect Hygiene Status
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::5
---------------------------------------------------
-Name:- log_time_filter_end
+Name:- log_msg_filter_end
 Type:- BOOL
 Description:- RP_PCMX_FILTER end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::4
 --------------------------------------------------
-Name:- log_time_filter_begin
+Name:- log_msg_filter_begin
 Type:- BOOL
 Description:- RP_PCMX_FILTER begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::5
 --------------------------------------------------
 Name:- Report_End
 Type:- BOOL
@@ -83,15 +67,15 @@ Description:- Reort end event flag
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::6
 --------------------------------------------------
-Name:- start_hpca_mx
+Name:- sync_write_start_hpca_mx
 Type:- BOOL
 Description:- Mx start to supply HPN2
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::7
 --------------------------------------------------
 Name:- prompt_abort_confirm_yes
 Type:- BOOL
@@ -99,7 +83,7 @@ Description:- RP_PCMX_FILTER Operator confirmed to abort due to invalid Hygiene 
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::8
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
@@ -107,7 +91,7 @@ Description:- RP_PCMX_FILTER Operator to confirm to abort due to invalid Hygiene
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::9
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
@@ -115,47 +99,39 @@ Description:- RP_PCMX_FILTER Mx or MFL or Sy have incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::10
 --------------------------------------------------
-Name:- filtration_complete_sy
+Name:- sync_write_filtration_complete_sy
 Type:- BOOL
 Description:- Sy Filtration complete
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::11
 --------------------------------------------------
-Name:- filtration_complete_mx
+Name:- sync_write_filtration_complete_mx
 Type:- BOOL
 Description:- Mx Filtration complete
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::12
 --------------------------------------------------
-Name:- ready_hpca_mx
+Name:- sync_read_ready_hpca_mx
 Type:- BOOL
 Description:- Mx is ready to supply HPCA
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::13
 --------------------------------------------------
-Name:- path_ready_sy
+Name:- sync_read_path_ready_sy
 Type:- BOOL
 Description:- Sy path is ready
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::16
---------------------------------------------------
-Name:- time_wrong_hygiene
-Type:- TOD
-Description:- RP_PCMX_FILTER Mx or MFL or Sy have incorrect Hygiene Status
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::17
+PARAMETER::14
 --------------------------------------------------
 Name:- sy_vessel_hygiene
 Type:- INT
@@ -163,7 +139,7 @@ Description:- Hygiene Status of unit Sy
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::15
 --------------------------------------------------
 Name:- mx_vessel_hygiene
 Type:- INT
@@ -171,23 +147,7 @@ Description:- Hygiene Status of unit Mx
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::19
---------------------------------------------------
-Name:- time_filter_end
-Type:- TOD
-Description:- RP_PCMX_FILTER end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::20
---------------------------------------------------
-Name:- time_filter_begin
-Type:- TOD
-Description:- RP_PCMX_FILTER begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::21
+PARAMETER::16
 --------------------------------------------------
 Name:- toggle_mode
 Type:- BOOL
@@ -195,7 +155,7 @@ Description:- Toggle mode of all used units
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::17
 --------------------------------------------------
 Name:- sy_vessel_cmd
 Type:- INT
@@ -203,7 +163,7 @@ Description:- Command to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::18
 --------------------------------------------------
 Name:- sy_vessel_subs
 Type:- INT
@@ -211,7 +171,7 @@ Description:- Substate selection to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::19
 --------------------------------------------------
 Name:- mx_vessel_state
 Type:- INT
@@ -219,7 +179,7 @@ Description:- Device State of unit Mx
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::20
 --------------------------------------------------
 Name:- sy_vessel_state
 Type:- INT
@@ -227,7 +187,7 @@ Description:- Device state of unit Sy
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::21
 --------------------------------------------------
 Name:- mx_vessel_cmd
 Type:- INT
@@ -235,7 +195,7 @@ Description:- Command to unit Mx
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::22
 --------------------------------------------------
 Name:- mx_vessel_subs
 Type:- INT
@@ -255,14 +215,10 @@ ACTION::01
 --------------------------------------------------
 Description:- Log Mx Filtration to Sy operation begin time.
 Action:- //Log Mx filtration to Sy operation begin
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_filter_begin;
-
 SET;
-S #_log_time_filter_begin;
-R #_filtration_complete_sy;
-R #_filtration_complete_mx;
-R #_prompt_abort;
+S #_log_msg_filter_begin;
+R #_sync_write_filtration_complete_sy;
+R #_sync_write_filtration_complete_mx;
 R #_Report_End; //REPORT END FLAG
 Verification:- A "uncondJump";
 
@@ -309,11 +265,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Log that either MFL or Sy are not in Hygiene status STERILE or Mx is not in Hygiene status BATCH?
 Action:- //Log time if either Mx or Sy are not in correct Hygiene status
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_wrong_hygiene;
-
 SET;
-S #_log_time_wrong_hygiene;
 S #_log_msg_wrong_hygiene;
 S #_prompt_abort;
 Verification:- A "uncondJump";
@@ -376,7 +328,7 @@ Title:- Sy and FLz path ready?
 EmptyTransition:- False
 Description:- Check if Sy and FLz path is ready. 
 If all path_ready flags have been set.
-Condition:- A #_path_ready_sy;
+Condition:- A #_sync_read_path_ready_sy;
 
 
 --------------------------------------------------
@@ -413,7 +365,7 @@ TRNNo:- 05
 Title:- HPCA ready?
 EmptyTransition:- False
 Description:- Check if SMFLx and MMFLx has flagged it is ready for HPCA
-Condition:- A #_ready_hpca_mx;
+Condition:- A #_sync_read_ready_hpca_mx;
 
 
 --------------------------------------------------
@@ -428,7 +380,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Set MX ready_hpn2 flag.
 Action:- SET;
-S #_start_hpca_mx;
+S #_sync_write_start_hpca_mx;
 Verification:- A "uncondJump";
 
 
@@ -456,9 +408,9 @@ ACTION::01
 Description:- Set SY flag filtration_complete
 Set MX flag filtration_complete
 Action:- SET;
-S #_filtration_complete_mx;
-S #_filtration_complete_sy;
-R #_start_hpca_mx;
+S #_sync_write_filtration_complete_mx;
+S #_sync_write_filtration_complete_sy;
+R #_sync_write_start_hpca_mx;
 Verification:- A "uncondJump";
 
 
@@ -492,8 +444,7 @@ Description:- Set Mx Hygiene Status to USED.
 ACTION::01
 --------------------------------------------------
 Description:- Set Mx Hygiene Status to USED.
-Action:- A #_filt_comp_mx;
-//Set Mx hygiene status to USED
+Action:- //Set Mx hygiene status to USED
 L "dbCONST".BLK.HYGIENE.USED;
 T #_mx_vessel_hygiene;
 
@@ -533,17 +484,14 @@ T #_mx_vessel_subs;
 
 
 //Log Filteration operation end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_filter_end;
-
 SET;
-S #_log_time_filter_end;
+S #_log_msg_filter_end;
 
 //Clear used flags
 R #_toggle_mode;
-R #_start_hpca_mx;
-R #_filtration_complete_mx;
-R #_filtration_complete_sy;
+R #_sync_write_start_hpca_mx;
+R #_sync_write_filtration_complete_mx;
+R #_sync_write_filtration_complete_sy;
 R #_prompt_abort_confirm_yes;
 R #_Report_End; 
 Verification:- A "uncondJump";

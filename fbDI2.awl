@@ -44,8 +44,8 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcOrigin             := #p.origin.mc ,
-        mcOwner              := #p.owner.mc
+    (   mcRead             := #p.read.mc ,
+        mcWrite              := #p.write.mc
     );
 
 NETWORK
@@ -57,7 +57,7 @@ TITLE = Set Device command which can only be ENABLE.
     // CMD is always ENABLE:                                                  //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.DI2.CMD.ENABLE;
-    T #p.owner.mc.CMD;
+    T #p.write.mc.CMD;
 
 NETWORK
 TITLE = Process Digital Input Signal
@@ -68,15 +68,15 @@ TITLE = Process Digital Input Signal
     // Calculate the process value based on the mode:                         //
     //------------------------------------------------------------------------//
     O(;
-    A #p.origin.mc.modeAUTO;
-    A #p.origin.DI_Auto;
+    A #p.read.mc.modeAUTO;
+    A #p.read.DI_Auto;
     );
     O(;
-    A #p.origin.mc.modeMANUAL;
-    A #p.owner.DI_Manual;
+    A #p.read.mc.modeMANUAL;
+    A #p.write.DI_Manual;
     );
     = #tPV;
-    = #p.origin.PV;
+    = #p.read.PV;
 
 NETWORK
 TITLE = Set ALARM Flag
@@ -87,8 +87,8 @@ TITLE = Set ALARM Flag
     // Set alarms:                                                            //
     //------------------------------------------------------------------------//
     A #tPV;
-    AN #p.origin.mc.modeOOS;
-    = #p.origin.ALARM;
+    AN #p.read.mc.modeOOS;
+    = #p.read.ALARM;
 
 NETWORK
 TITLE = Set INTERLOCK Flag
@@ -99,7 +99,7 @@ TITLE = Set INTERLOCK Flag
     // Set interlocks:                                                        //
     //------------------------------------------------------------------------//
     A #tPV;
-    = #p.origin.mc.INTERLOCK;
+    = #p.read.mc.INTERLOCK;
 
 NETWORK
 TITLE = Set Device State to Enabled if switch is off
@@ -112,7 +112,8 @@ TITLE = Set Device State to Enabled if switch is off
     AN #tPV;
     JCN _a;
     L "dbCONST".BLK.DI2.STATE.ENABLED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
+    R #p.read.mc.ERROR;
 _a:   NOP 0;
 
 NETWORK
@@ -121,9 +122,10 @@ TITLE = Setting Device State to ALARM
     // ALARM if switch is on and not OOS:                                     //
     //------------------------------------------------------------------------//
     A #tPV;
-    AN #p.origin.mc.modeOOS;
+    AN #p.read.mc.modeOOS;
     JCN _b;
     L "dbCONST".BLK.DI2.STATE.ALARM;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
+    S #p.read.mc.ERROR;
 _b:   NOP 0;
 END_FUNCTION_BLOCK

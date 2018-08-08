@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:28:16 PM by David Paspa
+generated on 8/08/2018 12:17:10 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -294,7 +294,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::34
 --------------------------------------------------
-Name:- log_time_cip_end
+Name:- log_msg_cip_end
 Type:- BOOL
 Description:- UO_MX_CIP end time
 
@@ -303,7 +303,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::35
 --------------------------------------------------
-Name:- log_time_cip_begin
+Name:- log_msg_cip_begin
 Type:- BOOL
 Description:- UO_MX_CIP begin time
 ParameterInOut:- VAR
@@ -631,29 +631,13 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::76
 --------------------------------------------------
-Name:- time_cip_end
-Type:- TOD
-Description:- UO_MX_CIP end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::77
---------------------------------------------------
-Name:- time_cip_begin
-Type:- TOD
-Description:- UO_MX_CIP begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::78
---------------------------------------------------
 Name:- r_time_wfi_rinse_mmflx
 Type:- TIME
 Description:- Time to rinse filtration line with WFI
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::79
+PARAMETER::77
 --------------------------------------------------
 Name:- r_time_wfi_empty_mx
 Type:- TIME
@@ -661,7 +645,7 @@ Description:- Time to empty the vessel after WFI rinse
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::80
+PARAMETER::78
 --------------------------------------------------
 Name:- r_time_pw_steam_mx
 Type:- TIME
@@ -669,7 +653,7 @@ Description:- Time to steam PW line
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::81
+PARAMETER::79
 --------------------------------------------------
 Name:- r_time_pw_wash_mx
 Type:- TIME
@@ -677,7 +661,7 @@ Description:- Time to wash with PW
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::82
+PARAMETER::80
 --------------------------------------------------
 Name:- r_time_pw_empty2
 Type:- TIME
@@ -685,7 +669,7 @@ Description:- Time to empty the vessel after washing
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::83
+PARAMETER::81
 --------------------------------------------------
 Name:- r_time_pw_empty1
 Type:- TIME
@@ -693,7 +677,7 @@ Description:- Time to empty the vessel after flooding
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::84
+PARAMETER::82
 --------------------------------------------------
 Name:- r_time_pw_agit
 Type:- TIME
@@ -701,7 +685,7 @@ Description:- Mixing time for flooded agitator
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::85
+PARAMETER::83
 --------------------------------------------------
 Name:- r_time_pw_flood
 Type:- TIME
@@ -709,7 +693,7 @@ Description:- Timeout for PW Flood Stage
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::86
+PARAMETER::84
 --------------------------------------------------
 Name:- r_time_pw_flush_mx
 Type:- TIME
@@ -717,7 +701,7 @@ Description:- Flushing time for PW pre-stage
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::87
+PARAMETER::85
 --------------------------------------------------
 Name:- r_mass_pw_flood
 Type:- REAL
@@ -739,11 +723,8 @@ ACTION::01
 Description:- Log Mx CIP operation begin time.
 Start Mass Tare operation.
 Action:- //Log Mx CIP operation begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_cip_begin;
-
 SET;
-S #_log_time_cip_begin;
+S #_log_msg_cip_begin;
 
 //Start Mass Tare.
 L "dbCONST".BLK.EMM1.SUBS.TARE;
@@ -905,8 +886,8 @@ T #_pw_flush_end_time;
 //Log actual PW flush time.
 CALL T_DIFF
 {date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_pw_flush_begin_time ,
-   IN2                         := #_pw_flush_end_time ,
+(  IN1                         := #_pw_flush_end_time ,
+   IN2                         := #_pw_flush_begin_time ,
   OUT                         := #_time_act_pw_flush
 );
 
@@ -1109,8 +1090,8 @@ T #_flood_mixing_end_time;
 //Log actual PW Flood mixing time.
 CALL T_DIFF
 {date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_flood_mixing_begin_time ,
-   IN2                         := #_flood_mixing_end_time ,
+(  IN1                         := #_flood_mixing_end_time ,
+   IN2                         := #_flood_mixing_begin_time ,
   OUT                         := #_time_act_flood_mixing
 );
 SET;
@@ -1265,8 +1246,8 @@ T #_pw_wash_end_time;
 //Log actual tank PW wash time
 CALL T_DIFF
 {date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_pw_wash_begin_time ,
-   IN2                         := #_pw_wash_end_time ,
+(  IN1                         := #_pw_wash_end_time ,
+   IN2                         := #_pw_wash_begin_time ,
   OUT                         := #_time_act_pw_wash
 );
 SET;
@@ -1379,8 +1360,8 @@ T #_pw_flwash_end_time;
 //Log actual filtration line PW wash time.
 CALL T_DIFF
 {date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_pw_flwash_begin_time ,
-   IN2                         := #_pw_flwash_end_time ,
+(  IN1                         := #_pw_flwash_end_time ,
+   IN2                         := #_pw_flwash_begin_time ,
   OUT                         := #_time_act_pw_flwash
 );
 SET;
@@ -1521,8 +1502,8 @@ T #_pw_steam_end_time;
 //Log actual PW line steaming time.
 CALL T_DIFF
 {date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_pw_steam_begin_time ,
-   IN2                         := #_pw_steam_end_time ,
+(  IN1                         := #_pw_steam_end_time ,
+   IN2                         := #_pw_steam_begin_time ,
   OUT                         := #_time_act_pw_steam
 );
 SET;
@@ -1727,8 +1708,8 @@ T #_wfi_rinse_end_time;
 //Log actual tank WFI rinse time.
 CALL T_DIFF
 {date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_wfi_rinse_begin_time ,
-   IN2                         := #_wfi_rinse_end_time ,
+(  IN1                         := #_wfi_rinse_end_time ,
+   IN2                         := #_wfi_rinse_begin_time ,
   OUT                         := #_time_act_wfi_rinse
 );
 SET;
@@ -1806,8 +1787,8 @@ T #_wfi_flrinse_end_time;
 //Log actual filtration line WFI Rinse time.
 CALL T_DIFF
 {date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_wfi_flrinse_begin_time ,
-   IN2                         := #_wfi_flrinse_end_time ,
+(  IN1                         := #_wfi_flrinse_end_time ,
+   IN2                         := #_wfi_flrinse_begin_time ,
   OUT                         := #_time_act_wfi_flrinse
 );
 SET;
@@ -1927,11 +1908,8 @@ L "dbCONST".BLK.CMD.STOP;
 T  #_emx_mmfl_cmd;
 
 // Log Mx CIP operation end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_cip_end;
-
 SET;
-S #_log_time_cip_end;
+S #_log_msg_cip_end;
 Verification:- A "uncondJump";
 
 

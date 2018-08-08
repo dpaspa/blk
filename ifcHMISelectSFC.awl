@@ -30,7 +30,7 @@ TITLE = Get the selected SFC
     // Get the SFC index number selected by the user when they clicked the    //
     // faceplate SFC target:                                                  //
     //------------------------------------------------------------------------//
-    L "dbHMIInterfaceSFC".sfcSelected;
+    L "dbHMIInterfaceSFC".sequence.sfcSelected;
     T #sfcSelected;
 
 @@TEMPLATE_BEGIN|INSTANCE_SFC@@
@@ -48,7 +48,7 @@ TITLE = @@INSTANCE@@ @@DESCRIPTION@@ : @@STATEDESCRIPTION@@
 
     CALL "fcHMIInterfaceSFC"
     (   smc                  := "idb@@CLASS@@".f[@@IDX@@].@@SFC@@.smc ,
-        sqSequencer          := "idb@@CLASS@@".f[@@IDX@@].@@SFC@@.sqSequencer
+        sqStep               := "idb@@CLASS@@".f[@@IDX@@].@@SFC@@.sqSequencer.STEP
     );
 
 _not_@@SFC@@_@@IDX@@:   NOP 0;

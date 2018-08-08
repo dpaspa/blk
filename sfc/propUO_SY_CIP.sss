@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:29:20 PM by David Paspa
+generated on 8/08/2018 12:18:18 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -349,7 +349,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::41
 --------------------------------------------------
-Name:- log_time_cip_begin
+Name:- log_msg_cip_begin
 Type:- BOOL
 Description:- UO_SY_CIP begin time
 ParameterInOut:- VAR
@@ -357,7 +357,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::42
 --------------------------------------------------
-Name:- log_time_cip_end
+Name:- log_msg_cip_end
 Type:- BOOL
 Description:- UO_SY_CIP end time
 ParameterInOut:- VAR
@@ -485,45 +485,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::58
 --------------------------------------------------
-Name:- steaming_proceed
-Type:- BOOL
-Description:- Steaming to proceed flag
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::59
---------------------------------------------------
-Name:- steaming_ready
-Type:- BOOL
-Description:- Ready to steam filling line
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::60
---------------------------------------------------
-Name:- cip_fill_ready
-Type:- BOOL
-Description:- Sy is setup to wash fill line
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::61
---------------------------------------------------
-Name:- wash_drain_done
-Type:- BOOL
-Description:- Set Wash Drain Complete
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::62
---------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
 Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::63
+PARAMETER::59
 --------------------------------------------------
 Name:- emc_water_sy_state
 Type:- INT
@@ -531,7 +499,7 @@ Description:- Device State of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::64
+PARAMETER::60
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -539,7 +507,7 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::65
+PARAMETER::61
 --------------------------------------------------
 Name:- emc_water_sy_subs
 Type:- INT
@@ -547,7 +515,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::66
+PARAMETER::62
 --------------------------------------------------
 Name:- emc_water_sy_cmd
 Type:- INT
@@ -555,7 +523,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::67
+PARAMETER::63
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -563,7 +531,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::68
+PARAMETER::64
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -571,7 +539,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::69
+PARAMETER::65
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -579,7 +547,7 @@ Description:- Medium selection of emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::70
+PARAMETER::66
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -587,7 +555,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::71
+PARAMETER::67
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -595,7 +563,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::72
+PARAMETER::68
 --------------------------------------------------
 Name:- time_act_pw_wash
 Type:- TIME
@@ -603,23 +571,7 @@ Description:- UO_SY_CIP PW wash time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::73
---------------------------------------------------
-Name:- time_cip_end
-Type:- TOD
-Description:- UO_SY_CIP end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::74
---------------------------------------------------
-Name:- time_cip_begin
-Type:- TOD
-Description:- UO_SY_CIP begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::75
+PARAMETER::69
 --------------------------------------------------
 Name:- r_time_wfi_empty_sy
 Type:- TIME
@@ -627,7 +579,7 @@ Description:- Time to wait to empty the vessel after WFI rinse
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::76
+PARAMETER::70
 --------------------------------------------------
 Name:- r_time_wfi_rinse_flz
 Type:- TIME
@@ -635,7 +587,7 @@ Description:- Time for WFI rinse of filling line
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::77
+PARAMETER::71
 --------------------------------------------------
 Name:- r_time_wfi_rinse_sy
 Type:- TIME
@@ -643,7 +595,7 @@ Description:- Time for WFI rinse of vessel
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::78
+PARAMETER::72
 --------------------------------------------------
 Name:- r_time_pw_empty_sy
 Type:- TIME
@@ -651,7 +603,7 @@ Description:- Time to empty the vessel after the PW wash
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::79
+PARAMETER::73
 --------------------------------------------------
 Name:- r_time_pw_wash_sy
 Type:- TIME
@@ -659,7 +611,7 @@ Description:- PW vessel wash time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::80
+PARAMETER::74
 --------------------------------------------------
 Name:- prompt_steam_confirm_yes
 Type:- BOOL
@@ -683,11 +635,8 @@ Description:- Log CIP operation begin time.
 Open tank path to outlet drain line.
 Open Sy tank outlet valve (DISCHARGE)
 Action:- //Log Sy CIP operation begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_cip_begin;
-
 SET;
-S #_log_time_cip_begin;
+S #_log_msg_cip_begin;
 
 // Open Sy outlet valve
 L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
@@ -835,8 +784,8 @@ T #_pw_wash_end_time;
 //Log actual tank PW wash time.
 CALL T_DIFF
 {date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_pw_wash_begin_time ,
-   IN2                         := #_pw_wash_end_time ,
+(  IN1                         := #_pw_wash_end_time ,
+   IN2                         := #_pw_wash_begin_time ,
   OUT                         := #_time_act_pw_wash
 );
 SET;
@@ -930,7 +879,7 @@ T #_pw_flz_rinse_end_time;
 CALL T_DIFF
 {date_type := 'Time_Of_Day', time_type := 'Time'}
 (  IN1                         := #_pw_flz_rinse_end_time ,
-   IN2                         := #_pw_flz_rinse_end_time ,
+   IN2                         := #_pw_flz_rinse_begin_time ,
   OUT                         := #_time_act_pw_flz_rinse
 );
 SET;
@@ -1010,8 +959,8 @@ T #_pw_smflx_rinse_end_time;
 //Log actual PW SMFLx rinse time.
 CALL T_DIFF
 {date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_pw_smflx_rinse_begin_time ,
-   IN2                         := #_pw_smflx_rinse_end_time ,
+(  IN1                         := #_pw_smflx_rinse_end_time ,
+   IN2                         := #_pw_smflx_rinse_begin_time ,
   OUT                         := #_time_act_pw_smflx_rinse
 );
 SET;
@@ -1141,8 +1090,8 @@ T #_pw_steam_end_time;
 //Log actual PW line steaming time.
 CALL T_DIFF
 {date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_pw_steam_begin_time ,
-   IN2                         := #_pw_steam_end_time ,
+(  IN1                         := #_pw_steam_end_time ,
+   IN2                         := #_pw_steam_begin_time ,
   OUT                         := #_time_act_pw_steam
 );
 SET;
@@ -1563,33 +1512,6 @@ Condition:- A #_prompt_steam_confirm_no;
 STEP::13
 --------------------------------------------------
 StepNo:- 13
-Title:- SY_UO_CIP : Wait for Steaming to be ready
-Description:- Flag parent ready for steaming by setting steaming_ready flag.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Flag parent ready for steaming by setting steaming_ready flag.
-Action:- //Flag parent ready for steaming.
-SET;
-S #_steaming_ready;
-Verification:- A "uncondJump";
-
-
---------------------------------------------------
-TRANSITION::14
---------------------------------------------------
-TRNNo:- 14
-Title:- Waiting for steaming to proceed
-EmptyTransition:- False
-Description:- Parent indicates to proceed with steaming by setting the steaming_proceed flag.
-Condition:- A #_steaming_proceed;
-
-
---------------------------------------------------
-STEP::14
---------------------------------------------------
-StepNo:- 14
 Title:- Sy_UO_CIP : WFI SMFLx Rinse Completed
 Description:- Open Sy steam drain valve and close Sy CIP drain valve.
 
@@ -1630,10 +1552,6 @@ T #_emc_water_sy_cmd;
 //Store WFI line PS Steam begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_wfi_steam_begin_time;
-
-
-SET;
-R #_steaming_ready;
 Verification:- A(;
    L  #_emc_water_sy_subs;
    L  "dbCONST".BLK.EMC3.SUBS.FLUSH;
@@ -1643,9 +1561,9 @@ Verification:- A(;
 
 
 --------------------------------------------------
-TRANSITION::15
+TRANSITION::14
 --------------------------------------------------
-TRNNo:- 15
+TRNNo:- 14
 Title:- Timer expired?
 EmptyTransition:- False
 Description:- TIME_WFI_STEAM_Sy expired?
@@ -1657,9 +1575,9 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 
 
 --------------------------------------------------
-STEP::15
+STEP::14
 --------------------------------------------------
-StepNo:- 15
+StepNo:- 14
 Title:- SY_UO_CIP : Filling Line steaming complete
 Description:- Close PS supply valve.
 Log actual post CIP CS steaming time.
@@ -1697,9 +1615,9 @@ L "dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::16
+TRANSITION::15
 --------------------------------------------------
-TRNNo:- 16
+TRNNo:- 15
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Jump
@@ -1707,9 +1625,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::16
+STEP::15
 --------------------------------------------------
-StepNo:- 16
+StepNo:- 15
 Title:- SY_UO_CIP : Unit Operation Completed
 Description:- Log Sy CIP operation end time.
 
@@ -1726,18 +1644,9 @@ T  #_emx_drain_subs;
 L "dbCONST".BLK.CMD.STOP;
 T  #_emx_drain_cmd;
 
-
-//Clear all used flags
-SET;
-R #_steaming_ready;
-R #_wash_drain_done;
-
 // Log Sy CIP operation end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_cip_end;
-
 SET;
-S #_log_time_cip_end;
+S #_log_msg_cip_end;
 
 Verification:- A(;
 L #_emx_drain_state;

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:31:42 PM by David Paspa
+generated on 8/08/2018 12:22:44 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -46,7 +46,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::3
 --------------------------------------------------
-Name:- log_time_fill_end
+Name:- log_msg_fill_end
 Type:- BOOL
 Description:- RP_PCSY_FILL end time
 
@@ -55,7 +55,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- log_time_fill_begin
+Name:- log_msg_fill_begin
 Type:- BOOL
 Description:- RP_PCSY_FILL begin time
 ParameterInOut:- VAR
@@ -63,21 +63,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- log_time_wrong_hygiene
-Type:- BOOL
-Description:- RP_PCSY_FILL Storage vessel unit has has incorrect Hygiene Status
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::6
---------------------------------------------------
 Name:- release_flz
 Type:- BOOL
 Description:- Description
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::6
 --------------------------------------------------
 Name:- prompt_abort_confirm_yes
 Type:- BOOL
@@ -85,7 +77,7 @@ Description:- RP_PCSY_FILL Operator confirmed to abort due to invalid Hygiene St
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::7
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
@@ -93,7 +85,7 @@ Description:- RP_PCSY_FILL Operator to confirm to abort due to invalid Hygiene S
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::8
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
@@ -101,7 +93,7 @@ Description:- RP_PCSY_FILL Storage vessel unit has has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::9
 --------------------------------------------------
 Name:- sy_vessel_hygiene
 Type:- INT
@@ -109,7 +101,7 @@ Description:- Hygiene Status of unit Sy
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::10
 --------------------------------------------------
 Name:- toggle_mode
 Type:- BOOL
@@ -117,31 +109,7 @@ Description:- Toggle mode of all used units
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::12
---------------------------------------------------
-Name:- time_wrong_hygiene
-Type:- TOD
-Description:- RP_PCSY_FILL Storage vessel unit has has incorrect Hygiene Status
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::13
---------------------------------------------------
-Name:- time_fill_end
-Type:- TOD
-Description:- RP_PCSY_FILL end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::14
---------------------------------------------------
-Name:- time_fill_begin
-Type:- TOD
-Description:- RP_PCSY_FILL begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::15
+PARAMETER::11
 --------------------------------------------------
 Name:- sy_vessel_state
 Type:- INT
@@ -149,7 +117,7 @@ Description:- Device State of unit Sy
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::12
 --------------------------------------------------
 Name:- sy_vessel_subs
 Type:- INT
@@ -157,7 +125,7 @@ Description:- Substate selection to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::13
 --------------------------------------------------
 Name:- sy_vessel_cmd
 Type:- INT
@@ -177,13 +145,9 @@ ACTION::01
 --------------------------------------------------
 Description:- Log transfer from storage to filling operation begin time.
 Action:- //Log Sy FILL operation begin
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_fill_begin;
-
 SET;
-S #_log_time_fill_begin;
+S #_log_msg_fill_begin;
 R #_toggle_mode;
-R #_prompt_abort;
 Verification:- A "uncondJump";
 
 
@@ -224,11 +188,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Log that Sy is not in Hygiene status BATCH.
 Action:- //Log time if Sy not in correct Hygiene status BATCH
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_wrong_hygiene;
-
 SET;
-S #_log_time_wrong_hygiene;
 S #_log_msg_wrong_hygiene;
 S #_prompt_abort;
 Verification:- A "uncondJump";
@@ -337,11 +297,8 @@ L "dbCONST".BLK.SAFE.CMD;
 T #_sy_vessel_subs;
 
 //Log product manufacture operation end
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_fill_end;
-
 SET;
-S #_log_time_fill_end;
+S #_log_msg_fill_end;
 
 //Clear used flags
 R #_toggle_mode;

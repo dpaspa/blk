@@ -61,18 +61,13 @@ TITLE = Check if message event needs to be raised
     // EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT  //
     // EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT  //
     //                                                                        //
-    // Check if real message event or test signal number requested:           //
+    // Check if prompt message event:                                         //
     //------------------------------------------------------------------------//
     L @@IDXEVENT@@;
     T #SourceData;
 
     A #eventPrompt[@@IDXEVENT@@].trigger;
     FP #eventPrompt[@@IDXEVENT@@].edgeTrigger;
-    O(;
-    L "testEventPrompt";
-    L #SourceData;
-    ==I;
-    );
     = #raiseEvent;
 
 NETWORK
@@ -95,7 +90,7 @@ TITLE = Raise message event and get alarm state and acknowledgement
     // take a long time for the operator to attend to the event message:      //
     //------------------------------------------------------------------------//
     CALL #Program_Alarm_@@IDXEVENT@@
-    (   SIG       := #raiseEvent ,
+    (   SIG       := #eventPrompt[@@IDXEVENT@@].trigger ,
 		SD_1      := #SourceData ,
         Error     := #Alarm@@IDXEVENT@@_ErrorBit1 ,
         Status    := #Alarm@@IDXEVENT@@_StatusWord1
@@ -159,12 +154,14 @@ TITLE = Return the confirmation
     //------------------------------------------------------------------------//
     A "alarmsEnabled";
     A #Alarm@@IDXEVENT@@_Active_Acknowledged;
+    AN #eventPrompt[@@IDXEVENT@@].confirmNo;
     JCN _a@@IDXEVENT@@;
     S #eventPrompt[@@IDXEVENT@@].confirmYes;
 _a@@IDXEVENT@@:   NOP 0;
 
     A "alarmsEnabled";
     A #Alarm@@IDXEVENT@@_Inactive_Acknowledged;
+    AN #eventPrompt[@@IDXEVENT@@].confirmYes;
     JCN _b@@IDXEVENT@@;
     S #eventPrompt[@@IDXEVENT@@].confirmNo;
 _b@@IDXEVENT@@:   NOP 0;

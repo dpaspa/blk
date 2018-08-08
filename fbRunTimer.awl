@@ -7,7 +7,7 @@
 // reset must be done to restart the timer next time. For non rtentive timer  //
 // automatically will be reset in every positive edge of EABLE signal.        //
 //                                                                            //
-// User can give set point in Hour, min, & Sec also be able to read out the   //
+// User can give set point in Hour, min, & Sec also be able to get the        //
 // remaining time as integer variable.                                        //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
@@ -39,14 +39,14 @@ VERSION : 0.1
    END_VAR
 
    VAR
-      RUNTMRNonRet {OriginalPartName := 'TON'; LibVersion := '1.0'} : TON;
+      RUNTMRNonRet {ReadalPartName := 'TON'; LibVersion := '1.0'} : TON;
       RetElapsedTime : Time;
       NonRetElapsedTime : Time;
       Time_hist : DInt;
       Tmr_Running : Bool;
       RunTmrQbit : Bool;
       Time_Remain : DInt;
-      TONR_TIME1 {OriginalPartName := 'IEC_TIMER'; LibVersion := '1.0'} : TONR_TIME;
+      TONR_TIME1 {ReadalPartName := 'IEC_TIMER'; LibVersion := '1.0'} : TONR_TIME;
    END_VAR
 
    VAR_TEMP

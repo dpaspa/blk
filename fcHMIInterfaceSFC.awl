@@ -22,7 +22,7 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 VAR_IN_OUT
     smc : "udtModeCommandSFC";         // SFC mode and command
-    sqSequencer : "udtSFCSequence32";  // Sequencer runtime
+    sqStep : "udtSFCStep32";  // Sequencer runtime
 END_VAR
 
 VAR_TEMP
@@ -39,7 +39,7 @@ TITLE = Copy the SFC mode and command data to the HMI interface block
     {blk_type := 'Any'}
     (   SRCBLK               := #smc ,
         RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMIInterfaceSFC".smc
+        DSTBLK               := "dbHMIInterfaceSFC".sequence.smc
     );
 
 NETWORK
@@ -49,10 +49,18 @@ TITLE = Copy the SFC runtime data to the HMI interface block
     //------------------------------------------------------------------------//
     CALL BLKMOV
     {blk_type := 'Any'}
-    (   SRCBLK               := #sqSequencer ,
+    (   SRCBLK               := #sqStep ,
         RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMIInterfaceSFC".sqSequencer
+        DSTBLK               := "dbHMIInterfaceSFC".sequence.sqStep
     );
+
+NETWORK
+TITLE = Send the user mode
+    //------------------------------------------------------------------------//
+    // Send any user selected mode to the SFC:                                //
+    //------------------------------------------------------------------------//
+    L "dbHMIInterfaceSFC".sequence.CMD_MODE;
+    T #smc.MODE;
 
 NETWORK
 TITLE = Send the user output commands if in Manual mode
@@ -66,13 +74,11 @@ TITLE = Send the user output commands if in Manual mode
     );
     JCN _notManual;
 
-    L "dbHMIInterfaceSFC".CMD_MODE;
-    T #smc.MODE;
-    L "dbHMIInterfaceSFC".CMD_SQ_CMD;
+    L "dbHMIInterfaceSFC".sequence.CMD_SQ_CMD;
     T #smc.SQ_CMD;
-    L "dbHMIInterfaceSFC".CMD_STEPNO_JUMP;
+    L "dbHMIInterfaceSFC".sequence.CMD_STEPNO_JUMP;
     T #smc.STEPNO_JUMP;
-    A "dbHMIInterfaceSFC".CMD_MAN_JUMP;
+    A "dbHMIInterfaceSFC".sequence.CMD_MAN_JUMP;
     = #smc.MAN_JUMP;
 
 _notManual:   NOP 0;

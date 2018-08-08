@@ -33,8 +33,8 @@ VAR_INPUT
 END_VAR
 
 VAR_IN_OUT
-    mc : "udtMCOrigin";      // Block origin mode and command
-    mco : "udtMCOwner";      // Block owner mode and command
+    mcr : "udtMCRead";         // Block read mode and command
+    mcw : "udtMCWrite";        // Block write mode and command
     bmc : "udtModeCommandBLK"; // Block events
 END_VAR
 
@@ -44,27 +44,27 @@ END_VAR
 
 BEGIN
 NETWORK
-TITLE = Copy the BLK origin mode and command data to the HMI interface block
+TITLE = Copy the BLK read mode and command data to the HMI interface block
     //------------------------------------------------------------------------//
-    // Copy origin mode and command data:                                     //
+    // Copy read mode and command data:                                     //
     //------------------------------------------------------------------------//
     CALL BLKMOV
     {blk_type := 'Any'}
-    (   SRCBLK               := #mc ,
+    (   SRCBLK               := #mcr ,
         RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMIInterfaceBLK".mc
+        DSTBLK               := "dbHMIInterfaceBLK".block.mcr
     );
 
 NETWORK
-TITLE = Copy the BLK owner mode and command data to the HMI interface block
+TITLE = Copy the BLK write mode and command data to the HMI interface block
     //------------------------------------------------------------------------//
-    // Copy owner mode and command data:                                      //
+    // Copy write mode and command data:                                      //
     //------------------------------------------------------------------------//
     CALL BLKMOV
     {blk_type := 'Any'}
-    (   SRCBLK               := #mco ,
+    (   SRCBLK               := #mcw ,
         RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMIInterfaceBLK".mco
+        DSTBLK               := "dbHMIInterfaceBLK".block.mcw
     );
 
 NETWORK
@@ -76,7 +76,7 @@ TITLE = Copy the BLK event data to the HMI interface block
     {blk_type := 'Any'}
     (   SRCBLK               := #bmc ,
         RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMIInterfaceBLK".bmc
+        DSTBLK               := "dbHMIInterfaceBLK".block.bmc
     );
 
 NETWORK
@@ -85,38 +85,38 @@ TITLE = Set the number of children and parameters
     // Set the number of children and parameters:                             //
     //------------------------------------------------------------------------//
     L #numChildren;
-    T "dbHMIInterfaceBLK".numChildren;
+    T "dbHMIInterfaceBLK".block.numChildren;
     L #numReadBool;
-    T "dbHMIInterfaceBLK".numReadBool;
+    T "dbHMIInterfaceBLK".block.numReadBool;
     L #numReadInt;
-    T "dbHMIInterfaceBLK".numReadInt;
+    T "dbHMIInterfaceBLK".block.numReadInt;
     L #numReadReal;
-    T "dbHMIInterfaceBLK".numReadReal;
+    T "dbHMIInterfaceBLK".block.numReadReal;
     L #numReadTime;
-    T "dbHMIInterfaceBLK".numReadTime;
+    T "dbHMIInterfaceBLK".block.numReadTime;
     L #numWriteBool;
-    T "dbHMIInterfaceBLK".numWriteBool;
+    T "dbHMIInterfaceBLK".block.numWriteBool;
     L #numWriteInt;
-    T "dbHMIInterfaceBLK".numWriteInt;
+    T "dbHMIInterfaceBLK".block.numWriteInt;
     L #numWriteReal;
-    T "dbHMIInterfaceBLK".numWriteReal;
+    T "dbHMIInterfaceBLK".block.numWriteReal;
     L #numWriteTime;
-    T "dbHMIInterfaceBLK".numWriteTime;
+    T "dbHMIInterfaceBLK".block.numWriteTime;
 
 NETWORK
 TITLE = Send the user output commands if in Manual mode
     //------------------------------------------------------------------------//
     // Send the user command to the BLK if in MANUAL:                         //
     //------------------------------------------------------------------------//
-    A #mc.modeMANUAL;
+    A #mcr.modeMANUAL;
     JCN _notManual;
 
-    L "dbHMIInterfaceBLK".CMD_MODE;
-    T #mco.MODE;
-    L "dbHMIInterfaceBLK".CMD_CMD;
-    T #mco.CMD;
-    L "dbHMIInterfaceBLK".CMD_SUBS;
-    T #mco.SUBS;
+    L "dbHMIInterfaceBLK".block.CMD_MODE;
+    T #mcw.MODE;
+    L "dbHMIInterfaceBLK".block.CMD_CMD;
+    T #mcw.CMD;
+    L "dbHMIInterfaceBLK".block.CMD_SUBS;
+    T #mcw.SUBS;
 
 _notManual:   NOP 0;
 

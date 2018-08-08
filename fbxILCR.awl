@@ -30,10 +30,10 @@ VERSION : 1.0
 //----------------------------------------------------------------------------//
 VAR
 @@TEMPLATE_BEGIN|CRIL@@
-    BSENDOrigin_@@IDX@@ {OriginalPartName := 'BSEND_SFB_PART'; LibVersion := '1.2'} : BSEND;
-    BRCVOrigin_@@IDX@@ {OriginalPartName := 'BRCV_SFB_PART'; LibVersion := '1.2'} : BRCV;
-    SendErrorOrigin_@@IDX@@ : Word;
-    RcvErrorOrigin_@@IDX@@ : Word;
+    BSENDRead_@@IDX@@ {ReadalPartName := 'BSEND_SFB_PART'; LibVersion := '1.2'} : BSEND;
+    BRCVRead_@@IDX@@ {ReadalPartName := 'BRCV_SFB_PART'; LibVersion := '1.2'} : BRCV;
+    SendErrorRead_@@IDX@@ : Word;
+    RcvErrorRead_@@IDX@@ : Word;
 @@TEMPLATE_END@@
     CTR { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Int;   // Counter
 END_VAR
@@ -61,106 +61,106 @@ _commsTimerNotExpired:   NOP 0;
 
 @@TEMPLATE_BEGIN|CRIL@@
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ if send Origin to partner CPU
+TITLE = Item @@IDX@@ @@INSTANCE@@ if send Read to partner CPU
     //------------------------------------------------------------------------//
-    // If this is the Block origin then set the transaction send and receive  //
+    // If this is the Block read then set the transaction send and receive  //
     // IDs and transfer the calculated parameters:                            //
     //------------------------------------------------------------------------//
-    A "idbCRIL".f[@@IDX@@].p.isOrigin;
+    A "idbCRIL".f[@@IDX@@].p.isRead;
     A(;
     L #CTR;
     L @@COUNTERTEMPLATE|1@@;
     ==I;
     );
-    JCN _notOriginBlock@@INSTANCE@@;
-    S #BSENDOrigin_@@IDX@@.REQ;
+    JCN _notReadBlock@@INSTANCE@@;
+    S #BSENDRead_@@IDX@@.REQ;
     L 601@@IDX@@1;
     T #xIDReceive;
     L 601@@IDX@@2;
     T #xIDSend;
-_notOriginBlock@@INSTANCE@@:   NOP 0;
+_notReadBlock@@INSTANCE@@:   NOP 0;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ if receive Origin from partner CPU
+TITLE = Item @@IDX@@ @@INSTANCE@@ if receive Read from partner CPU
     //------------------------------------------------------------------------//
-    // If this is not the Block origin then set the transaction send and      //
+    // If this is not the Block read then set the transaction send and      //
     // receive  IDs to receive the calculated parameters:                     //
     //------------------------------------------------------------------------//
-    AN "idbCRIL".f[@@IDX@@].p.isOrigin;
+    AN "idbCRIL".f[@@IDX@@].p.isRead;
     O(;
     L #CTR;
     L @@COUNTERTEMPLATE@@;
     <>I;
     );
-    JCN _originBlock@@INSTANCE@@;
-    R #BSENDOrigin_@@IDX@@.REQ;
+    JCN _readBlock@@INSTANCE@@;
+    R #BSENDRead_@@IDX@@.REQ;
     L 601@@IDX@@2;
     T #xIDReceive;
     L 601@@IDX@@1;
     T #xIDSend;
-_originBlock@@INSTANCE@@:   NOP 0;
+_readBlock@@INSTANCE@@:   NOP 0;
 
 NETWORK
-TITLE = Transfer item @@IDX@@ @@INSTANCE@@ Origin Block data to partner CPU
+TITLE = Transfer item @@IDX@@ @@INSTANCE@@ Read Block data to partner CPU
     //------------------------------------------------------------------------//
-    // If this is the Block origin then transfer the calculated parameters:   //
+    // If this is the Block read then transfer the calculated parameters:   //
     //------------------------------------------------------------------------//
-    CALL #BSENDOrigin_@@IDX@@
+    CALL #BSENDRead_@@IDX@@
     {ptr_type := 'Variant', id_type := 'CONN_PRG', r_id_type := 'CONN_R_ID'}
-    (   REQ                  := #BSENDOrigin_@@IDX@@.REQ ,
-        R                    := #BSENDOrigin_@@IDX@@.R ,
+    (   REQ                  := #BSENDRead_@@IDX@@.REQ ,
+        R                    := #BSENDRead_@@IDX@@.R ,
         ID                   := @@S7CONNECTION@@ ,
         R_ID                 := #xIDSend ,
-        DONE                 := #BSENDOrigin_@@IDX@@.DONE ,
-        ERROR                := #BSENDOrigin_@@IDX@@.ERROR ,
-        STATUS               := #BSENDOrigin_@@IDX@@.STATUS ,
+        DONE                 := #BSENDRead_@@IDX@@.DONE ,
+        ERROR                := #BSENDRead_@@IDX@@.ERROR ,
+        STATUS               := #BSENDRead_@@IDX@@.STATUS ,
         SD_1                 := "idbCRIL".f[@@IDX@@].p ,
-        LEN                  := #BSENDOrigin_@@IDX@@.LEN
+        LEN                  := #BSENDRead_@@IDX@@.LEN
     );
 
     //------------------------------------------------------------------------//
     // Store previous error status:                                           //
     //------------------------------------------------------------------------//
-    A #BSENDOrigin_@@IDX@@.ERROR;
-    AN #BSENDOrigin_@@IDX@@.DONE;
-    JCN _errorSendOrigin_@@IDX@@;
-    L #BSENDOrigin_@@IDX@@.STATUS;
-    T #SendErrorOrigin_@@IDX@@;
-_errorSendOrigin_@@IDX@@:   NOP 0;
+    A #BSENDRead_@@IDX@@.ERROR;
+    AN #BSENDRead_@@IDX@@.DONE;
+    JCN _errorSendRead_@@IDX@@;
+    L #BSENDRead_@@IDX@@.STATUS;
+    T #SendErrorRead_@@IDX@@;
+_errorSendRead_@@IDX@@:   NOP 0;
 
 NETWORK
-TITLE = Check item @@IDX@@ @@INSTANCE@@ if receive Origin from partner CPU
+TITLE = Check item @@IDX@@ @@INSTANCE@@ if receive Read from partner CPU
     //------------------------------------------------------------------------//
-    // If not origin then receive the calculated parameters:                  //
+    // If not read then receive the calculated parameters:                  //
     //------------------------------------------------------------------------//
-    AN "idbCRIL".f[@@IDX@@].p.isOrigin;
-    = #BRCVOrigin_@@IDX@@.EN_R;
+    AN "idbCRIL".f[@@IDX@@].p.isRead;
+    = #BRCVRead_@@IDX@@.EN_R;
 
 NETWORK
-TITLE = Receive item @@IDX@@ @@INSTANCE@@ Origin Block data from partner CPU
+TITLE = Receive item @@IDX@@ @@INSTANCE@@ Read Block data from partner CPU
     //------------------------------------------------------------------------//
-    // If not origin then receive the calculated parameters:                  //
+    // If not read then receive the calculated parameters:                  //
     //------------------------------------------------------------------------//
-    CALL #BRCVOrigin_@@IDX@@
+    CALL #BRCVRead_@@IDX@@
     {ptr_type := 'Variant', id_type := 'CONN_PRG', r_id_type := 'CONN_R_ID'}
-    (   EN_R                 := #BRCVOrigin_@@IDX@@.EN_R ,
+    (   EN_R                 := #BRCVRead_@@IDX@@.EN_R ,
         ID                   := @@S7CONNECTION@@ ,
         R_ID                 := #xIDReceive ,
-        NDR                  := #BRCVOrigin_@@IDX@@.NDR ,
-        ERROR                := #BRCVOrigin_@@IDX@@.ERROR ,
-        STATUS               := #BRCVOrigin_@@IDX@@.STATUS ,
+        NDR                  := #BRCVRead_@@IDX@@.NDR ,
+        ERROR                := #BRCVRead_@@IDX@@.ERROR ,
+        STATUS               := #BRCVRead_@@IDX@@.STATUS ,
         RD_1                 := "idbCRIL".f[@@IDX@@].p ,
-        LEN                  := #BRCVOrigin_@@IDX@@.LEN
+        LEN                  := #BRCVRead_@@IDX@@.LEN
     );
 
     //------------------------------------------------------------------------//
     // Store previous error status:                                           //
     //------------------------------------------------------------------------//
-    A #BRCVOrigin_@@IDX@@.ERROR;
-    JCN _errorReceiveOrigin_@@IDX@@;
-    L #BRCVOrigin_@@IDX@@.STATUS;
-    T #RcvErrorOrigin_@@IDX@@;
-_errorReceiveOrigin_@@IDX@@:   NOP 0;
+    A #BRCVRead_@@IDX@@.ERROR;
+    JCN _errorReceiveRead_@@IDX@@;
+    L #BRCVRead_@@IDX@@.STATUS;
+    T #RcvErrorRead_@@IDX@@;
+_errorReceiveRead_@@IDX@@:   NOP 0;
 
 @@TEMPLATE_END@@
 

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:27:03 PM by David Paspa
+generated on 8/08/2018 8:15:30 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -60,37 +60,21 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- time_measure_begin
-Type:- TOD
+Name:- log_msg_measure_begin
+Type:- BOOL
 Description:- PH_EMM1_MEASURE begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- log_time_measure_begin
+Name:- log_msg_measure_end
 Type:- BOOL
-Description:- PH_EMM1_MEASURE begin time
+Description:- PH_EMM1_MEASURE end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::6
---------------------------------------------------
-Name:- time_measure_end
-Type:- TOD
-Description:- PH_EMM1_MEASURE end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::7
---------------------------------------------------
-Name:- log_time_measure_end
-Type:- BOOL
-Description:- PH_EMM1_MEASURE end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::8
 --------------------------------------------------
 Name:- mass_tare
 Type:- REAL
@@ -98,7 +82,7 @@ Description:- Tare mass
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::7
 --------------------------------------------------
 Name:- mass_nett
 Type:- REAL
@@ -106,7 +90,7 @@ Description:- Nett Mass
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::8
 --------------------------------------------------
 Name:- settling_time
 Type:- TIME
@@ -128,11 +112,8 @@ ACTION::01
 Description:- Log MEASURE operation begin time.
 Request agitator to stop.
 Action:- //Log MEASURE operation begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_measure_begin;
-
 SET;
-S #_log_time_measure_begin;
+S #_log_msg_measure_begin;
 
 //Request agitator state to be stopped.
 L "dbCONST".BLK.SIC1.STATE.STOPPED;
@@ -236,11 +217,8 @@ L "dbCONST".BLK.SIC1.STATE.RUNNING;
 T #_sic_agit_cmd_peer;
 
 //Log MEASURE operation end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_measure_end;
-
 SET;
-S #_log_time_measure_end;
+S #_log_msg_measure_end;
 Verification:- A "uncondJump";
 
 ****************************************************************************************************

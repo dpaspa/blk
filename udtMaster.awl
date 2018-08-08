@@ -18,23 +18,28 @@ VERSION : 1.0
     END_STRUCT;
 END_TYPE
 
-TYPE "udtMCOrigin"
+TYPE "udtMCRead"
 VERSION : 1.0
     STRUCT
         ME : Int;                      // Unique ID of the block instance
         CMD_SAFE : Int;                // Safe command for the module
         STATE : Int;                   // State of the block
+        HYGIENE : Int;                 // Hygiene status
+        ERROR : Bool;                  // True if any error condition
         INTERLOCK : Bool;              // True if any interlock condition
         CRIL : Bool;                   // Critical Interlock that cannot be bypased.
         NCRIL : Bool;                  // Non-Critical Interlock that can be manually bypassed.
-        isOriginBlock : Bool;
+        FLOWPATH : Bool;               // True if a flowpath device where state must equal command.
         modeAUTO : Bool;
         modeMANUAL : Bool;
         modeOOS : Bool;
+        isAvailable : Bool;            // True if block has no write
+        isBatch : Bool;
+        isMaster : Bool;
     END_STRUCT;
 END_TYPE
 
-TYPE "udtMCOwner"
+TYPE "udtMCWrite"
 VERSION : 1.0
     STRUCT
         CMD : Int;                     // Start/Stop command
@@ -43,18 +48,15 @@ VERSION : 1.0
         RECIPE : Int;                  // Recipe ID of owning Process Cell
         SERIALNUM : Int;               // Unique batch or CIPSIP serial number
         SUBS : Int := 0;               // Selected substate for Block level modules
-        HYGIENE : Int;                 // Hygiene status
         MAN_OVERRIDE : Bool;           // Manual override to bypass NCRIL
-        isAvailable : Bool;            // True if block has no owner
-        isBatch : Bool;
-        isOriginOwner : Bool;
+        isMaster : Bool;
     END_STRUCT;
 END_TYPE
 
 //TYPE "udtModeCommand"
 //VERSION : 1.0
 //    STRUCT
-//        o : "udtMCOwner";
+//        o : "udtMCWrite";
 //        c : "udtMCCalculated";
 //    END_STRUCT;
 //END_TYPE
@@ -81,6 +83,20 @@ VERSION : 1.0
         stateINTERLOCKED : Bool;
         stateRUNNING : Bool;
         stateSTOPPED : Bool;
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtBLKError"
+VERSION : 1.0
+    STRUCT
+        interlocked : Bool;
+        badParameter : Bool;
+        childError : Bool;
+        childFlowpath : Bool;
+        childInterlocked : Bool;
+        childNotAuto : Bool;
+        childSafeState : Bool;
+        childUnavailable : Bool;
     END_STRUCT;
 END_TYPE
 
@@ -166,7 +182,7 @@ VERSION : 1.0
         INTERLOCK : Bool;              // Overall Interlock flag
         Source : Array[0..14] of Bool; // Interlock source array
         numInterlocks : Int;           // Number of interlocks used in the source array
-        isOrigin : Bool;
+        isRead : Bool;
     END_STRUCT;
 END_TYPE
 
@@ -408,31 +424,57 @@ END_TYPE
 TYPE "udtSFCSequence32"
 VERSION : 2.0
    STRUCT
-      STEP : "udtSFCStep32";
-      MODE : "udtSFCMode";
-      CMD : "udtSFCCommand";
-      FinalStep : Int;                 // LastStep number
-      Finished : Bool;                 // Sequencer Finished
-      Error_Fault : Bool;              // Sequence error
+        STEP : "udtSFCStep32";
+        MODE : "udtSFCMode";
+        CMD : "udtSFCCommand";
+        FinalStep : Int;                 // LastStep number
+        Finished : Bool;                 // Sequencer Finished
+        Error_Fault : Bool;              // Sequence error
    END_STRUCT;
 END_TYPE
 
-TYPE "udtHMISequence"
+TYPE "udtHMIInterfaceSFC"
 VERSION : 0.1
-   STRUCT
-      MODE : Int;
-      SQ_STATE : Int;
-      CURSTEP : Int;
-      S_ACTIVE : Bool;
-      ERR_FAULT : Bool;
-      PAUSED : Bool;
-      OFF_IDLE : Bool;
-      SQ_FINISHED : Bool;
-      STEPNO_JUMP : Int;
-      MAN_JUMP : Bool;
-      NO_VERIFIC : Bool;
-      TRN_AND_JUMP : Bool;
-      DONE : Array[1..104] of Bool;
-      WITHERROR : Array[1..104] of Bool;
-   END_STRUCT;
+    STRUCT
+        smc : "udtModeCommandSFC";
+        sqStep : "udtSFCStep32";
+        sfcNumPages : Int;
+        sfcPage : Int;
+        sfcSelected : Int;
+        CMD_MODE : Int;
+        CMD_SQ_CMD : Int;
+        CMD_STEPNO_JUMP : Int;
+        CMD_MAN_JUMP : Bool;
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtHMIInterfaceBLK"
+VERSION : 0.1
+    STRUCT
+        mcr : "udtMCRead";
+        mcw : "udtMCWrite";
+        bmc : "udtModeCommandBLK";
+        child : Array[1..30] of Int;
+        pReadReal : Array[1..20] of Real;
+        pWriteReal : Array[1..20] of Real;
+        pReadTime : Array[1..20] of Time;
+        pWriteTime : Array[1..20] of Time;
+        pReadInt : Array[1..20] of Int;
+        pWriteInt : Array[1..20] of Int;
+        pReadBool : Array[1..20] of Bool;
+        pWriteBool : Array[1..20] of Bool;
+        blkSelected : Int;
+        numChildren : Int;
+        numReadBool : Int;
+        numReadInt : Int;
+        numReadReal : Int;
+        numReadTime : Int;
+        numWriteBool : Int;
+        numWriteInt : Int;
+        numWriteReal : Int;
+        numWriteTime : Int;
+        CMD_MODE : Int;
+        CMD_CMD : Int;
+        CMD_SUBS : Int;
+    END_STRUCT;
 END_TYPE

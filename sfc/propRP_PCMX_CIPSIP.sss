@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:31:30 PM by David Paspa
+generated on 8/08/2018 12:22:31 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -49,7 +49,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::3
 --------------------------------------------------
-Name:- log_time_cipsip_begin
+Name:- log_msg_cipsip_begin
 Type:- BOOL
 Description:- RP_PCMX_CIPSIP begin time
 ParameterInOut:- VAR
@@ -57,7 +57,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::4
 --------------------------------------------------
-Name:- log_time_cipsip_end
+Name:- log_msg_cipsip_end
 Type:- BOOL
 Description:- RP_PCMX_CIPSIP end time
 ParameterInOut:- VAR
@@ -177,45 +177,13 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::19
 --------------------------------------------------
-Name:- log_time_wrong_hygiene
-Type:- BOOL
-Description:- RP_PCMX_CIPSIP Mixing Vessel Unit has incorrect Hygiene Status
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::20
---------------------------------------------------
-Name:- time_wrong_hygiene
-Type:- TOD
-Description:- RP_PCMX_CIPSIP Mixing Vessel Unit has incorrect Hygiene Status
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::21
---------------------------------------------------
-Name:- time_cipsip_end
-Type:- TOD
-Description:- RP_PCMX_CIPSIP end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::22
---------------------------------------------------
-Name:- time_cipsip_begin
-Type:- TOD
-Description:- RP_PCMX_CIPSIP begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::23
---------------------------------------------------
 Name:- mx_vessel_hygiene
 Type:- INT
 Description:- Hygiene Status of unit Mx
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::20
 --------------------------------------------------
 Name:- mx_vessel_state
 Type:- INT
@@ -223,7 +191,7 @@ Description:- Device State of unit Mx
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::21
 --------------------------------------------------
 Name:- mx_vessel_subs
 Type:- INT
@@ -231,7 +199,7 @@ Description:- Substate selection to unit Mx
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::22
 --------------------------------------------------
 Name:- mx_vessel_cmd
 Type:- INT
@@ -251,11 +219,8 @@ ACTION::01
 --------------------------------------------------
 Description:- Log product manufacture operation begin time.
 Action:- //Log CIPSIP operation begin
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_cipsip_begin;
-
 SET;
-S #_log_time_cipsip_begin;
+S #_log_msg_cipsip_begin;
 Verification:- A "uncondJump";
 
 
@@ -297,14 +262,20 @@ ACTION::01
 Description:- Log equipment is not in Hygiene status USED.
 Send message to HMI
 Action:- //Log time if one or more units not in correct Hygiene status USED
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_wrong_hygiene;
-
 SET;
-S #_log_time_wrong_hygiene;
 S #_log_msg_wrong_hygiene;
 S #_prompt_abort;
 Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 03
+Title:- Confirm Abort (Incorrect Hygiene Status)
+EmptyTransition:- False
+Description:- Confirm Abort (Incorrect Hygiene Status)
+Condition:- A #_prompt_abort_confirm_yes;
 
 
 --------------------------------------------------
@@ -536,11 +507,8 @@ L "dbCONST".BLK.SAFE.CMD;
 T #_mx_vessel_subs;
 
 //Log CIPSIP operation end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_cipsip_end;
-
 SET;
-S #_log_time_cipsip_end;
+S #_log_msg_cipsip_end;
 
 
 //Clear used flags

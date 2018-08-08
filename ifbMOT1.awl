@@ -66,7 +66,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #f[@@IDX@@].p.origin.mc.CRIL;
+    = #f[@@IDX@@].p.read.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -81,7 +81,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #f[@@IDX@@].p.origin.mc.NCRIL;
+    = #f[@@IDX@@].p.read.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -89,31 +89,42 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #f[@@IDX@@].p.origin.mc.ME;
+    T #f[@@IDX@@].p.read.mc.ME;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner ID
     //------------------------------------------------------------------------//
-    // Set the instance owner:                                                //
+    // Set the instance Owner ID:                                             //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #f[@@IDX@@].p.owner.mc.OWNER;
+    T #f[@@IDX@@].p.write.mc.OWNER;
+
+@@ATTR_BEGIN|FLOWPATH@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@CLASS@@ is a Flowpath device
+    //------------------------------------------------------------------------//
+    // This class of device is a FLOWPATH device where the state must equal   //
+    // the command once set by the parent:                                    //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #f[@@IDX@@].p.read.mc.FLOWPATH;
+@@ATTR_END|FLOWPATH@@
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
     //------------------------------------------------------------------------//
     // This block can only reside within this CPU:                            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+    = #f[@@IDX@@].p.read.mc.isMaster;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     //------------------------------------------------------------------------//
     // This block can only be owned by a parent block in this CPU:            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.owner.mc.isOriginOwner;
+    = #f[@@IDX@@].p.write.mc.isMaster;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -123,7 +134,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.MOT1.SAFE.CMD;
-    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+    T #f[@@IDX@@].p.read.mc.CMD_SAFE;
 _notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK
@@ -132,7 +143,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Breaker fault input
     // Set the instance breaker fault input value:                            //
     //------------------------------------------------------------------------//
     A "@@INSTANCE@@-BRK";
-    = #f[@@IDX@@].p.origin.BRK;
+    = #f[@@IDX@@].p.read.BRK;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Breaker fault input
@@ -140,7 +151,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Breaker fault input
     // Set the instance breaker fault input value:                            //
     //------------------------------------------------------------------------//
     A "@@INSTANCE@@-RUN";
-    = #f[@@IDX@@].p.origin.FB_RUN;
+    = #f[@@IDX@@].p.read.FB_RUN;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Three phase relay fault input
@@ -150,7 +161,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Three phase relay fault input
 @@ATTR_BEGIN|LINK@@
     A "@@PHRLINKINSTANCE@@-DI";
 @@ATTR_END|LINK@@
-    = #f[@@IDX@@].p.origin.PHR;
+    = #f[@@IDX@@].p.read.PHR;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
@@ -164,7 +175,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
     //------------------------------------------------------------------------//
     // Set the instance output command to the field:                          //
     //------------------------------------------------------------------------//
-    A #f[@@IDX@@].p.origin.OUT_Q;
+    A #f[@@IDX@@].p.read.OUT_Q;
     = "@@INSTANCE@@-CMD";
 
 @@TEMPLATE_END@@

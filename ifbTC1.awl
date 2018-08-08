@@ -71,7 +71,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
     A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|CRIL_TARGET@@
 @@ATTR_END|CRIL_EXISTS@@
-    = #f[@@IDX@@].p.origin.mc.CRIL;
+    = #f[@@IDX@@].p.read.mc.CRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
@@ -86,7 +86,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
 @@ATTR_END|NCRIL_TARGET@@
 @@ATTR_END|NCRIL_EXISTS@@
-    = #f[@@IDX@@].p.origin.mc.NCRIL;
+    = #f[@@IDX@@].p.read.mc.NCRIL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
@@ -94,31 +94,42 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@INSTANCE@@;
-    T #f[@@IDX@@].p.origin.mc.ME;
+    T #f[@@IDX@@].p.read.mc.ME;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner ID
     //------------------------------------------------------------------------//
-    // Set the instance owner:                                                //
+    // Set the instance Owner ID:                                             //
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
-    T #f[@@IDX@@].p.owner.mc.OWNER;
+    T #f[@@IDX@@].p.write.mc.OWNER;
+
+@@ATTR_BEGIN|FLOWPATH@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@CLASS@@ is a Flowpath device
+    //------------------------------------------------------------------------//
+    // This class of device is a FLOWPATH device where the state must equal   //
+    // the command once set by the parent:                                    //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #f[@@IDX@@].p.read.mc.FLOWPATH;
+@@ATTR_END|FLOWPATH@@
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Origin
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
     //------------------------------------------------------------------------//
     // This block can only reside within this CPU:                            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.origin.mc.isOriginBlock;
+    = #f[@@IDX@@].p.read.mc.isMaster;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner Origin
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     //------------------------------------------------------------------------//
     // This block can only be owned by a parent block in this CPU:            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.owner.mc.isOriginOwner;
+    = #f[@@IDX@@].p.write.mc.isMaster;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
@@ -128,7 +139,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
     A "flagFirstScanRestart";
     JCN _notRestart_@@COUNTERTEMPLATE|1@@;
     L "dbCONST".BLK.TC1.SAFE.CMD;
-    T #f[@@IDX@@].p.origin.mc.CMD_SAFE;
+    T #f[@@IDX@@].p.read.mc.CMD_SAFE;
 _notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 
 NETWORK

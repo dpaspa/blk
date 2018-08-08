@@ -87,8 +87,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcOrigin             := #p.origin.mc ,
-        mcOwner              := #p.owner.mc
+    (   mcRead             := #p.read.mc ,
+        mcWrite              := #p.write.mc
     );
 
 NETWORK
@@ -96,18 +96,18 @@ TITLE = Check any link device is not in AUTO
     //------------------------------------------------------------------------//
     // Check if any link cannot be controlled if not in AUTO:                 //
     //------------------------------------------------------------------------//
-    O #p.origin.mc.INTERLOCK;
-    O "idbPOS4".f[#p.link.DRAIN].p.origin.mc.INTERLOCK;
-    O "idbPOS4".f[#p.link.HPCA].p.origin.mc.INTERLOCK;
-    O "idbPOS4".f[#p.link.LPCA].p.origin.mc.INTERLOCK;
-    O "idbPOS4".f[#p.link.VACUUM].p.origin.mc.INTERLOCK;
-    O "idbPOS2".f[#p.link.VENT].p.origin.mc.INTERLOCK;
-    ON "idbPOS4".f[#p.link.DRAIN].p.origin.mc.modeAUTO;
-    ON "idbPOS4".f[#p.link.HPCA].p.origin.mc.modeAUTO;
-    ON "idbPOS4".f[#p.link.LPCA].p.origin.mc.modeAUTO;
-    ON "idbPOS4".f[#p.link.VACUUM].p.origin.mc.modeAUTO;
-    ON "idbPOS2".f[#p.link.VENT].p.origin.mc.modeAUTO;
-    = #p.origin.mc.INTERLOCK;
+    O #p.read.mc.INTERLOCK;
+    O "idbPOS4".f[#p.link.DRAIN].p.read.mc.INTERLOCK;
+    O "idbPOS4".f[#p.link.HPCA].p.read.mc.INTERLOCK;
+    O "idbPOS4".f[#p.link.LPCA].p.read.mc.INTERLOCK;
+    O "idbPOS4".f[#p.link.VACUUM].p.read.mc.INTERLOCK;
+    O "idbPOS2".f[#p.link.VENT].p.read.mc.INTERLOCK;
+    ON "idbPOS4".f[#p.link.DRAIN].p.read.mc.modeAUTO;
+    ON "idbPOS4".f[#p.link.HPCA].p.read.mc.modeAUTO;
+    ON "idbPOS4".f[#p.link.LPCA].p.read.mc.modeAUTO;
+    ON "idbPOS4".f[#p.link.VACUUM].p.read.mc.modeAUTO;
+    ON "idbPOS2".f[#p.link.VENT].p.read.mc.modeAUTO;
+    = #p.read.mc.INTERLOCK;
 
 NETWORK
 TITLE = Command is DISABLE
@@ -117,10 +117,10 @@ TITLE = Command is DISABLE
     //                                                                        //
     // CMD is DISABLE:                                                        //
     //------------------------------------------------------------------------//
-    O #p.origin.mc.modeOOS;
-    O #p.origin.mc.INTERLOCK;
+    O #p.read.mc.modeOOS;
+    O #p.read.mc.INTERLOCK;
     O(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.PC1.CMD.DISABLE;
     ==I;
     );
@@ -131,11 +131,11 @@ TITLE = Command is PRESSURE control
     //------------------------------------------------------------------------//
     // CMD is PRESSURE control and no fault condition:                        //
     //------------------------------------------------------------------------//
-    AN #p.origin.mc.modeOOS;
-    AN #p.origin.mc.INTERLOCK;
-    AN #p.origin.PI1_INTERLOCK;
+    AN #p.read.mc.modeOOS;
+    AN #p.read.mc.INTERLOCK;
+    AN #p.read.PI1_INTERLOCK;
     A(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.PC1.CMD.PRESSURE;
     ==I;
     );
@@ -146,10 +146,10 @@ TITLE = Command is VALVE open
     //------------------------------------------------------------------------//
     // CMD is VALVE open and no fault condition:                              //
     //------------------------------------------------------------------------//
-    AN #p.origin.mc.modeOOS;
-    AN #p.origin.mc.INTERLOCK;
+    AN #p.read.mc.modeOOS;
+    AN #p.read.mc.INTERLOCK;
     A(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.PC1.CMD.VALVE;
     ==I;
     );
@@ -166,8 +166,8 @@ TITLE = Calculate high pressure valve close limit in PRESSURE
     //------------------------------------------------------------------------//
     A #cmdPRESSURE;
     JCN _a;
-    L #p.owner.SETPOINT;
-    L #p.owner.DB_H;
+    L #p.write.SETPOINT;
+    L #p.write.DB_H;
     +R;
     T #dbHigh;
 _a:   NOP 0;
@@ -180,8 +180,8 @@ TITLE = Calculate low pressure valve open limit in PRESSURE
     //------------------------------------------------------------------------//
     A #cmdPRESSURE;
     JCN _b;
-    L #p.owner.SETPOINT;
-    L #p.owner.DB_L;
+    L #p.write.SETPOINT;
+    L #p.write.DB_L;
     -R;
     T #dbLow;
 _b:   NOP 0;
@@ -192,7 +192,7 @@ TITLE = Selected valve is DRAIN
     // Selected GAS valve is DRAIN:                                           //
     //------------------------------------------------------------------------//
     A(;
-    L #p.owner.MEDIUM_GAS;
+    L #p.write.MEDIUM_GAS;
     L "dbCONST".SEL.GAS.DRAIN;
     ==I;
     );
@@ -204,7 +204,7 @@ TITLE = Selected valve is HPCA
     // Selected GAS valve is HPCA:                                            //
     //------------------------------------------------------------------------//
     A(;
-    L #p.owner.MEDIUM_GAS;
+    L #p.write.MEDIUM_GAS;
     L "dbCONST".SEL.GAS.HPCA;
     ==I;
     );
@@ -216,7 +216,7 @@ TITLE = Selected valve is LPCA
     // Selected GAS valve is LPCA:                                            //
     //------------------------------------------------------------------------//
     A(;
-    L #p.owner.MEDIUM_GAS;
+    L #p.write.MEDIUM_GAS;
     L "dbCONST".SEL.GAS.LPCA;
     ==I;
     );
@@ -228,7 +228,7 @@ TITLE = Selected valve is VACUUM
     // Selected GAS valve is VACUUM:                                          //
     //------------------------------------------------------------------------//
     A(;
-    L #p.owner.MEDIUM_GAS;
+    L #p.write.MEDIUM_GAS;
     L "dbCONST".SEL.GAS.VACUUM;
     ==I;
     );
@@ -240,7 +240,7 @@ TITLE = Selected valve is VENT
     // Selected GAS valve is VENT:                                            //
     //------------------------------------------------------------------------//
     A(;
-    L #p.owner.MEDIUM_GAS;
+    L #p.write.MEDIUM_GAS;
     L "dbCONST".SEL.GAS.VENT;
     ==I;
     );
@@ -260,7 +260,7 @@ TITLE = Check if selected valve should be OPENED
     O(;
     A #cmdPRESSURE;
     A(;
-    L #p.origin.PI1_PV;
+    L #p.read.PI1_PV;
     L #dbLow;
     <R;
     );
@@ -277,8 +277,8 @@ TITLE = Check if selected valve should be CLOSED
     //------------------------------------------------------------------------//
     A #cmdPRESSURE;
     A(;
-    L #p.origin.PI1_PV;
-    L #p.owner.SETPOINT;
+    L #p.read.PI1_PV;
+    L #p.write.SETPOINT;
     >R;
     );
     JCN _d;
@@ -295,7 +295,7 @@ TITLE = Check if VENT valve should be OPENED in PRESSURE control
     A #cmdPRESSURE;
     AN #tDO;
     A(;
-    L #p.origin.PI1_PV;
+    L #p.read.PI1_PV;
     L #dbHigh;
     >R;
     );
@@ -312,8 +312,8 @@ TITLE = Check if VENT valve should be CLOSED
     A #cmdPRESSURE;
     AN #tDO;
     A(;
-    L #p.origin.PI1_PV;
-    L #p.owner.SETPOINT;
+    L #p.read.PI1_PV;
+    L #p.write.SETPOINT;
     <R;
     );
     JCN _f;
@@ -344,7 +344,7 @@ TITLE = Open DRAIN valve if required
     A #selectDRAIN;
     JCN _h;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T "idbPOS4".f[#p.link.DRAIN].p.owner.mc.CMD;
+    T "idbPOS4".f[#p.link.DRAIN].p.write.mc.CMD;
 _h:   NOP 0;
 
 NETWORK
@@ -356,7 +356,7 @@ TITLE = Open HPCA valve if required
     A #selectHPCA;
     JCN _i;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T "idbPOS2".f[#p.link.HPCA].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.HPCA].p.write.mc.CMD;
 _i:   NOP 0;
 
 NETWORK
@@ -368,7 +368,7 @@ TITLE = Open LPCA valve if required
     A #selectLPCA;
     JCN _j;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T "idbPOS2".f[#p.link.LPCA].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.LPCA].p.write.mc.CMD;
 _j:   NOP 0;
 
 NETWORK
@@ -380,7 +380,7 @@ TITLE = Open VACUUM valve if required
     A #selectVACUUM;
     JCN _k;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T "idbPOS2".f[#p.link.VACUUM].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.VACUUM].p.write.mc.CMD;
 _k:   NOP 0;
 
 NETWORK
@@ -398,7 +398,7 @@ TITLE = Open VENT valve if required
     );
     JCN _l;
     L "dbCONST".BLK.POSx.CMD.OPEN;
-    T "idbPOS2".f[#p.link.VENT].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.VENT].p.write.mc.CMD;
 _l:   NOP 0;
 
 NETWORK
@@ -412,7 +412,7 @@ TITLE = Close DRAIN valve if required
     ON #selectDRAIN;
     JCN _m;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T "idbPOS4".f[#p.link.DRAIN].p.owner.mc.CMD;
+    T "idbPOS4".f[#p.link.DRAIN].p.write.mc.CMD;
 _m:   NOP 0;
 
 NETWORK
@@ -424,7 +424,7 @@ TITLE = Close HPCA valve if required
     ON #selectHPCA;
     JCN _n;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T "idbPOS2".f[#p.link.HPCA].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.HPCA].p.write.mc.CMD;
 _n:   NOP 0;
 
 NETWORK
@@ -436,7 +436,7 @@ TITLE = Close LPCA valve if required
     ON #selectLPCA;
     JCN _o;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T "idbPOS2".f[#p.link.LPCA].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.LPCA].p.write.mc.CMD;
 _o:   NOP 0;
 
 NETWORK
@@ -448,7 +448,7 @@ TITLE = Close VACUUM valve if required
     ON #selectVACUUM;
     JCN _p;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T "idbPOS2".f[#p.link.VACUUM].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.VACUUM].p.write.mc.CMD;
 _p:   NOP 0;
 
 NETWORK
@@ -466,7 +466,7 @@ TITLE = Close VENT valve if required
     );
     JCN _q;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
-    T "idbPOS2".f[#p.link.VENT].p.owner.mc.CMD;
+    T "idbPOS2".f[#p.link.VENT].p.write.mc.CMD;
 _q:   NOP 0;
 
 NETWORK
@@ -480,7 +480,7 @@ TITLE = Set Device State to Disabled if commanded
     A #cmdDISABLE;
     JCN _r;
     L "dbCONST".BLK.PC1.STATE.DISABLED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _r:   NOP 0;
 
 NETWORK
@@ -491,17 +491,17 @@ TITLE = Set Device State to PRESSURE if commanded
     A #cmdPRESSURE;
     JCN _s;
     L "dbCONST".BLK.PC1.STATE.PRESSURE;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _s:   NOP 0;
 
 NETWORK
-TITLE = Set Device State to Fault if field fault signal is on
+TITLE = Set Device State to VALVE if commanded
     //------------------------------------------------------------------------//
     // State is VALVE if commanded to VALVE:                                  //
     //------------------------------------------------------------------------//
     A #cmdVALVE;
     JCN _t;
     L "dbCONST".BLK.PC1.STATE.VALVE;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _t:   NOP 0;
 END_FUNCTION_BLOCK

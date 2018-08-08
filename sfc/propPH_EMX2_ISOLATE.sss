@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:27:16 PM by David Paspa
+generated on 8/08/2018 8:15:44 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -73,37 +73,21 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- time_isolate_begin
-Type:- TOD
+Name:- log_msg_isolate_begin
+Type:- BOOL
 Description:- PH_EMX2_ISOLATE begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- log_time_isolate_begin
+Name:- log_msg_isolate_end
 Type:- BOOL
-Description:- PH_EMX2_ISOLATE begin time
+Description:- PH_EMX2_ISOLATE end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::8
---------------------------------------------------
-Name:- time_isolate_end
-Type:- TOD
-Description:- PH_EMX2_ISOLATE end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::9
---------------------------------------------------
-Name:- log_time_isolate_end
-Type:- BOOL
-Description:- PH_EMX2_ISOLATE end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::10
 --------------------------------------------------
 Name:- zsc_bfs1_state
 Type:- INT
@@ -111,7 +95,7 @@ Description:- S1 to F1P1 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::9
 --------------------------------------------------
 Name:- zsc_smfl2_state
 Type:- INT
@@ -119,7 +103,7 @@ Description:- VTL1 to M2 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::10
 --------------------------------------------------
 Name:- zsc_bfs2_state
 Type:- INT
@@ -127,7 +111,7 @@ Description:- S1 to F2P1 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::11
 --------------------------------------------------
 Name:- zsc_smfl1_state
 Type:- INT
@@ -135,7 +119,7 @@ Description:- VTL1 to M1 flowpath indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::12
 --------------------------------------------------
 Name:- prompt_isolate_confirm_yes
 Type:- BOOL
@@ -143,7 +127,7 @@ Description:- PH_EMX2_ISOLATE Operator confirmed fill machine flowpath disconnec
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::13
 --------------------------------------------------
 Name:- prompt_isolate
 Type:- BOOL
@@ -165,11 +149,8 @@ ACTION::01
 Description:- Log ISOLATE operation begin time.
 Send OUT command to zsc.
 Action:- //Log ISOLATE operation begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_isolate_begin;
-
 SET;
-S #_log_time_isolate_begin;
+S #_log_msg_isolate_begin;
 
 // Send OUT command to zsc.
 L "dbCONST".BLK.ZSC2.CMD.OUT;
@@ -278,7 +259,7 @@ Condition:- A "uncondJump";
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
-StepNo:- 4.0000
+StepNo:- 04
 Title:- PH_EMX2_ISOLATE : Last Step
 Description:- Log ISOLATE operation end time.
 
@@ -287,11 +268,8 @@ ACTION::01
 --------------------------------------------------
 Description:- Log ISOLATE operation end time.
 Action:- //Log ISOLATE operation end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_isolate_end;
-
 SET;
-S #_log_time_isolate_end;
+S #_log_msg_isolate_end;
 Verification:- A "uncondJump";
 
 ****************************************************************************************************

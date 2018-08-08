@@ -37,7 +37,7 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 VAR
     p : "udtTC1";            // Block data interface
-    PID1 {OriginalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
+    PID1 {ReadalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
 END_VAR
 
 VAR_TEMP
@@ -57,8 +57,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcOrigin             := #p.origin.mc ,
-        mcOwner              := #p.owner.mc
+    (   mcRead             := #p.read.mc ,
+        mcWrite              := #p.write.mc
     );
 
 NETWORK
@@ -66,10 +66,10 @@ TITLE = Check if the TCV is not in AUTO
     //------------------------------------------------------------------------//
     // Check if the TCV cannot be controlled if not in AUTO:                  //
     //------------------------------------------------------------------------//
-    O #p.origin.mc.INTERLOCK;
-    O "idbMOD1".f[#p.link.MOD_TCV].p.origin.mc.INTERLOCK;
-    ON "idbMOD1".f[#p.link.MOD_TCV].p.origin.mc.modeAUTO;
-    = #p.origin.mc.INTERLOCK;
+    O #p.read.mc.INTERLOCK;
+    O "idbMOD1".f[#p.link.MOD_TCV].p.read.mc.INTERLOCK;
+    ON "idbMOD1".f[#p.link.MOD_TCV].p.read.mc.modeAUTO;
+    = #p.read.mc.INTERLOCK;
 
 NETWORK
 TITLE = Device command ENABLE
@@ -79,10 +79,10 @@ TITLE = Device command ENABLE
     //                                                                        //
     // CMD is ENABLE:                                                         //
     //------------------------------------------------------------------------//
-    AN #p.origin.mc.modeOOS;
-    AN #p.origin.mc.INTERLOCK;
+    AN #p.read.mc.modeOOS;
+    AN #p.read.mc.INTERLOCK;
     A(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.TC1.CMD.ENABLE;
     ==I;
     );
@@ -95,7 +95,7 @@ TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
     ON #cmdEnable;
     O(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.TC1.CMD.DISABLE;
     ==I;
     );
@@ -109,7 +109,7 @@ TITLE = Command should be DISABLE if not ENABLE
     A #cmdDisable;
     JCN _a;
     L "dbCONST".BLK.TC1.CMD.DISABLE;
-    T #p.owner.mc.CMD;
+    T #p.write.mc.CMD;
 _a:   NOP 0;
 
 NETWORK
@@ -122,7 +122,7 @@ TITLE = Setpoint if Enabled
     //------------------------------------------------------------------------//
     A #cmdEnable;
     JCN _b;
-    L #p.owner.SETPOINT;
+    L #p.write.SETPOINT;
     T #tSetpoint;
 _b:   NOP 0;
 
@@ -148,8 +148,8 @@ TITLE = PID in manual if disabled or manual flag set
     O #cmdDisable;
     O(;
     A #cmdEnable;
-    A #p.origin.mc.modeMANUAL;
-    A #p.owner.MAN_PID;
+    A #p.read.mc.modeMANUAL;
+    A #p.write.MAN_PID;
     );
     = #tManual_Not_PID;
 
@@ -161,19 +161,19 @@ TITLE = PID Controller
     CALL #PID1
     (   COM_RST              := "flagFirstScanRestart" ,
         MAN_ON               := #tManual_Not_PID ,
-        P_SEL                := #p.origin.P_SEL ,
-        I_SEL                := #p.origin.I_SEL ,
-        D_SEL                := #p.origin.D_SEL ,
-        CYCLE                := #p.origin.CYCLE ,
+        P_SEL                := #p.read.P_SEL ,
+        I_SEL                := #p.read.I_SEL ,
+        D_SEL                := #p.read.D_SEL ,
+        CYCLE                := #p.read.CYCLE ,
         SP_INT               := #tSetpoint ,
-        PV_IN                := "idbPI1".f[#p.link.TI_HEX].p.origin.PV ,
+        PV_IN                := "idbPI1".f[#p.link.TI_HEX].p.read.PV ,
         MAN                  := #tSetpoint ,
-        GAIN                 := #p.origin.GAIN ,
-        TI                   := #p.origin.TI ,
-        TD                   := #p.origin.TD ,
+        GAIN                 := #p.read.GAIN ,
+        TI                   := #p.read.TI ,
+        TD                   := #p.read.TD ,
         LMN_HLM              := 100.0 ,
         LMN_LLM              := 0.0 ,
-        LMN                  := #p.origin.LMN
+        LMN                  := #p.read.LMN
     );
 
 NETWORK
@@ -182,9 +182,9 @@ TITLE = Output should be reverse acting
     // Change the output to be reverse acting:                                //
     //------------------------------------------------------------------------//
     L 100.0;
-    L #p.origin.LMN;
+    L #p.read.LMN;
     -R;
-    T #p.origin.LMN;
+    T #p.read.LMN;
 
 NETWORK
 TITLE = Output if Disabled
@@ -194,7 +194,7 @@ TITLE = Output if Disabled
     A #cmdDisable;
     JCN _d;
     L 0.0;
-    T #p.origin.LMN;
+    T #p.read.LMN;
 _d:   NOP 0;
 
 NETWORK
@@ -203,8 +203,8 @@ TITLE = Transfer PID output to MOD1 TC Valve
     // Write the PID controller output to the temperature control valve (TCV) //
     // remote position setpoint:                                              //
     //------------------------------------------------------------------------//
-    L #p.origin.LMN;
-    T "idbMOD1".f[#p.link.MOD_TCV].p.owner.POS_REMOTE;
+    L #p.read.LMN;
+    T "idbMOD1".f[#p.link.MOD_TCV].p.read.POS_REMOTE;
 
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
@@ -215,7 +215,7 @@ TITLE = Transfer PID output to MOD1 TC Valve
     A #cmdDisable;
     JCN _e;
     L "dbCONST".BLK.TC1.STATE.DISABLED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _e:   NOP 0;
 
     //------------------------------------------------------------------------//
@@ -224,6 +224,6 @@ _e:   NOP 0;
     A #cmdEnable;
     JCN _f;
     L "dbCONST".BLK.TC1.STATE.ENABLED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _f:   NOP 0;
 END_FUNCTION_BLOCK

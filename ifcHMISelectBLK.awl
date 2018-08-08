@@ -30,12 +30,12 @@ TITLE = Get the selected BLK
     // Get the BLK index number selected by the user when they clicked the    //
     // faceplate BLK target:                                                  //
     //------------------------------------------------------------------------//
-    L "dbHMIInterfaceBLK".blkSelected;
+    L "dbHMIInterfaceBLK".block.blkSelected;
     T #blkSelected;
 
 @@TEMPLATE_BEGIN|INSTANCE_BLK@@
 NETWORK
-TITLE = @@INSTANCE@@ @@DESCRIPTION@@ : @@STATEDESCRIPTION@@
+TITLE = @@INSTANCE@@ @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Check if this BLK instance is selected:                                //
     //------------------------------------------------------------------------//
@@ -74,9 +74,9 @@ TITLE = @@INSTANCE@@ @@DESCRIPTION@@ : @@STATEDESCRIPTION@@
 @@ATTR_BEGIN|numWriteTime@@
         numWriteTime         := @@NUM@@ ,
 @@ATTR_END|numWriteTime@@
-        bmc                  := "idb@@CLASS@@".f[@@IDX@@].p.origin.bmc ,
-        mc                   := "idb@@CLASS@@".f[@@IDX@@].p.origin.mc ,
-        mco                  := "idb@@CLASS@@".f[@@IDX@@].p.owner.mc
+        bmc                  := "idb@@CLASS@@".f[@@IDX@@].p.read.bmc ,
+        mcr                  := "idb@@CLASS@@".f[@@IDX@@].p.read.mc ,
+        mcw                  := "idb@@CLASS@@".f[@@IDX@@].p.write.mc
     );
 
 NETWORK
@@ -85,36 +85,36 @@ TITLE = Transfer the parameter values to the interface arrays
     // Transfer the parameter values:                                         //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|pReadBool@@
-    A "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
-    = "dbHMIInterfaceBLK".pBool[@@PIDX@@];
+    A "idb@@CLASS@@".f[@@IDX@@].p.read.@@BLOCKPARAMETER@@;
+    = "dbHMIInterfaceBLK".block.pReadBool[@@PIDX@@];
 @@ATTR_END|pReadBool@@
 @@ATTR_BEGIN|pReadInt@@
-    L "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
-    T "dbHMIInterfaceBLK".pInt[@@PIDX@@];
+    L "idb@@CLASS@@".f[@@IDX@@].p.read.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".block.pReadInt[@@PIDX@@];
 @@ATTR_END|pReadInt@@
 @@ATTR_BEGIN|pReadReal@@
-    L "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
-    T "dbHMIInterfaceBLK".pReal[@@PIDX@@];
+    L "idb@@CLASS@@".f[@@IDX@@].p.read.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".block.pReadReal[@@PIDX@@];
 @@ATTR_END|pReadReal@@
 @@ATTR_BEGIN|pReadTime@@
-    L "idb@@CLASS@@".f[@@IDX@@].p.origin.@@BLOCKPARAMETER@@;
-    T "dbHMIInterfaceBLK".pTime[@@PIDX@@];
+    L "idb@@CLASS@@".f[@@IDX@@].p.read.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".block.pReadTime[@@PIDX@@];
 @@ATTR_END|pReadTime@@
 @@ATTR_BEGIN|pWriteBool@@
-    A "idb@@CLASS@@".f[@@IDX@@].p.owner.@@BLOCKPARAMETER@@;
-    = "dbHMIInterfaceBLK".pBool[@@PIDX@@];
+    A "idb@@CLASS@@".f[@@IDX@@].p.write.@@BLOCKPARAMETER@@;
+    = "dbHMIInterfaceBLK".block.pWriteBool[@@PIDX@@];
 @@ATTR_END|pWriteBool@@
 @@ATTR_BEGIN|pWriteInt@@
-    L "idb@@CLASS@@".f[@@IDX@@].p.owner.@@BLOCKPARAMETER@@;
-    T "dbHMIInterfaceBLK".pInt[@@PIDX@@];
+    L "idb@@CLASS@@".f[@@IDX@@].p.write.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".block.pWriteInt[@@PIDX@@];
 @@ATTR_END|pWriteInt@@
 @@ATTR_BEGIN|pWriteReal@@
-    L "idb@@CLASS@@".f[@@IDX@@].p.owner.@@BLOCKPARAMETER@@;
-    T "dbHMIInterfaceBLK".pReal[@@PIDX@@];
+    L "idb@@CLASS@@".f[@@IDX@@].p.write.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".block.pWriteReal[@@PIDX@@];
 @@ATTR_END|pWriteReal@@
 @@ATTR_BEGIN|pWriteTime@@
-    L "idb@@CLASS@@".f[@@IDX@@].p.owner.@@BLOCKPARAMETER@@;
-    T "dbHMIInterfaceBLK".pTime[@@PIDX@@];
+    L "idb@@CLASS@@".f[@@IDX@@].p.write.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".block.pWriteTime[@@PIDX@@];
 @@ATTR_END|pWriteTime@@
 
 _not_@@INSTANCE@@:   NOP 0;

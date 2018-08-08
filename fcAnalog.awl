@@ -5,7 +5,7 @@
 // Description:                                                               //
 // Reads a raw analog value in counts and scaled to engineering units. Also   //
 // checks for underrange or overrange value error or open wire fault. Sets a  //
-// Data Quality flag if the reading is healthy.                               //
+// Data Quality flag if the value is healthy.                                 //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
@@ -40,7 +40,7 @@ TITLE = Raw field input scaling in Auto mode
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
     //                                                                        //
-    // Get the raw field input reading in Auto mode:                          //
+    // Get the raw field input if in Auto mode:                               //
     //------------------------------------------------------------------------//
     A #ai.modeAUTO;
     JCN _a;
@@ -62,7 +62,7 @@ _b:   NOP 0;
 NETWORK
 TITLE = Scale the input if not in Manual mode
     //------------------------------------------------------------------------//
-    // Scale the raw input reading:                                           //
+    // Scale the raw input value:                                             //
     //------------------------------------------------------------------------//
     AN #ai.modeMANUAL;
     JCN _c;

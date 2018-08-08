@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:31:32 PM by David Paspa
+generated on 8/08/2018 12:22:33 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -61,29 +61,21 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- log_time_wrong_hygiene
-Type:- BOOL
-Description:- RP_PCMX_FILL Mixing Vessel Unit has incorrect Hygiene Status
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::6
---------------------------------------------------
-Name:- log_time_fill_end
+Name:- log_msg_fill_end
 Type:- BOOL
 Description:- RP_PCMX_FILL end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::6
 --------------------------------------------------
-Name:- log_time_fill_begin
+Name:- log_msg_fill_begin
 Type:- BOOL
 Description:- RP_PCMX_FILL begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::7
 --------------------------------------------------
 Name:- Report_End
 Type:- BOOL
@@ -91,7 +83,7 @@ Description:- Reort end event flag
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::8
 --------------------------------------------------
 Name:- prompt_abort_confirm_yes
 Type:- BOOL
@@ -99,7 +91,7 @@ Description:- RP_PCMX_FILL Operator confirmed to abort due to invalid MX Hygiene
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::9
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
@@ -107,7 +99,7 @@ Description:- RP_PCMX_FILL Operator to confirm to abort due to invalid MX Hygien
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::10
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
@@ -115,15 +107,7 @@ Description:- RP_PCMX_FILL Mixing Vessel Unit has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
---------------------------------------------------
-Name:- time_wrong_hygiene
-Type:- TOD
-Description:- RP_PCMX_FILL Mixing Vessel Unit has incorrect Hygiene Status
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::13
+PARAMETER::11
 --------------------------------------------------
 Name:- mx_vessel_hygiene
 Type:- INT
@@ -131,23 +115,7 @@ Description:- Hygiene Status of unit Mx
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::14
---------------------------------------------------
-Name:- time_fill_end
-Type:- TOD
-Description:- RP_PCMX_FILL end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::15
---------------------------------------------------
-Name:- time_fill_begin
-Type:- TOD
-Description:- RP_PCMX_FILL begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::16
+PARAMETER::12
 --------------------------------------------------
 Name:- toggle_mode
 Type:- BOOL
@@ -155,7 +123,7 @@ Description:- Toggle mode of all used units
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::13
 --------------------------------------------------
 Name:- mx_vessel_state
 Type:- INT
@@ -163,7 +131,7 @@ Description:- Device State of unit Mx
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::14
 --------------------------------------------------
 Name:- mx_vessel_cmd
 Type:- INT
@@ -171,7 +139,7 @@ Description:- Command to unit Mx
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::15
 --------------------------------------------------
 Name:- mx_vessel_subs
 Type:- INT
@@ -191,11 +159,8 @@ ACTION::01
 --------------------------------------------------
 Description:- Log transfer from Mx vessel to filling operation begin time.
 Action:- //Log Mx FILL operation begin
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_fill_begin;
-
 SET;
-S #_log_time_fill_begin;
+S #_log_msg_fill_begin;
 
 // Reset used flags
 SET;
@@ -240,11 +205,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Log that Mx is not in Hygiene status BATCH.
 Action:- //Log time if Mx not in correct Hygiene status BATCH
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_wrong_hygiene;
-
 SET;
-S #_log_time_wrong_hygiene;
 S #_log_msg_wrong_hygiene;
 S #_prompt_abort;
 Verification:- A "uncondJump";
@@ -363,11 +324,8 @@ L "dbCONST".BLK.SAFE.CMD;
 T #_mx_vessel_subs;
 
 //Log FILL operation end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_fill_end;
-
 SET;
-S #_log_time_fill_end;
+S #_log_msg_fill_end;
 R #_prompt_abort_confirm_yes;
 Verification:- A "uncondJump";
 

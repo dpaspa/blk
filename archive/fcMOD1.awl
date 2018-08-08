@@ -52,8 +52,8 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcOrigin             := #p.origin.mc ,
-        mcOwner              := #p.owner.mc
+    (   mcRead             := #p.read.mc ,
+        mcWrite              := #p.write.mc
     );
 
 NETWORK
@@ -65,7 +65,7 @@ TITLE = Device command LOCAL
     // CMD is LOCAL:                                                          //
     //------------------------------------------------------------------------//
     A(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.MOD1.CMD.LOCAL;
     ==I;
     );
@@ -77,7 +77,7 @@ TITLE = Device command REMOTE
     // CMD is REMOTE:                                                         //
     //------------------------------------------------------------------------//
     A(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.MOD1.CMD.REMOTE;
     ==I;
     );
@@ -97,9 +97,9 @@ TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
     // CMD is DISABLE then close regardless of any interlock:                 //
     //------------------------------------------------------------------------//
-    O #p.origin.mc.INTERLOCK;
+    O #p.read.mc.INTERLOCK;
     O(;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     L "dbCONST".BLK.HE1.CMD.DISABLE;
     ==I;
     );
@@ -117,7 +117,7 @@ TITLE = LOCAL valve position setpoint
     //------------------------------------------------------------------------//
     A #cmdLocal;
     JCN _b;
-    L #p.owner.POS_LOCAL;
+    L #p.write.POS_LOCAL;
     T #tPOS;
 _b:   NOP 0;
 
@@ -128,7 +128,7 @@ TITLE = REMOTE valve position setpoint
     //------------------------------------------------------------------------//
     A #cmdRemote;
     JCN _c;
-    L #p.owner.POS_REMOTE;
+    L #p.write.POS_REMOTE;
     T #tPOS;
 _c:   NOP 0;
 
@@ -149,7 +149,7 @@ TITLE = Unscaling of Control Valve Position
         LO_LIM               := 0.0 ,
         BIPOLAR              := 0 ,
         RET_VAL              := #tRetVal ,
-        OUT                  := #p.origin.RAW_OUTPUT
+        OUT                  := #p.read.RAW_OUTPUT
     );
 _d:   NOP 0;
 
@@ -162,10 +162,10 @@ TITLE = Device State DISABLED if valve not operating
     // DISABLED if valve output is to be off:                                 //
     //------------------------------------------------------------------------//
     ON #tDO;
-    O #p.origin.mc.INTERLOCK;
+    O #p.read.mc.INTERLOCK;
     JCN _e;
     L "dbCONST".BLK.MOD1.STATE.DISABLED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _e:   NOP 0;
 
 NETWORK
@@ -174,10 +174,10 @@ TITLE = Valve close if Device State DISABLED
     // If valve DISABLED then analog output setpoint value should be 0:       //
     //------------------------------------------------------------------------//
     ON #tDO;
-    O #p.origin.mc.INTERLOCK;
+    O #p.read.mc.INTERLOCK;
     JCN _f;
     L 0;
-    T #p.origin.RAW_OUTPUT;
+    T #p.read.RAW_OUTPUT;
 _f:   NOP 0;
 
 NETWORK
@@ -189,7 +189,7 @@ TITLE = State LOCAL if commanded
     A #cmdLocal;
     JCN _g;
     L "dbCONST".BLK.MOD1.STATE.LOCAL;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _g:   NOP 0;
 
 NETWORK
@@ -201,6 +201,6 @@ TITLE = State REMOTE if commanded
     A #cmdRemote;
     JCN _h;
     L "dbCONST".BLK.MOD1.STATE.REMOTE;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _h:   NOP 0;
 END_FUNCTION

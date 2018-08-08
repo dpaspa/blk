@@ -46,8 +46,8 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcOrigin             := #p.origin.mc ,
-        mcOwner              := #p.owner.mc
+    (   mcRead             := #p.read.mc ,
+        mcWrite              := #p.write.mc
     );
 
 NETWORK
@@ -60,7 +60,7 @@ TITLE = Get Device command if CLOSE
     //------------------------------------------------------------------------//
     A(;
     L "dbCONST".BLK.ZSC1.CMD.CLOSE;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     ==I;
     );
     = #cmdCLOSE;
@@ -72,7 +72,7 @@ TITLE = Get Device command if OPEN
     //------------------------------------------------------------------------//
     A(;
     L "dbCONST".BLK.ZSC1.CMD.OPEN;
-    L #p.owner.mc.CMD;
+    L #p.write.mc.CMD;
     ==I;
     );
     = #cmdOPEN;
@@ -86,15 +86,15 @@ TITLE = Process Digital Input Signal
     // Calculate the process value based on the mode:                         //
     //------------------------------------------------------------------------//
     O(;
-    A #p.origin.DI_Auto;
-    A #p.origin.mc.modeAUTO;
+    A #p.read.DI_Auto;
+    A #p.read.mc.modeAUTO;
     );
     O(;
-    A #p.owner.DI_Manual;
-    A #p.origin.mc.modeMANUAL;
+    A #p.write.DI_Manual;
+    A #p.read.mc.modeMANUAL;
     );
     = #tPV;
-    = #p.origin.PV;
+    = #p.read.PV;
 
 NETWORK
 TITLE = Set ALARM Flag
@@ -105,10 +105,10 @@ TITLE = Set ALARM Flag
     // When the alarm cutout flag is set the alarm message is not raised:     //
     //------------------------------------------------------------------------//
     AN #tPV;
-    AN #p.owner.CUTOUT;
-    AN #p.origin.mc.modeOOS;
+    AN #p.write.CUTOUT;
+    AN #p.read.mc.modeOOS;
     AN #cmdOPEN;
-    = #p.origin.ALARM;
+    = #p.read.ALARM;
 
 NETWORK
 TITLE = Set Device State to CLOSED if switch is on
@@ -121,7 +121,7 @@ TITLE = Set Device State to CLOSED if switch is on
     A #tPV;
     JCN _a;
     L "dbCONST".BLK.ZSC1.STATE.CLOSED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _a:   NOP 0;
 
 NETWORK
@@ -140,7 +140,7 @@ TITLE = Set Device State to MISMATCH if CLOSED state does not follow command
     );
     JCN _b;
     L "dbCONST".BLK.ZSC1.STATE.MISMATCH;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _b:   NOP 0;
 
 NETWORK
@@ -152,6 +152,6 @@ TITLE = Set Device State to OPENED if switch is off and command is OPEN
     AN #tPV;
     JCN _c;
     L "dbCONST".BLK.ZSC1.STATE.OPENED;
-    T #p.origin.mc.STATE;
+    T #p.read.mc.STATE;
 _c:   NOP 0;
 END_FUNCTION_BLOCK

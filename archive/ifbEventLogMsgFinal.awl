@@ -44,38 +44,23 @@ VAR_TEMP
     almError : Bool;
     almState : Byte;
     almStatus : Word;
-    raiseEvent : Bool;
 END_VAR
 
 BEGIN
 @@ATTR_BEGIN|pEventLogMsgAll@@
 NETWORK
-TITLE = Check if message event needs to be raised
+TITLE = Raise message event if required
     //------------------------------------------------------------------------//
     // EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT  //
     // EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT  //
     //                                                                        //
-    // Check if real message event or test signal number requested:           //
+    // Raise the simple message event if requested. No acknowledge required:  //
     //------------------------------------------------------------------------//
     L @@IDXEVENT@@;
     T #SourceData;
 
-    A #eventLogMsg[@@IDXEVENT@@].trigger;
-    FP #eventLogMsg[@@IDXEVENT@@].edgeTrigger;
-    O(;
-    L "testEventLogMsg";
-    L #SourceData;
-    ==I;
-    );
-    = #raiseEvent;
-
-NETWORK
-TITLE = Raise message event if required
-    //------------------------------------------------------------------------//
-    // Raise the simple message event if requested. No acknowledge required:  //
-    //------------------------------------------------------------------------//
     CALL #Program_Alarm_@@IDXEVENT@@
-    (   SIG       := #raiseEvent ,
+    (   SIG       := #eventLogMsg[@@IDXEVENT@@].trigger ,
 		SD_1      := #SourceData ,
         Error     := #Alarm@@IDXEVENT@@_ErrorBit1 ,
         Status    := #Alarm@@IDXEVENT@@_StatusWord1

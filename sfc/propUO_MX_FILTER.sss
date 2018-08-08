@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 2/08/2018 4:28:26 PM by David Paspa
+generated on 8/08/2018 2:10:40 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -29,13 +29,21 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- prompt_filt_completed
+Type:- BOOL
+Description:- UO_MX_FILTER Operator to confirm filtration completed 
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
 Name:- emt_hex_setpoint
 Type:- REAL
 Description:- Heat exchanger temperature controller temperature setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::3
 --------------------------------------------------
 Name:- vessel_mx
 Type:- INT
@@ -43,7 +51,7 @@ Description:- Manufacturing vessel selection M1 or M2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::4
 --------------------------------------------------
 Name:- vessel_sy
 Type:- INT
@@ -51,7 +59,7 @@ Description:- Storage vessel selection S1 or S2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::5
 --------------------------------------------------
 Name:- log_msg_temperature_abort
 Type:- BOOL
@@ -59,7 +67,7 @@ Description:- UO_MX_FILTER Operation aborted due to HiHi temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::6
 --------------------------------------------------
 Name:- log_msg_hihi_temperature
 Type:- BOOL
@@ -67,7 +75,7 @@ Description:- UO_MX_FILTER Vessel temperature reached High High setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::7
 --------------------------------------------------
 Name:- r_mass_expect_reduced
 Type:- REAL
@@ -75,7 +83,7 @@ Description:- Expected Mass value to be reduced
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::8
 --------------------------------------------------
 Name:- emv_vessel_ti_vessel_pv
 Type:- REAL
@@ -83,7 +91,7 @@ Description:- Mx temperature indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::9
 --------------------------------------------------
 Name:- r_temp_limit_h
 Type:- REAL
@@ -91,7 +99,7 @@ Description:- Vessel temperature High limit setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::10
 --------------------------------------------------
 Name:- r_temp_limit_hh
 Type:- REAL
@@ -99,7 +107,7 @@ Description:- Vessel temperature High High limit setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::11
 --------------------------------------------------
 Name:- vessel_mass_alarm
 Type:- BOOL
@@ -107,7 +115,7 @@ Description:- Internal vessel mass alarm flag
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::12
 --------------------------------------------------
 Name:- hi_temperature_alarm
 Type:- BOOL
@@ -115,7 +123,7 @@ Description:- Internal vessel temperature alarm flag
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::13
 --------------------------------------------------
 Name:- FL_TIMER
 Type:- "TON"
@@ -123,7 +131,7 @@ Description:- Timer for TIME_FILTER
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::14
 --------------------------------------------------
 Name:- r_time_mass_reduce
 Type:- TIME
@@ -131,15 +139,15 @@ Description:- Time for mass reduce
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::15
 --------------------------------------------------
-Name:- mass_initial
+Name:- mass_prod_initial
 Type:- REAL
 Description:- Initial Mx vessel mass
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::16
 --------------------------------------------------
 Name:- log_msg_vessel_mass
 Type:- BOOL
@@ -147,7 +155,7 @@ Description:- UO_MX_FILTER Vessel mass not reduced enough in time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::17
 --------------------------------------------------
 Name:- log_msg_hi_temperature
 Type:- BOOL
@@ -155,25 +163,17 @@ Description:- UO_MX_FILTER Vessel temperature reached High setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::18
 --------------------------------------------------
-Name:- log_time_filtration_end
+Name:- log_msg_filtration_end
 Type:- BOOL
 Description:- UO_MX_FILTER Filtration end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
---------------------------------------------------
-Name:- time_filter_end
-Type:- TIME
-Description:- UO_MX_FILTER end time
-ParameterInOut:- VAR
-
---------------------------------------------------
 PARAMETER::19
 --------------------------------------------------
-Name:- log_time_filter_end
+Name:- log_msg_filter_end
 Type:- BOOL
 Description:- UO_MX_FILTER end time
 ParameterInOut:- VAR
@@ -181,21 +181,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::20
 --------------------------------------------------
-Name:- time_filter_begin
-Type:- TIME
-Description:- UO_MX_FILTER begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::21
---------------------------------------------------
-Name:- log_time_filter_begin
+Name:- log_msg_filter_begin
 Type:- BOOL
 Description:- UO_MX_FILTER begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::21
 --------------------------------------------------
 Name:- emm_vessel_mass_nett
 Type:- REAL
@@ -203,7 +195,7 @@ Description:- Mx mass indicator
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::22
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -211,7 +203,7 @@ Description:- Substate selection of emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::23
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -219,7 +211,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::24
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -227,7 +219,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::25
 --------------------------------------------------
 Name:- emt_hex_subs
 Type:- INT
@@ -235,7 +227,7 @@ Description:- Substate selection of emt_hex
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::26
 --------------------------------------------------
 Name:- emt_hex_state
 Type:- INT
@@ -243,7 +235,7 @@ Description:- Device State of emt_hex
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::27
 --------------------------------------------------
 Name:- emt_hex_cmd
 Type:- INT
@@ -251,7 +243,7 @@ Description:- Command to emt_hex
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::29
+PARAMETER::28
 --------------------------------------------------
 Name:- prompt_filtration
 Type:- BOOL
@@ -259,7 +251,7 @@ Description:- UO_MX_FILTER Operator to confirm to start filtration
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::29
 --------------------------------------------------
 Name:- prompt_filtration_confirm_yes
 Type:- BOOL
@@ -267,7 +259,7 @@ Description:- UO_MX_FILTER Operator to confirm to start filtration confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::31
+PARAMETER::30
 --------------------------------------------------
 Name:- temp_filt
 Type:- REAL
@@ -275,7 +267,7 @@ Description:- Filter temperature setpoint
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::31
 --------------------------------------------------
 Name:- emx_smfl_state
 Type:- INT
@@ -283,7 +275,7 @@ Description:- Device State of emx_smfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::32
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -291,7 +283,7 @@ Description:- Device State of emx_transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::33
 --------------------------------------------------
 Name:- emx_smfl_cmd
 Type:- INT
@@ -299,7 +291,7 @@ Description:- Command to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::34
 --------------------------------------------------
 Name:- emx_smfl_subs
 Type:- INT
@@ -307,7 +299,7 @@ Description:- Substate selection of emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::35
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -315,7 +307,7 @@ Description:- Command to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::36
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -323,23 +315,23 @@ Description:- Substate selection of emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::37
 --------------------------------------------------
 Name:- log_msg_filtration_complete
 Type:- BOOL
-Description:- UO_MX_FILTER Operator confirmed filtration complete 
+Description:- UO_MX_FILTER Operator confirmed filtration completed 
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::38
+--------------------------------------------------
+Name:- prompt_filt_completed_confirm_yes
+Type:- BOOL
+Description:- UO_MX_FILTER Operator to confirm filtration completed confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::39
---------------------------------------------------
-Name:- confirm_complete
-Type:- BOOL
-Description:- UO_MX_FILTER Sync flag to confirm filtration complete
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::40
 --------------------------------------------------
 Name:- r_mass_throttle_mx
 Type:- REAL
@@ -347,7 +339,7 @@ Description:- Mass nearing the end of transfer
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::40
 --------------------------------------------------
 Name:- r_pres_hpca_filt2
 Type:- REAL
@@ -355,23 +347,15 @@ Description:- HCPA Pressure control setpoint 2
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::41
 --------------------------------------------------
-Name:- start_hpca
+Name:- sync_read_start_hpca
 Type:- BOOL
-Description:- UO_MX_FILTER Sync flag to start HPN2 supply
+Description:- UO_MX_FILTER Sync flag to start HPCA supply
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::43
---------------------------------------------------
-Name:- time_filtration_end
-Type:- TOD
-Description:- UO_MX_FILTER Filtration end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::44
+PARAMETER::42
 --------------------------------------------------
 Name:- emx_mmfl_cmd
 Type:- INT
@@ -379,7 +363,7 @@ Description:- Command emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::43
 --------------------------------------------------
 Name:- emx_mmfl_subs
 Type:- INT
@@ -387,7 +371,7 @@ Description:- Substate selection of emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::44
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -395,7 +379,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::45
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -403,7 +387,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::46
 --------------------------------------------------
 Name:- emc_water_state
 Type:- INT
@@ -411,7 +395,7 @@ Description:- Device state of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::47
 --------------------------------------------------
 Name:- emc_water_subs
 Type:- INT
@@ -419,7 +403,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::48
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -427,7 +411,7 @@ Description:- emc_gas_setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::49
 --------------------------------------------------
 Name:- emx_mmfl_state
 Type:- INT
@@ -435,7 +419,7 @@ Description:- Device State of emx_mmfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::50
 --------------------------------------------------
 Name:- emc_water_cmd
 Type:- INT
@@ -443,7 +427,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::51
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -451,7 +435,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::54
+PARAMETER::52
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -459,7 +443,7 @@ Description:- emc_gas_medium
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::55
+PARAMETER::53
 --------------------------------------------------
 Name:- ema_vessel_state
 Type:- INT
@@ -467,7 +451,7 @@ Description:- Device State of ema_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::56
+PARAMETER::54
 --------------------------------------------------
 Name:- ema_vessel_subs
 Type:- INT
@@ -475,7 +459,7 @@ Description:- Substate selection to ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::57
+PARAMETER::55
 --------------------------------------------------
 Name:- ema_vessel_cmd
 Type:- INT
@@ -483,23 +467,23 @@ Description:- ema_vessel_cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::58
+PARAMETER::56
 --------------------------------------------------
-Name:- ready_hpca
+Name:- sync_write_ready_hpca
 Type:- BOOL
 Description:- UO_MX_FILTER Sync flag ready to start HPN2 supply
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::59
+PARAMETER::57
 --------------------------------------------------
-Name:- filtration_complete
+Name:- sync_read_filtration_complete
 Type:- BOOL
 Description:- UO_MX_FILTER Sync flag to start transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::60
+PARAMETER::58
 --------------------------------------------------
 Name:- r_pres_hpca_filt
 Type:- REAL
@@ -521,11 +505,8 @@ ACTION::01
 Description:- Log Mx Filter operation begin time.
 Propt operator to cinfirm Pre-Filter is connected to FPn1 ZSCn113 by starting EMX1_SETUP_FILTER.
 Action:- //Log Mx Filter operation begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_filter_begin;
-
 SET;
-S #_log_time_filter_begin;
+S #_log_msg_filter_begin;
 
 //Start EMX1_SETUP_FILTER.
 L "dbCONST".BLK.EMX1.SUBS.SETUP_FILTER;
@@ -612,22 +593,22 @@ L "dbCONST".BLK.STATE.STOPPED;
 --------------------------------------------------
 ACTION::02
 --------------------------------------------------
-Description:- Fetch the current vessel mass and store in mass_initial.
+Description:- Fetch the current vessel mass and store in mass_prod_initial.
 Prompt operator to start filtration and reset flags.
 Start TIME_MASS_REDUCE.
-Action:- //Clear out mass_initial.
+Action:- //Clear out mass_prod_initial.
 L     0.000000e+000; 
-T     #_mass_initial; 
+T     #_mass_prod_initial; 
 
 SET;
 S #_prompt_filtration;
-R #_ready_hpca;
+R #_sync_write_ready_hpca;
 R #_vessel_mass_alarm;
 R #_hi_temperature_alarm;
 
 //Store current mass to initial mass.
 L     #_emm_vessel_mass_nett;
-T     #_mass_initial; 
+T     #_mass_prod_initial; 
 
 //Start Timer for TIME_MASS_REDUCE .
 A #_FL_TIMER.Q;
@@ -790,7 +771,7 @@ ACTION::02
 --------------------------------------------------
 Description:- Set flag ready_HPCA
 Action:- SET;
-S #_ready_hpca;
+S #_sync_write_ready_hpca;
 Verification:- A "uncondJump";
 
 
@@ -801,7 +782,7 @@ TRNNo:- 04
 Title:- Parent set start flag?
 EmptyTransition:- False
 Description:- Wait for parent to indicate ready for HPCA.
-Condition:- A #_start_hpca;
+Condition:- A #_sync_read_start_hpca;
 
 
 --------------------------------------------------
@@ -869,7 +850,7 @@ Description:- Jump if mass difference is less than mass setpoint after TIME_MASS
 Condition:- A #_FL_TIMER.Q;
 AN #_vessel_mass_alarm;
 A(;
-L #_mass_initial;
+L #_mass_prod_initial;
 L #_emm_vessel_mass_nett;
 -R;
 L #_r_mass_expect_reduced;
@@ -994,9 +975,9 @@ Action:- // Set HPCA valve pressure control at setpoint 2
 L #_r_pres_hpca_filt2;
 T #_emc_gas_setpoint;
 
-
 SET;
-R #_ready_HPCA;
+R #_sync_write_ready_hpca;
+S #_prompt_filt_completed;
 Verification:- A "uncondJump";
 
 
@@ -1007,7 +988,7 @@ TRNNo:- 12
 Title:- Filtration complete?
 EmptyTransition:- False
 Description:- Wait for operator to confirm filtration is complete.
-Condition:- A #_confirm_complete;
+Condition:- A #_prompt_filt_completed_confirm_yes;
 
 
 --------------------------------------------------
@@ -1024,13 +1005,10 @@ Description:- Log operator confirmation transfer complete and filtration operati
 Action:- //Log operator confirmation transfer complete 
 SET;
 S #_log_msg_filtration_complete;
+R #_prompt_filt_completed_confirm_yes;
 
 //Log FILTRATION operation end time
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_filtration_end;
-
-SET;
-S #_log_time_filtration_end;
+S #_log_msg_filtration_end;
 Verification:- A "uncondJump";
 
 
@@ -1041,7 +1019,7 @@ TRNNo:- 13
 Title:- Transfer is complete?
 EmptyTransition:- False
 Description:- Wait for parent to indicate transfer is complete when flag filtration_complete is set by the parent.
-Condition:- A #_filtration_complete;
+Condition:- A #_sync_read_filtration_complete;
 
 
 --------------------------------------------------
@@ -1141,11 +1119,8 @@ L "dbCONST".BLK.CMD.START;
 T #_emv_vessel_cmd;
 
 //Log Mx Filter operation end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_time_filter_end;
-
 SET;
-S #_log_time_filter_end;
+S #_log_msg_filter_end;
 Verification:- A(;
 L #_emv_vessel_subs;
 L "dbCONST".BLK.EMV1.SUBS.MANWAY;
