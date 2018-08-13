@@ -658,4 +658,61 @@ TITLE = Running if output should be on
     L "dbCONST".BLK.SIC1.STATE.RUNNING;
     T #p.read.mc.STATE;
 _t:   NOP 0;
+
+NETWORK
+TITLE = Pack the alarm bits
+    //------------------------------------------------------------------------//
+    // Pack the alarm bits into an integer for the HMI to read:               //
+    //------------------------------------------------------------------------//
+    L 0;
+    T #p.read.mc.ALARM;
+
+    A #p.read.ALM_BRK;
+    JCN _not_ALM_BRK;
+    L 1;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_ALM_BRK:   NOP 0;
+
+    A #p.read.ALM_FLP;
+    JCN _not_ALM_FLP;
+    L 2;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_ALM_FLP:   NOP 0;
+
+    A #p.read.ALM_FLT;
+    JCN _not_ALM_FLT;
+    L 4;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_ALM_FLT:   NOP 0;
+
+    A #p.read.ALM_PHR;
+    JCN _not_ALM_PHR;
+    L 8;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_ALM_PHR:   NOP 0;
+
+    A #p.read.RUN_FAULT;
+    JCN _not_RUN_FAULT;
+    L 16;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_RUN_FAULT:   NOP 0;
+
+    A #p.read.ALM_THM;
+    JCN _not_ALM_THM;
+    L 32;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_ALM_THM:   NOP 0;
+
 END_FUNCTION_BLOCK

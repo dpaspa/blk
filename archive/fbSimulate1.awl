@@ -1,0 +1,67 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Class:       fbSimulate                                                    //
+// Description: Simulates the input status of all instances.                  //
+//                                                                            //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 Izzat            09-Aug-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbSimulate"
+TITLE = Simulate instance inputs
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fbSimulate
+VERSION : 2.0
+
+BEGIN
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|simulatePOS2@@
+NETWORK
+TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
+    //------------------------------------------------------------------------//
+    // Simulate the input switches for @@SCLASS@@:                             //
+    //------------------------------------------------------------------------//
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.OPEN;
+    ==I;
+    );
+    R "@@SINSTANCE@@-ZSC";
+
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.CLOSE;
+    ==I;
+    );
+    S "@@SINSTANCE@@-ZSC";
+
+@@ATTR_END|simulatePOS2@@
+
+@@ATTR_BEGIN|simulateZSC1@@
+NETWORK
+TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
+    //------------------------------------------------------------------------//
+    // Simulate the input switches for @@SCLASS@@:                             //
+    //------------------------------------------------------------------------//
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.OPEN;
+    ==I;
+    );
+    R "@@SINSTANCE@@-DI";
+
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.CLOSE;
+    ==I;
+    );
+    S "@@SINSTANCE@@-DI";
+
+@@ATTR_END|simulateZSC1@@
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

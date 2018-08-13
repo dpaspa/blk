@@ -157,7 +157,6 @@ VAR
         childCompleted : Bool;
         childError : Bool;
         childFailed : Bool;
-        childFlowpath : Bool;
         childInterlocked : Bool;
         childNotAuto : Bool;
         childMismatch : Bool;
@@ -260,7 +259,7 @@ TITLE = Check if any child is in error
 @@ATTR_BEGIN|CHILD_CASCADE@@
     O(;
     @@CHILDACQUIRESTATEMENT@@
-    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.ERROR
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.ERROR;
     );
 @@ATTR_END|CHILD_CASCADE@@
     = #flags.childError;
@@ -297,7 +296,6 @@ TITLE = Check if any Child has Failed
     // inhibited:                                                             //
     //------------------------------------------------------------------------//
     O #flags.childError;
-    O #flags.childFlowpath;
     O #flags.childInterlocked;
     O #flags.childNotAuto;
     O #flags.childUnavailable;
@@ -305,8 +303,24 @@ TITLE = Check if any Child has Failed
     A #flags.childMismatch;
     A #timeCheckChildStateExpired;
     );
-    = #flags.childFailed;
-    = #p.read.bmc.CHILD_FAIL;
+    S #flags.childFailed;
+
+NETWORK
+TITLE = Clear the latched child faild error
+    //------------------------------------------------------------------------//
+    // The child fail will latch until the operator requests to try again     //
+    // from the HMI:                                                          //
+    //------------------------------------------------------------------------//
+    AN #flags.childError;
+    AN #flags.childInterlocked;
+    AN #flags.childNotAuto;
+    AN #flags.childUnavailable;
+    AN(;
+    A #flags.childMismatch;
+    A #timeCheckChildStateExpired;
+    );
+    A #p.read.bmc.CHILD_FAIL;
+    R #flags.childFailed;
 
 NETWORK
 TITLE = Call General Mode and Command handling block
@@ -612,6 +626,7 @@ TITLE = Reset child completed flag
 _state_STARTING: NOP 0;
 	A #p.read.bmc.eventCmdStart;
     R #flags.childCompleted;
+    R #p.read.bmc.CHILD_FAIL;
 
 @@ATTR_BEGIN|STATE@@
 NETWORK
@@ -861,9 +876,9 @@ TITLE = Clear the operator prompt flags
     JCN _clrPrompt;
 @@ATTR_BEGIN|pEventPrompt@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    R "idbEventPrompt".eventPrompt[@@IDXEVENT@@].trigger;
-    R "idbEventPrompt".eventPrompt[@@IDXEVENT@@].confirmYes;
-    R "idbEventPrompt".eventPrompt[@@IDXEVENT@@].confirmNo;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].trigger;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmYes;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
 @@ATTR_END|pEventPrompt@@
 
 _clrPrompt:   NOP 0;
@@ -892,14 +907,17 @@ TITLE = Clear the log message flags
     //------------------------------------------------------------------------//
     // CLEAR LOG MESSAGE   CLEAR LOG MESSAGE   CLEAR LOG MESSAGE   CLEAR LOG  //
     //                                                                        //
-    // Clear the SFC log message bit and the global shared event DB bit:      //
+    // Clear the SFC log message bits and the class bits:                     //
     //------------------------------------------------------------------------//
     A #p.read.bmc.eventCmdStart;
     JCN _clrLogMsg;
-@@ATTR_BEGIN|pEventLogMsg@@
+    L 0;
+@@ATTR_BEGIN|pEventLogMsgWordClass@@
+    T #p.read.eventLogMsg_@@CWORD@@;
+@@ATTR_END|pEventLogMsgWordClass@@
+@@ATTR_BEGIN|pEventLogMsgClass@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    R "dbEventLogMsg".events.eventLogMsg[@@IDXEVENT@@].trigger;
-@@ATTR_END|pEventLogMsg@@
+@@ATTR_END|pEventLogMsgClass@@
 
 _clrLogMsg:   NOP 0;
 @@ATTR_END|pEventLogMsgExists@@
@@ -1116,7 +1134,8 @@ TITLE = Block errors
     // Set the child state mismatch error status if active:                   //
     //------------------------------------------------------------------------//
     A #flags.childMismatch;
-    = #p.read.err.childError;
+    A #timeCheckChildStateExpired;
+    = #p.read.err.childMismatch;
     = #p.read.mc.ERROR;
 
 @@ATTR_BEGIN|STATE@@
@@ -1151,9 +1170,10 @@ TITLE = Check if any Child state does not match the command
     //------------------------------------------------------------------------//
     A(;
 @@ATTR_BEGIN|CHILD_CASCADE@@
-    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.FLOWPATH;
     O(;
     @@CHILDACQUIRESTATEMENT@@
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.FLOWPATH;
     A(;
     L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.STATE;
     L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.CMD;
@@ -1164,20 +1184,31 @@ TITLE = Check if any Child state does not match the command
     L "dbCONST".BLK.STATE.COMPLETED;
     <>I;
     );
+    AN(;
+    A(;
+    L "dbCONST".BLK.CMD.START;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.CMD;
+    ==I;
+    );
+    A(;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.STATE;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.SUBS;
+    ==I;
+    );
+    );
+
     );
 @@ATTR_END|CHILD_CASCADE@@
     );
     JCN _noMismatch;
 
     S #flags.childMismatch;
-    S #flags.childFlowpath;
     JCN _noResetMismatch;
     CLR;
 
 _noMismatch:   NOP 0;
     S #flags.childCompleted;
     R #flags.childMismatch;
-    R #flags.childFlowpath;
 
 _noResetMismatch:   NOP 0;
 
@@ -1199,22 +1230,6 @@ TITLE = If child command changed, start timer to wait for child state
         ET                          := #timeCheckChildStateElapsed
     );
     NOP 0;
-
-@@ATTR_BEGIN|SFC@@
-NETWORK
-TITLE = Pause any running sequence if child mismatch
-    //------------------------------------------------------------------------//
-    // Pause running sequence if any child state does not match its command:  //
-    //------------------------------------------------------------------------//
-    A #timeCheckChildStateExpired;
-    A #flags.childMismatch;
-    A #subsRunning.@@STATE@@;
-    JCN _noPause_@@STATE@@;
-    L "dbCONST".SEQ.CMD.PAUSE;
-    T #@@SFC@@.smc.SQ_CMD;
-_noPause_@@STATE@@:   NOP 0;
-
-@@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
 NETWORK
@@ -1264,9 +1279,21 @@ TITLE = Raise operator prompt if required
 @@ATTR_END|SFC@@
     JCN _noRunPrompt;
 @@ATTR_BEGIN|pEventPrompt@@
+
     A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = "idbEventPrompt".eventPrompt[@@IDXEVENT@@].trigger;
+    JCN _not_eventPrompt_@@IDXEVENT@@;
+    S "dbEVENT".eventPrompt.event[@@IDXEVENT@@].trigger;
+    L #p.write.mc.SERIALNUM;
+    T "dbEVENT".eventPrompt.event[@@IDXEVENT@@].numSerial;
+    R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmYes;
+@@ATTR_BEGIN|pEventConfirmNoExists@@
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
+@@ATTR_END|pEventConfirmNoExists@@
+_not_eventPrompt_@@IDXEVENT@@:   NOP 0;
+
 @@ATTR_END|pEventPrompt@@
+
 _noRunPrompt:   NOP 0;
 
 @@ATTR_END|pEventPromptExists@@
@@ -1284,14 +1311,28 @@ TITLE = Return operator confirm bits if made
 @@ATTR_END|SFC@@
     JCN _noRunConfirm;
 @@ATTR_BEGIN|pEventPrompt@@
-    A "idbEventPrompt".eventPrompt[@@IDXEVENT@@].confirmYes;
-    = #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_yes;
+
+    A "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmYes;
+    JCN _not_eventPrompt_@@IDXEVENT@@_confirmYes;
+    S #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_yes;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].trigger;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmYes;
 @@ATTR_BEGIN|pEventConfirmNoExists@@
-    A "idbEventPrompt".eventPrompt[@@IDXEVENT@@].confirmNo;
-    = #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_no;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
+@@ATTR_END|pEventConfirmNoExists@@
+_not_eventPrompt_@@IDXEVENT@@_confirmYes:   NOP 0;
+@@ATTR_BEGIN|pEventConfirmNoExists@@
+    A "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
+    JCN _not_eventPrompt_@@IDXEVENT@@_confirmNo;
+    S #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_no;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].trigger;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmYes;
+_not_eventPrompt_@@IDXEVENT@@_confirmNo:   NOP 0;
 @@ATTR_END|pEventConfirmNoExists@@
 
 @@ATTR_END|pEventPrompt@@
+
 _noRunConfirm:   NOP 0;
 
 @@ATTR_END|pEventPromptExists@@
@@ -1308,10 +1349,18 @@ TITLE = Log message if required
     O #subsRunning.@@STATE@@;
 @@ATTR_END|SFC@@
     JCN _noRunLogMsg;
-@@ATTR_BEGIN|pEventLogMsg@@
-    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = "dbEventLogMsg".events.eventLogMsg[@@IDXEVENT@@].trigger;
-@@ATTR_END|pEventLogMsg@@
+@@ATTR_BEGIN|pEventLogMsgClass@@
+    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;   // Bit @@CBIT@@
+    JCN _not_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
+    L @@MAGICNUM@@;
+    L #p.read.eventLogMsg_@@CWORD@@;
+    +I;
+    T #p.read.eventLogMsg_@@CWORD@@;
+    R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+_not_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@:   NOP 0;
+
+@@ATTR_END|pEventLogMsgClass@@
+
 _noRunLogMsg:   NOP 0;
 
 @@ATTR_END|pEventLogMsgExists@@
@@ -1538,6 +1587,69 @@ _blkComplete@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|STATE@@
 
+NETWORK
+TITLE = Pack the alarm bits
+    //------------------------------------------------------------------------//
+    // Pack the alarm bits into an integer for the HMI to read:               //
+    //------------------------------------------------------------------------//
+    L 0;
+    T #p.read.mc.ALARM;
+
+    A #p.read.err.badParameter;
+    JCN _not_badParameter;
+    L 1;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_badParameter:   NOP 0;
+
+    A #p.read.err.childError;
+    JCN _not_childError;
+    L 2;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_childError:   NOP 0;
+
+    A #p.read.err.childInterlocked;
+    JCN _not_childInterlocked;
+    L 4;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_childInterlocked:   NOP 0;
+
+    A #p.read.err.childNotAuto;
+    JCN _not_childNotAuto;
+    L 8;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_childNotAuto:   NOP 0;
+
+    A #p.read.err.childSafeState;
+    JCN _not_childSafeState;
+    L 16;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_childSafeState:   NOP 0;
+
+    A #p.read.err.childUnavailable;
+    JCN _not_childUnavailable;
+    L 32;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_childUnavailable:   NOP 0;
+
+    A #p.read.err.interlocked;
+    JCN _not_interlocked;
+    L 64;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_interlocked:   NOP 0;
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

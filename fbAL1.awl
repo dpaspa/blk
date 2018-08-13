@@ -89,14 +89,6 @@ TITLE = Promote the analog input attributes
     T #p.read.PV;
     A #p.read.ai.DQ;
     = #p.read.DQ;
-    A #p.read.ai.ALARM_LL;
-    = #p.read.ALARM_LL;
-    A #p.read.ai.ALARM_L;
-    = #p.read.ALARM_L;
-    A #p.read.ai.ALARM_H;
-    = #p.read.ALARM_H;
-    A #p.read.ai.ALARM_HH;
-    = #p.read.ALARM_HH;
 
 NETWORK
 TITLE = Set INTERLOCK Flag
@@ -107,6 +99,7 @@ TITLE = Set INTERLOCK Flag
     // Set interlock if any external or any problem with the measurement:     //
     //------------------------------------------------------------------------//
     O #p.read.mc.INTERLOCK;
+    O #p.read.ai.ALARM_LL;
     O #p.read.ai.ALARM_HH;
     ON #p.read.ai.DQ;
     = #p.read.mc.INTERLOCK;
@@ -138,4 +131,53 @@ TITLE = Set Device State to Fault if any field signal error
     T #p.read.mc.STATE;
     S #p.read.mc.ERROR;
 _b: NOP 0;
+
+NETWORK
+TITLE = Pack the alarm bits
+    //------------------------------------------------------------------------//
+    // Pack the alarm bits into an integer for the HMI to read:               //
+    //------------------------------------------------------------------------//
+    L 0;
+    T #p.read.mc.ALARM;
+
+    A #p.read.ai.ALARM_HH;
+    JCN _not_ALARM_HH;
+    L 1;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_ALARM_HH:   NOP 0;
+
+    A #p.read.ai.ALARM_H;
+    JCN _not_ALARM_H;
+    L 2;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_ALARM_H:   NOP 0;
+
+    A #p.read.ai.ALARM_L;
+    JCN _not_ALARM_L;
+    L 4;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_ALARM_L:   NOP 0;
+
+    A #p.read.ai.ALARM_LL;
+    JCN _not_ALARM_LL;
+    L 8;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_ALARM_LL:   NOP 0;
+
+    A #p.read.ai.DQ;
+    JCN _not_DQ;
+    L 16;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_DQ:   NOP 0;
+
 END_FUNCTION_BLOCK

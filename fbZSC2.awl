@@ -122,6 +122,7 @@ TITLE = Set ALARM Flag
     // Alarm if mismatch and not OOS:                                         //
     //------------------------------------------------------------------------//
     A tMismatch;
+    A #p.write.mc.ARMED;
     AN #p.read.mc.modeOOS;
     = #p.read.ALARM;
 
@@ -154,9 +155,29 @@ _b:   NOP 0;
 
 NETWORK
 TITLE = Set Device State to MISMATCH if state does not follow command
+    //------------------------------------------------------------------------//
+    // Mismatch if the command does not equal the state:                      //
+    //------------------------------------------------------------------------//
     A tMismatch;
     JCN _c;
     L "dbCONST".BLK.ZSC2.STATE.MISMATCH;
     T #p.read.mc.STATE;
 _c:   NOP 0;
+
+NETWORK
+TITLE = Pack the alarm bit
+    //------------------------------------------------------------------------//
+    // Pack the alarm bit into an integer for the HMI to read:                //
+    //------------------------------------------------------------------------//
+    L 0;
+    T #p.read.mc.ALARM;
+
+    A #p.read.ALARM;
+    JCN _not_ALARM;
+    L 1;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_ALARM:   NOP 0;
+
 END_FUNCTION_BLOCK

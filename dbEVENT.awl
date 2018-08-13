@@ -1,0 +1,46 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable event words for process alarms and //
+// messages to be logged.                                                     //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.1 David Paspa      10-Aug-2018 NA        Convert triggers to word bits.  //
+// 1.0 David Paspa      14-May-2018 NA        Initial design for S7-1500.     //
+//----------------------------------------------------------------------------//
+DATA_BLOCK "dbEVENT"
+TITLE = Global messages bits
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : dbEVENT
+VERSION : 1.1
+
+STRUCT
+    alarmBlock : STRUCT                     // Block related alarms
+@@TEMPLATE_BEGIN|createLevelsGlobal@@
+@@ATTR_BEGIN|createClassesForLevel@@
+@@ATTR_BEGIN|createInstancesGlobal@@
+        alarm_@@INSTANCE@@ : Int;           // @@CLASS@@ block alarms
+@@ATTR_END|createInstancesGlobal@@
+@@ATTR_END|createClassesForLevel@@
+@@TEMPLATE_END@@
+    END_STRUCT ;
+    eventLogMsg : STRUCT                    // SFC events for logging messages
+@@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
+@@ATTR_BEGIN|pEventLogMsgWordInstance@@
+        event_@@INSTANCE@@_@@CWORD@@ : Int;
+@@ATTR_END|pEventLogMsgWordInstance@@
+@@TEMPLATE_END@@
+    END_STRUCT ;
+    eventPrompt : STRUCT                    // SFC events for operator prompts
+@@TEMPLATE_BEGIN|pEventPromptNum@@
+        event : Array[1..@@IDXEVENTMAX@@] of "udtEventPrompt";   
+@@TEMPLATE_END@@
+    END_STRUCT ;
+END_STRUCT;
+
+BEGIN
+END_DATA_BLOCK

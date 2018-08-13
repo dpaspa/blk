@@ -66,6 +66,7 @@ VAR
 END_VAR
 
 VAR_TEMP
+    bypassFeedback : BOOL;
     cmdCLOSE : Bool;
     cmdOPEN : Bool;
     modeAUTO : Bool;
@@ -215,6 +216,15 @@ TITLE = Valve might be TRAVEL if neither feedback on
     = #feedbackTRAVEL;
 
 NETWORK
+TITLE = Input Bypass Mode In Manual
+    //------------------------------------------------------------------------//
+    //
+    //------------------------------------------------------------------------//
+    A #p.read.mc.modeMANUAL;
+    A #p.read.IGNORE_FB;
+    = #bypassFeedback;
+
+NETWORK
 TITLE = Close command
     //------------------------------------------------------------------------//
     // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
@@ -276,7 +286,10 @@ TITLE = Valve CLOSED if command and feedback CLOSED
     // CLOSED if command is CLOSE and feedback is closed:                     //
     //------------------------------------------------------------------------//
     A #cmdCLOSE;
-    A #feedbackCLOSED;
+    A(;
+    O #feedbackCLOSED;
+    O #bypassFeedback;
+    );
     JCN _c;
     L "dbCONST".BLK.POSx.STATE.CLOSED;
     T #p.read.mc.STATE;
@@ -289,7 +302,10 @@ TITLE = Valve OPENED if command and feedback OPENED
     // OPENED if command is OPEN and feedback is opened:                      //
     //------------------------------------------------------------------------//
     A #cmdOPEN;
-    A #feedbackOPENED;
+    A(;
+    O #feedbackOPENED;
+    O #bypassFeedback;
+    );
     JCN _d;
     L "dbCONST".BLK.POSx.STATE.OPENED;
     T #p.read.mc.STATE;
@@ -302,6 +318,8 @@ TITLE = Valve TRAVEL if command issued and travel timer not expired
     // TRAVEL if command was issued but either open or closed valve feedback  //
     // has not come on yet, provided the travel timer has not expired:        //
     //------------------------------------------------------------------------//
+    AN #bypassFeedback;
+    A(;
     O(;
     A #cmdCLOSE;
     AN #feedbackCLOSED;
@@ -311,6 +329,7 @@ TITLE = Valve TRAVEL if command issued and travel timer not expired
     A #cmdOPEN;
     AN #feedbackOPENED;
     AN #openTMR.Q;
+    );
     );
     JCN _e;
     L "dbCONST".BLK.POSx.STATE.TRAVEL;
@@ -323,6 +342,7 @@ TITLE = Valve failed to CLOSE
     //------------------------------------------------------------------------//
     // Valve failed to CLOSE if travel timer expired but not in CLOSED state: //
     //------------------------------------------------------------------------//
+    AN #bypassFeedback;
     A #cmdCLOSE;
     A #closeTMR.Q;
     A(;
@@ -336,6 +356,7 @@ TITLE = Valve failed to OPEN
     //------------------------------------------------------------------------//
     // Valve failed to OPEN if travel timer expired but not in OPENED state:  //
     //------------------------------------------------------------------------//
+    AN #bypassFeedback;
     A #cmdOPEN;
     A #openTMR.Q;
     A(;
@@ -351,6 +372,7 @@ TITLE = Valve FAULT if both feedbacks on or travel timer expired
     // impossible, or if travel timer expires but feedback never comes on:    //
     //------------------------------------------------------------------------//
     O(;
+    AN #bypassFeedback;
     A #feedbackCLOSED;
     A #feedbackOPENED;
     );
@@ -361,4 +383,29 @@ TITLE = Valve FAULT if both feedbacks on or travel timer expired
     T #p.read.mc.STATE;
     S #p.read.mc.ERROR;
 _f:   NOP 0;
+
+NETWORK
+TITLE = Pack the alarm bits
+    //------------------------------------------------------------------------//
+    // Pack the alarm bits into an integer for the HMI to read:               //
+    //------------------------------------------------------------------------//
+    L 0;
+    T #p.read.mc.ALARM;
+
+    A #p.read.FAULT_C;
+    JCN _not_FAULT_C;
+    L 1;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_FAULT_C:   NOP 0;
+
+    A #p.read.FAULT_O;
+    JCN _not_FAULT_O;
+    L 2;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_FAULT_O:   NOP 0;
+
 END_FUNCTION_BLOCK

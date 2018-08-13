@@ -1,4 +1,42 @@
 ID,Name,"Alarm text [en-US], Alarm text",FieldInfo [Alarm text],Class,Trigger tag,Trigger bit,Acknowledgement tag,Acknowledgement bit,PLC acknowledgement tag,PLC acknowledgement bit,Group,Report,"Info text [en-US], Info text"
-@@TEMPLATE_BEGIN|TAGALARMS@@
-@@COUNTERTEMPLATE|1@@,DiscreteAlarm_@@COUNTERTEMPLATE@@,": <field ref=""0"" /> : @@INSTANCE@@ : @@MESSAGE@@","<ref id = 0; type = AlarmTag; Tag = ""idb@@CLASS@@.f[@@IDX@@].p.read.@@IDBTAG@@""; DisplayType = Text; Length = 6;>",Errors,"""hmiALARMS.ALARM""",@@COUNTERTEMPLATE@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+1,logConfirmYes,": <field ref=""0"" /> : <field ref=""1"" /> : Operator sent Yes confirm to sequence","<ref id = 0; type = AlarmTag; Tag = replyMessage.numSerial; DisplayType = Decimal; Length = 5;>
+<ref id = 1; type = AlarmTag; Tag = replyMessage.userID; DisplayType = Decimal; Length = 5;>",eventOperatorAction,replyMessage.alarmLogConfirm,1,<No value>,0,<No value>,0,<No value>,False,<No value>
+2,logSFCModeAuto,": <field ref=""0"" /> : <field ref=""1"" /> : Operator sent Auto mode command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 5;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 5;>",eventOperatorAction,sfcInterface.alarmLogManualAction,0,<No value>,0,<No value>,0,<No value>,False,<No value>
+3,logConfirmNo,": <field ref=""0"" /> : <field ref=""1"" /> : Operator sent No confirm to sequence","<ref id = 0; type = AlarmTag; Tag = replyMessage.numSerial; DisplayType = Decimal; Length = 5;>
+<ref id = 1; type = AlarmTag; Tag = replyMessage.userID; DisplayType = Decimal; Length = 5;>",eventOperatorAction,replyMessage.alarmLogConfirm,0,<No value>,0,<No value>,0,<No value>,False,<No value>
+4,logSFCModeManual,": <field ref=""0"" /> : <field ref=""1"" /> : Operator sent Manual mode command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 5;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 5;>",eventOperatorAction,sfcInterface.alarmLogManualAction,1,<No value>,0,<No value>,0,<No value>,False,<No value>
+5,logSFCCMDStart,": <field ref=""0"" /> : <field ref=""1"" /> : Operator sent Start command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 5;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 5;>",eventOperatorAction,sfcInterface.alarmLogManualAction,2,<No value>,0,<No value>,0,<No value>,False,<No value>
+6,logSFCCMDStop,": <field ref=""0"" /> : <field ref=""1"" /> : Operator sent Stop command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 5;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 5;>",eventOperatorAction,sfcInterface.alarmLogManualAction,3,<No value>,0,<No value>,0,<No value>,False,<No value>
+7,logSFCCMDPause,": <field ref=""0"" /> : <field ref=""1"" /> : Operator sent Pause command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 5;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 5;>",eventOperatorAction,sfcInterface.alarmLogManualAction,4,<No value>,0,<No value>,0,<No value>,False,<No value>
+8,logSFCCMDResume,": <field ref=""0"" /> : <field ref=""1"" /> : Operator sent Resume command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 5;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 5;>",eventOperatorAction,sfcInterface.alarmLogManualAction,5,<No value>,0,<No value>,0,<No value>,False,<No value>
+9,logSFCCMDAbort,": <field ref=""0"" /> : <field ref=""1"" /> : Operator sent Abort command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 5;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 5;>",eventOperatorAction,sfcInterface.alarmLogManualAction,6,<No value>,0,<No value>,0,<No value>,False,<No value>
+10,logSFCManualJump,": <field ref=""0"" /> : <field ref=""1"" /> : Operator sent Manual Jump to step <field ref=""2"" /> command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 5;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 5;>
+<ref id = 2; type = AlarmTag; Tag = sfcInterface.stepManualJump; DisplayType = Decimal; Length = 5;>",eventOperatorAction,sfcInterface.alarmLogManualAction,7,<No value>,0,<No value>,0,<No value>,False,<No value>
+@@TEMPLATE_BEGIN|createInstanceAlarmsGlobal@@
+@@COUNTERFILE|11@@,alarm_@@INSTANCE@@_@@MNEMONIC@@,": <field ref=""0"" /> : @@INSTANCE@@ : @@MESSAGE@@ ",<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>,alarmBlock,dbEVENT_alarmBlock_alarm_@@INSTANCE@@,@@BITTRIGGER@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|createClassNone@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
+@@ATTR_BEGIN|pEventLogMsgInstance@@
+@@COUNTERFILE@@,eventLogMsg_@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@,": <field ref=""0"" /> : @@INSTANCE@@ : @@CLASS@@ @@DESCRIPTION@@ : @@PARAMETERDESCRIPTION@@",<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>,eventLogMsg,dbEVENT_eventLogMsg_event_@@INSTANCE@@_@@CWORD@@,@@CBIT@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+@@ATTR_END|pEventLogMsgInstance@@
 @@TEMPLATE_END@@

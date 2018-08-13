@@ -116,10 +116,23 @@ TITLE = LOCAL valve position setpoint
     // Set valve position if LOCAL:                                           //
     //------------------------------------------------------------------------//
     A #cmdLocal;
+    AN #p.read.mc.modeMANUAL;
     JCN _b;
     L #p.read.POS_LOCAL;
     T #tPOS;
+    T #p.write.POS_MAN;
 _b:   NOP 0;
+
+NETWORK
+TITLE = MANUAL valve position setpoint
+    //------------------------------------------------------------------------//
+    // Set valve position if MANUAL:                                          //
+    //------------------------------------------------------------------------//
+    A #p.read.mc.modeMANUAL;
+    JCN _c;
+    L #p.write.POS_MAN;
+    T #tPOS;
+_c:   NOP 0;
 
 NETWORK
 TITLE = REMOTE valve position setpoint
@@ -127,10 +140,12 @@ TITLE = REMOTE valve position setpoint
     // Set valve position if REMOTE:                                          //
     //------------------------------------------------------------------------//
     A #cmdRemote;
-    JCN _c;
+    AN #p.read.mc.modeMANUAL;
+    JCN _d;
     L #p.read.POS_REMOTE;
     T #tPOS;
-_c:   NOP 0;
+    T #p.write.POS_MAN;
+_d:   NOP 0;
 
 NETWORK
 TITLE = Unscaling of Control Valve Position
@@ -142,7 +157,7 @@ TITLE = Unscaling of Control Valve Position
     // value:                                                                 //
     //------------------------------------------------------------------------//
     A #tDO;
-    JCN _d;
+    JCN _e;
     CALL UNSCALE
     (   IN                   := #tPOS ,
         HI_LIM               := 100.0 ,
@@ -151,7 +166,22 @@ TITLE = Unscaling of Control Valve Position
         RET_VAL              := #tRetVal ,
         OUT                  := #p.read.RAW_OUTPUT
     );
-_d:   NOP 0;
+_e:   NOP 0;
+
+NETWORK
+TITLE = Convert raw output counts to percent:
+    //------------------------------------------------------------------------//
+    // The output to the field is in raw counts, so convert to output back to //
+    // percent. Thus, should equal the input:                                 //
+    //------------------------------------------------------------------------//
+    L #p.read.RAW_OUTPUT;
+    DTR;
+
+    L 27648.0;
+    /R;
+    L 100.0;
+    *R;
+    T #p.read.MV_OUTPUT;
 
 NETWORK
 TITLE = Device State DISABLED if valve not operating
@@ -163,10 +193,10 @@ TITLE = Device State DISABLED if valve not operating
     //------------------------------------------------------------------------//
     ON #tDO;
     O #p.read.mc.INTERLOCK;
-    JCN _e;
+    JCN _f;
     L "dbCONST".BLK.MOD1.STATE.DISABLED;
     T #p.read.mc.STATE;
-_e:   NOP 0;
+_f:   NOP 0;
 
 NETWORK
 TITLE = Valve close if Device State DISABLED
@@ -175,10 +205,10 @@ TITLE = Valve close if Device State DISABLED
     //------------------------------------------------------------------------//
     ON #tDO;
     O #p.read.mc.INTERLOCK;
-    JCN _f;
+    JCN _g;
     L 0;
     T #p.read.RAW_OUTPUT;
-_f:   NOP 0;
+_g:   NOP 0;
 
 NETWORK
 TITLE = State LOCAL if commanded
@@ -187,10 +217,10 @@ TITLE = State LOCAL if commanded
     //------------------------------------------------------------------------//
     A #tDO;
     A #cmdLocal;
-    JCN _g;
+    JCN _h;
     L "dbCONST".BLK.MOD1.STATE.LOCAL;
     T #p.read.mc.STATE;
-_g:   NOP 0;
+_h:   NOP 0;
 
 NETWORK
 TITLE = State REMOTE if commanded
@@ -199,8 +229,8 @@ TITLE = State REMOTE if commanded
     //------------------------------------------------------------------------//
     A #tDO;
     A #cmdRemote;
-    JCN _h;
+    JCN _j;
     L "dbCONST".BLK.MOD1.STATE.REMOTE;
     T #p.read.mc.STATE;
-_h:   NOP 0;
+_j:   NOP 0;
 END_FUNCTION_BLOCK

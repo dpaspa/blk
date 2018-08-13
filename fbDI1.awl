@@ -128,4 +128,21 @@ TITLE = Setting Device State to ALARM
     T #p.read.mc.STATE;
     S #p.read.mc.ERROR;
 _b:   NOP 0;
+
+NETWORK
+TITLE = Pack the alarm bit
+    //------------------------------------------------------------------------//
+    // Pack the alarm bit into an integer for the HMI to read:                //
+    //------------------------------------------------------------------------//
+    L 0;
+    T #p.read.mc.ALARM;
+
+    A #p.read.ALARM;
+    JCN _not_ALARM;
+    L 1;
+    L #p.read.mc.ALARM;
+    +I;
+    T #p.read.mc.ALARM;
+_not_ALARM:   NOP 0;
+
 END_FUNCTION_BLOCK

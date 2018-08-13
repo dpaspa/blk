@@ -38,14 +38,17 @@ END_VAR
 BEGIN
 NETWORK
 TITLE = CPU to CPU Communication timer and pulse bit
-    AN "commsPulse";
+    //------------------------------------------------------------------------//
+    // PLC to PLC communication pulse timer:                                  //
+    //------------------------------------------------------------------------//
+    AN "pulseCOMMS";
     L S5T#5m;
-    SP "timerComms";
+    SP "timerCOMMS";
     NOP 0;
     NOP 0;
     NOP 0;
-    A "timerComms";
-    = "commsPulse";
+    A "timerCOMMS";
+    = "pulseCOMMS";
     NOP 0;
 
 NETWORK
@@ -173,13 +176,13 @@ TITLE = Initialise the alarms with a one shot
     CALL "fcAlarmInit";
 _alarmsInitialised:   NOP 0;
 
-NETWORK
-TITLE = Calling all SFC operator prompts
+//NETWORK
+//TITLE = Calling all SFC operator prompts
     //------------------------------------------------------------------------//
     // Call the message function to interface the PLC to the HMI. Messages    //
     // have prompt and confirm handshake:                                     //
     //------------------------------------------------------------------------//
-    CALL "ifbEventPrompt", "idbEventPrompt";
+ //   CALL "ifbEventPrompt", "idbEventPrompt";
 
 NETWORK
 TITLE = Calling all SFC log real data messages

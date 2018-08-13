@@ -21,6 +21,7 @@ END_TYPE
 TYPE "udtMCRead"
 VERSION : 1.0
     STRUCT
+        ALARM : Int;                   // Packed alarm bits
         ME : Int;                      // Unique ID of the block instance
         CMD_SAFE : Int;                // Safe command for the module
         STATE : Int;                   // State of the block
@@ -29,7 +30,7 @@ VERSION : 1.0
         INTERLOCK : Bool;              // True if any interlock condition
         CRIL : Bool;                   // Critical Interlock that cannot be bypased.
         NCRIL : Bool;                  // Non-Critical Interlock that can be manually bypassed.
-        FLOWPATH : Bool;               // True if a flowpath device where state must equal command.
+        FLOWPATH : Bool := False;      // True if a flowpath device where state must equal command.
         modeAUTO : Bool;
         modeMANUAL : Bool;
         modeOOS : Bool;
@@ -48,6 +49,7 @@ VERSION : 1.0
         RECIPE : Int;                  // Recipe ID of owning Process Cell
         SERIALNUM : Int;               // Unique batch or CIPSIP serial number
         SUBS : Int := 0;               // Selected substate for Block level modules
+        ARMED : Bool := False;         // Flowpath monitoring is armed
         MAN_OVERRIDE : Bool;           // Manual override to bypass NCRIL
         isMaster : Bool;
     END_STRUCT;
@@ -92,8 +94,8 @@ VERSION : 1.0
         interlocked : Bool;
         badParameter : Bool;
         childError : Bool;
-        childFlowpath : Bool;
         childInterlocked : Bool;
+        childMismatch : Bool;
         childNotAuto : Bool;
         childSafeState : Bool;
         childUnavailable : Bool;
@@ -128,25 +130,25 @@ END_TYPE
 TYPE "udtAnalog"
 VERSION : 1.0
     STRUCT
-        RAW_INPUT : Int;               // Raw input signal from Field (4mA = 0, 20mA = 27648)
-        USER_INPUT : Int;
         RANGE_UPPER : Real;            // Upper Range Limit in engineering units
         RANGE_LOWER : Real;            // Lower Range Limit in engineering units
-        POLARITY : Bool;               // Input signal is BIPOLAR (1) or UNIPOLAR (0)
         LIMIT_HH : Real;               // High High Alarm Limit
         LIMIT_H : Real;                // High Alarm Limit
         LIMIT_L : Real;                // Low Alarm Limit
         LIMIT_LL : Real;               // LowLow Alarm Limit
+        PV : Real;                     // Measured Value (after scaling)
+        RAW_INPUT : Int;               // Raw input signal from Field (4mA = 0, 20mA = 27648)
+        USER_INPUT : Int;
+        DQ : Bool;                     // MV data quality (0=Bad; 1=Good)
+        ALARM_HH : Bool;               // High High Alarm is active
+        ALARM_H : Bool;                // High Alarm is active
+        ALARM_L : Bool;                // Low Alarm is active
+        ALARM_LL : Bool;               // LowLow Alarm is active
         ENABLE_HH : Bool;              // Flag to Enable/Disable High High Alarm
         ENABLE_H : Bool;               // Flag to Enable/Disable High Alarm
         ENABLE_L : Bool;               // Flag to Enable/Disable Low Alarm
         ENABLE_LL : Bool;              // Flag to Enable/Disable Low Low Alarm
-        PV : Real;                     // Measured Value (after scaling)
-        DQ : Bool;                     // MV data quality (0=Bad; 1=Good)
-        ALARM_HH : Bool;               // HighHigh Alarm
-        ALARM_H : Bool;                // High Alarm
-        ALARM_L : Bool;                // Low Alarm
-        ALARM_LL : Bool;               // LowLow Alarm
+        POLARITY : Bool;               // Input signal is BIPOLAR (1) or UNIPOLAR (0)
         RANGE_ERROR : Bool;            // Range Error (<4mA or >20mA)
         BROKEN_WIRE : Bool;            // Broken Wire detection
         modeAUTO : Bool;
@@ -189,22 +191,30 @@ END_TYPE
 TYPE "udtEventPrompt"
 VERSION : 0.1
     STRUCT
+        numSerial : Int;               // Unique batch or CIPSIP serial number
+        active : Bool;
         trigger : Bool;
-        edgeTrigger : Bool;
         confirmYes : Bool;
         confirmNo : Bool;
     END_STRUCT;
 END_TYPE
 
-TYPE "udtEventLogMsg"
-VERSION : 0.1
-    STRUCT
-        trigger : Bool;
-        edgeTrigger : Bool;
-        isBatch : Bool;
-        numSerial : Int;               // Unique batch or CIPSIP serial number
-    END_STRUCT;
-END_TYPE
+
+//TYPE "udtEventLogMsg"
+//VERSION : 1.0
+//    STRUCT
+//        event : Array[0..15] of Bool;   // SFC events for logging messages
+//    END_STRUCT;
+//END_TYPE
+//TYPE "udtEventLogMsg"
+//VERSION : 0.1
+//    STRUCT
+//        trigger : Bool;
+//        edgeTrigger : Bool;
+//        isBatch : Bool;
+//        numSerial : Int;               // Unique batch or CIPSIP serial number
+//    END_STRUCT;
+//END_TYPE
 
 TYPE "udtEventLogReal"
 VERSION : 0.1
@@ -438,8 +448,6 @@ VERSION : 0.1
     STRUCT
         smc : "udtModeCommandSFC";
         sqStep : "udtSFCStep32";
-        sfcNumPages : Int;
-        sfcPage : Int;
         sfcSelected : Int;
         CMD_MODE : Int;
         CMD_SQ_CMD : Int;
@@ -454,25 +462,13 @@ VERSION : 0.1
         mcr : "udtMCRead";
         mcw : "udtMCWrite";
         bmc : "udtModeCommandBLK";
-        child : Array[1..30] of Int;
-        pReadReal : Array[1..20] of Real;
-        pWriteReal : Array[1..20] of Real;
-        pReadTime : Array[1..20] of Time;
-        pWriteTime : Array[1..20] of Time;
-        pReadInt : Array[1..20] of Int;
-        pWriteInt : Array[1..20] of Int;
-        pReadBool : Array[1..20] of Bool;
-        pWriteBool : Array[1..20] of Bool;
-        blkSelected : Int;
-        numChildren : Int;
-        numReadBool : Int;
-        numReadInt : Int;
-        numReadReal : Int;
-        numReadTime : Int;
-        numWriteBool : Int;
-        numWriteInt : Int;
-        numWriteReal : Int;
-        numWriteTime : Int;
+        arrChild : Array[1..50] of Int;
+        arrChildError : Array[1..50] of Bool;
+        arrReal : Array[1..200] of Real;
+        arrTime : Array[1..200] of Time;
+        arrInt : Array[1..200] of Int;
+        arrBool : Array[1..200] of Bool;
+        blockSelected : Int;
         CMD_MODE : Int;
         CMD_CMD : Int;
         CMD_SUBS : Int;

@@ -41,6 +41,22 @@ TITLE =Sequencer Timer
         ET                   := #sqSeqTimerElapsed
     );
 
+    CALL #SQ_TIMER2 (
+        IN                   := #sqSeqTimerStart2,
+        PT                   := #SQ_TIMER2.PT,
+        Q                    := #sqSeqTimerExpired2,
+        ET                   := #sqSeqTimerElapsed2
+    );
+
+NETWORK
+TITLE =Sequencer Timer
+    CALL #SQ_TIMER3 (
+        IN                   := #sqSeqTimerStart3,
+        PT                   := #SQ_TIMER3.PT,
+        Q                    := #sqSeqTimerExpired3,
+        ET                   := #sqSeqTimerElapsed3
+    );
+
 NETWORK
 TITLE =General Assignments
 
@@ -77,7 +93,7 @@ NotStopCmd:   NOP 0;
     R     #sqSequencer.STEP.Error_Fault;
     R     #sqSequencer.Error_Fault;
 _stopAction:   NOP 0;
-    
+
 NETWORK
 TITLE =Sequencer Finished
 

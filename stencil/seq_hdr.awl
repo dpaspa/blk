@@ -154,15 +154,23 @@ VAR
     sqRunTimer : "fbRunTimer";
     sqSequencer : "udtSFCSequence32";
     SQ_TIMER: "TON";
+    SQ_TIMER2: "TON";
+    SQ_TIMER3: "TON";
     sqSeqTimerStart : Bool;
+    sqSeqTimerStart2 : Bool;
+    sqSeqTimerStart3 : Bool;
 @@PARAMETER_LIST_VAR@@
 END_VAR
 
 VAR_TEMP
-    sqSeqTimerExpired : Bool;
-    sqStepTimerExpired : Bool;
     sqSeqTimerElapsed : Time;
+    sqSeqTimerElapsed2 : Time;
+    sqSeqTimerElapsed3 : Time;
+    sqSeqTimerExpired : Bool;
+    sqSeqTimerExpired2 : Bool;
+    sqSeqTimerExpired3 : Bool;
     sqStepTimerElapsed : Time;
+    sqStepTimerExpired : Bool;
 END_VAR
 
 BEGIN
@@ -384,6 +392,8 @@ STOP: NOP   0;
       R     #sqRunTimer.ENABLE;
       R     #sqStepTimer.IN;
       R     #sqSeqTimerStart;
+      R     #sqSeqTimerStart2;
+      R     #sqSeqTimerStart3;
       R     #smc.PAUSED;
       R     #smc.ABORTED;
 
@@ -444,6 +454,8 @@ _abrt_begin: NOP   0;
       R     #sqRunTimer.ENABLE;
       R     #sqStepTimer.IN;
       R     #sqSeqTimerStart;
+      R     #sqSeqTimerStart2;
+      R     #sqSeqTimerStart3;
       R     #smc.PAUSED;
       R     #smc.OFF_IDLE;
 

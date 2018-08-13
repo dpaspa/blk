@@ -1,0 +1,177 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// This file contains globally addressable event flags and data. The function //
+// traverses the event datablock UDT structures to see if any event bits have //
+// been raised. This is called each scan from the main program block OB1      //
+// which therefore takes care of the looping required.                        //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      16-May-2018 NA        Reboot design for S7-1500 not   //
+//                                            using ALARM_D etc.              //
+// 1.0 David Paspa      11-Apr-2018 NA        Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbEventPrompt"
+TITLE = S7 Alarms for SFC operator prompts on the HMI
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifbEventPrompt
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare variables:                                                         //
+//----------------------------------------------------------------------------//
+@@TEMPLATE_BEGIN@@
+VAR
+@@ATTR_BEGIN|pEventPromptNum@@
+    eventPrompt : Array[1..@@IDXEVENTMAX@@] of "udtEventPrompt";   // SFC events for operator prompts
+@@ATTR_END|pEventPromptNum@@
+@@ATTR_BEGIN|pEventPromptAll@@
+    Program_Alarm_@@IDXEVENT@@ : Program_Alarm;
+@@ATTR_END|pEventPromptAll@@
+@@ATTR_BEGIN|pEventPromptAll@@
+	Alarm@@IDXEVENT@@_Inactive_Acknowledged : Bool;   // Alarm inactive
+    Alarm@@IDXEVENT@@_Inactive_Unacknowledged : Bool;   // Alarm was active & no acknowledgement
+    Alarm@@IDXEVENT@@_Active_Acknowledged : Bool;   // Alarm active & acknowledged
+    Alarm@@IDXEVENT@@_Active_Unacknowleged : Bool;   // Alarm active & was not acknowledged
+    Alarm@@IDXEVENT@@_ErrorBit1 : Bool;
+    Alarm@@IDXEVENT@@_ErrorBit2 : Bool;
+    Alarm@@IDXEVENT@@_StatusWord1 : Word;
+    Alarm@@IDXEVENT@@_StatusWord2 : Word;
+    Alarm@@IDXEVENT@@_StateByte : Byte;
+@@ATTR_END|pEventPromptAll@@
+	SourceData : Word;
+END_VAR
+
+VAR_TEMP
+    ackPending : Bool;
+    almError : Bool;
+    almState : Byte;
+    almStatus : Word;
+    raiseEvent : Bool;
+END_VAR
+
+BEGIN
+@@ATTR_BEGIN|pEventPromptAll@@
+NETWORK
+TITLE = Check if message event needs to be raised
+    //------------------------------------------------------------------------//
+    // EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT  //
+    // EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT   EVENT  //
+    //                                                                        //
+    // Check if prompt message event:                                         //
+    //------------------------------------------------------------------------//
+    L @@IDXEVENT@@;
+    T #SourceData;
+
+    A #eventPrompt[@@IDXEVENT@@].trigger;
+    FP #eventPrompt[@@IDXEVENT@@].edgeTrigger;
+    = #raiseEvent;
+
+NETWORK
+TITLE = Clear response flags if message event needs to be raised
+    //------------------------------------------------------------------------//
+    // Clear the alarm request and response flags if raising a new event and  //
+    // set the alarm list message number:                                     //
+    //------------------------------------------------------------------------//
+    A #raiseEvent;
+    JCN _evRaise_@@IDXEVENT@@;
+    R #eventPrompt[@@IDXEVENT@@].confirmYes;
+    R #eventPrompt[@@IDXEVENT@@].confirmNo;
+_evRaise_@@IDXEVENT@@:   NOP 0;
+
+NETWORK
+TITLE = Raise message event and get alarm state and acknowledgement
+    //------------------------------------------------------------------------//
+    // Raise the message event if requested by the trigger bit.               //
+    // Get the acknowledgement response. Response is asynchronous and it may  //
+    // take a long time for the operator to attend to the event message:      //
+    //------------------------------------------------------------------------//
+    CALL #Program_Alarm_@@IDXEVENT@@
+    (   SIG       := #eventPrompt[@@IDXEVENT@@].trigger ,
+		SD_1      := #SourceData ,
+        Error     := #Alarm@@IDXEVENT@@_ErrorBit1 ,
+        Status    := #Alarm@@IDXEVENT@@_StatusWord1
+    );
+
+    CALL  Get_AlarmState
+    (   Alarm      := #Program_Alarm_@@IDXEVENT@@ ,
+        AlarmState := #Alarm@@IDXEVENT@@_StateByte  ,
+        Error      := #Alarm@@IDXEVENT@@_ErrorBit2 ,
+        STATUS     := #Alarm@@IDXEVENT@@_StatusWord2
+    );
+
+NETWORK
+TITLE = Alarm status
+    //------------------------------------------------------------------------//
+    // Alarm inactive and unacknowledged:                                     //
+    //------------------------------------------------------------------------//
+    A(;
+    L #Alarm@@IDXEVENT@@_StateByte;
+    L 16#84;
+    ==I;
+    );
+    = #Alarm@@IDXEVENT@@_Inactive_Unacknowledged;
+
+    //------------------------------------------------------------------------//
+    // Alarm inactive and acknowledged:                                       //
+    //------------------------------------------------------------------------//
+    A(;
+    L #Alarm@@IDXEVENT@@_StateByte;
+    L 16#86;
+    ==I;
+    );
+    = #Alarm@@IDXEVENT@@_Inactive_Acknowledged;
+
+    //------------------------------------------------------------------------//
+    // Alarm active and unacknowledged:                                       //
+    //------------------------------------------------------------------------//
+    A(;
+    L #Alarm@@IDXEVENT@@_StateByte;
+    L 16#85;
+    ==I;
+    );
+    = #Alarm@@IDXEVENT@@_Active_Unacknowleged;
+
+    //------------------------------------------------------------------------//
+    // Alarm active and acknowledged:                                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #Alarm@@IDXEVENT@@_StateByte;
+    L 16#87;
+    ==I;
+    );
+    = #Alarm@@IDXEVENT@@_Active_Acknowledged;
+
+NETWORK
+TITLE = Return the confirmation
+    //------------------------------------------------------------------------//
+    // HMI will leave the alarm active when acknowledging if confirm yes but  //
+    // clear the alarm trigger when acknowledging if confirm no.              //
+    // Reset the trigger bit if the alarm is acknowledged yes:                //
+    //------------------------------------------------------------------------//
+    A "alarmsEnabled";
+    A #Alarm@@IDXEVENT@@_Active_Acknowledged;
+    AN #eventPrompt[@@IDXEVENT@@].confirmNo;
+    JCN _a@@IDXEVENT@@;
+    S #eventPrompt[@@IDXEVENT@@].confirmYes;
+_a@@IDXEVENT@@:   NOP 0;
+
+    A "alarmsEnabled";
+    A #Alarm@@IDXEVENT@@_Inactive_Acknowledged;
+    AN #eventPrompt[@@IDXEVENT@@].confirmYes;
+    JCN _b@@IDXEVENT@@;
+    S #eventPrompt[@@IDXEVENT@@].confirmNo;
+_b@@IDXEVENT@@:   NOP 0;
+
+    A "alarmsEnabled";
+    A #Alarm@@IDXEVENT@@_Active_Acknowledged;
+    JCN _c@@IDXEVENT@@;
+    R #eventPrompt[@@IDXEVENT@@].trigger;
+_c@@IDXEVENT@@:   NOP 0;
+
+@@ATTR_END|pEventPromptAll@@
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK

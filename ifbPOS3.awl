@@ -194,5 +194,35 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
     A #f[@@IDX@@].p.read.OUT_Q;
     = "@@INSTANCE@@-CMD";
 
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Send the alarm bits to the global DB
+    //------------------------------------------------------------------------//
+    // Transfer the class event log message bits to the global DB:            //
+    //------------------------------------------------------------------------//
+    L #f[@@IDX@@].p.read.mc.ALARM;
+    T "dbEVENT".alarmBlock.alarm_@@INSTANCE@@;
+
 @@TEMPLATE_END@@
+
+@@TEMPLATE_BEGIN|createInstancesForeign@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
+    //------------------------------------------------------------------------//
+    // This block can only reside in another CPU:                             //
+    //------------------------------------------------------------------------//
+    A "alwaysLow";
+    = #f[@@IDX@@].p.read.mc.isMaster;
+
+@@ATTR_BEGIN|ISOWNED@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in another CPU:         //
+    //------------------------------------------------------------------------//
+    A "alwaysLow";
+    = #f[@@IDX@@].p.write.mc.isMaster;
+@@ATTR_END|ISOWNED@@
+
+@@TEMPLATE_END@@
+
 END_FUNCTION_BLOCK

@@ -1,0 +1,151 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Class:       fbSimulate                                                    //
+// Description: Simulates the input status of all instances.                  //
+//                                                                            //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 Izzat            09-Aug-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbSimulate"
+TITLE = Simulate instance inputs
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fbSimulate
+VERSION : 2.0
+
+   VAR
+      enableSimulation_POS2 : Bool := 1;
+      enableSimulation_POS4 : Bool := 1;
+      enableSimulation_ZSC1 : Bool := 1;
+      enableSimulation_ZSC2 : Bool := 1;
+      enableSimulation_DI1  : Bool := 1;
+      enableSimulation_DI2  : Bool := 1;
+   END_VAR
+
+BEGIN
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|simulatePOS2@@
+NETWORK
+TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
+    //------------------------------------------------------------------------//
+    // Simulate the input switches for @@SCLASS@@:                             //
+    //------------------------------------------------------------------------//
+    A #enableSimulation_POS2;
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.OPEN;
+    ==I;
+    );
+    R "@@SINSTANCE@@-ZSC";
+
+    A #enableSimulation_POS2;
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.CLOSE;
+    ==I;
+    );
+    S "@@SINSTANCE@@-ZSC";
+
+@@ATTR_END|simulatePOS2@@
+
+@@ATTR_BEGIN|simulatePOS4@@
+NETWORK
+TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
+    //------------------------------------------------------------------------//
+    // Simulate the input switches for @@SCLASS@@:                             //
+    //------------------------------------------------------------------------//
+    A #enableSimulation_POS4;
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.OPEN;
+    ==I;
+    );
+    = "@@SINSTANCE@@-ZSO";
+
+    A #enableSimulation_POS4;
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.CLOSE;
+    ==I;
+    );
+    = "@@SINSTANCE@@-ZSC";
+
+@@ATTR_END|simulatePOS4@@
+
+@@ATTR_BEGIN|simulateZSC1@@
+NETWORK
+TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
+    //------------------------------------------------------------------------//
+    // Simulate the input switches for @@SCLASS@@:                             //
+    //------------------------------------------------------------------------//
+    A #enableSimulation_ZSC1;
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.OPEN;
+    ==I;
+    );
+    R "@@SINSTANCE@@-DI";
+
+    A #enableSimulation_ZSC1;
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.CLOSE;
+    ==I;
+    );
+    S "@@SINSTANCE@@-DI";
+
+@@ATTR_END|simulateZSC1@@
+
+@@ATTR_BEGIN|simulateZSC2@@
+NETWORK
+TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
+    //------------------------------------------------------------------------//
+    // Simulate the input switches for @@SCLASS@@:                             //
+    //------------------------------------------------------------------------//
+    A #enableSimulation_ZSC2;
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.OUT;
+    ==I;
+    );
+    R "@@SINSTANCE@@-DI";
+
+    A #enableSimulation_ZSC2;
+    A(;
+    L "idb@@SCLASS@@".f[@@SIDX@@].p.write.mc.CMD;
+    L "dbCONST".BLK.@@SCLASS@@.CMD.IN;
+    ==I;
+    );
+    S "@@SINSTANCE@@-DI";
+
+@@ATTR_END|simulateZSC2@@
+
+
+@@ATTR_BEGIN|simulateDI1@@
+NETWORK
+TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
+    //------------------------------------------------------------------------//
+    // Simulate the input switches for @@SCLASS@@:                             //
+    //------------------------------------------------------------------------//
+    A #enableSimulation_DI1;
+    S "@@SINSTANCE@@-DI";
+
+@@ATTR_END|simulateDI1@@
+
+@@ATTR_BEGIN|simulateDI2@@
+NETWORK
+TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
+    //------------------------------------------------------------------------//
+    // Simulate the input switches for @@SCLASS@@:                             //
+    //------------------------------------------------------------------------//
+    A #enableSimulation_DI2;
+    R "@@SINSTANCE@@-DI";
+
+@@ATTR_END|simulateDI2@@
+
+@@TEMPLATE_END@@
+END_FUNCTION_BLOCK
