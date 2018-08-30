@@ -1,0 +1,188 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Name:        ifb@@CLASS@@                                                  //
+// Description: Instances of @@CLASS@@                                        //
+//                                                                            //
+// @@CLASSDESCRIPTION@@                                                       //
+// This file inherits from the base template ifbAL.awl.                       //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.1 David Paspa      25-Aug-2018 NA        Made separate block to store    //
+//                                            gross, tare and nett masses.    //
+// 2.0 David Paspa      08-Jan-2018 NA        Reboot for S7-1500. Created     //
+//                                            base template ifbAL1.           //
+// 0.4 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.3 Khairul Basar    14-Sep-2009 CC-09/016 Ref.OB100,Instance LIMIT_H/HH   //
+//                                            Hardcode deleted.               //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Upper/Lower range hardcoded.    //
+//                                            USER_INPUT added for manual     //
+//                                            mode simulation.                //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+@@TEMPLATE_BEGIN|createInstancesGlobal@@
+// @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
+@@TEMPLATE_END@@
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifb@@CLASS@@"
+TITLE = @@CLASS@@ Instances
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifb@@CLASS@@
+VERSION : 2.1
+
+//----------------------------------------------------------------------------//
+// Declare the instance objects of the class:                                 //
+//----------------------------------------------------------------------------//
+VAR
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|numInstances@@
+    f : Array[0..@@MAXITEM@@] of "fbMI1";
+@@ATTR_END|numInstances@@
+@@TEMPLATE_END@@
+END_VAR
+
+BEGIN
+@@TEMPLATE_BEGIN|createInstances@@
+NETWORK
+TITLE = @@INSTANCE@@ : Unique ID
+    //------------------------------------------------------------------------//
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    //                                                                        //
+    // Set the instance unique ID:                                            //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ID.@@INSTANCE@@;
+    T #f[@@IDX@@].p.read.mc.ME;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner ID
+    //------------------------------------------------------------------------//
+    // Set the instance Owner ID:                                             //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ID.@@PARENT@@;
+    T #f[@@IDX@@].p.write.mc.OWNER;
+
+@@ATTR_BEGIN|FLOWPATH@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@CLASS@@ is a Flowpath device
+    //------------------------------------------------------------------------//
+    // This class of device is a FLOWPATH device where the state must equal   //
+    // the command once set by the parent:                                    //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #f[@@IDX@@].p.read.mc.FLOWPATH;
+@@ATTR_END|FLOWPATH@@
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
+    //------------------------------------------------------------------------//
+    // This block can only reside within this CPU:                            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #f[@@IDX@@].p.read.mc.isMaster;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in this CPU:            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #f[@@IDX@@].p.write.mc.isMaster;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Safe Command
+    //------------------------------------------------------------------------//
+    // Set the safe command:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.AL1.SAFE.CMD;
+    T #f[@@IDX@@].p.read.mc.CMD_SAFE;
+
+@@ATTR_BEGIN|ANALOG@@
+NETWORK
+TITLE = @@INSTANCE@@ : Analog input attributes
+    //------------------------------------------------------------------------//
+    // Set the analog input attributes:                                       //
+    //------------------------------------------------------------------------//
+    L @@RANGELOW@@;
+    T #f[@@IDX@@].p.read.ai.RANGE_LOWER;
+    L @@RANGEHIGH@@;
+    T #f[@@IDX@@].p.read.ai.RANGE_UPPER;
+    L @@LIMITHH@@;
+    T #f[@@IDX@@].p.read.ai.LIMIT_HH;
+    L @@LIMITH@@;
+    T #f[@@IDX@@].p.read.ai.LIMIT_H;
+    L @@LIMITL@@;
+    T #f[@@IDX@@].p.read.ai.LIMIT_L;
+    L @@LIMITLL@@;
+    T #f[@@IDX@@].p.read.ai.LIMIT_LL;
+    A @@ENABLEHH@@;
+    = #f[@@IDX@@].p.read.ai.ENABLE_HH;
+    A @@ENABLEH@@;
+    = #f[@@IDX@@].p.read.ai.ENABLE_H;
+    A @@ENABLEL@@;
+    = #f[@@IDX@@].p.read.ai.ENABLE_L;
+    A @@ENABLELL@@;
+    = #f[@@IDX@@].p.read.ai.ENABLE_LL;
+    A @@POLARITY@@;
+    = #f[@@IDX@@].p.read.ai.POLARITY;
+    L "@@INSTANCE@@-RAW";
+    T #f[@@IDX@@].p.read.ai.RAW_INPUT;
+
+@@ATTR_END|ANALOG@@
+
+NETWORK
+TITLE = @@INSTANCE@@ : Command and state values
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.@@CLASS@@.CMD.ENABLE;
+    T #f[@@IDX@@].p.read.CMD_ENABLE;
+    L "dbCONST".BLK.@@CLASS@@.STATE.ENABLED;
+    T #f[@@IDX@@].p.read.STATE_ENABLED;
+    L "dbCONST".BLK.@@CLASS@@.STATE.FAULT;
+    T #f[@@IDX@@].p.read.STATE_FAULT;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process the instance:                       //
+    //------------------------------------------------------------------------//
+    CALL #f[@@IDX@@];
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Send the alarm bits to the global DB
+    //------------------------------------------------------------------------//
+    // Transfer the class event log message bits to the global DB:            //
+    //------------------------------------------------------------------------//
+    L #f[@@IDX@@].p.read.mc.ALARM;
+    T "dbEVENT".alarmBlock.alarm_@@INSTANCE@@;
+
+@@TEMPLATE_END@@
+
+@@TEMPLATE_BEGIN|createInstancesForeign@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
+    //------------------------------------------------------------------------//
+    // This block can only reside in another CPU:                             //
+    //------------------------------------------------------------------------//
+    A "alwaysLow";
+    = #f[@@IDX@@].p.read.mc.isMaster;
+
+@@ATTR_BEGIN|ISOWNED@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in another CPU:         //
+    //------------------------------------------------------------------------//
+    A "alwaysLow";
+    = #f[@@IDX@@].p.write.mc.isMaster;
+@@ATTR_END|ISOWNED@@
+
+@@TEMPLATE_END@@
+
+END_FUNCTION_BLOCK

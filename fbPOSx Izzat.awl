@@ -1,0 +1,401 @@
+﻿FUNCTION_BLOCK "fbPOSx"
+TITLE = POSx : On/Off valve with single output and  open/close feedback
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fbPOSx
+VERSION : 2.0
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbPOSx                                                        //
+// Description:                                                               //
+// On/Off valve with single output and open/close feedback;This CM also can be//
+// used for the valves without feedback, with only open feedback or only close//
+// feedback.                                                                  //
+// 1.POS1: on/off valve with single output & no beedback                      //
+//   In this case FB_O=OUT_Q,FB_C=NOT-OUT_Q ;The FB_C & FB_O both dont have   //
+//   feedback from field;                                                     //
+// 2.POS2:On/Off valve with single output and closed feedback                 //
+//   In this case FB_O=NOT-FB_C/OUT_Q;The FB_C has feedback from field;       //
+// 3.POS3:On/Off valve with single output and open feedback                   //
+//   In this case FB_C=NOT-FB_O/NOT-OUT_Q;The FB_O has feedback from field;   //
+// 4.POS4:On/Off valve with single output and both opened and closed feedback //
+//   In this case FB_O,FB_O both have feedback from field;                    //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.4 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.5 Steve Linehan    29-Sep-2009 CC-09/016 Bypass Input Mode Added.        //
+// 0.4 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters   //
+//                                            deleted. auto/manual both now   //
+//                                            using same parameters.          //
+// 0.3 Khairul Basar    10-Sep-2009 CC-09/016 ref2.                           //
+// 0.2 Khairul Basar    02-Sep-2009 CC-09/016 ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//                                                                            //
+// Ref2:                                                                      //
+// Instead of one timer, two timers namely openTMR and closeTMR used for       //
+// opening and closing travel time respectively.                              //
+// Nw13 Travelling logic changed.Logic for travelling is :                    //
+// When command=open, timer running, & still not opened.                      //
+// or command=close, timer running, still not closed.                         //
+// 3. Fail to open/Close divided into two Nw 10 & 11.                         //
+// 4.Openning timer in Nw8, Closing timer in Nw9 start by Command flag.       //
+// 5.Instead of using closing & openneing flag, temp flags are changed to     //
+// closed & opened respectivley & programed in Nw6 & 7.                       //
+//                                                                            //
+// Ref1:                                                                      //
+// 1.Travelling logic changed in NW9 & 10,travelling considered when both the //
+// feedback is unavailable but commanded to open or close.                    //
+// 2.Nw1 deleted, to get previous device state compared with state of fault   //
+// while open/close state.                                                    //
+// 3.Nw10 splitted into Nw10 & 11.                                            //
+// 4.Fault while Opened/Closed coded in the Nw12.Logic is once open or close  //
+// state is confirmed and then feedback lost or wrong feedback comes in, then //
+// it will say fault state.                                                   //
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+   VAR 
+      p : "udtPOSx";   // Block data interface
+      failToOpenTMR {OriginalPartName := 'IEC_TIMER'; LibVersion := '1.0'} : TON_TIME;
+      failToCloseTMR {OriginalPartName := 'IEC_TIMER'; LibVersion := '1.0'} : TON_TIME;
+   END_VAR
+   VAR DB_SPECIFIC
+      b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..15] of Bool;
+      w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT b : Word;
+   END_VAR
+
+   VAR_TEMP 
+      bypassFeedback : Bool;
+      cmdCLOSE : Bool;
+      cmdOPEN : Bool;
+      modeAUTO : Bool;
+      modeMANUAL : Bool;
+      modeOOS : Bool;
+      feedbackOPENED : Bool;
+      feedbackCLOSED : Bool;
+      feedbackTRAVEL : Bool;
+      feedbackFAULT : Bool;
+      OUT_Q_Close : Bool;
+      OUT_Q_Open : Bool;
+      openTMRElapsed : Time;
+      closeTMRElapsed : Time;
+      openTMRExpired : Bool;
+      closeTMRExpired : Bool;
+      FTO : Bool;
+      FTC : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Call Mode and Command handling function
+//------------------------------------------------------------------------//
+// MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+// MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+//                                                                        //
+// Set the safe command to CLOSE if normally closed valve:                //
+//------------------------------------------------------------------------//
+      A #p.read.NC;
+      JCN _a;
+      L "dbCONST".BLK.POSx.CMD.CLOSE;
+      T #p.read.mc.CMD_SAFE;
+_a:      NOP 0;
+
+  //------------------------------------------------------------------------//
+  // Set the safe command to OPEN if normally opened valve:                 //
+  //------------------------------------------------------------------------//
+      AN #p.read.NC;
+      JCN _b;
+      L "dbCONST".BLK.POSx.CMD.OPEN;
+      T #p.read.mc.CMD_SAFE;
+_b:      NOP 0;
+
+  //------------------------------------------------------------------------//
+  // Process the standard block functions for command, mode, interlock and  //
+  // state:                                                                 //
+  //------------------------------------------------------------------------//
+      CALL "fcModeCmd"
+      (  mcRead                      := #p.read.mc , 
+         mcWrite                     := #p.write.mc
+      );
+
+NETWORK
+TITLE = Device command OPEN
+//------------------------------------------------------------------------//
+// COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+// COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+//                                                                        //
+// CMD is OPEN:                                                           //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.mc.CMD;
+      L "dbCONST".BLK.POSx.CMD.OPEN;
+      ==I;
+      );
+      = #cmdOPEN;
+
+NETWORK
+TITLE = Device command CLOSE
+//------------------------------------------------------------------------//
+// CMD is CLOSE:                                                          //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.mc.CMD;
+      L "dbCONST".BLK.POSx.CMD.CLOSE;
+      ==I;
+      );
+      = #cmdCLOSE;
+
+NETWORK
+TITLE = Valve Command open
+//------------------------------------------------------------------------//
+// INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+// INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+//                                                                        //
+// Set output bit to high if Normally Closed valve. Open is the energised //
+// state. The opposite is the case for Normally Opened valve.             //
+//------------------------------------------------------------------------//
+      A #p.read.NC;
+      = #OUT_Q_Close;
+      NOT;
+      = #OUT_Q_Open;
+
+NETWORK
+TITLE = Open command is alowable if normal operation
+//------------------------------------------------------------------------//
+// Allow OPEN command if everything is operating normally:                //
+//------------------------------------------------------------------------//
+      A #cmdOPEN;
+      AN #p.read.mc.INTERLOCK;
+      AN #p.read.mc.modeOOS;
+      = #cmdOPEN;
+
+NETWORK
+TITLE = Close command is alowable if normal operation
+//------------------------------------------------------------------------//
+// Allow CLOSE command if everything is operating normally:               //
+//------------------------------------------------------------------------//
+      A #cmdCLOSE;
+      AN #p.read.mc.INTERLOCK;
+      AN #p.read.mc.modeOOS;
+      = #cmdCLOSE;
+
+NETWORK
+TITLE = Valve OPEN if feedback open
+//------------------------------------------------------------------------//
+// Valve is open if open feedback on and closed feedback off:             //
+//------------------------------------------------------------------------//
+      A #p.read.FB_O;
+      AN #p.read.FB_C;
+      = #feedbackOPENED;
+
+NETWORK
+TITLE = Valve CLOSED if feedback closed
+//------------------------------------------------------------------------//
+// Valve is closed if open feedback off and closed feedback on:           //
+//------------------------------------------------------------------------//
+      AN #p.read.FB_O;
+      A #p.read.FB_C;
+      = #feedbackCLOSED;
+
+NETWORK
+TITLE = Valve is fault if both feedbacks on
+//------------------------------------------------------------------------//
+// Valve is fault if both open and closed feedbacks are both on:          //
+//------------------------------------------------------------------------//
+      A #p.read.FB_O;
+      A #p.read.FB_C;
+      = #feedbackFAULT;
+
+NETWORK
+TITLE = Valve might be TRAVEL if neither feedback on
+//------------------------------------------------------------------------//
+// Valve is travel if neither open nor closed feedbacks are on, provided  //
+// the travel timer hasn't expired:                                       //
+//------------------------------------------------------------------------//
+      AN #p.read.FB_O;
+      AN #p.read.FB_C;
+      = #feedbackTRAVEL;
+
+NETWORK
+TITLE = Input Bypass Mode In Manual
+//------------------------------------------------------------------------//
+//
+//------------------------------------------------------------------------//
+      A #p.read.mc.modeMANUAL;
+      A #p.read.IGNORE_FB;
+      = #bypassFeedback;
+
+NETWORK
+TITLE = Close command
+//------------------------------------------------------------------------//
+// OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+// OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+//                                                                        //
+// CLOSE command if not OOS and no interlock:                             //
+//------------------------------------------------------------------------//
+      A #cmdCLOSE;
+      JCN _not_close;
+      A #OUT_Q_Close;
+      = #p.read.OUT_Q;
+_not_close:      NOP 0;
+
+NETWORK
+TITLE = Open command
+//------------------------------------------------------------------------//
+// OPEN command if not OOS and no interlock:                              //
+//------------------------------------------------------------------------//
+      A #cmdOPEN;
+      JCN _not_open;
+      A #OUT_Q_Open;
+      = #p.read.OUT_Q;
+_not_open:      NOP 0;
+
+NETWORK
+TITLE = Valve CLOSED if command and feedback CLOSED
+//------------------------------------------------------------------------//
+// STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+// STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+//                                                                        //
+// CLOSED if command is CLOSE and feedback is closed:                     //
+//------------------------------------------------------------------------//
+      A #cmdCLOSE;
+      A(;
+      O #feedbackCLOSED;
+      O #bypassFeedback;
+      );
+      JCN _c;
+      L "dbCONST".BLK.POSx.STATE.CLOSED;
+      T #p.read.mc.STATE;
+      R #p.read.mc.ERROR;
+_c:      NOP 0;
+
+NETWORK
+TITLE = Valve OPENED if command and feedback OPENED
+//------------------------------------------------------------------------//
+// OPENED if command is OPEN and feedback is opened:                      //
+//------------------------------------------------------------------------//
+      A #cmdOPEN;
+      A(;
+      O #feedbackOPENED;
+      O #bypassFeedback;
+      );
+      JCN _d;
+      L "dbCONST".BLK.POSx.STATE.OPENED;
+      T #p.read.mc.STATE;
+      R #p.read.mc.ERROR;
+_d:      NOP 0;
+
+NETWORK
+TITLE = Valve TRAVEL if command issued and travel timer not expired
+//------------------------------------------------------------------------//
+// TRAVEL if command was issued but either open or closed valve feedback  //
+// has not come on yet, provided the travel timer has not expired:        //
+//------------------------------------------------------------------------//
+      AN #bypassFeedback;
+      A(;
+      O(;
+      A #cmdCLOSE;
+      AN #feedbackCLOSED;
+      AN #failToCloseTMR.Q;
+      );
+      O(;
+      A #cmdOPEN;
+      AN #feedbackOPENED;
+      AN #failToOpenTMR.Q;
+      );
+      );
+      JCN _e;
+      L "dbCONST".BLK.POSx.STATE.TRAVEL;
+      T #p.read.mc.STATE;
+      R #p.read.mc.ERROR;
+_e:      NOP 0;
+
+NETWORK
+TITLE = Valve failed to CLOSE
+//------------------------------------------------------------------------//
+// Valve failed to CLOSE if travel timer expired but not in CLOSED state: //
+//------------------------------------------------------------------------//
+      AN #bypassFeedback;
+      A #cmdCLOSE;
+      A(;
+      ON #feedbackCLOSED;
+      O #feedbackOPENED;
+      );
+      = #FTC;
+
+      CALL #failToCloseTMR
+      {time_type := 'Time'}
+      (  IN                          := #FTC , 
+         PT                          := #p.read.TMR , 
+         Q                           := #closeTMRExpired , 
+         ET                          := #closeTMRElapsed
+      );
+      NOP 0;
+
+      A #closeTMRExpired;
+      = #p.read.FAULT_C;
+
+NETWORK
+TITLE = Valve failed to OPEN
+//------------------------------------------------------------------------//
+// Valve failed to OPEN if travel timer expired but not in OPENED state:  //
+//------------------------------------------------------------------------//
+      AN #bypassFeedback;
+      A #cmdOPEN;
+      A(;
+      O #feedbackCLOSED;
+      ON #feedbackOPENED;
+      );
+      = #FTO;
+
+
+      CALL #failToOpenTMR
+      {time_type := 'Time'}
+      (  IN                          := #FTO , 
+         PT                          := #p.read.TMR , 
+         Q                           := #openTMRExpired , 
+         ET                          := #openTMRElapsed
+      );
+      NOP 0;
+
+      A #openTMRExpired;
+      = #p.read.FAULT_O;
+
+NETWORK
+TITLE = Valve FAULT if both feedbacks on or travel timer expired
+//------------------------------------------------------------------------//
+// FAULT if both open and closed feedbacks on simultaneously, which is    //
+// impossible, or if travel timer expires but feedback never comes on:    //
+//------------------------------------------------------------------------//
+      O(;
+      AN #bypassFeedback;
+      A #feedbackCLOSED;
+      A #feedbackOPENED;
+      );
+      O #p.read.FAULT_C;
+      O #p.read.FAULT_O;
+      JCN _f;
+      L "dbCONST".BLK.POSx.STATE.FAULT;
+      T #p.read.mc.STATE;
+      S #p.read.mc.ERROR;
+_f:      NOP 0;
+
+NETWORK
+TITLE = Pack the alarm bits
+//------------------------------------------------------------------------//
+// Pack the alarm bits into an integer for the HMI to read:               //
+//------------------------------------------------------------------------//
+      A #p.read.FAULT_C;
+      = #b[0];
+      A #p.read.FAULT_O;
+      = #b[1];
+      L #w;
+      T #p.read.mc.ALARM;
+
+END_FUNCTION_BLOCK
+

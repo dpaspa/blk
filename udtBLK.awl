@@ -22,26 +22,36 @@ VERSION : 1.0
 @@ATTR_BEGIN|pChildReadDefine@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
 @@ATTR_END|pChildReadDefine@@
-@@ATTR_BEGIN|pEventPromptExists@@
-@@ATTR_BEGIN|pEventPromptNum@@
-        eventPrompt : Array[1..@@IDXEVENTMAX@@] of "udtEventPrompt";   // SFC events for operator prompts
-@@ATTR_END|pEventPromptNum@@
-@@ATTR_END|pEventPromptExists@@
 @@ATTR_BEGIN|pEventLogMsgExists@@
 @@ATTR_BEGIN|pEventLogMsgWordClass@@
         eventLogMsg_@@CWORD@@ : Int;           // SFC events for logging messages as Discrete Alarms
 @@ATTR_END|pEventLogMsgWordClass@@
 @@ATTR_END|pEventLogMsgExists@@
 @@ATTR_BEGIN|pEventLogRealExists@@
-@@ATTR_BEGIN|pEventLogRealNum@@
-        eventLogReal : Array[1..@@IDXEVENTMAX@@] of "udtEventLogReal";   // SFC events for logging real data
-@@ATTR_END|pEventLogRealNum@@
+@@ATTR_BEGIN|pEventLogRealWordClass@@
+        eventLogReal_@@CWORD@@ : Int;          // SFC events for logging real data as Discrete Alarms
+@@ATTR_END|pEventLogRealWordClass@@
 @@ATTR_END|pEventLogRealExists@@
 @@ATTR_BEGIN|pEventLogTimeExists@@
-@@ATTR_BEGIN|pEventLogTimeNum@@
-        eventLogTime : Array[1..@@IDXEVENTMAX@@] of "udtEventLogTime";   // SFC events for logging time data
-@@ATTR_END|pEventLogTimeNum@@
+@@ATTR_BEGIN|pEventLogTimeWordClass@@
+        eventLogTime_@@CWORD@@ : Int;          // SFC events for logging time data as Discrete Alarms
+@@ATTR_END|pEventLogTimeWordClass@@
 @@ATTR_END|pEventLogTimeExists@@
+@@ATTR_BEGIN|pEventPromptExists@@
+@@ATTR_BEGIN|pEventPromptNum@@
+        eventPrompt : Array[1..@@IDXEVENTMAX@@] of "udtEventPrompt";   // SFC events for operator prompts
+@@ATTR_END|pEventPromptNum@@
+@@ATTR_END|pEventPromptExists@@
+@@ATTR_BEGIN|pEventConfirmNoExists@@
+@@ATTR_BEGIN|pEventConfirmNoWordClass@@
+        eventConfirmNo_@@CWORD@@ : Int;      // SFC events for logging prompt event confirm No data as Discrete Alarms
+@@ATTR_END|pEventConfirmNoWordClass@@
+@@ATTR_END|pEventConfirmNoExists@@
+@@ATTR_BEGIN|pEventConfirmYesExists@@
+@@ATTR_BEGIN|pEventConfirmYesWordClass@@
+        eventConfirmYes_@@CWORD@@ : Int;      // SFC events for logging prompt event confirm Yes data as Discrete Alarms
+@@ATTR_END|pEventConfirmYesWordClass@@
+@@ATTR_END|pEventConfirmYesExists@@
 @@ATTR_BEGIN|HYGIENE@@
         hs : "udtHygiene";
 @@ATTR_END|HYGIENE@@
@@ -58,6 +68,9 @@ VERSION : 1.0
 @@ATTR_BEGIN|pChildWriteDefine@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
 @@ATTR_END|pChildWriteDefine@@
+@@ATTR_BEGIN|pBLOCK_RECIPE@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+@@ATTR_END|pBLOCK_RECIPE@@
     END_STRUCT;
 END_TYPE
 

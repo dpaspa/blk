@@ -1,0 +1,148 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbAL1                                                         //
+// Description:                                                               //
+// Load Cell mass indicator.                                                  //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.1 David Paspa      25-Aug-2018 NA        Made separate block to store    //
+//                                            gross, tare and nett masses.    //
+// 2.0 David Paspa      19-Apr-2018 NA        Reboot for S7-1500 consolidated //
+//                                            into fcAL1 from all analog      //
+//                                            classes.                        //
+// 0.3 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Upper/Lower range hardcoded.    //
+//                                            USER_INPUT added for manual     //
+//                                            mode simulation.                //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbMI1"
+TITLE = AL1 : Generic analog indicator
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fbMI1
+VERSION : 2.1
+
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR
+    p : "udtMI1";            // Block data interface
+END_VAR
+
+VAR DB_SPECIFIC
+    b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..15] of Bool;
+    w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT b : Word;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Call Mode and Command handling function
+    //------------------------------------------------------------------------//
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (   mcRead             := #p.read.mc ,
+        mcWrite              := #p.write.mc
+    );
+
+NETWORK
+TITLE = Call Analog Input handling function
+    //------------------------------------------------------------------------//
+    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
+    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
+    //                                                                        //
+    // Scale the analog input value and check it is healty:                   //
+    //------------------------------------------------------------------------//
+    CALL "fcAnalog"
+    (   ai                   := #p.read.ai
+    );
+
+NETWORK
+TITLE = Set Device command which can only be ENABLE.
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is always ENABLE:                                                  //
+    //------------------------------------------------------------------------//
+    L #p.read.CMD_ENABLE;
+    T #p.write.mc.CMD;
+
+NETWORK
+TITLE = Promote the analog input attributes
+    //------------------------------------------------------------------------//
+    // Promote the analog input attributes to module level:                   //
+    //------------------------------------------------------------------------//
+    L #p.read.ai.PV;
+    T #p.read.PV;
+    A #p.read.ai.DQ;
+    = #p.read.DQ;
+
+NETWORK
+TITLE = Set INTERLOCK Flag
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Set interlock if any external or any problem with the measurement:     //
+    //------------------------------------------------------------------------//
+    O #p.read.mc.INTERLOCK;
+    O #p.read.ai.ALARM_LL;
+    O #p.read.ai.ALARM_HH;
+    ON #p.read.ai.DQ;
+    = #p.read.mc.INTERLOCK;
+
+NETWORK
+TITLE = Set Device State to Enabled if healthy
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // ENABLED if input signal is healthy:                                    //
+    //------------------------------------------------------------------------//
+    A #p.read.ai.DQ;
+    JCN _a;
+    L #p.read.STATE_ENABLED;
+    T #p.read.mc.STATE;
+    R #p.read.mc.ERROR;
+_a:   NOP 0;
+
+NETWORK
+TITLE = Set Device State to Fault if any field signal error
+    //------------------------------------------------------------------------//
+    // FAULT if any input error:                                              //
+    //------------------------------------------------------------------------//
+    AN #p.read.ai.DQ;
+    AN #p.read.mc.modeOOS;
+    JCN _b;
+    L #p.read.STATE_FAULT;
+    T #p.read.mc.STATE;
+    S #p.read.mc.ERROR;
+_b: NOP 0;
+
+NETWORK
+TITLE = Pack the alarm bits
+    //------------------------------------------------------------------------//
+    // Pack the alarm bits into an integer for the HMI to read:               //
+    //------------------------------------------------------------------------//
+    A #p.read.ai.ALARM_HH;
+    = #b[8];
+    A #p.read.ai.ALARM_H;
+    = #b[9];
+    A #p.read.ai.ALARM_L;
+    = #b[10];
+    A #p.read.ai.ALARM_LL;
+    = #b[11];
+    A #p.read.ai.DQ;
+    = #b[12];
+    L #w;
+    T #p.read.mc.ALARM;
+
+END_FUNCTION_BLOCK

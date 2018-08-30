@@ -1,0 +1,2822 @@
+﻿FUNCTION_BLOCK "ifbHMISelectBLK"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR 
+      edge : Array[0..50] of Bool;
+   END_VAR
+
+   VAR_TEMP 
+      blockSelected : Int;
+      arrChildIndex : Array[0..50] of Int;
+      tempEdge : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Get the selected BLK
+//------------------------------------------------------------------------//
+// Get the BLK index number selected by the user when they clicked the    //
+// faceplate BLK target:                                                  //
+//------------------------------------------------------------------------//
+      L "dbHMIInterfaceBLK".block.blockSelected;
+      T #blockSelected;
+
+NETWORK
+TITLE = 
+      A(;
+      L #blockSelected;
+      L 1134;
+      ==I;
+      );
+      FP #edge[0];
+      = #tempEdge;
+      JCN out1;
+
+      A "idbEMA1".f[0].p.read.mc.modeAUTO;
+      R "dbHMIInterfaceBLK".block.manual;
+
+      A "idbEMA1".f[0].p.read.mc.modeMANUAL;
+      S "dbHMIInterfaceBLK".block.manual;
+
+out1:      NOP 0;
+
+NETWORK
+TITLE = EA1010 M1 Vessel Agitator
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1134;
+      ==I;
+      );
+
+      JCN _not_EA1010;
+      AN #tempEdge;
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMA1".f[0].p.read.mc , 
+         mcw                         := "idbEMA1".f[0].p.write.mc , 
+         bmc                         := "idbEMA1".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 0        ;// SIC_AGIT SIC1
+      T #arrChildIndex[1];
+      L "idbSIC1".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbSIC1".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbSIC1".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EA1010;
+      A "idbEMA1".f[0].p.read.AGIT_RUNNING;
+      = "dbHMIInterfaceBLK".block.arrBool[1];
+      A "idbEMA1".f[0].p.read.AGIT_STOPPED;
+      = "dbHMIInterfaceBLK".block.arrBool[2];
+      A "idbEMA1".f[0].p.read.RESETRUNTIMER;
+      = "dbHMIInterfaceBLK".block.arrBool[3];
+      L "idbEMA1".f[0].p.read.ACUMTIMEH;
+      T "dbHMIInterfaceBLK".block.arrInt[1];
+      L "idbEMA1".f[0].p.read.ACUMTIMEM;
+      T "dbHMIInterfaceBLK".block.arrInt[2];
+      L "idbEMA1".f[0].p.read.ACUMTIMES;
+      T "dbHMIInterfaceBLK".block.arrInt[3];
+      L "idbEMA1".f[0].p.write.RUNTIME_H;
+      T "dbHMIInterfaceBLK".block.arrInt[4];
+      L "idbEMA1".f[0].p.write.RUNTIME_M;
+      T "dbHMIInterfaceBLK".block.arrInt[5];
+      L "idbEMA1".f[0].p.write.RUNTIME_S;
+      T "dbHMIInterfaceBLK".block.arrInt[6];
+      L "idbEMA1".f[0].p.write.SETPOINT;
+      T "dbHMIInterfaceBLK".block.arrReal[1];
+_manual_EA1010:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EA1010;
+      A "dbHMIInterfaceBLK".block.arrBool[1];
+      = "idbEMA1".f[0].p.read.AGIT_RUNNING;
+      A "dbHMIInterfaceBLK".block.arrBool[2];
+      = "idbEMA1".f[0].p.read.AGIT_STOPPED;
+      A "dbHMIInterfaceBLK".block.arrBool[3];
+      = "idbEMA1".f[0].p.read.RESETRUNTIMER;
+      L "dbHMIInterfaceBLK".block.arrInt[1];
+      T "idbEMA1".f[0].p.read.ACUMTIMEH;
+      L "dbHMIInterfaceBLK".block.arrInt[2];
+      T "idbEMA1".f[0].p.read.ACUMTIMEM;
+      L "dbHMIInterfaceBLK".block.arrInt[3];
+      T "idbEMA1".f[0].p.read.ACUMTIMES;
+      L "dbHMIInterfaceBLK".block.arrInt[4];
+      T "idbEMA1".f[0].p.write.RUNTIME_H;
+      L "dbHMIInterfaceBLK".block.arrInt[5];
+      T "idbEMA1".f[0].p.write.RUNTIME_M;
+      L "dbHMIInterfaceBLK".block.arrInt[6];
+      T "idbEMA1".f[0].p.write.RUNTIME_S;
+      L "dbHMIInterfaceBLK".block.arrReal[1];
+      T "idbEMA1".f[0].p.write.SETPOINT;
+_auto_EA1010:      NOP 0;
+
+_not_EA1010:      NOP 0;
+
+NETWORK
+TITLE = EC1001 M1 LP CA and HP CA supply and Vacuum and Vent
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1135;
+      ==I;
+      );
+      JCN _not_EC1001;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMC1".f[0].p.read.mc , 
+         mcw                         := "idbEMC1".f[0].p.write.mc , 
+         bmc                         := "idbEMC1".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 0        ;// PC_VESSEL PC1
+      T #arrChildIndex[1];
+      L 0        ;// PI_VESSEL PI1
+      T #arrChildIndex[2];
+      L 1        ;// POS_HPCA POS2
+      T #arrChildIndex[3];
+      L 2        ;// POS_LPCA POS2
+      T #arrChildIndex[4];
+      L 3        ;// POS_VACUUM POS2
+      T #arrChildIndex[5];
+      L 0        ;// POS_VENT POS2
+      T #arrChildIndex[6];
+      L 0        ;// POS_DRAIN POS4
+      T #arrChildIndex[7];
+      L "idbPC1".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPC1".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPC1".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPI1".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPI1".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPI1".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbPOS2".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbPOS2".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbPOS2".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbPOS2".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbPOS2".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbPOS2".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+      L "idbPOS2".f[#arrChildIndex[5]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[5];
+      A "idbPOS2".f[#arrChildIndex[5]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[5];
+      A "idbPOS2".f[#arrChildIndex[5]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[5];
+      L "idbPOS2".f[#arrChildIndex[6]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[6];
+      A "idbPOS2".f[#arrChildIndex[6]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[6];
+      A "idbPOS2".f[#arrChildIndex[6]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[6];
+      L "idbPOS4".f[#arrChildIndex[7]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[7];
+      A "idbPOS4".f[#arrChildIndex[7]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[7];
+      A "idbPOS4".f[#arrChildIndex[7]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[7];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EC1001;
+      L "idbEMC1".f[0].p.write.MEDIUM_GAS;
+      T "dbHMIInterfaceBLK".block.arrInt[1];
+      L "idbEMC1".f[0].p.write.SETPOINT;
+      T "dbHMIInterfaceBLK".block.arrReal[1];
+_manual_EC1001:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EC1001;
+      L "dbHMIInterfaceBLK".block.arrInt[1];
+      T "idbEMC1".f[0].p.write.MEDIUM_GAS;
+      L "dbHMIInterfaceBLK".block.arrReal[1];
+      T "idbEMC1".f[0].p.write.SETPOINT;
+_auto_EC1001:      NOP 0;
+
+_not_EC1001:      NOP 0;
+
+NETWORK
+TITLE = EC1002 M1 WFI and PS supply plus PW and PS supply
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1136;
+      ==I;
+      );
+      JCN _not_EC1002;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMC2".f[0].p.read.mc , 
+         mcw                         := "idbEMC2".f[0].p.write.mc , 
+         bmc                         := "idbEMC2".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 5        ;// POS_PSPW POS2
+      T #arrChildIndex[1];
+      L 4        ;// POS_PSWFI POS2
+      T #arrChildIndex[2];
+      L 29        ;// POS_PW POS4
+      T #arrChildIndex[3];
+      L 28        ;// POS_WFI POS4
+      T #arrChildIndex[4];
+      L 2        ;// ZSC_FPINLET ZSC2
+      T #arrChildIndex[5];
+      L 1        ;// ZSC_FPPW ZSC2
+      T #arrChildIndex[6];
+      L 0        ;// ZSC_FPWFI ZSC2
+      T #arrChildIndex[7];
+      L "idbPOS2".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS2".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbPOS4".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbPOS4".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbPOS4".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbPOS4".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbPOS4".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbPOS4".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+      L "idbZSC2".f[#arrChildIndex[5]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[5];
+      A "idbZSC2".f[#arrChildIndex[5]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[5];
+      A "idbZSC2".f[#arrChildIndex[5]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[5];
+      L "idbZSC2".f[#arrChildIndex[6]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[6];
+      A "idbZSC2".f[#arrChildIndex[6]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[6];
+      A "idbZSC2".f[#arrChildIndex[6]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[6];
+      L "idbZSC2".f[#arrChildIndex[7]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[7];
+      A "idbZSC2".f[#arrChildIndex[7]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[7];
+      A "idbZSC2".f[#arrChildIndex[7]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[7];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EC1002;
+      A "idbEMC2".f[0].p.read.MASS_READY;
+      = "dbHMIInterfaceBLK".block.arrBool[1];
+      L "idbEMC2".f[0].p.write.MEDIUM_LIQUID;
+      T "dbHMIInterfaceBLK".block.arrInt[1];
+      L "idbEMC2".f[0].p.read.MASS_ACTUAL;
+      T "dbHMIInterfaceBLK".block.arrReal[1];
+      L "idbEMC2".f[0].p.read.MASS_FINAL;
+      T "dbHMIInterfaceBLK".block.arrReal[2];
+      L "idbEMC2".f[0].p.read.MASS_INITIAL;
+      T "dbHMIInterfaceBLK".block.arrReal[3];
+      L "idbEMC2".f[0].p.write.MASS_CHARGE;
+      T "dbHMIInterfaceBLK".block.arrReal[4];
+      L "idbEMC2".f[0].p.write.RUNTIME;
+      T "dbHMIInterfaceBLK".block.arrTime[1];
+      L "idbEMC2".f[0].p.write.TIMEOUT;
+      T "dbHMIInterfaceBLK".block.arrTime[2];
+_manual_EC1002:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EC1002;
+      A "dbHMIInterfaceBLK".block.arrBool[1];
+      = "idbEMC2".f[0].p.read.MASS_READY;
+      L "dbHMIInterfaceBLK".block.arrInt[1];
+      T "idbEMC2".f[0].p.write.MEDIUM_LIQUID;
+      L "dbHMIInterfaceBLK".block.arrReal[1];
+      T "idbEMC2".f[0].p.read.MASS_ACTUAL;
+      L "dbHMIInterfaceBLK".block.arrReal[2];
+      T "idbEMC2".f[0].p.read.MASS_FINAL;
+      L "dbHMIInterfaceBLK".block.arrReal[3];
+      T "idbEMC2".f[0].p.read.MASS_INITIAL;
+      L "dbHMIInterfaceBLK".block.arrReal[4];
+      T "idbEMC2".f[0].p.write.MASS_CHARGE;
+      L "dbHMIInterfaceBLK".block.arrTime[1];
+      T "idbEMC2".f[0].p.write.RUNTIME;
+      L "dbHMIInterfaceBLK".block.arrTime[2];
+      T "idbEMC2".f[0].p.write.TIMEOUT;
+_auto_EC1002:      NOP 0;
+
+_not_EC1002:      NOP 0;
+
+NETWORK
+TITLE = EC3001 S1 LP CA and HP CA supply and Vacuum and Vent
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1145;
+      ==I;
+      );
+      JCN _not_EC3001;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMC1".f[2].p.read.mc , 
+         mcw                         := "idbEMC1".f[2].p.write.mc , 
+         bmc                         := "idbEMC1".f[2].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 2        ;// PC_VESSEL PC1
+      T #arrChildIndex[1];
+      L 2        ;// PI_VESSEL PI1
+      T #arrChildIndex[2];
+      L 27        ;// POS_HPCA POS2
+      T #arrChildIndex[3];
+      L 28        ;// POS_LPCA POS2
+      T #arrChildIndex[4];
+      L 29        ;// POS_VACUUM POS2
+      T #arrChildIndex[5];
+      L 26        ;// POS_VENT POS2
+      T #arrChildIndex[6];
+      L 16        ;// POS_DRAIN POS4
+      T #arrChildIndex[7];
+      L "idbPC1".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPC1".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPC1".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPI1".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPI1".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPI1".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbPOS2".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbPOS2".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbPOS2".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbPOS2".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbPOS2".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbPOS2".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+      L "idbPOS2".f[#arrChildIndex[5]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[5];
+      A "idbPOS2".f[#arrChildIndex[5]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[5];
+      A "idbPOS2".f[#arrChildIndex[5]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[5];
+      L "idbPOS2".f[#arrChildIndex[6]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[6];
+      A "idbPOS2".f[#arrChildIndex[6]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[6];
+      A "idbPOS2".f[#arrChildIndex[6]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[6];
+      L "idbPOS4".f[#arrChildIndex[7]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[7];
+      A "idbPOS4".f[#arrChildIndex[7]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[7];
+      A "idbPOS4".f[#arrChildIndex[7]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[7];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EC3001;
+      L "idbEMC1".f[2].p.write.MEDIUM_GAS;
+      T "dbHMIInterfaceBLK".block.arrInt[1];
+      L "idbEMC1".f[2].p.write.SETPOINT;
+      T "dbHMIInterfaceBLK".block.arrReal[1];
+_manual_EC3001:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EC3001;
+      L "dbHMIInterfaceBLK".block.arrInt[1];
+      T "idbEMC1".f[2].p.write.MEDIUM_GAS;
+      L "dbHMIInterfaceBLK".block.arrReal[1];
+      T "idbEMC1".f[2].p.write.SETPOINT;
+_auto_EC3001:      NOP 0;
+
+_not_EC3001:      NOP 0;
+
+NETWORK
+TITLE = EC3002 S1 WFI and PS supply plus PW and PS supply
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1146;
+      ==I;
+      );
+      JCN _not_EC3002;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMC3".f[0].p.read.mc , 
+         mcw                         := "idbEMC3".f[0].p.write.mc , 
+         bmc                         := "idbEMC3".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 31        ;// POS_PSPW POS2
+      T #arrChildIndex[1];
+      L 30        ;// POS_PSWFI POS2
+      T #arrChildIndex[2];
+      L 33        ;// POS_PW POS4
+      T #arrChildIndex[3];
+      L 32        ;// POS_WFI POS4
+      T #arrChildIndex[4];
+      L 16        ;// ZSC_FPINLET ZSC2
+      T #arrChildIndex[5];
+      L 15        ;// ZSC_FPPW ZSC2
+      T #arrChildIndex[6];
+      L 14        ;// ZSC_FPWFI ZSC2
+      T #arrChildIndex[7];
+      L "idbPOS2".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS2".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbPOS4".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbPOS4".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbPOS4".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbPOS4".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbPOS4".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbPOS4".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+      L "idbZSC2".f[#arrChildIndex[5]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[5];
+      A "idbZSC2".f[#arrChildIndex[5]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[5];
+      A "idbZSC2".f[#arrChildIndex[5]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[5];
+      L "idbZSC2".f[#arrChildIndex[6]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[6];
+      A "idbZSC2".f[#arrChildIndex[6]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[6];
+      A "idbZSC2".f[#arrChildIndex[6]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[6];
+      L "idbZSC2".f[#arrChildIndex[7]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[7];
+      A "idbZSC2".f[#arrChildIndex[7]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[7];
+      A "idbZSC2".f[#arrChildIndex[7]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[7];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EC3002;
+      L "idbEMC3".f[0].p.write.MEDIUM_LIQUID;
+      T "dbHMIInterfaceBLK".block.arrInt[1];
+      L "idbEMC3".f[0].p.write.RUNTIME;
+      T "dbHMIInterfaceBLK".block.arrTime[1];
+_manual_EC3002:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EC3002;
+      L "dbHMIInterfaceBLK".block.arrInt[1];
+      T "idbEMC3".f[0].p.write.MEDIUM_LIQUID;
+      L "dbHMIInterfaceBLK".block.arrTime[1];
+      T "idbEMC3".f[0].p.write.RUNTIME;
+_auto_EC3002:      NOP 0;
+
+_not_EC3002:      NOP 0;
+
+NETWORK
+TITLE = EG1005 M1 gas filter heating and drain valve and temperature indicator
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1138;
+      ==I;
+      );
+      JCN _not_EG1005;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMG1".f[0].p.read.mc , 
+         mcw                         := "idbEMG1".f[0].p.write.mc , 
+         bmc                         := "idbEMG1".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 0        ;// HE_FILTER HE1
+      T #arrChildIndex[1];
+      L 1        ;// POS_DRAIN POS4
+      T #arrChildIndex[2];
+      L 1        ;// TI_DRAIN TI2
+      T #arrChildIndex[3];
+      L 0        ;// TI_VENT TI2
+      T #arrChildIndex[4];
+      L "idbHE1".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbHE1".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbHE1".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS4".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbTI2".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbTI2".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbTI2".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbTI2".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbTI2".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbTI2".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EG1005;
+_manual_EG1005:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EG1005;
+_auto_EG1005:      NOP 0;
+
+_not_EG1005:      NOP 0;
+
+NETWORK
+TITLE = EG3005 S1 gas filter heating and drain valve and temperature indicator
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1148;
+      ==I;
+      );
+      JCN _not_EG3005;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMG1".f[2].p.read.mc , 
+         mcw                         := "idbEMG1".f[2].p.write.mc , 
+         bmc                         := "idbEMG1".f[2].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 2        ;// HE_FILTER HE1
+      T #arrChildIndex[1];
+      L 17        ;// POS_DRAIN POS4
+      T #arrChildIndex[2];
+      L 9        ;// TI_DRAIN TI2
+      T #arrChildIndex[3];
+      L 8        ;// TI_VENT TI2
+      T #arrChildIndex[4];
+      L "idbHE1".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbHE1".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbHE1".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS4".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbTI2".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbTI2".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbTI2".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbTI2".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbTI2".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbTI2".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EG3005;
+_manual_EG3005:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EG3005;
+_auto_EG3005:      NOP 0;
+
+_not_EG3005:      NOP 0;
+
+NETWORK
+TITLE = EM1009 M1 load cell
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1139;
+      ==I;
+      );
+      JCN _not_EM1009;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMM1".f[0].p.read.mc , 
+         mcw                         := "idbEMM1".f[0].p.write.mc , 
+         bmc                         := "idbEMM1".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 0        ;// MI_VESSEL MI1
+      T #arrChildIndex[1];
+      L "idbMI1".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbMI1".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbMI1".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EM1009;
+      L "idbEMM1".f[0].p.write.MASS_GROSS;
+      T "dbHMIInterfaceBLK".block.arrReal[1];
+      L "idbEMM1".f[0].p.write.MASS_NETT;
+      T "dbHMIInterfaceBLK".block.arrReal[2];
+      L "idbEMM1".f[0].p.write.MASS_TARE;
+      T "dbHMIInterfaceBLK".block.arrReal[3];
+      L "idbEMM1".f[0].p.write.SETTLING_TIME;
+      T "dbHMIInterfaceBLK".block.arrTime[1];
+_manual_EM1009:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EM1009;
+      L "dbHMIInterfaceBLK".block.arrReal[1];
+      T "idbEMM1".f[0].p.write.MASS_GROSS;
+      L "dbHMIInterfaceBLK".block.arrReal[2];
+      T "idbEMM1".f[0].p.write.MASS_NETT;
+      L "dbHMIInterfaceBLK".block.arrReal[3];
+      T "idbEMM1".f[0].p.write.MASS_TARE;
+      L "dbHMIInterfaceBLK".block.arrTime[1];
+      T "idbEMM1".f[0].p.write.SETTLING_TIME;
+_auto_EM1009:      NOP 0;
+
+_not_EM1009:      NOP 0;
+
+NETWORK
+TITLE = ET1003 Manufacturing Filtration Line Heat Exchanger Temperature Control
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1143;
+      ==I;
+      );
+      JCN _not_ET1003;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMT1".f[0].p.read.mc , 
+         mcw                         := "idbEMT1".f[0].p.write.mc , 
+         bmc                         := "idbEMT1".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 0        ;// MOD_TCV MOD1
+      T #arrChildIndex[1];
+      L 25        ;// POS_RETURN POS4
+      T #arrChildIndex[2];
+      L 7        ;// POS_RETURNDRAIN POS4
+      T #arrChildIndex[3];
+      L 24        ;// POS_SUPPLY POS4
+      T #arrChildIndex[4];
+      L 6        ;// POS_SUPPLYDRAIN POS4
+      T #arrChildIndex[5];
+      L 0        ;// TC_HEX TC1
+      T #arrChildIndex[6];
+      L 1        ;// TI_HEX TI1
+      T #arrChildIndex[7];
+      L "idbMOD1".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbMOD1".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbMOD1".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS4".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbPOS4".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbPOS4".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbPOS4".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbPOS4".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbPOS4".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbPOS4".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+      L "idbPOS4".f[#arrChildIndex[5]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[5];
+      A "idbPOS4".f[#arrChildIndex[5]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[5];
+      A "idbPOS4".f[#arrChildIndex[5]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[5];
+      L "idbTC1".f[#arrChildIndex[6]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[6];
+      A "idbTC1".f[#arrChildIndex[6]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[6];
+      A "idbTC1".f[#arrChildIndex[6]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[6];
+      L "idbTI1".f[#arrChildIndex[7]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[7];
+      A "idbTI1".f[#arrChildIndex[7]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[7];
+      A "idbTI1".f[#arrChildIndex[7]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[7];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_ET1003;
+      L "idbEMT1".f[0].p.write.SETPOINT;
+      T "dbHMIInterfaceBLK".block.arrReal[1];
+      L "idbEMT1".f[0].p.write.DRAIN_TIME;
+      T "dbHMIInterfaceBLK".block.arrTime[1];
+_manual_ET1003:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_ET1003;
+      L "dbHMIInterfaceBLK".block.arrReal[1];
+      T "idbEMT1".f[0].p.write.SETPOINT;
+      L "dbHMIInterfaceBLK".block.arrTime[1];
+      T "idbEMT1".f[0].p.write.DRAIN_TIME;
+_auto_ET1003:      NOP 0;
+
+_not_ET1003:      NOP 0;
+
+NETWORK
+TITLE = EV1004 M1 vessel mounted equipment and valves
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1140;
+      ==I;
+      );
+      JCN _not_EV1004;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMV1".f[0].p.read.mc , 
+         mcw                         := "idbEMV1".f[0].p.write.mc , 
+         bmc                         := "idbEMV1".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 13        ;// DI_BURST DI1
+      T #arrChildIndex[1];
+      L 8        ;// POS_OUTLET POS2
+      T #arrChildIndex[2];
+      L 0        ;// TI_VESSEL TI1
+      T #arrChildIndex[3];
+      L 0        ;// ZSC_MANWAY ZSC1
+      T #arrChildIndex[4];
+      L "idbDI1".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbDI1".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbDI1".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS2".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbTI1".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbTI1".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbTI1".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbZSC1".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbZSC1".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbZSC1".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EV1004;
+_manual_EV1004:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EV1004;
+_auto_EV1004:      NOP 0;
+
+_not_EV1004:      NOP 0;
+
+NETWORK
+TITLE = EV1008 M1 Vessel Inlet Connection
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1141;
+      ==I;
+      );
+      JCN _not_EV1008;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMV2".f[0].p.read.mc , 
+         mcw                         := "idbEMV2".f[0].p.write.mc , 
+         bmc                         := "idbEMV2".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 6        ;// POS_SPRAYBALL1 POS2
+      T #arrChildIndex[1];
+      L 7        ;// POS_SPRAYBALL2 POS2
+      T #arrChildIndex[2];
+      L "idbPOS2".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS2".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EV1008;
+      L "idbEMV2".f[0].p.write.OPENED_TIME;
+      T "dbHMIInterfaceBLK".block.arrTime[1];
+_manual_EV1008:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EV1008;
+      L "dbHMIInterfaceBLK".block.arrTime[1];
+      T "idbEMV2".f[0].p.write.OPENED_TIME;
+_auto_EV1008:      NOP 0;
+
+_not_EV1008:      NOP 0;
+
+NETWORK
+TITLE = EV3004 S1 vessel mounted equipment and valves
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1149;
+      ==I;
+      );
+      JCN _not_EV3004;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMV1".f[2].p.read.mc , 
+         mcw                         := "idbEMV1".f[2].p.write.mc , 
+         bmc                         := "idbEMV1".f[2].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 15        ;// DI_BURST DI1
+      T #arrChildIndex[1];
+      L 34        ;// POS_OUTLET POS2
+      T #arrChildIndex[2];
+      L 4        ;// TI_VESSEL TI1
+      T #arrChildIndex[3];
+      L 2        ;// ZSC_MANWAY ZSC1
+      T #arrChildIndex[4];
+      L "idbDI1".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbDI1".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbDI1".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS2".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbTI1".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbTI1".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbTI1".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbZSC1".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbZSC1".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbZSC1".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EV3004;
+_manual_EV3004:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EV3004;
+_auto_EV3004:      NOP 0;
+
+_not_EV3004:      NOP 0;
+
+NETWORK
+TITLE = EV3008 S1 Vessel Inlet Connection
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1150;
+      ==I;
+      );
+      JCN _not_EV3008;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMV2".f[2].p.read.mc , 
+         mcw                         := "idbEMV2".f[2].p.write.mc , 
+         bmc                         := "idbEMV2".f[2].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 32        ;// POS_SPRAYBALL1 POS2
+      T #arrChildIndex[1];
+      L 33        ;// POS_SPRAYBALL2 POS2
+      T #arrChildIndex[2];
+      L "idbPOS2".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS2".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EV3008;
+      L "idbEMV2".f[2].p.write.OPENED_TIME;
+      T "dbHMIInterfaceBLK".block.arrTime[1];
+_manual_EV3008:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EV3008;
+      L "dbHMIInterfaceBLK".block.arrTime[1];
+      T "idbEMV2".f[2].p.write.OPENED_TIME;
+_auto_EV3008:      NOP 0;
+
+_not_EV3008:      NOP 0;
+
+NETWORK
+TITLE = EX1006 M1 CIP & SIP Drain
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1142;
+      ==I;
+      );
+      JCN _not_EX1006;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMX4".f[0].p.read.mc , 
+         mcw                         := "idbEMX4".f[0].p.write.mc , 
+         bmc                         := "idbEMX4".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 3        ;// POS_CIP POS4
+      T #arrChildIndex[1];
+      L 2        ;// POS_SIP POS4
+      T #arrChildIndex[2];
+      L 2        ;// TI_DRAIN TI2
+      T #arrChildIndex[3];
+      L "idbPOS4".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPOS4".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPOS4".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS4".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbTI2".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbTI2".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbTI2".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EX1006;
+      L "idbEMX4".f[0].p.write.CLOSED_TIME;
+      T "dbHMIInterfaceBLK".block.arrTime[1];
+      L "idbEMX4".f[0].p.write.OPENED_TIME;
+      T "dbHMIInterfaceBLK".block.arrTime[2];
+_manual_EX1006:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EX1006;
+      L "dbHMIInterfaceBLK".block.arrTime[1];
+      T "idbEMX4".f[0].p.write.CLOSED_TIME;
+      L "dbHMIInterfaceBLK".block.arrTime[2];
+      T "idbEMX4".f[0].p.write.OPENED_TIME;
+_auto_EX1006:      NOP 0;
+
+_not_EX1006:      NOP 0;
+
+NETWORK
+TITLE = EX1011 SMFL1 CIP & SIP Drain Line
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1154;
+      ==I;
+      );
+      JCN _not_EX1011;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMX4".f[2].p.read.mc , 
+         mcw                         := "idbEMX4".f[2].p.write.mc , 
+         bmc                         := "idbEMX4".f[2].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 5        ;// POS_CIP POS4
+      T #arrChildIndex[1];
+      L 4        ;// POS_SIP POS4
+      T #arrChildIndex[2];
+      L 3        ;// TI_DRAIN TI2
+      T #arrChildIndex[3];
+      L "idbPOS4".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPOS4".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPOS4".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS4".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbTI2".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbTI2".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbTI2".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EX1011;
+      L "idbEMX4".f[2].p.write.CLOSED_TIME;
+      T "dbHMIInterfaceBLK".block.arrTime[1];
+      L "idbEMX4".f[2].p.write.OPENED_TIME;
+      T "dbHMIInterfaceBLK".block.arrTime[2];
+_manual_EX1011:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EX1011;
+      L "dbHMIInterfaceBLK".block.arrTime[1];
+      T "idbEMX4".f[2].p.write.CLOSED_TIME;
+      L "dbHMIInterfaceBLK".block.arrTime[2];
+      T "idbEMX4".f[2].p.write.OPENED_TIME;
+_auto_EX1011:      NOP 0;
+
+_not_EX1011:      NOP 0;
+
+NETWORK
+TITLE = EX1014 MMFL1 filtration transfer line
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1144;
+      ==I;
+      );
+      JCN _not_EX1014;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMX1".f[0].p.read.mc , 
+         mcw                         := "idbEMX1".f[0].p.write.mc , 
+         bmc                         := "idbEMX1".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 11        ;// POS_FILTERINLET POS2
+      T #arrChildIndex[1];
+      L 12        ;// POS_HEXINLET POS2
+      T #arrChildIndex[2];
+      L 6        ;// ZSC_CIPSIP ZSC2
+      T #arrChildIndex[3];
+      L 5        ;// ZSC_FILTER ZSC2
+      T #arrChildIndex[4];
+      L "idbPOS2".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS2".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbZSC2".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbZSC2".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbZSC2".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbZSC2".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbZSC2".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbZSC2".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EX1014;
+_manual_EX1014:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EX1014;
+_auto_EX1014:      NOP 0;
+
+_not_EX1014:      NOP 0;
+
+NETWORK
+TITLE = EX1015 SMFL1 filtration transfer line
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1153;
+      ==I;
+      );
+      JCN _not_EX1015;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMX6".f[0].p.read.mc , 
+         mcw                         := "idbEMX6".f[0].p.write.mc , 
+         bmc                         := "idbEMX6".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 9        ;// POS_DRAIN POS2
+      T #arrChildIndex[1];
+      L 10        ;// POS_FILTER POS2
+      T #arrChildIndex[2];
+      L 3        ;// ZSC_FILTER ZSC2
+      T #arrChildIndex[3];
+      L 4        ;// ZSC_DRAIN ZSC2
+      T #arrChildIndex[4];
+      L "idbPOS2".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS2".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbZSC2".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbZSC2".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbZSC2".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbZSC2".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbZSC2".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbZSC2".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EX1015;
+_manual_EX1015:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EX1015;
+_auto_EX1015:      NOP 0;
+
+_not_EX1015:      NOP 0;
+
+NETWORK
+TITLE = EX3006 S1 Vessel CIP & SIP Drain
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1151;
+      ==I;
+      );
+      JCN _not_EX3006;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMX4".f[4].p.read.mc , 
+         mcw                         := "idbEMX4".f[4].p.write.mc , 
+         bmc                         := "idbEMX4".f[4].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 19        ;// POS_CIP POS4
+      T #arrChildIndex[1];
+      L 18        ;// POS_SIP POS4
+      T #arrChildIndex[2];
+      L 10        ;// TI_DRAIN TI2
+      T #arrChildIndex[3];
+      L "idbPOS4".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPOS4".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPOS4".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS4".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS4".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbTI2".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbTI2".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbTI2".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EX3006;
+      L "idbEMX4".f[4].p.write.CLOSED_TIME;
+      T "dbHMIInterfaceBLK".block.arrTime[1];
+      L "idbEMX4".f[4].p.write.OPENED_TIME;
+      T "dbHMIInterfaceBLK".block.arrTime[2];
+_manual_EX3006:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EX3006;
+      L "dbHMIInterfaceBLK".block.arrTime[1];
+      T "idbEMX4".f[4].p.write.CLOSED_TIME;
+      L "dbHMIInterfaceBLK".block.arrTime[2];
+      T "idbEMX4".f[4].p.write.OPENED_TIME;
+_auto_EX3006:      NOP 0;
+
+_not_EX3006:      NOP 0;
+
+NETWORK
+TITLE = EX3007 S1 Vessel Transfer Lines
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1152;
+      ==I;
+      );
+      JCN _not_EX3007;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMX2".f[0].p.read.mc , 
+         mcw                         := "idbEMX2".f[0].p.write.mc , 
+         bmc                         := "idbEMX2".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 37        ;// POS_DRAIN POS2
+      T #arrChildIndex[1];
+      L 38        ;// POS_FILL POS2
+      T #arrChildIndex[2];
+      L 36        ;// POS_SMFL POS2
+      T #arrChildIndex[3];
+      L 35        ;// POS_VESSEL POS2
+      T #arrChildIndex[4];
+      L 20        ;// ZSC_BFS2 ZSC2
+      T #arrChildIndex[5];
+      L 19        ;// ZSC_BFS1 ZSC2
+      T #arrChildIndex[6];
+      L 18        ;// ZSC_SMFL2 ZSC2
+      T #arrChildIndex[7];
+      L 17        ;// ZSC_SMFL1 ZSC2
+      T #arrChildIndex[8];
+      L "idbPOS2".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbPOS2".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbPOS2".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbPOS2".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbPOS2".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbPOS2".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbPOS2".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbPOS2".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbPOS2".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbPOS2".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+      L "idbZSC2".f[#arrChildIndex[5]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[5];
+      A "idbZSC2".f[#arrChildIndex[5]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[5];
+      A "idbZSC2".f[#arrChildIndex[5]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[5];
+      L "idbZSC2".f[#arrChildIndex[6]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[6];
+      A "idbZSC2".f[#arrChildIndex[6]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[6];
+      A "idbZSC2".f[#arrChildIndex[6]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[6];
+      L "idbZSC2".f[#arrChildIndex[7]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[7];
+      A "idbZSC2".f[#arrChildIndex[7]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[7];
+      A "idbZSC2".f[#arrChildIndex[7]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[7];
+      L "idbZSC2".f[#arrChildIndex[8]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[8];
+      A "idbZSC2".f[#arrChildIndex[8]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[8];
+      A "idbZSC2".f[#arrChildIndex[8]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[8];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EX3007;
+      L "idbEMX2".f[0].p.write.FILL_FLZ;
+      T "dbHMIInterfaceBLK".block.arrInt[1];
+      L "idbEMX2".f[0].p.write.VESSEL_MX;
+      T "dbHMIInterfaceBLK".block.arrInt[2];
+_manual_EX3007:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EX3007;
+      L "dbHMIInterfaceBLK".block.arrInt[1];
+      T "idbEMX2".f[0].p.write.FILL_FLZ;
+      L "dbHMIInterfaceBLK".block.arrInt[2];
+      T "idbEMX2".f[0].p.write.VESSEL_MX;
+_auto_EX3007:      NOP 0;
+
+_not_EX3007:      NOP 0;
+
+NETWORK
+TITLE = EX7402 BFS1 Filling Machine
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1133;
+      ==I;
+      );
+      JCN _not_EX7402;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbEMX5".f[0].p.read.mc , 
+         mcw                         := "idbEMX5".f[0].p.write.mc , 
+         bmc                         := "idbEMX5".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 0        ;// DI_PAUSE DI3
+      T #arrChildIndex[1];
+      L "idbDI3".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbDI3".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbDI3".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_EX7402;
+_manual_EX7402:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_EX7402;
+_auto_EX7402:      NOP 0;
+
+_not_EX7402:      NOP 0;
+
+NETWORK
+TITLE = 
+      A(;
+      L #blockSelected;
+      L 1327;
+      ==I;
+      );
+      FP #edge[20];
+      = #tempEdge;
+      JCN out;
+      A "idbPCMX".f[0].p.read.mc.modeAUTO;
+      R "dbHMIInterfaceBLK".block.manual;
+
+      A "idbPCMX".f[0].p.read.mc.modeMANUAL;
+      S "dbHMIInterfaceBLK".block.manual;
+
+out:      NOP 0;
+
+NETWORK
+TITLE = PCM1 SMS Process Cell 1
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1327;
+      ==I;
+      );
+      JCN _not_PCM1;
+
+      AN #tempEdge;
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbPCMX".f[0].p.read.mc , 
+         mcw                         := "idbPCMX".f[0].p.write.mc , 
+         bmc                         := "idbPCMX".f[0].p.read.bmc
+      );
+
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 0        ;// M1_VESSEL MX
+      T #arrChildIndex[1];
+      L 1        ;// M2_VESSEL MX
+      T #arrChildIndex[2];
+      L 0        ;// S1_VESSEL SY
+      T #arrChildIndex[3];
+      L 1        ;// S2_VESSEL SY
+      T #arrChildIndex[4];
+      L "idbMX".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbMX".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbMX".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbMX".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbMX".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbMX".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbSY".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbSY".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbSY".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbSY".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbSY".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbSY".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_PCM1;
+      A "idbPCMX".f[0].p.read.SYNC_READ_PATH_READY_SY;
+      = "dbHMIInterfaceBLK".block.arrBool[1];
+      A "idbPCMX".f[0].p.read.SYNC_READ_READY_HPCA_MX;
+      = "dbHMIInterfaceBLK".block.arrBool[2];
+      A "idbPCMX".f[0].p.write.SYNC_WRITE_FILTRATION_COMPLETE_MX;
+      = "dbHMIInterfaceBLK".block.arrBool[3];
+      A "idbPCMX".f[0].p.write.SYNC_WRITE_FILTRATION_COMPLETE_SY;
+      = "dbHMIInterfaceBLK".block.arrBool[4];
+      A "idbPCMX".f[0].p.write.SYNC_WRITE_START_HPCA_MX;
+      = "dbHMIInterfaceBLK".block.arrBool[5];
+      A "idbPCMX".f[0].p.write.TOGGLE_MODE;
+      = "dbHMIInterfaceBLK".block.arrBool[6];
+      L "idbPCMX".f[0].p.write.FILL_FLZ;
+      T "dbHMIInterfaceBLK".block.arrInt[1];
+      L "idbPCMX".f[0].p.write.VESSEL_MX;
+      T "dbHMIInterfaceBLK".block.arrInt[2];
+      L "idbPCMX".f[0].p.write.VESSEL_SY;
+      T "dbHMIInterfaceBLK".block.arrInt[3];
+_manual_PCM1:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_PCM1;
+      A "dbHMIInterfaceBLK".block.arrBool[1];
+      = "idbPCMX".f[0].p.read.SYNC_READ_PATH_READY_SY;
+      A "dbHMIInterfaceBLK".block.arrBool[2];
+      = "idbPCMX".f[0].p.read.SYNC_READ_READY_HPCA_MX;
+      A "dbHMIInterfaceBLK".block.arrBool[3];
+      = "idbPCMX".f[0].p.write.SYNC_WRITE_FILTRATION_COMPLETE_MX;
+      A "dbHMIInterfaceBLK".block.arrBool[4];
+      = "idbPCMX".f[0].p.write.SYNC_WRITE_FILTRATION_COMPLETE_SY;
+      A "dbHMIInterfaceBLK".block.arrBool[5];
+      = "idbPCMX".f[0].p.write.SYNC_WRITE_START_HPCA_MX;
+      A "dbHMIInterfaceBLK".block.arrBool[6];
+      = "idbPCMX".f[0].p.write.TOGGLE_MODE;
+      L "dbHMIInterfaceBLK".block.arrInt[1];
+      T "idbPCMX".f[0].p.write.FILL_FLZ;
+      L "dbHMIInterfaceBLK".block.arrInt[2];
+      T "idbPCMX".f[0].p.write.VESSEL_MX;
+      L "dbHMIInterfaceBLK".block.arrInt[3];
+      T "idbPCMX".f[0].p.write.VESSEL_SY;
+_auto_PCM1:      NOP 0;
+
+_not_PCM1:      NOP 0;
+
+NETWORK
+TITLE = PCS1 SMS Process Cell 3
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1329;
+      ==I;
+      );
+      JCN _not_PCS1;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbPCSY".f[0].p.read.mc , 
+         mcw                         := "idbPCSY".f[0].p.write.mc , 
+         bmc                         := "idbPCSY".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 0        ;// M1_VESSEL MX
+      T #arrChildIndex[1];
+      L 1        ;// M2_VESSEL MX
+      T #arrChildIndex[2];
+      L 0        ;// S1_VESSEL SY
+      T #arrChildIndex[3];
+      L 1        ;// S2_VESSEL SY
+      T #arrChildIndex[4];
+      L "idbMX".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbMX".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbMX".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbMX".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbMX".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbMX".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbSY".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbSY".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbSY".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbSY".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbSY".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbSY".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_PCS1;
+      A "idbPCSY".f[0].p.write.RELEASE_FLZ;
+      = "dbHMIInterfaceBLK".block.arrBool[1];
+      A "idbPCSY".f[0].p.write.TOGGLE_MODE;
+      = "dbHMIInterfaceBLK".block.arrBool[2];
+      L "idbPCSY".f[0].p.write.FILL_FLZ;
+      T "dbHMIInterfaceBLK".block.arrInt[1];
+      L "idbPCSY".f[0].p.write.VESSEL_MX;
+      T "dbHMIInterfaceBLK".block.arrInt[2];
+      L "idbPCSY".f[0].p.write.VESSEL_SY;
+      T "dbHMIInterfaceBLK".block.arrInt[3];
+_manual_PCS1:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_PCS1;
+      A "dbHMIInterfaceBLK".block.arrBool[1];
+      = "idbPCSY".f[0].p.write.RELEASE_FLZ;
+      A "dbHMIInterfaceBLK".block.arrBool[2];
+      = "idbPCSY".f[0].p.write.TOGGLE_MODE;
+      L "dbHMIInterfaceBLK".block.arrInt[1];
+      T "idbPCSY".f[0].p.write.FILL_FLZ;
+      L "dbHMIInterfaceBLK".block.arrInt[2];
+      T "idbPCSY".f[0].p.write.VESSEL_MX;
+      L "dbHMIInterfaceBLK".block.arrInt[3];
+      T "idbPCSY".f[0].p.write.VESSEL_SY;
+_auto_PCS1:      NOP 0;
+
+_not_PCS1:      NOP 0;
+
+NETWORK
+TITLE = M1 Manufacturing Vessel 1
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1323;
+      ==I;
+      );
+      JCN _not_M1;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbMX".f[0].p.read.mc , 
+         mcw                         := "idbMX".f[0].p.write.mc , 
+         bmc                         := "idbMX".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 0        ;// EMA_VESSEL EMA1
+      T #arrChildIndex[1];
+      L 0        ;// EMC_GAS EMC1
+      T #arrChildIndex[2];
+      L 0        ;// EMC_WATER EMC2
+      T #arrChildIndex[3];
+      L 0        ;// EMG_FILTER EMG1
+      T #arrChildIndex[4];
+      L 0        ;// EMM_VESSEL EMM1
+      T #arrChildIndex[5];
+      L 0        ;// EMT_HEX EMT1
+      T #arrChildIndex[6];
+      L 0        ;// EMV_INLET EMV2
+      T #arrChildIndex[7];
+      L 0        ;// EMV_VESSEL EMV1
+      T #arrChildIndex[8];
+      L 0        ;// EMX_DRAIN EMX4
+      T #arrChildIndex[9];
+      L 0        ;// EMX_MMFL EMX1
+      T #arrChildIndex[10];
+      L 0        ;// EMX_SMFL EMX6
+      T #arrChildIndex[11];
+      L 2        ;// EMX_SMFL_DRN EMX4
+      T #arrChildIndex[12];
+      L 0        ;// EMX_FILL1 EMX5
+      T #arrChildIndex[13];
+      L 1        ;// EMX_FILL2 EMX5
+      T #arrChildIndex[14];
+      L 0        ;// EMX_TRANSFER1 EMX2
+      T #arrChildIndex[15];
+      L 1        ;// EMX_TRANSFER2 EMX2
+      T #arrChildIndex[16];
+      L 0        ;// VS_VACUUM1 VS1
+      T #arrChildIndex[17];
+      L 0        ;// DI_ASL DI1
+      T #arrChildIndex[18];
+      L 4        ;// DI_ESTOP DI1
+      T #arrChildIndex[19];
+      L 5        ;// DI_ESTOP_AUX1 DI1
+      T #arrChildIndex[20];
+      L 6        ;// DI_ESTOP_AUX2 DI1
+      T #arrChildIndex[21];
+      L 7        ;// DI_ESTOP_AUX3 DI1
+      T #arrChildIndex[22];
+      L 0        ;// DI_RELAY DI2
+      T #arrChildIndex[23];
+      L "idbEMA1".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbEMA1".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbEMA1".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbEMC1".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbEMC1".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbEMC1".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbEMC2".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbEMC2".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbEMC2".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbEMG1".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbEMG1".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbEMG1".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+      L "idbEMM1".f[#arrChildIndex[5]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[5];
+      A "idbEMM1".f[#arrChildIndex[5]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[5];
+      A "idbEMM1".f[#arrChildIndex[5]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[5];
+      L "idbEMT1".f[#arrChildIndex[6]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[6];
+      A "idbEMT1".f[#arrChildIndex[6]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[6];
+      A "idbEMT1".f[#arrChildIndex[6]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[6];
+      L "idbEMV2".f[#arrChildIndex[7]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[7];
+      A "idbEMV2".f[#arrChildIndex[7]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[7];
+      A "idbEMV2".f[#arrChildIndex[7]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[7];
+      L "idbEMV1".f[#arrChildIndex[8]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[8];
+      A "idbEMV1".f[#arrChildIndex[8]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[8];
+      A "idbEMV1".f[#arrChildIndex[8]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[8];
+      L "idbEMX4".f[#arrChildIndex[9]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[9];
+      A "idbEMX4".f[#arrChildIndex[9]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[9];
+      A "idbEMX4".f[#arrChildIndex[9]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[9];
+      L "idbEMX1".f[#arrChildIndex[10]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[10];
+      A "idbEMX1".f[#arrChildIndex[10]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[10];
+      A "idbEMX1".f[#arrChildIndex[10]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[10];
+      L "idbEMX6".f[#arrChildIndex[11]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[11];
+      A "idbEMX6".f[#arrChildIndex[11]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[11];
+      A "idbEMX6".f[#arrChildIndex[11]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[11];
+      L "idbEMX4".f[#arrChildIndex[12]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[12];
+      A "idbEMX4".f[#arrChildIndex[12]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[12];
+      A "idbEMX4".f[#arrChildIndex[12]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[12];
+      L "idbEMX5".f[#arrChildIndex[13]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[13];
+      A "idbEMX5".f[#arrChildIndex[13]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[13];
+      A "idbEMX5".f[#arrChildIndex[13]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[13];
+      L "idbEMX5".f[#arrChildIndex[14]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[14];
+      A "idbEMX5".f[#arrChildIndex[14]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[14];
+      A "idbEMX5".f[#arrChildIndex[14]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[14];
+      L "idbEMX2".f[#arrChildIndex[15]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[15];
+      A "idbEMX2".f[#arrChildIndex[15]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[15];
+      A "idbEMX2".f[#arrChildIndex[15]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[15];
+      L "idbEMX2".f[#arrChildIndex[16]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[16];
+      A "idbEMX2".f[#arrChildIndex[16]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[16];
+      A "idbEMX2".f[#arrChildIndex[16]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[16];
+      L "idbVS1".f[#arrChildIndex[17]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[17];
+      A "idbVS1".f[#arrChildIndex[17]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[17];
+      A "idbVS1".f[#arrChildIndex[17]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[17];
+      L "idbDI1".f[#arrChildIndex[18]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[18];
+      A "idbDI1".f[#arrChildIndex[18]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[18];
+      A "idbDI1".f[#arrChildIndex[18]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[18];
+      L "idbDI1".f[#arrChildIndex[19]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[19];
+      A "idbDI1".f[#arrChildIndex[19]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[19];
+      A "idbDI1".f[#arrChildIndex[19]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[19];
+      L "idbDI1".f[#arrChildIndex[20]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[20];
+      A "idbDI1".f[#arrChildIndex[20]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[20];
+      A "idbDI1".f[#arrChildIndex[20]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[20];
+      L "idbDI1".f[#arrChildIndex[21]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[21];
+      A "idbDI1".f[#arrChildIndex[21]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[21];
+      A "idbDI1".f[#arrChildIndex[21]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[21];
+      L "idbDI1".f[#arrChildIndex[22]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[22];
+      A "idbDI1".f[#arrChildIndex[22]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[22];
+      A "idbDI1".f[#arrChildIndex[22]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[22];
+      L "idbDI2".f[#arrChildIndex[23]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[23];
+      A "idbDI2".f[#arrChildIndex[23]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[23];
+      A "idbDI2".f[#arrChildIndex[23]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[23];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_M1;
+      A "idbMX".f[0].p.read.SYNC_READ_FILTRATION_COMPLETE;
+      = "dbHMIInterfaceBLK".block.arrBool[1];
+      A "idbMX".f[0].p.read.SYNC_READ_READY_HPCA;
+      = "dbHMIInterfaceBLK".block.arrBool[2];
+      A "idbMX".f[0].p.read.SYNC_READ_START_HPCA;
+      = "dbHMIInterfaceBLK".block.arrBool[3];
+      A "idbMX".f[0].p.write.CMD_CHARGE;
+      = "dbHMIInterfaceBLK".block.arrBool[4];
+      A "idbMX".f[0].p.write.CMD_COMPLETE;
+      = "dbHMIInterfaceBLK".block.arrBool[5];
+      A "idbMX".f[0].p.write.CMD_MANWAY;
+      = "dbHMIInterfaceBLK".block.arrBool[6];
+      A "idbMX".f[0].p.write.CMD_MEASURE;
+      = "dbHMIInterfaceBLK".block.arrBool[7];
+      A "idbMX".f[0].p.write.CMD_MIX;
+      = "dbHMIInterfaceBLK".block.arrBool[8];
+      A "idbMX".f[0].p.write.MAKE_ACTIVE;
+      = "dbHMIInterfaceBLK".block.arrBool[9];
+      A "idbMX".f[0].p.write.SYNC_WRITE_FILTRATION_COMPLETE;
+      = "dbHMIInterfaceBLK".block.arrBool[10];
+      A "idbMX".f[0].p.write.SYNC_WRITE_READY_HPCA;
+      = "dbHMIInterfaceBLK".block.arrBool[11];
+      A "idbMX".f[0].p.write.SYNC_WRITE_START_HPCA;
+      = "dbHMIInterfaceBLK".block.arrBool[12];
+      A "idbMX".f[0].p.write.VACUUM_HOLD_TEST;
+      = "dbHMIInterfaceBLK".block.arrBool[13];
+      A "idbMX".f[0].p.write.WFI_ADDED;
+      = "dbHMIInterfaceBLK".block.arrBool[14];
+      L "idbMX".f[0].p.write.FILL_FLZ;
+      T "dbHMIInterfaceBLK".block.arrInt[1];
+      L "idbMX".f[0].p.write.FP_TIME_MAKE_AGIT_H;
+      T "dbHMIInterfaceBLK".block.arrInt[2];
+      L "idbMX".f[0].p.write.FP_TIME_MAKE_AGIT_M;
+      T "dbHMIInterfaceBLK".block.arrInt[3];
+      L "idbMX".f[0].p.write.FP_TIME_MAKE_AGIT_S;
+      T "dbHMIInterfaceBLK".block.arrInt[4];
+      L "idbMX".f[0].p.write.R_NUM_SIP_ABORT;
+      T "dbHMIInterfaceBLK".block.arrInt[5];
+      L "idbMX".f[0].p.write.R_PULSE_NUMBER;
+      T "dbHMIInterfaceBLK".block.arrInt[6];
+      L "idbMX".f[0].p.write.VESSEL_MX;
+      T "dbHMIInterfaceBLK".block.arrInt[7];
+      L "idbMX".f[0].p.write.VESSEL_SY;
+      T "dbHMIInterfaceBLK".block.arrInt[8];
+      L "idbMX".f[0].p.write.FP_CHARGE_WFI_MAKE;
+      T "dbHMIInterfaceBLK".block.arrReal[1];
+      L "idbMX".f[0].p.write.FP_SPEED_SETPOINT;
+      T "dbHMIInterfaceBLK".block.arrReal[2];
+      L "idbMX".f[0].p.write.R_AGIT_SETPOINT;
+      T "dbHMIInterfaceBLK".block.arrReal[3];
+      L "idbMX".f[0].p.write.R_MASS_EXPECT_REDUCED;
+      T "dbHMIInterfaceBLK".block.arrReal[4];
+      L "idbMX".f[0].p.write.R_MASS_PW_FLOOD;
+      T "dbHMIInterfaceBLK".block.arrReal[5];
+      L "idbMX".f[0].p.write.R_MASS_THROTTLE;
+      T "dbHMIInterfaceBLK".block.arrReal[6];
+      L "idbMX".f[0].p.write.R_MASS_THROTTLE_MX;
+      T "dbHMIInterfaceBLK".block.arrReal[7];
+      L "idbMX".f[0].p.write.R_PRES_HPCA_BLOW;
+      T "dbHMIInterfaceBLK".block.arrReal[8];
+      L "idbMX".f[0].p.write.R_PRES_HPCA_FILT;
+      T "dbHMIInterfaceBLK".block.arrReal[9];
+      L "idbMX".f[0].p.write.R_PRES_HPCA_FILT2;
+      T "dbHMIInterfaceBLK".block.arrReal[10];
+      L "idbMX".f[0].p.write.R_PRES_HPCA_LEAVE;
+      T "dbHMIInterfaceBLK".block.arrReal[11];
+      L "idbMX".f[0].p.write.R_PRES_LPCA_BLANK;
+      T "dbHMIInterfaceBLK".block.arrReal[12];
+      L "idbMX".f[0].p.write.R_PRES_LPCA_MAKE;
+      T "dbHMIInterfaceBLK".block.arrReal[13];
+      L "idbMX".f[0].p.write.R_PRES_STM_POS;
+      T "dbHMIInterfaceBLK".block.arrReal[14];
+      L "idbMX".f[0].p.write.R_PRES_VAC;
+      T "dbHMIInterfaceBLK".block.arrReal[15];
+      L "idbMX".f[0].p.write.R_PRES_VAC_FAIL;
+      T "dbHMIInterfaceBLK".block.arrReal[16];
+      L "idbMX".f[0].p.write.R_TEMP_FILT;
+      T "dbHMIInterfaceBLK".block.arrReal[17];
+      L "idbMX".f[0].p.write.R_TEMP_LIMIT_H;
+      T "dbHMIInterfaceBLK".block.arrReal[18];
+      L "idbMX".f[0].p.write.R_TEMP_LIMIT_HH;
+      T "dbHMIInterfaceBLK".block.arrReal[19];
+      L "idbMX".f[0].p.write.R_TEMP_SIP;
+      T "dbHMIInterfaceBLK".block.arrReal[20];
+      L "idbMX".f[0].p.write.R_TEMP_SIP_VENT;
+      T "dbHMIInterfaceBLK".block.arrReal[21];
+      L "idbMX".f[0].p.write.TEMP_FILT;
+      T "dbHMIInterfaceBLK".block.arrReal[22];
+      L "idbMX".f[0].p.write.R_TIME_DRAIN_PULSE;
+      T "dbHMIInterfaceBLK".block.arrTime[1];
+      L "idbMX".f[0].p.write.R_TIME_EJECT;
+      T "dbHMIInterfaceBLK".block.arrTime[2];
+      L "idbMX".f[0].p.write.R_TIME_MASS_REDUCE;
+      T "dbHMIInterfaceBLK".block.arrTime[3];
+      L "idbMX".f[0].p.write.R_TIME_PW_AGIT;
+      T "dbHMIInterfaceBLK".block.arrTime[4];
+      L "idbMX".f[0].p.write.R_TIME_PW_EMPTY1;
+      T "dbHMIInterfaceBLK".block.arrTime[5];
+      L "idbMX".f[0].p.write.R_TIME_PW_EMPTY2;
+      T "dbHMIInterfaceBLK".block.arrTime[6];
+      L "idbMX".f[0].p.write.R_TIME_PW_FLOOD;
+      T "dbHMIInterfaceBLK".block.arrTime[7];
+      L "idbMX".f[0].p.write.R_TIME_PW_FLUSH_MX;
+      T "dbHMIInterfaceBLK".block.arrTime[8];
+      L "idbMX".f[0].p.write.R_TIME_PW_STEAM_MX;
+      T "dbHMIInterfaceBLK".block.arrTime[9];
+      L "idbMX".f[0].p.write.R_TIME_PW_WASH_MMFLX;
+      T "dbHMIInterfaceBLK".block.arrTime[10];
+      L "idbMX".f[0].p.write.R_TIME_PW_WASH_MX;
+      T "dbHMIInterfaceBLK".block.arrTime[11];
+      L "idbMX".f[0].p.write.R_TIME_SIP;
+      T "dbHMIInterfaceBLK".block.arrTime[12];
+      L "idbMX".f[0].p.write.R_TIME_SIP_ABORT;
+      T "dbHMIInterfaceBLK".block.arrTime[13];
+      L "idbMX".f[0].p.write.R_TIME_STM_DRAIN_MX;
+      T "dbHMIInterfaceBLK".block.arrTime[14];
+      L "idbMX".f[0].p.write.R_TIME_VAC_HOLD;
+      T "dbHMIInterfaceBLK".block.arrTime[15];
+      L "idbMX".f[0].p.write.R_TIME_WFI_EMPTY_MX;
+      T "dbHMIInterfaceBLK".block.arrTime[16];
+      L "idbMX".f[0].p.write.R_TIME_WFI_RINSE_MMFLX;
+      T "dbHMIInterfaceBLK".block.arrTime[17];
+      L "idbMX".f[0].p.write.R_TIME_WFI_RINSE_MX;
+      T "dbHMIInterfaceBLK".block.arrTime[18];
+_manual_M1:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_M1;
+      A "dbHMIInterfaceBLK".block.arrBool[1];
+      = "idbMX".f[0].p.read.SYNC_READ_FILTRATION_COMPLETE;
+      A "dbHMIInterfaceBLK".block.arrBool[2];
+      = "idbMX".f[0].p.read.SYNC_READ_READY_HPCA;
+      A "dbHMIInterfaceBLK".block.arrBool[3];
+      = "idbMX".f[0].p.read.SYNC_READ_START_HPCA;
+      A "dbHMIInterfaceBLK".block.arrBool[4];
+      = "idbMX".f[0].p.write.CMD_CHARGE;
+      A "dbHMIInterfaceBLK".block.arrBool[5];
+      = "idbMX".f[0].p.write.CMD_COMPLETE;
+      A "dbHMIInterfaceBLK".block.arrBool[6];
+      = "idbMX".f[0].p.write.CMD_MANWAY;
+      A "dbHMIInterfaceBLK".block.arrBool[7];
+      = "idbMX".f[0].p.write.CMD_MEASURE;
+      A "dbHMIInterfaceBLK".block.arrBool[8];
+      = "idbMX".f[0].p.write.CMD_MIX;
+      A "dbHMIInterfaceBLK".block.arrBool[9];
+      = "idbMX".f[0].p.write.MAKE_ACTIVE;
+      A "dbHMIInterfaceBLK".block.arrBool[10];
+      = "idbMX".f[0].p.write.SYNC_WRITE_FILTRATION_COMPLETE;
+      A "dbHMIInterfaceBLK".block.arrBool[11];
+      = "idbMX".f[0].p.write.SYNC_WRITE_READY_HPCA;
+      A "dbHMIInterfaceBLK".block.arrBool[12];
+      = "idbMX".f[0].p.write.SYNC_WRITE_START_HPCA;
+      A "dbHMIInterfaceBLK".block.arrBool[13];
+      = "idbMX".f[0].p.write.VACUUM_HOLD_TEST;
+      A "dbHMIInterfaceBLK".block.arrBool[14];
+      = "idbMX".f[0].p.write.WFI_ADDED;
+      L "dbHMIInterfaceBLK".block.arrInt[1];
+      T "idbMX".f[0].p.write.FILL_FLZ;
+      L "dbHMIInterfaceBLK".block.arrInt[2];
+      T "idbMX".f[0].p.write.FP_TIME_MAKE_AGIT_H;
+      L "dbHMIInterfaceBLK".block.arrInt[3];
+      T "idbMX".f[0].p.write.FP_TIME_MAKE_AGIT_M;
+      L "dbHMIInterfaceBLK".block.arrInt[4];
+      T "idbMX".f[0].p.write.FP_TIME_MAKE_AGIT_S;
+      L "dbHMIInterfaceBLK".block.arrInt[5];
+      T "idbMX".f[0].p.write.R_NUM_SIP_ABORT;
+      L "dbHMIInterfaceBLK".block.arrInt[6];
+      T "idbMX".f[0].p.write.R_PULSE_NUMBER;
+      L "dbHMIInterfaceBLK".block.arrInt[7];
+      T "idbMX".f[0].p.write.VESSEL_MX;
+      L "dbHMIInterfaceBLK".block.arrInt[8];
+      T "idbMX".f[0].p.write.VESSEL_SY;
+      L "dbHMIInterfaceBLK".block.arrReal[1];
+      T "idbMX".f[0].p.write.FP_CHARGE_WFI_MAKE;
+      L "dbHMIInterfaceBLK".block.arrReal[2];
+      T "idbMX".f[0].p.write.FP_SPEED_SETPOINT;
+      L "dbHMIInterfaceBLK".block.arrReal[3];
+      T "idbMX".f[0].p.write.R_AGIT_SETPOINT;
+      L "dbHMIInterfaceBLK".block.arrReal[4];
+      T "idbMX".f[0].p.write.R_MASS_EXPECT_REDUCED;
+      L "dbHMIInterfaceBLK".block.arrReal[5];
+      T "idbMX".f[0].p.write.R_MASS_PW_FLOOD;
+      L "dbHMIInterfaceBLK".block.arrReal[6];
+      T "idbMX".f[0].p.write.R_MASS_THROTTLE;
+      L "dbHMIInterfaceBLK".block.arrReal[7];
+      T "idbMX".f[0].p.write.R_MASS_THROTTLE_MX;
+      L "dbHMIInterfaceBLK".block.arrReal[8];
+      T "idbMX".f[0].p.write.R_PRES_HPCA_BLOW;
+      L "dbHMIInterfaceBLK".block.arrReal[9];
+      T "idbMX".f[0].p.write.R_PRES_HPCA_FILT;
+      L "dbHMIInterfaceBLK".block.arrReal[10];
+      T "idbMX".f[0].p.write.R_PRES_HPCA_FILT2;
+      L "dbHMIInterfaceBLK".block.arrReal[11];
+      T "idbMX".f[0].p.write.R_PRES_HPCA_LEAVE;
+      L "dbHMIInterfaceBLK".block.arrReal[12];
+      T "idbMX".f[0].p.write.R_PRES_LPCA_BLANK;
+      L "dbHMIInterfaceBLK".block.arrReal[13];
+      T "idbMX".f[0].p.write.R_PRES_LPCA_MAKE;
+      L "dbHMIInterfaceBLK".block.arrReal[14];
+      T "idbMX".f[0].p.write.R_PRES_STM_POS;
+      L "dbHMIInterfaceBLK".block.arrReal[15];
+      T "idbMX".f[0].p.write.R_PRES_VAC;
+      L "dbHMIInterfaceBLK".block.arrReal[16];
+      T "idbMX".f[0].p.write.R_PRES_VAC_FAIL;
+      L "dbHMIInterfaceBLK".block.arrReal[17];
+      T "idbMX".f[0].p.write.R_TEMP_FILT;
+      L "dbHMIInterfaceBLK".block.arrReal[18];
+      T "idbMX".f[0].p.write.R_TEMP_LIMIT_H;
+      L "dbHMIInterfaceBLK".block.arrReal[19];
+      T "idbMX".f[0].p.write.R_TEMP_LIMIT_HH;
+      L "dbHMIInterfaceBLK".block.arrReal[20];
+      T "idbMX".f[0].p.write.R_TEMP_SIP;
+      L "dbHMIInterfaceBLK".block.arrReal[21];
+      T "idbMX".f[0].p.write.R_TEMP_SIP_VENT;
+      L "dbHMIInterfaceBLK".block.arrReal[22];
+      T "idbMX".f[0].p.write.TEMP_FILT;
+      L "dbHMIInterfaceBLK".block.arrTime[1];
+      T "idbMX".f[0].p.write.R_TIME_DRAIN_PULSE;
+      L "dbHMIInterfaceBLK".block.arrTime[2];
+      T "idbMX".f[0].p.write.R_TIME_EJECT;
+      L "dbHMIInterfaceBLK".block.arrTime[3];
+      T "idbMX".f[0].p.write.R_TIME_MASS_REDUCE;
+      L "dbHMIInterfaceBLK".block.arrTime[4];
+      T "idbMX".f[0].p.write.R_TIME_PW_AGIT;
+      L "dbHMIInterfaceBLK".block.arrTime[5];
+      T "idbMX".f[0].p.write.R_TIME_PW_EMPTY1;
+      L "dbHMIInterfaceBLK".block.arrTime[6];
+      T "idbMX".f[0].p.write.R_TIME_PW_EMPTY2;
+      L "dbHMIInterfaceBLK".block.arrTime[7];
+      T "idbMX".f[0].p.write.R_TIME_PW_FLOOD;
+      L "dbHMIInterfaceBLK".block.arrTime[8];
+      T "idbMX".f[0].p.write.R_TIME_PW_FLUSH_MX;
+      L "dbHMIInterfaceBLK".block.arrTime[9];
+      T "idbMX".f[0].p.write.R_TIME_PW_STEAM_MX;
+      L "dbHMIInterfaceBLK".block.arrTime[10];
+      T "idbMX".f[0].p.write.R_TIME_PW_WASH_MMFLX;
+      L "dbHMIInterfaceBLK".block.arrTime[11];
+      T "idbMX".f[0].p.write.R_TIME_PW_WASH_MX;
+      L "dbHMIInterfaceBLK".block.arrTime[12];
+      T "idbMX".f[0].p.write.R_TIME_SIP;
+      L "dbHMIInterfaceBLK".block.arrTime[13];
+      T "idbMX".f[0].p.write.R_TIME_SIP_ABORT;
+      L "dbHMIInterfaceBLK".block.arrTime[14];
+      T "idbMX".f[0].p.write.R_TIME_STM_DRAIN_MX;
+      L "dbHMIInterfaceBLK".block.arrTime[15];
+      T "idbMX".f[0].p.write.R_TIME_VAC_HOLD;
+      L "dbHMIInterfaceBLK".block.arrTime[16];
+      T "idbMX".f[0].p.write.R_TIME_WFI_EMPTY_MX;
+      L "dbHMIInterfaceBLK".block.arrTime[17];
+      T "idbMX".f[0].p.write.R_TIME_WFI_RINSE_MMFLX;
+      L "dbHMIInterfaceBLK".block.arrTime[18];
+      T "idbMX".f[0].p.write.R_TIME_WFI_RINSE_MX;
+_auto_M1:      NOP 0;
+
+_not_M1:      NOP 0;
+
+NETWORK
+TITLE = S1 Storage Vessel 1
+//------------------------------------------------------------------------//
+// Check if this BLK instance is selected:                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #blockSelected;
+      L 1325;
+      ==I;
+      );
+      JCN _not_S1;
+
+      CALL "fcHMIInterfaceBLK"
+      (  mcr                         := "idbSY".f[0].p.read.mc , 
+         mcw                         := "idbSY".f[0].p.write.mc , 
+         bmc                         := "idbSY".f[0].p.read.bmc
+      );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+//------------------------------------------------------------------------//
+// Transfer the child states and if they have any error condition:        //
+//------------------------------------------------------------------------//
+      L 2        ;// EMC_GAS EMC1
+      T #arrChildIndex[1];
+      L 0        ;// EMC_WATER_SY EMC3
+      T #arrChildIndex[2];
+      L 2        ;// EMG_FILTER EMG1
+      T #arrChildIndex[3];
+      L 10        ;// DI_ESTOP DI1
+      T #arrChildIndex[4];
+      L 11        ;// DI_ESTOP_AUX4 DI1
+      T #arrChildIndex[5];
+      L 2        ;// EMV_INLET EMV2
+      T #arrChildIndex[6];
+      L 2        ;// EMV_VESSEL EMV1
+      T #arrChildIndex[7];
+      L 4        ;// EMX_DRAIN EMX4
+      T #arrChildIndex[8];
+      L 0        ;// EMX_FILL1 EMX5
+      T #arrChildIndex[9];
+      L 1        ;// EMX_FILL2 EMX5
+      T #arrChildIndex[10];
+      L 0        ;// EMX_SMFL1 EMX6
+      T #arrChildIndex[11];
+      L 1        ;// EMX_SMFL2 EMX6
+      T #arrChildIndex[12];
+      L 2        ;// EMX_SMFL_DRN1 EMX4
+      T #arrChildIndex[13];
+      L 3        ;// EMX_SMFL_DRN2 EMX4
+      T #arrChildIndex[14];
+      L 0        ;// EMX_TRANSFER EMX2
+      T #arrChildIndex[15];
+      L 1        ;// VS_VACUUM2 VS1
+      T #arrChildIndex[16];
+      L 2        ;// DI_ASL DI1
+      T #arrChildIndex[17];
+      L 2        ;// DI_RELAY DI2
+      T #arrChildIndex[18];
+      L "idbEMC1".f[#arrChildIndex[1]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[1];
+      A "idbEMC1".f[#arrChildIndex[1]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[1];
+      A "idbEMC1".f[#arrChildIndex[1]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[1];
+      L "idbEMC3".f[#arrChildIndex[2]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[2];
+      A "idbEMC3".f[#arrChildIndex[2]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[2];
+      A "idbEMC3".f[#arrChildIndex[2]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[2];
+      L "idbEMG1".f[#arrChildIndex[3]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[3];
+      A "idbEMG1".f[#arrChildIndex[3]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[3];
+      A "idbEMG1".f[#arrChildIndex[3]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[3];
+      L "idbDI1".f[#arrChildIndex[4]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[4];
+      A "idbDI1".f[#arrChildIndex[4]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[4];
+      A "idbDI1".f[#arrChildIndex[4]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[4];
+      L "idbDI1".f[#arrChildIndex[5]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[5];
+      A "idbDI1".f[#arrChildIndex[5]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[5];
+      A "idbDI1".f[#arrChildIndex[5]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[5];
+      L "idbEMV2".f[#arrChildIndex[6]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[6];
+      A "idbEMV2".f[#arrChildIndex[6]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[6];
+      A "idbEMV2".f[#arrChildIndex[6]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[6];
+      L "idbEMV1".f[#arrChildIndex[7]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[7];
+      A "idbEMV1".f[#arrChildIndex[7]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[7];
+      A "idbEMV1".f[#arrChildIndex[7]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[7];
+      L "idbEMX4".f[#arrChildIndex[8]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[8];
+      A "idbEMX4".f[#arrChildIndex[8]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[8];
+      A "idbEMX4".f[#arrChildIndex[8]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[8];
+      L "idbEMX5".f[#arrChildIndex[9]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[9];
+      A "idbEMX5".f[#arrChildIndex[9]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[9];
+      A "idbEMX5".f[#arrChildIndex[9]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[9];
+      L "idbEMX5".f[#arrChildIndex[10]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[10];
+      A "idbEMX5".f[#arrChildIndex[10]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[10];
+      A "idbEMX5".f[#arrChildIndex[10]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[10];
+      L "idbEMX6".f[#arrChildIndex[11]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[11];
+      A "idbEMX6".f[#arrChildIndex[11]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[11];
+      A "idbEMX6".f[#arrChildIndex[11]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[11];
+      L "idbEMX6".f[#arrChildIndex[12]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[12];
+      A "idbEMX6".f[#arrChildIndex[12]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[12];
+      A "idbEMX6".f[#arrChildIndex[12]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[12];
+      L "idbEMX4".f[#arrChildIndex[13]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[13];
+      A "idbEMX4".f[#arrChildIndex[13]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[13];
+      A "idbEMX4".f[#arrChildIndex[13]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[13];
+      L "idbEMX4".f[#arrChildIndex[14]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[14];
+      A "idbEMX4".f[#arrChildIndex[14]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[14];
+      A "idbEMX4".f[#arrChildIndex[14]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[14];
+      L "idbEMX2".f[#arrChildIndex[15]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[15];
+      A "idbEMX2".f[#arrChildIndex[15]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[15];
+      A "idbEMX2".f[#arrChildIndex[15]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[15];
+      L "idbVS1".f[#arrChildIndex[16]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[16];
+      A "idbVS1".f[#arrChildIndex[16]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[16];
+      A "idbVS1".f[#arrChildIndex[16]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[16];
+      L "idbDI1".f[#arrChildIndex[17]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[17];
+      A "idbDI1".f[#arrChildIndex[17]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[17];
+      A "idbDI1".f[#arrChildIndex[17]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[17];
+      L "idbDI2".f[#arrChildIndex[18]].p.read.mc.STATE;
+      T "dbHMIInterfaceBLK".block.arrChildState[18];
+      A "idbDI2".f[#arrChildIndex[18]].p.read.mc.ERROR;
+      = "dbHMIInterfaceBLK".block.arrChildError[18];
+      A "idbDI2".f[#arrChildIndex[18]].p.read.mc.INTERLOCK;
+      = "dbHMIInterfaceBLK".block.arrChildInterlock[18];
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual_S1;
+      A "idbSY".f[0].p.read.SYNC_READ_FILTRATION_COMPLETE;
+      = "dbHMIInterfaceBLK".block.arrBool[1];
+      A "idbSY".f[0].p.read.SYNC_READ_PATH_READY;
+      = "dbHMIInterfaceBLK".block.arrBool[2];
+      A "idbSY".f[0].p.write.CONCURRENT_PATH_SIP;
+      = "dbHMIInterfaceBLK".block.arrBool[3];
+      A "idbSY".f[0].p.write.FILL_PROCEED;
+      = "dbHMIInterfaceBLK".block.arrBool[4];
+      A "idbSY".f[0].p.write.PAUSE_BUTTON;
+      = "dbHMIInterfaceBLK".block.arrBool[5];
+      A "idbSY".f[0].p.write.SYNC_WRITE_FILTRATION_COMPLETE;
+      = "dbHMIInterfaceBLK".block.arrBool[6];
+      A "idbSY".f[0].p.write.SYNC_WRITE_PATH_READY;
+      = "dbHMIInterfaceBLK".block.arrBool[7];
+      A "idbSY".f[0].p.write.VACUUM_HOLD_TEST;
+      = "dbHMIInterfaceBLK".block.arrBool[8];
+      L "idbSY".f[0].p.write.FILL_FLZ;
+      T "dbHMIInterfaceBLK".block.arrInt[1];
+      L "idbSY".f[0].p.write.R_NUM_SIP_ABORT;
+      T "dbHMIInterfaceBLK".block.arrInt[2];
+      L "idbSY".f[0].p.write.R_PULSE_NUMBER;
+      T "dbHMIInterfaceBLK".block.arrInt[3];
+      L "idbSY".f[0].p.write.VESSEL_MX;
+      T "dbHMIInterfaceBLK".block.arrInt[4];
+      L "idbSY".f[0].p.write.VESSEL_SY;
+      T "dbHMIInterfaceBLK".block.arrInt[5];
+      L "idbSY".f[0].p.write.EMG_TI_DRAIN_PV;
+      T "dbHMIInterfaceBLK".block.arrReal[1];
+      L "idbSY".f[0].p.write.EMG_TI_VENT_PV;
+      T "dbHMIInterfaceBLK".block.arrReal[2];
+      L "idbSY".f[0].p.write.EMV_TI_VESSEL_PV;
+      T "dbHMIInterfaceBLK".block.arrReal[3];
+      L "idbSY".f[0].p.write.EMX_11_TI_DRAIN_PV;
+      T "dbHMIInterfaceBLK".block.arrReal[4];
+      L "idbSY".f[0].p.write.EMX_6_TI_DRAIN_PV;
+      T "dbHMIInterfaceBLK".block.arrReal[5];
+      L "idbSY".f[0].p.write.R_PRES_HPCA_BLOW;
+      T "dbHMIInterfaceBLK".block.arrReal[6];
+      L "idbSY".f[0].p.write.R_PRES_HPCA_FILL;
+      T "dbHMIInterfaceBLK".block.arrReal[7];
+      L "idbSY".f[0].p.write.R_PRES_HPCA_LEAVE;
+      T "dbHMIInterfaceBLK".block.arrReal[8];
+      L "idbSY".f[0].p.write.R_PRES_LPCA_BLANK;
+      T "dbHMIInterfaceBLK".block.arrReal[9];
+      L "idbSY".f[0].p.write.R_PRES_LPCA_BLANKET;
+      T "dbHMIInterfaceBLK".block.arrReal[10];
+      L "idbSY".f[0].p.write.R_PRES_LPCA_PURGE;
+      T "dbHMIInterfaceBLK".block.arrReal[11];
+      L "idbSY".f[0].p.write.R_PRES_STM_POS;
+      T "dbHMIInterfaceBLK".block.arrReal[12];
+      L "idbSY".f[0].p.write.R_PRES_VAC;
+      T "dbHMIInterfaceBLK".block.arrReal[13];
+      L "idbSY".f[0].p.write.R_PRES_VAC_FAIL;
+      T "dbHMIInterfaceBLK".block.arrReal[14];
+      L "idbSY".f[0].p.write.R_TEMP_SIP;
+      T "dbHMIInterfaceBLK".block.arrReal[15];
+      L "idbSY".f[0].p.write.R_TEMP_SIP_VENT;
+      T "dbHMIInterfaceBLK".block.arrReal[16];
+      L "idbSY".f[0].p.write.R_TIME_DRAIN_PULSE;
+      T "dbHMIInterfaceBLK".block.arrTime[1];
+      L "idbSY".f[0].p.write.R_TIME_EJECT;
+      T "dbHMIInterfaceBLK".block.arrTime[2];
+      L "idbSY".f[0].p.write.R_TIME_PW_EMPTY_SY;
+      T "dbHMIInterfaceBLK".block.arrTime[3];
+      L "idbSY".f[0].p.write.R_TIME_PW_STEAM_SY;
+      T "dbHMIInterfaceBLK".block.arrTime[4];
+      L "idbSY".f[0].p.write.R_TIME_PW_WASH_FLZ;
+      T "dbHMIInterfaceBLK".block.arrTime[5];
+      L "idbSY".f[0].p.write.R_TIME_PW_WASH_SMFLX;
+      T "dbHMIInterfaceBLK".block.arrTime[6];
+      L "idbSY".f[0].p.write.R_TIME_PW_WASH_SY;
+      T "dbHMIInterfaceBLK".block.arrTime[7];
+      L "idbSY".f[0].p.write.R_TIME_SIP;
+      T "dbHMIInterfaceBLK".block.arrTime[8];
+      L "idbSY".f[0].p.write.R_TIME_SIP_ABORT;
+      T "dbHMIInterfaceBLK".block.arrTime[9];
+      L "idbSY".f[0].p.write.R_TIME_STM_DRAIN_SY;
+      T "dbHMIInterfaceBLK".block.arrTime[10];
+      L "idbSY".f[0].p.write.R_TIME_VAC_HOLD;
+      T "dbHMIInterfaceBLK".block.arrTime[11];
+      L "idbSY".f[0].p.write.R_TIME_WFI_EMPTY_SY;
+      T "dbHMIInterfaceBLK".block.arrTime[12];
+      L "idbSY".f[0].p.write.R_TIME_WFI_RINSE_FLZ;
+      T "dbHMIInterfaceBLK".block.arrTime[13];
+      L "idbSY".f[0].p.write.R_TIME_WFI_RINSE_SMFLX;
+      T "dbHMIInterfaceBLK".block.arrTime[14];
+      L "idbSY".f[0].p.write.R_TIME_WFI_RINSE_SY;
+      T "dbHMIInterfaceBLK".block.arrTime[15];
+      L "idbSY".f[0].p.write.R_TIME_WFI_STEAM_SY;
+      T "dbHMIInterfaceBLK".block.arrTime[16];
+_manual_S1:      NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+//------------------------------------------------------------------------//
+// Transfer the parameter values:                                         //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto_S1;
+      A "dbHMIInterfaceBLK".block.arrBool[1];
+      = "idbSY".f[0].p.read.SYNC_READ_FILTRATION_COMPLETE;
+      A "dbHMIInterfaceBLK".block.arrBool[2];
+      = "idbSY".f[0].p.read.SYNC_READ_PATH_READY;
+      A "dbHMIInterfaceBLK".block.arrBool[3];
+      = "idbSY".f[0].p.write.CONCURRENT_PATH_SIP;
+      A "dbHMIInterfaceBLK".block.arrBool[4];
+      = "idbSY".f[0].p.write.FILL_PROCEED;
+      A "dbHMIInterfaceBLK".block.arrBool[5];
+      = "idbSY".f[0].p.write.PAUSE_BUTTON;
+      A "dbHMIInterfaceBLK".block.arrBool[6];
+      = "idbSY".f[0].p.write.SYNC_WRITE_FILTRATION_COMPLETE;
+      A "dbHMIInterfaceBLK".block.arrBool[7];
+      = "idbSY".f[0].p.write.SYNC_WRITE_PATH_READY;
+      A "dbHMIInterfaceBLK".block.arrBool[8];
+      = "idbSY".f[0].p.write.VACUUM_HOLD_TEST;
+      L "dbHMIInterfaceBLK".block.arrInt[1];
+      T "idbSY".f[0].p.write.FILL_FLZ;
+      L "dbHMIInterfaceBLK".block.arrInt[2];
+      T "idbSY".f[0].p.write.R_NUM_SIP_ABORT;
+      L "dbHMIInterfaceBLK".block.arrInt[3];
+      T "idbSY".f[0].p.write.R_PULSE_NUMBER;
+      L "dbHMIInterfaceBLK".block.arrInt[4];
+      T "idbSY".f[0].p.write.VESSEL_MX;
+      L "dbHMIInterfaceBLK".block.arrInt[5];
+      T "idbSY".f[0].p.write.VESSEL_SY;
+      L "dbHMIInterfaceBLK".block.arrReal[1];
+      T "idbSY".f[0].p.write.EMG_TI_DRAIN_PV;
+      L "dbHMIInterfaceBLK".block.arrReal[2];
+      T "idbSY".f[0].p.write.EMG_TI_VENT_PV;
+      L "dbHMIInterfaceBLK".block.arrReal[3];
+      T "idbSY".f[0].p.write.EMV_TI_VESSEL_PV;
+      L "dbHMIInterfaceBLK".block.arrReal[4];
+      T "idbSY".f[0].p.write.EMX_11_TI_DRAIN_PV;
+      L "dbHMIInterfaceBLK".block.arrReal[5];
+      T "idbSY".f[0].p.write.EMX_6_TI_DRAIN_PV;
+      L "dbHMIInterfaceBLK".block.arrReal[6];
+      T "idbSY".f[0].p.write.R_PRES_HPCA_BLOW;
+      L "dbHMIInterfaceBLK".block.arrReal[7];
+      T "idbSY".f[0].p.write.R_PRES_HPCA_FILL;
+      L "dbHMIInterfaceBLK".block.arrReal[8];
+      T "idbSY".f[0].p.write.R_PRES_HPCA_LEAVE;
+      L "dbHMIInterfaceBLK".block.arrReal[9];
+      T "idbSY".f[0].p.write.R_PRES_LPCA_BLANK;
+      L "dbHMIInterfaceBLK".block.arrReal[10];
+      T "idbSY".f[0].p.write.R_PRES_LPCA_BLANKET;
+      L "dbHMIInterfaceBLK".block.arrReal[11];
+      T "idbSY".f[0].p.write.R_PRES_LPCA_PURGE;
+      L "dbHMIInterfaceBLK".block.arrReal[12];
+      T "idbSY".f[0].p.write.R_PRES_STM_POS;
+      L "dbHMIInterfaceBLK".block.arrReal[13];
+      T "idbSY".f[0].p.write.R_PRES_VAC;
+      L "dbHMIInterfaceBLK".block.arrReal[14];
+      T "idbSY".f[0].p.write.R_PRES_VAC_FAIL;
+      L "dbHMIInterfaceBLK".block.arrReal[15];
+      T "idbSY".f[0].p.write.R_TEMP_SIP;
+      L "dbHMIInterfaceBLK".block.arrReal[16];
+      T "idbSY".f[0].p.write.R_TEMP_SIP_VENT;
+      L "dbHMIInterfaceBLK".block.arrTime[1];
+      T "idbSY".f[0].p.write.R_TIME_DRAIN_PULSE;
+      L "dbHMIInterfaceBLK".block.arrTime[2];
+      T "idbSY".f[0].p.write.R_TIME_EJECT;
+      L "dbHMIInterfaceBLK".block.arrTime[3];
+      T "idbSY".f[0].p.write.R_TIME_PW_EMPTY_SY;
+      L "dbHMIInterfaceBLK".block.arrTime[4];
+      T "idbSY".f[0].p.write.R_TIME_PW_STEAM_SY;
+      L "dbHMIInterfaceBLK".block.arrTime[5];
+      T "idbSY".f[0].p.write.R_TIME_PW_WASH_FLZ;
+      L "dbHMIInterfaceBLK".block.arrTime[6];
+      T "idbSY".f[0].p.write.R_TIME_PW_WASH_SMFLX;
+      L "dbHMIInterfaceBLK".block.arrTime[7];
+      T "idbSY".f[0].p.write.R_TIME_PW_WASH_SY;
+      L "dbHMIInterfaceBLK".block.arrTime[8];
+      T "idbSY".f[0].p.write.R_TIME_SIP;
+      L "dbHMIInterfaceBLK".block.arrTime[9];
+      T "idbSY".f[0].p.write.R_TIME_SIP_ABORT;
+      L "dbHMIInterfaceBLK".block.arrTime[10];
+      T "idbSY".f[0].p.write.R_TIME_STM_DRAIN_SY;
+      L "dbHMIInterfaceBLK".block.arrTime[11];
+      T "idbSY".f[0].p.write.R_TIME_VAC_HOLD;
+      L "dbHMIInterfaceBLK".block.arrTime[12];
+      T "idbSY".f[0].p.write.R_TIME_WFI_EMPTY_SY;
+      L "dbHMIInterfaceBLK".block.arrTime[13];
+      T "idbSY".f[0].p.write.R_TIME_WFI_RINSE_FLZ;
+      L "dbHMIInterfaceBLK".block.arrTime[14];
+      T "idbSY".f[0].p.write.R_TIME_WFI_RINSE_SMFLX;
+      L "dbHMIInterfaceBLK".block.arrTime[15];
+      T "idbSY".f[0].p.write.R_TIME_WFI_RINSE_SY;
+      L "dbHMIInterfaceBLK".block.arrTime[16];
+      T "idbSY".f[0].p.write.R_TIME_WFI_STEAM_SY;
+_auto_S1:      NOP 0;
+
+_not_S1:      NOP 0;
+
+END_FUNCTION_BLOCK
+

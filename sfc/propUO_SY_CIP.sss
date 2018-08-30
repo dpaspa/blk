@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 10/08/2018 10:48:39 AM by David Paspa
+generated on 30/08/2018 12:22:45 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -1526,6 +1526,9 @@ Action:- L "dbCONST".BLK.EMX4.SUBS.SIP;
 T #_emx_drain_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emx_drain_cmd;
+
+//Reset prompt.
+R #_prompt_steam_confirm_yes;
 Verification:- A(;
 L #_emx_drain_subs;
 L "dbCONST".BLK.EMX4.SUBS.SIP;
@@ -1647,7 +1650,7 @@ T  #_emx_drain_cmd;
 // Log Sy CIP operation end time.
 SET;
 S #_log_msg_cip_end;
-
+R #_prompt_steam_confirm_no;
 Verification:- A(;
 L #_emx_drain_state;
 L "dbCONST".BLK.STATE.STOPPED;

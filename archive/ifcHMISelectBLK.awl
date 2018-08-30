@@ -1,0 +1,127 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Handles the HMI interface for operator control of each BLK.   //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      03-Aug-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+FUNCTION "ifcHMISelectBLK" : Void
+TITLE = BLK Selection
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifcHMISelectBLK
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare local variables:                                                   //
+//----------------------------------------------------------------------------//
+VAR_TEMP
+    blockSelected : Int;
+    arrChildIndex : Array[0..50] of Int;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Get the selected BLK
+    //------------------------------------------------------------------------//
+    // Get the BLK index number selected by the user when they clicked the    //
+    // faceplate BLK target:                                                  //
+    //------------------------------------------------------------------------//
+    L "dbHMIInterfaceBLK".block.blockSelected;
+    T #blockSelected;
+
+@@TEMPLATE_BEGIN|INSTANCE_BLK@@
+NETWORK
+TITLE = @@INSTANCE@@ @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Check if this BLK instance is selected:                                //
+    //------------------------------------------------------------------------//
+    A(;
+    L #blockSelected;
+    L 1@@ID@@;
+    ==I;
+    );
+    JCN _not_@@INSTANCE@@;
+
+    CALL "fcHMIInterfaceBLK"
+    (   bmc                  := "idb@@CLASS@@".f[@@IDX@@].p.read.bmc ,
+        mcr                  := "idb@@CLASS@@".f[@@IDX@@].p.read.mc ,
+        mcw                  := "idb@@CLASS@@".f[@@IDX@@].p.write.mc
+    );
+
+NETWORK
+TITLE = Transfer the child state values and errors to the interface array
+    //------------------------------------------------------------------------//
+    // Transfer the child states and if they have any error condition:        //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CHILD_INSTANCE@@
+    L @@CHILDIDX@@;          // @@CHILDPARAMETERALIAS@@ @@CHILDCLASS@@
+    T #arrChildIndex[@@COUNTERATTR|1@@];
+@@ATTR_END|CHILD_INSTANCE@@
+@@ATTR_BEGIN|CHILD_INSTANCE@@
+    L "idb@@CHILDALIASCLASS@@".f[arrChildIndex[@@COUNTERATTR|1@@]].p.read.mc.STATE;
+    T "dbHMIInterfaceBLK".block.arrChildState[@@COUNTERATTR@@];
+    A "idb@@CHILDALIASCLASS@@".f[arrChildIndex[@@COUNTERATTR@@]].p.read.mc.ERROR;
+    = "dbHMIInterfaceBLK".block.arrChildError[@@COUNTERATTR@@];
+    A "idb@@CHILDALIASCLASS@@".f[arrChildIndex[@@COUNTERATTR@@]].p.read.mc.INTERLOCK;
+    = "dbHMIInterfaceBLK".block.arrChildInterlock[@@COUNTERATTR@@];
+@@ATTR_END|CHILD_INSTANCE@@
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+    //------------------------------------------------------------------------//
+    // Transfer the parameter values:                                         //
+    //------------------------------------------------------------------------//
+    AN "dbHMIInterfaceBLK".block.manual;
+    JCN _manual_@@INSTANCE@@;
+@@ATTR_BEGIN|pInterfaceBool@@
+    A "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
+    = "dbHMIInterfaceBLK".block.arrBool[@@COUNTERATTR|1@@];
+@@ATTR_END|pInterfaceBool@@
+@@ATTR_BEGIN|pInterfaceInt@@
+    L "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".block.arrInt[@@COUNTERATTR|1@@];
+@@ATTR_END|pInterfaceInt@@
+@@ATTR_BEGIN|pInterfaceReal@@
+    L "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".block.arrReal[@@COUNTERATTR|1@@];
+@@ATTR_END|pInterfaceReal@@
+@@ATTR_BEGIN|pInterfaceTime@@
+    L "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
+    T "dbHMIInterfaceBLK".block.arrTime[@@COUNTERATTR|1@@];
+@@ATTR_END|pInterfaceTime@@
+_manual_@@INSTANCE@@:   NOP 0;
+
+NETWORK
+TITLE = Transfer the parameter values to the interface arrays
+    //------------------------------------------------------------------------//
+    // Transfer the parameter values:                                         //
+    //------------------------------------------------------------------------//
+    A "dbHMIInterfaceBLK".block.manual;
+    JCN _auto_@@INSTANCE@@;
+@@ATTR_BEGIN|pInterfaceBool@@
+    A "dbHMIInterfaceBLK".block.arrBool[@@COUNTERATTR|1@@];
+    = "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
+@@ATTR_END|pInterfaceBool@@
+@@ATTR_BEGIN|pInterfaceInt@@
+    L "dbHMIInterfaceBLK".block.arrInt[@@COUNTERATTR|1@@];
+    T "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
+@@ATTR_END|pInterfaceInt@@
+@@ATTR_BEGIN|pInterfaceReal@@
+    L "dbHMIInterfaceBLK".block.arrReal[@@COUNTERATTR|1@@];
+    T "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
+@@ATTR_END|pInterfaceReal@@
+@@ATTR_BEGIN|pInterfaceTime@@
+    L "dbHMIInterfaceBLK".block.arrTime[@@COUNTERATTR|1@@];
+    T "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
+@@ATTR_END|pInterfaceTime@@
+_auto_@@INSTANCE@@:   NOP 0;
+
+_not_@@INSTANCE@@:   NOP 0;
+
+@@TEMPLATE_END@@
+END_FUNCTION

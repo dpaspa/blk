@@ -9,56 +9,6 @@
 // 2.0 David Paspa      20-Jan-2018 NA        Reboot for S7-1500.             //
 // 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
 //----------------------------------------------------------------------------//
-DATA_BLOCK "dbCommLink"
-{ S7_Optimized_Access := 'TRUE' }
-VERSION : 0.1
-    STRUCT
-        GD_STATUS : DWord;   // Global data communication status
-        SendBuffer : Struct
-            DataID : DWord;   // Data Counter
-            Data : Array[1..8] of Word;
-        END_STRUCT;
-        RcvBuffer : Struct
-            DataID : DWord;   // Data Counter
-            Data : Array[1..8] of Word;
-        END_STRUCT;
-        CPU1_TO_CPU2 : Struct   // FL>>>>SMS1
-            FL_HEART_BEAT : Bool;
-            TI_4102_PV : Real;
-        END_STRUCT;
-        CPU2_TO_CPU1 : Struct   // SMS1>>>>FL
-            FL_HEART_BEAT : Bool;
-            EX1207_DV_xy71_CMD : Int;
-        END_STRUCT;
-    END_STRUCT;
-
-    BEGIN
-        RcvBuffer.Data[1] := WORD#16#0005;
-        RcvBuffer.Data[8] := WORD#16#0008;
-END_DATA_BLOCK
-
-
-
-
-//DATA_BLOCK "dbLogValue"
-//TITLE = DB interface for data logging
-//{ S7_Optimized_Access := 'TRUE' }
-//AUTHOR : REO
-//NAME : dbLogValue
-//VERSION : 2.0
-//
-//    STRUCT
-//        RealLog : "udtLogValue";
-//        Time_Index : Int;
-//        Real_Index : Int;
-//        Process_Time : Time;
-//        Process_Value : Real;
-//        EV_Trigger : Array[1..16] of Bool;
-//    END_STRUCT;
-//
-//    BEGIN
-//END_DATA_BLOCK
-
 DATA_BLOCK "dbTONR"
 {ReadalPartName := 'IEC_TIMER';
  VersionGUID := 'b68d17d6-3fcc-4468-818a-b36d847990bb';
@@ -77,6 +27,7 @@ END_DATA_BLOCK
 DATA_BLOCK "dbHMIInterfaceBLK"
 { S7_Optimized_Access := 'FALSE' }
 VERSION : 0.1
+NON_RETAIN
     STRUCT
         block : "udtHMIInterfaceBLK";
     END_STRUCT;
@@ -84,51 +35,26 @@ VERSION : 0.1
 BEGIN
 END_DATA_BLOCK
 
+DATA_BLOCK "idbHMISelectBLK"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+NON_RETAIN
+"ifbHMISelectBLK"
+
+BEGIN
+
+END_DATA_BLOCK
+
 DATA_BLOCK "dbHMIInterfaceSFC"
 { S7_Optimized_Access := 'FALSE' }
 VERSION : 0.1
+NON_RETAIN
     STRUCT
         sequence : "udtHMIInterfaceSFC";
     END_STRUCT;
 
 BEGIN
 END_DATA_BLOCK
-
-//DATA_BLOCK "dbEventLogMsg"
-//{ S7_Optimized_Access := 'FALSE' }
-//VERSION : 0.1
-//    STRUCT
-//        event : "udtEventLogMsg";
-//    END_STRUCT;
-//
-//BEGIN
-//END_DATA_BLOCK
-
-//        smc : "udtModeCommandSFC";
-//        sqStep : "udtSFCStep32";
-//        stepNumColour_1 : Int;
-//        stepNumColour_2 : Int;
-//        stepNumColour_3 : Int;
-//        stepNumColour_4 : Int;
-//        stepNumColour_5 : Int;
-//        stepNumColour_6 : Int;
-//        stepNumColour_7 : Int;
-//        stepNumColour_8 : Int;
-//        stepNumColour_9 : Int;
-//        stepNumColour_10 : Int;
-//        sfcNumPages : Int;
-//        sfcPage : Int;
-//        sfcSelected : Int;
-//        CMD_MODE : Int;
-//        CMD_SQ_CMD : Int;
-//        CMD_STEPNO_JUMP : Int;
-//        CMD_MAN_JUMP : Bool;
-//        enablePageForward : Bool;
-//        enablePageBackward : Bool;
-//   END_STRUCT;
-//
-//BEGIN
-//END_DATA_BLOCK
 
 DATA_BLOCK "TimeSyncBlock"
 { S7_Optimized_Access := 'TRUE' }
@@ -160,4 +86,13 @@ VERSION : 0.1
     END_STRUCT;
 
     BEGIN
+END_DATA_BLOCK
+
+DATA_BLOCK "fbSimulate_DB"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+NON_RETAIN
+"fbSimulate"
+
+BEGIN
 END_DATA_BLOCK

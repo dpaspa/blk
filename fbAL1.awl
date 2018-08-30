@@ -30,6 +30,11 @@ VAR
     p : "udtAL1";            // Block data interface
 END_VAR
 
+VAR DB_SPECIFIC
+    b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..15] of Bool;
+    w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT b : Word;
+END_VAR
+
 BEGIN
 NETWORK
 TITLE = Call Mode and Command handling function
@@ -44,18 +49,6 @@ TITLE = Call Mode and Command handling function
     (   mcRead             := #p.read.mc ,
         mcWrite              := #p.write.mc
     );
-
-NETWORK
-TITLE = Cascade the MODE flags
-    //------------------------------------------------------------------------//
-    // Set the ai MODE flags based on the mc calculated values:               //
-    //------------------------------------------------------------------------//
-    A #p.read.mc.modeAUTO;
-    = #p.read.ai.modeAUTO;
-    A #p.read.mc.modeMANUAL;
-    = #p.read.ai.modeMANUAL;
-    A #p.read.mc.modeOOS;
-    = #p.read.ai.modeOOS;
 
 NETWORK
 TITLE = Call Analog Input handling function
@@ -137,47 +130,17 @@ TITLE = Pack the alarm bits
     //------------------------------------------------------------------------//
     // Pack the alarm bits into an integer for the HMI to read:               //
     //------------------------------------------------------------------------//
-    L 0;
-    T #p.read.mc.ALARM;
-
     A #p.read.ai.ALARM_HH;
-    JCN _not_ALARM_HH;
-    L 1;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_ALARM_HH:   NOP 0;
-
+    = #b[8];
     A #p.read.ai.ALARM_H;
-    JCN _not_ALARM_H;
-    L 2;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_ALARM_H:   NOP 0;
-
+    = #b[9];
     A #p.read.ai.ALARM_L;
-    JCN _not_ALARM_L;
-    L 4;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_ALARM_L:   NOP 0;
-
+    = #b[10];
     A #p.read.ai.ALARM_LL;
-    JCN _not_ALARM_LL;
-    L 8;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_ALARM_LL:   NOP 0;
-
+    = #b[11];
     A #p.read.ai.DQ;
-    JCN _not_DQ;
-    L 16;
-    L #p.read.mc.ALARM;
-    +I;
+    = #b[12];
+    L #w;
     T #p.read.mc.ALARM;
-_not_DQ:   NOP 0;
 
 END_FUNCTION_BLOCK

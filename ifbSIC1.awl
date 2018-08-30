@@ -65,6 +65,7 @@ VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
     f : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
+    EmergencyStop : Bool;
 @@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
 END_VAR
@@ -216,7 +217,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Speed measurement attributes
     T #f[@@IDX@@].p.read.RANGE_UPPER;
     L @@RANGELOW@@;
     T #f[@@IDX@@].p.read.RANGE_LOWER;
-    A @@POLARITY@@;
+    A "alwaysLow";
     = #f[@@IDX@@].p.read.POLARITY;
     L @@LIMITHH@@;
     T #f[@@IDX@@].p.read.LIMIT_HH;
@@ -236,7 +237,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Speed Setpoint
     //------------------------------------------------------------------------//
     // Set the instance output speed setpoint to the field:                   //
     //------------------------------------------------------------------------//
-    L #f[@@IDX@@].p.read.LMN;
+    L #f[@@IDX@@].p.read.MV_OUTPUT;
     T "@@INSTANCE@@-OUT";
 
 NETWORK
@@ -244,18 +245,40 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
     //------------------------------------------------------------------------//
     // Set the instance output command to the field:                          //
     //------------------------------------------------------------------------//
-    A #f[@@IDX@@].p.read.OUT_Q;
+    A #f[@@IDX@@].p.read.OUT_CMD;
     = "@@INSTANCE@@-CMD";
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Forward and Reverse direction
+TITLE = Emergency stop active
     //------------------------------------------------------------------------//
-    // Set the instance output forward and reverse direction to the field:    //
+    // Check if any emergency stop is actiev:                                 //
     //------------------------------------------------------------------------//
-    A #f[@@IDX@@].p.read.OUT_Q_F;
-    = "@@INSTANCE@@-OUT_F";
-    A #f[@@IDX@@].p.read.OUT_Q_R;
-    = "@@INSTANCE@@-OUT_R";
+    A "ES1100-DI";
+    A "ES1101-DI";
+    = #EmergencyStop;
+
+NETWORK
+TITLE = Drive interface
+    //------------------------------------------------------------------------//
+    // Call the Siemens VFD drive interface module:                           //
+    //------------------------------------------------------------------------//
+    CALL "PZD_G120_Tel_352", "PZD_G120_Tel_352_DB_@@MXVFDNAME@@"
+      (  address                     := @@MXVFDADDRESS@@ ,
+         ON_OFF1                     := "@@INSTANCE@@-CMD" ,
+         enable_operation            := #EmergencyStop ,
+         acknowledge                 := #f[@@IDX@@].p.read.ERROR_RESET ,
+         CTW_bit_08                  := 1 ,
+         CTW_bit_09                  := 1 ,
+         CTW_bit_12                  := 1 ,
+         CTW_bit_15                  := 1 ,
+         speed_setpoint              := "@@INSTANCE@@-OUT" ,
+         reference_speed_P2000       := 1500.0 ,
+         reference_current_P2002     := 0.0 ,
+         reference_torque_P2003      := 0.0 ,
+         ready_for_switching_on      := #f[@@IDX@@].p.read.RDY_TO_ON ,
+         ready_for_operation         := #f[@@IDX@@].p.read.RDY_TO_RUN ,
+         operation_enabled           := #f[@@IDX@@].p.read.RUNNING
+      );
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Send the alarm bits to the global DB

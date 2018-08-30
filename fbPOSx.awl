@@ -61,8 +61,13 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 VAR
     p : "udtPOSx";           // Block data interface
-    openTMR {ReadalPartName := 'TON'; LibVersion := '1.0'} : TON;
-    closeTMR {ReadalPartName := 'TON'; LibVersion := '1.0'} : TON;
+    failToOpenTMR {OriginalPartName := 'IEC_TIMER'; LibVersion := '1.0'} : TON_TIME;
+    failToCloseTMR {OriginalPartName := 'IEC_TIMER'; LibVersion := '1.0'} : TON_TIME;
+END_VAR
+
+VAR DB_SPECIFIC
+    b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..15] of Bool;
+    w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT b : Word;
 END_VAR
 
 VAR_TEMP
@@ -82,6 +87,8 @@ VAR_TEMP
     closeTMRElapsed : Time;
     openTMRExpired : Bool;
     closeTMRExpired : Bool;
+    FTO : Bool;
+    FTC : Bool;
 END_VAR
 
 BEGIN
@@ -221,7 +228,7 @@ TITLE = Input Bypass Mode In Manual
     //
     //------------------------------------------------------------------------//
     A #p.read.mc.modeMANUAL;
-    A #p.read.IGNORE_FB;
+    A #p.write.IGNORE_FB;
     = #bypassFeedback;
 
 NETWORK
@@ -248,34 +255,6 @@ TITLE = Open command
     A #OUT_Q_Open;
     = #p.read.OUT_Q;
 _not_open:    NOP 0;
-
-NETWORK
-TITLE = Start opening travel timer
-    //------------------------------------------------------------------------//
-    // Start the opening travel timer if OPEN command issued:                 //
-    //------------------------------------------------------------------------//
-    CALL #openTMR
-    {time_type := 'Time'}
-    (   IN                   := #cmdOPEN ,
-        PT                   := #p.read.TMR ,
-        Q                    := #openTMRExpired ,
-        ET                   := #openTMRElapsed
-    );
-    NOP 0;
-
-NETWORK
-TITLE = Start closing travel timer
-    //------------------------------------------------------------------------//
-    // Start the closing travel timer if CLOSE command issued:                //
-    //------------------------------------------------------------------------//
-    CALL #closeTMR
-    {time_type := 'Time'}
-    (   IN                   := #cmdCLOSE ,
-        PT                   := #p.read.TMR ,
-        Q                    := #closeTMRExpired ,
-        ET                   := #closeTMRElapsed
-    );
-    NOP 0;
 
 NETWORK
 TITLE = Valve CLOSED if command and feedback CLOSED
@@ -323,12 +302,12 @@ TITLE = Valve TRAVEL if command issued and travel timer not expired
     O(;
     A #cmdCLOSE;
     AN #feedbackCLOSED;
-    AN #closeTMR.Q;
+    AN #failToCloseTMR.Q;
     );
     O(;
     A #cmdOPEN;
     AN #feedbackOPENED;
-    AN #openTMR.Q;
+    AN #failToOpenTMR.Q;
     );
     );
     JCN _e;
@@ -344,11 +323,22 @@ TITLE = Valve failed to CLOSE
     //------------------------------------------------------------------------//
     AN #bypassFeedback;
     A #cmdCLOSE;
-    A #closeTMR.Q;
     A(;
     ON #feedbackCLOSED;
     O #feedbackOPENED;
     );
+    = #FTC;
+
+    CALL #failToCloseTMR
+    {time_type := 'Time'}
+    (   IN                   := #FTC ,
+        PT                   := #p.read.TMR ,
+        Q                    := #closeTMRExpired ,
+        ET                   := #closeTMRElapsed
+    );
+    NOP 0;
+
+    A #closeTMRExpired;
     = #p.read.FAULT_C;
 
 NETWORK
@@ -358,11 +348,22 @@ TITLE = Valve failed to OPEN
     //------------------------------------------------------------------------//
     AN #bypassFeedback;
     A #cmdOPEN;
-    A #openTMR.Q;
     A(;
     O #feedbackCLOSED;
     ON #feedbackOPENED;
     );
+    = #FTO;
+
+    CALL #failToOpenTMR
+    {time_type := 'Time'}
+    (   IN                   := #FTO ,
+        PT                   := #p.read.TMR ,
+        Q                    := #openTMRExpired ,
+        ET                   := #openTMRElapsed
+    );
+    NOP 0;
+
+    A #openTMRExpired;
     = #p.read.FAULT_O;
 
 NETWORK
@@ -389,23 +390,11 @@ TITLE = Pack the alarm bits
     //------------------------------------------------------------------------//
     // Pack the alarm bits into an integer for the HMI to read:               //
     //------------------------------------------------------------------------//
-    L 0;
-    T #p.read.mc.ALARM;
-
     A #p.read.FAULT_C;
-    JCN _not_FAULT_C;
-    L 1;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_FAULT_C:   NOP 0;
-
+    = #b[0];
     A #p.read.FAULT_O;
-    JCN _not_FAULT_O;
-    L 2;
-    L #p.read.mc.ALARM;
-    +I;
+    = #b[1];
+    L #w;
     T #p.read.mc.ALARM;
-_not_FAULT_O:   NOP 0;
 
 END_FUNCTION_BLOCK

@@ -25,7 +25,6 @@ VERSION : 1.0
         ME : Int;                      // Unique ID of the block instance
         CMD_SAFE : Int;                // Safe command for the module
         STATE : Int;                   // State of the block
-        HYGIENE : Int;                 // Hygiene status
         ERROR : Bool;                  // True if any error condition
         INTERLOCK : Bool;              // True if any interlock condition
         CRIL : Bool;                   // Critical Interlock that cannot be bypased.
@@ -46,6 +45,7 @@ VERSION : 1.0
         CMD : Int;                     // Start/Stop command
         MODE : Int;                    // Select auto mode by default
         OWNER : Int;                   // Value to be set or reset by Parent
+        HYGIENE : Int;                 // Hygiene status
         RECIPE : Int;                  // Recipe ID of owning Process Cell
         SERIALNUM : Int;               // Unique batch or CIPSIP serial number
         SUBS : Int := 0;               // Selected substate for Block level modules
@@ -77,6 +77,7 @@ VERSION : 1.0
         eventCmdStop : Bool;
         CHILD_FAIL : Bool;
         BAD_PARAM : Bool;
+        hasSFC : Bool;
         edgeCommandStart : Bool;
         edgeCommandStop : Bool;
         edgeModeAuto : Bool;
@@ -94,7 +95,6 @@ VERSION : 1.0
         interlocked : Bool;
         badParameter : Bool;
         childError : Bool;
-        childInterlocked : Bool;
         childMismatch : Bool;
         childNotAuto : Bool;
         childSafeState : Bool;
@@ -138,7 +138,7 @@ VERSION : 1.0
         LIMIT_LL : Real;               // LowLow Alarm Limit
         PV : Real;                     // Measured Value (after scaling)
         RAW_INPUT : Int;               // Raw input signal from Field (4mA = 0, 20mA = 27648)
-        USER_INPUT : Int;
+        USER_INPUT : Real;             // User value in manual mode
         DQ : Bool;                     // MV data quality (0=Bad; 1=Good)
         ALARM_HH : Bool;               // High High Alarm is active
         ALARM_H : Bool;                // High Alarm is active
@@ -151,7 +151,7 @@ VERSION : 1.0
         POLARITY : Bool;               // Input signal is BIPOLAR (1) or UNIPOLAR (0)
         RANGE_ERROR : Bool;            // Range Error (<4mA or >20mA)
         BROKEN_WIRE : Bool;            // Broken Wire detection
-        modeAUTO : Bool;
+        modeAUTO : Bool := True;
         modeMANUAL : Bool;
         modeOOS : Bool;
     END_STRUCT;
@@ -216,27 +216,19 @@ END_TYPE
 //    END_STRUCT;
 //END_TYPE
 
-TYPE "udtEventLogReal"
-VERSION : 0.1
-    STRUCT
-        trigger : Bool;
-        edgeTrigger : Bool;
-        isBatch : Bool;
-        numSerial : Int;               // Unique batch or CIPSIP serial number
-        dataValue : Real;
-    END_STRUCT;
-END_TYPE
+//TYPE "udtEventLogReal"
+//VERSION : 0.1
+//    STRUCT
+//        dataValue : Real;
+//    END_STRUCT;
+//END_TYPE
 
-TYPE "udtEventLogTime"
-VERSION : 0.1
-    STRUCT
-        trigger : Bool;
-        edgeTrigger : Bool;
-        isBatch : Bool;
-        numSerial : Int;               // Unique batch or CIPSIP serial number
-        dataValue : DWord;
-    END_STRUCT;
-END_TYPE
+//TYPE "udtEventLogTime"
+//VERSION : 0.1
+//    STRUCT
+//        dataValue : DWord;
+//    END_STRUCT;
+//END_TYPE
 
 //TYPE "udtMsgPayload"
 //VERSION : 2.0
@@ -261,15 +253,15 @@ END_TYPE
 //    END_STRUCT;
 //END_TYPE
 
-TYPE "udtEventSequence"
-VERSION : 2.0
-    STRUCT
-        DisplayBatcnID : Int;
-        BatchID : Array[1..6] of Char;
-        MessageIndex : Word;
-        UnitNo : Int;
-    END_STRUCT;
-END_TYPE
+//TYPE "udtEventSequence"
+//VERSION : 2.0
+//    STRUCT
+//        DisplayBatcnID : Int;
+//        BatchID : Array[1..6] of Char;
+//        MessageIndex : Word;
+//        UnitNo : Int;
+//    END_STRUCT;
+//END_TYPE
 
 //TYPE "udtLogEvent"
 //VERSION : 2.0
@@ -316,6 +308,7 @@ VERSION : 2.0
    STRUCT
       Done : Array[1..8] of Bool;     // Step succesfully finished
       WithError : Array[1..8] of Bool;// Step unsuccesfully finished
+      jumpDone : Array[1..8] of Bool;  // Transitions actions succesfully finished
       Initial : Int := 1;              // Initial/Starting Step number
       NumberCurrent : Int;             // Step number currently Processing
       NumberNext : Int;                // Next Step number to jump to
@@ -337,6 +330,7 @@ VERSION : 2.0
    STRUCT
       Done : Array[1..16] of Bool;     // Step succesfully finished
       WithError : Array[1..16] of Bool;// Step unsuccesfully finished
+      jumpDone : Array[1..16] of Bool; // Transitions actions succesfully finished
       Initial : Int := 1;              // Initial/Starting Step number
       NumberCurrent : Int;             // Step number currently Processing
       NumberNext : Int;                // Next Step number to jump to
@@ -357,6 +351,7 @@ TYPE "udtSFCStep24"
 VERSION : 2.0
    STRUCT
       Done : Array[1..24] of Bool;     // Step succesfully finished
+      jumpDone : Array[1..24] of Bool; // Transitions actions succesfully finished
       WithError : Array[1..24] of Bool;// Step unsuccesfully finished
       Initial : Int := 1;              // Initial/Starting Step number
       NumberCurrent : Int;             // Step number currently Processing
@@ -377,7 +372,8 @@ END_TYPE
 TYPE "udtSFCStep32"
 VERSION : 2.0
    STRUCT
-      Done : Array[1..32] of Bool;     // Step succesfully finished
+      Done : Array[1..32] of Bool;     // Step actions succesfully finished
+      jumpDone : Array[1..32] of Bool; // Transitions actions succesfully finished
       WithError : Array[1..32] of Bool;// Step unsuccesfully finished
       Initial : Int := 1;              // Initial/Starting Step number
       NumberCurrent : Int;             // Step number currently Processing
@@ -453,6 +449,7 @@ VERSION : 0.1
         CMD_SQ_CMD : Int;
         CMD_STEPNO_JUMP : Int;
         CMD_MAN_JUMP : Bool;
+        manual : Bool;
     END_STRUCT;
 END_TYPE
 
@@ -462,15 +459,18 @@ VERSION : 0.1
         mcr : "udtMCRead";
         mcw : "udtMCWrite";
         bmc : "udtModeCommandBLK";
-        arrChild : Array[1..50] of Int;
-        arrChildError : Array[1..50] of Bool;
-        arrReal : Array[1..200] of Real;
-        arrTime : Array[1..200] of Time;
-        arrInt : Array[1..200] of Int;
-        arrBool : Array[1..200] of Bool;
+        arrChildState : Array[0..30] of Int;
+        arrChildError : Array[0..30] of Bool;
+        arrChildInterlock : Array[0..30] of Bool;
+        arrReal : Array[0..60] of Real;
+        arrTime : Array[0..60] of Time;
+        arrInt : Array[0..60] of Int;
+        arrBool : Array[0..60] of Bool;
         blockSelected : Int;
         CMD_MODE : Int;
         CMD_CMD : Int;
         CMD_SUBS : Int;
+        CMD_HYGIENE : Int;
+        manual : Bool;
     END_STRUCT;
 END_TYPE

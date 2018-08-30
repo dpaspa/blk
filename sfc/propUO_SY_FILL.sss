@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 10/08/2018 10:48:53 AM by David Paspa
+generated on 30/08/2018 12:22:55 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -678,6 +678,7 @@ Prompt operator to confirm when TRANSFER is complete.
 Action:- // Log time operator confirmed filter has been bled.
 SET;
 S #_log_msg_filter_bled;
+R #_prompt_filter_bled_confirm_yes;
 
 // Enable Sy HPCA pressure control at setpoint PRES_HPCA_FILL.
 L  #_r_pres_hpca_fill;
@@ -740,7 +741,7 @@ Action:- // Prompt Operator to RESET Filling Paused Button else ABORT the sequen
 SET;
 S #_log_msg_filling_paused;
 S #_prompt_reset_button;
-
+R #_prompt_reset_button_confirm_no;
 Verification:- A "uncondJump";
 
 
@@ -837,6 +838,7 @@ Disable Sy HPCA control and open vent valve.
 Action:- //Log operatior confirmation transfer is complete.
 SET;
 S #_log_msg_transfer_complete;
+R #_prompt_transfer_complete_confirm_yes;
 
 //Disable HPCA control.
 L "dbCONST".BLK.SAFE.CMD;

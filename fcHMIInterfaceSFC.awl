@@ -26,6 +26,7 @@ VAR_IN_OUT
 END_VAR
 
 VAR_TEMP
+    outAUTO : Bool;
     retVal : Int;
 END_VAR
 
@@ -55,12 +56,35 @@ TITLE = Copy the SFC runtime data to the HMI interface block
     );
 
 NETWORK
+TITLE = Change to Auto sends mode to SFC
+    //------------------------------------------------------------------------//
+    // If operator just changed to Auto then put the sequence in AUTO:        //
+    //------------------------------------------------------------------------//
+    A "dbHMIInterfaceSFC".sequence.manual;
+    FN "edgeSFC";
+    = #outAUTO;
+    JCN _out;
+    L "dbCONST".SEQ.MODE.AUTO;
+    T "dbHMIInterfaceSFC".sequence.CMD_MODE;
+    T #smc.MODE;
+_out:      NOP 0;
+
+NETWORK
 TITLE = Send the user mode
     //------------------------------------------------------------------------//
-    // Send any user selected mode to the SFC:                                //
+    // Send any user selected mode to the SFC if in Manual:                   //
     //------------------------------------------------------------------------//
+    A "dbHMIInterfaceSFC".sequence.manual;
+    JCN _auto;
     L "dbHMIInterfaceSFC".sequence.CMD_MODE;
     T #smc.MODE;
+_auto:   NOP 0;
+
+    AN "dbHMIInterfaceSFC".sequence.manual;
+    JCN _manual;
+    L #smc.MODE;
+    T "dbHMIInterfaceSFC".sequence.CMD_MODE;
+_manual:   NOP 0;
 
 NETWORK
 TITLE = Send the user output commands if in Manual mode

@@ -29,7 +29,6 @@ Dim i
 '/-----------------------------------------------------------------------------/
 '/ Shuffle any existing messages to have the oldest at the top:                /
 '/-----------------------------------------------------------------------------/
-ShowSystemAlarm ERR_PROC & "replyMessageInsert is shuffling..."
 If (SmartTags("replyMessage.idxMessage1") = 0) Then
     If (SmartTags("replyMessage.idxMessage2") = 0) Then
         If (SmartTags("replyMessage.idxMessage3") = 0) Then
@@ -69,7 +68,6 @@ End If
 '/ Check if the event is already raised in the message list:                   /
 '/-----------------------------------------------------------------------------/
 If (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active")) Then
-    ShowSystemAlarm ERR_PROC & "Message @@IDXEVENT@@ already active."
 
 '/-----------------------------------------------------------------------------/
 '/ The message is not in the list. Check if it has now been triggered:         /
@@ -80,18 +78,20 @@ ElseIf (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger")) Then
     '/ Messages are display in symbolic I/O fields linked to a Text List by    /
     '/ the list index HMI tag:                                                 /
     '/-------------------------------------------------------------------------/
-    ShowSystemAlarm ERR_PROC & "Message @@IDXEVENT@@ just triggered."
     bInserted = False
     If (SmartTags("replyMessage.idxMessage1") = 0) Then
         SmartTags("replyMessage.idxMessage1") = @@IDXEVENT@@
+        SmartTags("replyMessage.numSerial1") = SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.numSerial")
         bInserted = True
 
     ElseIf (SmartTags("replyMessage.idxMessage2") = 0) Then
         SmartTags("replyMessage.idxMessage2") = @@IDXEVENT@@
+        SmartTags("replyMessage.numSerial2") = SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.numSerial")
         bInserted = True
 
     ElseIf (SmartTags("replyMessage.idxMessage3") = 0) Then
         SmartTags("replyMessage.idxMessage3") = @@IDXEVENT@@
+        SmartTags("replyMessage.numSerial3") = SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.numSerial")
         bInserted = True
     End If
 
@@ -100,7 +100,6 @@ ElseIf (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger")) Then
     '/---------------------------------------------------------------------/
     If (bInserted) Then
         SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active") = True
-        ShowSystemAlarm ERR_PROC & "Message @@IDXEVENT@@ inserted."
     End If
 End If
 

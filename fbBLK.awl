@@ -14,14 +14,10 @@
 // If any Child not in AUTO mode                                              //
 //     Set flagChildNotAuto                                                   //
 //                                                                            //
-// If any Child in INTERLOCKED state                                          //
-//     Set flagChildInterlocked                                               //
-//                                                                            //
 // If any Child not Owned or not Available                                    //
 //     Set flagChildUnavailable                                               //
 //                                                                            //
-// If flagChildNotAuto OR flagChildInterlocked OR                             //
-//                       flagChildUnavailable OR flagChildMismatch            //
+// If flagChildNotAuto OR flagChildUnavailable OR flagChildMismatch           //
 //     Set flagChildFailed                                                    //
 //                                                                            //
 // If no Interlock condition and flagBadParameter ok and flagChildFailed ok   //
@@ -157,7 +153,6 @@ VAR
         childCompleted : Bool;
         childError : Bool;
         childFailed : Bool;
-        childInterlocked : Bool;
         childNotAuto : Bool;
         childMismatch : Bool;
         childUnavailable : Bool;
@@ -197,6 +192,66 @@ VAR
     END_STRUCT;
 END_VAR
 
+VAR DB_SPECIFIC
+    w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Word;
+    b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT w : Array[0..15] of Bool;
+
+@@ATTR_BEGIN|pEventConfirmNoExists@@
+@@ATTR_BEGIN|pEventConfirmNoNumWords@@
+    wEventConfirmNo { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..@@CWORDMAX@@] of Word;
+@@ATTR_END|pEventConfirmNoNumWords@@
+@@ATTR_END|pEventConfirmNoExists@@
+@@ATTR_BEGIN|pEventConfirmNoExists@@
+@@ATTR_BEGIN|pEventConfirmNoNum@@
+    bEventConfirmNo { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventConfirmNo : Array[0..@@IDXEVENTMAX@@] of Bool;
+@@ATTR_END|pEventConfirmNoNum@@
+@@ATTR_END|pEventConfirmNoExists@@
+
+@@ATTR_BEGIN|pEventConfirmYesExists@@
+@@ATTR_BEGIN|pEventConfirmYesNumWords@@
+    wEventConfirmYes { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..@@CWORDMAX@@] of Word;
+@@ATTR_END|pEventConfirmYesNumWords@@
+@@ATTR_END|pEventConfirmYesExists@@
+@@ATTR_BEGIN|pEventConfirmYesExists@@
+@@ATTR_BEGIN|pEventConfirmYesNum@@
+    bEventConfirmYes { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventConfirmYes : Array[0..@@IDXEVENTMAX@@] of Bool;
+@@ATTR_END|pEventConfirmYesNum@@
+@@ATTR_END|pEventConfirmYesExists@@
+
+@@ATTR_BEGIN|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogMsgNumWords@@
+    wEventLogMsg { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..@@CWORDMAX@@] of Word;
+@@ATTR_END|pEventLogMsgNumWords@@
+@@ATTR_END|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogMsgNum@@
+    bEventLogMsg { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventLogMsg : Array[0..@@IDXEVENTMAX@@] of Bool;
+@@ATTR_END|pEventLogMsgNum@@
+@@ATTR_END|pEventLogMsgExists@@
+
+@@ATTR_BEGIN|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogRealNumWords@@
+    wEventLogReal { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..@@CWORDMAX@@] of Word;
+@@ATTR_END|pEventLogRealNumWords@@
+@@ATTR_END|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogRealNum@@
+    bEventLogReal { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventLogReal : Array[0..@@IDXEVENTMAX@@] of Bool;
+@@ATTR_END|pEventLogRealNum@@
+@@ATTR_END|pEventLogRealExists@@
+
+@@ATTR_BEGIN|pEventLogTimeExists@@
+@@ATTR_BEGIN|pEventLogTimeNumWords@@
+    wEventLogTime { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..@@CWORDMAX@@] of Word;
+@@ATTR_END|pEventLogTimeNumWords@@
+@@ATTR_END|pEventLogTimeExists@@
+@@ATTR_BEGIN|pEventLogTimeExists@@
+@@ATTR_BEGIN|pEventLogTimeNum@@
+    bEventLogTime { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventLogTime : Array[0..@@IDXEVENTMAX@@] of Bool;
+@@ATTR_END|pEventLogTimeNum@@
+@@ATTR_END|pEventLogTimeExists@@
+END_VAR
+
 VAR_TEMP
     sq_finished : Bool;
 @@ATTR_BEGIN|TIMER@@
@@ -233,21 +288,6 @@ TITLE = Check if any child is not in AUTO mode
     );
 @@ATTR_END|CHILD_CASCADE@@
     = #flags.childNotAuto;
-
-NETWORK
-TITLE = Check if any child is Interlocked
-    //------------------------------------------------------------------------//
-    // CHILD INTERLOCK   CHILD INTERLOCK   CHILD INTERLOCK   CHILD INTERLOCK  //
-    //                                                                        //
-    // Check the child devices to see if any is in the INTERLOCK state:       //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|CHILD_CASCADE@@
-    O(;
-    @@CHILDACQUIRESTATEMENT@@
-    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.INTERLOCK;
-    );
-@@ATTR_END|CHILD_CASCADE@@
-    = #flags.childInterlocked;
 
 NETWORK
 TITLE = Check if any child is in error
@@ -296,7 +336,6 @@ TITLE = Check if any Child has Failed
     // inhibited:                                                             //
     //------------------------------------------------------------------------//
     O #flags.childError;
-    O #flags.childInterlocked;
     O #flags.childNotAuto;
     O #flags.childUnavailable;
     O(;
@@ -312,7 +351,6 @@ TITLE = Clear the latched child faild error
     // from the HMI:                                                          //
     //------------------------------------------------------------------------//
     AN #flags.childError;
-    AN #flags.childInterlocked;
     AN #flags.childNotAuto;
     AN #flags.childUnavailable;
     AN(;
@@ -577,6 +615,8 @@ TITLE = Hygiene Status Calculation
 NETWORK
 TITLE = Switch command and state
     //------------------------------------------------------------------------//
+    // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+    //                                                                        //
     // Switch statement for block command and state:
     //------------------------------------------------------------------------//
     A #p.read.bmc.eventCmdStart;
@@ -656,9 +696,22 @@ TITLE = Set substate running flags and running SUBSTATE
     S #subsRunning.@@STATE@@;
     L #p.write.mc.SUBS;
     T #p.read.mc.STATE;
+
 _noSubsRun_@@STATE@@:   NOP 0;
 
 @@ATTR_END|STATE@@
+
+@@ATTR_BEGIN|SFC@@
+@@ATTR_BEGIN|STATE_DISARM@@
+    //------------------------------------------------------------------------//
+    // Disarm the flowpath child devices:                                     //
+    //------------------------------------------------------------------------//
+    A #subsStart.@@STATE@@;
+@@ATTR_BEGIN|CHILD_CASCADE@@
+    R "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
+@@ATTR_END|CHILD_CASCADE@@
+@@ATTR_END|STATE_DISARM@@
+@@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SELECT@@
 @@ATTR_BEGIN|SELVALUE@@
@@ -884,22 +937,41 @@ TITLE = Clear the operator prompt flags
 _clrPrompt:   NOP 0;
 @@ATTR_END|pEventPromptExists@@
 
-@@ATTR_BEGIN|pEventConfirmExists@@
+@@ATTR_BEGIN|pEventConfirmNoExists@@
 NETWORK
-TITLE = Clear the operator confirm flags
+TITLE = Clear the event prompt confirm No message flags
     //------------------------------------------------------------------------//
-    // CLEAR OPERATOR CONFIRM   CLEAR OPERATOR CONFIRM   CLEAR OPERATOR CONFI //
+    // CLEAR PROMPT NO   CLEAR PROMPT NO   CLEAR PROMPT NO   CLEAR PROMPT NO  //
     //                                                                        //
-    // Clear the SFC confirm bit and the global shared event DB bit:          //
+    // Clear the SFC event prompt confirm No  bits and the class bits:        //
     //------------------------------------------------------------------------//
     A #p.read.bmc.eventCmdStart;
-    JCN _clrConfirm;
-@@ATTR_BEGIN|pEventConfirm@@
-    R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-@@ATTR_END|pEventConfirm@@
+    JCN _clrConfirmNo;
+    L 0;
+@@ATTR_BEGIN|pEventConfirmNoWordClass@@
+    T #wEventConfirmNo[@@CWORD@@];
+@@ATTR_END|pEventConfirmNoWordClass@@
 
-_clrConfirm:   NOP 0;
-@@ATTR_END|pEventConfirmExists@@
+_clrConfirmNo:   NOP 0;
+@@ATTR_END|pEventConfirmNoExists@@
+
+@@ATTR_BEGIN|pEventConfirmYesExists@@
+NETWORK
+TITLE = Clear the event prompt confirm Yes message flags
+    //------------------------------------------------------------------------//
+    // CLEAR PROMPT YES   CLEAR PROMPT YES   CLEAR PROMPT YES   CLEAR PROMPT  //
+    //                                                                        //
+    // Clear the SFC event prompt confirm Yes  bits and the class bits:       //
+    //------------------------------------------------------------------------//
+    A #p.read.bmc.eventCmdStart;
+    JCN _clrConfirmYes;
+    L 0;
+@@ATTR_BEGIN|pEventConfirmYesWordClass@@
+    T #wEventConfirmYes[@@CWORD@@];
+@@ATTR_END|pEventConfirmYesWordClass@@
+
+_clrConfirmYes:   NOP 0;
+@@ATTR_END|pEventConfirmYesExists@@
 
 @@ATTR_BEGIN|pEventLogMsgExists@@
 NETWORK
@@ -913,7 +985,7 @@ TITLE = Clear the log message flags
     JCN _clrLogMsg;
     L 0;
 @@ATTR_BEGIN|pEventLogMsgWordClass@@
-    T #p.read.eventLogMsg_@@CWORD@@;
+    T #wEventLogMsg[@@CWORD@@];
 @@ATTR_END|pEventLogMsgWordClass@@
 @@ATTR_BEGIN|pEventLogMsgClass@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
@@ -928,17 +1000,20 @@ TITLE = Clear the log real data flags
     //------------------------------------------------------------------------//
     // CLEAR LOG REAL   CLEAR LOG REAL   CLEAR LOG REAL   CLEAR LOG REAL   CL //
     //                                                                        //
-    // Clear the SFC log real bit and the global shared event DB bit and      //
-    // zero the global data:                                                  //
+    // Clear the SFC log real data:                                           //
     //------------------------------------------------------------------------//
     A #p.read.bmc.eventCmdStart;
     JCN _clrLogReal;
-@@ATTR_BEGIN|pEventLogReal@@
-    R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    R "idbEventLogReal".eventLogReal[@@IDXEVENT@@].trigger;
     L 0;
-    T "idbEventLogReal".eventLogReal[@@IDXEVENT@@].dataValue;
-@@ATTR_END|pEventLogReal@@
+@@ATTR_BEGIN|pEventLogRealWordClass@@
+    T #wEventLogReal[@@CWORD@@];
+@@ATTR_END|pEventLogRealWordClass@@
+@@ATTR_BEGIN|pEventDataReal@@
+    T "dbEVENT".eventDataReal[@@IDXEVENT@@];
+@@ATTR_END|pEventDataReal@@
+@@ATTR_BEGIN|pEventLogRealClass@@
+    R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+@@ATTR_END|pEventLogRealClass@@
 
 _clrLogReal:   NOP 0;
 @@ATTR_END|pEventLogRealExists@@
@@ -949,22 +1024,24 @@ TITLE = Clear the log time data flags
     //------------------------------------------------------------------------//
     // CLEAR LOG TIME   CLEAR LOG TIME   CLEAR LOG TIME   CLEAR LOG TIME   CL //
     //                                                                        //
-    // Clear the SFC log time bit and the global shared event DB bit and      //
-    // zero the global data:                                                  //
+    // Clear the SFC log time data:                                           //
     //------------------------------------------------------------------------//
     A #p.read.bmc.eventCmdStart;
     JCN _clrLogTime;
-@@ATTR_BEGIN|pEventLogTime@@
+@@ATTR_BEGIN|pEventLogTimeWordClass@@
+    T #wEventLogTime[@@CWORD@@];
+@@ATTR_END|pEventLogTimeWordClass@@
+@@ATTR_BEGIN|pEventDataTime@@
+    T "dbEVENT".eventDataTime[@@IDXEVENT@@];
+@@ATTR_END|pEventDataTime@@
+@@ATTR_BEGIN|pEventLogTimeClass@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    R "idbEventLogTime".eventLogTime[@@IDXEVENT@@].trigger;
-    L 0;
-    T "idbEventLogTime".eventLogTime[@@IDXEVENT@@].dataValue;
-@@ATTR_END|pEventLogTime@@
+@@ATTR_END|pEventLogTimeClass@@
 
 _clrLogTime:   NOP 0;
 @@ATTR_END|pEventLogTimeExists@@
 
-@@ATTR_BEGIN|pEventDataRealExists@@
+@@ATTR_BEGIN|pEventLogRealExists@@
 NETWORK
 TITLE = Zero the real data values
     //------------------------------------------------------------------------//
@@ -974,17 +1051,17 @@ TITLE = Zero the real data values
     //------------------------------------------------------------------------//
     A #p.read.bmc.eventCmdStart;
     JCN _clrDataReal;
-@@ATTR_BEGIN|pEventDataReal@@
     L 0;
+@@ATTR_BEGIN|pEventDataReal@@
     T #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 @@ATTR_END|pEventDataReal@@
 
 _clrDataReal:   NOP 0;
-@@ATTR_END|pEventDataRealExists@@
+@@ATTR_END|pEventLogRealExists@@
 
-@@ATTR_BEGIN|pEventDataTimeExists@@
+@@ATTR_BEGIN|pEventLogTimeExists@@
 NETWORK
-TITLE = Zero the log time datas
+TITLE = Zero the log time data values
     //------------------------------------------------------------------------//
     // ZERO DATA TIME   ZERO DATA TIME   ZERO DATA TIME   ZERO DATA TIME   ZE //
     //                                                                        //
@@ -992,13 +1069,13 @@ TITLE = Zero the log time datas
     //------------------------------------------------------------------------//
     A #p.read.bmc.eventCmdStart;
     JCN _clrDataTime;
-@@ATTR_BEGIN|pEventDataTime@@
     L 0;
+@@ATTR_BEGIN|pEventDataTime@@
     T #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 @@ATTR_END|pEventDataTime@@
 
 _clrDataTime:   NOP 0;
-@@ATTR_END|pEventDataTimeExists@@
+@@ATTR_END|pEventLogTimeExists@@
 
 
 @@ATTR_BEGIN|pSFCParametersRecipeExist@@
@@ -1107,13 +1184,6 @@ TITLE = Block errors
     //------------------------------------------------------------------------//
     A #flags.childNotAuto;
     = #p.read.err.childNotAuto;
-    = #p.read.mc.ERROR;
-
-    //------------------------------------------------------------------------//
-    // Set the child interlocked error status if active:                      //
-    //------------------------------------------------------------------------//
-    A #flags.childInterlocked;
-    = #p.read.err.childInterlocked;
     = #p.read.mc.ERROR;
 
     //------------------------------------------------------------------------//
@@ -1272,7 +1342,7 @@ TITLE = Raise operator prompt if required
     //------------------------------------------------------------------------//
     // OPERATOR PROMPT   OPERATOR PROMPT   OPERATOR PROMPT   OPERATOR PROMPT  //
     //                                                                        //
-    // Transfer the SFC prompt bit to the global event datablock:             //
+    // Transfer the SFC eventPrompt bit to the global event datablock:        //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|SFC@@
     O #subsRunning.@@STATE@@;
@@ -1304,7 +1374,7 @@ TITLE = Return operator confirm bits if made
     //------------------------------------------------------------------------//
     // OPERATOR CONFIRM   OPERATOR CONFIRM   OPERATOR CONFIRM   OPERATOR CONF //
     //                                                                        //
-    // Receive the SFC confirm bits from the global event datablock:          //
+    // Receive the eventPrompt confirm bits from the global event datablock:  //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|SFC@@
     O #subsRunning.@@STATE@@;
@@ -1321,7 +1391,7 @@ TITLE = Return operator confirm bits if made
     R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
 @@ATTR_END|pEventConfirmNoExists@@
 _not_eventPrompt_@@IDXEVENT@@_confirmYes:   NOP 0;
-@@ATTR_BEGIN|pEventConfirmNoExists@@
+@@ATTR_BEGIN|pEventPromptConfirmNo@@
     A "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
     JCN _not_eventPrompt_@@IDXEVENT@@_confirmNo;
     S #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_no;
@@ -1329,7 +1399,8 @@ _not_eventPrompt_@@IDXEVENT@@_confirmYes:   NOP 0;
     R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
     R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmYes;
 _not_eventPrompt_@@IDXEVENT@@_confirmNo:   NOP 0;
-@@ATTR_END|pEventConfirmNoExists@@
+
+@@ATTR_END|pEventPromptConfirmNo@@
 
 @@ATTR_END|pEventPrompt@@
 
@@ -1337,13 +1408,55 @@ _noRunConfirm:   NOP 0;
 
 @@ATTR_END|pEventPromptExists@@
 
+@@ATTR_BEGIN|pEventConfirmNoExists@@
+NETWORK
+TITLE = Log prompt confirm No if required
+    //------------------------------------------------------------------------//
+    // LOG PROMPT CONFIRM NO   LOG PROMPT CONFIRM NO   LOG PROMPT CONFIRM NO  //
+    //                                                                        //
+    // Set the eventPrompt confirm No message alarm bit if active:            //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|SFC@@
+    O #subsRunning.@@STATE@@;
+@@ATTR_END|SFC@@
+    JCN _noRunConfirmNo;
+@@ATTR_BEGIN|pEventConfirmNoClass@@
+    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    = #bEventConfirmNo[@@COFFSET@@];
+@@ATTR_END|pEventConfirmNoClass@@
+
+_noRunConfirmNo:   NOP 0;
+
+@@ATTR_END|pEventConfirmNoExists@@
+
+@@ATTR_BEGIN|pEventConfirmYesExists@@
+NETWORK
+TITLE = Log prompt confirm Yes if required
+    //------------------------------------------------------------------------//
+    // LOG PROMPT CONFIRM YES   LOG PROMPT CONFIRM YES   LOG PROMPT CONFIRM   //
+    //                                                                        //
+    // Set the eventPrompt confirm Yes message alarm bit if active:           //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|SFC@@
+    O #subsRunning.@@STATE@@;
+@@ATTR_END|SFC@@
+    JCN _noRunConfirmYes;
+@@ATTR_BEGIN|pEventConfirmYesClass@@
+    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+    = #bEventConfirmYes[@@COFFSET@@];
+@@ATTR_END|pEventConfirmYesClass@@
+
+_noRunConfirmYes:   NOP 0;
+
+@@ATTR_END|pEventConfirmYesExists@@
+
 @@ATTR_BEGIN|pEventLogMsgExists@@
 NETWORK
 TITLE = Log message if required
     //------------------------------------------------------------------------//
     // LOG MSG   LOG MSG   LOG MSG   LOG MSG   LOG MSG   LOG MSG   LOG MSG    //
     //                                                                        //
-    // Transfer the SFC log data to the global event datablock:               //
+    // Set the eventLogMsg message alarm bit if active:                       //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|SFC@@
     O #subsRunning.@@STATE@@;
@@ -1351,13 +1464,8 @@ TITLE = Log message if required
     JCN _noRunLogMsg;
 @@ATTR_BEGIN|pEventLogMsgClass@@
     A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;   // Bit @@CBIT@@
-    JCN _not_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@;
-    L @@MAGICNUM@@;
-    L #p.read.eventLogMsg_@@CWORD@@;
-    +I;
-    T #p.read.eventLogMsg_@@CWORD@@;
+    = #bEventLogMsg[@@COFFSET@@];
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-_not_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@:   NOP 0;
 
 @@ATTR_END|pEventLogMsgClass@@
 
@@ -1365,13 +1473,13 @@ _noRunLogMsg:   NOP 0;
 
 @@ATTR_END|pEventLogMsgExists@@
 
-@@ATTR_BEGIN|pEventDataRealExists@@
+@@ATTR_BEGIN|pEventLogRealExists@@
 NETWORK
 TITLE = Real data
     //------------------------------------------------------------------------//
     // REAL DATA   REAL DATA   REAL DATA   REAL DATA   REAL DATA   REAL DATA  //
     //                                                                        //
-    // Transfer the SFC log data to the global event datablock:               //
+    // Transfer the SFC eventLogReal real data to the global event datablock: //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|SFC@@
     O #subsRunning.@@STATE@@;
@@ -1379,11 +1487,11 @@ TITLE = Real data
     JCN _noRunLogReal;
 @@ATTR_BEGIN|pEventDataReal@@
     L #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    T "idbEventLogReal".eventLogReal[@@IDXEVENT@@].dataValue;
+    T "dbEVENT".eventDataReal[@@IDXOFFSET@@];
 @@ATTR_END|pEventDataReal@@
 _noRunLogReal:   NOP 0;
 
-@@ATTR_END|pEventDataRealExists@@
+@@ATTR_END|pEventLogRealExists@@
 
 @@ATTR_BEGIN|pEventLogRealExists@@
 NETWORK
@@ -1391,27 +1499,30 @@ TITLE = Log real data if required
     //------------------------------------------------------------------------//
     // LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG  //
     //                                                                        //
-    // Transfer the SFC log data to the global event datablock:               //
+    // Set the eventLogReal data alarm bit if active:                         //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|SFC@@
     O #subsRunning.@@STATE@@;
 @@ATTR_END|SFC@@
     JCN _noRunLogRealData;
-@@ATTR_BEGIN|pEventLogReal@@
-    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = "idbEventLogReal".eventLogReal[@@IDXEVENT@@].trigger;
-@@ATTR_END|pEventLogReal@@
+@@ATTR_BEGIN|pEventLogRealClass@@
+    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;   // Bit @@CBIT@@
+    = #bEventLogReal[@@COFFSET@@];
+    R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+
+@@ATTR_END|pEventLogRealClass@@
+
 _noRunLogRealData:   NOP 0;
 
 @@ATTR_END|pEventLogRealExists@@
 
-@@ATTR_BEGIN|pEventDataTimeExists@@
+@@ATTR_BEGIN|pEventLogTimeExists@@
 NETWORK
 TITLE = Time data
     //------------------------------------------------------------------------//
     // TIME DATA   TIME DATA   TIME DATA   TIME DATA   TIME DATA   TIME DATA  //
     //                                                                        //
-    // Transfer the SFC log data to the global event datablock:               //
+    // Transfer the SFC eventLogTime data to the global event datablock:      //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|SFC@@
     O #subsRunning.@@STATE@@;
@@ -1419,11 +1530,11 @@ TITLE = Time data
     JCN _noRunLogTime;
 @@ATTR_BEGIN|pEventDataTime@@
     L #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    T "idbEventLogTime".eventLogTime[@@IDXEVENT@@].dataValue;
+    T "dbEVENT".eventDataTime[@@IDXOFFSET@@];
 @@ATTR_END|pEventDataTime@@
 _noRunLogTime:   NOP 0;
 
-@@ATTR_END|pEventDataTimeExists@@
+@@ATTR_END|pEventLogTimeExists@@
 
 @@ATTR_BEGIN|pEventLogTimeExists@@
 NETWORK
@@ -1431,20 +1542,23 @@ TITLE = Log time data if required
     //------------------------------------------------------------------------//
     // LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG  //
     //                                                                        //
-    // Transfer the SFC log data to the global event datablock:               //
+    // Set the eventLogTime data alarm bit if active:                         //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|SFC@@
     O #subsRunning.@@STATE@@;
 @@ATTR_END|SFC@@
     JCN _noRunLogTimeData;
-@@ATTR_BEGIN|pEventLogTime@@
-    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    = "idbEventLogTime".eventLogTime[@@IDXEVENT@@].trigger;
-@@ATTR_END|pEventLogTime@@
+@@ATTR_BEGIN|pEventLogTimeClass@@
+    A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;   // Bit @@CBIT@@
+    = #bEventLogTime[@@COFFSET@@];
+    R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
+_not_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@:   NOP 0;
+
+@@ATTR_END|pEventLogTimeClass@@
+
 _noRunLogTimeData:   NOP 0;
 
 @@ATTR_END|pEventLogTimeExists@@
-
 
 @@ATTR_BEGIN|SFCExists@@
 NETWORK
@@ -1560,6 +1674,25 @@ _notFin@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|SFC@@
 
+@@ATTR_BEGIN|SFC@@
+@@ATTR_BEGIN|STATE_ARM@@
+    //------------------------------------------------------------------------//
+    // Arm any flowpath child devices:                                        //
+    //------------------------------------------------------------------------//
+    A #subsRunning.@@STATE@@;
+    A(;
+    O(;
+    A subsHasSFC.@@STATE@@;
+    A #flags.sfcCompleted;
+    );
+    ON subsHasSFC.@@STATE@@;
+    );
+@@ATTR_BEGIN|CHILD_CASCADE@@
+    S "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
+@@ATTR_END|CHILD_CASCADE@@
+@@ATTR_END|STATE_ARM@@
+@@ATTR_END|SFC@@
+
 @@ATTR_BEGIN|STATE@@
 NETWORK
 TITLE = Set block running substate completed if finished
@@ -1583,73 +1716,92 @@ TITLE = Set block running substate completed if finished
     T #p.read.bmc.lastSUBS;
     R #flags.sfcCompleted;
     R #subsRunning.@@STATE@@;
+
 _blkComplete@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|STATE@@
 
 NETWORK
-TITLE = Pack the alarm bits
+TITLE = Pack the general block alarm bits
     //------------------------------------------------------------------------//
     // Pack the alarm bits into an integer for the HMI to read:               //
     //------------------------------------------------------------------------//
-    L 0;
-    T #p.read.mc.ALARM;
-
     A #p.read.err.badParameter;
-    JCN _not_badParameter;
-    L 1;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_badParameter:   NOP 0;
-
+    = #b[0];
     A #p.read.err.childError;
-    JCN _not_childError;
-    L 2;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_childError:   NOP 0;
-
-    A #p.read.err.childInterlocked;
-    JCN _not_childInterlocked;
-    L 4;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_childInterlocked:   NOP 0;
-
+    = #b[1];
     A #p.read.err.childNotAuto;
-    JCN _not_childNotAuto;
-    L 8;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_childNotAuto:   NOP 0;
-
+    = #b[2];
     A #p.read.err.childSafeState;
-    JCN _not_childSafeState;
-    L 16;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_childSafeState:   NOP 0;
-
+    = #b[3];
     A #p.read.err.childUnavailable;
-    JCN _not_childUnavailable;
-    L 32;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_childUnavailable:   NOP 0;
-
+    = #b[4];
     A #p.read.err.interlocked;
-    JCN _not_interlocked;
-    L 64;
-    L #p.read.mc.ALARM;
-    +I;
+    = #b[5];
+    L #w;
     T #p.read.mc.ALARM;
-_not_interlocked:   NOP 0;
+
+@@ATTR_BEGIN|pEventConfirmNoExists@@
+NETWORK
+TITLE = Pack the prompt event confirm No message event alarm bits
+    //------------------------------------------------------------------------//
+    // Pack the eventPrompt confirm No alarm bits into an integer for the     //
+    // HMI to read:                                                           //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventConfirmNoWordClass@@
+    L #wEventConfirmNo[@@CWORD@@];
+    T #p.read.eventConfirmNo_@@CWORD@@;
+@@ATTR_END|pEventConfirmNoWordClass@@
+@@ATTR_END|pEventConfirmNoExists@@
+
+@@ATTR_BEGIN|pEventConfirmYesExists@@
+NETWORK
+TITLE = Pack the prompt event confirm Yes message event alarm bits
+    //------------------------------------------------------------------------//
+    // Pack the eventPrompt confirm Yes alarm bits into an integer for the    //
+    // HMI to read:                                                           //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventConfirmYesWordClass@@
+    L #wEventConfirmYes[@@CWORD@@];
+    T #p.read.eventConfirmYes_@@CWORD@@;
+@@ATTR_END|pEventConfirmYesWordClass@@
+@@ATTR_END|pEventConfirmYesExists@@
+
+@@ATTR_BEGIN|pEventLogMsgExists@@
+NETWORK
+TITLE = Pack the log message event alarm bits
+    //------------------------------------------------------------------------//
+    // Pack the eventLogMsg alarm bits into an integer for the HMI to read:   //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventLogMsgWordClass@@
+    L #wEventLogMsg[@@CWORD@@];
+    T #p.read.eventLogMsg_@@CWORD@@;
+@@ATTR_END|pEventLogMsgWordClass@@
+@@ATTR_END|pEventLogMsgExists@@
+
+@@ATTR_BEGIN|pEventLogRealExists@@
+NETWORK
+TITLE = Pack the log real data event alarm bits
+    //------------------------------------------------------------------------//
+    // Pack the eventLogReal alarm bits into an integer for the HMI to read:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventLogRealWordClass@@
+    L #wEventLogReal[@@CWORD@@];
+    T #p.read.eventLogReal_@@CWORD@@;
+@@ATTR_END|pEventLogRealWordClass@@
+@@ATTR_END|pEventLogRealExists@@
+
+@@ATTR_BEGIN|pEventLogTimeExists@@
+NETWORK
+TITLE = Pack the log time data event alarm bits
+    //------------------------------------------------------------------------//
+    // Pack the eventLogTime alarm bits into an integer for the HMI to read:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventLogTimeWordClass@@
+    L #wEventLogTime[@@CWORD@@];
+    T #p.read.eventLogTime_@@CWORD@@;
+@@ATTR_END|pEventLogTimeWordClass@@
+@@ATTR_END|pEventLogTimeExists@@
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

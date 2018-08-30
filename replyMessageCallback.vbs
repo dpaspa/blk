@@ -58,12 +58,15 @@ Else
     '/-------------------------------------------------------------------------/
     If (idxList = 1) Then
         SmartTags("replyMessage.idxMessage1") = 0
+        SmartTags("replyMessage.numSerial1") = 0
 
     ElseIf (idxList = 2) Then
         SmartTags("replyMessage.idxMessage2") = 0
+        SmartTags("replyMessage.numSerial2") = 0
 
     ElseIf (idxList = 3) Then
         SmartTags("replyMessage.idxMessage3") = 0
+        SmartTags("replyMessage.numSerial3") = 0
     End If
 
     '/-------------------------------------------------------------------------/
@@ -92,7 +95,6 @@ Else
         '/---------------------------------------------------------------------/
         '/ Set the message confirm bit and clear the selected message index:   /
         '/---------------------------------------------------------------------/
-        ShowSystemAlarm ERR_PROC & "Callback confirmed for message @@IDXEVENT@@"
     	SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.confirmNo") = bNo
     	SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.confirmYes") = bYes
         SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active") = False

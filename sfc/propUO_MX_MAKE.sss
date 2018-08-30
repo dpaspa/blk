@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 10/08/2018 10:47:26 AM by David Paspa
+generated on 30/08/2018 12:22:05 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -30,37 +30,30 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- make_active
+Type:- BOOL
+Description:- Flags that manual make operations are active
+
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
 Name:- emm_vessel_mass_nett
 Type:- REAL
 Description:- Mx vessel mass
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::2
---------------------------------------------------
-Name:- real_vessel_mass
-Type:- REAL
-Description:- UO_MX_MAKE Vessel nett mass after addition
-ParameterInOut:- VAR
-
---------------------------------------------------
 PARAMETER::3
---------------------------------------------------
-Name:- log_real_vessel_mass
-Type:- BOOL
-Description:- UO_MX_MAKE Vessel nett mass after addition
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::4
 --------------------------------------------------
 Name:- cmd_complete
 Type:- BOOL
 Description:- Manufacturing complete button
-ParameterInOut:- VAR
+ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::4
 --------------------------------------------------
 Name:- prompt_tare
 Type:- BOOL
@@ -68,7 +61,7 @@ Description:- UO_MX_MAKE Operator to confirm Mixing vessel ready for tare
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::5
 --------------------------------------------------
 Name:- prompt_tare_confirm_yes
 Type:- BOOL
@@ -76,7 +69,7 @@ Description:- UO_MX_MAKE Operator to confirm Mixing vessel ready for tare confir
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::6
 --------------------------------------------------
 Name:- vessel_mx
 Type:- INT
@@ -84,7 +77,7 @@ Description:- Manufacturing vessel selection M1 or M2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::7
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -92,15 +85,15 @@ Description:- Description
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::8
 --------------------------------------------------
 Name:- r_pres_lpca_make
 Type:- REAL
-Description:- Description
+Description:- Air pressure during make operation
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::9
 --------------------------------------------------
 Name:- log_msg_pmo_complete
 Type:- BOOL
@@ -108,7 +101,7 @@ Description:- UO_MX_MAKE Time when operator confirmed that manufacturing is comp
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::10
 --------------------------------------------------
 Name:- emc_water_timeout
 Type:- TIME
@@ -116,7 +109,7 @@ Description:- Description
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::11
 --------------------------------------------------
 Name:- log_msg_make_end
 Type:- BOOL
@@ -124,7 +117,7 @@ Description:- UO_MX_MAKE end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::12
 --------------------------------------------------
 Name:- log_msg_make_begin
 Type:- BOOL
@@ -132,7 +125,7 @@ Description:- UO_MX_MAKE begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::13
 --------------------------------------------------
 Name:- emm_vessel_state
 Type:- INT
@@ -140,7 +133,7 @@ Description:- Device State of emm_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::14
 --------------------------------------------------
 Name:- emm_vessel_subs
 Type:- INT
@@ -148,7 +141,7 @@ Description:- Substate selection to emm_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::15
 --------------------------------------------------
 Name:- emm_vessel_cmd
 Type:- INT
@@ -156,7 +149,7 @@ Description:- Command to emm_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::16
 --------------------------------------------------
 Name:- ema_vessel_state
 Type:- INT
@@ -164,7 +157,7 @@ Description:- Substate selection to ema_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::17
 --------------------------------------------------
 Name:- ema_vessel_subs
 Type:- INT
@@ -172,7 +165,7 @@ Description:- Command to ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::18
 --------------------------------------------------
 Name:- ema_vessel_cmd
 Type:- INT
@@ -180,7 +173,7 @@ Description:- Command to ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::19
 --------------------------------------------------
 Name:- prompt_manway_complete_confirm_yes
 Type:- BOOL
@@ -188,7 +181,7 @@ Description:- UO_MX_MAKE Operator to confirm when manual additions complete conf
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::20
 --------------------------------------------------
 Name:- prompt_manway_complete
 Type:- BOOL
@@ -196,7 +189,7 @@ Description:- UO_MX_MAKE Operator to confirm when manual additions complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::21
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -204,7 +197,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::22
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -212,7 +205,7 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::23
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -220,7 +213,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::24
 --------------------------------------------------
 Name:- cmd_manway
 Type:- BOOL
@@ -228,7 +221,7 @@ Description:- Command to enable Manway
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::25
 --------------------------------------------------
 Name:- wfi_added
 Type:- BOOL
@@ -236,31 +229,31 @@ Description:- Flag set after first adding of WFI
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
+PARAMETER::26
+--------------------------------------------------
+Name:- fp_time_make_agit_h
+Type:- INT
+Description:- Agitator runtime (Hours) from MAKE faceplate
+ParameterInOut:- IN
+
+--------------------------------------------------
 PARAMETER::27
 --------------------------------------------------
-Name:- r_time_make_agit_h
+Name:- fp_time_make_agit_m
 Type:- INT
-Description:- Agitator runtime (Hours)
-ParameterInOut:- VAR
+Description:- Agitator runtime (Minutes) from MAKE faceplate
+ParameterInOut:- IN
 
 --------------------------------------------------
 PARAMETER::28
 --------------------------------------------------
-Name:- r_time_make_agit_m
+Name:- fp_time_make_agit_s
 Type:- INT
-Description:- Agitator runtime (Minutes)
-ParameterInOut:- VAR
+Description:- Agitator runtime (Seconds) from MAKE faceplate
+ParameterInOut:- IN
 
 --------------------------------------------------
 PARAMETER::29
---------------------------------------------------
-Name:- r_time_make_agit_s
-Type:- INT
-Description:- Agitator runtime (Seconds)
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::30
 --------------------------------------------------
 Name:- prompt_pmo_confirm_yes
 Type:- BOOL
@@ -268,23 +261,23 @@ Description:- UO_MX_MAKE Operator to select Manufacturing Operation confirmed ye
 ParameterInOut:- VAR
 
 --------------------------------------------------
+PARAMETER::30
+--------------------------------------------------
+Name:- fp_speed_setpoint
+Type:- REAL
+Description:- Agitator speed setpoint from MAKE faceplate
+ParameterInOut:- IN
+
+--------------------------------------------------
 PARAMETER::31
 --------------------------------------------------
-Name:- r_speed_setpoint
+Name:- fp_charge_wfi_make
 Type:- REAL
-Description:- Agitator speed setpoint
-ParameterInOut:- VAR
+Description:- Value of Mass to be charged from MAKE faceplate
+ParameterInOut:- IN
 
 --------------------------------------------------
 PARAMETER::32
---------------------------------------------------
-Name:- r_charge_wfi_make
-Type:- REAL
-Description:- Value of Mass to be charged
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::33
 --------------------------------------------------
 Name:- cmd_charge
 Type:- BOOL
@@ -292,7 +285,7 @@ Description:- Charge additional WFI mass
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::33
 --------------------------------------------------
 Name:- cmd_mix
 Type:- BOOL
@@ -300,7 +293,7 @@ Description:- Enable Agitation of Vessel content
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::34
 --------------------------------------------------
 Name:- cmd_measure
 Type:- BOOL
@@ -308,7 +301,7 @@ Description:- Command to process correct mass measurement of vessel
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::35
 --------------------------------------------------
 Name:- ema_vessel_runtime_h
 Type:- INT
@@ -316,7 +309,7 @@ Description:- Agitator run time Hours for ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::36
 --------------------------------------------------
 Name:- ema_vessel_runtime_s
 Type:- INT
@@ -324,7 +317,7 @@ Description:- Agitator run time Seconds for ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::37
 --------------------------------------------------
 Name:- ema_vessel_runtime_m
 Type:- INT
@@ -332,7 +325,7 @@ Description:- Agitator run time Minutes for ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::38
 --------------------------------------------------
 Name:- ema_vessel_setpoint
 Type:- REAL
@@ -340,7 +333,7 @@ Description:- Agitator speed setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::39
 --------------------------------------------------
 Name:- emc_water_state
 Type:- INT
@@ -348,7 +341,7 @@ Description:- Device State of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::40
 --------------------------------------------------
 Name:- emc_water_mass_charge
 Type:- REAL
@@ -356,7 +349,7 @@ Description:- Mass to charge emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::41
 --------------------------------------------------
 Name:- emc_water_medium_liquid
 Type:- INT
@@ -364,7 +357,7 @@ Description:- Medium selection emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::43
+PARAMETER::42
 --------------------------------------------------
 Name:- emc_water_subs
 Type:- INT
@@ -372,7 +365,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::44
+PARAMETER::43
 --------------------------------------------------
 Name:- emc_water_cmd
 Type:- INT
@@ -380,7 +373,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::44
 --------------------------------------------------
 Name:- prompt_pmo
 Type:- BOOL
@@ -388,7 +381,7 @@ Description:- UO_MX_MAKE Operator to select Manufacturing Operation
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::45
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -396,7 +389,7 @@ Description:- Medium selection of emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::46
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -404,7 +397,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::47
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -412,7 +405,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::48
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -497,7 +490,9 @@ Description:- Set emm_vessel to substate TARE.
 ACTION::01
 --------------------------------------------------
 Description:- Set substate to safe state and stop emm_vessel.
-Action:- // Set emm_vessel to safe state.
+Action:- R #_prompt_tare_confirm_yes;
+
+// Set emm_vessel to safe state.
 L "dbCONST".BLK.SAFE.CMD;
 T  #_emm_vessel_subs;
 L "dbCONST".BLK.CMD.STOP;
@@ -544,36 +539,6 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 STEP::03
 --------------------------------------------------
 StepNo:- 03
-Title:- UO_MX_MAKE : Log Mx vessel weight.
-Description:- Log Mx vessel weight.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Log Mx vessel weight.
-Action:- //Log Mx vessel weight.
-L #_emm_vessel_mass_nett;
-T #_real_vessel_mass;
-
-SET;
-S #_log_real_vessel_mass;
-Verification:- A "uncondJump";
-
-
---------------------------------------------------
-TRANSITION::03
---------------------------------------------------
-TRNNo:- 03
-Title:- Empty Transition
-EmptyTransition:- False
-Description:- Jump
-Condition:- A "uncondJump";
-
-
---------------------------------------------------
-STEP::04
---------------------------------------------------
-StepNo:- 04
 Title:- UO_MX_MAKE : Manufacturing operations selection
 Description:- Prompt operator to select Manufacturing Operations.
 
@@ -584,13 +549,14 @@ Description:- Prompt operator to select Manufacturing Operations.
 Action:- //Prompt operator to select Manufacturing Operations.
 SET;
 S #_prompt_pmo;
+S #_make_active;
 Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::04
+TRANSITION::03
 --------------------------------------------------
-TRNNo:- 04
+TRNNo:- 03
 Title:- Manufacturing complete?
 EmptyTransition:- False
 Description:- Operator confirms manufacturing  is complete.
@@ -598,9 +564,9 @@ Condition:- A #_cmd_complete;
 
 
 --------------------------------------------------
-TRANSITION::05
+TRANSITION::04
 --------------------------------------------------
-TRNNo:- 05
+TRNNo:- 04
 Title:- MEASURE selected?
 EmptyTransition:- False
 Description:- Operator selects MEASURE button
@@ -609,9 +575,9 @@ A #_cmd_measure;
 
 
 --------------------------------------------------
-TRANSITION::06
+TRANSITION::05
 --------------------------------------------------
-TRNNo:- 06
+TRNNo:- 05
 Title:- CHARGE selected?
 EmptyTransition:- False
 Description:- Operator selects CHARGE button
@@ -627,9 +593,9 @@ L "dbCONST".BLK.EMV1.SUBS.MANWAY;
 
 
 --------------------------------------------------
-TRANSITION::07
+TRANSITION::06
 --------------------------------------------------
-TRNNo:- 07
+TRNNo:- 06
 Title:- MIX selected?
 EmptyTransition:- False
 Description:- Operator selects MIX button
@@ -643,9 +609,9 @@ L "dbCONST".BLK.EMV1.SUBS.MANWAY;
 
 
 --------------------------------------------------
-TRANSITION::08
+TRANSITION::07
 --------------------------------------------------
-TRNNo:- 08
+TRNNo:- 07
 Title:- MANWAY selected?
 EmptyTransition:- False
 Description:- Operator selects MANWAY button
@@ -654,9 +620,9 @@ A #_cmd_manway;
 
 
 --------------------------------------------------
-STEP::05
+STEP::04
 --------------------------------------------------
-StepNo:- 05
+StepNo:- 04
 Title:- UO_MX_MAKE : Measure vessel mass
 Description:- Set emm_vessel to substate MEASURE.
 
@@ -692,9 +658,9 @@ L "dbCONST".BLK.EMM1.SUBS.MEASURE;
 
 
 --------------------------------------------------
-TRANSITION::09
+TRANSITION::08
 --------------------------------------------------
-TRNNo:- 09
+TRNNo:- 08
 Title:- Substate MEASURE complete
 EmptyTransition:- False
 Description:- Check if substate MEASURE is complete.
@@ -706,9 +672,9 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 
 
 --------------------------------------------------
-STEP::06
+STEP::05
 --------------------------------------------------
-StepNo:- 06
+StepNo:- 05
 Title:- UO_MX_MAKE : Reset command
 Description:- Reset MEASURE command.
 
@@ -723,9 +689,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::10
+TRANSITION::09
 --------------------------------------------------
-TRNNo:- 10
+TRNNo:- 09
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Jump
@@ -733,9 +699,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::07
+STEP::06
 --------------------------------------------------
-StepNo:- 07
+StepNo:- 06
 Title:- UO_MX_MAKE : Charging with WFI
 Description:- Set emc_water to substate CHARGE and select WFI and amount of mass to charge, charge_wfi_make.
 
@@ -747,7 +713,7 @@ Action:- L T#10M;
 T #_emc_water_timeout;
 
 //Load Mass to charge Mx.
-L #_r_charge_wfi_make;
+L #_fp_charge_wfi_make;
 T #_emc_water_mass_charge;
 
 //Select WFI medium.
@@ -772,9 +738,9 @@ L "dbCONST".BLK.EMC2.SUBS.CHARGE;
 
 
 --------------------------------------------------
-TRANSITION::11
+TRANSITION::10
 --------------------------------------------------
-TRNNo:- 11
+TRNNo:- 10
 Title:- Charge WFI complete?
 EmptyTransition:- False
 Description:- Check if charging WFI is completed.
@@ -786,9 +752,9 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 
 
 --------------------------------------------------
-STEP::08
+STEP::07
 --------------------------------------------------
-StepNo:- 08
+StepNo:- 07
 Title:- UO_MX_MAKE : Reset command
 Description:- Reset CHARGE command.
 Log Mx vessel weight.
@@ -797,24 +763,16 @@ Log Mx vessel weight.
 ACTION::01
 --------------------------------------------------
 Description:- Reset CHARGE command.
-Log Mx vessel weight.
 Action:- // Reset flag.
 SET;
 R #_cmd_charge;
-
-//Log Mx vessel weight.
-L #_emm_vessel_mass_nett;
-T #_real_vessel_mass;
-
-SET;
-S #_log_real_vessel_mass;
 Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::12
+TRANSITION::11
 --------------------------------------------------
-TRNNo:- 12
+TRNNo:- 11
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Jump
@@ -822,9 +780,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::09
+STEP::08
 --------------------------------------------------
-StepNo:- 09
+StepNo:- 08
 Title:- UO_MX_MAKE : MIXING vessel contents
 Description:- Set ema_vessel to substate MIX with pre-selected runtime and speed.
 
@@ -849,14 +807,14 @@ ACTION::02
 Description:- Set ema_vessel to substate MIX with pre-selected timeout and speed.
 Action:- //Transfer input parameter from HMI to EM
 //Load Agitator speed setpoint.
-L #_r_speed_setpoint;
+L #_fp_speed_setpoint;
 T #_ema_vessel_setpoint;
 //Load Agitator runtime.
-L #_r_time_make_agit_h;
+L #_fp_time_make_agit_h;
 T #_ema_vessel_runtime_h;
-L #_r_time_make_agit_m;
+L #_fp_time_make_agit_m;
 T #_ema_vessel_runtime_m;
-L #_r_time_make_agit_s;
+L #_fp_time_make_agit_s;
 T #_ema_vessel_runtime_s;
 
 // Start Agitator 
@@ -873,9 +831,9 @@ L "dbCONST".BLK.EMA1.SUBS.MIX;
 
 
 --------------------------------------------------
-TRANSITION::13
+TRANSITION::12
 --------------------------------------------------
-TRNNo:- 13
+TRNNo:- 12
 Title:- Mixing complete?
 EmptyTransition:- False
 Description:- Check if Mixing is completed.
@@ -887,9 +845,9 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 
 
 --------------------------------------------------
-STEP::10
+STEP::09
 --------------------------------------------------
-StepNo:- 10
+StepNo:- 09
 Title:- UO_MX_MAKE : Reset MIX command.
 Description:- Reset MIX command.
 
@@ -904,9 +862,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::14
+TRANSITION::13
 --------------------------------------------------
-TRNNo:- 14
+TRNNo:- 13
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Jump
@@ -914,9 +872,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::11
+STEP::10
 --------------------------------------------------
-StepNo:- 11
+StepNo:- 10
 Title:- UO_MX_MAKE : Disabling manway alarm
 Description:- Disable Mx Low and LowLow Pressure Alarm.
 Disable Mx manway alarm.
@@ -960,9 +918,9 @@ L "dbCONST".BLK.EMV1.SUBS.MANWAY;
 
 
 --------------------------------------------------
-TRANSITION::15
+TRANSITION::14
 --------------------------------------------------
-TRNNo:- 15
+TRNNo:- 14
 Title:- Complete with MANWAY charges?
 EmptyTransition:- False
 Description:- Operator confirm charges via MANWAY are completed.
@@ -970,18 +928,16 @@ Condition:- A #_prompt_manway_complete_confirm_yes;
 
 
 --------------------------------------------------
-STEP::12
+STEP::11
 --------------------------------------------------
-StepNo:- 12
+StepNo:- 11
 Title:- UO_MX_MAKE : Reset command
 Description:- Enable MANWAY alarm and reset MANWAY command.
-Log Mx vessel weight.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Reset MANWAY command.
-Log Mx vessel weight.
 Action:- //Stop emv_vessel.
 L "dbCONST".BLK.SAFE.CMD;
 T #_emv_vessel_subs;
@@ -993,21 +949,13 @@ T #_emv_vessel_cmd;
 SET;
 R #_cmd_manway;
 R #_prompt_manway_complete_confirm_yes;
-
-
-//Log Mx vessel mass.
-L #_emm_vessel_mass_nett;
-T #_real_vessel_mass;
-
-SET;
-S #_log_real_vessel_mass;
 Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::16
+TRANSITION::15
 --------------------------------------------------
-TRNNo:- 16
+TRNNo:- 15
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Jump
@@ -1015,9 +963,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::13
+STEP::12
 --------------------------------------------------
-StepNo:- 13
+StepNo:- 12
 Title:- UO_MX_MAKE : Isolate WFI and vessel.
 Description:- Log operator confirmation.
 Isolate WFI and vessel.
@@ -1029,7 +977,7 @@ Description:- Log time when operator confirmed manufacturing complete, start tim
 Action:- //Log time when operator confirmed manufacturing complete.
 SET;
 S #_log_msg_pmo_complete;
-
+R #_make_active;
 // Isolate WFI
 L "dbCONST".BLK.EMC2.SUBS.ISOLATE;
 T #_emc_water_subs;
@@ -1059,9 +1007,9 @@ L     "dbCONST".BLK.EMV1.SUBS.ISOLATE;
 
 
 --------------------------------------------------
-TRANSITION::17
+TRANSITION::16
 --------------------------------------------------
-TRNNo:- 17
+TRNNo:- 16
 Title:- WFI and Vessel isolated?
 EmptyTransition:- False
 Description:- WFI and Vessel isolated.
@@ -1078,9 +1026,9 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 
 
 --------------------------------------------------
-STEP::14
+STEP::13
 --------------------------------------------------
-StepNo:- 14
+StepNo:- 13
 Title:- UO_MX_MAKE : Manufacturing Unit Operation Completed
 Description:- Enable LPCA pressure control and enable Mx Manway alarm.
 Enable Mx Low and LowLow Pressure Alarm.
@@ -1106,11 +1054,6 @@ Verification:- //Verify emv_vessel stopped.
 A(;
 L #_emv_vessel_state;
 L "dbCONST".BLK.STATE.STOPPED;
-==I;
-);
-A(;
-L #_emc_gas_state;
-L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ==I;
 );
 

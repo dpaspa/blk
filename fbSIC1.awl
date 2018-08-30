@@ -60,37 +60,30 @@ VERSION : 2.0
 VAR
     p : "udtSIC1";           // Block data interface
     startTMR {ReadalPartName := 'TON'; LibVersion := '1.0'} : TON;
-    dirTMR {ReadalPartName := 'TON'; LibVersion := '1.0'} : TON;
-    PID1 {ReadalPartName := 'CONT_C'; LibVersion := '1.0'} : CONT_C;
+    PID1 {OriginalPartName := 'CONT_C_1500'; LibVersion := '1.1'} : CONT_C;
+END_VAR
+
+VAR DB_SPECIFIC
+    b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..15] of Bool;
+    w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT b : Word;
 END_VAR
 
 VAR_TEMP
-    ALARM_L : Bool;          // Alarm_L
-    ALARM_LL : Bool;         // Alarm_LL
     cmdEnable : Bool;
     cmdDisable : Bool;
     edgeStart : Bool;
     eventStart : Bool;
-    eventTMRFwd : Bool;
-    eventTMRRev : Bool;
     tDO : Bool;
     tILAnalog : Bool;
-    tPV : Real;
     tPV_MASS : Real;
-    RET_VAL1 : Word;
-    unscaledOUT : Int;
-    percentSpeed : Real;
     tSetpoint : Real;
+    LMN : Real;
     RANGE_ERROR : Bool;
-    BROKEN_WIRE : Bool;
-    dirTMRStart : Bool;
     startTMRExpired : Bool;
-    dirTMRExpired : Bool;
     tManual_Not_PID : Bool;
     startTMRElapsed : Time;
-    dirTMRElapsed : Time;
     permitMass : Bool;
-    enable : Bool;
+    FTR : Bool;
 END_VAR
 
 BEGIN
@@ -135,18 +128,6 @@ TITLE = Disable command
     = #cmdDisable
 
 NETWORK
-TITLE = Cascade the MODE flags to the analog input structure
-    //------------------------------------------------------------------------//
-    // Set the ai MODE flags based on the mc calculated values:               //
-    //------------------------------------------------------------------------//
-    A #p.read.mc.modeAUTO;
-    = #p.read.ai.modeAUTO;
-    A #p.read.mc.modeMANUAL;
-    = #p.read.ai.modeMANUAL;
-    A #p.read.mc.modeOOS;
-    = #p.read.ai.modeOOS;
-
-NETWORK
 TITLE = Analog input attributes
     //------------------------------------------------------------------------//
     // Set the analog input attributes:                                       //
@@ -173,6 +154,8 @@ TITLE = Analog input attributes
     = #p.read.ai.ENABLE_LL;
     L #p.read.RAW_INPUT;
     T #p.read.ai.RAW_INPUT;
+    L #p.read.ai.PV;
+    T #p.read.PV;
 
 NETWORK
 TITLE = Call Analog Input handling function
@@ -383,56 +366,7 @@ TITLE = Drive the agitator output on if commanded and safe to run
     // are no interlocks and mass in the vessel is sufficient:                //
     //------------------------------------------------------------------------//
     A #tDO;
-    = #p.read.OUT_Q;
-
-NETWORK
-TITLE = Transfer the setpoint to the inverter reference value
-    //------------------------------------------------------------------------//
-    // Start the agitator if allowed to run if command is ENABLE and there    //
-    // are no interlocks and mass in the vessel is sufficient:                //
-    //------------------------------------------------------------------------//
-    A #tDO;
-    JCN _f;
-    L #tSetpoint;
-    T #p.read.OUT_LMN;
-_f:   NOP 0;
-
-NETWORK
-TITLE = Transfer the setpoint to the output setpoint
-    //------------------------------------------------------------------------//
-    // Transfer setpoint to output setpoint:                                  //
-    //------------------------------------------------------------------------//
-    L #tSetpoint;
-    T #p.read.OUT_SETPOINT;
-
-NETWORK
-TITLE = Unscale Setpoint
-    //------------------------------------------------------------------------//
-    // Unscale the setpoint to set the inverter percent reference value.      //
-    // For POLARITY, 0 = no polarity (0 to +x), 1 = dual polarity (-x to +x): //
-    //------------------------------------------------------------------------//
-    A #tDO;
-    JCN _g;
-    CALL UNSCALE
-    (   IN                   := #tSetpoint ,
-        HI_LIM               := #p.read.ai.RANGE_UPPER ,
-        LO_LIM               := #p.read.ai.RANGE_LOWER ,
-        BIPOLAR              := 1 ,
-        RET_VAL              := #RET_VAL1 ,
-        OUT                  := #unscaledOUT
-    );
-_g:   NOP 0;
-
-NETWORK
-TITLE = Setpoint reference to inverter in percent
-    //------------------------------------------------------------------------//
-    // Set the inverter percent reference value if running:                   //
-    //------------------------------------------------------------------------//
-    A #tDO;
-    JCN _h;
-    L #unscaledOUT;
-    T #p.read.OUT_LMN_PER;
-_h:   NOP 0;
+    = #p.read.OUT_CMD;
 
 NETWORK
 TITLE = PID Controller
@@ -458,15 +392,31 @@ TITLE = PID Controller
     );
 
 NETWORK
+TITLE = Converts PID output (%) to speed setpoint (RPM)
+      L #p.read.LMN;
+      L 100.0;
+      /R;
+      T #LMN;
+
+
+      CALL SCALE_X
+      {dest_type := 'Real', src_type := 'Real'}
+      (  MIN                         := 0.0 ,
+         VALUE                       := #LMN ,
+         MAX                         := 3000.0 ,
+         Ret_Val                     := #p.read.MV_OUTPUT
+      );
+
+NETWORK
 TITLE = Output if Disabled
-    //------------------------------------------------------------------------//
-    // Output should be 0 if disabled:                                        //
-    //------------------------------------------------------------------------//
-    A #cmdDisable;
-    JCN _i;
-    L 0.0;
-    T #p.read.LMN;
-_i:   NOP 0;
+//------------------------------------------------------------------------//
+// Output should be 0 if disabled:                                        //
+//------------------------------------------------------------------------//
+      A #cmdDisable;
+      JCN _i;
+      L 0.0;
+      T #p.read.MV_OUTPUT;
+_i:      NOP 0;
 
 NETWORK
 TITLE = Start event if commanded to start
@@ -478,133 +428,28 @@ TITLE = Start event if commanded to start
     = #eventStart;
 
 NETWORK
-TITLE = Start timer to check if fail to start or run at low speed
-    //------------------------------------------------------------------------//
-    // Start timer if commanded to run:                                       //
-    //------------------------------------------------------------------------//
-    A #eventStart;
-    JCN _j;
-    CALL #startTMR
-    {time_type := 'Time'}
-    (   IN                   := #tDO ,
-        PT                   := #p.read.FB_TDELAY ,
-        Q                    := #startTMRExpired ,
-        ET                   := #startTMRElapsed
-    );
-_j:   NOP 0;
-
-NETWORK
 TITLE = Fault if start timer expired and not running
     //------------------------------------------------------------------------//
     // Fault if start timer expired and still not running:                    //
     //------------------------------------------------------------------------//
-    A #startTMR.Q;
+    A #tDO;
     AN #p.read.RUNNING;
     AN #p.read.mc.modeOOS;
-    = #p.read.RUN_FAULT;
+    = #FTR;
 
-NETWORK
-TITLE = Calculate speed as a fraction of the setpoint
-    //------------------------------------------------------------------------//
-    // Calculate actual speed as a fraction of setpoint:                      //
-    //------------------------------------------------------------------------//
-    A #tDO;
-    JCN _k;
-    L #tPV;
-    L #tSetpoint;
-    /R;
-    T #percentSpeed;
-_k:   NOP 0;
-
-NETWORK
-TITLE = Calculate speed as a percent of the setpoint
-    //------------------------------------------------------------------------//
-    // Calculate actual speed as a percent of setpoint:                       //
-    //------------------------------------------------------------------------//
-    A #tDO;
-    JCN _l;
-    L #percentSpeed;
-    L 100.0;
-    *R;
-    T #percentSpeed;
-_l:   NOP 0;
-
-NETWORK
-TITLE = Flag RUNNING if speed above 25% of setpoint
-    //------------------------------------------------------------------------//
-    // Flag RUNNING if actual speed is above 25% of setpoint:                 //
-    //------------------------------------------------------------------------//
-    A #tDO;
-    L #percentSpeed;
-    L 25.0;
-    >R;
-    = #p.read.RUNNING;
-
-NETWORK
-TITLE = Run Direction Forward if just started
-    //------------------------------------------------------------------------//
-    // Direction is forward if command to start raised:                       //
-    //------------------------------------------------------------------------//
-    A #eventStart;
-    = #p.read.OUT_Q_F;
-
-NETWORK
-TITLE = Check run command and direction timer expired
-    //------------------------------------------------------------------------//
-    // Check if run command output is on and direction change timer expired:  //
-    //------------------------------------------------------------------------//
-    A #tDO;
-    AN #dirTMR.Q;
-    = #dirTMRStart;
-
-NETWORK
-TITLE = Start Forward Reverse Direction Timer
-    //------------------------------------------------------------------------//
-    // If running and direction changed, start timer to reverse again:        //
-    //------------------------------------------------------------------------//
-    CALL #dirTMR
+    CALL #startTMR
     {time_type := 'Time'}
-    (   IN                   := #dirTMRStart ,
-        PT                   := T#5M ,
-        Q                    := #dirTMRExpired ,
-        ET                   := #dirTMRElapsed
+    (   IN                   := #FTR ,
+        PT                   := #p.read.FB_TDELAY ,
+        Q                    := #startTMRExpired ,
+        ET                   := #startTMRElapsed
     );
     NOP 0;
 
+    A #startTMRExpired;
+    = #p.read.FAIL_TO_RUN;
+
 NETWORK
-TITLE = Reverse direction if timer expired
-    //------------------------------------------------------------------------//
-    // Change direction if timer expired:                                     //
-    //------------------------------------------------------------------------//
-    A #dirTMR.Q;
-    A #p.read.OUT_Q_F;
-    = #eventTMRRev;
-
-    A #eventTMRRev;
-    JCN _m;
-    R #p.read.OUT_Q_F;
-_m:   NOP 0;
-
-    A #eventTMRRev;
-    JCN _n;
-    S #p.read.OUT_Q_R;
-_n:   NOP 0;
-
-    A #dirTMR.Q;
-    A #p.read.OUT_Q_R;
-    = #eventTMRFwd;
-
-    A #eventTMRFwd;
-    JCN _o;
-    S #p.read.OUT_Q_F;
-_o:   NOP 0;
-
-    A #eventTMRFwd;
-    JCN _p;
-    R #p.read.OUT_Q_R;
-_p:   NOP 0;
-NETWORK
-
 TITLE = Disable state
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
@@ -616,6 +461,7 @@ TITLE = Disable state
     AN #p.read.THM;
     AN #p.read.FLP;
     AN #p.read.FLT;
+    AN #p.read.FAIL_TO_RUN;
     A #cmdDisable;
     JCN _q;
     L "dbCONST".BLK.SIC1.STATE.DISABLED;
@@ -631,6 +477,7 @@ TITLE = FAULT if any fault condition active
     O #p.read.THM;
     O #p.read.FLP;
     O #p.read.FLT;
+    O #p.read.FAIL_TO_RUN;
     JCN _r;
     L "dbCONST".BLK.SIC1.STATE.FAULT;
     T #p.read.mc.STATE;
@@ -642,6 +489,11 @@ TITLE = Stopped if command is ENABLE and mass not enough
     // STOPPED if command is enable and no interlock but mass not enough:     //
     //------------------------------------------------------------------------//
     A #cmdEnable;
+    AN #p.read.BRK;
+    AN #p.read.THM;
+    AN #p.read.FLP;
+    AN #p.read.FLT;
+    AN #p.read.FAIL_TO_RUN;
     AN #permitMass;
     JCN _s;
     L "dbCONST".BLK.SIC1.STATE.STOPPED;
@@ -653,6 +505,11 @@ TITLE = Running if output should be on
     //------------------------------------------------------------------------//
     // RUNNING if command is enable and no interlock and mass permits:        //
     //------------------------------------------------------------------------//
+    AN #p.read.BRK;
+    AN #p.read.THM;
+    AN #p.read.FLP;
+    AN #p.read.FLT;
+    AN #p.read.FAIL_TO_RUN;
     A #tDO;
     JCN _t;
     L "dbCONST".BLK.SIC1.STATE.RUNNING;
@@ -664,55 +521,18 @@ TITLE = Pack the alarm bits
     //------------------------------------------------------------------------//
     // Pack the alarm bits into an integer for the HMI to read:               //
     //------------------------------------------------------------------------//
-    L 0;
-    T #p.read.mc.ALARM;
-
     A #p.read.ALM_BRK;
-    JCN _not_ALM_BRK;
-    L 1;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_ALM_BRK:   NOP 0;
-
+    = #b[0];
     A #p.read.ALM_FLP;
-    JCN _not_ALM_FLP;
-    L 2;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_ALM_FLP:   NOP 0;
-
+    = #b[1];
     A #p.read.ALM_FLT;
-    JCN _not_ALM_FLT;
-    L 4;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_ALM_FLT:   NOP 0;
-
+    = #b[2];
     A #p.read.ALM_PHR;
-    JCN _not_ALM_PHR;
-    L 8;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_ALM_PHR:   NOP 0;
-
-    A #p.read.RUN_FAULT;
-    JCN _not_RUN_FAULT;
-    L 16;
-    L #p.read.mc.ALARM;
-    +I;
-    T #p.read.mc.ALARM;
-_not_RUN_FAULT:   NOP 0;
-
+    = #b[3];
+    A #p.read.FAIL_TO_RUN;
+    = #b[4];
     A #p.read.ALM_THM;
-    JCN _not_ALM_THM;
-    L 32;
-    L #p.read.mc.ALARM;
-    +I;
+    = #b[5];
+    L #w;
     T #p.read.mc.ALARM;
-_not_ALM_THM:   NOP 0;
-
 END_FUNCTION_BLOCK

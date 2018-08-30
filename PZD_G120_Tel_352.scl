@@ -1,0 +1,233 @@
+﻿FUNCTION_BLOCK "PZD_G120_Tel_352"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+   VAR_INPUT 
+      address : Int := 0;
+      ON_OFF1 : Bool := FALSE;
+      OFF2 : Bool := TRUE;
+      OFF3 : Bool := TRUE;
+      enable_operation : Bool := TRUE;
+      release_RFG : Bool := TRUE;
+      enable_RFG : Bool := TRUE;
+      enable_setpoint : Bool := TRUE;
+      acknowledge : Bool := FALSE;
+      CTW_bit_08 : Bool := FALSE;
+      CTW_bit_09 : Bool := FALSE;
+      PLC_is_master : Bool := TRUE;
+      direction_reversal : Bool := FALSE;
+      CTW_bit_12 : Bool := FALSE;
+      MOP_up : Bool := FALSE;
+      MOP_down : Bool := FALSE;
+      CTW_bit_15 : Bool := FALSE;
+      activate_manual_mode : Bool := FALSE;
+      speed_setpoint : Real := 0.0;
+      reference_speed_P2000 : Real := 1500.0;
+      reference_current_P2002 : Real := 0.0;
+      reference_torque_P2003 : Real := 0.0;
+   END_VAR
+
+   VAR_OUTPUT 
+      ready_for_switching_on : Bool;
+      ready_for_operation : Bool;
+      operation_enabled : Bool;
+      fault_active : Bool;
+      OFF2_inactive : Bool;
+      OFF3_inactive : Bool;
+      closing_lockout_active : Bool;
+      alarm_active : Bool;
+      speed_deviation_in_tol : Bool;
+      PLC_control_requested : Bool;
+      comp_speed_reached : Bool;
+      limit_reached : Bool;
+      holding_brake_open : Bool;
+      alarm_motor_overtemp : Bool;
+      rotating_right : Bool;
+      no_thermal_overload : Bool;
+      actual_speed : Real;
+      actual_current : Real;
+      actual_torque : Real;
+      actual_alarm : Word;
+      actual_fault : Word;
+      communication_error : Bool;
+   END_VAR
+
+   VAR 
+      internal_control_word : Word := W#16#047E;
+      internal_status_word : Word := 16#0000;
+      internal_setpoint : Real := 0.0;
+      return_value_RD : Int := 0;
+      return_value_WR : Int := 0;
+      ValueMax : Real := 16384.0;
+   END_VAR
+
+   VAR_TEMP 
+      Control_word : Word;
+      Control_word_bits AT Control_word : Struct
+         Bit_00 : Bool;
+         Bit_01 : Bool;
+         Bit_02 : Bool;
+         Bit_03 : Bool;
+         Bit_04 : Bool;
+         Bit_05 : Bool;
+         Bit_06 : Bool;
+         Bit_07 : Bool;
+         Bit_08 : Bool;
+         Bit_09 : Bool;
+         Bit_10 : Bool;
+         Bit_11 : Bool;
+         Bit_12 : Bool;
+         Bit_13 : Bool;
+         Bit_14 : Bool;
+         Bit_15 : Bool;
+      END_STRUCT;
+      Status_word : Word;
+      Status_word_bits AT Status_word : Struct
+         Bit_00 : Bool;
+         Bit_01 : Bool;
+         Bit_02 : Bool;
+         Bit_03 : Bool;
+         Bit_04 : Bool;
+         Bit_05 : Bool;
+         Bit_06 : Bool;
+         Bit_07 : Bool;
+         Bit_08 : Bool;
+         Bit_09 : Bool;
+         Bit_10 : Bool;
+         Bit_11 : Bool;
+         Bit_12 : Bool;
+         Bit_13 : Bool;
+         Bit_14 : Bool;
+         Bit_15 : Bool;
+      END_STRUCT;
+      tempout_int : Int;
+      tempout_real : Real;
+      temp_int : Int;
+      InData : Array[1..12] of Byte;
+      InData_word AT InData : Array[1..6] of Word;
+      OutData : Array[1..12] of Byte;
+      OutData_word AT OutData : Array[1..6] of Word;
+   END_VAR
+
+
+BEGIN
+	//RECEIVE DATA
+	//Copy all 6 received words (Siemens telegram 352) to buffer (with SFC14 DPRD_DAT)
+	#return_value_RD := DPRD_DAT(LADDR := INT_TO_UINT(#address),RECORD => #InData);
+	
+	//If SFC15 "DPRD_DAT" shows an error, overwrite #InData with 0
+	IF #return_value_RD <> 0 THEN
+	    FOR #temp_int := 1 TO 12 DO
+	        #InData[#temp_int] := 0;
+	    END_FOR;
+	END_IF;
+	
+	//CONVERT STATUS WORD AND COPY TO OUTPUTS
+	//The SINAMICS and the SIMATIC uses different Byte orders (Endianness)
+	//The SINAMICS use Intel format or Little-Endian while the SIMATIC uses Motorola format or Big-Endian.
+	//The control and status words have to be change the high AND low bytes.
+	#Status_word :=  ROL(IN:=#InData_word[1] ,N:=8);
+	#internal_status_word := #InData_word[1];
+	 
+	//copy bits of the status word to output
+	#ready_for_switching_on      := #Status_word_bits.Bit_00 ;//Power supply is on, pulses are blocked
+	#ready_for_operation         := #Status_word_bits.Bit_01 ;//Motor is switched on
+	#operation_enabled           := #Status_word_bits.Bit_02 ;//Motor follows setpoint
+	#fault_active                := #Status_word_bits.Bit_03 ;//SINAMICS shows a fault/error
+	#OFF2_inactive               := #Status_word_bits.Bit_04 ;//No immediately STOP
+	#OFF3_inactive               := #Status_word_bits.Bit_05 ;//No quick STOP
+	#closing_lockout_active      := #Status_word_bits.Bit_06 ;//Switch on is inhibit, ON_OFF1 must be set to 0
+	#alarm_active                := #Status_word_bits.Bit_07 ;//SINAMICS shows a alarm/warning
+	#speed_deviation_in_tol      := #Status_word_bits.Bit_08 ;//Setpoint/actual value deviation within tolerance range. 
+	#PLC_control_requested       := #Status_word_bits.Bit_09 ;//PLC is requested to assume control
+	#comp_speed_reached          := #Status_word_bits.Bit_10 ;//Speed is greater than or equal to the corresponding maximum speed.
+	#limit_reached               := #Status_word_bits.Bit_11 ;//Comparison value for current, torque or power has been reached or exceeded.
+	#holding_brake_open          := #Status_word_bits.Bit_12 ;//Signal to open and close a motor holding brake.
+	#alarm_motor_overtemp        := #Status_word_bits.Bit_13 ;//Alarm motor overtemperature
+	#rotating_right              := #Status_word_bits.Bit_14 ;//Internal inverter actual value > 0 
+	#no_thermal_overload         := #Status_word_bits.Bit_15 ;//No alarm, thermal power INT_TO_WORD overload
+	       
+	//CONVERT ACTUAL VALUES AND COPY TO OUTPUTS
+	//The speed, current and torque values are transferred as scaled values.
+	//The reference speed for the scaling is stored in P2000 in a SINAMICS G120. 
+	//The reference current for the scaling is stored in P2002 in a SINAMICS G120. 
+	//The reference torque for the scaling is stored in P2003 in a SINAMICS G120. 
+	//The scaling is: 100%(of P200x)=4000hex=16384dez  
+	
+	#actual_speed   := #reference_speed_P2000   * ( INT_TO_REAL( WORD_TO_INT(#InData_word[2])) / #ValueMax );
+	#actual_current := #reference_current_P2002 * ( INT_TO_REAL( WORD_TO_INT(#InData_word[3])) / #ValueMax );
+	#actual_torque  := #reference_torque_P2003  * ( INT_TO_REAL( WORD_TO_INT(#InData_word[4])) / #ValueMax );
+	
+	//COPY ALARM/FAULT CODES TO OUTPUTS
+	#actual_alarm := #InData_word[5] ;   
+	#actual_fault := #InData_word[6] ;  
+	
+	// ###########################################
+	
+	// Depending on activate_manual_mode we copy the input variables or the internal variables to the output buffer
+	IF #activate_manual_mode = FALSE THEN // normal mode
+	    //COPY INPUT BITS
+	    #Control_word_bits.Bit_00 := #ON_OFF1;            //Bit 0: 0=immediately STOP
+	    #Control_word_bits.Bit_01 := #OFF2;               //Bit 1: 0=cancel pulses
+	    #Control_word_bits.Bit_02 := #OFF3;               //Bit 2: 0=quick STOP
+	    #Control_word_bits.Bit_03 := #enable_operation;   //Bit 3: 0=cancel pulses
+	    
+	    #Control_word_bits.Bit_04 := #enable_RFG;         //Bit 4: 0= setpoint is 0; 1=setpoint enabled
+	    #Control_word_bits.Bit_05 := #enable_setpoint;    //Bit 5: 0= freeze RFG, 1= 1=RFG follows setpoint
+	    #Control_word_bits.Bit_06 := #enable_setpoint;    //Bit 6: 1= enable setpoint
+	    #Control_word_bits.Bit_07 := #acknowledge;        //Bit 7: 0 to 1 = fault acknowledge
+	   
+	    #Control_word_bits.Bit_08 := #CTW_bit_08;         //Bit 8: not used
+	    #Control_word_bits.Bit_09 := #CTW_bit_09;         //Bit 9: not used
+	    #Control_word_bits.Bit_10 := #PLC_is_master;      //Bit10: 1= PLC controls the drive
+	    #Control_word_bits.Bit_11 := #direction_reversal; //Bit11: 1= reverse turning direction
+	    
+	    #Control_word_bits.Bit_12 := #CTW_bit_12;         //Bit12: not used
+	    #Control_word_bits.Bit_13 := #MOP_up;             //Bit13: increase setpoint in motorized Potentiometer
+	    #Control_word_bits.Bit_14 := #MOP_down;           //Bit14: decrease setpoint in motorized Potentiometer
+	    #Control_word_bits.Bit_15 := #CTW_bit_15;         //Bit15: not used
+	    
+	    //CONVERT AND COPY CONTROL WORD TO BUFFER
+	    //The SINAMICS and the SIMATIC uses different Byte orders (Endianness)
+	    //The SINAMICS use Intel format or Little-Endian while the SIMATIC uses Motorola format or Big-Endian.
+	    //The control and status words have to be change the high AND low bytes.
+	    #OutData_word[1] :=  ROL(IN:=#Control_word ,N:=8);
+	    
+	    //CONVERT SETPOINT VALUE AND COPY TO BUFFER
+	    //The speed value is transferred as scaled value.
+	    //The reference speed for the scaling is stored in P2000 in a SINAMICS G120. 
+	    //The scaling is: 100%(of P2000)=4000hex=16384dez  
+	    #OutData_word[2]:=INT_TO_WORD (REAL_TO_INT (#speed_setpoint * #ValueMax / #reference_speed_P2000));
+	    
+	ELSE    //manual mode
+	    //CONVERT AND COPY CONTROL WORD TO BUFFER
+	    //The SINAMICS and the SIMATIC uses different Byte orders (Endianness)
+	    //The SINAMICS use Intel format or Little-Endian while the SIMATIC uses Motorola format or Big-Endian.
+	    //The control and status words have to be change the high AND low bytes.
+	    #OutData_word[1] :=  #internal_control_word;
+	    
+	    //CONVERT SETPOINT VALUE AND COPY TO BUFFER
+	    //The speed value is transferred as scaled value.
+	    //The reference speed for the scaling is stored in P2000 in a SINAMICS G120. 
+	    //The scaling is: 100%(of P2000)=4000hex=16384dez  
+	    #OutData_word[2]:=INT_TO_WORD (REAL_TO_INT (#internal_setpoint * #ValueMax / #reference_speed_P2000));
+	END_IF;
+	
+	//FILL NOT USED WORDS IN BUFFER
+	#OutData_word[3]:= INT_TO_WORD (0);
+	#OutData_word[4]:= INT_TO_WORD (0);
+	#OutData_word[5]:= INT_TO_WORD (0);
+	#OutData_word[6] := INT_TO_WORD(0);
+	
+	
+	//SEND DATA
+	//Copy all 6 words (Siemens telegram 352) from buffer (with SFC15 DPWR_DAT)
+	#return_value_WR := DPWR_DAT(LADDR := INT_TO_UINT(#address),RECORD := #OutData );
+	
+	//communication error
+	IF ((#return_value_RD <> 0) OR (#return_value_WR <> 0))
+	THEN  #communication_error := TRUE;
+	ELSE #communication_error := FALSE;
+	END_IF;
+	
+END_FUNCTION_BLOCK
+

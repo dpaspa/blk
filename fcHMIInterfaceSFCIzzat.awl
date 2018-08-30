@@ -1,0 +1,107 @@
+FUNCTION "fcHMIInterfaceSFC" : Void
+TITLE = HMI SFC Faceplate interface
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcHMIInterfaceSFC
+VERSION : 2.0
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcHMIInterfaceSFC                                             //
+// Description:                                                               //
+// Manages the data interface for the HMI SFC faceplate.                      //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      02-Aug-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+   VAR_IN_OUT 
+      smc : "udtModeCommandSFC";   // SFC mode and command
+      sqStep : "udtSFCStep32";   // Sequencer runtime
+   END_VAR
+
+   VAR_TEMP 
+      retVal : Int;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Copy the SFC mode and command data to the HMI interface block
+//------------------------------------------------------------------------//
+// Copy mode and command data:                                            //
+//------------------------------------------------------------------------//
+      CALL BLKMOV
+      {blk_type := 'Variant'}
+      (  SRCBLK                      := #smc , 
+         RET_VAL                     := #retVal , 
+         DSTBLK                      := "dbHMIInterfaceSFC".sequence.smc
+      );
+
+NETWORK
+TITLE = Copy the SFC runtime data to the HMI interface block
+//------------------------------------------------------------------------//
+// Copy runtime data:                                                     //
+//------------------------------------------------------------------------//
+      CALL BLKMOV
+      {blk_type := 'Variant'}
+      (  SRCBLK                      := #sqStep , 
+         RET_VAL                     := #retVal , 
+         DSTBLK                      := "dbHMIInterfaceSFC".sequence.sqStep
+      );
+
+NETWORK
+TITLE = 
+      A "dbHMIInterfaceSFC".sequence.manual;
+      FN "Tag_3";
+      = "Tag_4";
+      JCN out;
+      L "dbCONST".SEQ.MODE.AUTO;
+      T "dbHMIInterfaceSFC".sequence.CMD_MODE;
+      T #smc.MODE;
+out:      NOP 0;
+NETWORK
+TITLE = Send the user mode
+//------------------------------------------------------------------------//
+// Send any user selected mode to the SFC if in Manual:                   //
+//------------------------------------------------------------------------//
+      A "dbHMIInterfaceSFC".sequence.manual;
+      JCN _auto;
+      L "dbHMIInterfaceSFC".sequence.CMD_MODE;
+      T #smc.MODE;
+_auto:      NOP 0;
+
+      AN "dbHMIInterfaceSFC".sequence.manual;
+
+      JCN _manual;
+      L #smc.MODE;
+      T "dbHMIInterfaceSFC".sequence.CMD_MODE;
+_manual:      NOP 0;
+
+NETWORK
+TITLE = Send the user output commands if in Manual mode
+//------------------------------------------------------------------------//
+// Send the user command to the SFC if in MANUAL:                         //
+//------------------------------------------------------------------------//
+      A(;
+      L #smc.MODE;
+      L "dbCONST".SEQ.MODE.MANUAL;
+      ==I;
+      );
+      JCN _notManual;
+
+      L "dbHMIInterfaceSFC".sequence.CMD_SQ_CMD;
+      T #smc.SQ_CMD;
+      L "dbHMIInterfaceSFC".sequence.CMD_STEPNO_JUMP;
+      T #smc.STEPNO_JUMP;
+      A "dbHMIInterfaceSFC".sequence.CMD_MAN_JUMP;
+      = #smc.MAN_JUMP;
+
+_notManual:      NOP 0;
+
+END_FUNCTION
+

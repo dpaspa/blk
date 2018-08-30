@@ -17,9 +17,19 @@ NAME : dbRECIPE
 VERSION : 1.0
 
 STRUCT
-@@TEMPLATE_BEGIN|RECIPE@@
-    @@RECIPE@@ : "udtRecipe";
+    recipeInfo : Struct
+        recipeNumber : Int;
+        recipeDataRecordNumber : Int;
+    END_STRUCT;
+    recipeList : Struct
+@@TEMPLATE_BEGIN|RECIPE_CLASS@@
+        @@RECIPENAME@@ : Struct
+@@ATTR_BEGIN|RECIPE_PARAMETERS@@
+            @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;      // @@PARAMETERDESCRIPTION@@
+@@ATTR_END|RECIPE_PARAMETERS@@
+        END_STRUCT;
 @@TEMPLATE_END@@
+    END_STRUCT;
 END_STRUCT;
 
 BEGIN

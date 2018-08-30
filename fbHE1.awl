@@ -34,6 +34,11 @@ VAR
     p : "udtHE1";            // Block data interface
 END_VAR
 
+VAR DB_SPECIFIC
+    b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..15] of Bool;
+    w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT b : Word;
+END_VAR
+
 VAR_TEMP
     tDO : Bool;              // Temporary processed DO signal
     tFault : Bool;
@@ -173,15 +178,9 @@ TITLE = Pack the alarm bit
     //------------------------------------------------------------------------//
     // Pack the alarm bit into an integer for the HMI to read:                //
     //------------------------------------------------------------------------//
-    L 0;
-    T #p.read.mc.ALARM;
-
     A #p.read.FAULT;
-    JCN _not_FAULT;
-    L 1;
-    L #p.read.mc.ALARM;
-    +I;
+    = #b[0];
+    L #w;
     T #p.read.mc.ALARM;
-_not_FAULT:   NOP 0;
 
 END_FUNCTION_BLOCK

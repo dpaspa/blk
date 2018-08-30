@@ -166,56 +166,6 @@ TITLE = Call UN communications between PLCs if enabled
 _xUN:   NOP 0;
 
 NETWORK
-TITLE = Initialise the alarms with a one shot
-    //------------------------------------------------------------------------//
-    // Call the Program_Alarm initialisation function to toggle the trigger   //
-    // bits high as a one shot to reset each alarm status:                    //
-    //------------------------------------------------------------------------//
-    AN "alarmsEnabled";
-    JCN _alarmsInitialised;
-    CALL "fcAlarmInit";
-_alarmsInitialised:   NOP 0;
-
-//NETWORK
-//TITLE = Calling all SFC operator prompts
-    //------------------------------------------------------------------------//
-    // Call the message function to interface the PLC to the HMI. Messages    //
-    // have prompt and confirm handshake:                                     //
-    //------------------------------------------------------------------------//
- //   CALL "ifbEventPrompt", "idbEventPrompt";
-
-NETWORK
-TITLE = Calling all SFC log real data messages
-    //------------------------------------------------------------------------//
-    // Call the message function to interface the PLC to the HMI:             //
-    //------------------------------------------------------------------------//
-    CALL "ifbEventLogReal", "idbEventLogReal";
-
-NETWORK
-TITLE = Calling all SFC log time data messages
-    //------------------------------------------------------------------------//
-    // Call the message function to interface the PLC to the HMI:             //
-    //------------------------------------------------------------------------//
-    CALL "ifbEventLogTime", "idbEventLogTime";
-
-//NETWORK
-//TITLE = Calling all sequence message events
-    //------------------------------------------------------------------------//
-    // Call the message function to interface the PLC to the HMI. Messages    //
-    // have prompt and confirm handshake:                                     //
-    //------------------------------------------------------------------------//
-//    CALL "fcEventSequence";
-//    NOP 0;
-
-//NETWORK
-//TITLE = Calling all HMI Alarms
-    //------------------------------------------------------------------------//
-    // Call the alarm function to interface the PLC to the HMI:               //
-    //------------------------------------------------------------------------//
-//    CALL "fcHMIAlarms";
-//    NOP 0;
-
-NETWORK
 TITLE = HMI Sequence animation
     //------------------------------------------------------------------------//
     // Call the sequence select function for the HMI sequence interface:      //
@@ -223,26 +173,27 @@ TITLE = HMI Sequence animation
     CALL "ifcHMISelectSFC";
     NOP 0;
 
-//NETWORK
-//TITLE = HMI DATA LOG FOR THE REPORT WITH ACK IN DB8
-//      CALL "fcBatch_Report";
-//      NOP 0;
+NETWORK
+TITLE = HMI generic block animation
+    //------------------------------------------------------------------------//
+    // Call the sequence select function for the HMI sequence interface:      //
+    //------------------------------------------------------------------------//
+    CALL "ifbHMISelectBLK", "idbHMISelectBLK";
+    NOP 0;
 
-//NETWORK
-//TITLE = Get PLC CPU LED states
+NETWORK
+TITLE = Call simulation script
     //------------------------------------------------------------------------//
-    // Get the PLC health information for the CPU:                            //
+    // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+    // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+    // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+    // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+    // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+    // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+    // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
     //------------------------------------------------------------------------//
- //   CALL "fcLEDState";
-//    NOP 0;
-
-//NETWORK
-//TITLE = Time Sync from Batch PC
-    //------------------------------------------------------------------------//
-    // Synchronise the PLC CPU time with the master time keeper from the PC:  //
-    //------------------------------------------------------------------------//
-//    CALL "fbTimeSyncPLC";
-//    NOP 0;
+    CALL "fbSimulate", "fbSimulate_DB";
+    NOP 0;
 
 NETWORK
 TITLE = First scan after restart is over

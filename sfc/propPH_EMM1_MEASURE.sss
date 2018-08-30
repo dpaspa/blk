@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 10/08/2018 10:43:23 AM by David Paspa
+generated on 30/08/2018 12:18:34 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -36,13 +36,61 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- real_mass_gross
+Type:- REAL
+Description:- PH_EMM1_MEASURE current gross mass
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- log_real_mass_gross
+Type:- BOOL
+Description:- PH_EMM1_MEASURE current gross mass
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- real_mass_nett
+Type:- REAL
+Description:- Description
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- log_real_mass_nett
+Type:- BOOL
+Description:- PH_EMM1_MEASURE nett mass
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- log_msg_agit_stopped
+Type:- BOOL
+Description:- PH_EMM1_MEASURE agitator stopped
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- mi_vessel_mass_gross
+Type:- REAL
+Description:- Gross mass
+ParameterInOut:- IN_OUT
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
 Name:- sic_agit_state_peer
 Type:- INT
 Description:- Agitator peer running status
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::8
 --------------------------------------------------
 Name:- sic_agit_cmd_peer
 Type:- INT
@@ -50,7 +98,7 @@ Description:- Peer command to agitator
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::9
 --------------------------------------------------
 Name:- mi_vessel_pv
 Type:- REAL
@@ -58,7 +106,7 @@ Description:- Current mass
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::10
 --------------------------------------------------
 Name:- log_msg_measure_begin
 Type:- BOOL
@@ -66,7 +114,7 @@ Description:- PH_EMM1_MEASURE begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::11
 --------------------------------------------------
 Name:- log_msg_measure_end
 Type:- BOOL
@@ -74,23 +122,23 @@ Description:- PH_EMM1_MEASURE end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::12
 --------------------------------------------------
-Name:- mass_tare
+Name:- mi_vessel_mass_tare
 Type:- REAL
 Description:- Tare mass
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::13
 --------------------------------------------------
-Name:- mass_nett
+Name:- mi_vessel_mass_nett
 Type:- REAL
-Description:- Nett Mass
+Description:- PH_EMM1_MEASURE nett mass
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::14
 --------------------------------------------------
 Name:- settling_time
 Type:- TIME
@@ -172,17 +220,38 @@ STEP::03
 StepNo:- 03
 Title:- PH_EMM1_MEASURE : Update Net Mass
 Description:- Calculate the net mass value from current and tare mass difference.
+Log nett mass.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
+Description:- Save the current mass process value as the gross mass
+Action:- L #_mi_vessel_pv;
+T  #_mi_vessel_mass_gross;
+T #_real_mass_gross;
+
+//Log current mass.
+SET;
+S #_log_real_mass_gross;
+
+Verification:- A "uncondJump";
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
 Description:- Save Current mass field value into Current mass parameter for users reference.
 Update Nett Mass= Current Mass - Tare mass.
 Note: If the agitator was ON at the beginning of the Phase then re-enable it to leave it in the same state as found.
-Action:- L #_mi_vessel_pv;
-L #_mass_tare;
+Action:- L #_mi_vessel_mass_gross;
+L #_mi_vessel_mass_tare;
 -R;
-T  #_mass_nett;
+T  #_mi_vessel_mass_nett;
+T #_real_mass_nett;
+
+
+//Log nett mass.
+SET;
+S #_log_real_mass_nett;
 Verification:- A "uncondJump";
 
 

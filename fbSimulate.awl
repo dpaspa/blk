@@ -24,10 +24,34 @@ VERSION : 2.0
       enableSimulation_ZSC2 : Bool := 1;
       enableSimulation_DI1  : Bool := 1;
       enableSimulation_DI2  : Bool := 1;
+      ResetChildFail        : Bool := 0;
    END_VAR
 
 BEGIN
 @@TEMPLATE_BEGIN|createClassNone@@
+
+@@ATTR_BEGIN|simulateDI1@@
+NETWORK
+TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
+    //------------------------------------------------------------------------//
+    // Simulate the input switches for @@SCLASS@@:                             //
+    //------------------------------------------------------------------------//
+    A #enableSimulation_DI1;
+    S "@@SINSTANCE@@-DI";
+
+@@ATTR_END|simulateDI1@@
+
+@@ATTR_BEGIN|simulateDI2@@
+NETWORK
+TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
+    //------------------------------------------------------------------------//
+    // Simulate the input switches for @@SCLASS@@:                             //
+    //------------------------------------------------------------------------//
+    A #enableSimulation_DI2;
+    R "@@SINSTANCE@@-DI";
+
+@@ATTR_END|simulateDI2@@
+
 @@ATTR_BEGIN|simulatePOS2@@
 NETWORK
 TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
@@ -56,7 +80,7 @@ TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
 NETWORK
 TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
     //------------------------------------------------------------------------//
-    // Simulate the input switches for @@SCLASS@@:                             //
+    // Simulate the input switches for @@SCLASS@@:                            //
     //------------------------------------------------------------------------//
     A #enableSimulation_POS4;
     A(;
@@ -80,7 +104,7 @@ TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
 NETWORK
 TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
     //------------------------------------------------------------------------//
-    // Simulate the input switches for @@SCLASS@@:                             //
+    // Simulate the input switches for @@SCLASS@@:                            //
     //------------------------------------------------------------------------//
     A #enableSimulation_ZSC1;
     A(;
@@ -104,7 +128,7 @@ TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
 NETWORK
 TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
     //------------------------------------------------------------------------//
-    // Simulate the input switches for @@SCLASS@@:                             //
+    // Simulate the input switches for @@SCLASS@@:                            //
     //------------------------------------------------------------------------//
     A #enableSimulation_ZSC2;
     A(;
@@ -124,28 +148,17 @@ TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
 
 @@ATTR_END|simulateZSC2@@
 
-
-@@ATTR_BEGIN|simulateDI1@@
 NETWORK
-TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
+TITLE = Reset CHILD_FAIL flag.
     //------------------------------------------------------------------------//
-    // Simulate the input switches for @@SCLASS@@:                             //
+    // Reset CHILD_FAIL flag                                                  //
     //------------------------------------------------------------------------//
-    A #enableSimulation_DI1;
-    S "@@SINSTANCE@@-DI";
-
-@@ATTR_END|simulateDI1@@
-
-@@ATTR_BEGIN|simulateDI2@@
-NETWORK
-TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
-    //------------------------------------------------------------------------//
-    // Simulate the input switches for @@SCLASS@@:                             //
-    //------------------------------------------------------------------------//
-    A #enableSimulation_DI2;
-    R "@@SINSTANCE@@-DI";
-
-@@ATTR_END|simulateDI2@@
+    A ResetChildFail;
+@@ATTR_BEGIN|createClassesBlock@@
+@@ATTR_BEGIN|createInstances@@
+    = "idb@@CLASS@@".f[@@IDX@@].p.read.bmc.CHILD_FAIL;
+@@ATTR_END|createInstances@@
+@@ATTR_END|createClassesBlock@@
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK

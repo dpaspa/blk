@@ -132,6 +132,16 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     = #f[@@IDX@@].p.write.mc.isMaster;
 @@ATTR_END|ISOWNED@@
 
+@@ATTR_BEGIN|SFCFlag@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Flag if SFCs are used in this block
+    //------------------------------------------------------------------------//
+    // Flag whether this block has any SFC at all:                            //
+    //------------------------------------------------------------------------//
+    A @@EXISTSSFC@@;
+    = #f[@@IDX@@].p.read.bmc.hasSFC;
+@@ATTR_END|SFCFlag@@
+
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on startup
     //------------------------------------------------------------------------//
@@ -157,7 +167,7 @@ TITLE = Item @@IDX@@ Recipe parameters if owned by @@RECIPENAME@@
     );
     JCN _notRecipe_@@INSTANCE@@_@@RECIPENAME@@;
 @@ATTR_BEGIN|pBLOCK_RECIPE@@
-    L "dbRECIPE".@@RECIPENAME@@.@@BLOCKPARAMETER@@;
+    L "dbRECIPE".recipeList.@@RECIPENAME@@.@@BLOCKPARAMETER@@;
     T #t@@BLOCKPARAMETER@@;
 @@ATTR_END|pBLOCK_RECIPE@@
 _notRecipe_@@INSTANCE@@_@@RECIPENAME@@:   NOP 0;
@@ -203,6 +213,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     CALL #f[@@IDX@@];
 
+@@ATTR_BEGIN|pEventLogMsgExists@@
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class event log message bits to global DB
     //------------------------------------------------------------------------//
@@ -212,11 +223,60 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class event log message bits to glo
     L #f[@@IDX@@].p.read.eventLogMsg_@@CWORD@@;
     T "dbEVENT".eventLogMsg.event_@@INSTANCE@@_@@CWORD@@;
 @@ATTR_END|pEventLogMsgWordClass@@
+@@ATTR_END|pEventLogMsgExists@@
 
+@@ATTR_BEGIN|pEventLogRealExists@@
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Send the alarm bits to the global DB
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class event log real data bits to global DB
     //------------------------------------------------------------------------//
     // Transfer the class event log message bits to the global DB:            //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventLogRealWordClass@@
+    L #f[@@IDX@@].p.read.eventLogReal_@@CWORD@@;
+    T "dbEVENT".eventLogReal.event_@@INSTANCE@@_@@CWORD@@;
+@@ATTR_END|pEventLogRealWordClass@@
+@@ATTR_END|pEventLogRealExists@@
+
+@@ATTR_BEGIN|pEventLogTimeExists@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class event log time data bits to global DB
+    //------------------------------------------------------------------------//
+    // Transfer the class event log message bits to the global DB:            //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventLogTimeWordClass@@
+    L #f[@@IDX@@].p.read.eventLogTime_@@CWORD@@;
+    T "dbEVENT".eventLogTime.event_@@INSTANCE@@_@@CWORD@@;
+@@ATTR_END|pEventLogTimeWordClass@@
+@@ATTR_END|pEventLogTimeExists@@
+
+@@ATTR_BEGIN|pEventConfirmNoExists@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class prompt event confirm No message bits to global DB
+    //------------------------------------------------------------------------//
+    // Transfer the class event confirm No message bits to the global DB:    //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventConfirmNoWordClass@@
+    L #f[@@IDX@@].p.read.eventConfirmNo_@@CWORD@@;
+    T "dbEVENT".eventConfirmNo.event_@@INSTANCE@@_@@CWORD@@;
+@@ATTR_END|pEventConfirmNoWordClass@@
+@@ATTR_END|pEventConfirmNoExists@@
+
+@@ATTR_BEGIN|pEventConfirmYesExists@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class prompt event confirm Yes message bits to global DB
+    //------------------------------------------------------------------------//
+    // Transfer the class event confirm Yes message bits to the global DB:    //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventConfirmYesWordClass@@
+    L #f[@@IDX@@].p.read.eventConfirmYes_@@CWORD@@;
+    T "dbEVENT".eventConfirmYes.event_@@INSTANCE@@_@@CWORD@@;
+@@ATTR_END|pEventConfirmYesWordClass@@
+@@ATTR_END|pEventConfirmYesExists@@
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Send the general block alarm bits to the global DB
+    //------------------------------------------------------------------------//
+    // Transfer the block arlam bits to the global DB:                        //
     //------------------------------------------------------------------------//
     L #f[@@IDX@@].p.read.mc.ALARM;
     T "dbEVENT".alarmBlock.alarm_@@INSTANCE@@;

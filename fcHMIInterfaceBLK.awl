@@ -20,18 +20,6 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 // Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
-VAR_INPUT
-    numChildren : Int;
-    numReadBool : Int;
-    numReadInt : Int;
-    numReadReal : Int;
-    numReadTime : Int;
-    numWriteBool : Int;
-    numWriteInt : Int;
-    numWriteReal : Int;
-    numWriteTime : Int;
-END_VAR
-
 VAR_IN_OUT
     mcr : "udtMCRead";         // Block read mode and command
     mcw : "udtMCWrite";        // Block write mode and command
@@ -39,6 +27,7 @@ VAR_IN_OUT
 END_VAR
 
 VAR_TEMP
+    outAUTO : Bool;
     retVal : Int;
 END_VAR
 
@@ -80,28 +69,23 @@ TITLE = Copy the BLK event data to the HMI interface block
     );
 
 NETWORK
-TITLE = Set the number of children and parameters
+TITLE = Send the user mode
     //------------------------------------------------------------------------//
-    // Set the number of children and parameters:                             //
+    // Send any user selected mode to the BLK if in Manual:                   //
     //------------------------------------------------------------------------//
-    L #numChildren;
-    T "dbHMIInterfaceBLK".block.numChildren;
-    L #numReadBool;
-    T "dbHMIInterfaceBLK".block.numReadBool;
-    L #numReadInt;
-    T "dbHMIInterfaceBLK".block.numReadInt;
-    L #numReadReal;
-    T "dbHMIInterfaceBLK".block.numReadReal;
-    L #numReadTime;
-    T "dbHMIInterfaceBLK".block.numReadTime;
-    L #numWriteBool;
-    T "dbHMIInterfaceBLK".block.numWriteBool;
-    L #numWriteInt;
-    T "dbHMIInterfaceBLK".block.numWriteInt;
-    L #numWriteReal;
-    T "dbHMIInterfaceBLK".block.numWriteReal;
-    L #numWriteTime;
-    T "dbHMIInterfaceBLK".block.numWriteTime;
+    A "dbHMIInterfaceBLK".block.manual;
+    JCN _auto;
+    L "dbCONST".BLK.MODE.MANUAL;
+    T "dbHMIInterfaceBLK".block.CMD_MODE;
+    T #mcw.MODE;
+_auto:   NOP 0;
+
+    AN "dbHMIInterfaceBLK".block.manual;
+    JCN _manual;
+    L "dbCONST".BLK.MODE.AUTO;
+    T #mcw.MODE;
+    T "dbHMIInterfaceBLK".block.CMD_MODE;
+_manual:   NOP 0;
 
 NETWORK
 TITLE = Send the user output commands if in Manual mode
@@ -111,12 +95,12 @@ TITLE = Send the user output commands if in Manual mode
     A #mcr.modeMANUAL;
     JCN _notManual;
 
-    L "dbHMIInterfaceBLK".block.CMD_MODE;
-    T #mcw.MODE;
     L "dbHMIInterfaceBLK".block.CMD_CMD;
     T #mcw.CMD;
     L "dbHMIInterfaceBLK".block.CMD_SUBS;
     T #mcw.SUBS;
+    L "dbHMIInterfaceBLK".block.CMD_HYGIENE;
+    T #mcw.HYGIENE;
 
 _notManual:   NOP 0;
 

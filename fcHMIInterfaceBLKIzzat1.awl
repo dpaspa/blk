@@ -1,0 +1,117 @@
+﻿FUNCTION "fcHMIInterfaceBLK" : Void
+TITLE = HMI BLK Faceplate interface
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcHMIInterfaceBLK
+VERSION : 2.0
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcHMIInterfaceBLK                                             //
+// Description:                                                               //
+// Manages the data interface for the HMI BLK faceplate.                      //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      03-Aug-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+   VAR_IN_OUT 
+      mcr : "udtMCRead";   // Block read mode and command
+      mcw : "udtMCWrite";   // Block write mode and command
+      bmc : "udtModeCommandBLK";   // Block events
+   END_VAR
+
+   VAR_TEMP 
+      outAUTO : Bool;
+      retVal : Int;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Copy the BLK read mode and command data to the HMI interface block
+//------------------------------------------------------------------------//
+// Copy read mode and command data:                                     //
+//------------------------------------------------------------------------//
+      CALL BLKMOV
+      {blk_type := 'Variant'}
+      (  SRCBLK                      := #mcr , 
+         RET_VAL                     := #retVal , 
+         DSTBLK                      := "dbHMIInterfaceBLK".block.mcr
+      );
+
+NETWORK
+TITLE = Copy the BLK write mode and command data to the HMI interface block
+//------------------------------------------------------------------------//
+// Copy write mode and command data:                                      //
+//------------------------------------------------------------------------//
+      CALL BLKMOV
+      {blk_type := 'Variant'}
+      (  SRCBLK                      := #mcw , 
+         RET_VAL                     := #retVal , 
+         DSTBLK                      := "dbHMIInterfaceBLK".block.mcw
+      );
+
+NETWORK
+TITLE = Copy the BLK event data to the HMI interface block
+//------------------------------------------------------------------------//
+// Copy BLK event data:                                                   //
+//------------------------------------------------------------------------//
+      CALL BLKMOV
+      {blk_type := 'Variant'}
+      (  SRCBLK                      := #bmc , 
+         RET_VAL                     := #retVal , 
+         DSTBLK                      := "dbHMIInterfaceBLK".block.bmc
+      );
+
+NETWORK
+TITLE = Send the user mode
+//------------------------------------------------------------------------//
+// Send any user selected mode to the BLK if in Manual:                   //
+//------------------------------------------------------------------------//
+//      AN    "dbHMIInterfaceBLK".block.forceRead
+      A "dbHMIInterfaceBLK".block.manual;
+      JCN _auto;
+      L "dbCONST".BLK.MODE.MANUAL;
+      T "dbHMIInterfaceBLK".block.CMD_MODE;
+      T #mcw.MODE;
+_auto:      NOP 0;
+
+//      AN    "dbHMIInterfaceBLK".block.forceRead
+      AN "dbHMIInterfaceBLK".block.manual;
+      JCN _manual;
+      L "dbCONST".BLK.MODE.AUTO;
+      T #mcw.MODE;
+      T "dbHMIInterfaceBLK".block.CMD_MODE;
+_manual:      NOP 0;
+
+NETWORK
+TITLE = Send the user output commands if in Manual mode
+//------------------------------------------------------------------------//
+// Send the user command to the BLK if in MANUAL:                         //
+//------------------------------------------------------------------------//
+      A #mcr.modeMANUAL;
+      JCN _notManual;
+
+
+      L "dbHMIInterfaceBLK".block.CMD_CMD;
+      T #mcw.CMD;
+      L "dbHMIInterfaceBLK".block.CMD_SUBS;
+      T #mcw.SUBS;
+      L "dbHMIInterfaceBLK".block.CMD_HYGIENE;
+      T #mcw.HYGIENE;
+
+_notManual:      NOP 0;
+
+NETWORK
+TITLE = 
+//      A     "dbHMIInterfaceBLK".block.forceRead
+//      R     "dbHMIInterfaceBLK".block.forceRead
+//
+
+END_FUNCTION
+

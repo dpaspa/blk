@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 10/08/2018 10:43:26 AM by David Paspa
+generated on 30/08/2018 12:18:36 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -36,13 +36,53 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- mi_vessel_mass_nett
+Type:- REAL
+Description:- Nett mass
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- mi_vessel_mass_gross
+Type:- REAL
+Description:- Current gross mass
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_real_mass_tare
+Type:- BOOL
+Description:- PH_EMM1_TARE Tare mass
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- real_mass_tare
+Type:- REAL
+Description:- PH_EMM1_TARE Tare mass
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- mi_vessel_mass_tare
+Type:- REAL
+Description:- Tare mass
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
 Name:- log_msg_tare_begin
 Type:- BOOL
 Description:- PH_EMM1_TARE begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::7
 --------------------------------------------------
 Name:- log_msg_tare_end
 Type:- BOOL
@@ -50,15 +90,7 @@ Description:- PH_EMM1_TARE end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
---------------------------------------------------
-Name:- mass_tare
-Type:- REAL
-Description:- Tare mass
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::4
+PARAMETER::8
 --------------------------------------------------
 Name:- mi_vessel_pv
 Type:- REAL
@@ -66,7 +98,7 @@ Description:- mass field value
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::9
 --------------------------------------------------
 Name:- settling_time
 Type:- TIME
@@ -116,14 +148,23 @@ STEP::02
 --------------------------------------------------
 StepNo:- 02
 Title:- PH_EMM1_TARE : Update Tare Mass
-Description:- Save Current mass field value into Tare mass parameter for users reference.
+Description:- Save and log current mass field value into Tare mass parameter for users reference.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Save Current mass field value into Tare mass parameter for users reference.
 Action:- L #_mi_vessel_pv;
-T #_mass_tare;
+T #_mi_vessel_mass_tare;
+T #_mi_vessel_mass_gross;
+T #_real_mass_tare;
+
+//Log tare mass.
+SET;
+S #_log_real_mass_tare;
+
+L 0;
+T #_mi_vessel_mass_nett;
 Verification:- A "uncondJump";
 
 

@@ -1,0 +1,66 @@
+ID,Name,"Alarm text [en-US], Alarm text",FieldInfo [Alarm text],Class,Trigger tag,Trigger bit,Acknowledgement tag,Acknowledgement bit,PLC acknowledgement tag,PLC acknowledgement bit,Group,Report,"Info text [en-US], Info text"
+1,logConfirmYes,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Operator sent Yes confirm to sequence","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = replyMessage.userID; DisplayType = Decimal; Length = 6;>",eventOperatorAction,replyMessage.alarmLogConfirm,1,<No value>,0,<No value>,0,<No value>,False,<No value>
+2,logSFCModeAuto,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Operator sent Auto mode command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial1; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 6;>",eventOperatorAction,sfcInterface.alarmLogManualAction,0,<No value>,0,<No value>,0,<No value>,False,<No value>
+3,logConfirmNo,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Operator sent No confirm to sequence","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = replyMessage.userID; DisplayType = Decimal; Length = 6;>",eventOperatorAction,sfcInterface.alarmLogConfirm,0,<No value>,0,<No value>,0,<No value>,False,<No value>
+4,logSFCModeManual,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Operator sent Manual mode command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 6;>",eventOperatorAction,sfcInterface.alarmLogManualAction,1,<No value>,0,<No value>,0,<No value>,False,<No value>
+5,logSFCCMDStart,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Operator sent Start command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 6;>",eventOperatorAction,sfcInterface.alarmLogManualAction,2,<No value>,0,<No value>,0,<No value>,False,<No value>
+6,logSFCCMDStop,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Operator sent Stop command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 6;>",eventOperatorAction,sfcInterface.alarmLogManualAction,3,<No value>,0,<No value>,0,<No value>,False,<No value>
+7,logSFCCMDPause,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Operator sent Pause command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 6;>",eventOperatorAction,sfcInterface.alarmLogManualAction,4,<No value>,0,<No value>,0,<No value>,False,<No value>
+8,logSFCCMDResume,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Operator sent Resume command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 6;>",eventOperatorAction,sfcInterface.alarmLogManualAction,5,<No value>,0,<No value>,0,<No value>,False,<No value>
+9,logSFCCMDAbort,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Operator sent Abort command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 6;>",eventOperatorAction,sfcInterface.alarmLogManualAction,6,<No value>,0,<No value>,0,<No value>,False,<No value>
+10,logSFCManualJump,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Operator sent Manual Jump to step <field ref=""2"" /> command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 6;>
+<ref id = 2; type = AlarmTag; Tag = sfcInterface.stepManualJump; DisplayType = Decimal; Length = 6;>",eventOperatorAction,sfcInterface.alarmLogManualAction,7,<No value>,0,<No value>,0,<No value>,False,<No value>
+@@TEMPLATE_BEGIN|createInstanceAlarmsGlobal@@
+@@COUNTERFILE|11@@,alarm_@@INSTANCE@@_@@MNEMONIC@@,"SERIALID <field ref=""0"" /> : @@INSTANCE@@ : @@MESSAGE@@ ",<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>,alarmBlock,dbEVENT_alarmBlock_alarm_@@INSTANCE@@,@@BITTRIGGER@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|createClassNone@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@COUNTERFILEINCR@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
+@@ATTR_BEGIN|pEventConfirmNoInstance@@
+@@COUNTERFILE@@,eventConfirmNo_@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : @@INSTANCE@@ : @@CLASS@@ @@DESCRIPTION@@ : @@PARAMETERDESCRIPTION@@","<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = replyMessage.userID; DisplayType = Decimal; Length = 6;>",eventConfirmNo,dbEVENT_eventConfirmNo_event_@@INSTANCE@@_@@CWORD@@,@@CBIT@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+@@ATTR_END|pEventConfirmNoInstance@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
+@@ATTR_BEGIN|pEventConfirmYesInstance@@
+@@COUNTERFILE@@,eventConfirmYes_@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : @@INSTANCE@@ : @@CLASS@@ @@DESCRIPTION@@ : @@PARAMETERDESCRIPTION@@","<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = replyMessage.userID; DisplayType = Decimal; Length = 6;>",eventConfirmYes,dbEVENT_eventConfirmYes_event_@@INSTANCE@@_@@CWORD@@,@@CBIT@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+@@ATTR_END|pEventConfirmYesInstance@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
+@@ATTR_BEGIN|pEventLogMsgInstance@@
+@@COUNTERFILE@@,eventLogMsg_@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@,"SERIALID <field ref=""0"" /> : @@INSTANCE@@ : @@CLASS@@ @@DESCRIPTION@@ : @@PARAMETERDESCRIPTION@@",<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>,eventLogMsg,dbEVENT_eventLogMsg_event_@@INSTANCE@@_@@CWORD@@,@@CBIT@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+@@ATTR_END|pEventLogMsgInstance@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
+@@ATTR_BEGIN|pEventLogRealInstance@@
+@@COUNTERFILE@@,eventLogReal_@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@,"SERIALID <field ref=""0"" /> : LOGDATA <field ref=""1"" /> : @@INSTANCE@@ : @@CLASS@@ @@DESCRIPTION@@ : @@PARAMETERDESCRIPTION@@","<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = dbEVENT_eventDataReal{@@COFFSET@@}; DisplayType = Decimal; Length = 6;>",eventLogReal,dbEVENT_eventLogReal_event_@@INSTANCE@@_@@CWORD@@,@@CBIT@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+@@ATTR_END|pEventLogRealInstance@@
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
+@@ATTR_BEGIN|pEventLogTimeInstance@@
+@@COUNTERFILE@@,eventLogTime_@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@,": SERIALID <field ref=""0"" /> : LOGDATA <field ref=""1"" /> : @@INSTANCE@@ : @@CLASS@@ @@DESCRIPTION@@ : @@PARAMETERDESCRIPTION@@","<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = dbEVENT_eventDataTime{@@COFFSET@@}; DisplayType = Decimal; Length = 6;>",eventLogTime,dbEVENT_eventLogTime_event_@@INSTANCE@@_@@CWORD@@,@@CBIT@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+@@ATTR_END|pEventLogTimeInstance@@
+@@TEMPLATE_END@@
