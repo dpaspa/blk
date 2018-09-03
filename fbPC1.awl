@@ -97,15 +97,16 @@ TITLE = Check any link device is not in AUTO
     // Check if any link cannot be controlled if not in AUTO:                 //
     //------------------------------------------------------------------------//
     O #p.read.mc.INTERLOCK;
+    O "idbPI1".f[#p.link.PRESSURE].p.read.mc.INTERLOCK;
     O "idbPOS4".f[#p.link.DRAIN].p.read.mc.INTERLOCK;
-    O "idbPOS4".f[#p.link.HPCA].p.read.mc.INTERLOCK;
-    O "idbPOS4".f[#p.link.LPCA].p.read.mc.INTERLOCK;
-    O "idbPOS4".f[#p.link.VACUUM].p.read.mc.INTERLOCK;
+    O "idbPOS2".f[#p.link.HPCA].p.read.mc.INTERLOCK;
+    O "idbPOS2".f[#p.link.LPCA].p.read.mc.INTERLOCK;
+    O "idbPOS2".f[#p.link.VACUUM].p.read.mc.INTERLOCK;
     O "idbPOS2".f[#p.link.VENT].p.read.mc.INTERLOCK;
     ON "idbPOS4".f[#p.link.DRAIN].p.read.mc.modeAUTO;
-    ON "idbPOS4".f[#p.link.HPCA].p.read.mc.modeAUTO;
-    ON "idbPOS4".f[#p.link.LPCA].p.read.mc.modeAUTO;
-    ON "idbPOS4".f[#p.link.VACUUM].p.read.mc.modeAUTO;
+    ON "idbPOS2".f[#p.link.HPCA].p.read.mc.modeAUTO;
+    ON "idbPOS2".f[#p.link.LPCA].p.read.mc.modeAUTO;
+    ON "idbPOS2".f[#p.link.VACUUM].p.read.mc.modeAUTO;
     ON "idbPOS2".f[#p.link.VENT].p.read.mc.modeAUTO;
     = #p.read.mc.INTERLOCK;
 
@@ -133,7 +134,7 @@ TITLE = Command is PRESSURE control
     //------------------------------------------------------------------------//
     AN #p.read.mc.modeOOS;
     AN #p.read.mc.INTERLOCK;
-    AN #p.read.PI1_INTERLOCK;
+    AN "idbPI1".f[#p.link.PRESSURE].p.read.mc.INTERLOCK;
     A(;
     L #p.write.mc.CMD;
     L "dbCONST".BLK.PC1.CMD.PRESSURE;
@@ -260,7 +261,7 @@ TITLE = Check if selected valve should be OPENED
     O(;
     A #cmdPRESSURE;
     A(;
-    L #p.read.PI1_PV;
+    L "idbPI1".f[#p.link.PRESSURE].p.read.ai.PV;
     L #dbLow;
     <R;
     );
@@ -277,7 +278,7 @@ TITLE = Check if selected valve should be CLOSED
     //------------------------------------------------------------------------//
     A #cmdPRESSURE;
     A(;
-    L #p.read.PI1_PV;
+    L "idbPI1".f[#p.link.PRESSURE].p.read.ai.PV;
     L #p.write.SETPOINT;
     >R;
     );
@@ -295,7 +296,7 @@ TITLE = Check if VENT valve should be OPENED in PRESSURE control
     A #cmdPRESSURE;
     AN #tDO;
     A(;
-    L #p.read.PI1_PV;
+    L "idbPI1".f[#p.link.PRESSURE].p.read.ai.PV;
     L #dbHigh;
     >R;
     );
@@ -312,7 +313,7 @@ TITLE = Check if VENT valve should be CLOSED
     A #cmdPRESSURE;
     AN #tDO;
     A(;
-    L #p.read.PI1_PV;
+    L "idbPI1".f[#p.link.PRESSURE].p.read.ai.PV;
     L #p.write.SETPOINT;
     <R;
     );
@@ -342,6 +343,8 @@ TITLE = Open DRAIN valve if required
     //------------------------------------------------------------------------//
     A #tDO;
     A #selectDRAIN;
+    AN "idbPOS4".f[#p.link.DRAIN].p.read.mc.INTERLOCK;
+    A "idbPOS4".f[#p.link.DRAIN].p.read.mc.modeAUTO;
     JCN _h;
     L "dbCONST".BLK.POSx.CMD.OPEN;
     T "idbPOS4".f[#p.link.DRAIN].p.write.mc.CMD;
@@ -354,6 +357,8 @@ TITLE = Open HPCA valve if required
     //------------------------------------------------------------------------//
     A #tDO;
     A #selectHPCA;
+    AN "idbPOS2".f[#p.link.HPCA].p.read.mc.INTERLOCK;
+    A "idbPOS2".f[#p.link.HPCA].p.read.mc.modeAUTO;
     JCN _i;
     L "dbCONST".BLK.POSx.CMD.OPEN;
     T "idbPOS2".f[#p.link.HPCA].p.write.mc.CMD;
@@ -366,6 +371,8 @@ TITLE = Open LPCA valve if required
     //------------------------------------------------------------------------//
     A #tDO;
     A #selectLPCA;
+    AN "idbPOS2".f[#p.link.LPCA].p.read.mc.INTERLOCK;
+    A "idbPOS2".f[#p.link.LPCA].p.read.mc.modeAUTO;
     JCN _j;
     L "dbCONST".BLK.POSx.CMD.OPEN;
     T "idbPOS2".f[#p.link.LPCA].p.write.mc.CMD;
@@ -378,6 +385,8 @@ TITLE = Open VACUUM valve if required
     //------------------------------------------------------------------------//
     A #tDO;
     A #selectVACUUM;
+    AN "idbPOS2".f[#p.link.VACUUM].p.read.mc.INTERLOCK;
+    A "idbPOS2".f[#p.link.VACUUM].p.read.mc.modeAUTO;
     JCN _k;
     L "dbCONST".BLK.POSx.CMD.OPEN;
     T "idbPOS2".f[#p.link.VACUUM].p.write.mc.CMD;
@@ -388,6 +397,9 @@ TITLE = Open VENT valve if required
     //------------------------------------------------------------------------//
     // If PRESSURE or VALVE and VENT selected then OPEN it:                   //
     //------------------------------------------------------------------------//
+    AN "idbPOS2".f[#p.link.VENT].p.read.mc.INTERLOCK;
+    A "idbPOS2".f[#p.link.VENT].p.read.mc.modeAUTO;
+    A(
     O(;
     A #cmdPRESSURE;
     A #tDO_VENT;
@@ -395,6 +407,7 @@ TITLE = Open VENT valve if required
     O(;
     A #tDO;
     A #selectVENT;
+    );
     );
     JCN _l;
     L "dbCONST".BLK.POSx.CMD.OPEN;

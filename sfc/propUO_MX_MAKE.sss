@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 30/08/2018 12:22:05 PM by David Paspa
+generated on 31/08/2018 10:38:59 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -561,6 +561,7 @@ Title:- Manufacturing complete?
 EmptyTransition:- False
 Description:- Operator confirms manufacturing  is complete.
 Condition:- A #_cmd_complete;
+A #_prompt_pmo_confirm_yes;
 
 
 --------------------------------------------------
@@ -977,6 +978,7 @@ Description:- Log time when operator confirmed manufacturing complete, start tim
 Action:- //Log time when operator confirmed manufacturing complete.
 SET;
 S #_log_msg_pmo_complete;
+R #_prompt_pmo_confirm_yes;
 R #_make_active;
 // Isolate WFI
 L "dbCONST".BLK.EMC2.SUBS.ISOLATE;

@@ -163,6 +163,11 @@ VAR
         @@CHILDPARAMETERALIAS@@ : Bool;       // @@CHILDPARAMETERALIAS@@
 @@ATTR_END|CHILD@@
     END_STRUCT;
+    alreadyOwned : Struct
+@@ATTR_BEGIN|CHILD@@
+        @@CHILDPARAMETERALIAS@@ : Bool;       // @@CHILDPARAMETERALIAS@@
+@@ATTR_END|CHILD@@
+    END_STRUCT;
 @@ATTR_BEGIN|SELECT@@
     selected_@@PARAMETER@@_@@SELECTION@@ : Struct
 @@ATTR_BEGIN|SELVALUE@@
@@ -283,6 +288,10 @@ TITLE = Check if any child is not in AUTO mode
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_CASCADE@@
     O(;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     @@CHILDACQUIRESTATEMENT@@
     AN "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
     );
@@ -298,11 +307,37 @@ TITLE = Check if any child is in error
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_CASCADE@@
     O(;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     @@CHILDACQUIRESTATEMENT@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.ERROR;
     );
 @@ATTR_END|CHILD_CASCADE@@
     = #flags.childError;
+
+NETWORK
+TITLE = Check if any Child is already Owned
+    //------------------------------------------------------------------------//
+    // Check if the child is always owned by this parent:                     //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CHILD_CASCADE@@
+    A(;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
+    L #p.read.mc.ME;
+    ==I;
+    );
+    S #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+
+    AN(;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
+    L #p.read.mc.ME;
+    ==I;
+    );
+    R #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+
+@@ATTR_END|CHILD_CASCADE@@
 
 NETWORK
 TITLE = Check if any Child is not Owned or not Available
@@ -470,6 +505,10 @@ TITLE = Set child devices to safe state if any interlock or child failure
 @@ATTR_BEGIN|CHILD_CASCADE@@
     @@CHILDACQUIRESTATEMENT@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     JCN _blkSafe_@@CHILDPARAMETERALIAS@@;
     L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.CMD;
@@ -514,9 +553,15 @@ TITLE = Cascade Auto or OOS Mode to children
     // Switch child mode to Auto or OOS when parent mode transitions:         //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_CASCADE@@
+    A(;
     O #p.read.bmc.eventModeAUTO;
     O #p.read.bmc.eventModeOOS;
+    );
     @@CHILDACQUIRESTATEMENT@@
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     JCN _cascMode@@COUNTERATTR|1@@;
     L #p.write.mc.MODE;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.MODE;
@@ -707,6 +752,10 @@ _noSubsRun_@@STATE@@:   NOP 0;
     // Disarm the flowpath child devices:                                     //
     //------------------------------------------------------------------------//
     A #subsStart.@@STATE@@;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
 @@ATTR_BEGIN|CHILD_CASCADE@@
     R "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
 @@ATTR_END|CHILD_CASCADE@@
@@ -774,6 +823,10 @@ TITLE = Cascade Batch Serial Number to all children
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_CASCADE@@
     A #p.read.bmc.eventCmdStart;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     @@CHILDACQUIRESTATEMENT@@
     JCN _childBatch_@@COUNTERATTR|1@@;
     L #p.write.mc.SERIALNUM;
@@ -793,7 +846,7 @@ TITLE = Set parent parameter @@CHILDPARAMETERATTRIBUTE@@ value for child device 
     //                                                                        //
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
-    A #p.read.bmc.eventCmdStart;
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
     JCN _parentWrite_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
     L #p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
     T #p.@@OPERATION@@.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
@@ -812,7 +865,7 @@ TITLE = Set parent parameter @@CHILDPARAMETERATTRIBUTE@@ value for child device 
     //                                                                        //
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
-    A #p.read.bmc.eventCmdStart;
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
     JCN _parentWriteBool_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
     A #p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
     = #p.@@OPERATION@@.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
@@ -831,7 +884,11 @@ TITLE = Download child parameter @@CHILDPARAMETERATTRIBUTE@@ value to child devi
     //                                                                        //
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
-    A #p.read.bmc.eventCmdStart;
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     JCN _childWrite_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
     L #p.@@OPERATION@@.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
@@ -850,7 +907,11 @@ TITLE = Download child parameter @@CHILDPARAMETERATTRIBUTE@@ value to child devi
     //                                                                        //
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
-    A #p.read.bmc.eventCmdStart;
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     JCN _childWriteBool_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
     A #p.@@OPERATION@@.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
     = "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
@@ -869,8 +930,16 @@ TITLE = Download child synchronisation flag @@BLOCKPARAMETER@@ value to child de
     //                                                                        //
     // Set the synchronisation flag value in the child:                       //
     //------------------------------------------------------------------------//
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
+    JCN _childWriteSync_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@;
     A #p.@@OPERATION@@.@@BLOCKPARAMETER@@;
     = "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.@@CHILDSYNCPARAMETER@@;
+
+_childWriteSync_@@COUNTERATTR@@_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
 @@ATTR_END|pSyncWrite@@
 @@ATTR_END|CHILD@@
@@ -886,6 +955,10 @@ TITLE = Command child device @@CHILDPARAMETERALIAS@@ for state @@STATE@@ to its 
     // Command the child device to its initial command if condition is true:  //
     //------------------------------------------------------------------------//
     A #subsStart.@@STATE@@;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     @@CONDITIONSTATEMENT@@
     JCN _childInitTrue_@@COUNTERATTR|1@@_@@STATE@@;
     @@TRUESTATEMENT@@
@@ -906,6 +979,10 @@ TITLE = Command child device @@CHILDPARAMETERALIAS@@ for state @@STATE@@ to its 
     // Command the child device to its initial command:                       //
     //------------------------------------------------------------------------//
     A #subsStart.@@STATE@@;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     AN(;
     @@CONDITIONSTATEMENT@@
     );
@@ -1241,6 +1318,10 @@ TITLE = Check if any Child state does not match the command
     A(;
 @@ATTR_BEGIN|CHILD_CASCADE@@
     O(;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     @@CHILDACQUIRESTATEMENT@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.FLOWPATH;
@@ -1590,6 +1671,10 @@ TITLE = Set child devices to safe state if SFC Paused or Error
 @@ATTR_BEGIN|CHILD_CASCADE@@
     @@CHILDACQUIRESTATEMENT@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     JCN _sfcSafe_@@CHILDPARAMETERALIAS@@;
     L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.CMD;
@@ -1599,40 +1684,6 @@ _sfcSafe_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
 _safeSFC:   NOP 0;
 @@ATTR_END|SFCExists@@
-
-@@ATTR_BEGIN|SFC@@
-NETWORK
-TITLE = Acknowlede Sequence Error Fault
-    //------------------------------------------------------------------------//
-    // SFC ERROR ACKNOWLDGE   SFC ERROR ACKNOWLDGE   SFC ERROR ACKNOWLDGE     //
-    //                                                                        //
-    // If the sequence error has been acknowledged, set the SFC command to    //
-    // error acknowledged:                                                    //
-    //------------------------------------------------------------------------//
-    A #@@SFC@@.smc.SQ_ACK;
-    A #@@SFC@@.smc.SQ_ERROR;
-    A #subsRunning.@@STATE@@;
-    JCN _ackSFC_@@COUNTERATTR|1@@;
-    L "dbCONST".SEQ.CMD.ACKNOWLEDGE_ERR;
-    T #@@SFC@@.smc.SQ_CMD;
-_ackSFC_@@COUNTERATTR@@:   NOP 0;
-
-@@ATTR_END|SFC@@
-
-@@ATTR_BEGIN|SFC@@
-NETWORK
-TITLE = SQ Acknowlede Error Fault and Resume
-    //------------------------------------------------------------------------//
-    // Reset the sequence error acknowledge flag:                             //
-    //------------------------------------------------------------------------//
-    A #@@SFC@@.smc.SQ_ACK;
-    A #@@SFC@@.smc.SQ_ERROR;
-    A #subsRunning.@@STATE@@;
-    JCN _rAckSFC_@@COUNTERATTR|1@@;
-    R #@@SFC@@.smc.SQ_ACK;
-_rAckSFC_@@COUNTERATTR@@:   NOP 0;
-
-@@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
 NETWORK
@@ -1680,6 +1731,10 @@ _notFin@@COUNTERATTR@@:   NOP 0;
     // Arm any flowpath child devices:                                        //
     //------------------------------------------------------------------------//
     A #subsRunning.@@STATE@@;
+    A(;
+    O #alreadyOwned.@@CHILDPARAMETERALIAS@@;
+    O #acquire.@@CHILDPARAMETERALIAS@@;
+    );
     A(;
     O(;
     A subsHasSFC.@@STATE@@;

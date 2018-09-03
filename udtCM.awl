@@ -661,8 +661,6 @@ TYPE "udtPC1read"
 VERSION : 1.0
     STRUCT
         mc : "udtMCRead";              // Block mode and command for calculations on read CPU
-        PI1_PV : Real;                 // Pressure measured process value (after scaling)
-        PI1_INTERLOCK : Bool;          // Pressure indicator interlock
     END_STRUCT;
 END_TYPE
 
@@ -680,11 +678,12 @@ END_TYPE
 TYPE "udtPC1link"
 VERSION : 1.0
     STRUCT
-        DRAIN : Int;                   // Drain valve instance DB index
-        HPCA : Int;                    // HPCA valve instance DB index
-        LPCA : Int;                    // LPCA valve instance DB index
-        VACUUM : Int;                  // Vacuum valve instance DB index
-        VENT : Int;                    // Vent valve instance DB index
+        PRESSURE : Int;                // PI1 Pressure in the vessel
+        DRAIN : Int;                   // POS4 Drain valve instance DB index
+        HPCA : Int;                    // POS4 HPCA valve instance DB index
+        LPCA : Int;                    // POS4 LPCA valve instance DB index
+        VACUUM : Int;                  // POS4 Vacuum valve instance DB index
+        VENT : Int;                    // POS2 Vent valve instance DB index
     END_STRUCT;
 END_TYPE
 

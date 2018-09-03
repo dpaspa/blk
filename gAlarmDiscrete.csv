@@ -20,8 +20,14 @@ ID,Name,"Alarm text [en-US], Alarm text",FieldInfo [Alarm text],Class,Trigger ta
 10,logSFCManualJump,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Operator sent Manual Jump to step <field ref=""2"" /> command to SFC","<ref id = 0; type = AlarmTag; Tag = sfcInterface.numSerial; DisplayType = Decimal; Length = 6;>
 <ref id = 1; type = AlarmTag; Tag = sfcInterface.userID; DisplayType = Decimal; Length = 6;>
 <ref id = 2; type = AlarmTag; Tag = sfcInterface.stepManualJump; DisplayType = Decimal; Length = 6;>",eventOperatorAction,sfcInterface.alarmLogManualAction,7,<No value>,0,<No value>,0,<No value>,False,<No value>
+11,logonManualAction,"SERIALID <field ref=""0"" /> : USERID <field ref=""1"" /> : Manual Action : <field ref=""2"" /> <field ref=""3"" /> <field ref=""4"" /> <field ref=""5"" />","<ref id = 0; type = AlarmTag; Tag = interfaceVerify.numSerial; DisplayType = Decimal; Length = 6;>
+<ref id = 1; type = AlarmTag; Tag = sysUserName; DisplayType = Text; Length = 6;>
+<ref id = 2; type = AlarmTag; Tag = interfaceVerify.pendingClass; DisplayType = Text; Length = 10;>
+<ref id = 3; type = AlarmTag; Tag = interfaceVerify.pendingInstance; DisplayType = Text; Length = 20;>
+<ref id = 4; type = AlarmTag; Tag = interfaceVerify.pendingTarget; DisplayType = Text; Length = 10;>
+<ref id = 5; type = AlarmTag; Tag = interfaceVerify.pendingCommand; DisplayType = Text; Length = 5;>",manualOperatorAction,interfaceVerify.alarmLogManualAction,0,<No value>,0,<No value>,0,<No value>,False,<No value>
 @@TEMPLATE_BEGIN|createInstanceAlarmsGlobal@@
-@@COUNTERFILE|11@@,alarm_@@INSTANCE@@_@@MNEMONIC@@,"SERIALID <field ref=""0"" /> : @@INSTANCE@@ : @@MESSAGE@@ ",<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>,alarmBlock,dbEVENT_alarmBlock_alarm_@@INSTANCE@@,@@BITTRIGGER@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+@@COUNTERFILE|12@@,alarm_@@INSTANCE@@_@@MNEMONIC@@,"SERIALID <field ref=""0"" /> : @@INSTANCE@@ : @@MESSAGE@@ ",<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>,alarmBlock,dbEVENT_alarmBlock_alarm_@@INSTANCE@@,@@BITTRIGGER@@,<No value>,0,<No value>,0,<No value>,False,<No value>
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|createClassNone@@
 @@COUNTERFILEINCR@@
@@ -55,12 +61,12 @@ ID,Name,"Alarm text [en-US], Alarm text",FieldInfo [Alarm text],Class,Trigger ta
 @@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
 @@ATTR_BEGIN|pEventLogRealInstance@@
 @@COUNTERFILE@@,eventLogReal_@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@,"SERIALID <field ref=""0"" /> : LOGDATA <field ref=""1"" /> : @@INSTANCE@@ : @@CLASS@@ @@DESCRIPTION@@ : @@PARAMETERDESCRIPTION@@","<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>
-<ref id = 1; type = AlarmTag; Tag = dbEVENT_eventDataReal{@@COFFSET@@}; DisplayType = Decimal; Length = 6;>",eventLogReal,dbEVENT_eventLogReal_event_@@INSTANCE@@_@@CWORD@@,@@CBIT@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+<ref id = 1; type = AlarmTag; Tag = dbEVENT_eventDataReal{@@GOFFSET@@}; DisplayType = Decimal; Length = 6;>",eventLogReal,dbEVENT_eventLogReal_event_@@INSTANCE@@_@@CWORD@@,@@CBIT@@,<No value>,0,<No value>,0,<No value>,False,<No value>
 @@ATTR_END|pEventLogRealInstance@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
 @@ATTR_BEGIN|pEventLogTimeInstance@@
 @@COUNTERFILE@@,eventLogTime_@@INSTANCE@@_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@,": SERIALID <field ref=""0"" /> : LOGDATA <field ref=""1"" /> : @@INSTANCE@@ : @@CLASS@@ @@DESCRIPTION@@ : @@PARAMETERDESCRIPTION@@","<ref id = 0; type = AlarmTag; Tag = idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM; DisplayType = Decimal; Length = 6;>
-<ref id = 1; type = AlarmTag; Tag = dbEVENT_eventDataTime{@@COFFSET@@}; DisplayType = Decimal; Length = 6;>",eventLogTime,dbEVENT_eventLogTime_event_@@INSTANCE@@_@@CWORD@@,@@CBIT@@,<No value>,0,<No value>,0,<No value>,False,<No value>
+<ref id = 1; type = AlarmTag; Tag = dbEVENT_eventDataTime{@@GOFFSET@@}; DisplayType = Decimal; Length = 6;>",eventLogTime,dbEVENT_eventLogTime_event_@@INSTANCE@@_@@CWORD@@,@@CBIT@@,<No value>,0,<No value>,0,<No value>,False,<No value>
 @@ATTR_END|pEventLogTimeInstance@@
 @@TEMPLATE_END@@

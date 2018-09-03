@@ -103,6 +103,16 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner ID
     T #f[@@IDX@@].p.write.mc.OWNER;
 @@ATTR_END|ISOWNED@@
 
+@@ATTR_BEGIN|SELVALUEMYSELF@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Instance selection of myself
+    //------------------------------------------------------------------------//
+    // Set the instance selection value to itself:                            //
+    //------------------------------------------------------------------------//
+    L "dbCONST".SEL.@@SELECTION@@.@@INSTANCE@@;
+    T #f[@@IDX@@].p.write.@@PARAMETER@@_@@SELECTION@@;
+@@ATTR_END|SELVALUEMYSELF@@
+
 @@ATTR_BEGIN|FLOWPATH@@
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@CLASS@@ is a Flowpath device

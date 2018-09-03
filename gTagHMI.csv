@@ -21,6 +21,7 @@ idb@@CLASS@@_@@INSTANCE@@_p_read_mc_STATE,Default tag table,HMI_Connection_1,idb
 idb@@CLASS@@_@@INSTANCE@@_p_write_mc_MODE,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.write.mc.MODE,Int,2,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
 idb@@CLASS@@_@@INSTANCE@@_p_write_mc_CMD,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.write.mc.CMD,Int,2,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
 idb@@CLASS@@_@@INSTANCE@@_p_write_mc_SERIALNUM,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.write.mc.SERIALNUM,Int,2,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+idb@@CLASS@@_@@INSTANCE@@_p_write_mc_MAN_OVERRIDE,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.write.mc.MAN_OVERRIDE,Bool,1,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
 @@ATTR_END|createInstancesGlobal@@
 @@ATTR_END|createClassesForLevel@@
 @@TEMPLATE_END@@
@@ -120,14 +121,14 @@ dbEVENT_eventLogTime_event_@@INSTANCE@@_@@CWORD@@,Default tag table,HMI_Connecti
 @@ATTR_END|pEventLogTimeWordInstance@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
-@@ATTR_BEGIN|pEventLogRealWordInstance@@
-dbEVENT_eventDataReal{@@IDXEVENT@@},Default tag table,HMI_Connection_1,dbEVENT.eventDataReal[@@IDXEVENT@@],Real,4,IEEE754,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
-@@ATTR_END|pEventLogRealWordInstance@@
+@@ATTR_BEGIN|pEventLogRealInstance@@
+dbEVENT_eventDataReal{@@GOFFSET@@},Default tag table,HMI_Connection_1,dbEVENT.eventDataReal[@@GOFFSET@@],Real,4,IEEE754,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+@@ATTR_END|pEventLogRealInstance@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
-@@ATTR_BEGIN|pEventLogTimeWordInstance@@
-dbEVENT_eventDataTime{@@IDXEVENT@@},Default tag table,HMI_Connection_1,dbEVENT.eventDataTime[@@IDXEVENT@@],Real,4,IEEE754,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
-@@ATTR_END|pEventLogTimeWordInstance@@
+@@ATTR_BEGIN|pEventLogTimeInstance@@
+dbEVENT_eventDataTime{@@GOFFSET@@},Default tag table,HMI_Connection_1,dbEVENT.eventDataTime[@@GOFFSET@@],Real,4,IEEE754,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+@@ATTR_END|pEventLogTimeInstance@@
 @@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|RECIPE_CLASS@@
 @@ATTR_BEGIN|RECIPE_PARAMETERS@@
@@ -144,4 +145,11 @@ idb@@CLASS@@_@@INSTANCE@@_p_read_bmc_stateRUNNING,Default tag table,HMI_Connecti
 idbEMM1_@@INSTANCE@@_p_read_MI_VESSEL_MASS_NETT,Default tag table,HMI_Connection_1,idbEMM1.f[@@IDX@@].p.read.MI_VESSEL_MASS_NETT,Real,4,IEEE754,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
 idbMX_@@INSTANCE@@_UO_MX_MAKE__make_active,Default tag table,HMI_Connection_1,idbMX.f[@@IDX@@].UO_MX_MAKE._make_active,Bool,1,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
 idbPC1_@@INSTANCE@@_p_read_PI1_PV,Default tag table,HMI_Connection_1,idbPC1.f[@@IDX@@].p.read.PI1_PV,Real,4,IEEE754,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+@@TEMPLATE_END@@
+@@TEMPLATE_BEGIN|createLevelsGlobal@@
+@@ATTR_BEGIN|createClassesForLevel@@
+@@ATTR_BEGIN|createInstancesGlobal@@
+idb@@CLASS@@_@@INSTANCE@@_p_write_mc_MAN_OVERRIDE,Default tag table,HMI_Connection_1,idb@@CLASS@@.f[@@IDX@@].p.write.mc.MAN_OVERRIDE,Bool,1,Binary,Symbolic access,<No Value>,False,<No Value>,<No Value>,0,<No Value>,<No Value>,Cyclic in operation,1 s,None,<No Value>,None,<No Value>,None,<No Value>,None,<No Value>,False,10,0,100,0,False,None,False
+@@ATTR_END|createInstancesGlobal@@
+@@ATTR_END|createClassesForLevel@@
 @@TEMPLATE_END@@

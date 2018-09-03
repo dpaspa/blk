@@ -79,7 +79,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
     //------------------------------------------------------------------------//
     // Get the non-critical interlock if there is one. If not set alwaysLow:  //
     //------------------------------------------------------------------------//
-
 @@ATTR_BEGIN|NCRIL_EXISTS@@
 @@ATTR_DEFAULT_BEGIN@@
     A "alwaysLow";
@@ -154,24 +153,14 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Deadband values
     T #f[@@IDX@@].p.write.DB_H;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Pressure interlock
-    //------------------------------------------------------------------------//
-    // Set the instance pressure interlock:                                   //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|LINK@@
-    A "idb@@PILINKCLASS@@".f[@@PILINKIDX@@].p.read.mc.INTERLOCK;    // @@PILINKCLASS@@
-@@ATTR_END|LINK@@
-    = #f[@@IDX@@].p.read.PI1_INTERLOCK;
-
-NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Pressure measured value
     //------------------------------------------------------------------------//
     // Set the instance pressure measured value from the PI1:                 //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|LINK@@
-    L "idb@@PILINKCLASS@@".f[@@PILINKIDX@@].p.read.ai.PV;    // @@PILINKCLASS@@
+    L @@PILINKIDX@@;         // @@PILINKCLASS@@
+    T #f[@@IDX@@].p.link.PRESSURE;
 @@ATTR_END|LINK@@
-    T #f[@@IDX@@].p.read.PI1_PV;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : DRAIN valve mode and command
