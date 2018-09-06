@@ -48,38 +48,20 @@ TITLE = Call Mode and Command handling function
     );
 
 NETWORK
-TITLE = Set Device command which can only be ENABLE.
+TITLE = Process user command
     //------------------------------------------------------------------------//
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     //                                                                        //
-    // CMD is always ENABLE:                                                  //
+    // Calculate the process value based on the user command:                 //
     //------------------------------------------------------------------------//
-    L "dbCONST".BLK.DI3.CMD.ENABLE;
-    T #p.write.mc.CMD;
-
-NETWORK
-TITLE = Process user input signal
-    //------------------------------------------------------------------------//
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    //                                                                        //
-    // Calculate the process value based on the software input:               //
-    //------------------------------------------------------------------------//
-    A #p.write.DI_Manual;
-    = #tPV;
-    = #p.read.PV;
-
-NETWORK
-TITLE = Set ALARM Flag
-    //------------------------------------------------------------------------//
-    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
-    // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
-    //                                                                        //
-    // Set alarms:                                                            //
-    //------------------------------------------------------------------------//
-    AN #tPV;
     AN #p.read.mc.modeOOS;
+    A(;
+    L #p.write.mc.CMD;
+    L "dbCONST".BLK.DI3.CMD.PAUSE;
+    ==I;
+    );
+    = #tPV;
     = #p.read.ALARM;
 
 NETWORK
@@ -95,32 +77,15 @@ TITLE = Set INTERLOCK Flag
     = #p.read.mc.INTERLOCK;
 
 NETWORK
-TITLE = Set Device State to Enabled if user input is on
+TITLE = Set Device State to follow Command
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     //                                                                        //
-    // ENABLED if switch is on:                                               //
+    // State just follows the command:                                        //
     //------------------------------------------------------------------------//
-    A #tPV;
-    JCN _a;
-    L "dbCONST".BLK.DI3.STATE.ENABLED;
+    L #p.write.mc.CMD;
     T #p.read.mc.STATE;
-    R #p.read.mc.ERROR;
-_a:   NOP 0;
-
-NETWORK
-TITLE = Setting Device State to ALARM
-    //------------------------------------------------------------------------//
-    // ALARM if user input is off and not OOS:                                //
-    //------------------------------------------------------------------------//
-    AN #tPV;
-    AN #p.read.mc.modeOOS;
-    JCN _b;
-    L "dbCONST".BLK.DI3.STATE.ALARM;
-    T #p.read.mc.STATE;
-    S #p.read.mc.ERROR;
-_b:   NOP 0;
 
 NETWORK
 TITLE = Pack the alarm bit

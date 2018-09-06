@@ -3,6 +3,7 @@
 //                Automatically Generated File - Do Not Edit                  //
 //----------------------------------------------------------------------------//
 // Description: Handles the HMI interface for operator control of each BLK.   //
+//              The interface block is used for read only.                    //
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
@@ -30,6 +31,7 @@ VAR_TEMP
 END_VAR
 
 BEGIN
+@@TEMPLATE_BEGIN|INSTANCE_BLK@@
 NETWORK
 TITLE = Get the selected BLK
     //------------------------------------------------------------------------//
@@ -38,26 +40,6 @@ TITLE = Get the selected BLK
     //------------------------------------------------------------------------//
     L "dbHMIInterfaceBLK".block.blockSelected;
     T #blockSelected;
-
-@@TEMPLATE_BEGIN|INSTANCE_BLK@@
-NETWORK
-TITLE = @@INSTANCE@@ @@DESCRIPTION@@
-    A(;
-    L #blockSelected;
-    L 1@@ID@@;
-    ==I;
-    );
-    FP #edge[@@COUNTERTEMPLATE|1@@];
-    = #tempEdge;
-    JCN out_@@INSTANCE@@;
-
-    A "idb@@CLASS@@".f[@@IDX@@].p.read.mc.modeAUTO;
-    R "dbHMIInterfaceBLK".block.manual;
-
-    A "idb@@CLASS@@".f[@@IDX@@].p.read.mc.modeMANUAL;
-    S "dbHMIInterfaceBLK".block.manual;
-
-out_@@INSTANCE@@:      NOP 0;
 
 NETWORK
 TITLE = @@INSTANCE@@ @@DESCRIPTION@@
@@ -74,12 +56,13 @@ TITLE = @@INSTANCE@@ @@DESCRIPTION@@
     AN #tempEdge;
     CALL "fcHMIInterfaceBLK"
     (   bmc                  := "idb@@CLASS@@".f[@@IDX@@].p.read.bmc ,
+        err                  := "idb@@CLASS@@".f[@@IDX@@].p.read.err ,
         mcr                  := "idb@@CLASS@@".f[@@IDX@@].p.read.mc ,
         mcw                  := "idb@@CLASS@@".f[@@IDX@@].p.write.mc
     );
 
 NETWORK
-TITLE = Transfer the child state values and errors to the interface array
+TITLE = Transfer the child state values and errors to the read only interface array
     //------------------------------------------------------------------------//
     // Transfer the child states and if they have any error condition:        //
     //------------------------------------------------------------------------//
@@ -97,12 +80,10 @@ TITLE = Transfer the child state values and errors to the interface array
 @@ATTR_END|CHILD_INSTANCE@@
 
 NETWORK
-TITLE = Transfer the parameter values to the interface arrays
+TITLE = Transfer the parameter values to the read only interface arrays
     //------------------------------------------------------------------------//
     // Transfer the parameter values:                                         //
     //------------------------------------------------------------------------//
-    AN "dbHMIInterfaceBLK".block.manual;
-    JCN _manual_@@INSTANCE@@;
 @@ATTR_BEGIN|pInterfaceBool@@
     A "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
     = "dbHMIInterfaceBLK".block.arrBool[@@COUNTERATTR|1@@];
@@ -119,32 +100,6 @@ TITLE = Transfer the parameter values to the interface arrays
     L "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
     T "dbHMIInterfaceBLK".block.arrTime[@@COUNTERATTR|1@@];
 @@ATTR_END|pInterfaceTime@@
-_manual_@@INSTANCE@@:   NOP 0;
-
-NETWORK
-TITLE = Transfer the parameter values to the interface arrays
-    //------------------------------------------------------------------------//
-    // Transfer the parameter values:                                         //
-    //------------------------------------------------------------------------//
-    A "dbHMIInterfaceBLK".block.manual;
-    JCN _auto_@@INSTANCE@@;
-@@ATTR_BEGIN|pInterfaceBool@@
-    A "dbHMIInterfaceBLK".block.arrBool[@@COUNTERATTR|1@@];
-    = "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
-@@ATTR_END|pInterfaceBool@@
-@@ATTR_BEGIN|pInterfaceInt@@
-    L "dbHMIInterfaceBLK".block.arrInt[@@COUNTERATTR|1@@];
-    T "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
-@@ATTR_END|pInterfaceInt@@
-@@ATTR_BEGIN|pInterfaceReal@@
-    L "dbHMIInterfaceBLK".block.arrReal[@@COUNTERATTR|1@@];
-    T "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
-@@ATTR_END|pInterfaceReal@@
-@@ATTR_BEGIN|pInterfaceTime@@
-    L "dbHMIInterfaceBLK".block.arrTime[@@COUNTERATTR|1@@];
-    T "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
-@@ATTR_END|pInterfaceTime@@
-_auto_@@INSTANCE@@:   NOP 0;
 
 _not_@@INSTANCE@@:   NOP 0;
 

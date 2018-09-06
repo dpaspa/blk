@@ -42,14 +42,6 @@ VAR
 @@TEMPLATE_END@@
 END_VAR
 
-VAR_TEMP
-@@TEMPLATE_BEGIN|createClassNone@@
-@@ATTR_BEGIN|pBLOCK_RECIPE@@
-    t@@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;     // @@PARAMETERDESCRIPTION@@ //
-@@ATTR_END|pBLOCK_RECIPE@@
-@@TEMPLATE_END@@
-END_VAR
-
 BEGIN
 @@TEMPLATE_BEGIN|createInstances@@
 NETWORK
@@ -164,35 +156,16 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on startup
 _notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 
 @@ATTR_BEGIN|pBLOCK_RECIPE_EXISTS@@
-@@ATTR_BEGIN|RECIPE_CLASS@@
-NETWORK
-TITLE = Item @@IDX@@ Recipe parameters if owned by @@RECIPENAME@@
-    //------------------------------------------------------------------------//
-    // Get the recipe parameters:                                             //
-    //------------------------------------------------------------------------//
-    A(;
-    L "dbCONST".BLK.ID.@@RECIPENAME@@;
-    L #f[@@IDX@@].p.write.mc.RECIPE;
-    ==I;
-    );
-    JCN _notRecipe_@@INSTANCE@@_@@RECIPENAME@@;
-@@ATTR_BEGIN|pBLOCK_RECIPE@@
-    L "dbRECIPE".recipeList.@@RECIPENAME@@.@@BLOCKPARAMETER@@;
-    T #t@@BLOCKPARAMETER@@;
-@@ATTR_END|pBLOCK_RECIPE@@
-_notRecipe_@@INSTANCE@@_@@RECIPENAME@@:   NOP 0;
-
-@@ATTR_END|RECIPE_CLASS@@
-
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Set recipe parameters
     //------------------------------------------------------------------------//
-    // Set the recipe parameter values:                                       //
+    // Get the recipe parameters:                                             //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|pBLOCK_RECIPE@@
-    L #t@@BLOCKPARAMETER@@;
+    L "dbRECIPE".recipeControl.PC@@INSTANCE@@.@@BLOCKPARAMETER@@;
     T #f[@@IDX@@].p.write.@@BLOCKPARAMETER@@;
 @@ATTR_END|pBLOCK_RECIPE@@
+
 @@ATTR_END|pBLOCK_RECIPE_EXISTS@@
 
 NETWORK

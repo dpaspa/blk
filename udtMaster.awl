@@ -24,8 +24,9 @@ VERSION : 1.0
         ALARM : Int;                   // Packed alarm bits
         ME : Int;                      // Unique ID of the block instance
         CMD_SAFE : Int;                // Safe command for the module
-        STATE : Int;                   // State of the block
+        STATE : Int := 1;              // State of the block
         ERROR : Bool;                  // True if any error condition
+        HYGIENE : Int := 1;            // Hygiene status
         INTERLOCK : Bool;              // True if any interlock condition
         CRIL : Bool;                   // Critical Interlock that cannot be bypased.
         NCRIL : Bool;                  // Non-Critical Interlock that can be manually bypassed.
@@ -42,10 +43,9 @@ END_TYPE
 TYPE "udtMCWrite"
 VERSION : 1.0
     STRUCT
-        CMD : Int;                     // Start/Stop command
-        MODE : Int;                    // Select auto mode by default
+        CMD : Int := 1;                // Start/Stop command
+        MODE : Int := 2;               // Select auto mode by default
         OWNER : Int;                   // Value to be set or reset by Parent
-        HYGIENE : Int;                 // Hygiene status
         RECIPE : Int;                  // Recipe ID of owning Process Cell
         SERIALNUM : Int;               // Unique batch or CIPSIP serial number
         SUBS : Int := 0;               // Selected substate for Block level modules
@@ -75,7 +75,6 @@ VERSION : 1.0
         eventModeOOS : Bool;
         eventCmdStart : Bool;
         eventCmdStop : Bool;
-        CHILD_FAIL : Bool;
         CHILD_FAIL_RESET : Bool;
         BAD_PARAM : Bool;
         hasSFC : Bool;
@@ -107,7 +106,7 @@ TYPE "udtModeCommandSFC"
 VERSION : 1.0
     STRUCT
         CURSTEP : INT;
-        MODE : Int := 1;               // AUTO by default
+        MODE : Int := 2;               // AUTO by default
         SQ_CMD : INT;
         SQ_STATE : INT;
         STEPNO_JUMP : INT;
@@ -460,6 +459,7 @@ VERSION : 0.1
         mcr : "udtMCRead";
         mcw : "udtMCWrite";
         bmc : "udtModeCommandBLK";
+        err : "udtBLKError";         // Block error
         arrChildState : Array[0..30] of Int;
         arrChildError : Array[0..30] of Bool;
         arrChildInterlock : Array[0..30] of Bool;
@@ -468,10 +468,5 @@ VERSION : 0.1
         arrInt : Array[0..60] of Int;
         arrBool : Array[0..60] of Bool;
         blockSelected : Int;
-        CMD_MODE : Int;
-        CMD_CMD : Int;
-        CMD_SUBS : Int;
-        CMD_HYGIENE : Int;
-        manual : Bool;
     END_STRUCT;
 END_TYPE

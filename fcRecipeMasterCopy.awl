@@ -1,0 +1,95 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcRecipeMasterCopy                                            //
+// Description:                                                               //
+// Copies the Master recipe to the selected Control recipe.                   //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      04-Sep-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+FUNCTION "fcRecipeMasterCopy" : Void
+TITLE = Copy Master RCP to Control RCP
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fcRecipeMasterCopy
+VERSION : 1.0
+
+//----------------------------------------------------------------------------//
+// Declare local variables:                                                   //
+//----------------------------------------------------------------------------//
+VAR_TEMP
+    retVal : Int;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Copy the PCMX Master Recipe to PCM1 Control Recipe if selected
+    //------------------------------------------------------------------------//
+    // Copy the PCMX data to PCM1:                                            //
+    //------------------------------------------------------------------------//
+    A "rcpPCM1Update";
+    JCN _noUpdatePCM1;
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := "dbRECIPE".recipeMaster.PCMX ,
+        DSTBLK               := "dbRECIPE".recipeControl.PCM1 ,
+        RET_VAL              := #retVal
+    );
+    SET;
+    R "rcpPCM1Update";
+_noUpdatePCM1:   NOP 0;
+
+NETWORK
+TITLE = Copy the PCMX Master Recipe to PCM2 Control Recipe if selected
+    //------------------------------------------------------------------------//
+    // Copy the PCMX data to PCM2:                                            //
+    //------------------------------------------------------------------------//
+    A "rcpPCM2Update";
+    JCN _noUpdatePCM2;
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := "dbRECIPE".recipeMaster.PCMX ,
+        DSTBLK               := "dbRECIPE".recipeControl.PCM2 ,
+        RET_VAL              := #retVal
+    );
+    SET;
+    R "rcpPCM2Update";
+_noUpdatePCM2:   NOP 0;
+
+NETWORK
+TITLE = Copy the PCSY Master Recipe to PCS1 Control Recipe if selected
+    //------------------------------------------------------------------------//
+    // Copy the PCSY data to PCS1:                                            //
+    //------------------------------------------------------------------------//
+    A "rcpPCS1Update";
+    JCN _noUpdatePCS1;
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := "dbRECIPE".recipeMaster.PCSY ,
+        DSTBLK               := "dbRECIPE".recipeControl.PCS1 ,
+        RET_VAL              := #retVal
+    );
+    SET;
+    R "rcpPCS1Update";
+_noUpdatePCS1:   NOP 0;
+
+NETWORK
+TITLE = Copy the PCSY Master Recipe to PCS2 Control Recipe if selected
+    //------------------------------------------------------------------------//
+    // Copy the PCSY data to PCS2:                                            //
+    //------------------------------------------------------------------------//
+    A "rcpPCS2Update";
+    JCN _noUpdatePCS2;
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := "dbRECIPE".recipeMaster.PCSY ,
+        DSTBLK               := "dbRECIPE".recipeControl.PCS2 ,
+        RET_VAL              := #retVal
+    );
+    SET;
+    R "rcpPCS2Update";
+_noUpdatePCS2:   NOP 0;
+
+END_FUNCTION

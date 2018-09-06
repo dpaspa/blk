@@ -11,17 +11,33 @@
 //----------------------------------------------------------------------------//
 DATA_BLOCK "dbRECIPE"
 TITLE = Control Recipe
-{ S7_Optimized_Access := 'TRUE' }
+{ S7_Optimized_Access := 'FALSE' }
 AUTHOR : REO
 NAME : dbRECIPE
 VERSION : 1.0
 
 STRUCT
     recipeInfo : Struct
-        recipeNumber : Int;
-        recipeDataRecordNumber : Int;
+        rcpPCMXNumber : Int;
+        rcpPCMXDataRecordNumber : Int;
+        rcpPCMXStatus : Int;
+        rcpPCSYNumber : Int;
+        rcpPCSYDataRecordNumber : Int;
+        rcpPCSYStatus : Int;
     END_STRUCT;
-    recipeList : Struct
+    recipeMaster : Struct
+        PCMX : Struct
+@@TEMPLATE_BEGIN|RECIPE_PARAMETERS@@
+            @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;      // @@PARAMETERDESCRIPTION@@
+@@TEMPLATE_END@@
+        END_STRUCT;
+        PCSY : Struct
+@@TEMPLATE_BEGIN|RECIPE_PARAMETERS@@
+            @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;      // @@PARAMETERDESCRIPTION@@
+@@TEMPLATE_END@@
+        END_STRUCT;
+    END_STRUCT;
+    recipeControl : Struct
 @@TEMPLATE_BEGIN|RECIPE_CLASS@@
         @@RECIPENAME@@ : Struct
 @@ATTR_BEGIN|RECIPE_PARAMETERS@@

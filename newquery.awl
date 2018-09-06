@@ -1,0 +1,5 @@
+SELECT S.State, S.childParameterAlias, S.childClass AS childAliasClass, printf("%d", S.childIndex) AS childIndex, S.conditionStatement, S.trueStatement, S.trueCommand, S.falseStatement, S.falseCommand 
+FROM tblClass_Child AS C INNER JOIN tblClass_ChildStateValues AS S ON C.childKey = S.childKey 
+WHERE C.Class = "EMC2" AND (S.childAcquire = "TRUE" OR S.childAcquire = "OWNER") 
+GROUP BY S.childParameterAlias, S.trueCommand
+ORDER BY S.childParameterAlias

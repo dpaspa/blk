@@ -71,10 +71,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner ID
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@CLASS@@ is a Flowpath device
     //------------------------------------------------------------------------//
-    // This class of device is a FLOWPATH device where the state must equal   //
-    // the command once set by the parent:                                    //
+    // This class of device is a not a FLOWPATH device where the state must   //
+    // equal the command once set by the parent:                              //
     //------------------------------------------------------------------------//
-    A "alwaysHigh";
+    A "alwaysLow";
     = #f[@@IDX@@].p.read.mc.FLOWPATH;
 @@ATTR_END|FLOWPATH@@
 
@@ -113,27 +113,13 @@ TITLE = @@INSTANCE@@ : Analog input attributes
     L @@RANGEHIGH@@;
     T #f[@@IDX@@].p.read.ai.RANGE_UPPER;
     L @@LIMITHH@@;
-    T #f[@@IDX@@].p.read.ai.LIMIT_HH;
-    L @@LIMITH@@;
-    T #f[@@IDX@@].p.read.ai.LIMIT_H;
-    L @@LIMITL@@;
-    T #f[@@IDX@@].p.read.ai.LIMIT_L;
-    L @@LIMITLL@@;
-    T #f[@@IDX@@].p.read.ai.LIMIT_LL;
-    A @@ENABLEHH@@;
-    = #f[@@IDX@@].p.read.ai.ENABLE_HH;
-    A @@ENABLEH@@;
-    = #f[@@IDX@@].p.read.ai.ENABLE_H;
-    A @@ENABLEL@@;
-    = #f[@@IDX@@].p.read.ai.ENABLE_L;
-    A @@ENABLELL@@;
-    = #f[@@IDX@@].p.read.ai.ENABLE_LL;
-    A @@POLARITY@@;
-    = #f[@@IDX@@].p.read.ai.POLARITY;
     L "@@INSTANCE@@-RAW";
     T #f[@@IDX@@].p.read.ai.RAW_INPUT;
+	A @@POLARITY@@;
+    = #f[@@IDX@@].p.read.ai.POLARITY;
 
 @@ATTR_END|ANALOG@@
+
 
 NETWORK
 TITLE = @@INSTANCE@@ : Command and state values

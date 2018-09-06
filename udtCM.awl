@@ -25,7 +25,15 @@ TYPE "udtAL1write"
 VERSION : 1.0
     STRUCT
         mc : "udtMCWrite";             // Block mode and command for directives from write CPU
-    END_STRUCT;
+		LIMIT_HH : Real;               // High High Alarm Limit from parent
+        LIMIT_H : Real;                // High Alarm Limit from parent
+        LIMIT_L : Real;                // Low Alarm Limit from parent
+        LIMIT_LL : Real;               // LowLow Alarm Limit from parent
+		ENABLE_HH : Bool;              // Flag to Enable/Disable High High Alarm from parent
+        ENABLE_H : Bool;               // Flag to Enable/Disable High Alarm from parent
+        ENABLE_L : Bool;               // Flag to Enable/Disable Low Alarm from parent
+        ENABLE_LL : Bool;              // Flag to Enable/Disable Low Low Alarm from parent
+	END_STRUCT;
 END_TYPE
 
 TYPE "udtAL1"
@@ -50,7 +58,6 @@ TYPE "udtDI1write"
 VERSION : 1.0
     STRUCT
         mc : "udtMCWrite";             // Block mode and command for directives from write CPU
-        DI_Manual : Bool;              // User digital signal for simulating
     END_STRUCT;
 END_TYPE
 
@@ -76,7 +83,6 @@ TYPE "udtDI2write"
 VERSION : 1.0
     STRUCT
         mc : "udtMCWrite";             // Block mode and command for directives from write CPU
-        DI_Manual : Bool;              // User digital signal for simulating
     END_STRUCT;
 END_TYPE
 
@@ -93,7 +99,6 @@ VERSION : 1.0
     STRUCT
         mc : "udtMCRead";              // Block mode and command for calculations on read CPU
         ALARM : Bool;                  // Alarm Flag (0 = OK, 1 = ALARM)
-        PV : Bool;                     // Processed DI
     END_STRUCT;
 END_TYPE
 
@@ -101,7 +106,6 @@ TYPE "udtDI3write"
 VERSION : 1.0
     STRUCT
         mc : "udtMCWrite";             // Block mode and command for directives from write CPU
-        DI_Manual : Bool;              // User digital signal for simulating
     END_STRUCT;
 END_TYPE
 
@@ -158,7 +162,16 @@ TYPE "udtMI1write"
 VERSION : 1.0
     STRUCT
         mc : "udtMCWrite";             // Block mode and command for directives from write CPU
-    END_STRUCT;
+    	LIMIT_HH : Real;               // High High Alarm Limit from parent
+        LIMIT_H : Real;                // High Alarm Limit from parent
+        LIMIT_L : Real;                // Low Alarm Limit from parent
+        LIMIT_LL : Real;               // LowLow Alarm Limit from parent
+		ENABLE_HH : Bool;              // Flag to Enable/Disable High High Alarm from parent
+        ENABLE_H : Bool;               // Flag to Enable/Disable High Alarm from parent
+        ENABLE_L : Bool;               // Flag to Enable/Disable Low Alarm from parent
+        ENABLE_LL : Bool;              // Flag to Enable/Disable Low Low Alarm from parent
+
+	END_STRUCT;
 END_TYPE
 
 TYPE "udtMI1"
@@ -615,7 +628,6 @@ TYPE "udtZSC1write"
 VERSION : 1.0
     STRUCT
         mc : "udtMCWrite";             // Block mode and command for directives from write CPU
-        DI_Manual : Bool;              // User digital signal for simulating
         CUTOUT : Bool;                 // Flag indicating if alarm is to be cutout (0= Alarm Enabled, 1= Alarm Disabled)
     END_STRUCT;
 END_TYPE
@@ -642,7 +654,6 @@ TYPE "udtZSC2write"
 VERSION : 1.0
     STRUCT
         mc : "udtMCWrite";             // Block mode and command for directives from write CPU
-        DI_Manual : Bool;              // User digital signal for simulating
     END_STRUCT;
 END_TYPE
 

@@ -84,6 +84,34 @@ TITLE = Promote the analog input attributes
     = #p.read.DQ;
 
 NETWORK
+TITLE = Analog input setpoints
+    //------------------------------------------------------------------------//
+    // Set the analog input setpoints:                		                  //
+    //------------------------------------------------------------------------//
+	
+	A #p.read.mc.modeAUTO;
+	JCN _manual;
+	L #p.write.LIMIT_HH;
+    T #p.read.ai.LIMIT_HH;
+    L #p.write.LIMIT_H;
+    T #p.read.ai.LIMIT_H;
+    L #p.write.LIMIT_L;
+    T #p.read.ai.LIMIT_L;
+    L #p.write.LIMIT_LL;
+    T #p.read.ai.LIMIT_LL;
+    A #p.write.ENABLE_HH;
+    = #p.read.ai.ENABLE_HH;
+    A #p.write.ENABLE_H;
+    = #p.read.ai.ENABLE_H;
+    A #p.write.ENABLE_L;
+    = #p.read.ai.ENABLE_L;
+    A #p.write.ENABLE_LL;
+    = #p.read.ai.ENABLE_LL;
+
+_manual: NOP 0;
+
+
+NETWORK
 TITLE = Set INTERLOCK Flag
     //------------------------------------------------------------------------//
     // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //

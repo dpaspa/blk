@@ -88,7 +88,8 @@ TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
     L "dbCONST".BLK.@@SCLASS@@.CMD.OPEN;
     ==I;
     );
-    = "@@SINSTANCE@@-ZSO";
+    R "@@SINSTANCE@@-ZSC";
+    S "@@SINSTANCE@@-ZSO";
 
     A #enableSimulation_POS4;
     A(;
@@ -96,7 +97,8 @@ TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
     L "dbCONST".BLK.@@SCLASS@@.CMD.CLOSE;
     ==I;
     );
-    = "@@SINSTANCE@@-ZSC";
+    S "@@SINSTANCE@@-ZSC";
+    R "@@SINSTANCE@@-ZSO";
 
 @@ATTR_END|simulatePOS4@@
 
@@ -147,18 +149,6 @@ TITLE = Class @@SCLASS@@ Instance @@SINSTANCE@@
     S "@@SINSTANCE@@-DI";
 
 @@ATTR_END|simulateZSC2@@
-
-NETWORK
-TITLE = Reset CHILD_FAIL flag.
-    //------------------------------------------------------------------------//
-    // Reset CHILD_FAIL flag                                                  //
-    //------------------------------------------------------------------------//
-    A ResetChildFail;
-@@ATTR_BEGIN|createClassesBlock@@
-@@ATTR_BEGIN|createInstances@@
-    = "idb@@CLASS@@".f[@@IDX@@].p.read.bmc.CHILD_FAIL;
-@@ATTR_END|createInstances@@
-@@ATTR_END|createClassesBlock@@
 
 @@TEMPLATE_END@@
 END_FUNCTION_BLOCK
