@@ -159,12 +159,16 @@ _notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Set recipe parameters
     //------------------------------------------------------------------------//
-    // Get the recipe parameters:                                             //
+    // Get the Control Recipe parameters if starting a new command:           //
     //------------------------------------------------------------------------//
+    A #f[@@IDX@@].p.read.bmc.eventCmdStart;
+    JCN _noStart_@@IDX@@;
 @@ATTR_BEGIN|pBLOCK_RECIPE@@
     L "dbRECIPE".recipeControl.PC@@INSTANCE@@.@@BLOCKPARAMETER@@;
     T #f[@@IDX@@].p.write.@@BLOCKPARAMETER@@;
 @@ATTR_END|pBLOCK_RECIPE@@
+
+_noStart_@@IDX@@:   NOP 0;
 
 @@ATTR_END|pBLOCK_RECIPE_EXISTS@@
 

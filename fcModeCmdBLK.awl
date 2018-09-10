@@ -139,10 +139,11 @@ TITLE = Interlocked State. Send safe command in case of any interlock or failure
     //------------------------------------------------------------------------//
     O #mcRead.INTERLOCK;
     ON #bmc.permitStart;
-    FP #bmc.stateINTERLOCKED;
-    = #edgeInterlock;
+    FP #bmc.edgeInterlock;
+    = #bmc.eventInterlock;
     JCN _noInterlock;
     S #mcRead.INTERLOCK;
+    S #bmc.stateINTERLOCKED;
     L #mcRead.STATE;
     T #bmc.lastSTATE;
     L "dbCONST".BLK.STATE.INTERLOCKED;
