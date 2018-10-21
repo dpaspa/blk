@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/09/2018 2:35:34 PM by David Paspa
+generated on 16/09/2018 10:26:02 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -103,21 +103,13 @@ ParameterInOut:- IN_OUT
 --------------------------------------------------
 PARAMETER::10
 --------------------------------------------------
-Name:- toggle_mode
-Type:- BOOL
-Description:- Toggle mode of all used units
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::11
---------------------------------------------------
 Name:- sy_vessel_state
 Type:- INT
 Description:- Device State of unit Sy
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::11
 --------------------------------------------------
 Name:- sy_vessel_subs
 Type:- INT
@@ -125,7 +117,7 @@ Description:- Substate selection to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::12
 --------------------------------------------------
 Name:- sy_vessel_cmd
 Type:- INT
@@ -147,7 +139,6 @@ Description:- Log transfer from storage to filling operation begin time.
 Action:- //Log Sy FILL operation begin
 SET;
 S #_log_msg_fill_begin;
-R #_toggle_mode;
 Verification:- A "uncondJump";
 
 
@@ -209,22 +200,26 @@ STEP::03
 --------------------------------------------------
 StepNo:- 03
 Title:- RP_PCSY_FILL : Start Sy FILL Unit Operations
-Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-
-Initiate Unit Operations
+Description:- Initiate Unit Operations
 SY STATE=FILL
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+Description:- Reset the Sy Unit.
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_sy_vessel_cmd;
+Verification:- A(;
+L #_sy_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
 
-Initiate SY STATE=FILL Unit Operation
-Action:- //Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-SET;
-S #_toggle_mode;
-
-//Initiate SY STATE=FILL Unit Operation
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Initiate SY STATE=FILL Unit Operation
+Action:- //Initiate SY STATE=FILL Unit Operation
 L "dbCONST".BLK.SY.SUBS.FILL;
 T #_sy_vessel_subs;
 L "dbCONST".BLK.CMD.START;
@@ -301,7 +296,6 @@ SET;
 S #_log_msg_fill_end;
 
 //Clear used flags
-R #_toggle_mode;
 R #_prompt_abort_confirm_yes;
 Verification:- A "uncondJump";
 

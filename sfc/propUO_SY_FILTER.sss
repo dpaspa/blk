@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/09/2018 3:30:27 PM by David Paspa
+generated on 16/09/2018 4:58:46 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -226,6 +226,31 @@ Set flag path_ready.
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
+Description:- Reset EMs
+Action:- // Set remaining Sy equipment to SAFE state:
+L "dbCONST".BLK.CMD.STOP;
+T #_emv_vessel_cmd;
+T  #_emc_water_sy_cmd;
+T  #_emc_gas_cmd;
+Verification:- A(;
+L   #_emv_vessel_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emc_water_sy_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
 Description:- Log Sy Filter operation begin time.
 Open Sy vent valve without LPCA control.
 Set Sy Outlet valve open (STATE=DISCHARGE).
@@ -235,24 +260,11 @@ Action:- //Log Sy Filter operation begin time.
 SET;
 S #_log_msg_filter_begin;
 
-// Open Sy vent valve without LPCA control
-L "dbCONST".BLK.SAFE.CMD;
-T  #_emc_gas_subs;
-L "dbCONST".BLK.CMD.STOP;
-T  #_emc_gas_cmd;
-
 // Open Sy outlet valve
 L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
 T #_emv_vessel_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emv_vessel_cmd;
-
-// Set remaining Sy equipment to SAFE state:
-L "dbCONST".BLK.CMD.STOP;
-T  #_emc_water_sy_cmd;
-L "dbCONST".BLK.SAFE.CMD;
-T  #_emc_water_sy_subs;
-
 Verification:- A(;
 L #_emc_gas_state;
 L "dbCONST".BLK.STATE.STOPPED;
@@ -270,7 +282,7 @@ L "dbCONST".BLK.STATE.STOPPED;
 );
 
 --------------------------------------------------
-ACTION::02
+ACTION::03
 --------------------------------------------------
 Description:- Set flag path_ready.
 Action:- // Set flag path_ready.
@@ -300,6 +312,18 @@ Start Timer with TIME_LPCA_PURGE.
 
 --------------------------------------------------
 ACTION::01
+--------------------------------------------------
+Description:- Reset gas EM
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_emc_gas_cmd;
+Verification:- A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
 --------------------------------------------------
 Description:- Enable Sy LPCA control at PRES_LPCA_PURGE.
 
@@ -352,6 +376,18 @@ Set SMFL and SVT hygiene status to USED.
 
 --------------------------------------------------
 ACTION::01
+--------------------------------------------------
+Description:- Reset gas EM
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_emc_gas_cmd;
+Verification:- A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
 --------------------------------------------------
 Description:- Adjust Sy LPCA pressure control setpoint to PRES_LPCA_BLANKET with the Vent valve closed.
 Set SMFL and SVT hygiene status to USED.
@@ -410,8 +446,6 @@ Description:- Log Sy Filter operation end time.
 Set other equipment to safe state:
 
 Action:- // Set other equipment to safe state.
-L "dbCONST".BLK.SAFE.CMD;
-T #_emv_vessel_subs;
 L "dbCONST".BLK.CMD.STOP;
 T #_emv_vessel_cmd;
 

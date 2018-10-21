@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/09/2018 2:35:22 PM by David Paspa
+generated on 16/09/2018 10:25:52 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -169,21 +169,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::18
 --------------------------------------------------
-Name:- toggle_mode
-Type:- BOOL
-Description:- Toggle mode of all used units
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::19
---------------------------------------------------
 Name:- mx_vessel_hygiene
 Type:- INT
 Description:- Hygiene Status of unit Mx
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::19
 --------------------------------------------------
 Name:- mx_vessel_state
 Type:- INT
@@ -191,7 +183,7 @@ Description:- Device State of unit Mx
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::20
 --------------------------------------------------
 Name:- mx_vessel_subs
 Type:- INT
@@ -199,7 +191,7 @@ Description:- Substate selection to unit Mx
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::21
 --------------------------------------------------
 Name:- mx_vessel_cmd
 Type:- INT
@@ -283,25 +275,29 @@ STEP::03
 --------------------------------------------------
 StepNo:- 03
 Title:- RP_PCMX_CIPSIP : Initiate SETUP operations
-Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-
-Initiate Unit Operations;
+Description:- Initiate Unit Operations;
 MX STATE=SETUP.
 
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+Description:- Reset the Mx Unit.
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_mx_vessel_cmd;
+Verification:- A(;
+L #_mx_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
 
-Initiate Unit Operations
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Initiate Unit Operations
 MX STATE=SETUP
 
-Action:- //Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-SET;
-S #_toggle_mode;
-
-//Initiate Unit Operation for unit Mx
+Action:- //Initiate Unit Operation for unit Mx
 L "dbCONST".BLK.MX.SUBS.SETUP;
 T #_mx_vessel_subs;
 L "dbCONST".BLK.CMD.START;
@@ -337,6 +333,18 @@ Initiate Mx CIP Unit Operation.
 
 --------------------------------------------------
 ACTION::01
+--------------------------------------------------
+Description:- Reset the Mx Unit.
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_mx_vessel_cmd;
+Verification:- A(;
+L #_mx_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
 --------------------------------------------------
 Description:- MFL unit ready for flushing
 Action:- //Set Mx equipment to Hygiene Status to CIP
@@ -409,6 +417,18 @@ Set MX Hygiene Status to SIP.
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
+Description:- Action Description
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_mx_vessel_cmd;
+Verification:- A(;
+L #_mx_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
 Description:- Initiate MX SIP Operations.
 MX STATE=SIP
 
@@ -423,7 +443,6 @@ T #_mx_vessel_cmd;
 //Set Mx hygiene status to SIP
 L "dbCONST".BLK.HYGIENE.SIP;
 T #_mx_vessel_hygiene;
-
 Verification:- A(;
 L #_mx_vessel_subs;
 L "dbCONST".BLK.MX.SUBS.SIP;
@@ -500,20 +519,13 @@ Reset all used flags
 ACTION::01
 --------------------------------------------------
 Description:- Reset all used flags
-Action:- //Stop MX Unit Operation
-L "dbCONST".BLK.CMD.STOP;
-T #_mx_vessel_cmd;
-L "dbCONST".BLK.SAFE.CMD;
-T #_mx_vessel_subs;
-
-//Log CIPSIP operation end time.
+Action:- //Log CIPSIP operation end time.
 SET;
 S #_log_msg_cipsip_end;
 
 
 //Clear used flags
 SET;
-R #_toggle_mode;
 R #_prompt_abort;
 R #_prompt_abort_confirm_yes;
 Verification:- A "uncondJump";

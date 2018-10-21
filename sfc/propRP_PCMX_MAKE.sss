@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/09/2018 2:35:29 PM by David Paspa
+generated on 16/09/2018 10:25:57 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -85,21 +85,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::8
 --------------------------------------------------
-Name:- toggle_mode
-Type:- BOOL
-Description:- Toggle mode of all used units
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::9
---------------------------------------------------
 Name:- mx_vessel_hygiene
 Type:- INT
 Description:- Hygiene Status of unit Mx
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::9
 --------------------------------------------------
 Name:- mx_vessel_cmd
 Type:- INT
@@ -107,7 +99,7 @@ Description:- Command to unit Mx
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::10
 --------------------------------------------------
 Name:- mx_vessel_state
 Type:- INT
@@ -115,7 +107,7 @@ Description:- Device State of unit Mx
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::11
 --------------------------------------------------
 Name:- mx_vessel_subs
 Type:- INT
@@ -140,7 +132,6 @@ S #_log_msg_make_begin;
 
 // Reset used flags
 SET;
-R #_toggle_mode;
 R #_prompt_abort;
 Verification:- A "uncondJump";
 
@@ -205,25 +196,29 @@ StepNo:- 03
 Title:- RP_PCMX_MAKE : Initiate MAKE Unit Operation
 Description:- Set Mx Hygiene Status to BATCH.
 
-Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-
 Initiate MX STATE=MAKE Unit Operation
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Set Mx Hygiene Status to BATCH.
+Description:- Reset the Mx Unit.
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_mx_vessel_cmd;
+Verification:- A(;
+L #_mx_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
 
-Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Set Mx Hygiene Status to BATCH.
 
 Initiate MX STATE=MAKE Unit Operation
 Action:- //Set Mx Hygiene Status to BATCH.
 L "dbCONST".BLK.HYGIENE.BATCH;
 T #_mx_vessel_hygiene;
-
-//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-SET;
-S #_toggle_mode;
 
 //Initiate MX STATE=MAKE Unit Operation
 L "dbCONST".BLK.MX.SUBS.MAKE;
@@ -262,13 +257,8 @@ Release the water system
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-Release Water System of Mx
-Action:- //Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-SET;
-R #_toggle_mode;
-
-//Release the water system
+Description:- Release Water System of Mx
+Action:- //Release the water system
 S #_Release_Water_System_Mx;
 Verification:- A "uncondJump";
 
@@ -288,22 +278,13 @@ STEP::05
 --------------------------------------------------
 StepNo:- 05
 Title:- RP_PCMX_MAKE : Recipe Procedure Completed
-Description:- Stop Mx unit operation
-Log product manufacture operation end time.
+Description:- Log product manufacture operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Stop Mx unit operation.
-Log product manufacture operation end time.
-Action:- //Stop MX Unit Operation
-L "dbCONST".BLK.CMD.STOP;
-T #_mx_vessel_cmd;
-L "dbCONST".BLK.SAFE.CMD;
-T #_mx_vessel_subs;
-
-
-//Log Make operation end time.
+Description:- Log product manufacture operation end time.
+Action:- //Log Make operation end time.
 SET;
 S #_log_msg_make_end;
 R #_prompt_abort_confirm_yes;

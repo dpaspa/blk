@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/09/2018 2:35:24 PM by David Paspa
+generated on 16/09/2018 10:25:53 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -117,21 +117,13 @@ ParameterInOut:- IN_OUT
 --------------------------------------------------
 PARAMETER::12
 --------------------------------------------------
-Name:- toggle_mode
-Type:- BOOL
-Description:- Toggle mode of all used units
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::13
---------------------------------------------------
 Name:- mx_vessel_state
 Type:- INT
 Description:- Device State of unit Mx
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::13
 --------------------------------------------------
 Name:- mx_vessel_cmd
 Type:- INT
@@ -139,7 +131,7 @@ Description:- Command to unit Mx
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::14
 --------------------------------------------------
 Name:- mx_vessel_subs
 Type:- INT
@@ -226,22 +218,26 @@ STEP::03
 --------------------------------------------------
 StepNo:- 03
 Title:- RP_PCMX_FILL : Start Mx FILL Unit Operations
-Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-
-Initiate Unit Operations
+Description:- Initiate Unit Operations
 Mx STATE=FILL
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+Description:- Reset the Mx Unit.
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_mx_vessel_cmd;
+Verification:- A(;
+L #_mx_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
 
-Initiate MX STATE=FILL Unit Operation
-Action:- //Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-SET;
-S #_toggle_mode;
-
-//Initiate Mx STATE=FILL Unit Operation
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Initiate MX STATE=FILL Unit Operation
+Action:- //Initiate Mx STATE=FILL Unit Operation
 L "dbCONST".BLK.MX.SUBS.FILL;
 T #_mx_vessel_subs;
 L "dbCONST".BLK.CMD.START;
@@ -318,10 +314,6 @@ L "dbCONST".BLK.HYGIENE.USED;
 L #_mx_vessel_hygiene;
 ==I;
 );
-
-//put substate to none of mx.
-L "dbCONST".BLK.SAFE.CMD;
-T #_mx_vessel_subs;
 
 //Log FILL operation end time.
 SET;

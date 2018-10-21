@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/09/2018 2:27:06 PM by David Paspa
+generated on 12/09/2018 2:20:56 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -90,21 +90,13 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- ResetRunTimer
-Type:- BOOL
-Description:- Reset Run timer
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::8
---------------------------------------------------
 Name:- runtime_s
 Type:- INT
 Description:- RunTimeS
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::8
 --------------------------------------------------
 Name:- runtime_m
 Type:- INT
@@ -112,7 +104,7 @@ Description:- RunTimeM
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::9
 --------------------------------------------------
 Name:- runtime_h
 Type:- INT
@@ -120,7 +112,7 @@ Description:- RunTimeH
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::10
 --------------------------------------------------
 Name:- AcumTimeS
 Type:- INT
@@ -128,7 +120,7 @@ Description:- AcumTimeS
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::11
 --------------------------------------------------
 Name:- AcumTimeM
 Type:- INT
@@ -136,7 +128,7 @@ Description:- AcumTimeM
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::12
 --------------------------------------------------
 Name:- AcumTimeH
 Type:- INT
@@ -144,7 +136,7 @@ Description:- Total acumulated running time
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::13
 --------------------------------------------------
 Name:- agit_hist
 Type:- INT
@@ -152,7 +144,7 @@ Description:- Previous state of SIC
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::14
 --------------------------------------------------
 Name:- agit_stopped
 Type:- BOOL
@@ -160,7 +152,7 @@ Description:- Agitator stopped message to be logged
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::15
 --------------------------------------------------
 Name:- sic_agit_state
 Type:- INT
@@ -420,9 +412,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Reset the timer, store current SIC state and report the event.
 Log EMA1_MIX end time.
-Action:- A #_ResetRunTimer;
-=#sqRunTimer.RESET;
-//Store current SIC state.
+Action:- //Store current SIC state.
 L #_sic_agit_state;
 T #_agit_hist;
 

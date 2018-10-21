@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/09/2018 2:35:26 PM by David Paspa
+generated on 16/09/2018 10:25:55 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -149,21 +149,13 @@ ParameterInOut:- IN_OUT
 --------------------------------------------------
 PARAMETER::16
 --------------------------------------------------
-Name:- toggle_mode
-Type:- BOOL
-Description:- Toggle mode of all used units
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::17
---------------------------------------------------
 Name:- sy_vessel_cmd
 Type:- INT
 Description:- Command to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::17
 --------------------------------------------------
 Name:- sy_vessel_subs
 Type:- INT
@@ -171,7 +163,7 @@ Description:- Substate selection to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::18
 --------------------------------------------------
 Name:- mx_vessel_state
 Type:- INT
@@ -179,7 +171,7 @@ Description:- Device State of unit Mx
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::19
 --------------------------------------------------
 Name:- sy_vessel_state
 Type:- INT
@@ -187,7 +179,7 @@ Description:- Device state of unit Sy
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::20
 --------------------------------------------------
 Name:- mx_vessel_cmd
 Type:- INT
@@ -195,7 +187,7 @@ Description:- Command to unit Mx
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::21
 --------------------------------------------------
 Name:- mx_vessel_subs
 Type:- INT
@@ -288,25 +280,29 @@ StepNo:- 03
 Title:- RP_PCMX_FILTER : Initiate Sy FILTRATION Unit Operation
 Description:- Set Sy Hygiene Status to BATCH.
 
-Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-
 Set Unit Sy to state FILTER.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Set Sy Hygiene Status to BATCH.
+Description:- Reset the Sy Unit.
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_sy_vessel_cmd;
+Verification:- A(;
+L #_sy_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
 
-Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Set Sy Hygiene Status to BATCH.
 
 Set Unit SY to state FILTER
 Action:- //Set Sy Hygiene Status to BATCH.
 L "dbCONST".BLK.HYGIENE.BATCH;
 T #_sy_vessel_hygiene;
-
-//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-SET;
-S #_toggle_mode;
 
 //Set Unit SY to state FILTER
 L "dbCONST".BLK.SY.SUBS.FILTER;
@@ -341,16 +337,24 @@ Description:- Set Unit MX to state FILTER
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
+Description:- Reset the Mx Unit.
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_mx_vessel_cmd;
+Verification:- A(;
+L #_mx_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
 Description:- Set Unit MX to state FILTER
 Action:- //Set Unit Mx to state FILTER
 L "dbCONST".BLK.MX.SUBS.FILTER;
 T #_mx_vessel_subs;
 L "dbCONST".BLK.MX.CMD.START;
 T #_mx_vessel_cmd;
-
-//Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-SET;
-R #_toggle_mode;
 Verification:- A(;
 L 	#_mx_vessel_subs;
 L 	"dbCONST".BLK.MX.SUBS.FILTER;
@@ -373,12 +377,12 @@ STEP::05
 --------------------------------------------------
 StepNo:- 05
 Title:- RP_PCMX_FILTER : Wait for filtration to complete
-Description:- Set MX ready_hpCA flag.
+Description:- Set MX ready_HPCA flag.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Set MX ready_hpn2 flag.
+Description:- Set MX ready_hpca flag.
 Action:- SET;
 S #_mx_vessel_sync_write_start_hpca;
 Verification:- A "uncondJump";
@@ -479,16 +483,12 @@ Log FILTRATION operation end time.
 Action:- //Stop Mx Unit Operation
 L "dbCONST".BLK.CMD.STOP;
 T #_mx_vessel_cmd;
-L "dbCONST".BLK.SAFE.CMD;
-T #_mx_vessel_subs;
-
 
 //Log Filteration operation end time.
 SET;
 S #_log_msg_filter_end;
 
 //Clear used flags
-R #_toggle_mode;
 R #_mx_vessel_sync_write_start_hpca;
 R #_mx_vessel_sync_write_filtration_complete;
 R #_sy_vessel_sync_write_filtration_complete;

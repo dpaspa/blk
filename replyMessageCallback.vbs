@@ -32,8 +32,8 @@ Dim idxMessage
 '/-----------------------------------------------------------------------------/
 '/ Get the selected message index number saved by the list item click events:  /
 '/-----------------------------------------------------------------------------/
-idxList = SmartTags("replyMessage.idxSelectedList")
-idxMessage = SmartTags("replyMessage.idxSelectedMessage")
+idxList = SmartTags("interfaceReply.idxSelectedList")
+idxMessage = SmartTags("interfaceReply.idxSelectedMessage")
 
 '/-----------------------------------------------------------------------------/
 '/ Check if there is no current active reply message:                          /
@@ -57,16 +57,16 @@ Else
     '/ Reset the symbolic I/O field index to clear the message:                /
     '/-------------------------------------------------------------------------/
     If (idxList = 1) Then
-        SmartTags("replyMessage.idxMessage1") = 0
-        SmartTags("replyMessage.numSerial1") = 0
+        SmartTags("interfaceReply.idxMessage1") = 0
+        SmartTags("interfaceReply.numSerial1") = 0
 
     ElseIf (idxList = 2) Then
-        SmartTags("replyMessage.idxMessage2") = 0
-        SmartTags("replyMessage.numSerial2") = 0
+        SmartTags("interfaceReply.idxMessage2") = 0
+        SmartTags("interfaceReply.numSerial2") = 0
 
     ElseIf (idxList = 3) Then
-        SmartTags("replyMessage.idxMessage3") = 0
-        SmartTags("replyMessage.numSerial3") = 0
+        SmartTags("interfaceReply.idxMessage3") = 0
+        SmartTags("interfaceReply.numSerial3") = 0
     End If
 
     '/-------------------------------------------------------------------------/
@@ -105,8 +105,8 @@ Else
     '/-------------------------------------------------------------------------/
     '/ Reset the message and list selection indices:                           /
     '/-------------------------------------------------------------------------/
-    SmartTags("replyMessage.idxSelectedList") = 0
-    SmartTags("replyMessage.idxSelectedMessage") = 0
+    SmartTags("interfaceReply.idxSelectedList") = 0
+    SmartTags("interfaceReply.idxSelectedMessage") = 0
 End If
 
 End Sub

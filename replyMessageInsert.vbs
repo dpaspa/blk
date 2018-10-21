@@ -23,38 +23,42 @@ Dim bInserted
 Dim i
 
 '/-----------------------------------------------------------------------------/
-'/ Deselect any selected row:                                                  /
-'/-----------------------------------------------------------------------------/
-
-'/-----------------------------------------------------------------------------/
 '/ Shuffle any existing messages to have the oldest at the top:                /
 '/-----------------------------------------------------------------------------/
-If (SmartTags("replyMessage.idxMessage1") = 0) Then
-    If (SmartTags("replyMessage.idxMessage2") = 0) Then
-        If (SmartTags("replyMessage.idxMessage3") = 0) Then
+If (SmartTags("interfaceReply.idxMessage1") = 0) Then
+    If (SmartTags("interfaceReply.idxMessage2") = 0) Then
+        If (SmartTags("interfaceReply.idxMessage3") = 0) Then
         Else
-            SmartTags("replyMessage.idxSelectedList") = 0
-            SmartTags("replyMessage.idxMessage1") = SmartTags("replyMessage.idxMessage3")
-            SmartTags("replyMessage.idxMessage3") = 0
+            SmartTags("interfaceReply.idxSelectedList") = 0
+            SmartTags("interfaceReply.idxMessage1") = SmartTags("interfaceReply.idxMessage3")
+            SmartTags("interfaceReply.numSerial1") = SmartTags("interfaceReply.numSerial3")
+            SmartTags("interfaceReply.idxMessage3") = 0
+            SmartTags("interfaceReply.numSerial3") = 0
         End If
     Else
-        SmartTags("replyMessage.idxSelectedList") = 0
-        SmartTags("replyMessage.idxMessage1") = SmartTags("replyMessage.idxMessage2")
-        If (SmartTags("replyMessage.idxMessage3") = 0) Then
-            SmartTags("replyMessage.idxMessage2") = 0
+        SmartTags("interfaceReply.idxSelectedList") = 0
+        SmartTags("interfaceReply.idxMessage1") = SmartTags("interfaceReply.idxMessage2")
+        SmartTags("interfaceReply.numSerial1") = SmartTags("interfaceReply.numSerial2")
+        If (SmartTags("interfaceReply.idxMessage3") = 0) Then
+            SmartTags("interfaceReply.idxMessage2") = 0
+            SmartTags("interfaceReply.numSerial2") = 0
         Else
-            SmartTags("replyMessage.idxSelectedList") = 0
-            SmartTags("replyMessage.idxMessage2") = SmartTags("replyMessage.idxMessage3")
-            SmartTags("replyMessage.idxMessage3") = 0
+            SmartTags("interfaceReply.idxSelectedList") = 0
+            SmartTags("interfaceReply.idxMessage2") = SmartTags("interfaceReply.idxMessage3")
+            SmartTags("interfaceReply.numSerial2") = SmartTags("interfaceReply.numSerial3")
+            SmartTags("interfaceReply.idxMessage3") = 0
+            SmartTags("interfaceReply.numSerial3") = 0
         End If
     End If
 Else
-    If (SmartTags("replyMessage.idxMessage2") = 0) Then
-        If (SmartTags("replyMessage.idxMessage3") = 0) Then
+    If (SmartTags("interfaceReply.idxMessage2") = 0) Then
+        If (SmartTags("interfaceReply.idxMessage3") = 0) Then
         Else
-            SmartTags("replyMessage.idxSelectedList") = 0
-            SmartTags("replyMessage.idxMessage2") = SmartTags("replyMessage.idxMessage3")
-            SmartTags("replyMessage.idxMessage3") = 0
+            SmartTags("interfaceReply.idxSelectedList") = 0
+            SmartTags("interfaceReply.idxMessage2") = SmartTags("interfaceReply.idxMessage3")
+            SmartTags("interfaceReply.numSerial2") = SmartTags("interfaceReply.numSerial3")
+            SmartTags("interfaceReply.idxMessage3") = 0
+            SmartTags("interfaceReply.numSerial3") = 0
         End If
     End If
 End If
@@ -79,19 +83,19 @@ ElseIf (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger")) Then
     '/ the list index HMI tag:                                                 /
     '/-------------------------------------------------------------------------/
     bInserted = False
-    If (SmartTags("replyMessage.idxMessage1") = 0) Then
-        SmartTags("replyMessage.idxMessage1") = @@IDXEVENT@@
-        SmartTags("replyMessage.numSerial1") = SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.numSerial")
+    If (SmartTags("interfaceReply.idxMessage1") = 0) Then
+        SmartTags("interfaceReply.idxMessage1") = @@IDXEVENT@@
+        SmartTags("interfaceReply.numSerial1") = SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.numSerial")
         bInserted = True
 
-    ElseIf (SmartTags("replyMessage.idxMessage2") = 0) Then
-        SmartTags("replyMessage.idxMessage2") = @@IDXEVENT@@
-        SmartTags("replyMessage.numSerial2") = SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.numSerial")
+    ElseIf (SmartTags("interfaceReply.idxMessage2") = 0) Then
+        SmartTags("interfaceReply.idxMessage2") = @@IDXEVENT@@
+        SmartTags("interfaceReply.numSerial2") = SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.numSerial")
         bInserted = True
 
-    ElseIf (SmartTags("replyMessage.idxMessage3") = 0) Then
-        SmartTags("replyMessage.idxMessage3") = @@IDXEVENT@@
-        SmartTags("replyMessage.numSerial3") = SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.numSerial")
+    ElseIf (SmartTags("interfaceReply.idxMessage3") = 0) Then
+        SmartTags("interfaceReply.idxMessage3") = @@IDXEVENT@@
+        SmartTags("interfaceReply.numSerial3") = SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.numSerial")
         bInserted = True
     End If
 

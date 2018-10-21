@@ -159,16 +159,12 @@ _notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Set recipe parameters
     //------------------------------------------------------------------------//
-    // Get the Control Recipe parameters if starting a new command:           //
+    // Set the Control Recipe parameter values:                               //
     //------------------------------------------------------------------------//
-    A #f[@@IDX@@].p.read.bmc.eventCmdStart;
-    JCN _noStart_@@IDX@@;
 @@ATTR_BEGIN|pBLOCK_RECIPE@@
-    L "dbRECIPE".recipeControl.PC@@INSTANCE@@.@@BLOCKPARAMETER@@;
+    L "dbRECIPE".recipeControl.@@RECIPE@@.@@BLOCKPARAMETER@@;
     T #f[@@IDX@@].p.write.@@BLOCKPARAMETER@@;
 @@ATTR_END|pBLOCK_RECIPE@@
-
-_noStart_@@IDX@@:   NOP 0;
 
 @@ATTR_END|pBLOCK_RECIPE_EXISTS@@
 
@@ -192,6 +188,19 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Linked block parameters
     T #f[@@IDX@@].p.link.@@LINKALIAS@@;
 
 @@ATTR_END|LINK_BLK@@
+
+@@ATTR_BEGIN|pEventPromptExists@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : eventPrompt instance index values
+    //------------------------------------------------------------------------//
+    // Set the index values for the instance eventPrompt:                     //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventPromptInstance@@
+    L @@IDXEVENT@@;
+    T #f[@@IDX@@].p.link.eventPrompt_@@NUMEVENT@@;
+@@ATTR_END|pEventPromptInstance@@
+
+@@ATTR_END|pEventPromptExists@@
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@

@@ -34,6 +34,7 @@ VERSION : 1.0
         modeAUTO : Bool;
         modeMANUAL : Bool;
         modeOOS : Bool;
+        needAttention : Bool;          // True if block needs operator attention
         isAvailable : Bool;            // True if block has no write
         isBatch : Bool;
         isMaster : Bool;
@@ -76,8 +77,6 @@ VERSION : 1.0
         eventModeOOS : Bool;
         eventCmdStart : Bool;
         eventCmdStop : Bool;
-        CHILD_FAIL_RESET : Bool;
-        BAD_PARAM : Bool;
         hasSFC : Bool;
         edgeInterlock : Bool;
         edgeCommandStart : Bool;
@@ -85,7 +84,6 @@ VERSION : 1.0
         edgeModeAuto : Bool;
         edgeModeManual : Bool;
         edgeModeOOS : Bool;
-        stateINTERLOCKED : Bool;
         stateRUNNING : Bool;
         stateSTOPPED : Bool;
     END_STRUCT;
@@ -94,11 +92,9 @@ END_TYPE
 TYPE "udtBLKError"
 VERSION : 1.0
     STRUCT
-        interlocked : Bool;
-        badParameter : Bool;
+        permitStart : Bool;
         childError : Bool;
         childMismatch : Bool;
-        childNotAuto : Bool;
         childSafeState : Bool;
         childUnavailable : Bool;
     END_STRUCT;

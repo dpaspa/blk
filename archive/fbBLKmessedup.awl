@@ -57,11 +57,13 @@ VAR
     timeCheckChildStateExpired : Bool;
     timeCheckChildStateElapsed : Time;
     flags : Struct
+        childCompleted : Bool;
         childError : Bool;
         childFailed : Bool;
         childMismatch : Bool;
         childUnavailable : Bool;
         sfcCompleted : Bool;
+        stateCompleted : Bool;
     END_STRUCT;
     acquire : Struct
 @@ATTR_BEGIN|CHILD@@
@@ -105,6 +107,8 @@ VAR DB_SPECIFIC
 @@ATTR_BEGIN|pEventConfirmNoNumWords@@
     wEventConfirmNo { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..@@CWORDMAX@@] of Word;
 @@ATTR_END|pEventConfirmNoNumWords@@
+@@ATTR_END|pEventConfirmNoExists@@
+@@ATTR_BEGIN|pEventConfirmNoExists@@
 @@ATTR_BEGIN|pEventConfirmNoNum@@
     bEventConfirmNo { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventConfirmNo : Array[0..@@IDXEVENTMAX@@] of Bool;
 @@ATTR_END|pEventConfirmNoNum@@
@@ -114,6 +118,8 @@ VAR DB_SPECIFIC
 @@ATTR_BEGIN|pEventConfirmYesNumWords@@
     wEventConfirmYes { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..@@CWORDMAX@@] of Word;
 @@ATTR_END|pEventConfirmYesNumWords@@
+@@ATTR_END|pEventConfirmYesExists@@
+@@ATTR_BEGIN|pEventConfirmYesExists@@
 @@ATTR_BEGIN|pEventConfirmYesNum@@
     bEventConfirmYes { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventConfirmYes : Array[0..@@IDXEVENTMAX@@] of Bool;
 @@ATTR_END|pEventConfirmYesNum@@
@@ -123,6 +129,8 @@ VAR DB_SPECIFIC
 @@ATTR_BEGIN|pEventLogMsgNumWords@@
     wEventLogMsg { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..@@CWORDMAX@@] of Word;
 @@ATTR_END|pEventLogMsgNumWords@@
+@@ATTR_END|pEventLogMsgExists@@
+@@ATTR_BEGIN|pEventLogMsgExists@@
 @@ATTR_BEGIN|pEventLogMsgNum@@
     bEventLogMsg { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventLogMsg : Array[0..@@IDXEVENTMAX@@] of Bool;
 @@ATTR_END|pEventLogMsgNum@@
@@ -132,6 +140,8 @@ VAR DB_SPECIFIC
 @@ATTR_BEGIN|pEventLogRealNumWords@@
     wEventLogReal { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..@@CWORDMAX@@] of Word;
 @@ATTR_END|pEventLogRealNumWords@@
+@@ATTR_END|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogRealExists@@
 @@ATTR_BEGIN|pEventLogRealNum@@
     bEventLogReal { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventLogReal : Array[0..@@IDXEVENTMAX@@] of Bool;
 @@ATTR_END|pEventLogRealNum@@
@@ -141,6 +151,8 @@ VAR DB_SPECIFIC
 @@ATTR_BEGIN|pEventLogTimeNumWords@@
     wEventLogTime { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..@@CWORDMAX@@] of Word;
 @@ATTR_END|pEventLogTimeNumWords@@
+@@ATTR_END|pEventLogTimeExists@@
+@@ATTR_BEGIN|pEventLogTimeExists@@
 @@ATTR_BEGIN|pEventLogTimeNum@@
     bEventLogTime { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventLogTime : Array[0..@@IDXEVENTMAX@@] of Bool;
 @@ATTR_END|pEventLogTimeNum@@
@@ -209,7 +221,21 @@ TITLE = Check if any Child has Failed
     A #flags.childMismatch;
     A #timeCheckChildStateExpired;
     );
-    = #flags.childFailed;
+    S #flags.childFailed;
+
+NETWORK
+TITLE = Clear the latched child failed error
+    //------------------------------------------------------------------------//
+    // The child fail will latch until the operator requests to try again     //
+    // from the HMI:                                                          //
+    //------------------------------------------------------------------------//
+    AN #flags.childError;
+    AN #flags.childUnavailable;
+    AN #flags.childMismatch;
+    A #p.read.bmc.CHILD_FAIL_RESET;
+    R #flags.childFailed;
+    R #p.read.mc.INTERLOCK;
+    R #p.read.bmc.CHILD_FAIL_RESET;
 
 NETWORK
 TITLE = Call General Mode and Command handling block
@@ -237,24 +263,13 @@ TITLE = Set Start command permitted flag if all okay
     = #p.read.bmc.permitStart;
 
 NETWORK
-TITLE = Operator Attention Flag
-    //------------------------------------------------------------------------//
-    // If not in Auto or any interlock or inhibit condition then the block    //
-    // needs operator attention:                                              //
-    //------------------------------------------------------------------------//
-    O #p.read.mc.modeMANUAL;
-    O #p.read.mc.modeOOS;
-    ON #p.read.bmc.permitStart;
-    = #p.read.mc.needAttention;
-
-NETWORK
 TITLE = Call BLOCK Mode and Command handling block
     //------------------------------------------------------------------------//
     // Process the stackable block functions for mode and command change      //
     // events:                                                                //
     //------------------------------------------------------------------------//
     CALL "fcModeCmdBLK"
-    (   mcRead             := #p.read.mc ,
+    (   mcRead               := #p.read.mc ,
         mcWrite              := #p.write.mc ,
         bmc                  := #p.read.bmc
     );
@@ -285,31 +300,13 @@ _childSelect_@@COUNTERATTR|1@@:   NOP 0;
 
 @@ATTR_END|CHILD_SELECT@@
 
-@@ATTR_BEGIN|CHILD_ACQUIRE@@
-NETWORK
-TITLE = Release child @@CHILDPARAMETERALIAS@@ if acquired and command completed
-    //------------------------------------------------------------------------//
-    // RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELE   //
-    //                                                                        //
-    // Release the child device if acquired earlier to run the command:       //
-    //------------------------------------------------------------------------//
-    A #flags.sfcCompleted;
-    A #acquire.@@CHILDPARAMETERALIAS@@;
-    JCN _notOwn@@COUNTERATTR|1@@;
-    L "dbCONST".BLK.ID.AVAILABLE;
-    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
-    R #acquire.@@CHILDPARAMETERALIAS@@;
-_notOwn@@COUNTERATTR@@:   NOP 0;
-
-@@ATTR_END|CHILD_ACQUIRE@@
-
 NETWORK
 TITLE = Set child devices to safe state if any interlock or child failure
     //------------------------------------------------------------------------//
     // SAFE STATE   SAFE STATE   SAFE STATE   SAFE STATE  SAFE STATE  SAFE ST //
     //                                                                        //
     // Set the child device to the safe state on any interlock condition or   //
-    // child failure:                                                         //
+    // child failure or just stopping:                                        //
     //------------------------------------------------------------------------//
     O #p.read.bmc.eventCmdStop;
     ON #p.read.bmc.permitStart;
@@ -330,24 +327,13 @@ _blkSafe_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
 _childSafe:   NOP 0;
 
-
-NETWORK
-TITLE = Flag SFC finished if none exist
-    //------------------------------------------------------------------------//
-    // Flag SFC completed if there aren't any:                                //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|STATE@@
-    AN #subsHasSFC.@@STATE@@;
-@@ATTR_END|STATE@@
-    S #flags.sfcCompleted;
-
 @@ATTR_BEGIN|SFCExists@@
 NETWORK
-TITLE = All SQ are in Auto mode when EM in Auto
+TITLE = All SQ are in Auto mode when block switched to Auto
     //------------------------------------------------------------------------//
     // SFC AUTO   SFC AUTO   SFC AUTO   SFC AUTO   SFC AUTO   SFC AUTO   SFC  //
     //                                                                        //
-    // Set all SFCs to AUTO mode if the block is in AUTO:                     //
+    // Set all SFCs to AUTO mode if the block is switched to AUTO:            //
     //------------------------------------------------------------------------//
     A #p.read.bmc.eventModeAUTO;
     JCN _nomcAuto;
@@ -366,10 +352,8 @@ TITLE = Cascade Auto or OOS Mode to children
     //                                                                        //
     // Switch child mode to Auto or OOS when parent mode transitions:         //
     //------------------------------------------------------------------------//
-    A(;
     O #p.read.bmc.eventModeAUTO;
     O #p.read.bmc.eventModeOOS;
-    );
     JCN _nomcAutoOOS;
 
 @@ATTR_BEGIN|CHILD_COMMAND@@
@@ -381,6 +365,25 @@ _cascMode@@COUNTERATTR|1@@:   NOP 0;
 
 @@ATTR_END|CHILD_COMMAND@@
 _nomcAutoOOS:   NOP 0;
+
+@@ATTR_BEGIN|CHILD_COMMAND_BLK_EXISTS@@
+NETWORK
+TITLE = Cascade child fail reset bit to all Block children
+    //------------------------------------------------------------------------//
+    // RESET CASCADE   RESET CASCADE   RESET CASCADE   RESET CASCADE   RESET  //
+    //                                                                        //
+    // Reset child fail bit to all Block children, but not CMs:               //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CHILD_COMMAND_BLK@@
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
+    @@CHILDCOMMANDSTATEMENT@@
+    JCN _nocascReset@@COUNTERATTR|1@@;
+    A #p.read.bmc.CHILD_FAIL_RESET;
+    = "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.bmc.CHILD_FAIL_RESET;
+_nocascReset@@COUNTERATTR|1@@:   NOP 0;
+
+@@ATTR_END|CHILD_COMMAND_BLK@@
+@@ATTR_END|CHILD_COMMAND_BLK_EXISTS@@
 
 @@ATTR_BEGIN|pChildReadExists@@
 NETWORK
@@ -456,6 +459,7 @@ _parentWriteBool_@@COUNTERATTR@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBU
 @@ATTR_END|pParentWriteBool@@
 @@ATTR_END|CHILD_COMMAND@@
 
+
 @@ATTR_BEGIN|HYGIENE@@
 NETWORK
 TITLE = Hygiene Status Calculation
@@ -488,6 +492,9 @@ TITLE = Switch command and state
     A #p.read.bmc.stateSTOPPED;
     JC _state_STOPPED;
 
+    A #p.read.bmc.stateINTERLOCKED;
+    JC _state_INTERLOCKED;
+
 NETWORK
 TITLE = Reset running substate if block stopped
     //------------------------------------------------------------------------//
@@ -511,7 +518,16 @@ _state_STOPPED:      NOP 0;
     R #subsRunning.@@STATE@@;
 @@ATTR_END|STATE@@
 
+
+NETWORK
+TITLE = Reset child completed flag
+    //------------------------------------------------------------------------//
+    // Reset the child completed flag awaiting new child command:             //
+    //------------------------------------------------------------------------//
 _state_STARTING: NOP 0;
+	A #p.read.bmc.eventCmdStart;
+    R #flags.childCompleted;
+    R #p.read.bmc.CHILD_FAIL_RESET;
 
 @@ATTR_BEGIN|STATE@@
 NETWORK
@@ -700,10 +716,9 @@ TITLE = Clear the operator prompt flags
 @@ATTR_BEGIN|pEventPromptConfirmNo@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_no;
 @@ATTR_END|pEventPromptConfirmNo@@
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].trigger;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmYes;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmNo;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].active;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].trigger;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmYes;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
 @@ATTR_END|pEventPrompt@@
 
 _clrPrompt:   NOP 0;
@@ -918,7 +933,7 @@ TITLE = Set block state STOPPED if block stopped
 
 _blkStopped: NOP 0;
 
-_state_RUNNING: NOP 0;
+_state_INTERLOCKED: NOP 0;
 
 @@ATTR_BEGIN|SFC@@
 NETWORK
@@ -929,22 +944,26 @@ TITLE = Any Interlock must pause the running SFC
 	AN #p.read.bmc.permitStart;
     A #subsRunning.@@STATE@@;
     JCN _ilSFC_@@COUNTERATTR|1@@;
+    S #p.read.mc.INTERLOCK;
     L "dbCONST".SEQ.CMD.PAUSE;
     T #@@SFC@@.smc.SQ_CMD;
 _ilSFC_@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|SFC@@
 
+_state_RUNNING: NOP 0;
+
 NETWORK
 TITLE = Block errors
     //------------------------------------------------------------------------//
-    // Set the block start perimt error status if active:                     //
+    // Set the block interlock error status if active:                        //
     //------------------------------------------------------------------------//
-    AN #p.read.bmc.permitStart;
-    = #p.read.err.permitStart;
+    O #p.read.mc.INTERLOCK;
+    ON #p.read.bmc.permitStart;
+    = #p.read.err.interlocked;
 
     //------------------------------------------------------------------------//
-    // Set the child error status if active:                                  //
+    // Set the child interlocked error status if active:                      //
     //------------------------------------------------------------------------//
     A #flags.childError;
     = #p.read.err.childError;
@@ -969,7 +988,7 @@ TITLE = Block errors
     O #p.read.err.childMismatch;
     O #p.read.err.childSafeState;
     O #p.read.err.childUnavailable;
-    O #p.read.err.permitStart;
+    O #p.read.err.interlocked;
     = #p.read.mc.ERROR;
 
 NETWORK
@@ -977,7 +996,7 @@ TITLE = Interlocked condition cleared
     //------------------------------------------------------------------------//
     // Set the state stopped if the interlock condition just cleared:         //
     //------------------------------------------------------------------------//
-    AN #p.read.mc.INTERLOCK;
+	AN #p.read.bmc.stateINTERLOCKED;
     A(;
     L #p.read.mc.STATE;
     L "dbCONST".BLK.STATE.INTERLOCKED;
@@ -1037,6 +1056,7 @@ TITLE = Check if any Child state does not match the command
     CLR;
 
 _noMismatch:   NOP 0;
+    S #flags.childCompleted;
     R #flags.childMismatch;
 
 _noResetMismatch:   NOP 0;
@@ -1118,7 +1138,7 @@ TITLE = Set the child attribute if it is in auto
     //------------------------------------------------------------------------//
     // Set the child substate:                                                //
     //------------------------------------------------------------------------//
-@@ATTR_BEGIN|CHILD_COMMAND_BLK@@
+@@ATTR_BEGIN|CHILD_COMMAND@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
     @@CHILDCOMMANDSTATEMENT@@
     JCN _pSUBS_@@CHILDPARAMETERALIAS@@;
@@ -1126,7 +1146,7 @@ TITLE = Set the child attribute if it is in auto
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.SUBS;
 _pSUBS_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
-@@ATTR_END|CHILD_COMMAND_BLK@@
+@@ATTR_END|CHILD_COMMAND@@
 
     //------------------------------------------------------------------------//
     // Set the child command:                                                 //
@@ -1206,19 +1226,22 @@ TITLE = Raise operator prompt if required
     A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
     JCN _not_eventPrompt_@@IDXEVENT@@;
     L #p.write.mc.SERIALNUM;
-    T "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].numSerial;
+    T "dbEVENT".eventPrompt.event[@@IDXEVENT@@].numSerial;
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmYes;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmYes;
 @@ATTR_BEGIN|pEventConfirmNoExists@@
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmNo;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
 @@ATTR_END|pEventConfirmNoExists@@
-    S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].trigger;
+    S "dbEVENT".eventPrompt.event[@@IDXEVENT@@].trigger;
 _not_eventPrompt_@@IDXEVENT@@:   NOP 0;
 
 @@ATTR_END|pEventPrompt@@
 
 _noRunPrompt:   NOP 0;
 
+@@ATTR_END|pEventPromptExists@@
+
+@@ATTR_BEGIN|pEventPromptExists@@
 NETWORK
 TITLE = Return operator confirm bits if made
     //------------------------------------------------------------------------//
@@ -1228,22 +1251,22 @@ TITLE = Return operator confirm bits if made
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|pEventPrompt@@
 
-    A "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmYes;
+    A "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmYes;
     JCN _not_eventPrompt_@@IDXEVENT@@_confirmYes;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].trigger;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].trigger;
     S #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_yes;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmYes;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmYes;
 @@ATTR_BEGIN|pEventConfirmNoExists@@
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmNo;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
 @@ATTR_END|pEventConfirmNoExists@@
 _not_eventPrompt_@@IDXEVENT@@_confirmYes:   NOP 0;
 @@ATTR_BEGIN|pEventPromptConfirmNo@@
-    A "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmNo;
+    A "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
     JCN _not_eventPrompt_@@IDXEVENT@@_confirmNo;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].trigger;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].trigger;
     S #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_no;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmNo;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmYes;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmNo;
+    R "dbEVENT".eventPrompt.event[@@IDXEVENT@@].confirmYes;
 _not_eventPrompt_@@IDXEVENT@@_confirmNo:   NOP 0;
 
 @@ATTR_END|pEventPromptConfirmNo@@
@@ -1465,15 +1488,22 @@ _notFinSuc@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_BEGIN|SFC@@
 NETWORK
-TITLE = Flag SFC finished if unsuccessfully completed execution
+TITLE = Flag SFC finished if no longer running for some reason
     //------------------------------------------------------------------------//
-    // Flag SFC completed if the sequence has been aborted:                   //
+    // Flag SFC completed if the sequence has been aborted or stopped:        //
     //------------------------------------------------------------------------//
     A #subsRunning.@@STATE@@;
     A(;
+    O(;
     L #@@SFC@@.smc.SQ_STATE;
     L "dbCONST".SEQ.STATE.ABORTED;
     ==I;
+    );
+    O(;
+    L "dbCONST".SEQ.STATE.OFF_IDLE;
+    L #@@SFC@@.smc.SQ_STATE;
+    ==I;
+    );
     );
     JCN _notFin@@COUNTERATTR|1@@;
     S #flags.sfcCompleted;
@@ -1481,27 +1511,6 @@ TITLE = Flag SFC finished if unsuccessfully completed execution
     T #p.read.mc.STATE;
 _notFin@@COUNTERATTR@@:   NOP 0;
 
-@@ATTR_END|SFC@@
-
-@@ATTR_BEGIN|SFC@@
-@@ATTR_BEGIN|STATE_ARM@@
-    //------------------------------------------------------------------------//
-    // Arm any flowpath child devices:                                        //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|CHILD_COMMAND@@
-    A #subsRunning.@@STATE@@;
-    @@CHILDCOMMANDSTATEMENT@@
-    A(;
-    O(;
-    A subsHasSFC.@@STATE@@;
-    A #flags.sfcCompleted;
-    );
-    ON subsHasSFC.@@STATE@@;
-    );
-    S "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
-@@ATTR_END|CHILD_COMMAND@@
-
-@@ATTR_END|STATE_ARM@@
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|STATE@@
@@ -1520,6 +1529,33 @@ TITLE = Set block running substate completed if finished
     );
     ON subsHasSFC.@@STATE@@;
     );
+    S #flags.stateCompleted;
+
+@@ATTR_END|STATE@@
+
+    //------------------------------------------------------------------------//
+    // Arm any flowpath child devices:                                        //
+    //------------------------------------------------------------------------//
+    A #flags.stateCompleted;
+    JCN _noArm;
+@@ATTR_BEGIN|SFC@@
+@@ATTR_BEGIN|STATE_ARM@@
+@@ATTR_BEGIN|CHILD_COMMAND@@
+    S "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
+@@ATTR_END|CHILD_COMMAND@@
+@@ATTR_END|STATE_ARM@@
+@@ATTR_END|SFC@@
+_noArm:   NOP 0;
+
+@@ATTR_BEGIN|STATE@@
+NETWORK
+TITLE = Set block running substate completed if finished
+    //------------------------------------------------------------------------//
+    // BLOCK COMPLETE   BLOCK COMPLETE   BLOCK COMPLETE   BLOCK COMPLETE   BL //
+    //                                                                        //
+    // Set the block state to COMPLETED if no SFC or SFC completed:           //
+    //------------------------------------------------------------------------//
+    A #flags.stateCompleted;
     JCN _blkComplete@@COUNTERATTR|1@@;
     L "dbCONST".BLK.@@CLASS@@.STATE.COMPLETED;
     T #p.read.mc.STATE;
@@ -1553,6 +1589,7 @@ TITLE = Reset block running substate if @@SFC@@ stopped
     ON subsHasSFC.@@STATE@@;
     );
     JCN _sfcStopped_@@SFC@@_@@COUNTERATTR|1@@;
+    S #flags.stateCompleted;
     L #p.write.mc.SUBS;
     T #p.read.bmc.lastSUBS;
     R #flags.sfcCompleted;
@@ -1562,6 +1599,28 @@ _sfcStopped_@@SFC@@_@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|SFC@@
 
+@@ATTR_BEGIN|CHILD_ACQUIRE@@
+NETWORK
+TITLE = Release child @@CHILDPARAMETERALIAS@@ if acquired and command completed
+    //------------------------------------------------------------------------//
+    // RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELE   //
+    //                                                                        //
+    // Release the child device if acquired earlier to run the command:       //
+    //------------------------------------------------------------------------//
+    A #flags.stateCompleted;
+    A #acquire.@@CHILDPARAMETERALIAS@@;
+    JCN _notOwn@@COUNTERATTR|1@@;
+    L "dbCONST".BLK.ID.AVAILABLE;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
+    R #acquire.@@CHILDPARAMETERALIAS@@;
+_notOwn@@COUNTERATTR@@:   NOP 0;
+
+@@ATTR_END|CHILD_ACQUIRE@@
+
+NETWORK
+TITLE = Reset state completed as all actions performed at this point
+    A #flags.stateCompleted;
+    R #flags.stateCompleted;
 
 NETWORK
 TITLE = Pack the general block alarm bits
@@ -1576,7 +1635,7 @@ TITLE = Pack the general block alarm bits
     = #b[2];
     A #p.read.err.childUnavailable;
     = #b[3];
-    A #p.read.err.permitStart;
+    A #p.read.err.interlocked;
     = #b[4];
     L #w;
     T #p.read.mc.ALARM;

@@ -62,7 +62,7 @@ VERSION : 2.0
       PID1 {OriginalPartName := 'CONT_C_1500'; LibVersion := '1.1'} : CONT_C;
    END_VAR
    VAR DB_SPECIFIC
-      b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..8] of Bool;
+      b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..15] of Bool;
       w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT b : Word;
    END_VAR
 
@@ -81,6 +81,7 @@ VERSION : 2.0
       tManual_Not_PID : Bool;
       startTMRElapsed : Time;
       permitMass : Bool;
+      FTR : Bool;
    END_VAR
 
 
@@ -154,6 +155,7 @@ TITLE = Analog input attributes
       T #p.read.ai.RAW_INPUT;
       L #p.read.ai.PV;
       T #p.read.PV;
+
 NETWORK
 TITLE = Call Analog Input handling function
 //------------------------------------------------------------------------//
@@ -394,7 +396,7 @@ TITLE = Converts PID output (%) to speed setpoint (RPM)
       L #p.read.LMN;
       L 100.0;
       /R;
-      T #p.read.LMN;
+      T #LMN;
 
 
       CALL SCALE_X
@@ -426,31 +428,26 @@ TITLE = Start event if commanded to start
       = #eventStart;
 
 NETWORK
-TITLE = Start timer to check if fail to start or run at low speed
-//------------------------------------------------------------------------//
-// Start timer if commanded to run:                                       //
-//------------------------------------------------------------------------//
-      A #eventStart;
-      JCN _j;
-      CALL #startTMR
-      {time_type := 'Time'}
-      (  IN                          := #tDO , 
-         PT                          := #p.read.FB_TDELAY , 
-         Q                           := #startTMRExpired , 
-         ET                          := #startTMRElapsed
-      );
-_j:      NOP 0;
-
-NETWORK
 TITLE = Fault if start timer expired and not running
 //------------------------------------------------------------------------//
 // Fault if start timer expired and still not running:                    //
 //------------------------------------------------------------------------//
-      A #startTMR.Q;
+      A #tDO;
       AN #p.read.RUNNING;
       AN #p.read.mc.modeOOS;
-      = #p.read.RUN_FAULT;
+      = #FTR;
 
+      CALL #startTMR
+      {time_type := 'Time'}
+      (  IN                          := #FTR , 
+         PT                          := #p.read.FB_TDELAY , 
+         Q                           := #startTMRExpired , 
+         ET                          := #startTMRElapsed
+      );
+      NOP 0;
+
+      A #startTMRExpired;
+      = #p.read.FAIL_TO_RUN;
 NETWORK
 TITLE = Disable state
 //------------------------------------------------------------------------//
@@ -463,6 +460,7 @@ TITLE = Disable state
       AN #p.read.THM;
       AN #p.read.FLP;
       AN #p.read.FLT;
+      AN #p.read.FAIL_TO_RUN;
       A #cmdDisable;
       JCN _q;
       L "dbCONST".BLK.SIC1.STATE.DISABLED;
@@ -478,6 +476,7 @@ TITLE = FAULT if any fault condition active
       O #p.read.THM;
       O #p.read.FLP;
       O #p.read.FLT;
+      O #p.read.FAIL_TO_RUN;
       JCN _r;
       L "dbCONST".BLK.SIC1.STATE.FAULT;
       T #p.read.mc.STATE;
@@ -489,6 +488,11 @@ TITLE = Stopped if command is ENABLE and mass not enough
 // STOPPED if command is enable and no interlock but mass not enough:     //
 //------------------------------------------------------------------------//
       A #cmdEnable;
+      AN #p.read.BRK;
+      AN #p.read.THM;
+      AN #p.read.FLP;
+      AN #p.read.FLT;
+      AN #p.read.FAIL_TO_RUN;
       AN #permitMass;
       JCN _s;
       L "dbCONST".BLK.SIC1.STATE.STOPPED;
@@ -500,6 +504,11 @@ TITLE = Running if output should be on
 //------------------------------------------------------------------------//
 // RUNNING if command is enable and no interlock and mass permits:        //
 //------------------------------------------------------------------------//
+      AN #p.read.BRK;
+      AN #p.read.THM;
+      AN #p.read.FLP;
+      AN #p.read.FLT;
+      AN #p.read.FAIL_TO_RUN;
       A #tDO;
       JCN _t;
       L "dbCONST".BLK.SIC1.STATE.RUNNING;
@@ -513,22 +522,16 @@ TITLE = Pack the alarm bits
 //------------------------------------------------------------------------//
       A #p.read.ALM_BRK;
       = #b[0];
-
       A #p.read.ALM_FLP;
       = #b[1];
-
       A #p.read.ALM_FLT;
       = #b[2];
-
       A #p.read.ALM_PHR;
       = #b[3];
-
-      A #p.read.RUN_FAULT;
+      A #p.read.FAIL_TO_RUN;
       = #b[4];
-
       A #p.read.ALM_THM;
       = #b[5];
-
       L #w;
       T #p.read.mc.ALARM;
 END_FUNCTION_BLOCK

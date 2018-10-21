@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/09/2018 2:35:32 PM by David Paspa
+generated on 16/09/2018 10:26:00 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -185,21 +185,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::20
 --------------------------------------------------
-Name:- toggle_mode
-Type:- BOOL
-Description:- Toggle mode of all used units
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::21
---------------------------------------------------
 Name:- sy_vessel_hygiene
 Type:- INT
 Description:- Hygiene Status of unit Sy
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::21
 --------------------------------------------------
 Name:- sy_vessel_state
 Type:- INT
@@ -207,7 +199,7 @@ Description:- Device State of unit Sy
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::22
 --------------------------------------------------
 Name:- sy_vessel_subs
 Type:- INT
@@ -215,7 +207,7 @@ Description:- Substate selection to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::23
 --------------------------------------------------
 Name:- sy_vessel_cmd
 Type:- INT
@@ -299,23 +291,27 @@ STEP::03
 --------------------------------------------------
 StepNo:- 03
 Title:- RP_PCSY_CIPSIP : Initiate SETUP operations
-Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-
-Initiate Unit Operations
+Description:- Initiate Unit Operations
 Sy STATE=SETUP
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
+Description:- Reset the Sy Unit.
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_sy_vessel_cmd;
+Verification:- A(;
+L #_sy_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
 
-Initiate Unit Operations
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Initiate Unit Operations
 SY STATE=SETUP
-Action:- //Toggle all Units From Manual to Auto. This will cascade down to make sure all equipment is in Auto.
-SET;
-S #_toggle_mode;
-
-//Initiate Unit Operation for unit Sy
+Action:- //Initiate Unit Operation for unit Sy
 L "dbCONST".BLK.SY.SUBS.SETUP;
 T #_sy_vessel_subs;
 L "dbCONST".BLK.CMD.START;
@@ -351,6 +347,18 @@ Initiate Unit Operation for Sy CIP.
 
 --------------------------------------------------
 ACTION::01
+--------------------------------------------------
+Description:- Reset the Sy Unit.
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_sy_vessel_cmd;
+Verification:- A(;
+L #_sy_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
 --------------------------------------------------
 Description:- Set Sy equipment to Hygiene Status to CIP.
 Initiate Unit Operation for Sy CIP.
@@ -425,6 +433,18 @@ Set Sy Hygiene Status to SIP.
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
+Description:- Reset the Sy Unit.
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_sy_vessel_cmd;
+Verification:- A(;
+L #_sy_vessel_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
 Description:- Initiate Sy SIP Operations.
 
 Set Sy Hygiene Status to SIP.
@@ -437,7 +457,6 @@ T #_sy_vessel_cmd;
 //Set Sy equipment to Hygiene Status to SIP. 
 L "dbCONST".BLK.HYGIENE.SIP;
 T #_sy_vessel_hygiene;
-
 Verification:- A(;
 L #_sy_vessel_subs;
 L "dbCONST".BLK.SY.SUBS.SIP;
@@ -516,8 +535,6 @@ Description:- Reset all used flags
 Action:- //Stop Sy Unit Operation
 L "dbCONST".BLK.CMD.STOP;
 T #_sy_vessel_cmd;
-L "dbCONST".BLK.SAFE.CMD;
-T #_sy_vessel_subs;
 
 //Log CIPSIP operation end time.
 SET;
@@ -527,7 +544,6 @@ S #_log_msg_cipsip_end;
 
 //Clear used flags
 SET;
-R #_toggle_mode;
 R #_prompt_abort_confirm_yes;
 Verification:- A "uncondJump";
 

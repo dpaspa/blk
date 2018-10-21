@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 7/09/2018 3:16:43 PM by David Paspa
+generated on 16/09/2018 4:59:07 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -500,19 +500,9 @@ SET;
 S #_prompt_connect_ok;
 
 //Set Sy equipments to SAFE state.
-L "dbCONST".BLK.SAFE.CMD;
-T  #_emc_gas_subs;
 L "dbCONST".BLK.CMD.STOP;
 T  #_emc_gas_cmd;
-
-L "dbCONST".BLK.SAFE.CMD;
-T  #_emv_vessel_subs;
-L "dbCONST".BLK.CMD.STOP;
 T  #_emv_vessel_cmd;
-
-L "dbCONST".BLK.SAFE.CMD;
-T  #_emc_water_sy_subs;
-L "dbCONST".BLK.CMD.STOP;
 T  #_emc_water_sy_cmd;
 Verification:- A(;
 L #_emc_gas_state;
@@ -554,6 +544,24 @@ Flowplate FP33 Sy to FLzZSC-zzyyy
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
+Description:- Reset Ems
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_emx_smfl_cmd;
+T #_emx_transfer_cmd;
+Verification:- A(;
+L   #_emx_smfl_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emx_transfer_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
 Description:- Setup the following path:
 Spool piece SPx2 SMFLx to ZSCx111
 Flowplate FP31 Mx to Sy/FLz ZSCn11y
@@ -585,10 +593,19 @@ L "dbCONST".BLK.EMX2.SUBS.SETUP;
 TRANSITION::02
 --------------------------------------------------
 TRNNo:- 02
-Title:- Empty Transition
+Title:- Setup
 EmptyTransition:- False
-Description:- Jump
-Condition:- A "uncondJump";
+Description:- Continue if setup completed
+Condition:- A(;
+L   #_emx_smfl_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+A(;
+L   #_emx_transfer_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
 
 
 --------------------------------------------------
@@ -597,18 +614,32 @@ STEP::03
 StepNo:- 03
 Title:- UO_SY_SETUP : Unit Operation Commenced
 Description:- Connect PW inlet line to Sy. Set emc_water to substate SETUP and MEDIUM=PW.
-Connect Sy to manufacturing filtration line and Filling Drain.
-Set emx_transfer to substate SETUP.
 Set emv_vessel to substate DISCHARGE.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
+Description:- Reset EMs
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_emc_water_sy_cmd;
+T #_emv_vessel_cmd;
+Verification:- A(;
+L   #_emc_water_sy_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emv_vessel_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
 Description:- Set Sy equipment to requested states.
 Connect PW inlet line to Sy. Set emc_water to substate SETUP and MEDIUM=PW.
 
-Connect Sy to manufacturing filtration line and Filling Drain
-Set emx_transfer to substate SETUP.
 Set emv_vessel to substate DISCHARGE.
 Action:- // Connect PW inlet line to Sy.
 L "dbCONST".SEL.LIQUID.PW;
@@ -617,13 +648,6 @@ L "dbCONST".BLK.EMC3.SUBS.SETUP;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emc_water_sy_cmd;
-
-//Set emx_transfer to substate SETUP.
-L "dbCONST".BLK.EMX2.SUBS.SETUP;
-T #_emx_transfer_subs;
-L "dbCONST".BLK.CMD.START;
-T #_emx_transfer_cmd;
-
 
 // Set emv_vessel to substate DISCHARGE.
 L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
@@ -646,11 +670,6 @@ EmptyTransition:- False
 Description:- Cointinue if SETUP completed
 Condition:- A(;
 L   #_emc_water_sy_state;
-L   "dbCONST".BLK.STATE.COMPLETED;
-==I;
-);
-A(;
-L   #_emx_transfer_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
@@ -689,6 +708,18 @@ Log Vacuum begin time
 
 --------------------------------------------------
 ACTION::01
+--------------------------------------------------
+Description:- Reset gas EM
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_emc_gas_cmd;
+Verification:- A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
 --------------------------------------------------
 Description:- Enable vacuum.
 Start vacuum timer. Log Vacuum begin time
@@ -789,8 +820,6 @@ Store Vacuum Hold test begin time.
 Action:- //Close Mx vacuum valves.
 L "dbCONST".BLK.CMD.STOP;
 T #_emc_gas_cmd;
-L "dbCONST".BLK.SAFE.CMD;
-T #_emc_gas_subs;
 
 // Start vacuum hold timer
 SET;
@@ -881,7 +910,7 @@ Condition:- A "uncondJump";
 STEP::10
 --------------------------------------------------
 StepNo:- 10
-Title:- UO_MX_SETUP: Sequence reentry point
+Title:- UO_MX_SETUP: Vacuum Hold Test
 
 --------------------------------------------------
 ACTION::01

@@ -91,6 +91,16 @@ TITLE = Interlock Flag
     = #mcRead.INTERLOCK;
 
 NETWORK
+TITLE = Operator Attention Flag
+    //------------------------------------------------------------------------//
+    // If not in Auto or any interlock then the block needs attention:        //
+    //------------------------------------------------------------------------//
+    O #mcRead.modeMANUAL;
+    O #mcRead.modeOOS;
+    O #mcRead.INTERLOCK;
+    = #mcRead.needAttention;
+
+NETWORK
 TITLE = Availability Flag
     //------------------------------------------------------------------------//
     // Set boolean available flag if the OWNER ID is zero:                    //
