@@ -173,6 +173,7 @@ TITLE = Check if any child is in error
 @@ATTR_END|CHILD_COMMAND@@
     = #flags.childError;
 
+@@ATTR_BEGIN|CHILD_ACQUIRE_EXISTS@@
 NETWORK
 TITLE = Check if any shared Child is not Owned or not Available
     //------------------------------------------------------------------------//
@@ -193,6 +194,7 @@ TITLE = Check if any shared Child is not Owned or not Available
     );
 @@ATTR_END|CHILD_ACQUIRE@@
     = #flags.childUnavailable;
+@@ATTR_END|CHILD_ACQUIRE_EXISTS@@
 
 NETWORK
 TITLE = Check if any Child has Failed
@@ -317,12 +319,13 @@ TITLE = Set child devices to safe state if any interlock or child failure
 
     //------------------------------------------------------------------------//
     // Set all child devices to safe state due to block stop or problem:      //
+    // L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_COMMAND@@
     @@CHILDCOMMANDSTATEMENT@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
     JCN _blkSafe_@@CHILDPARAMETERALIAS@@;
-    L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.CMD_SAFE;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.CMD;
 _blkSafe_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
@@ -1429,12 +1432,13 @@ TITLE = Set child devices to safe state if SFC Paused or Error
 
     //------------------------------------------------------------------------//
     // Set all child devices to safe state due to sequence problem:           //
+    // L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_COMMAND@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
     @@CHILDCOMMANDSTATEMENT@@
     JCN _sfcSafe_@@CHILDPARAMETERALIAS@@;
-    L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.CMD_SAFE;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.CMD;
 _sfcSafe_@@CHILDPARAMETERALIAS@@:   NOP 0;
 

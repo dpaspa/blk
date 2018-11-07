@@ -421,8 +421,11 @@ TITLE = Close DRAIN valve if required
     //                                                                        //
     // If DRAIN valve to be closed then CLOSE it:                             //
     //------------------------------------------------------------------------//
+    A "idbPOS4".f[#p.link.DRAIN].p.read.mc.modeAUTO;
+    A(;
     ON #tDO;
     ON #selectDRAIN;
+    );
     JCN _m;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
     T "idbPOS4".f[#p.link.DRAIN].p.write.mc.CMD;
@@ -433,8 +436,11 @@ TITLE = Close HPCA valve if required
     //------------------------------------------------------------------------//
     // If HPCA valve to be closed then CLOSE it:                              //
     //------------------------------------------------------------------------//
+    A "idbPOS2".f[#p.link.HPCA].p.read.mc.modeAUTO;
+    A(;
     ON #tDO;
     ON #selectHPCA;
+    );
     JCN _n;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
     T "idbPOS2".f[#p.link.HPCA].p.write.mc.CMD;
@@ -445,8 +451,11 @@ TITLE = Close LPCA valve if required
     //------------------------------------------------------------------------//
     // If LPCA valve to be closed then CLOSE it:                              //
     //------------------------------------------------------------------------//
+    A "idbPOS2".f[#p.link.LPCA].p.read.mc.modeAUTO;
+    A(;
     ON #tDO;
     ON #selectLPCA;
+    );
     JCN _o;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
     T "idbPOS2".f[#p.link.LPCA].p.write.mc.CMD;
@@ -457,8 +466,11 @@ TITLE = Close VACUUM valve if required
     //------------------------------------------------------------------------//
     // If VACUUM valve to be closed then CLOSE it:                            //
     //------------------------------------------------------------------------//
+    A "idbPOS2".f[#p.link.VACUUM].p.read.mc.modeAUTO;
+    A(;
     ON #tDO;
     ON #selectVACUUM;
+    );
     JCN _p;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
     T "idbPOS2".f[#p.link.VACUUM].p.write.mc.CMD;
@@ -469,6 +481,8 @@ TITLE = Close VENT valve if required
     //------------------------------------------------------------------------//
     // If VENT valve to be closed then CLOSE it:                              //
     //------------------------------------------------------------------------//
+    A "idbPOS2".f[#p.link.VENT].p.read.mc.modeAUTO;
+    A(;
     O(;
     A #cmdPRESSURE;
     AN #tDO_VENT;
@@ -476,6 +490,7 @@ TITLE = Close VENT valve if required
     O(;
     A #selectVENT;
     AN #tDO;
+    );
     );
     JCN _q;
     L "dbCONST".BLK.POSx.CMD.CLOSE;

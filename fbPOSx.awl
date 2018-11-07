@@ -116,6 +116,15 @@ _a:   NOP 0;
 _b:   NOP 0;
 
     //------------------------------------------------------------------------//
+    // Apply the safe command if restarting the PLC:                          //
+    //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    JCN _noRestart;
+    L #p.read.mc.CMD_SAFE;
+    T #p.write.mc.CMD;
+_noRestart:   NOP 0;
+
+    //------------------------------------------------------------------------//
     // Process the standard block functions for command, mode, interlock and  //
     // state:                                                                 //
     //------------------------------------------------------------------------//
@@ -237,24 +246,36 @@ TITLE = Close command
     // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
     // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
     //                                                                        //
-    // CLOSE command if not OOS and no interlock:                             //
+    // De-energise if not OOS and no interlock:                               //
     //------------------------------------------------------------------------//
+    O(;
     A #cmdCLOSE;
-    JCN _not_close;
     A #OUT_Q_Close;
-    = #p.read.OUT_Q;
-_not_close:    NOP 0;
+    );
+    O(;
+    A #cmdOPEN;
+    A #OUT_Q_Open;
+    );
+    JCN _not_denergise;
+    R #p.read.OUT_Q;
+_not_denergise:    NOP 0;
 
 NETWORK
 TITLE = Open command
     //------------------------------------------------------------------------//
-    // OPEN command if not OOS and no interlock:                              //
+    // Energise if not OOS and no interlock:                                  //
     //------------------------------------------------------------------------//
+    O(;
     A #cmdOPEN;
-    JCN _not_open;
+    A #OUT_Q_Close;
+    );
+    O(;
+    A #cmdCLOSE;
     A #OUT_Q_Open;
-    = #p.read.OUT_Q;
-_not_open:    NOP 0;
+    );
+    JCN _not_energise;
+    S #p.read.OUT_Q;
+_not_energise:    NOP 0;
 
 NETWORK
 TITLE = Valve CLOSED if command and feedback CLOSED

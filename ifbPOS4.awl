@@ -138,15 +138,12 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     = #f[@@IDX@@].p.write.mc.isMaster;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Normally opened or closed
     //------------------------------------------------------------------------//
-    // Set the safe command if restarting the PLC:                            //
+    // Set the instance opened feedback value from the field:                 //
     //------------------------------------------------------------------------//
-    A "flagFirstScanRestart";
-    JCN _notRestart_@@COUNTERTEMPLATE|1@@;
-    L "dbCONST".BLK.POS4.SAFE.CMD;
-    T #f[@@IDX@@].p.read.mc.CMD_SAFE;
-_notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
+    A @@NC@@;
+    = #f[@@IDX@@].p.read.NC;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Feedback from the field
@@ -175,19 +172,19 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Opened feedback
     = #f[@@IDX@@].p.read.FB_O;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Normally opened or closed
-    //------------------------------------------------------------------------//
-    // Set the instance opened feedback value from the field:                 //
-    //------------------------------------------------------------------------//
-    A @@NC@@;
-    = #f[@@IDX@@].p.read.NC;
-
-NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #f[@@IDX@@];
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
+    //------------------------------------------------------------------------//
+    // Set the instance output command to the field:                          //
+    //------------------------------------------------------------------------//
+    A #f[@@IDX@@].p.read.OUT_Q;
+    = "@@INSTANCE@@-CMD";
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Send the alarm bits to the global DB

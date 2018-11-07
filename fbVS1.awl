@@ -95,7 +95,7 @@ TITLE = Check vacuum pumps are available
     );
     = #p.read.FAULT;
 	= #p.read.mc.INTERLOCK;
-	
+
     //------------------------------------------------------------------------//
     // Check if any user valve is open which is a call for vacuum:            //
     //------------------------------------------------------------------------//
@@ -116,13 +116,14 @@ TITLE = Check vacuum pumps are available
     = #tDO;
 
 NETWORK
-TITLE = Check vacuum pumps are available
+TITLE = Start or stop vacuum pumps if required
     //------------------------------------------------------------------------//
     // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
     // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
     //                                                                        //
     // Start vacuum pump 1 if a call for vacuum and all okay:                 //
     //------------------------------------------------------------------------//
+    A "idbMOT1".f[#p.link.PUMP1].p.read.mc.modeAUTO;
     A #tDO;
     JCN _a;
     L "dbCONST".BLK.MOT1.CMD.START;
@@ -132,6 +133,7 @@ _a:   NOP 0;
     //------------------------------------------------------------------------//
     // Start vacuum pump 2 if a call for vacuum and all okay:                 //
     //------------------------------------------------------------------------//
+    A "idbMOT1".f[#p.link.PUMP2].p.read.mc.modeAUTO;
     A #tDO;
     JCN _b;
     L "dbCONST".BLK.MOT1.CMD.START;
@@ -141,6 +143,7 @@ _b:   NOP 0;
     //------------------------------------------------------------------------//
     // Stop vacuum pump 1 if not required to run:                             //
     //------------------------------------------------------------------------//
+    A "idbMOT1".f[#p.link.PUMP1].p.read.mc.modeAUTO;
     AN #tDO;
     JCN _c;
     L "dbCONST".BLK.MOT1.CMD.STOP;
@@ -150,6 +153,7 @@ _c:   NOP 0;
     //------------------------------------------------------------------------//
     // Stop vacuum pump 2 if not required to run:                             //
     //------------------------------------------------------------------------//
+    A "idbMOT1".f[#p.link.PUMP2].p.read.mc.modeAUTO;
     AN #tDO;
     JCN _d;
     L "dbCONST".BLK.MOT1.CMD.STOP;

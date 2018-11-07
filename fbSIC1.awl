@@ -272,6 +272,36 @@ TITLE = Low mass condition must stop the agitator from running
 _b:   NOP 0;
 
 NETWORK
+TITLE = Clamp the Setpoint at minimum
+    //------------------------------------------------------------------------//
+    // Setpoint minimum clamp:                                                //
+    //------------------------------------------------------------------------//
+    A(;
+    L #p.write.SETPOINT;
+    L @@MXMINIMUMAGIT@@;
+    <R;
+    );
+    JCN _ma;
+    L @@MXMINIMUMAGIT@@;
+    T #p.write.SETPOINT;
+_ma:   NOP 0;
+
+NETWORK
+TITLE = Clamp the Setpoint at maximum
+    //------------------------------------------------------------------------//
+    // Setpoint maximum clamp:                                                //
+    //------------------------------------------------------------------------//
+    A(;
+    L #p.write.SETPOINT;
+    L @@MXMAXIMUMAGIT@@;
+    >R;
+    );
+    JCN _mb;
+    L @@MXMAXIMUMAGIT@@;
+    T #p.write.SETPOINT;
+_mb:   NOP 0;
+
+NETWORK
 TITLE = Setpoint if Enabled
     //------------------------------------------------------------------------//
     // Setpoint if ENABLE:                                                    //
@@ -409,14 +439,14 @@ TITLE = Converts PID output (%) to speed setpoint (RPM)
 
 NETWORK
 TITLE = Output if Disabled
-//------------------------------------------------------------------------//
-// Output should be 0 if disabled:                                        //
-//------------------------------------------------------------------------//
-      A #cmdDisable;
-      JCN _i;
-      L 0.0;
-      T #p.read.MV_OUTPUT;
-_i:      NOP 0;
+    //------------------------------------------------------------------------//
+    // Output should be 0 if disabled:                                        //
+    //------------------------------------------------------------------------//
+    A #cmdDisable;
+    JCN _i;
+    L 0.0;
+    T #p.read.MV_OUTPUT;
+_i:    NOP 0;
 
 NETWORK
 TITLE = Start event if commanded to start
@@ -458,6 +488,7 @@ TITLE = Disable state
     // DISABLED if command is disable or any interlock and not motor fault:   //
     //------------------------------------------------------------------------//
     AN #p.read.BRK;
+    AN #p.read.PHR;
     AN #p.read.THM;
     AN #p.read.FLP;
     AN #p.read.FLT;
@@ -474,6 +505,7 @@ TITLE = FAULT if any fault condition active
     // FAULT if any motor fault condition is active:                          //
     //------------------------------------------------------------------------//
     O #p.read.BRK;
+    O #p.read.PHR;
     O #p.read.THM;
     O #p.read.FLP;
     O #p.read.FLT;
@@ -490,6 +522,7 @@ TITLE = Stopped if command is ENABLE and mass not enough
     //------------------------------------------------------------------------//
     A #cmdEnable;
     AN #p.read.BRK;
+    AN #p.read.PHR;
     AN #p.read.THM;
     AN #p.read.FLP;
     AN #p.read.FLT;
@@ -506,6 +539,7 @@ TITLE = Running if output should be on
     // RUNNING if command is enable and no interlock and mass permits:        //
     //------------------------------------------------------------------------//
     AN #p.read.BRK;
+    AN #p.read.PHR;
     AN #p.read.THM;
     AN #p.read.FLP;
     AN #p.read.FLT;
