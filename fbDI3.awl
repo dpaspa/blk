@@ -34,6 +34,18 @@ END_VAR
 
 BEGIN
 NETWORK
+TITLE = Safe Command on restart
+    //------------------------------------------------------------------------//
+    // Set the safe command if restarting the PLC:                            //
+    //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    JCN _noRestart;
+    L "dbCONST".BLK.DI3.SAFE.CMD;
+    T #p.write.mc.CMD;
+    T #p.read.mc.CMD_SAFE;
+_noRestart:   NOP 0;
+
+NETWORK
 TITLE = Call Mode and Command handling function
     //------------------------------------------------------------------------//
     // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
@@ -53,6 +65,20 @@ TITLE = Process user command
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     //                                                                        //
+    // Enable command:                                                        //
+    //------------------------------------------------------------------------//
+    AN #p.read.mc.modeOOS;
+    A(;
+    L #p.write.mc.CMD;
+    L "dbCONST".BLK.DI3.CMD.ENABLE;
+    ==I;
+    );
+    JCN _a;
+    R #tPV;
+    R #p.read.ALARM;
+_a:   NOP 0;
+
+    //------------------------------------------------------------------------//
     // Calculate the process value based on the user command:                 //
     //------------------------------------------------------------------------//
     AN #p.read.mc.modeOOS;
@@ -61,8 +87,10 @@ TITLE = Process user command
     L "dbCONST".BLK.DI3.CMD.PAUSE;
     ==I;
     );
-    = #tPV;
-    = #p.read.ALARM;
+    JCN _b;
+    S #tPV;
+    S #p.read.ALARM;
+_b:   NOP 0;
 
 NETWORK
 TITLE = Set INTERLOCK Flag

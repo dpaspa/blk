@@ -121,17 +121,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     = #f[@@IDX@@].p.write.mc.isMaster;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
-    //------------------------------------------------------------------------//
-    // Set the safe command if restarting the PLC:                            //
-    //------------------------------------------------------------------------//
-    A "flagFirstScanRestart";
-    JCN _a_@@COUNTERTEMPLATE|1@@;
-    L "dbCONST".BLK.MOD1.SAFE.CMD;
-    T #f[@@IDX@@].p.read.mc.CMD_SAFE;
-_a_@@COUNTERTEMPLATE@@:   NOP 0;
-
-NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Initial remote position is closed
     //------------------------------------------------------------------------//
     // Set the initial remote position to be zero which is closed:            //

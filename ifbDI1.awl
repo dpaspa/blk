@@ -94,17 +94,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     = #f[@@IDX@@].p.write.mc.isMaster;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on restart
-    //------------------------------------------------------------------------//
-    // Set the safe command if restarting the PLC:                            //
-    //------------------------------------------------------------------------//
-    A "flagFirstScanRestart";
-    JCN _notRestart_@@COUNTERTEMPLATE|1@@;
-    L "dbCONST".BLK.DI1.SAFE.CMD;
-    T #f[@@IDX@@].p.read.mc.CMD_SAFE;
-_notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
-
-NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Field Input
     //------------------------------------------------------------------------//
     // Set the instance field input valve:                                    //

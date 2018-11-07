@@ -40,6 +40,18 @@ END_VAR
 
 BEGIN
 NETWORK
+TITLE = Safe Command on restart
+    //------------------------------------------------------------------------//
+    // Set the safe command if restarting the PLC:                            //
+    //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    JCN _noRestart;
+    L "dbCONST".BLK.DI1.SAFE.CMD;
+    T #p.write.mc.CMD;
+    T #p.read.mc.CMD_SAFE;
+_noRestart:   NOP 0;
+
+NETWORK
 TITLE = Call Mode and Command handling function
     //------------------------------------------------------------------------//
     // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
@@ -63,6 +75,7 @@ TITLE = Set Device command which can only be ENABLE.
     //------------------------------------------------------------------------//
     L "dbCONST".BLK.DI1.CMD.ENABLE;
     T #p.write.mc.CMD;
+    T #p.read.mc.CMD_SAFE;
 
 NETWORK
 TITLE = Process Digital Input Signal

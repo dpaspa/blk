@@ -144,17 +144,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Flag if SFCs are used in this block
     = #f[@@IDX@@].p.read.bmc.hasSFC;
 @@ATTR_END|SFCFlag@@
 
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Safe Command on startup
-    //------------------------------------------------------------------------//
-    // Set the safe command if restarting the PLC:                            //
-    //------------------------------------------------------------------------//
-    A "flagFirstScanRestart";
-    JCN _notRestart_@@COUNTERTEMPLATE|1@@;
-    L "dbCONST".BLK.@@CLASS@@.SAFE.CMD;
-    T #f[@@IDX@@].p.read.mc.CMD_SAFE;
-_notRestart_@@COUNTERTEMPLATE@@:   NOP 0;
-
 @@ATTR_BEGIN|pBLOCK_RECIPE_EXISTS@@
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Set recipe parameters
