@@ -563,6 +563,17 @@ TITLE = Running if output should be on
 _t:   NOP 0;
 
 NETWORK
+TITLE = Operator Attention Flag
+    //------------------------------------------------------------------------//
+    // If not in Auto or any interlock or inhibit condition then the block    //
+    // needs operator attention:                                              //
+    //------------------------------------------------------------------------//
+    O #p.read.mc.needAttention;
+    O #p.read.mc.INTERLOCK;
+    O #p.read.FAIL_TO_RUN;
+    = #p.read.mc.needAttention;
+
+NETWORK
 TITLE = Pack the alarm bits
     //------------------------------------------------------------------------//
     // Pack the alarm bits into an integer for the HMI to read:               //

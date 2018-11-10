@@ -7,9 +7,6 @@
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
-// 2.1 David Paspa      07-Nov-2018 NA        Simplified by removing valve    //
-//                                            selection option performed by   //
-//                                            EMC1.                           //
 // 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
 // 0.6 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic.             //
 // 0.5 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Input Parameters      //
@@ -52,11 +49,11 @@
 // Initial Value of MEASURE is changed to 1.0                                 //
 //----------------------------------------------------------------------------//
 FUNCTION_BLOCK "fbPC1"
-TITLE = PC1 : Vessel ON/OFF pressure control
+TITLE = PC1 : Vessel ON/OFF pressure control loop with output valve sel
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
 NAME : fbPC1
-VERSION : 2.1
+VERSION : 2.0
 
 //----------------------------------------------------------------------------//
 // Declare interface and variables:                                           //
@@ -67,9 +64,13 @@ END_VAR
 
 VAR_TEMP
     cmdDISABLE : Bool;
-    cmdENABLE : Bool;
+    cmdPRESSURE : Bool;
+    cmdVALVE : Bool;
+    selectDRAIN : Bool;
     selectHPCA : Bool;
     selectLPCA : Bool;
+    selectVACUUM : Bool;
+    selectVENT : Bool;
     dbHigh : Real;           // Deadband pressure high
     dbLow : Real;            // Deadband pressure low
     tDO : Bool;
@@ -103,6 +104,25 @@ TITLE = Call Mode and Command handling block
     );
 
 NETWORK
+TITLE = Check any link device is not in AUTO
+    //------------------------------------------------------------------------//
+    // Check if any link cannot be controlled if not in AUTO:                 //
+    //------------------------------------------------------------------------//
+    O #p.read.mc.INTERLOCK;
+    O "idbPI1".f[#p.link.PRESSURE].p.read.mc.INTERLOCK;
+    O "idbPOS4".f[#p.link.DRAIN].p.read.mc.INTERLOCK;
+    O "idbPOS2".f[#p.link.HPCA].p.read.mc.INTERLOCK;
+    O "idbPOS2".f[#p.link.LPCA].p.read.mc.INTERLOCK;
+    O "idbPOS2".f[#p.link.VACUUM].p.read.mc.INTERLOCK;
+    O "idbPOS2".f[#p.link.VENT].p.read.mc.INTERLOCK;
+    ON "idbPOS4".f[#p.link.DRAIN].p.read.mc.modeAUTO;
+    ON "idbPOS2".f[#p.link.HPCA].p.read.mc.modeAUTO;
+    ON "idbPOS2".f[#p.link.LPCA].p.read.mc.modeAUTO;
+    ON "idbPOS2".f[#p.link.VACUUM].p.read.mc.modeAUTO;
+    ON "idbPOS2".f[#p.link.VENT].p.read.mc.modeAUTO;
+    = #p.read.mc.INTERLOCK;
+
+NETWORK
 TITLE = Command is DISABLE
     //------------------------------------------------------------------------//
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
@@ -118,31 +138,35 @@ TITLE = Command is DISABLE
     ==I;
     );
     = #cmdDISABLE;
-    = #p.read.cmdDisable;
 
 NETWORK
-TITLE = DISABLE event if just commanded
+TITLE = Command is PRESSURE control
     //------------------------------------------------------------------------//
-    // Check if the command has just been changed to Disabled:                //
-    //------------------------------------------------------------------------//
-    A #p.read.cmdDisable;
-    FP #p.read.edgeCmdDisable;
-    = #p.read.eventCmdDisable;
-
-NETWORK
-TITLE = Command is ENABLE
-    //------------------------------------------------------------------------//
-    // CMD is ENABLE control and no fault condition:                          //
+    // CMD is PRESSURE control and no fault condition:                        //
     //------------------------------------------------------------------------//
     AN #p.read.mc.modeOOS;
     AN #p.read.mc.INTERLOCK;
     AN "idbPI1".f[#p.link.PRESSURE].p.read.mc.INTERLOCK;
     A(;
     L #p.write.mc.CMD;
-    L "dbCONST".BLK.PC1.CMD.ENABLE;
+    L "dbCONST".BLK.PC1.CMD.PRESSURE;
     ==I;
     );
-    = #cmdENABLE;
+    = #cmdPRESSURE;
+
+NETWORK
+TITLE = Command is VALVE open
+    //------------------------------------------------------------------------//
+    // CMD is VALVE open and no fault condition:                              //
+    //------------------------------------------------------------------------//
+    AN #p.read.mc.modeOOS;
+    AN #p.read.mc.INTERLOCK;
+    A(;
+    L #p.write.mc.CMD;
+    L "dbCONST".BLK.PC1.CMD.VALVE;
+    ==I;
+    );
+    = #cmdVALVE;
 
 NETWORK
 TITLE = Calculate high pressure valve close limit in PRESSURE
@@ -153,7 +177,7 @@ TITLE = Calculate high pressure valve close limit in PRESSURE
     // Add deadband high to setpoint to calculate the value when the selected //
     // valve should close in PRESSURE control:                                //
     //------------------------------------------------------------------------//
-    A #cmdENABLE;
+    A #cmdPRESSURE;
     JCN _a;
     L #p.write.SETPOINT;
     L #p.write.DB_H;
@@ -167,13 +191,25 @@ TITLE = Calculate low pressure valve open limit in PRESSURE
     // Subtract deadband low from setpoint to calculate the value when the    //
     // selected valve should open in PRESSURE control:                        //
     //------------------------------------------------------------------------//
-    A #cmdENABLE;
+    A #cmdPRESSURE;
     JCN _b;
     L #p.write.SETPOINT;
     L #p.write.DB_L;
     -R;
     T #dbLow;
 _b:   NOP 0;
+
+NETWORK
+TITLE = Selected valve is DRAIN
+    //------------------------------------------------------------------------//
+    // Selected GAS valve is DRAIN:                                           //
+    //------------------------------------------------------------------------//
+    A(;
+    L #p.write.MEDIUM_GAS;
+    L "dbCONST".SEL.GAS.DRAIN;
+    ==I;
+    );
+    = #selectDRAIN;
 
 NETWORK
 TITLE = Selected valve is HPCA
@@ -200,31 +236,28 @@ TITLE = Selected valve is LPCA
     = #selectLPCA;
 
 NETWORK
-TITLE = Check any link device is not in AUTO
+TITLE = Selected valve is VACUUM
     //------------------------------------------------------------------------//
-    // Check if any link cannot be controlled if not in AUTO:                 //
+    // Selected GAS valve is VACUUM:                                          //
     //------------------------------------------------------------------------//
-    O #p.read.mc.INTERLOCK;
-    O "idbPI1".f[#p.link.PRESSURE].p.read.mc.INTERLOCK;
-    O(;
-    A #selectHPCA;
-    A "idbPOS2".f[#p.link.HPCA].p.read.mc.INTERLOCK;
+    A(;
+    L #p.write.MEDIUM_GAS;
+    L "dbCONST".SEL.GAS.VACUUM;
+    ==I;
     );
-    O(;
-    A #selectLPCA;
-    O "idbPOS2".f[#p.link.LPCA].p.read.mc.INTERLOCK;
+    = #selectVACUUM;
+
+NETWORK
+TITLE = Selected valve is VENT
+    //------------------------------------------------------------------------//
+    // Selected GAS valve is VENT:                                            //
+    //------------------------------------------------------------------------//
+    A(;
+    L #p.write.MEDIUM_GAS;
+    L "dbCONST".SEL.GAS.VENT;
+    ==I;
     );
-    O "idbPOS2".f[#p.link.VENT].p.read.mc.INTERLOCK;
-    O(;
-    A #selectHPCA;
-    AN "idbPOS2".f[#p.link.HPCA].p.read.mc.modeAUTO;
-    );
-    O(;
-    A #selectLPCA;
-    AN "idbPOS2".f[#p.link.LPCA].p.read.mc.modeAUTO;
-    );
-    ON "idbPOS2".f[#p.link.VENT].p.read.mc.modeAUTO;
-    = #p.read.mc.INTERLOCK;
+    = #selectVENT;
 
 NETWORK
 TITLE = Check if selected valve should be OPENED
@@ -236,11 +269,14 @@ TITLE = Check if selected valve should be OPENED
     // pressure measured process PV is less than the setpoint minus the       //
     // low deadband or if VALVE open command:                                 //
     //------------------------------------------------------------------------//
-    A #cmdENABLE;
+    O #cmdVALVE;
+    O(;
+    A #cmdPRESSURE;
     A(;
     L "idbPI1".f[#p.link.PRESSURE].p.read.ai.PV;
     L #dbLow;
     <R;
+    );
     );
     JCN _c;
     S #tDO;
@@ -252,7 +288,7 @@ TITLE = Check if selected valve should be CLOSED
     // Check if selected valve should be CLOSED if PRESSURE control and       //
     // pressure measured process PV is greater than the setpoint:             //
     //------------------------------------------------------------------------//
-    A #cmdENABLE;
+    A #cmdPRESSURE;
     A(;
     L "idbPI1".f[#p.link.PRESSURE].p.read.ai.PV;
     L #p.write.SETPOINT;
@@ -263,12 +299,13 @@ TITLE = Check if selected valve should be CLOSED
 _d:   NOP 0;
 
 NETWORK
-TITLE = Check if VENT valve should be OPENED
+TITLE = Check if VENT valve should be OPENED in PRESSURE control
     //------------------------------------------------------------------------//
-    // Check if vent valve should be OPENED if the pressure PV is greater     //
-    // than the setpoint plus the high deadband:                              //
+    // Check if vent valve should be OPENED if PRESSURE control and pressure  //
+    // measured process PV is greater than the setpoint plus the high         //
+    // deadband:                                                              //
     //------------------------------------------------------------------------//
-    A #cmdENABLE;
+    A #cmdPRESSURE;
     AN #tDO;
     A(;
     L "idbPI1".f[#p.link.PRESSURE].p.read.ai.PV;
@@ -282,10 +319,10 @@ _e:   NOP 0;
 NETWORK
 TITLE = Check if VENT valve should be CLOSED
     //------------------------------------------------------------------------//
-    // Check if vent valve should be CLOSED if the pressure PV is less than   //
-    // the setpoint:                                                          //
+    // Check if vent valve should be CLOSED if PRESSURE control and pressure  //
+    // measured process PV is less than the setpoint:                         //
     //------------------------------------------------------------------------//
-    A #cmdENABLE;
+    A #cmdPRESSURE;
     AN #tDO;
     A(;
     L "idbPI1".f[#p.link.PRESSURE].p.read.ai.PV;
@@ -310,11 +347,26 @@ TITLE = Check if all valves should be CLOSED
 _g:   NOP 0;
 
 NETWORK
+TITLE = Open DRAIN valve if required
+    //------------------------------------------------------------------------//
+    // OPEN VALVE   OPEN VALVE   OPEN VALVE   OPEN VALVE   OPEN VALVE   OPEN  //
+    //                                                                        //
+    // If PRESSURE or VALVE and DRAIN selected then OPEN it:                  //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    A #selectDRAIN;
+    AN "idbPOS4".f[#p.link.DRAIN].p.read.mc.INTERLOCK;
+    A "idbPOS4".f[#p.link.DRAIN].p.read.mc.modeAUTO;
+    JCN _h;
+    L "dbCONST".BLK.POSx.CMD.OPEN;
+    T "idbPOS4".f[#p.link.DRAIN].p.write.mc.CMD;
+_h:   NOP 0;
+
+NETWORK
 TITLE = Open HPCA valve if required
     //------------------------------------------------------------------------//
-    // If enabled and HPCA selected then OPEN it:                             //
+    // If PRESSURE or VALVE and HPCA selected then OPEN it:                   //
     //------------------------------------------------------------------------//
-    AN #p.read.mc.INTERLOCK;
     A #tDO;
     A #selectHPCA;
     AN "idbPOS2".f[#p.link.HPCA].p.read.mc.INTERLOCK;
@@ -327,9 +379,8 @@ _i:   NOP 0;
 NETWORK
 TITLE = Open LPCA valve if required
     //------------------------------------------------------------------------//
-    // If enabled and LPCA selected then OPEN it:                             //
+    // If PRESSURE or VALVE and LPCA selected then OPEN it:                   //
     //------------------------------------------------------------------------//
-    AN #p.read.mc.INTERLOCK;
     A #tDO;
     A #selectLPCA;
     AN "idbPOS2".f[#p.link.LPCA].p.read.mc.INTERLOCK;
@@ -340,17 +391,34 @@ TITLE = Open LPCA valve if required
 _j:   NOP 0;
 
 NETWORK
+TITLE = Open VACUUM valve if required
+    //------------------------------------------------------------------------//
+    // If PRESSURE or VALVE and VACUUM selected then OPEN it:                 //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    A #selectVACUUM;
+    AN "idbPOS2".f[#p.link.VACUUM].p.read.mc.INTERLOCK;
+    A "idbPOS2".f[#p.link.VACUUM].p.read.mc.modeAUTO;
+    JCN _k;
+    L "dbCONST".BLK.POSx.CMD.OPEN;
+    T "idbPOS2".f[#p.link.VACUUM].p.write.mc.CMD;
+_k:   NOP 0;
+
+NETWORK
 TITLE = Open VENT valve if required
     //------------------------------------------------------------------------//
-    // If enabled and VENT required then OPEN it:                             //
+    // If PRESSURE or VALVE and VENT selected then OPEN it:                   //
     //------------------------------------------------------------------------//
     AN "idbPOS2".f[#p.link.VENT].p.read.mc.INTERLOCK;
     A "idbPOS2".f[#p.link.VENT].p.read.mc.modeAUTO;
     A(;
-    O #p.read.eventCmdDisable;
     O(;
-    A #cmdENABLE;
+    A #cmdPRESSURE;
     A #tDO_VENT;
+    );
+    O(;
+    A #tDO;
+    A #selectVENT;
     );
     );
     JCN _l;
@@ -359,22 +427,31 @@ TITLE = Open VENT valve if required
 _l:   NOP 0;
 
 NETWORK
+TITLE = Close DRAIN valve if required
+    //------------------------------------------------------------------------//
+    // CLOSE VALVE   CLOSE VALVE   CLOSE VALVE   CLOSE VALVE   CLOSE VALVE    //
+    //                                                                        //
+    // If DRAIN valve to be closed then CLOSE it:                             //
+    //------------------------------------------------------------------------//
+    A "idbPOS4".f[#p.link.DRAIN].p.read.mc.modeAUTO;
+    A(;
+    ON #tDO;
+    ON #selectDRAIN;
+    );
+    JCN _m;
+    L "dbCONST".BLK.POSx.CMD.CLOSE;
+    T "idbPOS4".f[#p.link.DRAIN].p.write.mc.CMD;
+_m:   NOP 0;
+
+NETWORK
 TITLE = Close HPCA valve if required
     //------------------------------------------------------------------------//
     // If HPCA valve to be closed then CLOSE it:                              //
     //------------------------------------------------------------------------//
     A "idbPOS2".f[#p.link.HPCA].p.read.mc.modeAUTO;
     A(;
-    O(;
-    A #cmdENABLE;
-    A #selectHPCA;
-    AN #tDO;
-    );
-    O(;
-    A #cmdENABLE;
-    AN #selectHPCA;
-    );
-    O #p.read.eventCmdDisable;
+    ON #tDO;
+    ON #selectHPCA;
     );
     JCN _n;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
@@ -388,16 +465,8 @@ TITLE = Close LPCA valve if required
     //------------------------------------------------------------------------//
     A "idbPOS2".f[#p.link.LPCA].p.read.mc.modeAUTO;
     A(;
-    O(;
-    A #cmdENABLE;
-    A #selectLPCA;
-    AN #tDO;
-    );
-    O(;
-    A #cmdENABLE;
-    AN #selectLPCA;
-    );
-    O #p.read.eventCmdDisable;
+    ON #tDO;
+    ON #selectLPCA;
     );
     JCN _o;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
@@ -405,13 +474,36 @@ TITLE = Close LPCA valve if required
 _o:   NOP 0;
 
 NETWORK
+TITLE = Close VACUUM valve if required
+    //------------------------------------------------------------------------//
+    // If VACUUM valve to be closed then CLOSE it:                            //
+    //------------------------------------------------------------------------//
+    A "idbPOS2".f[#p.link.VACUUM].p.read.mc.modeAUTO;
+    A(;
+    ON #tDO;
+    ON #selectVACUUM;
+    );
+    JCN _p;
+    L "dbCONST".BLK.POSx.CMD.CLOSE;
+    T "idbPOS2".f[#p.link.VACUUM].p.write.mc.CMD;
+_p:   NOP 0;
+
+NETWORK
 TITLE = Close VENT valve if required
     //------------------------------------------------------------------------//
     // If VENT valve to be closed then CLOSE it:                              //
     //------------------------------------------------------------------------//
-    A #cmdENABLE;
     A "idbPOS2".f[#p.link.VENT].p.read.mc.modeAUTO;
+    A(;
+    O(;
+    A #cmdPRESSURE;
     AN #tDO_VENT;
+    );
+    O(;
+    A #selectVENT;
+    AN #tDO;
+    );
+    );
     JCN _q;
     L "dbCONST".BLK.POSx.CMD.CLOSE;
     T "idbPOS2".f[#p.link.VENT].p.write.mc.CMD;
@@ -432,14 +524,24 @@ TITLE = Set Device State to Disabled if commanded
 _r:   NOP 0;
 
 NETWORK
-TITLE = Set Device State to Enabled if commanded
+TITLE = Set Device State to PRESSURE if commanded
     //------------------------------------------------------------------------//
-    // State is ENABLED if commanded to ENABLE:                               //
+    // State is PRESSURE if commanded to PRESSURE:                            //
     //------------------------------------------------------------------------//
-    A #cmdENABLE;
+    A #cmdPRESSURE;
     JCN _s;
-    L "dbCONST".BLK.PC1.STATE.ENABLED;
+    L "dbCONST".BLK.PC1.STATE.PRESSURE;
     T #p.read.mc.STATE;
 _s:   NOP 0;
 
+NETWORK
+TITLE = Set Device State to VALVE if commanded
+    //------------------------------------------------------------------------//
+    // State is VALVE if commanded to VALVE:                                  //
+    //------------------------------------------------------------------------//
+    A #cmdVALVE;
+    JCN _t;
+    L "dbCONST".BLK.PC1.STATE.VALVE;
+    T #p.read.mc.STATE;
+_t:   NOP 0;
 END_FUNCTION_BLOCK

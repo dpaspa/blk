@@ -325,13 +325,31 @@ TITLE = Set child devices to safe state if any interlock or child failure
     // Set the child device to the safe state on any interlock condition or   //
     // child failure:                                                         //
     //------------------------------------------------------------------------//
-    O #p.read.bmc.eventCmdStop;
+    O(;
+    O #p.read.bmc.stateSTOPPED;
     ON #p.read.bmc.permitStart;
-    JCN _childSafe;
+    );
+@@ATTR_BEGIN|SFCExists@@
+    O(;
+    A #p.read.bmc.permitStart;
+    A(;
+@@ATTR_BEGIN|SFC@@
+    O(;
+    A #subsRunning.@@STATE@@;
+    A(;
+    O #@@SFC@@.smc.PAUSED;
+    O #@@SFC@@.smc.ERR_FAULT;
+    );
+    );
+@@ATTR_END|SFC@@
+    );
+    );
+@@ATTR_END|SFCExists@@
+    = #p.read.err.childSafeState;
+    JCN _notChildSafe;
 
     //------------------------------------------------------------------------//
     // Set all child devices to safe state due to block stop or problem:      //
-    // L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_COMMAND@@
     @@CHILDCOMMANDSTATEMENT@@
@@ -343,8 +361,7 @@ _blkSafe_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
 @@ATTR_END|CHILD_COMMAND@@
 
-_childSafe:   NOP 0;
-
+_notChildSafe:   NOP 0;
 
 NETWORK
 TITLE = Flag SFC finished if none exist
@@ -1418,46 +1435,6 @@ _not_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@:   NOP 0;
 _noRunLogTimeData:   NOP 0;
 
 @@ATTR_END|pEventLogTimeExists@@
-
-@@ATTR_BEGIN|SFCExists@@
-NETWORK
-TITLE = Set child devices to safe state if SFC Paused or Error
-    //------------------------------------------------------------------------//
-    // SAFE STATE ON SFC ERROR   SAFE STATE ON SFC ERROR   SAFE STATE ON SFC  //
-    //                                                                        //
-    // Check if the running SFC has a problem:                                //
-    //------------------------------------------------------------------------//
-    A #p.read.bmc.permitStart;
-    A(;
-@@ATTR_BEGIN|SFC@@
-    O(;
-    A #subsRunning.@@STATE@@;
-    A(;
-    O #@@SFC@@.smc.PAUSED;
-    O #@@SFC@@.smc.ERR_FAULT;
-    );
-    );
-@@ATTR_END|SFC@@
-    );
-    = #p.read.err.childSafeState;
-    JCN _safeSFC;
-
-    //------------------------------------------------------------------------//
-    // Set all child devices to safe state due to sequence problem:           //
-    // L "dbCONST".BLK.@@CHILDALIASCLASS@@.SAFE.CMD;
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|CHILD_COMMAND@@
-    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
-    @@CHILDCOMMANDSTATEMENT@@
-    JCN _sfcSafe_@@CHILDPARAMETERALIAS@@;
-    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.CMD_SAFE;
-    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.CMD;
-_sfcSafe_@@CHILDPARAMETERALIAS@@:   NOP 0;
-
-@@ATTR_END|CHILD_COMMAND@@
-
-_safeSFC:   NOP 0;
-@@ATTR_END|SFCExists@@
 
 @@ATTR_BEGIN|SFC@@
 NETWORK

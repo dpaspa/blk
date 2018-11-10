@@ -17,13 +17,13 @@ VERSION : 1.0
         bmc : "udtModeCommandBLK";   // Block mode and command
         err : "udtBLKError";         // Block error
 @@ATTR_BEGIN|pClassBlockRead@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
 @@ATTR_END|pClassBlockRead@@
 @@ATTR_BEGIN|CHILD_COMMAND@@
         @@CHILDPARAMETERALIAS@@_STATE : INT;
 @@ATTR_END|CHILD_COMMAND@@
 @@ATTR_BEGIN|pSFCChildReadDefine@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
 @@ATTR_END|pSFCChildReadDefine@@
 @@ATTR_BEGIN|pEventLogMsgExists@@
 @@ATTR_BEGIN|pEventLogMsgWordClass@@
@@ -66,7 +66,7 @@ VERSION : 1.0
     STRUCT
         mc : "udtMCWrite";             // Block mode and command for directives from write CPU
 @@ATTR_BEGIN|pClassBlockWrite@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
 @@ATTR_END|pClassBlockWrite@@
 @@ATTR_BEGIN|CHILD_COMMAND@@
         @@CHILDPARAMETERALIAS@@_CMD : INT;
@@ -75,16 +75,16 @@ VERSION : 1.0
         @@CHILDPARAMETERALIAS@@_SUBS : INT;
 @@ATTR_END|CHILD_COMMAND_BLK@@
 @@ATTR_BEGIN|pSFCChildWriteDefine@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
 @@ATTR_END|pSFCChildWriteDefine@@
 @@ATTR_BEGIN|pSFCChildWriteBoolDefine@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
 @@ATTR_END|pSFCChildWriteBoolDefine@@
 @@ATTR_BEGIN|pSFCSelectMCWriteDefine@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
 @@ATTR_END|pSFCSelectMCWriteDefine@@
 @@ATTR_BEGIN|pBLOCK_RECIPE@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
 @@ATTR_END|pBLOCK_RECIPE@@
     END_STRUCT;
 END_TYPE
@@ -119,7 +119,7 @@ VERSION : 1.0
         @@LINKPARAMETERALIAS@@ : Int;        // @@CHILDCLASS@@ Instance DB Index
 @@ATTR_END|pChildSelect@@
 @@ATTR_BEGIN|pSFCSelectMCWriteDefine@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@;
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
 @@ATTR_END|pSFCSelectMCWriteDefine@@
     END_STRUCT;
 END_TYPE

@@ -118,7 +118,9 @@ _b:   NOP 0;
     //------------------------------------------------------------------------//
     // Apply the safe command if restarting the PLC:                          //
     //------------------------------------------------------------------------//
-    A "flagFirstScanRestart";
+    O "flagFirstScanRestart";
+    O #p.read.mc.INTERLOCK;
+    O #p.read.mc.modeOOS;
     JCN _noRestart;
     L #p.read.mc.CMD_SAFE;
     T #p.write.mc.CMD;
@@ -173,26 +175,6 @@ TITLE = Valve Command open
     = #OUT_Q_Close;
     NOT;
     = #OUT_Q_Open;
-
-NETWORK
-TITLE = Open command is alowable if normal operation
-    //------------------------------------------------------------------------//
-    // Allow OPEN command if everything is operating normally:                //
-    //------------------------------------------------------------------------//
-    A #cmdOPEN;
-    AN #p.read.mc.INTERLOCK;
-    AN #p.read.mc.modeOOS;
-    = #cmdOPEN;
-
-NETWORK
-TITLE = Close command is alowable if normal operation
-    //------------------------------------------------------------------------//
-    // Allow CLOSE command if everything is operating normally:               //
-    //------------------------------------------------------------------------//
-    A #cmdCLOSE;
-    AN #p.read.mc.INTERLOCK;
-    AN #p.read.mc.modeOOS;
-    = #cmdCLOSE;
 
 NETWORK
 TITLE = Valve OPEN if feedback open

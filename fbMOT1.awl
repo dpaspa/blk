@@ -69,7 +69,6 @@ VAR_TEMP
     enableStopTimer : Bool;
     tDO : Bool;              // Flag indicating whether to drive output
     tFault: Bool;
-    TMR : Time := T#3S;      // Motor Start/Stop transition time for checking status
     startTMRElapsed : Time;
     stopTMRElapsed : Time;
     startTMRExpired : Bool;
@@ -189,7 +188,7 @@ TITLE = Stop Timer to wait for running feedback to go off
     //------------------------------------------------------------------------//
     // Stop timer to allow time for running feedback to go off:               //
     //------------------------------------------------------------------------//
-    AN #tDO;
+    A #cmdStop;
     = #enableStopTimer;
 
 NETWORK
@@ -200,7 +199,7 @@ TITLE = Start Transition Timer in the event of Start or Stop
     CALL #startTMR
     {time_type := 'Time'}
     (   IN                   := #enableStartTimer ,
-        PT                   := #TMR ,
+        PT                   := T#3s ,
         Q                    := #startTMRExpired ,
         ET                   := #startTMRElapsed
     );
@@ -214,7 +213,7 @@ TITLE = Stop Transition Timer in the event of Start or Stop
     CALL #stopTMR
     {time_type := 'Time'}
     (   IN                   := #enableStopTimer ,
-        PT                   := #TMR ,
+        PT                   := T#3s ,
         Q                    := #stopTMRExpired ,
         ET                   := #stopTMRElapsed
     );
@@ -304,6 +303,17 @@ TITLE = Set State FAULT if any fault condition
     L "dbCONST".BLK.MOT1.STATE.FAULT;
     T #p.read.mc.STATE;
 _d:   NOP 0;
+
+NETWORK
+TITLE = Operator Attention Flag
+    //------------------------------------------------------------------------//
+    // If not in Auto or any interlock or inhibit condition then the block    //
+    // needs operator attention:                                              //
+    //------------------------------------------------------------------------//
+    O #p.read.mc.needAttention;
+    O #p.read.mc.INTERLOCK;
+    O #p.read.mc.ERROR;
+    = #p.read.mc.needAttention;
 
 NETWORK
 TITLE = Pack the alarm bits

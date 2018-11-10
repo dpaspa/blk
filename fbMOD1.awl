@@ -35,6 +35,7 @@ VAR
 END_VAR
 
 VAR_TEMP
+    cmdDisable : Bool;
     cmdLocal : Bool;
     cmdRemote : Bool;
     tRetVal : Word;          // Returns a value of W#16#0000 if the instruction executes without error.
@@ -69,11 +70,23 @@ TITLE = Call Mode and Command handling block
     );
 
 NETWORK
-TITLE = Device command LOCAL
+TITLE = Device command DISABLE
     //------------------------------------------------------------------------//
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     //                                                                        //
+    // CMD is DISABLE:                                                        //
+    //------------------------------------------------------------------------//
+    A(;
+    L #p.write.mc.CMD;
+    L "dbCONST".BLK.MOD1.CMD.DISABLE;
+    ==I;
+    );
+    = #cmdDisable;
+
+NETWORK
+TITLE = Device command LOCAL
+    //------------------------------------------------------------------------//
     // CMD is LOCAL:                                                          //
     //------------------------------------------------------------------------//
     A(;
@@ -102,19 +115,15 @@ TITLE = Valve should OPEN in LOCAL or REMOTE
     //------------------------------------------------------------------------//
     O #cmdLocal;
     O #cmdRemote;
-    = #tDO;
+    S #tDO;
 
 NETWORK
-TITLE = Device command DISABLE
+TITLE = Valve should CLOSE in DISABLe or interlock
     //------------------------------------------------------------------------//
     // CMD is DISABLE then close regardless of any interlock:                 //
     //------------------------------------------------------------------------//
     O #p.read.mc.INTERLOCK;
-    O(;
-    L #p.write.mc.CMD;
-    L "dbCONST".BLK.HE1.CMD.DISABLE;
-    ==I;
-    );
+    O #cmdDisable;
     JCN _a;
     R #tDO;
 _a:   NOP 0;
@@ -128,23 +137,10 @@ TITLE = LOCAL valve position setpoint
     // Set valve position if LOCAL:                                           //
     //------------------------------------------------------------------------//
     A #cmdLocal;
-    AN #p.read.mc.modeMANUAL;
     JCN _b;
-    L #p.read.POS_LOCAL;
+    L #p.write.POS_LOCAL;
     T #tPOS;
-    T #p.write.POS_MAN;
 _b:   NOP 0;
-
-NETWORK
-TITLE = MANUAL valve position setpoint
-    //------------------------------------------------------------------------//
-    // Set valve position if MANUAL:                                          //
-    //------------------------------------------------------------------------//
-    A #p.read.mc.modeMANUAL;
-    JCN _c;
-    L #p.write.POS_MAN;
-    T #tPOS;
-_c:   NOP 0;
 
 NETWORK
 TITLE = REMOTE valve position setpoint
@@ -152,12 +148,21 @@ TITLE = REMOTE valve position setpoint
     // Set valve position if REMOTE:                                          //
     //------------------------------------------------------------------------//
     A #cmdRemote;
-    AN #p.read.mc.modeMANUAL;
     JCN _d;
-    L #p.read.POS_REMOTE;
+    L #p.write.POS_REMOTE;
     T #tPOS;
-    T #p.write.POS_MAN;
 _d:   NOP 0;
+
+NETWORK
+TITLE = Valve close if Device State DISABLED
+    //------------------------------------------------------------------------//
+    // If valve DISABLED then analog output setpoint value should be 0:       //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    JCN _g;
+    L 0.0;
+    T #tPOS;
+_g:   NOP 0;
 
 NETWORK
 TITLE = Unscaling of Control Valve Position
@@ -203,24 +208,11 @@ TITLE = Device State DISABLED if valve not operating
     //                                                                        //
     // DISABLED if valve output is to be off:                                 //
     //------------------------------------------------------------------------//
-    ON #tDO;
-    O #p.read.mc.INTERLOCK;
+    AN #tDO;
     JCN _f;
     L "dbCONST".BLK.MOD1.STATE.DISABLED;
     T #p.read.mc.STATE;
 _f:   NOP 0;
-
-NETWORK
-TITLE = Valve close if Device State DISABLED
-    //------------------------------------------------------------------------//
-    // If valve DISABLED then analog output setpoint value should be 0:       //
-    //------------------------------------------------------------------------//
-    ON #tDO;
-    O #p.read.mc.INTERLOCK;
-    JCN _g;
-    L 0;
-    T #p.read.RAW_OUTPUT;
-_g:   NOP 0;
 
 NETWORK
 TITLE = State LOCAL if commanded

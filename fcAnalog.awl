@@ -79,18 +79,19 @@ _c:   NOP 0;
 NETWORK
 TITLE = Check for out of range error
     //------------------------------------------------------------------------//
-    // Check if the raw input value is underrange or overrange:               //
+    // Check if the raw input value is underrange or overrange.               //
+    // Counts rage would be 0 to 27648 for 4 to 20 mA but allow for noise:    //
     //------------------------------------------------------------------------//
     A(;
     O(;
     L #tRAW;
-    L 27648;
-    >=I;
+    L 27668;
+    >I;
     );
     O(;
     L #tRAW;
-    L 0;
-    <=I;
+    L -20;
+    <I;
     );
     );
     AN #ai.modeOOS;

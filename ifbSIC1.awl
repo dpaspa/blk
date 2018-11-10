@@ -196,22 +196,46 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Mass values to run and stop agitator
     L @@MXMASSAGITSTOP@@;
     T #f[@@IDX@@].p.read.MASS_STOP;
 
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Speed measurement attributes
-    //------------------------------------------------------------------------//
-    // Set the speed measurement attribute values:                            //
-    //------------------------------------------------------------------------//
 @@ATTR_BEGIN|ANALOG_EMBED@@
-    L @@RANGEHIGH@@;
-    T #f[@@IDX@@].p.read.RANGE_UPPER;
-    L @@RANGELOW@@;
-    T #f[@@IDX@@].p.read.RANGE_LOWER;
-    A "alwaysLow";
-    = #f[@@IDX@@].p.read.POLARITY;
-    L @@LIMITHH@@;
-    T #f[@@IDX@@].p.read.LIMIT_HH;
+NETWORK
+TITLE = @@INSTANCE@@ : Analog input default alarms
+    //------------------------------------------------------------------------//
+    // Set the default alarm values on startup:                               //
+    //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    JCN _noRestart_@@INSTANCE@@;
+    L @@LIMITLL@@;
+    T #f[@@IDX@@].p.write.LIMIT_LL;
+    L @@LIMITL@@;
+    T #f[@@IDX@@].p.write.LIMIT_L;
     L @@LIMITH@@;
-    T #f[@@IDX@@].p.read.LIMIT_H;
+    T #f[@@IDX@@].p.write.LIMIT_H;
+    L @@LIMITHH@@;
+    T #f[@@IDX@@].p.write.LIMIT_HH;
+    A @@ENABLELL@@;
+    = #f[@@IDX@@].p.write.ENABLE_LL;
+    A @@ENABLEL@@;
+    = #f[@@IDX@@].p.write.ENABLE_L;
+    A @@ENABLEH@@;
+    = #f[@@IDX@@].p.write.ENABLE_H;
+    A @@ENABLEHH@@;
+    = #f[@@IDX@@].p.write.ENABLE_HH;
+_noRestart_@@INSTANCE@@:   NOP 0;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Analog input attributes
+    //------------------------------------------------------------------------//
+    // Set the fixed analog input attributes:                                 //
+    //------------------------------------------------------------------------//
+    A @@POLARITY@@;
+    = #f[@@IDX@@].p.read.ai.POLARITY;
+    L @@RANGELOW@@;
+    T #f[@@IDX@@].p.read.ai.RANGE_LOWER;
+    L @@RANGEHIGH@@;
+    T #f[@@IDX@@].p.read.ai.RANGE_UPPER;
+    L "@@INSTANCE@@-RAW";
+    T #f[@@IDX@@].p.read.ai.RAW_INPUT;
+
 @@ATTR_END|ANALOG_EMBED@@
 
 NETWORK
@@ -260,10 +284,10 @@ TITLE = Drive interface
          CTW_bit_09                  := 1 ,
          CTW_bit_12                  := 1 ,
          CTW_bit_15                  := 1 ,
-         speed_setpoint              := "@@INSTANCE@@-OUT" ,
-         reference_speed_P2000       := 1500.0 ,
-         reference_current_P2002     := 0.0 ,
-         reference_torque_P2003      := 0.0 ,
+         speed_setpoint              := #f[@@IDX@@].p.write.SETPOINT ,
+         reference_speed_P2000       := @@MXAGITREFERENCESPEED@@ ,
+         reference_current_P2002     := @@MXAGITREFERENCECURRENT@@ ,
+         reference_torque_P2003      := @@MXAGITREFERENCETORQUE@@ ,
          ready_for_switching_on      := #f[@@IDX@@].p.read.RDY_TO_ON ,
          ready_for_operation         := #f[@@IDX@@].p.read.RDY_TO_RUN ,
          operation_enabled           := #f[@@IDX@@].p.read.RUNNING

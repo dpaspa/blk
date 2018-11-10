@@ -121,28 +121,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     = #f[@@IDX@@].p.write.mc.isMaster;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Initial remote position is closed
-    //------------------------------------------------------------------------//
-    // Set the initial remote position to be zero which is closed:            //
-    //------------------------------------------------------------------------//
-    A "flagFirstScanRestart";
-    JCN _b_@@COUNTERTEMPLATE@@;
-    L 0.0;
-    T #f[@@IDX@@].p.read.POS_REMOTE;
-_b_@@COUNTERTEMPLATE@@:   NOP 0;
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Initial local position is closed
-    //------------------------------------------------------------------------//
-    // Set the initial local position to be zero which is closed:             //
-    //------------------------------------------------------------------------//
-    A "flagFirstScanRestart";
-    JCN _c_@@COUNTERTEMPLATE@@;
-    L 0.0;
-    T #f[@@IDX@@].p.read.POS_LOCAL;
-_c_@@COUNTERTEMPLATE@@:   NOP 0;
-
-NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //

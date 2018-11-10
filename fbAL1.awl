@@ -63,33 +63,10 @@ TITLE = Call Mode and Command handling function
     );
 
 NETWORK
-TITLE = Call Analog Input handling function
-    //------------------------------------------------------------------------//
-    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
-    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
-    //                                                                        //
-    // Scale the analog input value and check it is healty:                   //
-    //------------------------------------------------------------------------//
-    CALL "fcAnalog"
-    (   ai                   := #p.read.ai
-    );
-
-NETWORK
-TITLE = Promote the analog input attributes
-    //------------------------------------------------------------------------//
-    // Promote the analog input attributes to module level:                   //
-    //------------------------------------------------------------------------//
-    L #p.read.ai.PV;
-    T #p.read.PV;
-    A #p.read.ai.DQ;
-    = #p.read.DQ;
-
-NETWORK
 TITLE = Analog input setpoints
     //------------------------------------------------------------------------//
     // Set the analog input setpoints:                		                  //
     //------------------------------------------------------------------------//
-
 	A #p.read.mc.modeAUTO;
 	JCN _manual;
 	L #p.write.LIMIT_HH;
@@ -111,6 +88,27 @@ TITLE = Analog input setpoints
 
 _manual: NOP 0;
 
+NETWORK
+TITLE = Call Analog Input handling function
+    //------------------------------------------------------------------------//
+    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
+    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
+    //                                                                        //
+    // Scale the analog input value and check it is healty:                   //
+    //------------------------------------------------------------------------//
+    CALL "fcAnalog"
+    (   ai                   := #p.read.ai
+    );
+
+NETWORK
+TITLE = Promote the analog input attributes
+    //------------------------------------------------------------------------//
+    // Promote the analog input attributes to module level:                   //
+    //------------------------------------------------------------------------//
+    L #p.read.ai.PV;
+    T #p.read.PV;
+    A #p.read.ai.DQ;
+    = #p.read.DQ;
 
 NETWORK
 TITLE = Set INTERLOCK Flag
@@ -146,8 +144,11 @@ TITLE = Set Device State to Fault if any field signal error
     //------------------------------------------------------------------------//
     // FAULT if any input error:                                              //
     //------------------------------------------------------------------------//
-    AN #p.read.ai.DQ;
     AN #p.read.mc.modeOOS;
+    A(;
+    ON #p.read.ai.DQ;
+    O #p.read.mc.INTERLOCK;
+    );
     JCN _b;
     L #p.read.STATE_FAULT;
     T #p.read.mc.STATE;

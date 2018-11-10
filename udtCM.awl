@@ -170,7 +170,6 @@ VERSION : 1.0
         ENABLE_H : Bool;               // Flag to Enable/Disable High Alarm from parent
         ENABLE_L : Bool;               // Flag to Enable/Disable Low Alarm from parent
         ENABLE_LL : Bool;              // Flag to Enable/Disable Low Low Alarm from parent
-
 	END_STRUCT;
 END_TYPE
 
@@ -186,8 +185,6 @@ TYPE "udtMOD1read"
 VERSION : 1.0
     STRUCT
         mc : "udtMCRead";              // Block mode and command for calculations on read CPU
-        POS_LOCAL : Real;              // Local valve position setpoint
-        POS_REMOTE : Real;             // Remote valve position setpoint
         RAW_OUTPUT : Int;              // Raw output signal to Field (4mA = 0, 20mA = 27648)
         MV_OUTPUT : Real;              // Calculated percent output
     END_STRUCT;
@@ -197,7 +194,8 @@ TYPE "udtMOD1write"
 VERSION : 1.0
     STRUCT
         mc : "udtMCWrite";             // Block mode and command for directives from write CPU
-        POS_MAN : Real;                // Manual valve position setpoint
+        POS_LOCAL : Real;              // Local valve position setpoint
+        POS_REMOTE : Real;             // Remote valve position setpoint
     END_STRUCT;
 END_TYPE
 
@@ -302,22 +300,16 @@ VERSION : 1.0
         mc : "udtMCRead";              // Block mode and command for calculations on read CPU
         ai : "udtAnalog";              // Analog input structure
         STATE_PEER : Int := 0;         // State check for agitator motor from other modules
-        RAW_INPUT : Int;               // Raw input from the field
         MASS_RUN : Real;               // Low mass threshold at which the agitator may run
         MASS_STOP : Real;              // Low low mass threshold at which the agitator must stop
         MI1_MASS : Real;               // Measured Mass
         MI1_DQ : Bool;                 // Measured Mass Data Quality
-        RANGE_UPPER : Real;            // Upper speed range limit
-        RANGE_LOWER : Real;            // Lower speed range limit
-        POLARITY : Bool;               // 0- no polarity(0 to z), 1= dual polarity(-x to +y)
         FB_TDELAY : Time := T#20S;
         BRK	: Bool;                    // Motor breaker fault
         PHR : Bool;                    // Three-phase relay alarm
         FLP : Bool;                    // Pulse counter fault
         FLT : Bool;                    // Inverter fault
         THM : Bool;                    // Thermistor module alarm
-        LIMIT_HH : Real;               // High High speed alarm limit
-        LIMIT_H : Real;                // High speed alarm limit
         P_SEL : Bool := TRUE;
         I_SEL : Bool := TRUE;
         D_SEL : Bool := TRUE;
@@ -326,9 +318,7 @@ VERSION : 1.0
         TD : Time := T#10S;
         CYCLE : Time := T#1S;          // SAMPLING TIME:The time between the block calls constant
         OUT_CMD : Bool;                // Inverter Motor Run/Stop Command
-        PV : Real;                     // Measured Value (after scaling)
         RUNNING : Bool;
-        DQ : Bool;
         RDY_TO_ON : Bool;
         RDY_TO_RUN : Bool;
         ALM_BRK : Bool;
@@ -352,6 +342,14 @@ VERSION : 1.0
         SETPOINT : Real;               // Agitator speed setpoint
         USER_INPUT : Word;             // Manual mode, equivallent of Analog input, to be entered by Operator
         MAN_PID : Bool;                // Manual non pid selection
+		LIMIT_HH : Real;               // High High Alarm Limit from parent
+        LIMIT_H : Real;                // High Alarm Limit from parent
+        LIMIT_L : Real;                // Low Alarm Limit from parent
+        LIMIT_LL : Real;               // LowLow Alarm Limit from parent
+		ENABLE_HH : Bool;              // Flag to Enable/Disable High High Alarm from parent
+        ENABLE_H : Bool;               // Flag to Enable/Disable High Alarm from parent
+        ENABLE_L : Bool;               // Flag to Enable/Disable Low Alarm from parent
+        ENABLE_LL : Bool;              // Flag to Enable/Disable Low Low Alarm from parent
     END_STRUCT;
 END_TYPE
 
@@ -503,10 +501,11 @@ TYPE "udtPC1write"
 VERSION : 1.0
     STRUCT
         mc : "udtMCWrite";             // Block mode and command for directives from write CPU
-        SETPOINT : Real;               // Pressure setpoint
-        MEDIUM_GAS : Int;              // Select medium valve to be operated
         DB_L : Real := 0.1;            // Deadband LOW differential
         DB_H : Real := 0.1;            // Deadband HIGH differential
+        SETPOINT : Real := 0.2;        // Pressure setpoint
+        MEDIUM_GAS : Int;              // Select medium valve to be operated
+        VESSEL : Int;                  // Select vessel 0,1,2,3 for M1,M2,S1,S2
     END_STRUCT;
 END_TYPE
 
@@ -514,10 +513,8 @@ TYPE "udtPC1link"
 VERSION : 1.0
     STRUCT
         PRESSURE : Int;                // PI1 Pressure in the vessel
-        DRAIN : Int;                   // POS4 Drain valve instance DB index
         HPCA : Int;                    // POS4 HPCA valve instance DB index
         LPCA : Int;                    // POS4 LPCA valve instance DB index
-        VACUUM : Int;                  // POS4 Vacuum valve instance DB index
         VENT : Int;                    // POS2 Vent valve instance DB index
     END_STRUCT;
 END_TYPE

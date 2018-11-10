@@ -94,18 +94,43 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
 
 @@ATTR_BEGIN|ANALOG@@
 NETWORK
+TITLE = @@INSTANCE@@ : Analog input default alarms
+    //------------------------------------------------------------------------//
+    // Set the default alarm values on startup:                               //
+    //------------------------------------------------------------------------//
+    A "flagFirstScanRestart";
+    JCN _noRestart_@@INSTANCE@@;
+    L @@LIMITLL@@;
+    T #f[@@IDX@@].p.write.LIMIT_LL;
+    L @@LIMITL@@;
+    T #f[@@IDX@@].p.write.LIMIT_L;
+    L @@LIMITH@@;
+    T #f[@@IDX@@].p.write.LIMIT_H;
+    L @@LIMITHH@@;
+    T #f[@@IDX@@].p.write.LIMIT_HH;
+    A @@ENABLELL@@;
+    = #f[@@IDX@@].p.write.ENABLE_LL;
+    A @@ENABLEL@@;
+    = #f[@@IDX@@].p.write.ENABLE_L;
+    A @@ENABLEH@@;
+    = #f[@@IDX@@].p.write.ENABLE_H;
+    A @@ENABLEHH@@;
+    = #f[@@IDX@@].p.write.ENABLE_HH;
+_noRestart_@@INSTANCE@@:   NOP 0;
+
+NETWORK
 TITLE = @@INSTANCE@@ : Analog input attributes
     //------------------------------------------------------------------------//
     // Set the fixed analog input attributes:                                 //
     //------------------------------------------------------------------------//
+    A @@POLARITY@@;
+    = #f[@@IDX@@].p.read.ai.POLARITY;
     L @@RANGELOW@@;
     T #f[@@IDX@@].p.read.ai.RANGE_LOWER;
     L @@RANGEHIGH@@;
     T #f[@@IDX@@].p.read.ai.RANGE_UPPER;
     L "@@INSTANCE@@-RAW";
     T #f[@@IDX@@].p.read.ai.RAW_INPUT;
-    A @@POLARITY@@;
-    = #f[@@IDX@@].p.read.ai.POLARITY;
 
 @@ATTR_END|ANALOG@@
 

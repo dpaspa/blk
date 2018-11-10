@@ -9,6 +9,9 @@
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
+// 2.1 David Paspa      07-Nov-2018 NA        Simplified by removing valve    //
+//                                            selection option performed by   //
+//                                            EMC1.                           //
 // 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
 // 0.7 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
 //                                            Toggle.                         //
@@ -41,7 +44,7 @@ TITLE = Instances of PC1 pressure controller
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
 NAME : ifbPC1
-VERSION : 2.0
+VERSION : 2.1
 
 //----------------------------------------------------------------------------//
 // Declare the instance objects of the class:                                 //
@@ -133,13 +136,12 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     = #f[@@IDX@@].p.write.mc.isMaster;
 
 NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Deadband values
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Set the selected vessel
     //------------------------------------------------------------------------//
-    // Set the instance pressure deadband values for valve open and close:    //
+    // Set the vessel index number 0,1,2,3 for M1,M2,S1,S2:                   //
     //------------------------------------------------------------------------//
-    L @@PC1DEADBAND@@;
-    T #f[@@IDX@@].p.write.DB_L;
-    T #f[@@IDX@@].p.write.DB_H;
+    L @@IDX@@;
+    T #f[@@IDX@@].p.write.VESSEL;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Pressure measured value
@@ -149,16 +151,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Pressure measured value
 @@ATTR_BEGIN|LINK@@
     L @@PILINKIDX@@;         // @@PILINKCLASS@@
     T #f[@@IDX@@].p.link.PRESSURE;
-@@ATTR_END|LINK@@
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : DRAIN valve mode and command
-    //------------------------------------------------------------------------//
-    // Set the instance pressure measured value from the PI1:                 //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|LINK@@
-    L @@DRAINLINKIDX@@;     // @@DRAINLINKCLASS@@
-    T #f[@@IDX@@].p.link.DRAIN;
 @@ATTR_END|LINK@@
 
 NETWORK
@@ -179,16 +171,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : LPCA valve mode and command
 @@ATTR_BEGIN|LINK@@
     L @@LPCALINKIDX@@;     // @@LPCALINKCLASS@@
     T #f[@@IDX@@].p.link.LPCA;
-@@ATTR_END|LINK@@
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : VACUUM valve mode and command
-    //------------------------------------------------------------------------//
-    // Copy the VACUUM valve mode and command structures to the PC1 instance: //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|LINK@@
-    L @@VACUUMLINKIDX@@;     // @@VACUUMLINKCLASS@@
-    T #f[@@IDX@@].p.link.VACUUM;
 @@ATTR_END|LINK@@
 
 NETWORK
