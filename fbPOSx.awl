@@ -93,10 +93,10 @@ END_VAR
 
 BEGIN
 NETWORK
-TITLE = Call Mode and Command handling function
+TITLE = Safe command
     //------------------------------------------------------------------------//
-    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
-    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    // SAFE COMMAND   SAFE COMMAND   SAFE COMMAND   SAFE COMMAND   SAFE COMM  //
+    // SAFE COMMAND   SAFE COMMAND   SAFE COMMAND   SAFE COMMAND   SAFE COMM  //
     //                                                                        //
     // Set the safe command to CLOSE if normally closed valve:                //
     //------------------------------------------------------------------------//
@@ -126,7 +126,12 @@ _b:   NOP 0;
     T #p.write.mc.CMD;
 _noRestart:   NOP 0;
 
+NETWORK
+TITLE = Call Mode and Command handling function
     //------------------------------------------------------------------------//
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    //                                                                        //
     // Process the standard block functions for command, mode, interlock and  //
     // state:                                                                 //
     //------------------------------------------------------------------------//
@@ -216,7 +221,7 @@ TITLE = Valve might be TRAVEL if neither feedback on
 NETWORK
 TITLE = Input Bypass Mode In Manual
     //------------------------------------------------------------------------//
-    //
+    // Bypass field feedback switches if requested:                           //
     //------------------------------------------------------------------------//
     A #p.read.mc.modeMANUAL;
     A #p.write.IGNORE_FB;
@@ -275,7 +280,7 @@ TITLE = Valve CLOSED if command and feedback CLOSED
     JCN _c;
     L "dbCONST".BLK.POSx.STATE.CLOSED;
     T #p.read.mc.STATE;
-    R #p.read.mc.ERROR;
+    R #p.read.mc.INTIL;
 _c:   NOP 0;
 
 NETWORK
@@ -291,7 +296,7 @@ TITLE = Valve OPENED if command and feedback OPENED
     JCN _d;
     L "dbCONST".BLK.POSx.STATE.OPENED;
     T #p.read.mc.STATE;
-    R #p.read.mc.ERROR;
+    R #p.read.mc.INTIL;
 _d:   NOP 0;
 
 NETWORK
@@ -316,7 +321,7 @@ TITLE = Valve TRAVEL if command issued and travel timer not expired
     JCN _e;
     L "dbCONST".BLK.POSx.STATE.TRAVEL;
     T #p.read.mc.STATE;
-    R #p.read.mc.ERROR;
+    R #p.read.mc.INTIL;
 _e:   NOP 0;
 
 NETWORK
@@ -375,17 +380,15 @@ TITLE = Valve FAULT if both feedbacks on or travel timer expired
     // FAULT if both open and closed feedbacks on simultaneously, which is    //
     // impossible, or if travel timer expires but feedback never comes on:    //
     //------------------------------------------------------------------------//
-    O(;
     AN #bypassFeedback;
-    A #feedbackCLOSED;
-    A #feedbackOPENED;
-    );
+    A(;
     O #p.read.FAULT_C;
     O #p.read.FAULT_O;
+    );
     JCN _f;
     L "dbCONST".BLK.POSx.STATE.FAULT;
     T #p.read.mc.STATE;
-    S #p.read.mc.ERROR;
+    S #p.read.mc.INTIL;
 _f:   NOP 0;
 
 NETWORK

@@ -74,7 +74,6 @@ VAR_TEMP
     edgeStart : Bool;
     eventStart : Bool;
     tDO : Bool;
-    tILAnalog : Bool;
     tPV_MASS : Real;
     tSetpoint : Real;
     LMN : Real;
@@ -98,6 +97,101 @@ TITLE = Safe Command on restart
     T #p.write.mc.CMD;
     T #p.read.mc.CMD_SAFE;
 _noRestart:   NOP 0;
+
+NETWORK
+TITLE = Analog alarm setpoints
+    //------------------------------------------------------------------------//
+    // Set the analog alarm setpoints:                		                  //
+    //------------------------------------------------------------------------//
+	L #p.write.LIMIT_HH;
+    T #p.read.ai.LIMIT_HH;
+    L #p.write.LIMIT_H;
+    T #p.read.ai.LIMIT_H;
+    L #p.write.LIMIT_L;
+    T #p.read.ai.LIMIT_L;
+    L #p.write.LIMIT_LL;
+    T #p.read.ai.LIMIT_LL;
+    A #p.write.ENABLE_HH;
+    = #p.read.ai.ENABLE_HH;
+    A #p.write.ENABLE_H;
+    = #p.read.ai.ENABLE_H;
+    A #p.write.ENABLE_L;
+    = #p.read.ai.ENABLE_L;
+    A #p.write.ENABLE_LL;
+    = #p.read.ai.ENABLE_LL;
+
+NETWORK
+TITLE = Call Analog Input handling function
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Scale the analog input value and check it is healty:                   //
+    //------------------------------------------------------------------------//
+    CALL "fcAnalog"
+    (   ai                   := #p.read.ai
+    );
+
+NETWORK
+TITLE = Duplicate PV for parent
+    //------------------------------------------------------------------------//
+    // Transfer the PV for use by the parent:                                 //
+    //------------------------------------------------------------------------//
+    L #p.read.ai.PV;
+    T #p.read.PV;
+
+NETWORK
+TITLE = Motor faults and three phase relay alarm
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Raise alarm if any motor control fault condition is active:            //
+    //------------------------------------------------------------------------//
+    A #p.read.PHR;
+    = #p.read.ALM_PHR;
+    = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Motor breaker fault
+    A #p.read.BRK;
+    = #p.read.ALM_BRK;
+    = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Pulse counter fault
+    A #p.read.FLP;
+    = #p.read.ALM_FLP;
+    = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Inverter fault
+    A #p.read.FLT;
+    = #p.read.ALM_FLT;
+    = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Thermistor module alarm
+    A #p.read.THM;
+    = #p.read.ALM_THM;
+    = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Aggregate all internal interlock conditions
+    //------------------------------------------------------------------------//
+    // Collect all internal interlock conditions:                             //
+    //------------------------------------------------------------------------//
+    O #p.read.ai.ALARM_LL;
+    O #p.read.ai.ALARM_HH;
+    ON #p.read.ai.DQ;
+    O #p.read.BRK;
+    O #p.read.PHR;
+    O #p.read.FLP;
+    O #p.read.FLT;
+    O #p.read.THM;
+    O #p.read.FAIL_TO_RUN;
+    ON #p.read.MI1_DQ;
+    = #p.read.mc.INTIL;
 
 NETWORK
 TITLE = Call Mode and Command handling block
@@ -140,114 +234,6 @@ TITLE = Disable command
     = #cmdDisable
 
 NETWORK
-TITLE = Analog input attributes
-    //------------------------------------------------------------------------//
-    // Set the analog input attributes:                                       //
-    //------------------------------------------------------------------------//
-    L #p.read.RANGE_LOWER;
-    T #p.read.ai.RANGE_LOWER;
-    L #p.read.RANGE_UPPER;
-    T #p.read.ai.RANGE_UPPER;
-    L #p.read.LIMIT_HH;
-    T #p.read.ai.LIMIT_HH;
-    L #p.read.LIMIT_H;
-    T #p.read.ai.LIMIT_H;
-    L 0.0;
-    T #p.read.ai.LIMIT_L;
-    L 0.0;
-    T #p.read.ai.LIMIT_LL;
-    A "alwaysHigh";
-    = #p.read.ai.ENABLE_HH;
-    A "alwaysHigh";
-    = #p.read.ai.ENABLE_H;
-    A "alwaysLow";
-    = #p.read.ai.ENABLE_L;
-    A "alwaysLow";
-    = #p.read.ai.ENABLE_LL;
-    L #p.read.RAW_INPUT;
-    T #p.read.ai.RAW_INPUT;
-    L #p.read.ai.PV;
-    T #p.read.PV;
-
-NETWORK
-TITLE = Call Analog Input handling function
-    //------------------------------------------------------------------------//
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    //                                                                        //
-    // Scale the analog input value and check it is healty:                   //
-    //------------------------------------------------------------------------//
-    CALL "fcAnalog"
-    (   ai                   := #p.read.ai
-    );
-
-NETWORK
-TITLE = Motor faults and three phase relay alarm
-    //------------------------------------------------------------------------//
-    // MOTOR FAULTS                                                           //
-    // Raise alarm if any motor control fault condition is active:            //
-    //------------------------------------------------------------------------//
-    A #p.read.PHR;
-    = #p.read.ALM_PHR;
-    = #p.read.mc.ERROR;
-
-NETWORK
-TITLE = Motor breaker fault
-    A #p.read.BRK;
-    = #p.read.ALM_BRK;
-    = #p.read.mc.ERROR;
-
-NETWORK
-TITLE = Pulse counter fault
-    A #p.read.FLP;
-    = #p.read.ALM_FLP;
-    = #p.read.mc.ERROR;
-
-NETWORK
-TITLE = Inverter fault
-    A #p.read.FLT;
-    = #p.read.ALM_FLT;
-    = #p.read.mc.ERROR;
-
-NETWORK
-TITLE = Thermistor module alarm
-    A #p.read.THM;
-    = #p.read.ALM_THM;
-    = #p.read.mc.ERROR;
-
-NETWORK
-TITLE = Aggregate all interlock conditions
-    //------------------------------------------------------------------------//
-    // Collect all interlock conditions:                                      //
-    //------------------------------------------------------------------------//
-    O #p.read.mc.INTERLOCK;
-    O tILAnalog;
-    O #p.read.BRK;
-    O #p.read.PHR;
-    O #p.read.FLP;
-    O #p.read.FLT;
-    O #p.read.THM;
-    ON #p.read.MI1_DQ;
-    = #p.read.mc.INTERLOCK;
-
-NETWORK
-TITLE = Interlock overrides ENABLE command
-    //------------------------------------------------------------------------//
-    // Don't allow enable command if any interlock:                           //
-    //------------------------------------------------------------------------//
-    A #cmdEnable;
-    AN #p.read.mc.INTERLOCK;
-    = #cmdEnable;
-
-NETWORK
-TITLE = If not ENABLE then command must be DISABLE
-    //------------------------------------------------------------------------//
-    // Don't allow enable command if any interlock:                           //
-    //------------------------------------------------------------------------//
-    AN #cmdEnable;
-    = #cmdDisable;
-
-NETWORK
 TITLE = Vessel mass
     //------------------------------------------------------------------------//
     // Get the vessel mass from the MI1 CM:                                   //
@@ -284,43 +270,13 @@ TITLE = Low mass condition must stop the agitator from running
 _b:   NOP 0;
 
 NETWORK
-TITLE = Clamp the Setpoint at minimum
-    //------------------------------------------------------------------------//
-    // Setpoint minimum clamp:                                                //
-    //------------------------------------------------------------------------//
-    A(;
-    L #p.write.SETPOINT;
-    L @@MXMINIMUMAGIT@@;
-    <R;
-    );
-    JCN _ma;
-    L @@MXMINIMUMAGIT@@;
-    T #p.write.SETPOINT;
-_ma:   NOP 0;
-
-NETWORK
-TITLE = Clamp the Setpoint at maximum
-    //------------------------------------------------------------------------//
-    // Setpoint maximum clamp:                                                //
-    //------------------------------------------------------------------------//
-    A(;
-    L #p.write.SETPOINT;
-    L @@MXMAXIMUMAGIT@@;
-    >R;
-    );
-    JCN _mb;
-    L @@MXMAXIMUMAGIT@@;
-    T #p.write.SETPOINT;
-_mb:   NOP 0;
-
-NETWORK
 TITLE = Setpoint if Enabled
     //------------------------------------------------------------------------//
     // Setpoint if ENABLE:                                                    //
     //------------------------------------------------------------------------//
     A #cmdEnable;
     JCN _c;
-    L #p.write.SETPOINT;
+    L #p.read.SETPOINT_VFD;
     T #tSetpoint;
 _c:   NOP 0;
 
@@ -331,7 +287,7 @@ TITLE = Setpoint if Disabled
     //------------------------------------------------------------------------//
     A #cmdDisable;
     JCN _d;
-    L 0;
+    L 0.0;
     T #tSetpoint;
 _d:   NOP 0;
 
@@ -358,6 +314,7 @@ TITLE = Disable command
     //------------------------------------------------------------------------//
     A #cmdDisable;
     JCN _e;
+    R #tDO;
     L "dbCONST".BLK.SIC1.CMD.DISABLE;
     T #p.write.mc.CMD;
 _e:   NOP 0;
@@ -370,6 +327,7 @@ TITLE = Flag output should be on if command is ENABLE and mass is enough
     // no stop request from another interested party (i.e. module, such EMM1)://
     //------------------------------------------------------------------------//
     A #cmdEnable;
+    AN #p.read.mc.INTERLOCK;
     A #permitMass;
     AN #p.read.mc.modeOOS;
     AN(;
@@ -377,7 +335,7 @@ TITLE = Flag output should be on if command is ENABLE and mass is enough
     L "dbCONST".BLK.SIC1.STATE.STOPPED;
     ==I;
     );
-    = #tDO;
+    S #tDO;
 
 NETWORK
 TITLE = Set the peer state running if so
@@ -410,6 +368,7 @@ TITLE = Drive the agitator output on if commanded and safe to run
     A #tDO;
     = #p.read.OUT_CMD;
 
+@@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = PID Controller
     //------------------------------------------------------------------------//
@@ -423,31 +382,31 @@ TITLE = PID Controller
         D_SEL                := #p.read.D_SEL ,
         CYCLE                := #p.read.CYCLE ,
         SP_INT               := #tSetpoint ,
-        PV_IN                := #p.read.PV ,
+        PV_IN                := #p.read.ai.PV ,
         MAN                  := #tSetpoint ,
         GAIN                 := #p.read.GAIN ,
         TI                   := #p.read.TI ,
         TD                   := #p.read.TD ,
-        LMN_HLM              := 100.0 ,
+        LMN_HLM              := 1425.0 ,
         LMN_LLM              := 0.0 ,
-        LMN                  := #p.read.LMN
+        LMN                  := #p.read.MV_OUTPUT
     );
 
-NETWORK
-TITLE = Converts PID output (%) to speed setpoint (RPM)
-      L #p.read.LMN;
-      L 100.0;
-      /R;
-      T #LMN;
-
-
-      CALL SCALE_X
-      {dest_type := 'Real', src_type := 'Real'}
-      (  MIN                         := 0.0 ,
-         VALUE                       := #LMN ,
-         MAX                         := 3000.0 ,
-         Ret_Val                     := #p.read.MV_OUTPUT
-      );
+//NETWORK
+//TITLE = Converts PID output (%) to speed setpoint (RPM)
+//      L #p.read.LMN;
+//      L 100.0;
+//      /R;
+//      T #LMN;
+//
+//      CALL SCALE_X
+//      {dest_type := 'Real', src_type := 'Real'}
+//      (  MIN                         := 0.0 ,
+//         VALUE                       := #LMN ,
+//         MAX                         := 1425.0 ,
+//         Ret_Val                     := #p.read.MV_OUTPUT
+//      );
+@@TEMPLATE_END@@
 
 NETWORK
 TITLE = Output if Disabled

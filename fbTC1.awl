@@ -61,6 +61,23 @@ TITLE = Safe Command on restart
 _noRestart:   NOP 0;
 
 NETWORK
+TITLE = Check if the TCV is not in AUTO and REMOTE
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Check if the TCV cannot be controlled if not in AUTO:                  //
+    //------------------------------------------------------------------------//
+    O "idbMOD1".f[#p.link.MOD_TCV].p.read.mc.INTERLOCK;
+    ON "idbMOD1".f[#p.link.MOD_TCV].p.read.mc.modeAUTO;
+    ON(;
+    L "idbMOD1".f[#p.link.MOD_TCV].p.write.mc.CMD;
+    L "dbCONST".BLK.MOD1.CMD.REMOTE;
+    ==I;
+    );
+    = #p.read.mc.INTIL;
+
+NETWORK
 TITLE = Call Mode and Command handling block
     //------------------------------------------------------------------------//
     // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
@@ -72,16 +89,6 @@ TITLE = Call Mode and Command handling block
     (   mcRead               := #p.read.mc ,
         mcWrite              := #p.write.mc
     );
-
-NETWORK
-TITLE = Check if the TCV is not in AUTO
-    //------------------------------------------------------------------------//
-    // Check if the TCV cannot be controlled if not in AUTO:                  //
-    //------------------------------------------------------------------------//
-    O #p.read.mc.INTERLOCK;
-    O "idbMOD1".f[#p.link.MOD_TCV].p.read.mc.INTERLOCK;
-    ON "idbMOD1".f[#p.link.MOD_TCV].p.read.mc.modeAUTO;
-    = #p.read.mc.INTERLOCK;
 
 NETWORK
 TITLE = Device command ENABLE
@@ -145,7 +152,7 @@ TITLE = Setpoint if Disabled
     //------------------------------------------------------------------------//
     A #cmdDisable;
     JCN _c;
-    L 0;
+    L 0.0;
     T #tSetpoint;
 _c:   NOP 0;
 

@@ -45,55 +45,19 @@ TITLE = Safe Command on restart
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
     JCN _noRestart;
-    L "dbCONST".BLK.AL1.SAFE.CMD;
+    L "dbCONST".BLK.MI1.SAFE.CMD;
     T #p.write.mc.CMD;
     T #p.read.mc.CMD_SAFE;
 _noRestart:   NOP 0;
 
 NETWORK
-TITLE = Call Mode and Command handling function
-    //------------------------------------------------------------------------//
-    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
-    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
-    //                                                                        //
-    // Process the standard block functions for command, mode, interlock and  //
-    // state:                                                                 //
-    //------------------------------------------------------------------------//
-    CALL "fcModeCmd"
-    (   mcRead             := #p.read.mc ,
-        mcWrite              := #p.write.mc
-    );
-
-NETWORK
-TITLE = Call Analog Input handling function
-    //------------------------------------------------------------------------//
-    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
-    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
-    //                                                                        //
-    // Scale the analog input value and check it is healty:                   //
-    //------------------------------------------------------------------------//
-    CALL "fcAnalog"
-    (   ai                   := #p.read.ai
-    );
-
-NETWORK
-TITLE = Promote the analog input attributes
-    //------------------------------------------------------------------------//
-    // Promote the analog input attributes to module level:                   //
-    //------------------------------------------------------------------------//
-    L #p.read.ai.PV;
-    T #p.read.PV;
-    A #p.read.ai.DQ;
-    = #p.read.DQ;
-
-NETWORK
 TITLE = Analog input setpoints
     //------------------------------------------------------------------------//
+    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
+    // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
+    //                                                                        //
     // Set the analog input setpoints:                		                  //
     //------------------------------------------------------------------------//
-
-	A #p.read.mc.modeAUTO;
-	JCN _manual;
 	L #p.write.LIMIT_HH;
     T #p.read.ai.LIMIT_HH;
     L #p.write.LIMIT_H;
@@ -111,22 +75,51 @@ TITLE = Analog input setpoints
     A #p.write.ENABLE_LL;
     = #p.read.ai.ENABLE_LL;
 
-_manual: NOP 0;
-
+NETWORK
+TITLE = Call Analog Input handling function
+    //------------------------------------------------------------------------//
+    // Scale the analog input value and check it is healty:                   //
+    //------------------------------------------------------------------------//
+    CALL "fcAnalog"
+    (   ai                   := #p.read.ai
+    );
 
 NETWORK
-TITLE = Set INTERLOCK Flag
+TITLE = Promote the analog input attributes
+    //------------------------------------------------------------------------//
+    // Promote the analog input attributes to module level:                   //
+    //------------------------------------------------------------------------//
+    L #p.read.ai.PV;
+    T #p.read.PV;
+    A #p.read.ai.DQ;
+    = #p.read.DQ;
+
+NETWORK
+TITLE = Set Internal INTERLOCK Flag
     //------------------------------------------------------------------------//
     // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
     // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
     //                                                                        //
-    // Set interlock if any external or any problem with the measurement:     //
+    // Internal interlock flag if any problem with the measurement:           //
     //------------------------------------------------------------------------//
-    O #p.read.mc.INTERLOCK;
     O #p.read.ai.ALARM_LL;
     O #p.read.ai.ALARM_HH;
     ON #p.read.ai.DQ;
-    = #p.read.mc.INTERLOCK;
+    = #p.read.mc.INTIL;
+
+NETWORK
+TITLE = Call Mode and Command handling function
+    //------------------------------------------------------------------------//
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (   mcRead             := #p.read.mc ,
+        mcWrite              := #p.write.mc
+    );
 
 NETWORK
 TITLE = Set Device State to Enabled if healthy

@@ -90,6 +90,35 @@ TITLE = Safe Command on restart
 _noRestart:   NOP 0;
 
 NETWORK
+TITLE = Check any link device is not in AUTO
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Check if any link cannot be controlled if not in AUTO:                 //
+    //------------------------------------------------------------------------//
+    O "idbPI1".f[#p.link.PRESSURE].p.read.mc.INTERLOCK;
+    O(;
+    A #selectHPCA;
+    A "idbPOS2".f[#p.link.HPCA].p.read.mc.INTERLOCK;
+    );
+    O(;
+    A #selectLPCA;
+    A "idbPOS2".f[#p.link.LPCA].p.read.mc.INTERLOCK;
+    );
+    O "idbPOS2".f[#p.link.VENT].p.read.mc.INTERLOCK;
+    O(;
+    A #selectHPCA;
+    AN "idbPOS2".f[#p.link.HPCA].p.read.mc.modeAUTO;
+    );
+    O(;
+    A #selectLPCA;
+    AN "idbPOS2".f[#p.link.LPCA].p.read.mc.modeAUTO;
+    );
+    ON "idbPOS2".f[#p.link.VENT].p.read.mc.modeAUTO;
+    = #p.read.mc.INTIL;
+
+NETWORK
 TITLE = Call Mode and Command handling block
     //------------------------------------------------------------------------//
     // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
@@ -98,7 +127,7 @@ TITLE = Call Mode and Command handling block
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcRead             := #p.read.mc ,
+    (   mcRead               := #p.read.mc ,
         mcWrite              := #p.write.mc
     );
 
@@ -198,33 +227,6 @@ TITLE = Selected valve is LPCA
     ==I;
     );
     = #selectLPCA;
-
-NETWORK
-TITLE = Check any link device is not in AUTO
-    //------------------------------------------------------------------------//
-    // Check if any link cannot be controlled if not in AUTO:                 //
-    //------------------------------------------------------------------------//
-    O #p.read.mc.INTERLOCK;
-    O "idbPI1".f[#p.link.PRESSURE].p.read.mc.INTERLOCK;
-    O(;
-    A #selectHPCA;
-    A "idbPOS2".f[#p.link.HPCA].p.read.mc.INTERLOCK;
-    );
-    O(;
-    A #selectLPCA;
-    O "idbPOS2".f[#p.link.LPCA].p.read.mc.INTERLOCK;
-    );
-    O "idbPOS2".f[#p.link.VENT].p.read.mc.INTERLOCK;
-    O(;
-    A #selectHPCA;
-    AN "idbPOS2".f[#p.link.HPCA].p.read.mc.modeAUTO;
-    );
-    O(;
-    A #selectLPCA;
-    AN "idbPOS2".f[#p.link.LPCA].p.read.mc.modeAUTO;
-    );
-    ON "idbPOS2".f[#p.link.VENT].p.read.mc.modeAUTO;
-    = #p.read.mc.INTERLOCK;
 
 NETWORK
 TITLE = Check if selected valve should be OPENED

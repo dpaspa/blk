@@ -58,6 +58,18 @@ TITLE = Safe Command on restart
 _noRestart:   NOP 0;
 
 NETWORK
+TITLE = Process Fault Digital Input Signal
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Check if the field indicates there is a fault:                         //
+    //------------------------------------------------------------------------//
+    A #p.read.FAULT;
+    = #tFault;
+    = #p.read.mc.INTIL;
+
+NETWORK
 TITLE = Call Mode and Command handling block
     //------------------------------------------------------------------------//
     // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
@@ -69,29 +81,6 @@ TITLE = Call Mode and Command handling block
     (   mcRead             := #p.read.mc ,
         mcWrite            := #p.write.mc
     );
-
-NETWORK
-TITLE = Process Fault Digital Input Signal
-    //------------------------------------------------------------------------//
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    //                                                                        //
-    // Check if the field indicates there is a fault:                         //
-    //------------------------------------------------------------------------//
-    A #p.read.FAULT;
-    = #tFault;
-
-NETWORK
-TITLE = Interlock if any fault or external interlock
-    //------------------------------------------------------------------------//
-    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
-    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
-    //                                                                        //
-    // Interlock also the field indicates a fault:                            //
-    //------------------------------------------------------------------------//
-    O #p.read.mc.INTERLOCK;
-    O #p.read.FAULT;
-    = #p.read.mc.INTERLOCK;
 
 NETWORK
 TITLE = Device command ENABLE

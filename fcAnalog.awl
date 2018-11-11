@@ -80,17 +80,18 @@ NETWORK
 TITLE = Check for out of range error
     //------------------------------------------------------------------------//
     // Check if the raw input value is underrange or overrange.               //
-    // Counts rage would be 0 to 27648 for 4 to 20 mA but allow for noise:    //
+    // Counts rage would be 0 to 27648 for 4 to 20 mA but make an allowance   //
+    // for noise, say +- 30 counts:                                           //
     //------------------------------------------------------------------------//
     A(;
     O(;
     L #tRAW;
-    L 27668;
+    L 27678;
     >I;
     );
     O(;
     L #tRAW;
-    L -20;
+    L -30;
     <I;
     );
     );

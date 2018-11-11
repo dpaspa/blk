@@ -154,7 +154,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Speed measured value
     // Set the instance speed measured value from the field:                  //
     //------------------------------------------------------------------------//
     L "@@INSTANCE@@-RAW";
-    T #f[@@IDX@@].p.read.RAW_INPUT;
+    T #f[@@IDX@@].p.read.ai.RAW_INPUT;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Field Fault Inputs
@@ -239,36 +239,69 @@ TITLE = @@INSTANCE@@ : Analog input attributes
 @@ATTR_END|ANALOG_EMBED@@
 
 NETWORK
+TITLE = Clamp the Setpoint at minimum
+    //------------------------------------------------------------------------//
+    // Setpoint minimum clamp:                                                //
+    //------------------------------------------------------------------------//
+    A(;
+    L #f[@@IDX@@].p.write.SETPOINT;
+    L @@MXMINIMUMAGIT@@;
+    <R;
+    );
+    JCN _ma;
+    L @@MXMINIMUMAGIT@@;
+    T #f[@@IDX@@].p.write.SETPOINT;
+_ma:   NOP 0;
+
+NETWORK
+TITLE = Clamp the Setpoint at maximum
+    //------------------------------------------------------------------------//
+    // Setpoint maximum clamp:                                                //
+    //------------------------------------------------------------------------//
+    A(;
+    L #f[@@IDX@@].p.write.SETPOINT;
+    L @@MXMAXIMUMAGIT@@;
+    >R;
+    );
+    JCN _mb;
+    L @@MXMAXIMUMAGIT@@;
+    T #f[@@IDX@@].p.write.SETPOINT;
+_mb:   NOP 0;
+
+NETWORK
+TITLE = @@INSTANCE@@ : Setpoint adjustment for gear box ratio
+    //------------------------------------------------------------------------//
+    // Adjust the impeller setpoint for the motor setpoint based on the gear  //
+    // box ratio:                                                             //
+    //------------------------------------------------------------------------//
+    L @@MXAGITGEARBOXRATIO@@;
+    L #f[@@IDX@@].p.write.SETPOINT;
+    *R;
+    T #f[@@IDX@@].p.read.SETPOINT_VFD;
+
+NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #f[@@IDX@@];
 
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Speed Setpoint
-    //------------------------------------------------------------------------//
-    // Set the instance output speed setpoint to the field:                   //
-    //------------------------------------------------------------------------//
-    L #f[@@IDX@@].p.read.MV_OUTPUT;
-    T "@@INSTANCE@@-OUT";
-
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
-    //------------------------------------------------------------------------//
-    // Set the instance output command to the field:                          //
-    //------------------------------------------------------------------------//
-    A #f[@@IDX@@].p.read.OUT_CMD;
-    = "@@INSTANCE@@-CMD";
-
-NETWORK
-TITLE = Emergency stop active
-    //------------------------------------------------------------------------//
-    // Check if any emergency stop is active:                                 //
-    //------------------------------------------------------------------------//
-    O "ES@@CONNECTION@@100-DI";
-    O "ES@@CONNECTION@@101-DI";
-    = #EmergencyStop;
+//NETWORK
+//TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
+//    //------------------------------------------------------------------------//
+//    // Set the instance output command to the field:                          //
+//    //------------------------------------------------------------------------//
+//    A #f[@@IDX@@].p.read.OUT_CMD;
+//    = "@@INSTANCE@@-CMD";
+//
+//NETWORK
+//TITLE = Emergency stop active
+//    //------------------------------------------------------------------------//
+//    // Check if any emergency stop is active:                                 //
+//    //------------------------------------------------------------------------//
+//    O "ES@@CONNECTION@@100-DI";
+//    O "ES@@CONNECTION@@101-DI";
+//    = #EmergencyStop;
 
 NETWORK
 TITLE = Drive interface
@@ -278,13 +311,13 @@ TITLE = Drive interface
     CALL "PZD_G120_Tel_352", "PZD_G120_Tel_352_DB_@@MXVFDNAME@@"
       (  address                     := @@MXVFDADDRESS@@ ,
          ON_OFF1                     := "@@INSTANCE@@-CMD" ,
-         enable_operation            := #EmergencyStop ,
+         enable_operation            := #f[@@IDX@@].p.read.OUT_CMD ,
          acknowledge                 := #f[@@IDX@@].p.read.ERROR_RESET ,
          CTW_bit_08                  := 1 ,
          CTW_bit_09                  := 1 ,
          CTW_bit_12                  := 1 ,
          CTW_bit_15                  := 1 ,
-         speed_setpoint              := #f[@@IDX@@].p.write.SETPOINT ,
+         speed_setpoint              := #f[@@IDX@@].p.read.MV_OUTPUT ,
          reference_speed_P2000       := @@MXAGITREFERENCESPEED@@ ,
          reference_current_P2002     := @@MXAGITREFERENCECURRENT@@ ,
          reference_torque_P2003      := @@MXAGITREFERENCETORQUE@@ ,

@@ -218,6 +218,7 @@ VERSION : 1.0
         ALM_BRK : Bool;
         ALM_PHR : Bool;
         FAIL_START : Bool;             // Fail to start
+        FAIL_STOP : Bool;              // Fail to stop
     END_STRUCT;
 END_TYPE
 
@@ -299,6 +300,7 @@ VERSION : 1.0
     STRUCT
         mc : "udtMCRead";              // Block mode and command for calculations on read CPU
         ai : "udtAnalog";              // Analog input structure
+        PV : Real;                     // Duplicated PV for use by parent
         STATE_PEER : Int := 0;         // State check for agitator motor from other modules
         MASS_RUN : Real;               // Low mass threshold at which the agitator may run
         MASS_STOP : Real;              // Low low mass threshold at which the agitator must stop
@@ -328,6 +330,7 @@ VERSION : 1.0
         ALM_THM : Bool;
         ERROR_RESET : Bool;
         FAIL_TO_RUN : Bool;
+        SETPOINT_VFD : Real;           // Motor speed setpoint prior to reduction gearbox
         OUT_SETPOINT : Real;           // Setpoint output value
         LMN : Real;                    // Inverter Speed reference from PID
         MV_OUTPUT : Real;              // Calculated percent output
@@ -339,7 +342,7 @@ VERSION : 1.0
     STRUCT
         mc : "udtMCWrite";             // Block mode and command for directives from write CPU
         CMD_PEER : Int := 0;           // Command request for agitator motor from other modules
-        SETPOINT : Real;               // Agitator speed setpoint
+        SETPOINT : Real;               // Agitator impeller speed setpoint
         USER_INPUT : Word;             // Manual mode, equivallent of Analog input, to be entered by Operator
         MAN_PID : Bool;                // Manual non pid selection
 		LIMIT_HH : Real;               // High High Alarm Limit from parent

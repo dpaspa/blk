@@ -52,6 +52,29 @@ TITLE = Safe Command on restart
 _noRestart:   NOP 0;
 
 NETWORK
+TITLE = Process Digital Input Signal
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    //                                                                        //
+    // Calculate the process value based on input:                            //
+    //------------------------------------------------------------------------//
+    A #p.read.DI_Auto;
+    = #tPV;
+    = #p.read.PV;
+
+NETWORK
+TITLE = Set Internal INTERLOCK Flag
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Set internal interlock if the switch goes ON:                          //
+    //------------------------------------------------------------------------//
+    A #tPV;
+    = #p.read.mc.INTIL;
+
+NETWORK
 TITLE = Call Mode and Command handling function
     //------------------------------------------------------------------------//
     // MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
@@ -66,18 +89,6 @@ TITLE = Call Mode and Command handling function
     );
 
 NETWORK
-TITLE = Process Digital Input Signal
-    //------------------------------------------------------------------------//
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    //                                                                        //
-    // Calculate the process value based on input:                            //
-    //------------------------------------------------------------------------//
-    A #p.read.DI_Auto;
-    = #tPV;
-    = #p.read.PV;
-
-NETWORK
 TITLE = Set ALARM Flag
     //------------------------------------------------------------------------//
     // ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM   ALARM  //
@@ -88,17 +99,6 @@ TITLE = Set ALARM Flag
     A #tPV;
     AN #p.read.mc.modeOOS;
     = #p.read.ALARM;
-
-NETWORK
-TITLE = Set INTERLOCK Flag
-    //------------------------------------------------------------------------//
-    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
-    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
-    //                                                                        //
-    // Set interlocks:                                                        //
-    //------------------------------------------------------------------------//
-    A #tPV;
-    = #p.read.mc.INTERLOCK;
 
 NETWORK
 TITLE = Set Device State to Enabled if switch is off

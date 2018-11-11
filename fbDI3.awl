@@ -55,7 +55,7 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcRead             := #p.read.mc ,
+    (   mcRead               := #p.read.mc ,
         mcWrite              := #p.write.mc
     );
 
@@ -100,9 +100,8 @@ TITLE = Set INTERLOCK Flag
     //                                                                        //
     // Set interlocks:                                                        //
     //------------------------------------------------------------------------//
-    O #p.read.mc.INTERLOCK;
-    O #tPV;
-    = #p.read.mc.INTERLOCK;
+    A #tPV;
+    = #p.read.mc.INTIL;
 
 NETWORK
 TITLE = Set Device State to follow Command

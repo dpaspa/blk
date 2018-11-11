@@ -89,6 +89,34 @@ TITLE = Safe Command on restart
 _noRestart:   NOP 0;
 
 NETWORK
+TITLE = Motor faults and three phase relay alarm
+    //------------------------------------------------------------------------//
+    // INPUTS   INPUTS   INPUTS   INPUTS    cjffff   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+    // MOTOR FAULTS                                                           //
+    // Raise alarm if any motor control fault condition is active:            //
+    //------------------------------------------------------------------------//
+    A #p.read.PHR;
+    = #p.read.ALM_PHR;
+
+NETWORK
+TITLE = Motor breaker fault
+    A #p.read.BRK;
+    = #p.read.ALM_BRK;
+    = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Internal Interlock if any field fault
+    //------------------------------------------------------------------------//
+    // Include motor field faults in the internal interlock calculation:      //
+    //------------------------------------------------------------------------//
+    O #p.read.BRK;
+    O #p.read.PHR cjffff
+    O #p.read.FAIL_START;
+    O #p.read.FAIL_STOP;
+    = #p.read.mc.INTIL;
+
+NETWORK
 TITLE = Call Mode and Command handling block
     //------------------------------------------------------------------------//
     // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
@@ -107,88 +135,32 @@ TITLE = Start command
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
     //                                                                        //
-    // CMD is START:                                                          //
+    // CMD is START sets the output on and starts the timer:                  //
     //------------------------------------------------------------------------//
+    AN #p.read.mc.modeOOS;
+    AN #p.read.mc.INTERLOCK;
     A(;
     L #p.write.mc.CMD;
     L "dbCONST".BLK.MOT1.CMD.START;
     ==I;
     );
-    =#cmdStart;
+    = #cmdStart;
+    = #p.read.OUT_Q;
+    = #tDO;
+    = #enableStartTimer;
 
 NETWORK
 TITLE = Stop command
     //------------------------------------------------------------------------//
     // CMD is STOP:                                                           //
     //------------------------------------------------------------------------//
+    ON #cmdStart;
     A(;
     L #p.write.mc.CMD;
     L "dbCONST".BLK.MOT1.CMD.STOP;
     ==I;
     );
-    = #cmdStop
-
-NETWORK
-TITLE = Motor faults and three phase relay alarm
-    //------------------------------------------------------------------------//
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
-    // MOTOR FAULTS                                                           //
-    // Raise alarm if any motor control fault condition is active:            //
-    //------------------------------------------------------------------------//
-    A #p.read.PHR;
-    = #p.read.ALM_PHR;
-
-NETWORK
-TITLE = Motor breaker fault
-    A #p.read.BRK;
-    = #p.read.ALM_BRK;
-    = #p.read.mc.ERROR;
-
-NETWORK
-TITLE = Interlock if any field fault
-    //------------------------------------------------------------------------//
-    // Include motor field faults in the interlock calculation:
-    //------------------------------------------------------------------------//
-    O #p.read.mc.INTERLOCK;
-    O #p.read.BRK;
-    O #p.read.PHR;
-    = #p.read.mc.INTERLOCK;
-
-NETWORK
-TITLE = Start comand allowable if no fault conditions or OOS
-    //------------------------------------------------------------------------//
-    // Allow start if no interlock or OOS mode:                               //
-    //------------------------------------------------------------------------//
-    A cmdStart;
-    AN #p.read.mc.modeOOS;
-    AN #p.read.mc.INTERLOCK;
-    = cmdStart;
-
-    //------------------------------------------------------------------------//
-    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
-    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
-    //                                                                        //
-    // Set the output on if start selected and allowable:                     //
-    //------------------------------------------------------------------------//
-    A cmdStart;
-    = #p.read.OUT_Q;
-    = #tDO;
-
-NETWORK
-TITLE = Start Timer to wait for running feedback
-    //------------------------------------------------------------------------//
-    // Start timer to allow time for running feedback to come on:             //
-    //------------------------------------------------------------------------//
-    A #cmdStart;
-    = #enableStartTimer;
-
-NETWORK
-TITLE = Stop Timer to wait for running feedback to go off
-    //------------------------------------------------------------------------//
-    // Stop timer to allow time for running feedback to go off:               //
-    //------------------------------------------------------------------------//
-    A #cmdStop;
+    = #cmdStop;
     = #enableStopTimer;
 
 NETWORK
@@ -231,6 +203,8 @@ TITLE = Device State RUNNING if running feedback on or bypass
     AN #tDO;
     AN #p.read.FB_RUN;
     JCN _a;
+    R #p.read.FAIL_START;
+    R #p.read.FAIL_STOP;
     L "dbCONST".BLK.MOT1.STATE.STOPPED;
     T #p.read.mc.STATE;
 _a:   NOP 0;
@@ -242,7 +216,9 @@ _a:   NOP 0;
     A #tDO;
     A #p.read.FB_RUN;
     AN #p.read.FAIL_START;
-    JCN _b;
+    JCN _b cjffff
+    R #p.read.FAIL_START cjffff
+    R #p.read.FAIL_STOP;
     L "dbCONST".BLK.MOT1.STATE.RUNNING;
     T #p.read.mc.STATE;
 _b:   NOP 0;
@@ -264,6 +240,8 @@ TITLE = Device State transition if waiting for running or stopped
     A #p.read.FB_RUN;
     );
     JCN _c;
+    R #p.read.FAIL_START;
+    R #p.read.FAIL_STOP;
     L "dbCONST".BLK.MOT1.STATE.STARTING_STOPPING;
     T #p.read.mc.STATE;
 _c:   NOP 0;
@@ -276,29 +254,29 @@ TITLE = Device State FAULT if timed out waiting for running
     A #tDO;
     A #startTMR.Q;
     AN #p.read.FB_RUN;
-    = #p.read.FAIL_START;
-    = #tFault;
+    JCN _failStart;
+    S #p.read.FAIL_START;
+_failStart:   NOP 0;
 
 NETWORK
 TITLE = Device State FAULT also if timed out waiting for stopped
     //------------------------------------------------------------------------//
     // Fault if stopping timer expired and not stopped:                       //
     //------------------------------------------------------------------------//
-    O #tFault;
-    O(;
     AN #tDO;
     A #stopTMR.Q;
     A #p.read.FB_RUN;
-    );
-    = #tFault;
-    = #p.read.mc.ERROR;
+    JCN _failStop;
+    S #p.read.FAIL_STOP;
+_failStop:   NOP 0;
 
 NETWORK
 TITLE = Set State FAULT if any fault condition
     //------------------------------------------------------------------------//
     // Fault if starting timer expired and not running:                       //
     //------------------------------------------------------------------------//
-    A #tFault;
+    O #p.read.FAIL_START;
+    O #p.read.FAIL_STOP;
     JCN _d;
     L "dbCONST".BLK.MOT1.STATE.FAULT;
     T #p.read.mc.STATE;
