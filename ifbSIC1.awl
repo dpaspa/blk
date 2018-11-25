@@ -269,31 +269,12 @@ TITLE = Clamp the Setpoint at maximum
 _mb:   NOP 0;
 
 NETWORK
-TITLE = @@INSTANCE@@ : Setpoint adjustment for gear box ratio
-    //------------------------------------------------------------------------//
-    // Adjust the impeller setpoint for the motor setpoint based on the gear  //
-    // box ratio:                                                             //
-    //------------------------------------------------------------------------//
-    L @@MXAGITGEARBOXRATIO@@;
-    L #f[@@IDX@@].p.write.SETPOINT;
-    *R;
-    T #f[@@IDX@@].p.read.SETPOINT_VFD;
-
-NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #f[@@IDX@@];
 
-//NETWORK
-//TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
-//    //------------------------------------------------------------------------//
-//    // Set the instance output command to the field:                          //
-//    //------------------------------------------------------------------------//
-//    A #f[@@IDX@@].p.read.OUT_CMD;
-//    = "@@INSTANCE@@-CMD";
-//
 //NETWORK
 //TITLE = Emergency stop active
 //    //------------------------------------------------------------------------//
@@ -325,6 +306,14 @@ TITLE = Drive interface
          ready_for_operation         := #f[@@IDX@@].p.read.RDY_TO_RUN ,
          operation_enabled           := #f[@@IDX@@].p.read.RUNNING
       );
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
+    //------------------------------------------------------------------------//
+    // Set the instance output command to the field:                          //
+    //------------------------------------------------------------------------//
+    A #f[@@IDX@@].p.read.OUT_CMD;
+    = "@@INSTANCE@@-CMD";
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Send the alarm bits to the global DB

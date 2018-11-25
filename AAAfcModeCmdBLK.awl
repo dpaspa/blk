@@ -1,0 +1,171 @@
+﻿FUNCTION "fcModeCmdBLK" : Void
+TITLE = Stackable Block Mode, Command & Interlock handling block
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fcModeCmdBLK
+VERSION : 2.0
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description: Generic Block Common Mode and Command handling function block.//
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      28-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.4 Khairul Basar    05-Oct-2009 NA        Substate change will issue STOP //
+// 0.3 Khairul Basar    17-Sep-2009 NA        Instead of Auto/Man command,    //
+//                                            now only single COMMAND.        //
+// 0.2 Khairul Basar    20-Aug-2009 NA        Ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009 NA        Initial design.                 //
+// Ref1.                                                                      //
+// Mode change:#tMode_Changed NO is removed from the parallel path of         //
+// Substate changed for not to generate #tEdgeAutoStart pulse when mode is    //
+// changed.                                                                   //
+//----------------------------------------------------------------------------//
+   VAR_IN_OUT 
+      mcRead : "udtMCRead";   // Block mode and command from read CPU
+      mcWrite : "udtMCWrite";   // Block mode and command directives from write CPU
+      bmc : "udtModeCommandBLK";   // Block mode and command
+   END_VAR
+
+   VAR_TEMP 
+      edgeInterlock : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Flag if block Mode just changed to Auto
+//------------------------------------------------------------------------//
+// MODE CHANGE EVENT   MODE CHANGE EVENT   MODE CHANGE EVENT   MODE CHANG //
+//                                                                        //
+// Check if the mode has just been changed to Auto if the bit positive    //
+// edge. The result will only last for one scan after the positive edge:  //
+//------------------------------------------------------------------------//
+      A #mcRead.modeAUTO;
+      FP #bmc.edgeModeAuto;
+      = #bmc.eventModeAuto;
+
+NETWORK
+TITLE = Flag if block Mode just changed to Manual
+//------------------------------------------------------------------------//
+// Check if the mode has just been changed to Manual:                     //
+//------------------------------------------------------------------------//
+      A #mcRead.modeMANUAL;
+      FP #bmc.edgeModeManual;
+      = #bmc.eventModeManual;
+
+NETWORK
+TITLE = Flag if block Mode just changed to Out Of Service
+//------------------------------------------------------------------------//
+// Check if the mode has just been changed to Out of Service:             //
+//------------------------------------------------------------------------//
+      A #mcRead.modeOOS;
+      FP #bmc.edgeModeOOS;
+      = #bmc.eventModeOOS;
+
+NETWORK
+TITLE = Check if restart event
+      A #bmc.permitStart;
+      A(;
+      L #mcWrite.CMD;
+      L "dbCONST".BLK.CMD.RESTART;
+      ==I;
+      );
+      A(;
+      L #mcRead.STATE;
+      L "dbCONST".BLK.STATE.COMPLETED;
+      ==I;
+      );
+      FP #bmc.edgeCommandRestart;
+      = #bmc.eventCmdRestart;
+
+NETWORK
+TITLE = Flag if a new block running substate command issued
+//------------------------------------------------------------------------//
+// START COMMAND   START COMMAND   START COMMAND   START COMMAND   START  //
+//                                                                        //
+// Check if the start command has just been issued if the bit positive    //
+// edge. The result will only last for one scan after the positive edge:  //
+//------------------------------------------------------------------------//
+      A #bmc.permitStart;
+      A(;
+      L #mcWrite.CMD;
+      L "dbCONST".BLK.CMD.START;
+      ==I;
+      );
+      A(;
+      L #mcRead.STATE;
+      L "dbCONST".BLK.STATE.STOPPED;
+      ==I;
+      );
+      FP #bmc.edgeCommandStart;
+      = #bmc.eventCmdStart;
+
+NETWORK
+TITLE = Flag if block stop command issued
+//------------------------------------------------------------------------//
+// STOP COMMAND   STOP COMMAND   STOP COMMAND   STOP COMMAND   STOP COMM  //
+//                                                                        //
+// Check if the stop command has just been issued if the bit positive     //
+// edge. The result will only last for one scan after the positive edge:  //
+//------------------------------------------------------------------------//
+      A(;
+      L #mcWrite.CMD;
+      L "dbCONST".BLK.CMD.STOP;
+      ==I;
+      );
+      FP #bmc.edgeCommandStop;
+      = #bmc.eventCmdStop;
+
+NETWORK
+TITLE = Stopped flag if in STOPPED state
+//------------------------------------------------------------------------//
+// STOPPED state flag for convenience:                                    //
+//------------------------------------------------------------------------//
+      A(;
+      L "dbCONST".BLK.STATE.STOPPED;
+      L #mcRead.STATE;
+      ==I;
+      );
+      = #bmc.stateSTOPPED;
+
+NETWORK
+TITLE = Running flag if in a RUNNING substate
+//------------------------------------------------------------------------//
+// STOPPED state flag for convenience:                                    //
+//------------------------------------------------------------------------//
+      A(;
+      L #mcRead.STATE;
+      L "dbCONST".BLK.STATE.STOPPED;
+      >I;
+      );
+      A(;
+      L #mcRead.STATE;
+      L "dbCONST".BLK.STATE.INTERLOCKED;
+      <I;
+      );
+      = #bmc.stateRUNNING;
+
+NETWORK
+TITLE = Interlocked State. Send safe command in case of any interlock or failure
+//------------------------------------------------------------------------//
+// Block should be interlocked state if STOPPED and interlock active or   //
+// child failed:                                                          //
+//------------------------------------------------------------------------//
+      O #mcRead.INTERLOCK;
+      ON #bmc.permitStart;
+      FP #bmc.edgeInterlock;
+      = #bmc.eventInterlock;
+      JCN _noInterlock;
+      S #mcRead.INTERLOCK;
+      L #mcRead.STATE;
+      T #bmc.lastSTATE;
+      L "dbCONST".BLK.STATE.INTERLOCKED;
+      T #mcRead.STATE;
+
+_noInterlock:      NOP 0;
+
+
+END_FUNCTION
+

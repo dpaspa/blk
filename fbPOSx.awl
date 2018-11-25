@@ -119,8 +119,6 @@ _b:   NOP 0;
     // Apply the safe command if restarting the PLC:                          //
     //------------------------------------------------------------------------//
     O "flagFirstScanRestart";
-    O #p.read.mc.INTERLOCK;
-    O #p.read.mc.modeOOS;
     JCN _noRestart;
     L #p.read.mc.CMD_SAFE;
     T #p.write.mc.CMD;
@@ -136,7 +134,7 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcRead             := #p.read.mc ,
+    (   mcRead               := #p.read.mc ,
         mcWrite              := #p.write.mc
     );
 
@@ -228,7 +226,7 @@ TITLE = Input Bypass Mode In Manual
     = #bypassFeedback;
 
 NETWORK
-TITLE = Close command
+TITLE = Deenergise command
     //------------------------------------------------------------------------//
     // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
     // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
@@ -248,7 +246,7 @@ TITLE = Close command
 _not_denergise:    NOP 0;
 
 NETWORK
-TITLE = Open command
+TITLE = Energise command
     //------------------------------------------------------------------------//
     // Energise if not OOS and no interlock:                                  //
     //------------------------------------------------------------------------//
@@ -395,11 +393,15 @@ NETWORK
 TITLE = Pack the alarm bits
     //------------------------------------------------------------------------//
     // Pack the alarm bits into an integer for the HMI to read:               //
+    // Alarms are arranged in the following Little Endian order...            //
+    // Word   1                                0                              //
+    // Bit    0   1   2   3   4   5   6   7    8   9  10  11  12  13  14  15  //
+    // Order  9  10  11  12  13  14  15  16    1   2   3   4   5   6   7   8  //
     //------------------------------------------------------------------------//
     A #p.read.FAULT_C;
-    = #b[0];
+    = #b[8];
     A #p.read.FAULT_O;
-    = #b[1];
+    = #b[9];
     L #w;
     T #p.read.mc.ALARM;
 

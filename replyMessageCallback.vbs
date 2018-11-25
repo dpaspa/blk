@@ -18,7 +18,8 @@ Sub replyMessageCallback(ByVal confirmCallback)
 '/-----------------------------------------------------------------------------/
 '/ Revision history:                                                           /
 '/ Rev By               Date        CC        Note                             /
-'/ 1   David Paspa      11-Aug-2019 NA        Reboot for S7-1500.              /
+'/ 2   David Paspa      16-Nov-2018 NA        Add HMI specific trigger.        /
+'/ 1   David Paspa      11-Aug-2018 NA        Reboot for S7-1500.              /
 '/-----------------------------------------------------------------------------/
 '/ Declare local variables:                                                    /
 '/-----------------------------------------------------------------------------/
@@ -84,20 +85,16 @@ Else
         bYes = True
     End If
 
-@@TEMPLATE_BEGIN|pEventPromptAll@@
     '/-------------------------------------------------------------------------/
     '/ The following should be done in a simple small script but WinCC does    /
     '/ not allow the structure SmartTag to be a variable.                      /
-    '/                                                                         /
-    '/ Check if this is the selected message:                                  /
+    '/ Set the confirm bit and clear the index for the selected message:       /
     '/-------------------------------------------------------------------------/
+@@TEMPLATE_BEGIN|pEventPromptAll@@
     If (idxMessage = @@IDXEVENT@@) Then
-        '/---------------------------------------------------------------------/
-        '/ Set the message confirm bit and clear the selected message index:   /
-        '/---------------------------------------------------------------------/
     	SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.confirmNo") = bNo
     	SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.confirmYes") = bYes
-        SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active") = False
+        SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active2") = False
     End If
 
 @@TEMPLATE_END@@

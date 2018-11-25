@@ -313,12 +313,12 @@ VERSION : 1.0
         FLT : Bool;                    // Inverter fault
         THM : Bool;                    // Thermistor module alarm
         P_SEL : Bool := TRUE;
-        I_SEL : Bool := TRUE;
-        D_SEL : Bool := TRUE;
-        GAIN : Real := 1.0;
-        TI : Time := T#20S;
-        TD : Time := T#10S;
-        CYCLE : Time := T#1S;          // SAMPLING TIME:The time between the block calls constant
+        I_SEL : Bool := FALSE;
+        D_SEL : Bool := FALSE;
+        GAIN : Real := 0.02;
+        TI : Time := T#3S;
+        TD : Time := T#5S;
+        CYCLE : Time := T#100MS;       // SAMPLING TIME:The time between the block calls constant
         OUT_CMD : Bool;                // Inverter Motor Run/Stop Command
         RUNNING : Bool;
         RDY_TO_ON : Bool;
@@ -368,8 +368,8 @@ TYPE "udtTC1read"
 VERSION : 1.0
     STRUCT
         mc : "udtMCRead";              // Block mode and command for calculations on read CPU
-        GAIN : Real := 1.0;            // Proportional Gain
-        TI : Time := T#20S;            // Integral Time
+        GAIN : Real := 0.05;            // Proportional Gain
+        TI : Time := T#10S;            // Integral Time
         TD : Time := T#10S;            // Derivative Time
         CYCLE : Time := T#100MS;       // PID Block Sampling Time
         P_SEL : Bool := TRUE;          // Proportional Action ON/OFF

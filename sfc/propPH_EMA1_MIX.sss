@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/09/2018 2:20:56 PM by David Paspa
+generated on 25/11/2018 11:51:45 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -90,29 +90,13 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- runtime_s
-Type:- INT
-Description:- RunTimeS
+Name:- runtime
+Type:- TIME
+Description:- Agitator run time
 ParameterInOut:- IN
 
 --------------------------------------------------
 PARAMETER::8
---------------------------------------------------
-Name:- runtime_m
-Type:- INT
-Description:- RunTimeM
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::9
---------------------------------------------------
-Name:- runtime_h
-Type:- INT
-Description:- RunTimeH
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::10
 --------------------------------------------------
 Name:- AcumTimeS
 Type:- INT
@@ -120,7 +104,7 @@ Description:- AcumTimeS
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::9
 --------------------------------------------------
 Name:- AcumTimeM
 Type:- INT
@@ -128,7 +112,7 @@ Description:- AcumTimeM
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::10
 --------------------------------------------------
 Name:- AcumTimeH
 Type:- INT
@@ -136,7 +120,7 @@ Description:- Total acumulated running time
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::11
 --------------------------------------------------
 Name:- agit_hist
 Type:- INT
@@ -144,7 +128,7 @@ Description:- Previous state of SIC
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::12
 --------------------------------------------------
 Name:- agit_stopped
 Type:- BOOL
@@ -152,7 +136,7 @@ Description:- Agitator stopped message to be logged
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::13
 --------------------------------------------------
 Name:- sic_agit_state
 Type:- INT
@@ -187,13 +171,13 @@ S #sqRunTimer.RESET;
 R #sqRunTimer.NON_RET;
 
 //Assign the run time setpoint
-L #_runtime_h;
+L 0;
 T #sqRunTimer.TIME_H;
 
-L #_runtime_m;
+L 0;
 T #sqRunTimer.TIME_M;
 
-L #_runtime_s;
+L #_runtime;
 T #sqRunTimer.TIME_S;
 
 // Mixer is running so start accumulating the run time.

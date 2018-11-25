@@ -91,7 +91,7 @@ _noRestart:   NOP 0;
 NETWORK
 TITLE = Motor faults and three phase relay alarm
     //------------------------------------------------------------------------//
-    // INPUTS   INPUTS   INPUTS   INPUTS    cjffff   INPUTS   INPUTS   INPUTS  //
+    // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
     // INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
     // MOTOR FAULTS                                                           //
     // Raise alarm if any motor control fault condition is active:            //
@@ -111,7 +111,7 @@ TITLE = Internal Interlock if any field fault
     // Include motor field faults in the internal interlock calculation:      //
     //------------------------------------------------------------------------//
     O #p.read.BRK;
-    O #p.read.PHR cjffff
+    O #p.read.PHR;
     O #p.read.FAIL_START;
     O #p.read.FAIL_STOP;
     = #p.read.mc.INTIL;
@@ -147,24 +147,39 @@ TITLE = Start command
     = #cmdStart;
     = #p.read.OUT_Q;
     = #tDO;
-    = #enableStartTimer;
+
+NETWORK
+TITLE = Start transition timer
+    //------------------------------------------------------------------------//
+    // Start transition timer:                                                //
+    //------------------------------------------------------------------------//
+    A #cmdStart;
+    AN #p.read.FB_RUN;
+    S #enableStartTimer;
 
 NETWORK
 TITLE = Stop command
     //------------------------------------------------------------------------//
     // CMD is STOP:                                                           //
     //------------------------------------------------------------------------//
-    ON #cmdStart;
     A(;
     L #p.write.mc.CMD;
     L "dbCONST".BLK.MOT1.CMD.STOP;
     ==I;
     );
     = #cmdStop;
-    = #enableStopTimer;
 
 NETWORK
-TITLE = Start Transition Timer in the event of Start or Stop
+TITLE = Stop transition timer
+    //------------------------------------------------------------------------//
+    // Stop transition timer:                                                 //
+    //------------------------------------------------------------------------//
+    A #cmdStop;
+    A #p.read.FB_RUN;
+    S #enableStopTimer;
+
+NETWORK
+TITLE = Start Transition Timer in the event of Start
     //------------------------------------------------------------------------//
     // Start the starting timer if START command issued:                      //
     //------------------------------------------------------------------------//
@@ -178,9 +193,9 @@ TITLE = Start Transition Timer in the event of Start or Stop
     NOP 0;
 
 NETWORK
-TITLE = Stop Transition Timer in the event of Start or Stop
+TITLE = Stop Transition Timer in the event of Stop
     //------------------------------------------------------------------------//
-    // Start the stopping timer if START command issued not issued:           //
+    // Start the stopping timer if STOP command issued:                       //
     //------------------------------------------------------------------------//
     CALL #stopTMR
     {time_type := 'Time'}
@@ -192,32 +207,33 @@ TITLE = Stop Transition Timer in the event of Start or Stop
     NOP 0;
 
 NETWORK
-TITLE = Device State RUNNING if running feedback on or bypass
+TITLE = Device State STOPPED if running feedback off
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
     //                                                                        //
     // STOPPED if output off and not running:                                 //
     //------------------------------------------------------------------------//
-    AN #cmdStart;
-    AN #tDO;
+    A #cmdStop;
     AN #p.read.FB_RUN;
     JCN _a;
+    R #enableStopTimer;
     R #p.read.FAIL_START;
     R #p.read.FAIL_STOP;
     L "dbCONST".BLK.MOT1.STATE.STOPPED;
     T #p.read.mc.STATE;
 _a:   NOP 0;
 
+NETWORK
+TITLE = Device State RUNNING if running feedback on or bypass
     //------------------------------------------------------------------------//
     // RUNNING if output is on with running feedback or bypass:               //
     //------------------------------------------------------------------------//
     A #cmdStart;
-    A #tDO;
     A #p.read.FB_RUN;
-    AN #p.read.FAIL_START;
-    JCN _b cjffff
-    R #p.read.FAIL_START cjffff
+    JCN _b;
+    R #enableStartTimer;
+    R #p.read.FAIL_START;
     R #p.read.FAIL_STOP;
     L "dbCONST".BLK.MOT1.STATE.RUNNING;
     T #p.read.mc.STATE;
@@ -230,14 +246,12 @@ TITLE = Device State transition if waiting for running or stopped
     // come on or output is off and waiting for running feedback to go off:   //
     //------------------------------------------------------------------------//
     O(;
-    A #tDO;
+    A #enableStartTimer;
     AN #startTMR.Q;
-    AN #p.read.FB_RUN;
     );
     O(;
-    AN #tDO;
+    A #enableStopTimer;
     AN #stopTMR.Q;
-    A #p.read.FB_RUN;
     );
     JCN _c;
     R #p.read.FAIL_START;
@@ -251,9 +265,7 @@ TITLE = Device State FAULT if timed out waiting for running
     //------------------------------------------------------------------------//
     // Fault if starting timer expired and not running:                       //
     //------------------------------------------------------------------------//
-    A #tDO;
     A #startTMR.Q;
-    AN #p.read.FB_RUN;
     JCN _failStart;
     S #p.read.FAIL_START;
 _failStart:   NOP 0;
@@ -263,9 +275,7 @@ TITLE = Device State FAULT also if timed out waiting for stopped
     //------------------------------------------------------------------------//
     // Fault if stopping timer expired and not stopped:                       //
     //------------------------------------------------------------------------//
-    AN #tDO;
     A #stopTMR.Q;
-    A #p.read.FB_RUN;
     JCN _failStop;
     S #p.read.FAIL_STOP;
 _failStop:   NOP 0;
@@ -275,8 +285,7 @@ TITLE = Set State FAULT if any fault condition
     //------------------------------------------------------------------------//
     // Fault if starting timer expired and not running:                       //
     //------------------------------------------------------------------------//
-    O #p.read.FAIL_START;
-    O #p.read.FAIL_STOP;
+    A #p.read.mc.INTIL;
     JCN _d;
     L "dbCONST".BLK.MOT1.STATE.FAULT;
     T #p.read.mc.STATE;
@@ -297,13 +306,19 @@ NETWORK
 TITLE = Pack the alarm bits
     //------------------------------------------------------------------------//
     // Pack the alarm bits into an integer for the HMI to read:               //
+    // Alarms are arranged in the following Little Endian order...            //
+    // Word   1                                0                              //
+    // Bit    0   1   2   3   4   5   6   7    8   9  10  11  12  13  14  15  //
+    // Order  9  10  11  12  13  14  15  16    1   2   3   4   5   6   7   8  //
     //------------------------------------------------------------------------//
     A #p.read.ALM_BRK;
-    = #b[0];
+    = #b[8];
     A #p.read.ALM_PHR;
-    = #b[1];
+    = #b[9];
     A #p.read.FAIL_START;
-    = #b[2];
+    = #b[10];
+    A #p.read.FAIL_STOP;
+    = #b[11];
     L #w;
     T #p.read.mc.ALARM;
 

@@ -1,0 +1,259 @@
+﻿ORGANIZATION_BLOCK "Main"
+TITLE = "Main Program Sweep (Cycle)"
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : Main
+VERSION : 2.0
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Description:                                                               //
+// The entry point for the entire program called by the system. This block is //
+// called cyclically after the Startup OB100 is called on first scan after    //
+// PLC start.                                                                 //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      09-Feb-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+   VAR_TEMP 
+      OB1_EV_CLASS : Byte;   // Bits 0-3 = 1 (Coming event), Bits 4-7 = 1 (Event class 1)
+      OB1_SCAN_1 : Byte;   // 1 (Cold restart scan 1 of OB 1), 3 (Scan 2-n of OB 1)
+      OB1_PRIORITY : Byte;   // Priority of OB Execution
+      OB1_OB_NUMBR : Byte;   // 1 (Organization block 1, OB1)
+      OB1_RESERVED_1 : Byte;   // Reserved for system
+      OB1_RESERVED_2 : Byte;   // Reserved for system
+      OB1_PREV_CYCLE : Int;   // Cycle time of previous OB1 scan (milliseconds)
+      OB1_MIN_CYCLE : Int;   // Minimum cycle time of OB1 (milliseconds)
+      OB1_MAX_CYCLE : Int;   // Maximum cycle time of OB1 (milliseconds)
+      OB1_DATE_TIME : Date_And_Time;   // Date and time OB1 started
+      tmpRetVal : Int;
+      wabc : Int;
+      wmode : Int;
+      hmi2PBeat : Bool;
+      hmi2NBeat : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = CPU to CPU Communication timer and pulse bit
+//------------------------------------------------------------------------//
+// PLC to PLC communication pulse timer:                                  //
+//------------------------------------------------------------------------//
+      AN "pulseCOMMS";
+      L S5T#5m;
+      SP "timerCOMMS";
+      NOP 0;
+      NOP 0;
+      NOP 0;
+      A "timerCOMMS";
+      = "pulseCOMMS";
+      NOP 0;
+
+NETWORK
+TITLE = HMI 2 Heartbeat
+      A "hmi2Pulse";
+      FP "hmi2PEdge";
+      = #hmi2PBeat;
+
+
+      A "hmi2Pulse";
+      FN "hmi2PEdge";
+      = #hmi2NBeat;
+
+      O #hmi2PBeat;
+      O #hmi2NBeat;
+      S "hmi2Active";
+
+      AN #hmi2PBeat;
+      AN #hmi2NBeat;
+      L S5T#5s;
+      SP "hmi2Timer";
+      NOP 0;
+      NOP 0;
+      NOP 0;
+
+      AN #hmi2PBeat;
+      AN #hmi2NBeat;
+      AN "hmi2Timer";
+      R "hmi2Active";
+      NOP 0;
+
+NETWORK
+TITLE = Time Management
+
+      CALL "fcTimeManagement"
+      (  SET                         := "timeManagement" , 
+         NEW_DATE                    := "dbCONST".CHRONO.NEW_DATE , 
+         NEW_TIME                    := "dbCONST".CHRONO.NEW_TIME , 
+         CPU_DATE                    := "dbCONST".CHRONO.CPU_DATE , 
+         CPU_TIME                    := "dbCONST".CHRONO.CPU_TIME
+      );
+
+NETWORK
+TITLE = load OB1 previous cycle time into DB memory
+      L #OB1_PREV_CYCLE;
+      T "dbCONST".CHRONO.OB1_prev_cycle;
+
+NETWORK
+TITLE = load OB1 maximum cycle time into DB memory
+      A(;
+      L #OB1_PREV_CYCLE;
+      L #OB1_MAX_CYCLE;
+      >I;
+      );
+      JCN notMaximum;
+      L #OB1_PREV_CYCLE;
+      T #OB1_MAX_CYCLE;
+      T "timeOBMax";
+notMaximum:      NOP 0;
+
+NETWORK
+TITLE = Calling all Critical Interlocks
+//------------------------------------------------------------------------//
+// Call the Critical Interlock block:                                     //
+//------------------------------------------------------------------------//
+      CALL "ifbCRIL", "idbCRIL";
+      NOP 0;
+
+NETWORK
+TITLE = Calling all Non Critical Interlocks
+//------------------------------------------------------------------------//
+// Call the Non-Critical Interlock block:                                 //
+//------------------------------------------------------------------------//
+      CALL "ifbNCRIL", "idbNCRIL";
+      NOP 0;
+
+NETWORK
+TITLE = 
+      L 1000;
+      T "MI2101-RAW";
+
+NETWORK
+TITLE = Calling all Control Modules (CM)
+//------------------------------------------------------------------------//
+// Call all user control module blocks to execute the user application.   //
+// Each CM is a bespoke hand coded module with specific I/O and function: //
+//------------------------------------------------------------------------//
+      CALL "fcCallCMs";
+      NOP 0;
+
+NETWORK
+TITLE = Calling all Equipment Modules (EM)
+//------------------------------------------------------------------------//
+// Call all user equipment module blocks to execute the user application. //
+// These are all instances of the generic block logic:                    //
+//------------------------------------------------------------------------//
+      CALL "fcCallEMs";
+      NOP 0;
+
+NETWORK
+TITLE = Calling all Units (UN)
+//------------------------------------------------------------------------//
+// Call all user Unit blocks to execute the user application.             //
+// These are all instances of the generic block logic:                    //
+//------------------------------------------------------------------------//
+      CALL "fcCallUNs";
+      NOP 0;
+
+NETWORK
+TITLE = Calling all Process Cells (PC)
+//------------------------------------------------------------------------//
+// Call all user Process Cell blocks to execute the user application.     //
+// These are all instances of the generic block logic:                    //
+//------------------------------------------------------------------------//
+      CALL "fcCallPCs";
+      NOP 0;
+
+NETWORK
+TITLE = Call CM communications between PLCs if enabled
+//------------------------------------------------------------------------//
+// Call the communications functions if comms is enabled:                 //
+//------------------------------------------------------------------------//
+      A "commsEnable";
+      JCN _xCM;
+      CALL "fcCallxCMs";
+_xCM:      NOP 0;
+
+NETWORK
+TITLE = Call EM communications between PLCs if enabled
+//------------------------------------------------------------------------//
+// Call the communications functions if comms is enabled:                 //
+//------------------------------------------------------------------------//
+      A "commsEnable";
+      JCN _xEM;
+      CALL "fcCallxEMs";
+_xEM:      NOP 0;
+
+NETWORK
+TITLE = Call UN communications between PLCs if enabled
+//------------------------------------------------------------------------//
+// Call the communications functions if comms is enabled:                 //
+//------------------------------------------------------------------------//
+      A "commsEnable";
+      JCN _xUN;
+      CALL "fcCallxUNs";
+_xUN:      NOP 0;
+
+NETWORK
+TITLE = Call RECIPE communications between PLCs if enabled
+//------------------------------------------------------------------------//
+// Transfer the Master Recipes from master M1 PLC to slave M2 PLC:        //
+//------------------------------------------------------------------------//
+      A "commsEnable";
+      JCN _xRCP;
+      CALL "fbxRECIPE", "dbxRECIPE";
+_xRCP:      NOP 0;
+
+NETWORK
+TITLE = HMI Sequence animation
+//------------------------------------------------------------------------//
+// Call the sequence select function for the HMI sequence interface:      //
+//------------------------------------------------------------------------//
+      CALL "ifcHMISelectSFC";
+      NOP 0;
+
+NETWORK
+TITLE = HMI generic block animation
+//------------------------------------------------------------------------//
+// Call the sequence select function for the HMI sequence interface:      //
+//------------------------------------------------------------------------//
+      CALL "ifbHMISelectBLK", "idbHMISelectBLK";
+      NOP 0;
+
+NETWORK
+TITLE = Recipe handler
+//------------------------------------------------------------------------//
+// Call the recipe handler to copy the Master Recipe to the Control       //
+// Recipe when selected:                                                  //
+//------------------------------------------------------------------------//
+      CALL "fcRecipeMasterCopy";
+      NOP 0;
+
+//NETWORK
+//TITLE = Call simulation script
+  //------------------------------------------------------------------------//
+  // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+  // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+  // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+  // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+  // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+  // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+  // ###DANGER###   ###DANGER###   ###DANGER###   ###DANGER###   ###DANG### //
+  //------------------------------------------------------------------------//
+//    CALL "fbSimulate", "fbSimulate_DB";
+//    NOP 0;
+
+NETWORK
+TITLE = First scan after restart is over
+//------------------------------------------------------------------------//
+// Very Important!!!!!!!!!!!!!!!!!!!!!                                    //
+// This MUST be the last instruction of OB1. The flag is set in OB100     //
+// which is the startup OB which is called only once on PLC start:        //
+//------------------------------------------------------------------------//
+      A "flagFirstScanRestart";
+      R "flagFirstScanRestart";
+END_ORGANIZATION_BLOCK
+

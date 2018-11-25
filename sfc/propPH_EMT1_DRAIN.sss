@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/09/2018 2:21:15 PM by David Paspa
+generated on 12/11/2018 12:38:31 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -31,13 +31,21 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- mod_tcv_pos_remote
+Type:- REAL
+Description:- MOD1 valve position in remote
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
 Name:- log_msg_drain_begin
 Type:- BOOL
 Description:- PH_EMT1_DRAIN begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::3
 --------------------------------------------------
 Name:- log_msg_drain_end
 Type:- BOOL
@@ -45,7 +53,7 @@ Description:- PH_EMT1_DRAIN end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::4
 --------------------------------------------------
 Name:- mod_tcv_cmd
 Type:- INT
@@ -53,7 +61,7 @@ Description:- MOD1 cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::5
 --------------------------------------------------
 Name:- mod_tcv_state
 Type:- INT
@@ -61,7 +69,7 @@ Description:- MOD1 state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::6
 --------------------------------------------------
 Name:- pos_returndrain_cmd
 Type:- INT
@@ -69,7 +77,7 @@ Description:- Cooling Water Return drain valve command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::7
 --------------------------------------------------
 Name:- pos_returndrain_state
 Type:- INT
@@ -77,7 +85,7 @@ Description:- Cooling Water Return drain valve state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::8
 --------------------------------------------------
 Name:- pos_return_state
 Type:- INT
@@ -85,7 +93,7 @@ Description:- Cooling Water Return Valve State
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::9
 --------------------------------------------------
 Name:- pos_supply_state
 Type:- INT
@@ -93,7 +101,7 @@ Description:- Cooling Water Supply Valve State
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::10
 --------------------------------------------------
 Name:- pos_return_cmd
 Type:- INT
@@ -101,7 +109,7 @@ Description:- Cooling Water Return Valve Cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::11
 --------------------------------------------------
 Name:- pos_supply_cmd
 Type:- INT
@@ -109,7 +117,7 @@ Description:- Cooling Water Supply Valve Cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::12
 --------------------------------------------------
 Name:- pos_supplydrain_state
 Type:- INT
@@ -117,7 +125,7 @@ Description:- Cooling Water Supply drain valve state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::13
 --------------------------------------------------
 Name:- pos_supplydrain_cmd
 Type:- INT
@@ -125,7 +133,7 @@ Description:- Cooling Water Supply drain valve command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::14
 --------------------------------------------------
 Name:- drain_time
 Type:- TIME
@@ -162,9 +170,15 @@ T #_pos_supplydrain_cmd;
 L "dbCONST".BLK.POSx.CMD.OPEN;
 T #_pos_returndrain_cmd;
 
-//Open MOD 1 TCV.
-L "dbCONST".BLK.POSx.CMD.OPEN;
+//Close MOD 1 TCV.
+L "dbCONST".BLK.MOD1.CMD.DISABLE;
 T #_mod_tcv_cmd;
+
+//Open MOD 1 TCV.
+//L 100.0;
+//T #_mod_tcv_pos_remote;
+//L "dbCONST".BLK.MOD1.CMD.REMOTE;
+//T #_mod_tcv_cmd;
 
 //Close Supply valve.
 L "dbCONST".BLK.POSx.CMD.CLOSE;
@@ -185,10 +199,10 @@ L #_pos_returndrain_state;
 L "dbCONST".BLK.POSx.STATE.OPENED;
 ==I;
 );
-//Verify Supply TCV was opened.
+//Verify Supply TCV was closed.
 A(;
 L #_mod_tcv_state;
-L "dbCONST".BLK.POSx.STATE.OPENED;
+L "dbCONST".BLK.MOD1.STATE.DISABLED;
 ==I;
 );
 //Verify Supply valve was closed.
@@ -219,7 +233,6 @@ S #sqSeqTimerStart;
 //Load the drain time setpoint.
 L #_drain_time;
 T #SQ_TIMER.PT;
-
 Verification:- A #sqSeqTimerStart;
 
 
@@ -258,9 +271,9 @@ T #_pos_supplydrain_cmd;
 L "dbCONST".BLK.POSx.CMD.CLOSE;
 T #_pos_returndrain_cmd;
 
-//Open MOD 1 TCV.
-L "dbCONST".BLK.POSx.CMD.CLOSE;
-T #_mod_tcv_cmd;
+//Close MOD 1 TCV.
+//L "dbCONST".BLK.MOD1.CMD.DISABLE;
+//T #_mod_tcv_cmd;
 
 //Close Supply valve.
 L "dbCONST".BLK.POSx.CMD.CLOSE;

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/09/2018 2:21:05 PM by David Paspa
+generated on 25/11/2018 11:03:26 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -124,7 +124,6 @@ Description:- Log SETUP begin time.
 Action:- //Log SETUP begin time.
 SET;
 S #_log_msg_setup_begin;
-
 Verification:- A "uncondJump";
 
 
@@ -142,20 +141,12 @@ Condition:- A "uncondJump";
 STEP::02
 --------------------------------------------------
 StepNo:- 02
-Title:- PH_EMC2_SETUP : Reset prompt.
-Description:- Reset prompt.
+Title:- PH_EMC2_SETUP : Check if PW or WFI
+Description:- Empty step for loop
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Reset prompt.
-Action:- //Reset prompt.
-SET;
-R #_prompt_wfi;
-R #_prompt_pw;
-
-Verification:- A "uncondJump";
-
 
 --------------------------------------------------
 TRANSITION::02
@@ -217,13 +208,11 @@ Verification:- A "uncondJump";
 --------------------------------------------------
 TRANSITION::04
 --------------------------------------------------
-TRNNo:- 4.0000
+TRNNo:- 04
 Title:- Operator confirmation
 EmptyTransition:- False
 Description:- Wait for operator to confirm connections have been made.
-Condition:- A(;
-O #_prompt_wfi_confirm_yes;
-);
+Condition:- A #_prompt_wfi_confirm_yes;
 
 
 --------------------------------------------------
@@ -240,7 +229,6 @@ Description:- Prompt operator to connect PW supply to the vessel Mx inlet line, 
 Action:- //Prompt to connect PW.
 SET;
 S #_prompt_pw;
-
 Verification:- A "uncondJump";
 
 
@@ -251,9 +239,7 @@ TRNNo:- 05
 Title:- Operator confirmation
 EmptyTransition:- False
 Description:- Wait for operator to confirm connections have been made.
-Condition:- A(;
-O #_prompt_pw_confirm_yes;
-);
+Condition:- A #_prompt_pw_confirm_yes;
 
 
 --------------------------------------------------
@@ -266,12 +252,9 @@ Description:- Log operator confirmation and continue to check connection.
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log operator confirmation and reset flag.
+Description:- Log operator confirmation
 Action:- SET;
 S #_log_msg_confirm_connect;
-R #_prompt_pw_confirm_yes;
-R #_prompt_wfi_confirm_yes;
-Verification:- A "uncondJump";
 
 
 --------------------------------------------------

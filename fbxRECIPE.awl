@@ -1,0 +1,275 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbxRECIPE                                                     //
+// Description: Copies the M1 PLC Master Recipes to the M2 PLC.               //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      19-Jan-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbxRECIPE"
+TITLE = Transfer RECIPE data from M1 PLC to M2 PLC
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fbxRECIPE
+VERSION : 1.0
+
+//----------------------------------------------------------------------------//
+// Declare the instance objects of the class:                                 //
+//----------------------------------------------------------------------------//
+VAR
+    BSEND_PCMX {ReadalPartName := 'BSEND_SFB_PART'; LibVersion := '1.2'} : BSEND;
+    BRCV_PCMX {ReadalPartName := 'BRCV_SFB_PART'; LibVersion := '1.2'} : BRCV;
+    SendError_PCMX : Word;
+    RcvError_PCMX : Word;
+    BSEND_PCSY {ReadalPartName := 'BSEND_SFB_PART'; LibVersion := '1.2'} : BSEND;
+    BRCV_PCSY {ReadalPartName := 'BRCV_SFB_PART'; LibVersion := '1.2'} : BRCV;
+    SendError_PCSY : Word;
+    RcvError_PCSY : Word;
+    CTR { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Int;   // Counter
+END_VAR
+
+VAR_TEMP
+    xIDReceive : CONN_R_ID;
+    xIDSend : CONN_R_ID;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = COMMS Counter
+    //------------------------------------------------------------------------//
+    // COMMS   COMMS   COMMS   COMMS   COMMS   COMMS   COMMS   COMMS   COMMS  //
+    // COMMS   COMMS   COMMS   COMMS   COMMS   COMMS   COMMS   COMMS   COMMS  //
+    //                                                                        //
+    // Increment the counter if pulse timer is high:                          //
+    //------------------------------------------------------------------------//
+    A "pulseCOMMS";
+    JCN _commsTimerNotExpired;
+    L #CTR;
+    INC 1;
+    T #CTR;
+_commsTimerNotExpired:   NOP 0;
+
+NETWORK
+TITLE = PLC PCMX Master recipe
+    //------------------------------------------------------------------------//
+    // Check if this is the master PLC:                                       //
+    // IDs and transfer the calculated parameters:                            //
+    //------------------------------------------------------------------------//
+    A "dbRECIPE".isMaster;
+    A(;
+    L #CTR;
+    L 1;
+    ==I;
+    );
+    JCN _notReadBlockPCMX;
+    S #BSEND_PCMX.REQ;
+    L 1;
+    T #xIDReceive;
+    L 2;
+    T #xIDSend;
+_notReadBlockPCMX:   NOP 0;
+
+NETWORK
+TITLE = Item 8 PCMX if receive Read from partner CPU
+    //------------------------------------------------------------------------//
+    // If this is not the Block read then set the transaction send and      //
+    // receive  IDs to receive the calculated parameters:                     //
+    //------------------------------------------------------------------------//
+    AN "dbRECIPE".isMaster;
+    O(;
+    L #CTR;
+    L 1;
+    <>I;
+    );
+    JCN _readBlockPCMX;
+    R #BSEND_PCMX.REQ;
+    L 2;
+    T #xIDReceive;
+    L 1;
+    T #xIDSend;
+_readBlockPCMX:   NOP 0;
+
+NETWORK
+TITLE = Transfer PCMX Master Recipe data to partner CPU
+    //------------------------------------------------------------------------//
+    // If this is the Block read then transfer the calculated parameters:   //
+    //------------------------------------------------------------------------//
+    CALL #BSEND_PCMX
+    {ptr_type := 'Variant', id_type := 'CONN_PRG', r_id_type := 'CONN_R_ID'}
+    (   REQ                  := #BSEND_PCMX.REQ ,
+        R                    := #BSEND_PCMX.R ,
+        ID                   := 16#100 ,
+        R_ID                 := #xIDSend ,
+        DONE                 := #BSEND_PCMX.DONE ,
+        ERROR                := #BSEND_PCMX.ERROR ,
+        STATUS               := #BSEND_PCMX.STATUS ,
+        SD_1                 := "dbRECIPE".recipeMaster.PCMX ,
+        LEN                  := #BSEND_PCMX.LEN
+    );
+
+    //------------------------------------------------------------------------//
+    // Store previous error status:                                           //
+    //------------------------------------------------------------------------//
+    A #BSEND_PCMX.ERROR;
+    AN #BSEND_PCMX.DONE;
+    JCN _errorSendRead_PCMX;
+    L #BSEND_PCMX.STATUS;
+    T #SendError_PCMX;
+_errorSendRead_PCMX:   NOP 0;
+
+NETWORK
+TITLE = Check PCMX if receive Read from partner CPU
+    //------------------------------------------------------------------------//
+    // If not read then receive the calculated parameters:                  //
+    //------------------------------------------------------------------------//
+    AN "dbRECIPE".isMaster;
+    = #BRCV_PCMX.EN_R;
+
+NETWORK
+TITLE = Receive PCMX Master Recipe data from partner CPU
+    //------------------------------------------------------------------------//
+    // If not read then receive the calculated parameters:                  //
+    //------------------------------------------------------------------------//
+    CALL #BRCV_PCMX
+    {ptr_type := 'Variant', id_type := 'CONN_PRG', r_id_type := 'CONN_R_ID'}
+    (   EN_R                 := #BRCV_PCMX.EN_R ,
+        ID                   := 16#100 ,
+        R_ID                 := #xIDReceive ,
+        NDR                  := #BRCV_PCMX.NDR ,
+        ERROR                := #BRCV_PCMX.ERROR ,
+        STATUS               := #BRCV_PCMX.STATUS ,
+        RD_1                 := "dbRECIPE".recipeMaster.PCMX ,
+        LEN                  := #BRCV_PCMX.LEN
+    );
+
+    //------------------------------------------------------------------------//
+    // Store previous error status:                                           //
+    //------------------------------------------------------------------------//
+    A #BRCV_PCMX.ERROR;
+    JCN _errorReceiveRead_PCMX;
+    L #BRCV_PCMX.STATUS;
+    T #RcvError_PCMX;
+_errorReceiveRead_PCMX:   NOP 0;
+
+
+NETWORK
+TITLE = PLC PCSY Master recipe
+    //------------------------------------------------------------------------//
+    // Check if this is the master PLC:                                       //
+    // IDs and transfer the calculated parameters:                            //
+    //------------------------------------------------------------------------//
+    A "dbRECIPE".isMaster;
+    A(;
+    L #CTR;
+    L 2;
+    ==I;
+    );
+    JCN _notReadBlockPCSY;
+    S #BSEND_PCSY.REQ;
+    L 3;
+    T #xIDReceive;
+    L 4;
+    T #xIDSend;
+_notReadBlockPCSY:   NOP 0;
+
+NETWORK
+TITLE = Item 8 PCSY if receive Read from partner CPU
+    //------------------------------------------------------------------------//
+    // If this is not the Block read then set the transaction send and      //
+    // receive  IDs to receive the calculated parameters:                     //
+    //------------------------------------------------------------------------//
+    AN "dbRECIPE".isMaster;
+    O(;
+    L #CTR;
+    L 2;
+    <>I;
+    );
+    JCN _readBlockPCSY;
+    R #BSEND_PCSY.REQ;
+    L 4;
+    T #xIDReceive;
+    L 3;
+    T #xIDSend;
+_readBlockPCSY:   NOP 0;
+
+NETWORK
+TITLE = Transfer PCSY Master Recipe data to partner CPU
+    //------------------------------------------------------------------------//
+    // If this is the Block read then transfer the calculated parameters:   //
+    //------------------------------------------------------------------------//
+    CALL #BSEND_PCSY
+    {ptr_type := 'Variant', id_type := 'CONN_PRG', r_id_type := 'CONN_R_ID'}
+    (   REQ                  := #BSEND_PCSY.REQ ,
+        R                    := #BSEND_PCSY.R ,
+        ID                   := 16#100 ,
+        R_ID                 := #xIDSend ,
+        DONE                 := #BSEND_PCSY.DONE ,
+        ERROR                := #BSEND_PCSY.ERROR ,
+        STATUS               := #BSEND_PCSY.STATUS ,
+        SD_1                 := "dbRECIPE".recipeMaster.PCSY ,
+        LEN                  := #BSEND_PCSY.LEN
+    );
+
+    //------------------------------------------------------------------------//
+    // Store previous error status:                                           //
+    //------------------------------------------------------------------------//
+    A #BSEND_PCSY.ERROR;
+    AN #BSEND_PCSY.DONE;
+    JCN _errorSendRead_PCSY;
+    L #BSEND_PCSY.STATUS;
+    T #SendError_PCSY;
+_errorSendRead_PCSY:   NOP 0;
+
+NETWORK
+TITLE = Check PCSY if receive Read from partner CPU
+    //------------------------------------------------------------------------//
+    // If not read then receive the calculated parameters:                  //
+    //------------------------------------------------------------------------//
+    AN "dbRECIPE".isMaster;
+    = #BRCV_PCSY.EN_R;
+
+NETWORK
+TITLE = Receive PCSY Master Recipe data from partner CPU
+    //------------------------------------------------------------------------//
+    // If not read then receive the calculated parameters:                  //
+    //------------------------------------------------------------------------//
+    CALL #BRCV_PCSY
+    {ptr_type := 'Variant', id_type := 'CONN_PRG', r_id_type := 'CONN_R_ID'}
+    (   EN_R                 := #BRCV_PCSY.EN_R ,
+        ID                   := 16#100 ,
+        R_ID                 := #xIDReceive ,
+        NDR                  := #BRCV_PCSY.NDR ,
+        ERROR                := #BRCV_PCSY.ERROR ,
+        STATUS               := #BRCV_PCSY.STATUS ,
+        RD_1                 := "dbRECIPE".recipeMaster.PCSY ,
+        LEN                  := #BRCV_PCSY.LEN
+    );
+
+    //------------------------------------------------------------------------//
+    // Store previous error status:                                           //
+    //------------------------------------------------------------------------//
+    A #BRCV_PCSY.ERROR;
+    JCN _errorReceiveRead_PCSY;
+    L #BRCV_PCSY.STATUS;
+    T #RcvError_PCSY;
+_errorReceiveRead_PCSY:   NOP 0;
+
+
+NETWORK
+TITLE = Reset COMMS counter
+    //------------------------------------------------------------------------//
+    // Store previous error status:                                           //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 2;
+    >I;
+    );
+    JCN _commsCountComplete;
+    L 1;
+    T #CTR;
+_commsCountComplete:   NOP 0;
+
+END_FUNCTION_BLOCK

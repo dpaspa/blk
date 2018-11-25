@@ -65,6 +65,27 @@ TITLE = Flag if block Mode just changed to Out Of Service
     = #bmc.eventModeOOS;
 
 NETWORK
+TITLE = Flag if a running substate restart command issued
+    //------------------------------------------------------------------------//
+    // RESTART COMMAND   RESTART COMMAND   RESTART COMMAND   RESTART COMMAND  //
+    //                                                                        //
+    // Check if a restart command has just been issued. It acts as a one shot://
+    //------------------------------------------------------------------------//
+    A #bmc.permitStart;
+    A(;
+    L #mcWrite.CMD;
+    L "dbCONST".BLK.CMD.RESTART;
+    ==I;
+    );
+    A(;
+    L #mcRead.STATE;
+    L "dbCONST".BLK.STATE.COMPLETED;
+    ==I;
+    );
+    FP #bmc.edgeCommandRestart;
+    = #bmc.eventCmdRestart;
+
+NETWORK
 TITLE = Flag if a new block running substate command issued
     //------------------------------------------------------------------------//
     // START COMMAND   START COMMAND   START COMMAND   START COMMAND   START  //

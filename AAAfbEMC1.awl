@@ -1,0 +1,1679 @@
+﻿FUNCTION_BLOCK "fbEMC1"
+TITLE = Vessel LPCA HPCA Vacuum and Vent
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fbEMC1
+VERSION : 2.0
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Title:       EMC1
+// Description: Vessel LPCA HPCA Vacuum and Vent
+//                                                                            //
+// This is the main function block for all higher level S88 blocks, including //
+// EMs, Units and Process Cells. The block is generic and any heirarchical    //
+// structure can be supported.                                                //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 1.0 Gerald Kontriner 10-Oct-2009 CC-09/023 Added Alarm flag MON_MISMATCH.  //
+// 0.9 Khairul Basar    04-Oct-2009 CC-09/023 SHARED_BY  changed to OWNER int.//
+// 0.8 Khairul Basar    02-Oct-2009 CC-09/023 SQ_STATE, ERR flag reset if SQ  //
+//                                            off.                            //
+// 0.7 Khoon            01-Oct-2009 CC-09/016 Mode=2 init,'Substate change'   //
+//                                            added to STOP input of Subs.    //
+// 0.6 Khairul Basar    30-Sep-2009 CC-09/023 EM Mode var changed to IN_OUT.  //
+// 0.5 Khairul Basar    25-Sep-2009 CC-09/016 Ref2.                           //
+// 0.4 Khairul Basar    21-Sep-2009 CC-09/016 Ref1.                           //
+// 0.3 Khairul Basar    17-Sep-2009 CC-09/016 Duplicate command/SP parameters //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters.          //
+// 0.2 Khairul Basar    27-Aug-2009 CC-09/023 Path_IL added, Phase updated.   //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+// Ref2:                                                                      //
+// SQ_ACK,SQ_RESUME,SQ_ERROR,CURSTEP,SQ_STATE variables are added as to       //
+// control from HMI faceplate.                                                //
+// Ref1:                                                                      //
+// Phases are updated.Flush & Charge Syncronised for valve commands.SQ_stop   //
+// command is passed when CALL flag is OFF(previously there was error).PULSE  //
+// timer is created as multiple instance of a standard FB, no more hard coded //
+// S5 timer. ERR_FLT is changed to TIMEOUT_VER, PATH_IL to FLOWPATH.Shared    //
+// Equipment availability flag programmed,BatchCycle variable added.          //
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+   VAR 
+      p : "udtEMC1";   // Block data interface
+      RUNTMR : "fbRunTimer";
+      timeCheckChildState {OriginalPartName := 'IEC_TIMER'; LibVersion := '1.0'} : TON_TIME;
+      timeCheckChildStateElapsed : Time;
+      timeCheckChildStateExpired : Bool;
+      cmdSTOPPED : Bool;
+      stateBeforeError : Int;
+      childReqCMD : Struct
+         PC_VESSEL : Int;
+         PI_VESSEL : Int;
+         POS_DRAIN : Int;
+         POS_HPCA : Int;
+         POS_LPCA : Int;
+         POS_VACUUM : Int;
+         POS_VENT : Int;
+      END_STRUCT;
+      flags : Struct
+         childInterlock : Bool;
+         childFailed : Bool;
+         childMismatch : Bool;
+         childUnavailable : Bool;
+         sfcAborted : Bool;
+         sfcCompleted : Bool;
+         substateCompleted : Bool;
+      END_STRUCT;
+      acquire : Struct
+         PC_VESSEL : Bool;   // PC_VESSEL
+         PI_VESSEL : Bool;   // PI_VESSEL
+         POS_HPCA : Bool;   // POS_HPCA
+         POS_LPCA : Bool;   // POS_LPCA
+         POS_VACUUM : Bool;   // POS_VACUUM
+         POS_VENT : Bool;   // POS_VENT
+         POS_DRAIN : Bool;   // POS_DRAIN
+      END_STRUCT;
+      alreadyOwned : Struct
+         PC_VESSEL : Bool;   // PC_VESSEL
+         PI_VESSEL : Bool;   // PI_VESSEL
+         POS_HPCA : Bool;   // POS_HPCA
+         POS_LPCA : Bool;   // POS_LPCA
+         POS_VACUUM : Bool;   // POS_VACUUM
+         POS_VENT : Bool;   // POS_VENT
+         POS_DRAIN : Bool;   // POS_DRAIN
+      END_STRUCT;
+      selected_MEDIUM_GAS : Struct
+         DRAIN : Bool;
+         HPCA : Bool;
+         LPCA : Bool;
+         NONE : Bool;
+         VACUUM : Bool;
+         VENT : Bool;
+      END_STRUCT;
+      subsHasSFC : Struct
+         PRESSURE : Bool := FALSE;   // Blanketing and charging air to vessel
+         VALVE : Bool := FALSE;   // Opened Selected Valve (Vent, LPCA, HPCA, Vacuum, Drain)
+      END_STRUCT;
+      subsRunning : Struct
+         PRESSURE : Bool;   // Blanketing and charging air to vessel
+         VALVE : Bool;   // Opened Selected Valve (Vent, LPCA, HPCA, Vacuum, Drain)
+      END_STRUCT;
+      subsStart : Struct
+         PRESSURE : Bool;   // Blanketing and charging air to vessel
+         VALVE : Bool;   // Opened Selected Valve (Vent, LPCA, HPCA, Vacuum, Drain)
+      END_STRUCT;
+   END_VAR
+   VAR DB_SPECIFIC
+      w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Word;
+      b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT w : Array[0..15] of Bool;
+   END_VAR
+
+   VAR_TEMP 
+      sq_finished : Bool;
+      returnValue : Int;
+      dummy : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Safe Command as STOPPED on restart
+//------------------------------------------------------------------------//
+// Set the safe command if restarting the PLC:                            //
+//------------------------------------------------------------------------//
+      A "flagFirstScanRestart";
+      JCN _noRestart;
+      L "dbCONST".BLK.SAFE.CMD;
+      T #p.write.mc.CMD;
+      T #p.read.mc.CMD_SAFE;
+      R #subsRunning.PRESSURE;
+      R #subsRunning.VALVE;
+
+_noRestart:      NOP 0;
+
+NETWORK
+TITLE = Shutdown if STOPPED command no matter what
+//------------------------------------------------------------------------//
+// Check for STOPPED comamnd:                                             //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.mc.CMD;
+      L "dbCONST".BLK.CMD.STOP;
+      ==I;
+      );
+      = #cmdSTOPPED;
+
+
+NETWORK
+TITLE = Check if any Child has Failed
+//------------------------------------------------------------------------//
+// CHILD FAILED   CHILD FAILED   CHILD FAILED   CHILD FAILED   CHILD FAIL //
+//                                                                        //
+// Check if any child cannot be controlled by this parent block in which  //
+// case this block will fail and so operation at this level should be     //
+// inhibited:                                                             //
+//------------------------------------------------------------------------//
+      O #flags.childInterlock;
+      O #flags.childUnavailable;
+      O #timeCheckChildStateExpired;
+      JCN _noChildFail;
+      S #flags.childFailed;
+_noChildFail:      NOP 0;
+
+NETWORK
+TITLE = Check if Child Failed condition cleard
+//------------------------------------------------------------------------//
+// Child fail condition cleared if all children match:                    //
+//------------------------------------------------------------------------//
+      AN #flags.childInterlock;
+      AN #flags.childUnavailable;
+      AN #flags.childMismatch;
+      JCN _childFailCleared;
+      R #flags.childFailed;
+_childFailCleared:      NOP 0;
+
+NETWORK
+TITLE = Call General Mode and Command handling block
+//------------------------------------------------------------------------//
+// COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
+//                                                                        //
+// Process the standard block functions for command, mode, interlock and  //
+// state:                                                                 //
+//------------------------------------------------------------------------//
+
+      CALL "fcModeCmd"
+      (  mcRead                      := #p.read.mc , 
+         mcWrite                     := #p.write.mc
+      );
+
+NETWORK
+TITLE = Set Start command permitted flag if all okay
+//------------------------------------------------------------------------//
+// PERMIT START   PERMIT START   PERMIT START   PERMIT START   PERMIT ST  //
+//                                                                        //
+// If no interlock and all calling parameters and child devices are okay  //
+// then a Start is permitted:                                             //
+//------------------------------------------------------------------------//
+      AN #p.read.mc.INTERLOCK;
+      AN #flags.childFailed;
+      = #p.read.bmc.permitStart;
+
+NETWORK
+TITLE = Operator Attention Flag
+//------------------------------------------------------------------------//
+// If not in Auto or any interlock or inhibit condition then the block    //
+// needs operator attention:                                              //
+//------------------------------------------------------------------------//
+      O #p.read.mc.needAttention;
+      ON #p.read.bmc.permitStart;
+      = #p.read.mc.needAttention;
+
+NETWORK
+TITLE = Call BLOCK Mode and Command handling block
+//------------------------------------------------------------------------//
+// Process the stackable block functions for mode and command change      //
+// events:                                                                //
+//------------------------------------------------------------------------//
+
+      CALL "fcModeCmdBLK"
+      (  mcRead                      := #p.read.mc , 
+         mcWrite                     := #p.write.mc , 
+         bmc                         := #p.read.bmc
+      );
+
+NETWORK
+TITLE = Set child devices to safe state if stopped command or SFC pause
+//------------------------------------------------------------------------//
+// SAFE STATE   SAFE STATE   SAFE STATE   SAFE STATE  SAFE STATE  SAFE ST //
+//                                                                        //
+// Set the child device to the safe state on stop or pause command:       //
+//------------------------------------------------------------------------//
+      O #cmdSTOPPED;
+      = #p.read.err.childSafeState;
+      JCN _notChildSafe;
+
+  //------------------------------------------------------------------------//
+  // Set all child devices to safe state due to block stop or problem:      //
+  //------------------------------------------------------------------------//
+      A "alwaysHigh";
+      A "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.modeAUTO;
+      JCN _blkSafe_PC_VESSEL;
+      L "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.CMD_SAFE;
+      T "idbPC1".f[#p.child.PC_VESSEL].p.write.mc.CMD;
+      T #childReqCMD.PC_VESSEL;
+_blkSafe_PC_VESSEL:      NOP 0;
+      A "alwaysHigh";
+      A "idbPI1".f[#p.child.PI_VESSEL].p.read.mc.modeAUTO;
+      JCN _blkSafe_PI_VESSEL;
+      L "idbPI1".f[#p.child.PI_VESSEL].p.read.mc.CMD_SAFE;
+      T "idbPI1".f[#p.child.PI_VESSEL].p.write.mc.CMD;
+      T #childReqCMD.PI_VESSEL;
+_blkSafe_PI_VESSEL:      NOP 0;
+      A "alwaysHigh";
+      A "idbPOS4".f[#p.child.POS_DRAIN].p.read.mc.modeAUTO;
+      JCN _blkSafe_POS_DRAIN;
+      L "idbPOS4".f[#p.child.POS_DRAIN].p.read.mc.CMD_SAFE;
+      T "idbPOS4".f[#p.child.POS_DRAIN].p.write.mc.CMD;
+      T #childReqCMD.POS_DRAIN;
+_blkSafe_POS_DRAIN:      NOP 0;
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_HPCA].p.read.mc.modeAUTO;
+      JCN _blkSafe_POS_HPCA;
+      L "idbPOS2".f[#p.child.POS_HPCA].p.read.mc.CMD_SAFE;
+      T "idbPOS2".f[#p.child.POS_HPCA].p.write.mc.CMD;
+      T #childReqCMD.POS_HPCA;
+_blkSafe_POS_HPCA:      NOP 0;
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_LPCA].p.read.mc.modeAUTO;
+      JCN _blkSafe_POS_LPCA;
+      L "idbPOS2".f[#p.child.POS_LPCA].p.read.mc.CMD_SAFE;
+      T "idbPOS2".f[#p.child.POS_LPCA].p.write.mc.CMD;
+      T #childReqCMD.POS_LPCA;
+_blkSafe_POS_LPCA:      NOP 0;
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_VACUUM].p.read.mc.modeAUTO;
+      JCN _blkSafe_POS_VACUUM;
+      L "idbPOS2".f[#p.child.POS_VACUUM].p.read.mc.CMD_SAFE;
+      T "idbPOS2".f[#p.child.POS_VACUUM].p.write.mc.CMD;
+      T #childReqCMD.POS_VACUUM;
+_blkSafe_POS_VACUUM:      NOP 0;
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_VENT].p.read.mc.modeAUTO;
+      JCN _blkSafe_POS_VENT;
+      L "idbPOS2".f[#p.child.POS_VENT].p.read.mc.CMD_SAFE;
+      T "idbPOS2".f[#p.child.POS_VENT].p.write.mc.CMD;
+      T #childReqCMD.POS_VENT;
+_blkSafe_POS_VENT:      NOP 0;
+
+_notChildSafe:      NOP 0;
+
+
+NETWORK
+TITLE = Cascade Auto or OOS Mode to children
+//------------------------------------------------------------------------//
+// MODE CASCADE   MODE CASCADE   MODE CASCADE   MODE CASCADE   MODE CASC  //
+//                                                                        //
+// Switch child mode to Auto or OOS when parent mode transitions:         //
+//------------------------------------------------------------------------//
+      A(;
+      O #p.read.bmc.eventModeAuto;
+      O #p.read.bmc.eventModeOOS;
+      );
+      JCN _nomcAutoOOS;
+
+      A "alwaysHigh";
+      JCN _cascMode1;
+      L #p.write.mc.MODE;
+      T "idbPC1".f[#p.child.PC_VESSEL].p.write.mc.MODE;
+_cascMode1:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode2;
+      L #p.write.mc.MODE;
+      T "idbPI1".f[#p.child.PI_VESSEL].p.write.mc.MODE;
+_cascMode2:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode3;
+      L #p.write.mc.MODE;
+      T "idbPOS4".f[#p.child.POS_DRAIN].p.write.mc.MODE;
+_cascMode3:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode4;
+      L #p.write.mc.MODE;
+      T "idbPOS2".f[#p.child.POS_HPCA].p.write.mc.MODE;
+_cascMode4:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode5;
+      L #p.write.mc.MODE;
+      T "idbPOS2".f[#p.child.POS_LPCA].p.write.mc.MODE;
+_cascMode5:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode6;
+      L #p.write.mc.MODE;
+      T "idbPOS2".f[#p.child.POS_VACUUM].p.write.mc.MODE;
+_cascMode6:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode7;
+      L #p.write.mc.MODE;
+      T "idbPOS2".f[#p.child.POS_VENT].p.write.mc.MODE;
+_cascMode7:      NOP 0;
+
+_nomcAutoOOS:      NOP 0;
+
+NETWORK
+TITLE = Interlocked condition cleared
+//------------------------------------------------------------------------//
+// Set the state stopped if the interlock condition just cleared:         //
+//------------------------------------------------------------------------//
+      AN #p.read.mc.INTERLOCK;
+      A(;
+      L #p.read.mc.STATE;
+      L "dbCONST".BLK.STATE.INTERLOCKED;
+      ==I;
+      );
+      JCN _ilCleared;
+      L #p.read.bmc.lastSTATE;
+      T #p.read.mc.STATE;
+
+_ilCleared:      NOP 0;
+
+NETWORK
+TITLE = Upload non-boolean child parameter values
+//------------------------------------------------------------------------//
+// CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER  //
+//                                                                        //
+// Get the initial input non-boolean value for the child parameter:       //
+//------------------------------------------------------------------------//
+      L "idbPI1".f[#p.child.PI_VESSEL].p.read.PV;
+      T #p.read.PI_VESSEL_PV;
+
+
+NETWORK
+TITLE = Set parent parameter MEDIUM_GAS value for child device PC_VESSEL
+//------------------------------------------------------------------------//
+// PARENT PARAMETER   PARENT PARAMETER   PARENT PARAMETER   PARENT PARAM  //
+//                                                                        //
+// Set the initial input value for the child calling parameter:           //
+//------------------------------------------------------------------------//
+      A "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _parentWrite_1_PC_VESSEL_MEDIUM_GAS;
+      L #p.write.MEDIUM_GAS;
+      T #p.write.PC_VESSEL_MEDIUM_GAS;
+
+_parentWrite_1_PC_VESSEL_MEDIUM_GAS:      NOP 0;
+
+NETWORK
+TITLE = Set parent parameter SETPOINT value for child device PC_VESSEL
+//------------------------------------------------------------------------//
+// PARENT PARAMETER   PARENT PARAMETER   PARENT PARAMETER   PARENT PARAM  //
+//                                                                        //
+// Set the initial input value for the child calling parameter:           //
+//------------------------------------------------------------------------//
+      A "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _parentWrite_2_PC_VESSEL_SETPOINT;
+      L #p.write.SETPOINT;
+      T #p.write.PC_VESSEL_SETPOINT;
+
+_parentWrite_2_PC_VESSEL_SETPOINT:      NOP 0;
+
+
+
+
+NETWORK
+TITLE = SWITCH SWITCH SWITCH command and state
+//------------------------------------------------------------------------//
+// SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+//                                                                        //
+// Switch statement for block command and state. The order of the jumps   //
+// is important:                                                          //
+//------------------------------------------------------------------------//
+_switch:      NOP 0;
+      A #cmdSTOPPED;
+      JC _state_STOPPED;
+
+      A #p.read.bmc.eventCmdStop;
+      JC _state_STOPPING;
+
+      O #p.read.bmc.eventCmdStart;
+      O #p.read.bmc.eventCmdRestart;
+      JC _state_STARTING;
+
+      A #flags.substateCompleted;
+      JC _state_COMPLETED;
+
+      A #p.read.bmc.stateRUNNING;
+      JC _state_RUNNING;
+
+      SET;
+      JC _switch_end;
+
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED    //
+  // STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED    //
+  //------------------------------------------------------------------------//
+_state_STOPPED:      NOP 0;
+
+NETWORK
+TITLE = STOPPED STOPPED STOPPED Set block state STOPPED
+//------------------------------------------------------------------------//
+// Reset the completed flag and the block state to stopped:               //
+//------------------------------------------------------------------------//
+      L "dbCONST".BLK.EMC1.STATE.STOPPED;
+      T #p.read.mc.STATE;
+
+NETWORK
+TITLE = Send SFC STOP command
+//------------------------------------------------------------------------//
+// If commanded to Stop then tell the SFC to go to the last step:         //
+//------------------------------------------------------------------------//
+      L "dbCONST".SEQ.CMD.STOP;
+
+NETWORK
+TITLE = Reset running substate and completion flags
+//------------------------------------------------------------------------//
+// Reset flags:                                                           //
+//------------------------------------------------------------------------//
+      R #flags.sfcAborted;
+      R #flags.sfcCompleted;
+      R #flags.substateCompleted;
+      R #subsRunning.PRESSURE;
+      R #subsRunning.VALVE;
+
+NETWORK
+TITLE = Disarm flowpath devices on STOP command
+//------------------------------------------------------------------------//
+// Disarm the flowpath child devices when STOP command issued:            //
+//------------------------------------------------------------------------//
+      R "idbPC1".f[#p.child.PC_VESSEL].p.write.mc.ARMED;
+      R "idbPI1".f[#p.child.PI_VESSEL].p.write.mc.ARMED;
+      R "idbPOS4".f[#p.child.POS_DRAIN].p.write.mc.ARMED;
+      R "idbPOS2".f[#p.child.POS_HPCA].p.write.mc.ARMED;
+      R "idbPOS2".f[#p.child.POS_LPCA].p.write.mc.ARMED;
+      R "idbPOS2".f[#p.child.POS_VACUUM].p.write.mc.ARMED;
+      R "idbPOS2".f[#p.child.POS_VENT].p.write.mc.ARMED;
+
+
+
+
+
+
+
+
+
+      SET;
+      JC _switch_end;
+
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // STARTING   STARTING   STARTING   STARTING   STARTING   STARTING   STAR //
+  // STARTING   STARTING   STARTING   STARTING   STARTING   STARTING   STAR //
+  //------------------------------------------------------------------------//
+_state_STARTING:      NOP 0;
+
+NETWORK
+TITLE = STARTING STARTING STARTING Reset running substate and completion flags
+//------------------------------------------------------------------------//
+// Reset flags:                                                           //
+//------------------------------------------------------------------------//
+      R #flags.sfcAborted;
+      R #flags.sfcCompleted;
+      R #flags.substateCompleted;
+      R #subsRunning.PRESSURE;
+      R #subsRunning.VALVE;
+
+NETWORK
+TITLE = Set running SUBSTATE if PRESSURE
+//------------------------------------------------------------------------//
+// RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG  //
+//                                                                        //
+// Convert running substate values into boolean flags for ease of use in  //
+// boolean logic:                                                         //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.mc.SUBS;
+      L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
+      ==I;
+      );
+      = #subsStart.PRESSURE;
+      JCN _noSubsRun_PRESSURE;
+      S #subsRunning.PRESSURE;
+_noSubsRun_PRESSURE:      NOP 0;
+
+NETWORK
+TITLE = Set running SUBSTATE if VALVE
+//------------------------------------------------------------------------//
+// RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG  //
+//                                                                        //
+// Convert running substate values into boolean flags for ease of use in  //
+// boolean logic:                                                         //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.mc.SUBS;
+      L "dbCONST".BLK.EMC1.SUBS.VALVE;
+      ==I;
+      );
+      = #subsStart.VALVE;
+      JCN _noSubsRun_VALVE;
+      S #subsRunning.VALVE;
+_noSubsRun_VALVE:      NOP 0;
+
+
+NETWORK
+TITLE = The STATE follows the SUBSTATE when running
+//------------------------------------------------------------------------//
+// Set the state to the substate if running:                              //
+//------------------------------------------------------------------------//
+      O #subsRunning.PRESSURE;
+      O #subsRunning.VALVE;
+      JCN _noSubsRun;
+      L #p.write.mc.SUBS;
+      T #p.read.mc.STATE;
+_noSubsRun:      NOP 0;
+
+
+NETWORK
+TITLE = Calling Parameter Selection flags
+//------------------------------------------------------------------------//
+// CALLING PARAMETER SELECTION FLAG   CALLING PARAMETER SELECTION FLAG    //
+//                                                                        //
+// Convert calling parameter selections into the boolean flags for ease   //
+// of use in boolean logic if starting a new substate:                    //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.MEDIUM_GAS;
+      L "dbCONST".SEL.GAS.DRAIN;
+      ==I;
+      );
+      JCN _noSelect_MEDIUM_GAS_DRAIN;
+      S #selected_MEDIUM_GAS.DRAIN;
+      JC _select_MEDIUM_GAS_DRAIN;
+
+_noSelect_MEDIUM_GAS_DRAIN:      NOP 0;
+      R #selected_MEDIUM_GAS.DRAIN;
+
+_select_MEDIUM_GAS_DRAIN:      NOP 0;
+
+      A(;
+      L #p.write.MEDIUM_GAS;
+      L "dbCONST".SEL.GAS.HPCA;
+      ==I;
+      );
+      JCN _noSelect_MEDIUM_GAS_HPCA;
+      S #selected_MEDIUM_GAS.HPCA;
+      JC _select_MEDIUM_GAS_HPCA;
+
+_noSelect_MEDIUM_GAS_HPCA:      NOP 0;
+      R #selected_MEDIUM_GAS.HPCA;
+
+_select_MEDIUM_GAS_HPCA:      NOP 0;
+
+      A(;
+      L #p.write.MEDIUM_GAS;
+      L "dbCONST".SEL.GAS.LPCA;
+      ==I;
+      );
+      JCN _noSelect_MEDIUM_GAS_LPCA;
+      S #selected_MEDIUM_GAS.LPCA;
+      JC _select_MEDIUM_GAS_LPCA;
+
+_noSelect_MEDIUM_GAS_LPCA:      NOP 0;
+      R #selected_MEDIUM_GAS.LPCA;
+
+_select_MEDIUM_GAS_LPCA:      NOP 0;
+
+      A(;
+      L #p.write.MEDIUM_GAS;
+      L "dbCONST".SEL.GAS.NONE;
+      ==I;
+      );
+      JCN _noSelect_MEDIUM_GAS_NONE;
+      S #selected_MEDIUM_GAS.NONE;
+      JC _select_MEDIUM_GAS_NONE;
+
+_noSelect_MEDIUM_GAS_NONE:      NOP 0;
+      R #selected_MEDIUM_GAS.NONE;
+
+_select_MEDIUM_GAS_NONE:      NOP 0;
+
+      A(;
+      L #p.write.MEDIUM_GAS;
+      L "dbCONST".SEL.GAS.VACUUM;
+      ==I;
+      );
+      JCN _noSelect_MEDIUM_GAS_VACUUM;
+      S #selected_MEDIUM_GAS.VACUUM;
+      JC _select_MEDIUM_GAS_VACUUM;
+
+_noSelect_MEDIUM_GAS_VACUUM:      NOP 0;
+      R #selected_MEDIUM_GAS.VACUUM;
+
+_select_MEDIUM_GAS_VACUUM:      NOP 0;
+
+      A(;
+      L #p.write.MEDIUM_GAS;
+      L "dbCONST".SEL.GAS.VENT;
+      ==I;
+      );
+      JCN _noSelect_MEDIUM_GAS_VENT;
+      S #selected_MEDIUM_GAS.VENT;
+      JC _select_MEDIUM_GAS_VENT;
+
+_noSelect_MEDIUM_GAS_VENT:      NOP 0;
+      R #selected_MEDIUM_GAS.VENT;
+
+_select_MEDIUM_GAS_VENT:      NOP 0;
+
+
+
+NETWORK
+TITLE = Cascade Batch Serial Number to all children
+//------------------------------------------------------------------------//
+// RECIPE AND BATCH ID    RECIPE AND BATCH ID    RECIPE AND BATCH ID      //
+//                                                                        //
+// Cascade this block's Batch Number and Recipe ID to all child devices:  //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      JCN _childBatch_1;
+      L #p.write.mc.SERIALNUM;
+      T "idbPC1".f[#p.child.PC_VESSEL].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbPC1".f[#p.child.PC_VESSEL].p.write.mc.RECIPE;
+_childBatch_1:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_2;
+      L #p.write.mc.SERIALNUM;
+      T "idbPI1".f[#p.child.PI_VESSEL].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbPI1".f[#p.child.PI_VESSEL].p.write.mc.RECIPE;
+_childBatch_2:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_3;
+      L #p.write.mc.SERIALNUM;
+      T "idbPOS4".f[#p.child.POS_DRAIN].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbPOS4".f[#p.child.POS_DRAIN].p.write.mc.RECIPE;
+_childBatch_3:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_4;
+      L #p.write.mc.SERIALNUM;
+      T "idbPOS2".f[#p.child.POS_HPCA].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbPOS2".f[#p.child.POS_HPCA].p.write.mc.RECIPE;
+_childBatch_4:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_5;
+      L #p.write.mc.SERIALNUM;
+      T "idbPOS2".f[#p.child.POS_LPCA].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbPOS2".f[#p.child.POS_LPCA].p.write.mc.RECIPE;
+_childBatch_5:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_6;
+      L #p.write.mc.SERIALNUM;
+      T "idbPOS2".f[#p.child.POS_VACUUM].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbPOS2".f[#p.child.POS_VACUUM].p.write.mc.RECIPE;
+_childBatch_6:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_7;
+      L #p.write.mc.SERIALNUM;
+      T "idbPOS2".f[#p.child.POS_VENT].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbPOS2".f[#p.child.POS_VENT].p.write.mc.RECIPE;
+_childBatch_7:      NOP 0;
+
+
+NETWORK
+TITLE = Command child device PC_VESSEL for initial TRUE command DISABLE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.VALVE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_PC_VESSEL_DISABLE;
+      L "dbCONST".BLK.PC1.CMD.DISABLE;
+      T #p.write.PC_VESSEL_CMD;
+      T #childReqCMD.PC_VESSEL;
+
+_childInitTrue_PC_VESSEL_DISABLE:      NOP 0;
+
+NETWORK
+TITLE = Command child device PC_VESSEL for initial TRUE command ENABLE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.PRESSURE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_PC_VESSEL_ENABLE;
+      L "dbCONST".BLK.PC1.CMD.ENABLE;
+      T #p.write.PC_VESSEL_CMD;
+      T #childReqCMD.PC_VESSEL;
+
+_childInitTrue_PC_VESSEL_ENABLE:      NOP 0;
+
+NETWORK
+TITLE = Command child device PI_VESSEL for initial TRUE command ENABLE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPI1".f[#p.child.PI_VESSEL].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.PRESSURE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      O(;
+      A #subsStart.VALVE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_PI_VESSEL_ENABLE;
+      L "dbCONST".BLK.PI1.CMD.ENABLE;
+      T #p.write.PI_VESSEL_CMD;
+      T #childReqCMD.PI_VESSEL;
+
+_childInitTrue_PI_VESSEL_ENABLE:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_DRAIN for initial TRUE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS4".f[#p.child.POS_DRAIN].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.PRESSURE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_POS_DRAIN_CLOSE;
+      L "dbCONST".BLK.POS4.CMD.CLOSE;
+      T #p.write.POS_DRAIN_CMD;
+      T #childReqCMD.POS_DRAIN;
+
+_childInitTrue_POS_DRAIN_CLOSE:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_DRAIN for initial TRUE command OPEN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS4".f[#p.child.POS_DRAIN].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.VALVE;
+      A "alwaysHigh";
+      A #selected_MEDIUM_GAS.DRAIN;
+      );
+      );
+      JCN _childInitTrue_POS_DRAIN_OPEN;
+      L "dbCONST".BLK.POS4.CMD.OPEN;
+      T #p.write.POS_DRAIN_CMD;
+      T #childReqCMD.POS_DRAIN;
+
+_childInitTrue_POS_DRAIN_OPEN:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_HPCA for initial TRUE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_HPCA].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.PRESSURE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_POS_HPCA_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_HPCA_CMD;
+      T #childReqCMD.POS_HPCA;
+
+_childInitTrue_POS_HPCA_CLOSE:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_HPCA for initial TRUE command OPEN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_HPCA].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.VALVE;
+      A "alwaysHigh";
+      A #selected_MEDIUM_GAS.HPCA;
+      );
+      );
+      JCN _childInitTrue_POS_HPCA_OPEN;
+      L "dbCONST".BLK.POS2.CMD.OPEN;
+      T #p.write.POS_HPCA_CMD;
+      T #childReqCMD.POS_HPCA;
+
+_childInitTrue_POS_HPCA_OPEN:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_LPCA for initial TRUE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_LPCA].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.PRESSURE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_POS_LPCA_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_LPCA_CMD;
+      T #childReqCMD.POS_LPCA;
+
+_childInitTrue_POS_LPCA_CLOSE:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_LPCA for initial TRUE command OPEN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_LPCA].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.VALVE;
+      A "alwaysHigh";
+      A #selected_MEDIUM_GAS.LPCA;
+      );
+      );
+      JCN _childInitTrue_POS_LPCA_OPEN;
+      L "dbCONST".BLK.POS2.CMD.OPEN;
+      T #p.write.POS_LPCA_CMD;
+      T #childReqCMD.POS_LPCA;
+
+_childInitTrue_POS_LPCA_OPEN:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_VACUUM for initial TRUE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_VACUUM].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.PRESSURE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_POS_VACUUM_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_VACUUM_CMD;
+      T #childReqCMD.POS_VACUUM;
+
+_childInitTrue_POS_VACUUM_CLOSE:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_VACUUM for initial TRUE command OPEN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_VACUUM].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.VALVE;
+      A "alwaysHigh";
+      A #selected_MEDIUM_GAS.VACUUM;
+      );
+      );
+      JCN _childInitTrue_POS_VACUUM_OPEN;
+      L "dbCONST".BLK.POS2.CMD.OPEN;
+      T #p.write.POS_VACUUM_CMD;
+      T #childReqCMD.POS_VACUUM;
+
+_childInitTrue_POS_VACUUM_OPEN:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_VENT for initial TRUE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_VENT].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.PRESSURE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_POS_VENT_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_VENT_CMD;
+      T #childReqCMD.POS_VENT;
+
+_childInitTrue_POS_VENT_CLOSE:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_VENT for initial TRUE command OPEN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_VENT].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.VALVE;
+      A "alwaysHigh";
+      A #selected_MEDIUM_GAS.VENT;
+      );
+      );
+      JCN _childInitTrue_POS_VENT_OPEN;
+      L "dbCONST".BLK.POS2.CMD.OPEN;
+      T #p.write.POS_VENT_CMD;
+      T #childReqCMD.POS_VENT;
+
+_childInitTrue_POS_VENT_OPEN:      NOP 0;
+
+
+NETWORK
+TITLE = Command child device POS_DRAIN for initial FALSE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbPOS4".f[#p.child.POS_DRAIN].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.VALVE;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A #selected_MEDIUM_GAS.DRAIN;
+      );
+      );
+      );
+      JCN _childInitFalse_POS_DRAIN_CLOSE;
+      L "dbCONST".BLK.POS4.CMD.CLOSE;
+      T #p.write.POS_DRAIN_CMD;
+      T #childReqCMD.POS_DRAIN;
+
+_childInitFalse_POS_DRAIN_CLOSE:      NOP 0;
+NETWORK
+TITLE = Command child device POS_HPCA for initial FALSE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_HPCA].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.VALVE;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A #selected_MEDIUM_GAS.HPCA;
+      );
+      );
+      );
+      JCN _childInitFalse_POS_HPCA_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_HPCA_CMD;
+      T #childReqCMD.POS_HPCA;
+
+_childInitFalse_POS_HPCA_CLOSE:      NOP 0;
+NETWORK
+TITLE = Command child device POS_LPCA for initial FALSE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_LPCA].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.VALVE;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A #selected_MEDIUM_GAS.LPCA;
+      );
+      );
+      );
+      JCN _childInitFalse_POS_LPCA_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_LPCA_CMD;
+      T #childReqCMD.POS_LPCA;
+
+_childInitFalse_POS_LPCA_CLOSE:      NOP 0;
+NETWORK
+TITLE = Command child device POS_VACUUM for initial FALSE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_VACUUM].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.VALVE;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A #selected_MEDIUM_GAS.VACUUM;
+      );
+      );
+      );
+      JCN _childInitFalse_POS_VACUUM_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_VACUUM_CMD;
+      T #childReqCMD.POS_VACUUM;
+
+_childInitFalse_POS_VACUUM_CLOSE:      NOP 0;
+NETWORK
+TITLE = Command child device POS_VENT for initial FALSE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_VENT].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.VALVE;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A #selected_MEDIUM_GAS.VENT;
+      );
+      );
+      );
+      JCN _childInitFalse_POS_VENT_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_VENT_CMD;
+      T #childReqCMD.POS_VENT;
+
+_childInitFalse_POS_VENT_CLOSE:      NOP 0;
+
+
+
+
+
+NETWORK
+TITLE = Arm flowpath devices
+//------------------------------------------------------------------------//
+// Arm any flowpath child devices:                                        //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      JCN _noArm_PC_VESSEL;
+      S "idbPC1".f[#p.child.PC_VESSEL].p.write.mc.ARMED;
+_noArm_PC_VESSEL:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _noArm_PI_VESSEL;
+      S "idbPI1".f[#p.child.PI_VESSEL].p.write.mc.ARMED;
+_noArm_PI_VESSEL:      NOP 0;
+
+      A #subsRunning.VALVE;
+      JCN _noArm_POS_DRAIN;
+      S "idbPOS4".f[#p.child.POS_DRAIN].p.write.mc.ARMED;
+_noArm_POS_DRAIN:      NOP 0;
+
+      A #subsRunning.VALVE;
+      JCN _noArm_POS_HPCA;
+      S "idbPOS2".f[#p.child.POS_HPCA].p.write.mc.ARMED;
+_noArm_POS_HPCA:      NOP 0;
+
+      A #subsRunning.VALVE;
+      JCN _noArm_POS_LPCA;
+      S "idbPOS2".f[#p.child.POS_LPCA].p.write.mc.ARMED;
+_noArm_POS_LPCA:      NOP 0;
+
+      A #subsRunning.VALVE;
+      JCN _noArm_POS_VACUUM;
+      S "idbPOS2".f[#p.child.POS_VACUUM].p.write.mc.ARMED;
+_noArm_POS_VACUUM:      NOP 0;
+
+      A #subsRunning.VALVE;
+      JCN _noArm_POS_VENT;
+      S "idbPOS2".f[#p.child.POS_VENT].p.write.mc.ARMED;
+_noArm_POS_VENT:      NOP 0;
+
+
+      SET;
+      JC _switch_end;
+
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOP //
+  // STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOP //
+  //------------------------------------------------------------------------//
+_state_STOPPING:      NOP 0;
+
+      SET;
+      JC _switch_end;
+
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING    //
+  // RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING    //
+  //------------------------------------------------------------------------//
+_state_RUNNING:      NOP 0;
+
+
+NETWORK
+TITLE = Set child selection commands
+//------------------------------------------------------------------------//
+// Set the child selection command:                                       //
+//------------------------------------------------------------------------//
+
+NETWORK
+TITLE = Check if substate completed
+//------------------------------------------------------------------------//
+// Check if substate has been completed if SFC finished if there is one:  //
+//------------------------------------------------------------------------//
+      O(;
+      A #subsRunning.PRESSURE;
+      A(;
+      O(;
+      A #subsHasSFC.PRESSURE;
+      A #flags.sfcCompleted;
+      );
+      ON #subsHasSFC.PRESSURE;
+      );
+      );
+      O(;
+      A #subsRunning.VALVE;
+      A(;
+      O(;
+      A #subsHasSFC.VALVE;
+      A #flags.sfcCompleted;
+      );
+      ON #subsHasSFC.VALVE;
+      );
+      );
+      JCN _noSubstateComplete;
+      S #flags.substateCompleted;
+_noSubstateComplete:      NOP 0;
+
+      SET;
+      JC _switch_end;
+
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // COMPLETED   COMPLETED   COMPLETED   COMPLETED   COMPLETED   COMPLETED  //
+  // COMPLETED   COMPLETED   COMPLETED   COMPLETED   COMPLETED   COMPLETED  //
+  //------------------------------------------------------------------------//
+_state_COMPLETED:      NOP 0;
+
+NETWORK
+TITLE = COMPLETED COMPLETED COMPLETED Running substate completed
+//------------------------------------------------------------------------//
+// BLOCK COMPLETE   BLOCK COMPLETE   BLOCK COMPLETE   BLOCK COMPLETE   BL //
+//                                                                        //
+// Set the block state to COMPLETED if no SFC or SFC completed:           //
+//------------------------------------------------------------------------//
+      AN #flags.childMismatch;
+      AN #flags.sfcAborted;
+      JCN _blkComplete;
+      L "dbCONST".BLK.EMC1.STATE.COMPLETED;
+      T #p.read.mc.STATE;
+      L #p.write.mc.SUBS;
+      T #p.read.bmc.lastSUBS;
+
+_blkComplete:      NOP 0;
+
+
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // END   END   END   END   END   END  END   END   END   END   END   END   //
+  // END   END   END   END   END   END  END   END   END   END   END   END   //
+  //------------------------------------------------------------------------//
+_switch_end:      NOP 0;
+
+NETWORK
+TITLE = SWITCH END SWITCH END ERROR if child mismatch
+//------------------------------------------------------------------------//
+// BLOCK ERROR   BLOCK ERROR   BLOCK ERROR   BLOCK ERROR   BLOCK ERROR    //
+//                                                                        //
+// Set the block state to ERROR if child mismatch and not STOPPED:        //
+//------------------------------------------------------------------------//
+      AN #cmdSTOPPED;
+      A(;
+      ON #p.read.bmc.permitStart;
+      O #flags.sfcAborted;
+      );
+      A(;
+      L "dbCONST".BLK.EMC1.STATE.ERROR;
+      L #p.read.mc.STATE;
+      <>I;
+      );
+      JCN _blkError;
+      L #p.read.mc.STATE;
+      T #stateBeforeError;
+      L "dbCONST".BLK.EMC1.STATE.ERROR;
+      T #p.read.mc.STATE;
+_blkError:      NOP 0;
+
+NETWORK
+TITLE = RESUME if children now okay
+//------------------------------------------------------------------------//
+// BLOCK RESUME   BLOCK RESUME   BLOCK RESUME   BLOCK RESUME   BLOCK RES  //
+//                                                                        //
+// Resume the running SFC sequence if no interlock or failure condition:  //
+//------------------------------------------------------------------------//
+      AN #cmdSTOPPED;
+      A #p.read.bmc.permitStart;
+      AN #flags.sfcAborted;
+      A(;
+      L "dbCONST".BLK.EMC1.STATE.ERROR;
+      L #p.read.mc.STATE;
+      ==I;
+      );
+      JCN _noResume;
+      L #stateBeforeError;
+      T #p.read.mc.STATE;
+
+
+_noResume:      NOP 0;
+
+
+NETWORK
+TITLE = Set the child command attributes
+//------------------------------------------------------------------------//
+// Upload the child state:                                                //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      JCN _pSTATE_PC_VESSEL;
+      L "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.STATE;
+      T #p.read.PC_VESSEL_STATE;
+_pSTATE_PC_VESSEL:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_PI_VESSEL;
+      L "idbPI1".f[#p.child.PI_VESSEL].p.read.mc.STATE;
+      T #p.read.PI_VESSEL_STATE;
+_pSTATE_PI_VESSEL:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_POS_DRAIN;
+      L "idbPOS4".f[#p.child.POS_DRAIN].p.read.mc.STATE;
+      T #p.read.POS_DRAIN_STATE;
+_pSTATE_POS_DRAIN:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_POS_HPCA;
+      L "idbPOS2".f[#p.child.POS_HPCA].p.read.mc.STATE;
+      T #p.read.POS_HPCA_STATE;
+_pSTATE_POS_HPCA:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_POS_LPCA;
+      L "idbPOS2".f[#p.child.POS_LPCA].p.read.mc.STATE;
+      T #p.read.POS_LPCA_STATE;
+_pSTATE_POS_LPCA:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_POS_VACUUM;
+      L "idbPOS2".f[#p.child.POS_VACUUM].p.read.mc.STATE;
+      T #p.read.POS_VACUUM_STATE;
+_pSTATE_POS_VACUUM:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_POS_VENT;
+      L "idbPOS2".f[#p.child.POS_VENT].p.read.mc.STATE;
+      T #p.read.POS_VENT_STATE;
+_pSTATE_POS_VENT:      NOP 0;
+
+
+  //------------------------------------------------------------------------//
+  // Set the child substate if no child mismatch:                           //
+  //------------------------------------------------------------------------//
+      AN #timeCheckChildStateExpired;
+      A(;
+      O #p.read.bmc.stateRUNNING;
+      O(;
+      L "dbCONST".BLK.EMC1.STATE.COMPLETED;
+      L #p.read.mc.STATE;
+      ==I;
+      );
+      );
+      JCN _noCommandOnChildMismatch;
+
+
+  //------------------------------------------------------------------------//
+  // Set the child command if no child mismatch:                            //
+  //------------------------------------------------------------------------//
+      A "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_PC_VESSEL;
+      L #p.write.PC_VESSEL_CMD;
+      T "idbPC1".f[#p.child.PC_VESSEL].p.write.mc.CMD;
+      T #childReqCMD.PC_VESSEL;
+_pCMD_PC_VESSEL:      NOP 0;
+
+      A "idbPI1".f[#p.child.PI_VESSEL].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_PI_VESSEL;
+      L #p.write.PI_VESSEL_CMD;
+      T "idbPI1".f[#p.child.PI_VESSEL].p.write.mc.CMD;
+      T #childReqCMD.PI_VESSEL;
+_pCMD_PI_VESSEL:      NOP 0;
+
+      A "idbPOS4".f[#p.child.POS_DRAIN].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_POS_DRAIN;
+      L #p.write.POS_DRAIN_CMD;
+      T "idbPOS4".f[#p.child.POS_DRAIN].p.write.mc.CMD;
+      T #childReqCMD.POS_DRAIN;
+_pCMD_POS_DRAIN:      NOP 0;
+
+      A "idbPOS2".f[#p.child.POS_HPCA].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_POS_HPCA;
+      L #p.write.POS_HPCA_CMD;
+      T "idbPOS2".f[#p.child.POS_HPCA].p.write.mc.CMD;
+      T #childReqCMD.POS_HPCA;
+_pCMD_POS_HPCA:      NOP 0;
+
+      A "idbPOS2".f[#p.child.POS_LPCA].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_POS_LPCA;
+      L #p.write.POS_LPCA_CMD;
+      T "idbPOS2".f[#p.child.POS_LPCA].p.write.mc.CMD;
+      T #childReqCMD.POS_LPCA;
+_pCMD_POS_LPCA:      NOP 0;
+
+      A "idbPOS2".f[#p.child.POS_VACUUM].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_POS_VACUUM;
+      L #p.write.POS_VACUUM_CMD;
+      T "idbPOS2".f[#p.child.POS_VACUUM].p.write.mc.CMD;
+      T #childReqCMD.POS_VACUUM;
+_pCMD_POS_VACUUM:      NOP 0;
+
+      A "idbPOS2".f[#p.child.POS_VENT].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_POS_VENT;
+      L #p.write.POS_VENT_CMD;
+      T "idbPOS2".f[#p.child.POS_VENT].p.write.mc.CMD;
+      T #childReqCMD.POS_VENT;
+_pCMD_POS_VENT:      NOP 0;
+
+
+  //------------------------------------------------------------------------//
+  // Write the non-boolean child parameters if no child mismatch:           //
+  //------------------------------------------------------------------------//
+      A "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.modeAUTO;
+      JCN _pSFCChildWrite_PC_VESSEL_MEDIUM_GAS;
+      L #p.write.PC_VESSEL_MEDIUM_GAS;
+      T "idbPC1".f[#p.child.PC_VESSEL].p.write.MEDIUM_GAS;
+_pSFCChildWrite_PC_VESSEL_MEDIUM_GAS:      NOP 0;
+
+      A "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.modeAUTO;
+      JCN _pSFCChildWrite_PC_VESSEL_SETPOINT;
+      L #p.write.PC_VESSEL_SETPOINT;
+      T "idbPC1".f[#p.child.PC_VESSEL].p.write.SETPOINT;
+_pSFCChildWrite_PC_VESSEL_SETPOINT:      NOP 0;
+
+
+  //------------------------------------------------------------------------//
+  // Write the boolean child parameters if no child mismatch:               //
+  //------------------------------------------------------------------------//
+
+_noCommandOnChildMismatch:      NOP 0;
+
+
+
+
+
+
+
+
+
+
+
+NETWORK
+TITLE = Check if any Child state does not match the command
+//------------------------------------------------------------------------//
+// CHILD FLOWPATH STATE MISMATCH   CHILD FLOWPATH STATE MISMATCH   CHILD  //
+//                                                                        //
+// Check if any child flowpath device state does not match the command    //
+// from this parent block if the child state grace period timer has       //
+// expired. Stop checking if the first child state mismatch found:        //
+//------------------------------------------------------------------------//
+      A(;
+      O(;
+      A "alwaysHigh";
+      A "idbPC1".f[#p.child.PC_VESSEL].p.write.mc.ARMED;
+      A "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.FLOWPATH;
+      A(;
+      L "idbPC1".f[#p.child.PC_VESSEL].p.read.mc.STATE;
+      L #childReqCMD.PC_VESSEL;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbPI1".f[#p.child.PI_VESSEL].p.write.mc.ARMED;
+      A "idbPI1".f[#p.child.PI_VESSEL].p.read.mc.FLOWPATH;
+      A(;
+      L "idbPI1".f[#p.child.PI_VESSEL].p.read.mc.STATE;
+      L #childReqCMD.PI_VESSEL;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbPOS4".f[#p.child.POS_DRAIN].p.write.mc.ARMED;
+      A "idbPOS4".f[#p.child.POS_DRAIN].p.read.mc.FLOWPATH;
+      A(;
+      L "idbPOS4".f[#p.child.POS_DRAIN].p.read.mc.STATE;
+      L #childReqCMD.POS_DRAIN;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_HPCA].p.write.mc.ARMED;
+      A "idbPOS2".f[#p.child.POS_HPCA].p.read.mc.FLOWPATH;
+      A(;
+      L "idbPOS2".f[#p.child.POS_HPCA].p.read.mc.STATE;
+      L #childReqCMD.POS_HPCA;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_LPCA].p.write.mc.ARMED;
+      A "idbPOS2".f[#p.child.POS_LPCA].p.read.mc.FLOWPATH;
+      A(;
+      L "idbPOS2".f[#p.child.POS_LPCA].p.read.mc.STATE;
+      L #childReqCMD.POS_LPCA;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_VACUUM].p.write.mc.ARMED;
+      A "idbPOS2".f[#p.child.POS_VACUUM].p.read.mc.FLOWPATH;
+      A(;
+      L "idbPOS2".f[#p.child.POS_VACUUM].p.read.mc.STATE;
+      L #childReqCMD.POS_VACUUM;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_VENT].p.write.mc.ARMED;
+      A "idbPOS2".f[#p.child.POS_VENT].p.read.mc.FLOWPATH;
+      A(;
+      L "idbPOS2".f[#p.child.POS_VENT].p.read.mc.STATE;
+      L #childReqCMD.POS_VENT;
+      <>I;
+      );
+      );
+      );
+      JCN _noMismatch;
+
+      S #flags.childMismatch;
+      JC _noResetMismatch;
+
+_noMismatch:      NOP 0;
+      R #flags.childMismatch;
+      R #p.read.mc.INTIL;
+
+_noResetMismatch:      NOP 0;
+
+NETWORK
+TITLE = If child command changed, start timer to wait for child state
+//------------------------------------------------------------------------//
+// CHILD STATE TIMER   CHILD STATE TIMER   CHILD STATE TIMER   CHILD STAT //
+//                                                                        //
+// If any child command changed then start a timer to provide a grace     //
+// period to allow the child device state to match the command (e.g. to   //
+// allow a valve to move from closed to opened position).                 //
+// Start the child state check timer if a command changed:                //
+//------------------------------------------------------------------------//
+      CALL #timeCheckChildState
+      {time_type := 'Time'}
+      (  IN                          := #flags.childMismatch , 
+         PT                          := #p.read.bmc.transTime , 
+         Q                           := #timeCheckChildStateExpired , 
+         ET                          := #timeCheckChildStateElapsed
+      );
+      NOP 0;
+
+NETWORK
+TITLE = Block errors
+//------------------------------------------------------------------------//
+// Set the block start perimt error status if active:                     //
+//------------------------------------------------------------------------//
+      AN #p.read.bmc.permitStart;
+      = #p.read.err.permitStart;
+
+  //------------------------------------------------------------------------//
+  // Set the child error status if active:                                  //
+  //------------------------------------------------------------------------//
+      A #flags.childInterlock;
+      = #p.read.err.childInterlock;
+
+  //------------------------------------------------------------------------//
+  // Set the child unavailable error status if active:                      //
+  //------------------------------------------------------------------------//
+      A #flags.childUnavailable;
+      = #p.read.err.childUnavailable;
+
+  //------------------------------------------------------------------------//
+  // Set the child state mismatch error status if active:                   //
+  //------------------------------------------------------------------------//
+      A #timeCheckChildStateExpired;
+      = #p.read.err.childMismatch;
+      JCN _noInternalIL;
+      S #p.read.mc.INTIL;
+_noInternalIL:      NOP 0;
+
+  //------------------------------------------------------------------------//
+  // Set the block error flag if anything gone wrong:                       //
+  //------------------------------------------------------------------------//
+      O #p.read.err.childInterlock;
+      O #p.read.err.childMismatch;
+      O #p.read.err.childSafeState;
+      O #p.read.err.childUnavailable;
+      O #p.read.err.permitStart;
+      = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Pack the general block alarm bits
+//------------------------------------------------------------------------//
+// Pack the alarm bits into an integer for the HMI to read:               //
+// Alarms are arranged in the following Little Endian order...            //
+// Word   1                                0                              //
+// Bit    0   1   2   3   4   5   6   7    8   9  10  11  12  13  14  15  //
+// Order  9  10  11  12  13  14  15  16    1   2   3   4   5   6   7   8  //
+//------------------------------------------------------------------------//
+//    A #p.read.err.childInterlock;
+//    = #b[8];
+      A #p.read.err.childMismatch;
+      = #b[9];
+//    A #p.read.err.childSafeState;
+//    = #b[10];
+      A #p.read.err.childUnavailable;
+      = #b[11];
+      A #p.read.err.permitStart;
+      = #b[12];
+      L #w;
+      T #p.read.mc.ALARM;
+
+
+
+
+
+
+END_FUNCTION_BLOCK
+

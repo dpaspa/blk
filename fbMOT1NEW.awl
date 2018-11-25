@@ -1,0 +1,320 @@
+﻿FUNCTION_BLOCK "fbMOT1"
+TITLE = MOT1 : Vacuum Pump Control
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fbMOT1
+VERSION : 2.0
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbMOT1                                                        //
+// Description:                                                               //
+// Vacuum Pump control.                                                       //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 1.0 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic.             //
+// 0.9 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized.               //
+// 0.8 Steve Linehan    30-Sep-2009 CC-09/016 Out of Service Mode Added.      //
+// 0.7 Steve Linehan    29-Sep-2009 CC-09/016 Bypass Input Mode Added.        //
+// 0.6 Khairul Basar    22-Sep-2009 CC-09/016 Nw3,FAULT_S remove.             //
+// 0.5 Khairul Basar    17-Sep-2009 CC-09/016 Instead of Auto/Man dual command//
+//                                            only CMD used now.              //
+// 0.4 Khairul Basar    11-Sep-2009 CC-09/016 FAULT_S reset after Out_Q is off//
+// 0.3 Khairul Basar    11-Sep-2009 CC-09/016 INTERLOCK is now o/p instead of //
+//                                            temporary flag.                 //
+// 0.3 Khairul Basar    09-Sep-2009 CC-09/016 Ref2.                           //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//                                                                            //
+// Ref2:Instead of using one timer, another timer is created.One timer will   //
+// start when there is Start command , another will start when Stop command.  //
+// And there is FAULT_S which will be setting, so operator acknowledge signal //
+// must reset that flag, to be able restart the MOT1 again.Start and Stop     //
+// command divided into two networks, NW2 & 3.                                //
+//                                                                            //
+// Ref1.                                                                      //
+// STOPPED & RUNNING states are changed to 1 & 2 respectively while previously//
+// it was 2 & 1. Timer start signal is paralleled with start & Stop flag,     //
+// every transition of run to stop or stop to run the timer should start.     //
+// Previously it the start flag was duplicated twice. Now Fault state can be  //
+// verified, Previously FAULT_S & FAULT_O was not assigned.                   //
+// Name of parameter DELAY_TIME is changed to TMR.                            //
+// Initial value in code is changed from 10S to 3S.                           //
+// Now Alarm Tag names are corrected, Logic is assigned for them.             //
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+   VAR
+      p : "udtMOT1";   // Block data interface
+      startTMR {OriginalPartName := 'IEC_TIMER'; LibVersion := '1.0'} : TON_TIME;   // Motor Start/Stop Transition timer
+      stopTMR {OriginalPartName := 'IEC_TIMER'; LibVersion := '1.0'} : TON_TIME;
+   END_VAR
+   VAR DB_SPECIFIC
+      b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..15] of Bool;
+      w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT b : Word;
+   END_VAR
+
+   VAR_TEMP
+      cmdStart : Bool;
+      cmdStop : Bool;
+      enableStartTimer : Bool;
+      enableStopTimer : Bool;
+      tDO : Bool;   // Flag indicating whether to drive output
+      tFault : Bool;
+      startTMRElapsed : Time;
+      stopTMRElapsed : Time;
+      startTMRExpired : Bool;
+      stopTMRExpired : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Safe Command on restart
+//------------------------------------------------------------------------//
+// Set the safe command if restarting the PLC:                            //
+//------------------------------------------------------------------------//
+      A "flagFirstScanRestart";
+      JCN _noRestart;
+      L "dbCONST".BLK.MOT1.SAFE.CMD;
+      T #p.write.mc.CMD;
+      T #p.read.mc.CMD_SAFE;
+_noRestart:      NOP 0;
+
+NETWORK
+TITLE = Motor faults and three phase relay alarm
+//------------------------------------------------------------------------//
+// INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+// INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS   INPUTS  //
+// MOTOR FAULTS                                                           //
+// Raise alarm if any motor control fault condition is active:            //
+//------------------------------------------------------------------------//
+      A #p.read.PHR;
+      = #p.read.ALM_PHR;
+
+NETWORK
+TITLE = Motor breaker fault
+      A #p.read.BRK;
+      = #p.read.ALM_BRK;
+      = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Internal Interlock if any field fault
+//------------------------------------------------------------------------//
+// Include motor field faults in the internal interlock calculation:      //
+//------------------------------------------------------------------------//
+      O #p.read.BRK;
+      O #p.read.PHR;
+      O #p.read.FAIL_START;
+      O #p.read.FAIL_STOP;
+      = #p.read.mc.INTIL;
+
+NETWORK
+TITLE = Call Mode and Command handling block
+//------------------------------------------------------------------------//
+// COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
+//                                                                        //
+// Process the standard block functions for command, mode, interlock and  //
+// state:                                                                 //
+//------------------------------------------------------------------------//
+
+      CALL "fcModeCmd"
+      (  mcRead                      := #p.read.mc ,
+         mcWrite                     := #p.write.mc
+      );
+
+NETWORK
+TITLE = Start command
+//------------------------------------------------------------------------//
+// COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+// COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+//                                                                        //
+// CMD is START sets the output on and starts the timer:                  //
+//------------------------------------------------------------------------//
+      AN #p.read.mc.modeOOS;
+      AN #p.read.mc.INTERLOCK;
+      A(;
+      L #p.write.mc.CMD;
+      L "dbCONST".BLK.MOT1.CMD.START;
+      ==I;
+      );
+      = #cmdStart;
+      = #p.read.OUT_Q;
+      = #tDO;
+
+NETWORK
+TITLE = Start transition timer
+//------------------------------------------------------------------------//
+// Start transition timer:                                                //
+//------------------------------------------------------------------------//
+      A #cmdStart;
+      AN #p.read.FB_RUN;
+      S #enableStartTimer;
+
+NETWORK
+TITLE = Stop command
+//------------------------------------------------------------------------//
+// CMD is STOP:                                                           //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.mc.CMD;
+      L "dbCONST".BLK.MOT1.CMD.STOP;
+      ==I;
+      );
+      = #cmdStop;
+
+NETWORK
+TITLE = Stop transition timer
+//------------------------------------------------------------------------//
+// Stop transition timer:                                                 //
+//------------------------------------------------------------------------//
+      A #cmdStop;
+      A #p.read.FB_RUN;
+      S #enableStopTimer;
+
+NETWORK
+TITLE = Start Transition Timer in the event of Start
+//------------------------------------------------------------------------//
+// Start the starting timer if START command issued:                      //
+//------------------------------------------------------------------------//
+      CALL #startTMR
+      {time_type := 'Time'}
+      (  IN                          := #enableStartTimer ,
+         PT                          := T#3s ,
+         Q                           := #startTMRExpired ,
+         ET                          := #startTMRElapsed
+      );
+      NOP 0;
+
+NETWORK
+TITLE = Stop Transition Timer in the event of Stop
+//------------------------------------------------------------------------//
+// Start the stopping timer if STOP command issued:                       //
+//------------------------------------------------------------------------//
+      CALL #stopTMR
+      {time_type := 'Time'}
+      (  IN                          := #enableStopTimer ,
+         PT                          := T#3s ,
+         Q                           := #stopTMRExpired ,
+         ET                          := #stopTMRElapsed
+      );
+      NOP 0;
+
+NETWORK
+TITLE = Device State STOPPED if running feedback off
+//------------------------------------------------------------------------//
+// STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+// STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+//                                                                        //
+// STOPPED if output off and not running:                                 //
+//------------------------------------------------------------------------//
+      A #cmdStop;
+      AN #p.read.FB_RUN;
+      JCN _a;
+      R #enableStopTimer;
+      R #p.read.FAIL_START;
+      R #p.read.FAIL_STOP;
+      L "dbCONST".BLK.MOT1.STATE.STOPPED;
+      T #p.read.mc.STATE;
+_a:      NOP 0;
+
+NETWORK
+TITLE = Device State RUNNING if running feedback on or bypass
+//------------------------------------------------------------------------//
+// RUNNING if output is on with running feedback or bypass:               //
+//------------------------------------------------------------------------//
+      A #cmdStart;
+      A #p.read.FB_RUN;
+      JCN _b;
+      R #enableStartTimer;
+      R #p.read.FAIL_START;
+      R #p.read.FAIL_STOP;
+      L "dbCONST".BLK.MOT1.STATE.RUNNING;
+      T #p.read.mc.STATE;
+_b:      NOP 0;
+
+NETWORK
+TITLE = Device State transition if waiting for running or stopped
+//------------------------------------------------------------------------//
+// Transition state if output is on and waiting for running feedback to   //
+// come on or output is off and waiting for running feedback to go off:   //
+//------------------------------------------------------------------------//
+      O(;
+      A #enableStartTimer;
+      AN #startTMR.Q;
+      );
+      O(;
+      A #enableStopTimer;
+      AN #stopTMR.Q;
+      );
+      JCN _c;
+      R #p.read.FAIL_START;
+      R #p.read.FAIL_STOP;
+      L "dbCONST".BLK.MOT1.STATE.STARTING_STOPPING;
+      T #p.read.mc.STATE;
+_c:      NOP 0;
+
+NETWORK
+TITLE = Device State FAULT if timed out waiting for running
+//------------------------------------------------------------------------//
+// Fault if starting timer expired and not running:                       //
+//------------------------------------------------------------------------//
+      A #startTMR.Q;
+      JCN _failStart;
+      S #p.read.FAIL_START;
+_failStart:      NOP 0;
+
+NETWORK
+TITLE = Device State FAULT also if timed out waiting for stopped
+//------------------------------------------------------------------------//
+// Fault if stopping timer expired and not stopped:                       //
+//------------------------------------------------------------------------//
+      A #stopTMR.Q;
+      JCN _failStop;
+      S #p.read.FAIL_STOP;
+_failStop:      NOP 0;
+
+NETWORK
+TITLE = Set State FAULT if any fault condition
+//------------------------------------------------------------------------//
+// Fault if starting timer expired and not running:                       //
+//------------------------------------------------------------------------//
+      A #p.read.mc.INTIL;
+      JCN _d;
+      L "dbCONST".BLK.MOT1.STATE.FAULT;
+      T #p.read.mc.STATE;
+_d:      NOP 0;
+
+NETWORK
+TITLE = Operator Attention Flag
+//------------------------------------------------------------------------//
+// If not in Auto or any interlock or inhibit condition then the block    //
+// needs operator attention:                                              //
+//------------------------------------------------------------------------//
+      O #p.read.mc.needAttention;
+      O #p.read.mc.INTERLOCK;
+      O #p.read.mc.ERROR;
+      = #p.read.mc.needAttention;
+
+NETWORK
+TITLE = Pack the alarm bits
+//------------------------------------------------------------------------//
+// Pack the alarm bits into an integer for the HMI to read:               //
+// Alarms are arranged in the following Little Endian order...            //
+// Word   1                                0                              //
+// Bit    0   1   2   3   4   5   6   7    8   9  10  11  12  13  14  15  //
+// Order  9  10  11  12  13  14  15  16    1   2   3   4   5   6   7   8  //
+//------------------------------------------------------------------------//
+      A #p.read.ALM_BRK;
+      = #b[8];
+      A #p.read.ALM_PHR;
+      = #b[9];
+      A #p.read.FAIL_START;
+      = #b[10];
+      L #w;
+      T #p.read.mc.ALARM;
+
+END_FUNCTION_BLOCK

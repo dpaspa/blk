@@ -102,9 +102,7 @@ TITLE = Set Internal INTERLOCK Flag
     //                                                                        //
     // Internal interlock flag if any problem with the measurement:           //
     //------------------------------------------------------------------------//
-    O #p.read.ai.ALARM_LL;
-    O #p.read.ai.ALARM_HH;
-    ON #p.read.ai.DQ;
+    AN #p.read.ai.DQ;
     = #p.read.mc.INTIL;
 
 NETWORK
@@ -153,17 +151,21 @@ NETWORK
 TITLE = Pack the alarm bits
     //------------------------------------------------------------------------//
     // Pack the alarm bits into an integer for the HMI to read:               //
+    // Alarms are arranged in the following Little Endian order...            //
+    // Word   1                                0                              //
+    // Bit    0   1   2   3   4   5   6   7    8   9  10  11  12  13  14  15  //
+    // Order  9  10  11  12  13  14  15  16    1   2   3   4   5   6   7   8  //
     //------------------------------------------------------------------------//
     A #p.read.ai.ALARM_HH;
-    = #b[8];
+    = #b[0];
     A #p.read.ai.ALARM_H;
-    = #b[9];
+    = #b[1];
     A #p.read.ai.ALARM_L;
-    = #b[10];
+    = #b[2];
     A #p.read.ai.ALARM_LL;
-    = #b[11];
-    A #p.read.ai.DQ;
-    = #b[12];
+    = #b[3];
+    AN #p.read.ai.DQ;
+    = #b[4];
     L #w;
     T #p.read.mc.ALARM;
 

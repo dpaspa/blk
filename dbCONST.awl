@@ -102,6 +102,7 @@ STRUCT
         CMD : STRUCT
             STOP : INT  := 0;
             START : INT  := 1;
+            RESTART : INT  := 2;       // Restart command without going through STOPPED
         END_STRUCT ;
         MODE : STRUCT
             MANUAL : INT  := 1;
@@ -114,6 +115,7 @@ STRUCT
         STATE : STRUCT
             STOPPED : INT  := 0;       // Block stopped
             INTERLOCKED : INT  := 51;  // Block interlocked
+            ERROR : INT  := 97;        // Block substate had an error and not finished
             ABORTED : INT  := 98;      // Block substate unsucessfully finished,
             COMPLETED : INT  := 99;    // Block substate successfully finished, Finished after SFC (if any) is complete.
         END_STRUCT ;
@@ -444,6 +446,7 @@ STRUCT
             CMD : STRUCT
                 STOP : INT  := 0;
                 START : INT  := 1;
+                RESTART : INT  := 2;       // Restart command without going through STOPPED
             END_STRUCT ;
             SAFE : STRUCT
                 CMD : INT  := 0;       // Substate for safe state
@@ -451,6 +454,7 @@ STRUCT
             STATE : STRUCT
                 STOPPED : INT  := 0;       // Block stopped
                 INTERLOCKED : INT  := 51;  // Block interlocked
+                ERROR : INT  := 97;        // Block substate had an error and not finished
                 ABORTED : INT  := 98;      // Block substate unsuccessfully finished,
                 COMPLETED : INT  := 99;    // Block substate successfully finished, Finished after SFC (if any) is complete.
             END_STRUCT ;

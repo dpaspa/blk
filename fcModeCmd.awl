@@ -77,18 +77,38 @@ TITLE = Mode Out Of Service
     = #mcRead.modeOOS;
 
 NETWORK
-TITLE = Interlock Flag
+TITLE = External Interlock
     //------------------------------------------------------------------------//
     // Set boolean interlock flag if any interlock condition exists:          //
     // Instance Specific Non-Critical Interlocks can be bypassed by Manual    //
     // Override command from Operator Station (HMI):                          //
     //------------------------------------------------------------------------//
-    O #mcRead.INTIL;
     O #mcRead.CRIL;
     O(;
     A #mcRead.NCRIL;
     AN #mcWrite.MAN_OVERRIDE;
     );
+    = #mcRead.INTERLOCK;
+
+NETWORK
+TITLE = Send safe command in case of any external interlock or failure
+    //------------------------------------------------------------------------//
+    // Send safe command if any interlock or startup:                         //
+    //------------------------------------------------------------------------//
+    O "flagFirstScanRestart";
+    O #mcRead.INTERLOCK;
+    JCN _b;
+    L #mcRead.CMD_SAFE;
+    T #mcWrite.CMD;
+_b:   NOP 0;
+
+NETWORK
+TITLE = Consolidate external and internal Interlocks
+    //------------------------------------------------------------------------//
+    // Either external or internal condition can interlock the device:        //
+    //------------------------------------------------------------------------//
+    O #mcRead.INTIL;
+    O #mcRead.INTERLOCK;
     = #mcRead.INTERLOCK;
 
 NETWORK
@@ -112,16 +132,4 @@ TITLE = Availability Flag
     ==I;
     );
     = #mcRead.isAvailable;
-
-NETWORK
-TITLE = Send safe command in case of any interlock or failure
-    //------------------------------------------------------------------------//
-    // Send safe command if any interlock or startup:                         //
-    //------------------------------------------------------------------------//
-    O "flagFirstScanRestart";
-    O #mcRead.INTERLOCK;
-    JCN _b;
-    L #mcRead.CMD_SAFE;
-    T #mcWrite.CMD;
-_b:   NOP 0;
 END_FUNCTION

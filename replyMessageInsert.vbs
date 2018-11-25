@@ -13,7 +13,8 @@ Sub replyMessageInsert()
 '/-----------------------------------------------------------------------------/
 '/ Revision history:                                                           /
 '/ Rev By               Date        CC        Note                             /
-'/ 1   David Paspa      11-Aug-2019 NA        Reboot for S7-1500.              /
+'/ 2   David Paspa      16-Nov-2018 NA        Add HMI specific trigger.        /
+'/ 1   David Paspa      11-Aug-2018 NA        Reboot for S7-1500.              /
 '/-----------------------------------------------------------------------------/
 '/ Declare local variables:                                                    /
 '/-----------------------------------------------------------------------------/
@@ -63,24 +64,26 @@ Else
     End If
 End If
 
-@@TEMPLATE_BEGIN|pEventPromptAll@@
 '/-----------------------------------------------------------------------------/
 '/ The following should be done in a for-next loop to process all of the events/
 '/ in a simple small script but the brain dead WinCC does not allow the        /
 '/ structure SmartTag to be a variable :(                                      /
-'/                                                                             /
+'/ Messages are display in symbolic I/O fields linked to a Text List by        /
+'/ the list index HMI tag:                                                     /
+'/-----------------------------------------------------------------------------/
+
+@@TEMPLATE_BEGIN|pEventPromptAll@@
+'/-----------------------------------------------------------------------------/
 '/ Check if the event is already raised in the message list:                   /
 '/-----------------------------------------------------------------------------/
-If (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active")) Then
+If (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active2")) Then
 
 '/-----------------------------------------------------------------------------/
 '/ The message is not in the list. Check if it has now been triggered:         /
 '/-----------------------------------------------------------------------------/
-ElseIf (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger")) Then
+ElseIf (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger2")) Then
     '/-------------------------------------------------------------------------/
-    '/ Insert the event message into the first available message box slot.     /
-    '/ Messages are display in symbolic I/O fields linked to a Text List by    /
-    '/ the list index HMI tag:                                                 /
+    '/ Insert the event message into the first available message box slot:     /
     '/-------------------------------------------------------------------------/
     bInserted = False
     If (SmartTags("interfaceReply.idxMessage1") = 0) Then
@@ -99,11 +102,12 @@ ElseIf (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger")) Then
         bInserted = True
     End If
 
-    '/---------------------------------------------------------------------/
-    '/ Flag it was inserted if there was a message slot available:         /
-    '/---------------------------------------------------------------------/
+    '/-------------------------------------------------------------------------/
+    '/ Flag it was inserted if there was a message slot available:             /
+    '/-------------------------------------------------------------------------/
     If (bInserted) Then
-        SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active") = True
+        SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active2") = True
+        SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger2") = False
     End If
 End If
 

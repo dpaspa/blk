@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 10/11/2018 5:50:05 PM by David Paspa
+generated on 24/11/2018 4:24:44 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -20,10 +20,11 @@ Level:- UO
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
 HeaderName:- MUSIP
-Version:- 0.3
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
-// 0.3 Srinivas Nimmala  19-May-2010  Wong(Changed Cooling-Preempt)
+// 2.0 David Paspa      09-Aug-2018            Reboot for S7-1500.
+// 0.3 Srinivas Nimmala 19-May-2010            Wong(Changed Cooling-Preempt)
 // 0.2 David Paspa      26-Oct-2009            Added synch flags
 // 0.1 Gerald Kontriner 09-Sep-2009            SFC structural design
 HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
@@ -281,7 +282,7 @@ PARAMETER::32
 --------------------------------------------------
 Name:- r_pulse_number
 Type:- INT
-Description:- Number of valve pulsing times
+Description:- MX SIP Number of times to pulse SIP drain valves
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -297,7 +298,7 @@ PARAMETER::34
 --------------------------------------------------
 Name:- r_num_sip_abort
 Type:- INT
-Description:- number of SIP abort times
+Description:- MX SIP Number of SIP attempts before abort
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -313,7 +314,7 @@ PARAMETER::36
 --------------------------------------------------
 Name:- r_time_sip
 Type:- TIME
-Description:- Description
+Description:- MX SIP Sterilisation time
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -329,7 +330,7 @@ PARAMETER::38
 --------------------------------------------------
 Name:- r_time_sip_abort
 Type:- TIME
-Description:- time_sip_abort
+Description:- MX SIP Time to abort SIP if sterilisation temperature not reached
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -337,7 +338,7 @@ PARAMETER::39
 --------------------------------------------------
 Name:- r_time_stm_drain_mx
 Type:- TIME
-Description:- time_stm_drain_mx
+Description:- MX SIP Time to steam drain valves
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -369,7 +370,7 @@ PARAMETER::43
 --------------------------------------------------
 Name:- r_time_eject
 Type:- TIME
-Description:- Vacuum eject time
+Description:- MX SIP Vacuum system run time before timeout
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -377,7 +378,7 @@ PARAMETER::44
 --------------------------------------------------
 Name:- r_pres_vac
 Type:- REAL
-Description:- vacuum pressure
+Description:- MX SIP Vacuum pressure setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -433,7 +434,7 @@ PARAMETER::51
 --------------------------------------------------
 Name:- r_temp_sip
 Type:- REAL
-Description:- SIP temperature
+Description:- MX SIP Sterilisation temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -441,7 +442,7 @@ PARAMETER::52
 --------------------------------------------------
 Name:- r_temp_sip_vent
 Type:- REAL
-Description:- VENT valve SIP temperature
+Description:- MX SIP Sterilisation temperature for vessel vent valve line
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -609,7 +610,7 @@ PARAMETER::73
 --------------------------------------------------
 Name:- r_time_drain_pulse
 Type:- TIME
-Description:- Time for drain pulsing.
+Description:- MX SIP Time to pulse drain valves
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -617,7 +618,7 @@ PARAMETER::74
 --------------------------------------------------
 Name:- r_pres_hpca_leave
 Type:- REAL
-Description:- HPCA pressure to leave 
+Description:- MX SIP HPCA pressure after condensate drain blow down
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -625,15 +626,15 @@ PARAMETER::75
 --------------------------------------------------
 Name:- r_pres_hpca_blow
 Type:- REAL
-Description:- Pressure
+Description:- MX SIP HPCA Pressure to blow out condesate drain valves
 ParameterInOut:- VAR
 
 --------------------------------------------------
 PARAMETER::76
 --------------------------------------------------
-Name:- r_pres_lpca_blank
+Name:- r_pres_lpca_blanket
 Type:- REAL
-Description:- LPCA blanket pressure
+Description:- MX SIP LPCA blanket pressure
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -641,7 +642,7 @@ PARAMETER::77
 --------------------------------------------------
 Name:- r_pres_stm_pos
 Type:- REAL
-Description:- Positive steam pressure threshold
+Description:- MX SIP Positive steam pressure threshold
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -721,6 +722,25 @@ T #_emx_mmfl_cmd;
 Verification:- A(;
 L #_emv_vessel_subs;
 L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Discharge completed
+EmptyTransition:- False
+Description:- Discharge completed
+Condition:- A(;
+L   #_emv_vessel_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+A(;
+L   #_emx_mmfl_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
 
@@ -915,6 +935,16 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
+TRANSITION::07
+--------------------------------------------------
+TRNNo:- 07
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
 STEP::06
 --------------------------------------------------
 StepNo:- 06
@@ -933,9 +963,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::07
+TRANSITION::08
 --------------------------------------------------
-TRNNo:- 07
+TRNNo:- 8.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -978,9 +1008,9 @@ L   "dbCONST".BLK.EMC2.SUBS.FLUSH;
 
 
 --------------------------------------------------
-TRANSITION::08
+TRANSITION::09
 --------------------------------------------------
-TRNNo:- 08
+TRNNo:- 9.0000
 Title:- Pressure check
 EmptyTransition:- False
 Description:- Pressure increased above PRES_STM_POS. PCx013> PRES_STM_POS
@@ -1037,9 +1067,9 @@ L "dbCONST".BLK.EMG1.SUBS.SIP;
 
 
 --------------------------------------------------
-TRANSITION::09
+TRANSITION::10
 --------------------------------------------------
-TRNNo:- 09
+TRNNo:- 10.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -1069,9 +1099,9 @@ Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
-TRANSITION::10
+TRANSITION::11
 --------------------------------------------------
-TRNNo:- 10
+TRNNo:- 11.0000
 Title:- Timer expired
 EmptyTransition:- False
 Description:- Timer TIME_STM_DRAIN_Mx expired?
@@ -1097,9 +1127,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::11
+TRANSITION::12
 --------------------------------------------------
-TRNNo:- 11
+TRNNo:- 12.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -1138,9 +1168,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::12
+TRANSITION::13
 --------------------------------------------------
-TRNNo:- 12
+TRNNo:- 13.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -1158,9 +1188,9 @@ ACTION::01
 --------------------------------------------------
 
 --------------------------------------------------
-TRANSITION::13
+TRANSITION::14
 --------------------------------------------------
-TRNNo:- 13.0000
+TRNNo:- 14.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -1205,9 +1235,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::14
+TRANSITION::15
 --------------------------------------------------
-TRNNo:- 14
+TRNNo:- 15.0000
 Title:- Temperature below setpoint
 EmptyTransition:- False
 Description:- SIP timer running and any temperature below TEMP_SIP or the vent filter inlet temperature below TEMP_SIP_VENT?
@@ -1241,9 +1271,9 @@ L 	#_r_temp_sip;
 
 
 --------------------------------------------------
-TRANSITION::15
+TRANSITION::16
 --------------------------------------------------
-TRNNo:- 15
+TRNNo:- 16.0000
 Title:- All temperatures above setpoint.
 EmptyTransition:- False
 Description:- All SIP temperatures above TEMP_SIP °C and the vent filter inlet temperature above TEMP_SIP_VENT?
@@ -1279,9 +1309,9 @@ L 	#_r_temp_sip;
 
 
 --------------------------------------------------
-TRANSITION::16
+TRANSITION::17
 --------------------------------------------------
-TRNNo:- 16
+TRNNo:- 17.0000
 Title:- Temperature logging timer expired
 EmptyTransition:- False
 Description:- 30 seconds expired.
@@ -1289,9 +1319,9 @@ Condition:- A #SQ_TIMER2.Q;
 
 
 --------------------------------------------------
-TRANSITION::17
+TRANSITION::18
 --------------------------------------------------
-TRNNo:- 17.0000
+TRNNo:- 18.0000
 Title:- SIP Timer Expired
 EmptyTransition:- False
 Description:- Timer TIME_SIP expired.
@@ -1300,9 +1330,9 @@ A #_sip_timer_started;
 
 
 --------------------------------------------------
-TRANSITION::18
+TRANSITION::19
 --------------------------------------------------
-TRNNo:- 18
+TRNNo:- 19.0000
 Title:- Abort timer expired
 EmptyTransition:- False
 Description:- Timer TIME_SIP_ABORT is expired.
@@ -1341,9 +1371,9 @@ Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
-TRANSITION::19
+TRANSITION::20
 --------------------------------------------------
-TRNNo:- 19.0000
+TRNNo:- 20.0000
 Title:- SIP Timer Expired
 EmptyTransition:- False
 Description:- Timer TIME_SIP not yet expired.
@@ -1379,9 +1409,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::20
+TRANSITION::21
 --------------------------------------------------
-TRNNo:- 20
+TRNNo:- 21.0000
 Title:- Retry SIP again
 EmptyTransition:- False
 Description:- Temperature has dropped less than 'NUM_SIP_ABORT' times
@@ -1393,9 +1423,9 @@ L 	#_r_num_sip_abort;
 
 
 --------------------------------------------------
-TRANSITION::21
+TRANSITION::22
 --------------------------------------------------
-TRNNo:- 21
+TRNNo:- 22.0000
 Title:- Abort SIP
 EmptyTransition:- False
 Description:- Temperature has dropped 'NUM_SIP_ABORT' times.
@@ -1464,9 +1494,9 @@ L "dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::23
+TRANSITION::24
 --------------------------------------------------
-TRNNo:- 23
+TRNNo:- 24.0000
 Title:- Pressure dopped below PRES_HPCA_BLOW.
 EmptyTransition:- False
 Description:- Pressure dropped to PRES_HPCA_BLOW. PIC-x103 <= PRES_HPCA_BLOW
@@ -1494,9 +1524,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::22
+TRANSITION::23
 --------------------------------------------------
-TRNNo:- 22.0000
+TRNNo:- 23.0000
 Title:- Always High
 EmptyTransition:- False
 Description:- Always High
@@ -1562,9 +1592,9 @@ L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 
 
 --------------------------------------------------
-TRANSITION::24
+TRANSITION::25
 --------------------------------------------------
-TRNNo:- 24.0000
+TRNNo:- 25.0000
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Empty transition.
@@ -1594,9 +1624,9 @@ Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
-TRANSITION::25
+TRANSITION::26
 --------------------------------------------------
-TRNNo:- 25
+TRNNo:- 26.0000
 Title:- Finished pulsing drain valves?
 EmptyTransition:- False
 Description:- Drain valves pulsed pulse_number times
@@ -1656,9 +1686,9 @@ Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
-TRANSITION::27
+TRANSITION::28
 --------------------------------------------------
-TRNNo:- 27.0000
+TRNNo:- 28.0000
 Title:- Timer expired?
 EmptyTransition:- False
 Description:- Time for drain pulsing TIME_DRAIN_PULSE expired.
@@ -1740,9 +1770,9 @@ Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
-TRANSITION::28
+TRANSITION::29
 --------------------------------------------------
-TRNNo:- 28
+TRNNo:- 29.0000
 Title:- Finished pulsing drain valves after repeats.
 EmptyTransition:- False
 Description:- Drain valves pulsed pulse_number times after delay OR pulse wait time expired
@@ -1778,9 +1808,9 @@ L 	"dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::29
+TRANSITION::30
 --------------------------------------------------
-TRNNo:- 29
+TRNNo:- 30.0000
 Title:- HPCA pressure below PRES_HPCA_LEAVE.
 EmptyTransition:- False
 Description:- Pressure below PRES_HPCA_LEAVE. PIC_x103 <= PRES_HPCA_LEAVE
@@ -1837,9 +1867,9 @@ L "dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::30
+TRANSITION::31
 --------------------------------------------------
-TRNNo:- 30.0000
+TRNNo:- 31.0000
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Unconditional jump
@@ -1851,7 +1881,7 @@ STEP::24
 --------------------------------------------------
 StepNo:- 24
 Title:- UO_MX_SIP : Start LPCA blanketing and open vent valve
-Description:- Enable Mx LPCA pressure control at setpoint PRES_LPCA_BLANK.
+Description:- Enable Mx LPCA pressure control at setpoint PRES_LPCA_BLANKET.
 Open vent valve.
 
 --------------------------------------------------
@@ -1881,10 +1911,10 @@ L   "dbCONST".BLK.STATE.STOPPED;
 --------------------------------------------------
 ACTION::02
 --------------------------------------------------
-Description:- Enable Mx LPCA pressure control at setpoint PRES_LPCA_BLANK.
+Description:- Enable Mx LPCA pressure control at setpoint PRES_LPCA_BLANKET.
 Open vent valve.
 Action:- // Enable Mx LPCA pressure control and open Vent valve.
-L #_r_pres_lpca_blank;
+L #_r_pres_lpca_blanket;
 T #_emc_gas_setpoint;
 L "dbCONST".SEL.GAS.LPCA;
 T #_emc_gas_medium_gas;
@@ -1901,9 +1931,9 @@ L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 
 
 --------------------------------------------------
-TRANSITION::31
+TRANSITION::32
 --------------------------------------------------
-TRNNo:- 31.0000
+TRNNo:- 32.0000
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Unconditional jump

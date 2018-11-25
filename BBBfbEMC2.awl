@@ -1,0 +1,2872 @@
+﻿FUNCTION_BLOCK "fbEMC2"
+TITLE = WFI PW PS supply to MX vessel
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fbEMC2
+VERSION : 2.0
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Title:       EMC2
+// Description: WFI PW PS supply to MX vessel
+//                                                                            //
+// This is the main function block for all higher level S88 blocks, including //
+// EMs, Units and Process Cells. The block is generic and any heirarchical    //
+// structure can be supported.                                                //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 1.0 Gerald Kontriner 10-Oct-2009 CC-09/023 Added Alarm flag MON_MISMATCH.  //
+// 0.9 Khairul Basar    04-Oct-2009 CC-09/023 SHARED_BY  changed to OWNER int.//
+// 0.8 Khairul Basar    02-Oct-2009 CC-09/023 SQ_STATE, ERR flag reset if SQ  //
+//                                            off.                            //
+// 0.7 Khoon            01-Oct-2009 CC-09/016 Mode=2 init,'Substate change'   //
+//                                            added to STOP input of Subs.    //
+// 0.6 Khairul Basar    30-Sep-2009 CC-09/023 EM Mode var changed to IN_OUT.  //
+// 0.5 Khairul Basar    25-Sep-2009 CC-09/016 Ref2.                           //
+// 0.4 Khairul Basar    21-Sep-2009 CC-09/016 Ref1.                           //
+// 0.3 Khairul Basar    17-Sep-2009 CC-09/016 Duplicate command/SP parameters //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters.          //
+// 0.2 Khairul Basar    27-Aug-2009 CC-09/023 Path_IL added, Phase updated.   //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+// Ref2:                                                                      //
+// SQ_ACK,SQ_RESUME,SQ_ERROR,CURSTEP,SQ_STATE variables are added as to       //
+// control from HMI faceplate.                                                //
+// Ref1:                                                                      //
+// Phases are updated.Flush & Charge Syncronised for valve commands.SQ_stop   //
+// command is passed when CALL flag is OFF(previously there was error).PULSE  //
+// timer is created as multiple instance of a standard FB, no more hard coded //
+// S5 timer. ERR_FLT is changed to TIMEOUT_VER, PATH_IL to FLOWPATH.Shared    //
+// Equipment availability flag programmed,BatchCycle variable added.          //
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+   VAR 
+      p : "udtEMC2";   // Block data interface
+      RUNTMR : "fbRunTimer";
+      PH_EMC2_CHARGE : "fbPH_EMC2_CHARGE";   // Preset weight charging to Manufacturing Vessel
+      PH_EMC2_FLUSH : "fbPH_EMC2_FLUSH";   // Timed Filling of PW/WFI to Manufacturing Vessel
+      PH_EMC2_ISOLATE : "fbPH_EMC2_ISOLATE";   // Disconnect WFI/PW to Manufacturing Vessel
+      PH_EMC2_SETUP : "fbPH_EMC2_SETUP";   // WFI/PW Setup for Manufacturing Vessel
+      timeCheckChildState {OriginalPartName := 'IEC_TIMER'; LibVersion := '1.0'} : TON_TIME;
+      timeCheckChildStateElapsed : Time;
+      timeCheckChildStateExpired : Bool;
+      cmdSTOPPED : Bool;
+      stateBeforeError : Int;
+      childReqCMD : Struct
+         POS_PSPW : Int;
+         POS_PSWFI : Int;
+         POS_PW : Int;
+         POS_WFI : Int;
+         ZSC_FPINLET : Int;
+         ZSC_FPPW : Int;
+         ZSC_FPWFI : Int;
+      END_STRUCT;
+      flags : Struct
+         childInterlock : Bool;
+         childFailed : Bool;
+         childMismatch : Bool;
+         childUnavailable : Bool;
+         sfcAborted : Bool;
+         sfcCompleted : Bool;
+         substateCompleted : Bool;
+      END_STRUCT;
+      acquire : Struct
+         POS_PSPW : Bool;   // POS_PSPW
+         POS_PSWFI : Bool;   // POS_PSWFI
+         POS_PW : Bool;   // POS_PW
+         POS_WFI : Bool;   // POS_WFI
+         ZSC_FPINLET : Bool;   // ZSC_FPINLET
+         ZSC_FPPW : Bool;   // ZSC_FPPW
+         ZSC_FPWFI : Bool;   // ZSC_FPWFI
+      END_STRUCT;
+      alreadyOwned : Struct
+         POS_PSPW : Bool;   // POS_PSPW
+         POS_PSWFI : Bool;   // POS_PSWFI
+         POS_PW : Bool;   // POS_PW
+         POS_WFI : Bool;   // POS_WFI
+         ZSC_FPINLET : Bool;   // ZSC_FPINLET
+         ZSC_FPPW : Bool;   // ZSC_FPPW
+         ZSC_FPWFI : Bool;   // ZSC_FPWFI
+      END_STRUCT;
+      selected_MEDIUM_LIQUID : Struct
+         NONE : Bool;
+         PSPW : Bool;
+         PSWFI : Bool;
+         PW : Bool;
+         WFI : Bool;
+      END_STRUCT;
+      subsHasSFC : Struct
+         CHARGE : Bool := TRUE;   // Preset weight charging to Manufacturing Vessel
+         FLUSH : Bool := TRUE;   // Timed Filling of PW/WFI to Manufacturing Vessel
+         ISOLATE : Bool := TRUE;   // Disconnect WFI/PW to Manufacturing Vessel
+         SETUP : Bool := TRUE;   // WFI/PW Setup for Manufacturing Vessel
+      END_STRUCT;
+      subsRunning : Struct
+         CHARGE : Bool;   // Preset weight charging to Manufacturing Vessel
+         FLUSH : Bool;   // Timed Filling of PW/WFI to Manufacturing Vessel
+         ISOLATE : Bool;   // Disconnect WFI/PW to Manufacturing Vessel
+         SETUP : Bool;   // WFI/PW Setup for Manufacturing Vessel
+      END_STRUCT;
+      subsStart : Struct
+         CHARGE : Bool;   // Preset weight charging to Manufacturing Vessel
+         FLUSH : Bool;   // Timed Filling of PW/WFI to Manufacturing Vessel
+         ISOLATE : Bool;   // Disconnect WFI/PW to Manufacturing Vessel
+         SETUP : Bool;   // WFI/PW Setup for Manufacturing Vessel
+      END_STRUCT;
+   END_VAR
+   VAR DB_SPECIFIC
+      w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Word;
+      b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT w : Array[0..15] of Bool;
+      wEventConfirmNo { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..0] of Word;
+      bEventConfirmNo { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventConfirmNo : Array[0..1] of Bool;
+      wEventConfirmYes { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..0] of Word;
+      bEventConfirmYes { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventConfirmYes : Array[0..4] of Bool;
+      wEventLogMsg { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..0] of Word;
+      bEventLogMsg { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventLogMsg : Array[0..14] of Bool;
+      wEventLogReal { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..0] of Word;
+      bEventLogReal { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT wEventLogReal : Array[0..4] of Bool;
+   END_VAR
+
+   VAR_TEMP 
+      sq_finished : Bool;
+      tTime : Time;
+      dTime : DInt;
+      returnValue : Int;
+      dummy : Bool;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Safe Command as STOPPED on restart
+//------------------------------------------------------------------------//
+// Set the safe command if restarting the PLC:                            //
+//------------------------------------------------------------------------//
+      A "flagFirstScanRestart";
+      JCN _noRestart;
+      L "dbCONST".BLK.SAFE.CMD;
+      T #p.write.mc.CMD;
+      T #p.read.mc.CMD_SAFE;
+      R #subsRunning.CHARGE;
+      R #subsRunning.FLUSH;
+      R #subsRunning.ISOLATE;
+      R #subsRunning.SETUP;
+
+_noRestart:      NOP 0;
+
+NETWORK
+TITLE = Shutdown if STOPPED command no matter what
+//------------------------------------------------------------------------//
+// Check for STOPPED comamnd:                                             //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.mc.CMD;
+      L "dbCONST".BLK.CMD.STOP;
+      ==I;
+      );
+      = #cmdSTOPPED;
+
+
+NETWORK
+TITLE = Check if any Child has Failed
+//------------------------------------------------------------------------//
+// CHILD FAILED   CHILD FAILED   CHILD FAILED   CHILD FAILED   CHILD FAIL //
+//                                                                        //
+// Check if any child cannot be controlled by this parent block in which  //
+// case this block will fail and so operation at this level should be     //
+// inhibited:                                                             //
+//------------------------------------------------------------------------//
+      O #flags.childInterlock;
+      O #flags.childUnavailable;
+      O #timeCheckChildStateExpired;
+      JCN _noChildFail;
+      S #flags.childFailed;
+_noChildFail:      NOP 0;
+
+NETWORK
+TITLE = Check if Child Failed condition cleard
+//------------------------------------------------------------------------//
+// Child fail condition cleared if all children match:                    //
+//------------------------------------------------------------------------//
+      AN #flags.childInterlock;
+      AN #flags.childUnavailable;
+      AN #flags.childMismatch;
+      JCN _childFailCleared;
+      R #flags.childFailed;
+_childFailCleared:      NOP 0;
+
+NETWORK
+TITLE = Call General Mode and Command handling block
+//------------------------------------------------------------------------//
+// COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
+//                                                                        //
+// Process the standard block functions for command, mode, interlock and  //
+// state:                                                                 //
+//------------------------------------------------------------------------//
+
+      CALL "fcModeCmd"
+      (  mcRead                      := #p.read.mc , 
+         mcWrite                     := #p.write.mc
+      );
+
+NETWORK
+TITLE = Set Start command permitted flag if all okay
+//------------------------------------------------------------------------//
+// PERMIT START   PERMIT START   PERMIT START   PERMIT START   PERMIT ST  //
+//                                                                        //
+// If no interlock and all calling parameters and child devices are okay  //
+// then a Start is permitted:                                             //
+//------------------------------------------------------------------------//
+      AN #p.read.mc.INTERLOCK;
+      AN #flags.childFailed;
+      = #p.read.bmc.permitStart;
+
+NETWORK
+TITLE = Operator Attention Flag
+//------------------------------------------------------------------------//
+// If not in Auto or any interlock or inhibit condition then the block    //
+// needs operator attention:                                              //
+//------------------------------------------------------------------------//
+      O #p.read.mc.needAttention;
+      ON #p.read.bmc.permitStart;
+      = #p.read.mc.needAttention;
+
+NETWORK
+TITLE = Call BLOCK Mode and Command handling block
+//------------------------------------------------------------------------//
+// Process the stackable block functions for mode and command change      //
+// events:                                                                //
+//------------------------------------------------------------------------//
+
+      CALL "fcModeCmdBLK"
+      (  mcRead                      := #p.read.mc , 
+         mcWrite                     := #p.write.mc , 
+         bmc                         := #p.read.bmc
+      );
+
+NETWORK
+TITLE = Set child devices to safe state if stopped command or SFC fault
+//------------------------------------------------------------------------//
+// SAFE STATE   SAFE STATE   SAFE STATE   SAFE STATE  SAFE STATE  SAFE ST //
+//                                                                        //
+// Set the child device to the safe state on stop or fault:               //
+//------------------------------------------------------------------------//
+      O #cmdSTOPPED;
+      O(;
+      A #subsRunning.CHARGE;
+      A #PH_EMC2_CHARGE.smc.ERR_FAULT;
+      );
+      O(;
+      A #subsRunning.FLUSH;
+      A #PH_EMC2_FLUSH.smc.ERR_FAULT;
+      );
+      O(;
+      A #subsRunning.ISOLATE;
+      A #PH_EMC2_ISOLATE.smc.ERR_FAULT;
+      );
+      O(;
+      A #subsRunning.SETUP;
+      A #PH_EMC2_SETUP.smc.ERR_FAULT;
+      );
+      = #p.read.err.childSafeState;
+      JCN _notChildSafe;
+
+  //------------------------------------------------------------------------//
+  // Set all child devices to safe state due to block stop or problem:      //
+  //------------------------------------------------------------------------//
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_PSPW].p.read.mc.modeAUTO;
+      JCN _blkSafe_POS_PSPW;
+      L "idbPOS2".f[#p.child.POS_PSPW].p.read.mc.CMD_SAFE;
+      T "idbPOS2".f[#p.child.POS_PSPW].p.write.mc.CMD;
+      T #childReqCMD.POS_PSPW;
+_blkSafe_POS_PSPW:      NOP 0;
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_PSWFI].p.read.mc.modeAUTO;
+      JCN _blkSafe_POS_PSWFI;
+      L "idbPOS2".f[#p.child.POS_PSWFI].p.read.mc.CMD_SAFE;
+      T "idbPOS2".f[#p.child.POS_PSWFI].p.write.mc.CMD;
+      T #childReqCMD.POS_PSWFI;
+_blkSafe_POS_PSWFI:      NOP 0;
+      A "alwaysHigh";
+      A "idbPOS4".f[#p.child.POS_PW].p.read.mc.modeAUTO;
+      JCN _blkSafe_POS_PW;
+      L "idbPOS4".f[#p.child.POS_PW].p.read.mc.CMD_SAFE;
+      T "idbPOS4".f[#p.child.POS_PW].p.write.mc.CMD;
+      T #childReqCMD.POS_PW;
+_blkSafe_POS_PW:      NOP 0;
+      A "alwaysHigh";
+      A "idbPOS4".f[#p.child.POS_WFI].p.read.mc.modeAUTO;
+      JCN _blkSafe_POS_WFI;
+      L "idbPOS4".f[#p.child.POS_WFI].p.read.mc.CMD_SAFE;
+      T "idbPOS4".f[#p.child.POS_WFI].p.write.mc.CMD;
+      T #childReqCMD.POS_WFI;
+_blkSafe_POS_WFI:      NOP 0;
+      A "alwaysHigh";
+      A "idbZSC2".f[#p.child.ZSC_FPINLET].p.read.mc.modeAUTO;
+      JCN _blkSafe_ZSC_FPINLET;
+      L "idbZSC2".f[#p.child.ZSC_FPINLET].p.read.mc.CMD_SAFE;
+      T "idbZSC2".f[#p.child.ZSC_FPINLET].p.write.mc.CMD;
+      T #childReqCMD.ZSC_FPINLET;
+_blkSafe_ZSC_FPINLET:      NOP 0;
+      A "alwaysHigh";
+      A "idbZSC2".f[#p.child.ZSC_FPPW].p.read.mc.modeAUTO;
+      JCN _blkSafe_ZSC_FPPW;
+      L "idbZSC2".f[#p.child.ZSC_FPPW].p.read.mc.CMD_SAFE;
+      T "idbZSC2".f[#p.child.ZSC_FPPW].p.write.mc.CMD;
+      T #childReqCMD.ZSC_FPPW;
+_blkSafe_ZSC_FPPW:      NOP 0;
+      A "alwaysHigh";
+      A "idbZSC2".f[#p.child.ZSC_FPWFI].p.read.mc.modeAUTO;
+      JCN _blkSafe_ZSC_FPWFI;
+      L "idbZSC2".f[#p.child.ZSC_FPWFI].p.read.mc.CMD_SAFE;
+      T "idbZSC2".f[#p.child.ZSC_FPWFI].p.write.mc.CMD;
+      T #childReqCMD.ZSC_FPWFI;
+_blkSafe_ZSC_FPWFI:      NOP 0;
+
+_notChildSafe:      NOP 0;
+
+NETWORK
+TITLE = All SQ are in Auto mode when EM in Auto
+//------------------------------------------------------------------------//
+// SFC AUTO   SFC AUTO   SFC AUTO   SFC AUTO   SFC AUTO   SFC AUTO   SFC  //
+//                                                                        //
+// Set all SFCs to AUTO mode if the block is in AUTO:                     //
+//------------------------------------------------------------------------//
+      A #p.read.bmc.eventModeAuto;
+      JCN _nomcAuto;
+      L #p.write.mc.MODE;
+      T #PH_EMC2_CHARGE.smc.MODE;
+      T #PH_EMC2_FLUSH.smc.MODE;
+      T #PH_EMC2_ISOLATE.smc.MODE;
+      T #PH_EMC2_SETUP.smc.MODE;
+_nomcAuto:      NOP 0;
+
+NETWORK
+TITLE = Cascade Auto or OOS Mode to children
+//------------------------------------------------------------------------//
+// MODE CASCADE   MODE CASCADE   MODE CASCADE   MODE CASCADE   MODE CASC  //
+//                                                                        //
+// Switch child mode to Auto or OOS when parent mode transitions:         //
+//------------------------------------------------------------------------//
+      A(;
+      O #p.read.bmc.eventModeAuto;
+      O #p.read.bmc.eventModeOOS;
+      );
+      JCN _nomcAutoOOS;
+
+      A "alwaysHigh";
+      JCN _cascMode1;
+      L #p.write.mc.MODE;
+      T "idbPOS2".f[#p.child.POS_PSPW].p.write.mc.MODE;
+_cascMode1:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode2;
+      L #p.write.mc.MODE;
+      T "idbPOS2".f[#p.child.POS_PSWFI].p.write.mc.MODE;
+_cascMode2:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode3;
+      L #p.write.mc.MODE;
+      T "idbPOS4".f[#p.child.POS_PW].p.write.mc.MODE;
+_cascMode3:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode4;
+      L #p.write.mc.MODE;
+      T "idbPOS4".f[#p.child.POS_WFI].p.write.mc.MODE;
+_cascMode4:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode5;
+      L #p.write.mc.MODE;
+      T "idbZSC2".f[#p.child.ZSC_FPINLET].p.write.mc.MODE;
+_cascMode5:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode6;
+      L #p.write.mc.MODE;
+      T "idbZSC2".f[#p.child.ZSC_FPPW].p.write.mc.MODE;
+_cascMode6:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _cascMode7;
+      L #p.write.mc.MODE;
+      T "idbZSC2".f[#p.child.ZSC_FPWFI].p.write.mc.MODE;
+_cascMode7:      NOP 0;
+
+_nomcAutoOOS:      NOP 0;
+
+NETWORK
+TITLE = Interlocked condition cleared
+//------------------------------------------------------------------------//
+// Set the state stopped if the interlock condition just cleared:         //
+//------------------------------------------------------------------------//
+      AN #p.read.mc.INTERLOCK;
+      A(;
+      L #p.read.mc.STATE;
+      L "dbCONST".BLK.STATE.INTERLOCKED;
+      ==I;
+      );
+      JCN _ilCleared;
+      L #p.read.bmc.lastSTATE;
+      T #p.read.mc.STATE;
+
+_ilCleared:      NOP 0;
+
+
+
+
+
+
+NETWORK
+TITLE = SWITCH SWITCH SWITCH command and state
+//------------------------------------------------------------------------//
+// SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+//                                                                        //
+// Switch statement for block command and state. The order of the jumps   //
+// is important:                                                          //
+//------------------------------------------------------------------------//
+_switch:      NOP 0;
+      A #p.read.bmc.eventCmdStop;
+      JC _state_STOPPING;
+
+      A #cmdSTOPPED;
+      JC _state_STOPPED;
+
+      O #p.read.bmc.eventCmdStart;
+      O #p.read.bmc.eventCmdRestart;
+      JC _state_STARTING;
+
+      A #flags.substateCompleted;
+      JC _state_COMPLETED;
+
+      A #p.read.bmc.stateRUNNING;
+      JC _state_RUNNING;
+
+      SET;
+      JC _switch_end;
+
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED    //
+  // STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED    //
+  //------------------------------------------------------------------------//
+_state_STOPPED:      NOP 0;
+
+NETWORK
+TITLE = STOPPED STOPPED STOPPED Set block state STOPPED
+//------------------------------------------------------------------------//
+// Reset the completed flag and the block state to stopped:               //
+//------------------------------------------------------------------------//
+      L "dbCONST".BLK.EMC2.STATE.STOPPED;
+      T #p.read.mc.STATE;
+
+NETWORK
+TITLE = Send SFC STOP command
+//------------------------------------------------------------------------//
+// If commanded to Stop then tell the SFC to go to the last step:         //
+//------------------------------------------------------------------------//
+      L "dbCONST".SEQ.CMD.STOP;
+      T #PH_EMC2_CHARGE.smc.SQ_CMD;
+      T #PH_EMC2_CHARGE.sqSequencer.CMD.New;
+      T #PH_EMC2_FLUSH.smc.SQ_CMD;
+      T #PH_EMC2_FLUSH.sqSequencer.CMD.New;
+      T #PH_EMC2_ISOLATE.smc.SQ_CMD;
+      T #PH_EMC2_ISOLATE.sqSequencer.CMD.New;
+      T #PH_EMC2_SETUP.smc.SQ_CMD;
+      T #PH_EMC2_SETUP.sqSequencer.CMD.New;
+
+NETWORK
+TITLE = Reset running substate and completion flags
+//------------------------------------------------------------------------//
+// Reset flags:                                                           //
+//------------------------------------------------------------------------//
+      R #flags.sfcAborted;
+      R #flags.sfcCompleted;
+      R #flags.substateCompleted;
+      R #subsRunning.CHARGE;
+      R #subsRunning.FLUSH;
+      R #subsRunning.ISOLATE;
+      R #subsRunning.SETUP;
+
+NETWORK
+TITLE = Reset child commands
+//------------------------------------------------------------------------//
+// Reset the child commands:                                              //
+//------------------------------------------------------------------------//
+      L 0;
+      T #p.write.POS_PSPW_CMD;
+      T #p.write.POS_PSWFI_CMD;
+      T #p.write.POS_PW_CMD;
+      T #p.write.POS_WFI_CMD;
+      T #p.write.ZSC_FPPW_CMD;
+      T #p.write.ZSC_FPWFI_CMD;
+
+NETWORK
+TITLE = Disarm flowpath devices on STOP command
+//------------------------------------------------------------------------//
+// Disarm the flowpath child devices when STOP command issued:            //
+//------------------------------------------------------------------------//
+      R "idbPOS2".f[#p.child.POS_PSPW].p.write.mc.ARMED;
+      R "idbPOS2".f[#p.child.POS_PSWFI].p.write.mc.ARMED;
+      R "idbPOS4".f[#p.child.POS_PW].p.write.mc.ARMED;
+      R "idbPOS4".f[#p.child.POS_WFI].p.write.mc.ARMED;
+      R "idbZSC2".f[#p.child.ZSC_FPINLET].p.write.mc.ARMED;
+      R "idbZSC2".f[#p.child.ZSC_FPPW].p.write.mc.ARMED;
+      R "idbZSC2".f[#p.child.ZSC_FPWFI].p.write.mc.ARMED;
+
+NETWORK
+TITLE = Clear the event prompt confirm No message flags
+//------------------------------------------------------------------------//
+// CLEAR PROMPT NO   CLEAR PROMPT NO   CLEAR PROMPT NO   CLEAR PROMPT NO  //
+//                                                                        //
+// Clear the SFC event prompt confirm No  bits and the class bits:        //
+//------------------------------------------------------------------------//
+      L 0;
+      T #wEventConfirmNo[0];
+
+NETWORK
+TITLE = Clear the event prompt confirm Yes message flags
+//------------------------------------------------------------------------//
+// CLEAR PROMPT YES   CLEAR PROMPT YES   CLEAR PROMPT YES   CLEAR PROMPT  //
+//                                                                        //
+// Clear the SFC event prompt confirm Yes  bits and the class bits:       //
+//------------------------------------------------------------------------//
+      L 0;
+      T #wEventConfirmYes[0];
+
+NETWORK
+TITLE = Clear the log message flags
+//------------------------------------------------------------------------//
+// CLEAR LOG MESSAGE   CLEAR LOG MESSAGE   CLEAR LOG MESSAGE   CLEAR LOG  //
+//                                                                        //
+// Clear the SFC log message bits and the class bits:                     //
+//------------------------------------------------------------------------//
+      L 0;
+      T #wEventLogMsg[0];
+      R #PH_EMC2_CHARGE._log_msg_charge_begin;
+      R #PH_EMC2_CHARGE._log_msg_charge_end;
+      R #PH_EMC2_SETUP._log_msg_confirm_connect;
+      R #PH_EMC2_CHARGE._log_msg_filling_timeout;
+      R #PH_EMC2_CHARGE._log_msg_filling_timeout_abort;
+      R #PH_EMC2_CHARGE._log_msg_filling_timeout_repeat;
+      R #PH_EMC2_FLUSH._log_msg_flush_begin;
+      R #PH_EMC2_FLUSH._log_msg_flush_end;
+      R #PH_EMC2_CHARGE._log_msg_invalid_mass_abort;
+      R #PH_EMC2_CHARGE._log_msg_invalid_mass_repeat;
+      R #PH_EMC2_ISOLATE._log_msg_isolate_begin;
+      R #PH_EMC2_ISOLATE._log_msg_isolate_confirm;
+      R #PH_EMC2_ISOLATE._log_msg_isolate_end;
+      R #PH_EMC2_SETUP._log_msg_setup_begin;
+      R #PH_EMC2_SETUP._log_msg_setup_end;
+
+NETWORK
+TITLE = Clear the log real data flags
+//------------------------------------------------------------------------//
+// CLEAR LOG REAL   CLEAR LOG REAL   CLEAR LOG REAL   CLEAR LOG REAL   CL //
+//                                                                        //
+// Clear the SFC log real data:                                           //
+//------------------------------------------------------------------------//
+      L 0;
+      T #wEventLogReal[0];
+      T "dbEVENT".eventDataReal[1];
+      T "dbEVENT".eventDataReal[2];
+      T "dbEVENT".eventDataReal[3];
+      T "dbEVENT".eventDataReal[4];
+      T "dbEVENT".eventDataReal[5];
+      R #PH_EMC2_CHARGE._log_real_actual_mass;
+      R #PH_EMC2_CHARGE._log_real_final_mass;
+      R #PH_EMC2_CHARGE._log_real_initial_mass;
+      R #PH_EMC2_CHARGE._log_real_invalid_mass;
+      R #PH_EMC2_CHARGE._log_real_timeout_mass;
+
+
+NETWORK
+TITLE = Zero the real data values
+//------------------------------------------------------------------------//
+// ZERO DATA REAL   ZERO DATA REAL   ZERO DATA REAL   ZERO DATA REAL   ZE //
+//                                                                        //
+// Zero the SFC log real data parameter:                                  //
+//------------------------------------------------------------------------//
+      L 0;
+      T #PH_EMC2_CHARGE._real_final_mass;
+      T #PH_EMC2_CHARGE._real_actual_mass;
+      T #PH_EMC2_CHARGE._real_timeout_mass;
+      T #PH_EMC2_CHARGE._real_initial_mass;
+      T #PH_EMC2_CHARGE._real_invalid_mass;
+
+
+      SET;
+      JC _switch_end;
+
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // STARTING   STARTING   STARTING   STARTING   STARTING   STARTING   STAR //
+  // STARTING   STARTING   STARTING   STARTING   STARTING   STARTING   STAR //
+  //------------------------------------------------------------------------//
+_state_STARTING:      NOP 0;
+
+NETWORK
+TITLE = STARTING STARTING STARTING Reset running substate and completion flags
+//------------------------------------------------------------------------//
+// Reset flags:                                                           //
+//------------------------------------------------------------------------//
+      R #flags.sfcAborted;
+      R #flags.sfcCompleted;
+      R #flags.substateCompleted;
+      R #subsRunning.CHARGE;
+      R #subsRunning.FLUSH;
+      R #subsRunning.ISOLATE;
+      R #subsRunning.SETUP;
+
+NETWORK
+TITLE = Set running SUBSTATE if CHARGE
+//------------------------------------------------------------------------//
+// RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG  //
+//                                                                        //
+// Convert running substate values into boolean flags for ease of use in  //
+// boolean logic:                                                         //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.mc.SUBS;
+      L "dbCONST".BLK.EMC2.SUBS.CHARGE;
+      ==I;
+      );
+      = #subsStart.CHARGE;
+      JCN _noSubsRun_CHARGE;
+      S #subsRunning.CHARGE;
+_noSubsRun_CHARGE:      NOP 0;
+
+NETWORK
+TITLE = Set running SUBSTATE if FLUSH
+//------------------------------------------------------------------------//
+// RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG  //
+//                                                                        //
+// Convert running substate values into boolean flags for ease of use in  //
+// boolean logic:                                                         //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.mc.SUBS;
+      L "dbCONST".BLK.EMC2.SUBS.FLUSH;
+      ==I;
+      );
+      = #subsStart.FLUSH;
+      JCN _noSubsRun_FLUSH;
+      S #subsRunning.FLUSH;
+_noSubsRun_FLUSH:      NOP 0;
+
+NETWORK
+TITLE = Set running SUBSTATE if ISOLATE
+//------------------------------------------------------------------------//
+// RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG  //
+//                                                                        //
+// Convert running substate values into boolean flags for ease of use in  //
+// boolean logic:                                                         //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.mc.SUBS;
+      L "dbCONST".BLK.EMC2.SUBS.ISOLATE;
+      ==I;
+      );
+      = #subsStart.ISOLATE;
+      JCN _noSubsRun_ISOLATE;
+      S #subsRunning.ISOLATE;
+_noSubsRun_ISOLATE:      NOP 0;
+
+NETWORK
+TITLE = Set running SUBSTATE if SETUP
+//------------------------------------------------------------------------//
+// RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG  //
+//                                                                        //
+// Convert running substate values into boolean flags for ease of use in  //
+// boolean logic:                                                         //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.mc.SUBS;
+      L "dbCONST".BLK.EMC2.SUBS.SETUP;
+      ==I;
+      );
+      = #subsStart.SETUP;
+      JCN _noSubsRun_SETUP;
+      S #subsRunning.SETUP;
+_noSubsRun_SETUP:      NOP 0;
+
+
+NETWORK
+TITLE = The STATE follows the SUBSTATE when running
+//------------------------------------------------------------------------//
+// Set the state to the substate if running:                              //
+//------------------------------------------------------------------------//
+      O #subsRunning.CHARGE;
+      O #subsRunning.FLUSH;
+      O #subsRunning.ISOLATE;
+      O #subsRunning.SETUP;
+      JCN _noSubsRun;
+      L #p.write.mc.SUBS;
+      T #p.read.mc.STATE;
+_noSubsRun:      NOP 0;
+
+
+NETWORK
+TITLE = Calling Parameter Selection flags
+//------------------------------------------------------------------------//
+// CALLING PARAMETER SELECTION FLAG   CALLING PARAMETER SELECTION FLAG    //
+//                                                                        //
+// Convert calling parameter selections into the boolean flags for ease   //
+// of use in boolean logic if starting a new substate:                    //
+//------------------------------------------------------------------------//
+      A(;
+      L #p.write.MEDIUM_LIQUID;
+      L "dbCONST".SEL.LIQUID.NONE;
+      ==I;
+      );
+      JCN _noSelect_MEDIUM_LIQUID_NONE;
+      S #selected_MEDIUM_LIQUID.NONE;
+      JC _select_MEDIUM_LIQUID_NONE;
+
+_noSelect_MEDIUM_LIQUID_NONE:      NOP 0;
+      R #selected_MEDIUM_LIQUID.NONE;
+
+_select_MEDIUM_LIQUID_NONE:      NOP 0;
+
+      A(;
+      L #p.write.MEDIUM_LIQUID;
+      L "dbCONST".SEL.LIQUID.PSPW;
+      ==I;
+      );
+      JCN _noSelect_MEDIUM_LIQUID_PSPW;
+      S #selected_MEDIUM_LIQUID.PSPW;
+      JC _select_MEDIUM_LIQUID_PSPW;
+
+_noSelect_MEDIUM_LIQUID_PSPW:      NOP 0;
+      R #selected_MEDIUM_LIQUID.PSPW;
+
+_select_MEDIUM_LIQUID_PSPW:      NOP 0;
+
+      A(;
+      L #p.write.MEDIUM_LIQUID;
+      L "dbCONST".SEL.LIQUID.PSWFI;
+      ==I;
+      );
+      JCN _noSelect_MEDIUM_LIQUID_PSWFI;
+      S #selected_MEDIUM_LIQUID.PSWFI;
+      JC _select_MEDIUM_LIQUID_PSWFI;
+
+_noSelect_MEDIUM_LIQUID_PSWFI:      NOP 0;
+      R #selected_MEDIUM_LIQUID.PSWFI;
+
+_select_MEDIUM_LIQUID_PSWFI:      NOP 0;
+
+      A(;
+      L #p.write.MEDIUM_LIQUID;
+      L "dbCONST".SEL.LIQUID.PW;
+      ==I;
+      );
+      JCN _noSelect_MEDIUM_LIQUID_PW;
+      S #selected_MEDIUM_LIQUID.PW;
+      JC _select_MEDIUM_LIQUID_PW;
+
+_noSelect_MEDIUM_LIQUID_PW:      NOP 0;
+      R #selected_MEDIUM_LIQUID.PW;
+
+_select_MEDIUM_LIQUID_PW:      NOP 0;
+
+      A(;
+      L #p.write.MEDIUM_LIQUID;
+      L "dbCONST".SEL.LIQUID.WFI;
+      ==I;
+      );
+      JCN _noSelect_MEDIUM_LIQUID_WFI;
+      S #selected_MEDIUM_LIQUID.WFI;
+      JC _select_MEDIUM_LIQUID_WFI;
+
+_noSelect_MEDIUM_LIQUID_WFI:      NOP 0;
+      R #selected_MEDIUM_LIQUID.WFI;
+
+_select_MEDIUM_LIQUID_WFI:      NOP 0;
+
+
+
+NETWORK
+TITLE = Cascade Batch Serial Number to all children
+//------------------------------------------------------------------------//
+// RECIPE AND BATCH ID    RECIPE AND BATCH ID    RECIPE AND BATCH ID      //
+//                                                                        //
+// Cascade this block's Batch Number and Recipe ID to all child devices:  //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      JCN _childBatch_1;
+      L #p.write.mc.SERIALNUM;
+      T "idbPOS2".f[#p.child.POS_PSPW].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbPOS2".f[#p.child.POS_PSPW].p.write.mc.RECIPE;
+_childBatch_1:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_2;
+      L #p.write.mc.SERIALNUM;
+      T "idbPOS2".f[#p.child.POS_PSWFI].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbPOS2".f[#p.child.POS_PSWFI].p.write.mc.RECIPE;
+_childBatch_2:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_3;
+      L #p.write.mc.SERIALNUM;
+      T "idbPOS4".f[#p.child.POS_PW].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbPOS4".f[#p.child.POS_PW].p.write.mc.RECIPE;
+_childBatch_3:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_4;
+      L #p.write.mc.SERIALNUM;
+      T "idbPOS4".f[#p.child.POS_WFI].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbPOS4".f[#p.child.POS_WFI].p.write.mc.RECIPE;
+_childBatch_4:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_5;
+      L #p.write.mc.SERIALNUM;
+      T "idbZSC2".f[#p.child.ZSC_FPINLET].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbZSC2".f[#p.child.ZSC_FPINLET].p.write.mc.RECIPE;
+_childBatch_5:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_6;
+      L #p.write.mc.SERIALNUM;
+      T "idbZSC2".f[#p.child.ZSC_FPPW].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbZSC2".f[#p.child.ZSC_FPPW].p.write.mc.RECIPE;
+_childBatch_6:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _childBatch_7;
+      L #p.write.mc.SERIALNUM;
+      T "idbZSC2".f[#p.child.ZSC_FPWFI].p.write.mc.SERIALNUM;
+      L #p.write.mc.RECIPE;
+      T "idbZSC2".f[#p.child.ZSC_FPWFI].p.write.mc.RECIPE;
+_childBatch_7:      NOP 0;
+
+
+NETWORK
+TITLE = Command child device POS_PSPW for initial TRUE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_PSPW].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.CHARGE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      O(;
+      A #subsStart.ISOLATE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      O(;
+      A #subsStart.SETUP;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_POS_PSPW_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_PSPW_CMD;
+      T #childReqCMD.POS_PSPW;
+
+_childInitTrue_POS_PSPW_CLOSE:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_PSPW for initial TRUE command OPEN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_PSPW].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.FLUSH;
+      A "alwaysHigh";
+      A #selected_MEDIUM_LIQUID.PSPW;
+      );
+      );
+      JCN _childInitTrue_POS_PSPW_OPEN;
+      L "dbCONST".BLK.POS2.CMD.OPEN;
+      T #p.write.POS_PSPW_CMD;
+      T #childReqCMD.POS_PSPW;
+
+_childInitTrue_POS_PSPW_OPEN:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_PSWFI for initial TRUE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_PSWFI].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.CHARGE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      O(;
+      A #subsStart.ISOLATE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      O(;
+      A #subsStart.SETUP;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_POS_PSWFI_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_PSWFI_CMD;
+      T #childReqCMD.POS_PSWFI;
+
+_childInitTrue_POS_PSWFI_CLOSE:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_PSWFI for initial TRUE command OPEN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_PSWFI].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.FLUSH;
+      A "alwaysHigh";
+      A #selected_MEDIUM_LIQUID.PSWFI;
+      );
+      );
+      JCN _childInitTrue_POS_PSWFI_OPEN;
+      L "dbCONST".BLK.POS2.CMD.OPEN;
+      T #p.write.POS_PSWFI_CMD;
+      T #childReqCMD.POS_PSWFI;
+
+_childInitTrue_POS_PSWFI_OPEN:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_PW for initial TRUE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS4".f[#p.child.POS_PW].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.CHARGE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      O(;
+      A #subsStart.ISOLATE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      O(;
+      A #subsStart.SETUP;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_POS_PW_CLOSE;
+      L "dbCONST".BLK.POS4.CMD.CLOSE;
+      T #p.write.POS_PW_CMD;
+      T #childReqCMD.POS_PW;
+
+_childInitTrue_POS_PW_CLOSE:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_PW for initial TRUE command OPEN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS4".f[#p.child.POS_PW].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.FLUSH;
+      A "alwaysHigh";
+      A #selected_MEDIUM_LIQUID.PW;
+      );
+      );
+      JCN _childInitTrue_POS_PW_OPEN;
+      L "dbCONST".BLK.POS4.CMD.OPEN;
+      T #p.write.POS_PW_CMD;
+      T #childReqCMD.POS_PW;
+
+_childInitTrue_POS_PW_OPEN:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_WFI for initial TRUE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS4".f[#p.child.POS_WFI].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.CHARGE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      O(;
+      A #subsStart.ISOLATE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      O(;
+      A #subsStart.SETUP;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_POS_WFI_CLOSE;
+      L "dbCONST".BLK.POS4.CMD.CLOSE;
+      T #p.write.POS_WFI_CMD;
+      T #childReqCMD.POS_WFI;
+
+_childInitTrue_POS_WFI_CLOSE:      NOP 0;
+
+NETWORK
+TITLE = Command child device POS_WFI for initial TRUE command OPEN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbPOS4".f[#p.child.POS_WFI].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.FLUSH;
+      A "alwaysHigh";
+      A #selected_MEDIUM_LIQUID.WFI;
+      );
+      );
+      JCN _childInitTrue_POS_WFI_OPEN;
+      L "dbCONST".BLK.POS4.CMD.OPEN;
+      T #p.write.POS_WFI_CMD;
+      T #childReqCMD.POS_WFI;
+
+_childInitTrue_POS_WFI_OPEN:      NOP 0;
+
+NETWORK
+TITLE = Command child device ZSC_FPINLET for initial TRUE command IN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbZSC2".f[#p.child.ZSC_FPINLET].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.CHARGE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      O(;
+      A #subsStart.FLUSH;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      O(;
+      A #subsStart.SETUP;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_ZSC_FPINLET_IN;
+      L "dbCONST".BLK.ZSC2.CMD.IN;
+      T #p.write.ZSC_FPINLET_CMD;
+      T #childReqCMD.ZSC_FPINLET;
+
+_childInitTrue_ZSC_FPINLET_IN:      NOP 0;
+
+NETWORK
+TITLE = Command child device ZSC_FPINLET for initial TRUE command OUT
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbZSC2".f[#p.child.ZSC_FPINLET].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.ISOLATE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_ZSC_FPINLET_OUT;
+      L "dbCONST".BLK.ZSC2.CMD.OUT;
+      T #p.write.ZSC_FPINLET_CMD;
+      T #childReqCMD.ZSC_FPINLET;
+
+_childInitTrue_ZSC_FPINLET_OUT:      NOP 0;
+
+NETWORK
+TITLE = Command child device ZSC_FPPW for initial TRUE command IN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbZSC2".f[#p.child.ZSC_FPPW].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.CHARGE;
+      A "alwaysHigh";
+      A(;
+      O #selected_MEDIUM_LIQUID.PW;
+      O #selected_MEDIUM_LIQUID.PSPW;
+      );
+      );
+      O(;
+      A #subsStart.FLUSH;
+      A "alwaysHigh";
+      A(;
+      O #selected_MEDIUM_LIQUID.PW;
+      O #selected_MEDIUM_LIQUID.PSPW;
+      );
+      );
+      O(;
+      A #subsStart.SETUP;
+      A "alwaysHigh";
+      A(;
+      O #selected_MEDIUM_LIQUID.PW;
+      O #selected_MEDIUM_LIQUID.PSPW;
+      );
+      );
+      );
+      JCN _childInitTrue_ZSC_FPPW_IN;
+      L "dbCONST".BLK.ZSC2.CMD.IN;
+      T #p.write.ZSC_FPPW_CMD;
+      T #childReqCMD.ZSC_FPPW;
+
+_childInitTrue_ZSC_FPPW_IN:      NOP 0;
+
+NETWORK
+TITLE = Command child device ZSC_FPPW for initial TRUE command OUT
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbZSC2".f[#p.child.ZSC_FPPW].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.ISOLATE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_ZSC_FPPW_OUT;
+      L "dbCONST".BLK.ZSC2.CMD.OUT;
+      T #p.write.ZSC_FPPW_CMD;
+      T #childReqCMD.ZSC_FPPW;
+
+_childInitTrue_ZSC_FPPW_OUT:      NOP 0;
+
+NETWORK
+TITLE = Command child device ZSC_FPWFI for initial TRUE command IN
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbZSC2".f[#p.child.ZSC_FPWFI].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.CHARGE;
+      A "alwaysHigh";
+      A(;
+      O #selected_MEDIUM_LIQUID.WFI;
+      O #selected_MEDIUM_LIQUID.PSWFI;
+      );
+      );
+      O(;
+      A #subsStart.FLUSH;
+      A "alwaysHigh";
+      A(;
+      O #selected_MEDIUM_LIQUID.WFI;
+      O #selected_MEDIUM_LIQUID.PSWFI;
+      );
+      );
+      O(;
+      A #subsStart.SETUP;
+      A "alwaysHigh";
+      A(;
+      O #selected_MEDIUM_LIQUID.WFI;
+      O #selected_MEDIUM_LIQUID.PSWFI;
+      );
+      );
+      );
+      JCN _childInitTrue_ZSC_FPWFI_IN;
+      L "dbCONST".BLK.ZSC2.CMD.IN;
+      T #p.write.ZSC_FPWFI_CMD;
+      T #childReqCMD.ZSC_FPWFI;
+
+_childInitTrue_ZSC_FPWFI_IN:      NOP 0;
+
+NETWORK
+TITLE = Command child device ZSC_FPWFI for initial TRUE command OUT
+//------------------------------------------------------------------------//
+// CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command if condition is true:  //
+//------------------------------------------------------------------------//
+      A "idbZSC2".f[#p.child.ZSC_FPWFI].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.ISOLATE;
+      A "alwaysHigh";
+      A "alwaysHigh";
+      );
+      );
+      JCN _childInitTrue_ZSC_FPWFI_OUT;
+      L "dbCONST".BLK.ZSC2.CMD.OUT;
+      T #p.write.ZSC_FPWFI_CMD;
+      T #childReqCMD.ZSC_FPWFI;
+
+_childInitTrue_ZSC_FPWFI_OUT:      NOP 0;
+
+
+NETWORK
+TITLE = Command child device POS_PSPW for initial FALSE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_PSPW].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.FLUSH;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A #selected_MEDIUM_LIQUID.PSPW;
+      );
+      );
+      );
+      JCN _childInitFalse_POS_PSPW_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_PSPW_CMD;
+      T #childReqCMD.POS_PSPW;
+
+_childInitFalse_POS_PSPW_CLOSE:      NOP 0;
+NETWORK
+TITLE = Command child device POS_PSWFI for initial FALSE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_PSWFI].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.FLUSH;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A #selected_MEDIUM_LIQUID.PSWFI;
+      );
+      );
+      );
+      JCN _childInitFalse_POS_PSWFI_CLOSE;
+      L "dbCONST".BLK.POS2.CMD.CLOSE;
+      T #p.write.POS_PSWFI_CMD;
+      T #childReqCMD.POS_PSWFI;
+
+_childInitFalse_POS_PSWFI_CLOSE:      NOP 0;
+NETWORK
+TITLE = Command child device POS_PW for initial FALSE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbPOS4".f[#p.child.POS_PW].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.FLUSH;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A #selected_MEDIUM_LIQUID.PW;
+      );
+      );
+      );
+      JCN _childInitFalse_POS_PW_CLOSE;
+      L "dbCONST".BLK.POS4.CMD.CLOSE;
+      T #p.write.POS_PW_CMD;
+      T #childReqCMD.POS_PW;
+
+_childInitFalse_POS_PW_CLOSE:      NOP 0;
+NETWORK
+TITLE = Command child device POS_WFI for initial FALSE command CLOSE
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbPOS4".f[#p.child.POS_WFI].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.FLUSH;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A #selected_MEDIUM_LIQUID.WFI;
+      );
+      );
+      );
+      JCN _childInitFalse_POS_WFI_CLOSE;
+      L "dbCONST".BLK.POS4.CMD.CLOSE;
+      T #p.write.POS_WFI_CMD;
+      T #childReqCMD.POS_WFI;
+
+_childInitFalse_POS_WFI_CLOSE:      NOP 0;
+NETWORK
+TITLE = Command child device ZSC_FPINLET for initial FALSE command OUT
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbZSC2".f[#p.child.ZSC_FPINLET].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.FLUSH;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A "alwaysHigh";
+      );
+      );
+      );
+      JCN _childInitFalse_ZSC_FPINLET_OUT;
+      L "dbCONST".BLK.ZSC2.CMD.OUT;
+      T #p.write.ZSC_FPINLET_CMD;
+      T #childReqCMD.ZSC_FPINLET;
+
+_childInitFalse_ZSC_FPINLET_OUT:      NOP 0;
+NETWORK
+TITLE = Command child device ZSC_FPPW for initial FALSE command OUT
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbZSC2".f[#p.child.ZSC_FPPW].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.CHARGE;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A(;
+      O #selected_MEDIUM_LIQUID.PW;
+      O #selected_MEDIUM_LIQUID.PSPW;
+      );
+      );
+      );
+      O(;
+      A #subsStart.FLUSH;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A(;
+      O #selected_MEDIUM_LIQUID.PW;
+      O #selected_MEDIUM_LIQUID.PSPW;
+      );
+      );
+      );
+      O(;
+      A #subsStart.SETUP;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A(;
+      O #selected_MEDIUM_LIQUID.PW;
+      O #selected_MEDIUM_LIQUID.PSPW;
+      );
+      );
+      );
+      );
+      JCN _childInitFalse_ZSC_FPPW_OUT;
+      L "dbCONST".BLK.ZSC2.CMD.OUT;
+      T #p.write.ZSC_FPPW_CMD;
+      T #childReqCMD.ZSC_FPPW;
+
+_childInitFalse_ZSC_FPPW_OUT:      NOP 0;
+NETWORK
+TITLE = Command child device ZSC_FPWFI for initial FALSE command OUT
+//------------------------------------------------------------------------//
+// CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
+//                                                                        //
+// Set the initial command values for the child devices.                  //
+// Command the child device to its initial command:                       //
+//------------------------------------------------------------------------//
+      A "idbZSC2".f[#p.child.ZSC_FPWFI].p.read.mc.modeAUTO;
+      A(;
+      O(;
+      A #subsStart.CHARGE;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A(;
+      O #selected_MEDIUM_LIQUID.WFI;
+      O #selected_MEDIUM_LIQUID.PSWFI;
+      );
+      );
+      );
+      O(;
+      A #subsStart.FLUSH;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A(;
+      O #selected_MEDIUM_LIQUID.WFI;
+      O #selected_MEDIUM_LIQUID.PSWFI;
+      );
+      );
+      );
+      O(;
+      A #subsStart.SETUP;
+      A(;
+      A "alwaysHigh";
+      );
+      AN(;
+      A(;
+      O #selected_MEDIUM_LIQUID.WFI;
+      O #selected_MEDIUM_LIQUID.PSWFI;
+      );
+      );
+      );
+      );
+      JCN _childInitFalse_ZSC_FPWFI_OUT;
+      L "dbCONST".BLK.ZSC2.CMD.OUT;
+      T #p.write.ZSC_FPWFI_CMD;
+      T #childReqCMD.ZSC_FPWFI;
+
+_childInitFalse_ZSC_FPWFI_OUT:      NOP 0;
+
+
+
+NETWORK
+TITLE = Start the SFC sequence PH_EMC2_CHARGE in Auto for running substate CHARGE
+//------------------------------------------------------------------------//
+// START SFC   START SFC   START SFC   START SFC   START SFC   START SFC  //
+//                                                                        //
+// Start the running substate SFC.                                        //
+//                                                                        //
+// Set the running substate SFC to AUTO mode and start it:                //
+//------------------------------------------------------------------------//
+      A #subsStart.CHARGE;
+      JCN _notSFCStarting_CHARGE;
+      L "dbCONST".SEQ.MODE.AUTO;
+      T #PH_EMC2_CHARGE.smc.MODE;
+      L "dbCONST".SEQ.CMD.START;
+      T #PH_EMC2_CHARGE.smc.SQ_CMD;
+      L 0;
+      T #PH_EMC2_CHARGE.sqSequencer.CMD.Old;
+
+_notSFCStarting_CHARGE:      NOP 0;
+NETWORK
+TITLE = Start the SFC sequence PH_EMC2_FLUSH in Auto for running substate FLUSH
+//------------------------------------------------------------------------//
+// START SFC   START SFC   START SFC   START SFC   START SFC   START SFC  //
+//                                                                        //
+// Start the running substate SFC.                                        //
+//                                                                        //
+// Set the running substate SFC to AUTO mode and start it:                //
+//------------------------------------------------------------------------//
+      A #subsStart.FLUSH;
+      JCN _notSFCStarting_FLUSH;
+      L "dbCONST".SEQ.MODE.AUTO;
+      T #PH_EMC2_FLUSH.smc.MODE;
+      L "dbCONST".SEQ.CMD.START;
+      T #PH_EMC2_FLUSH.smc.SQ_CMD;
+      L 0;
+      T #PH_EMC2_FLUSH.sqSequencer.CMD.Old;
+
+_notSFCStarting_FLUSH:      NOP 0;
+NETWORK
+TITLE = Start the SFC sequence PH_EMC2_ISOLATE in Auto for running substate ISOLATE
+//------------------------------------------------------------------------//
+// START SFC   START SFC   START SFC   START SFC   START SFC   START SFC  //
+//                                                                        //
+// Start the running substate SFC.                                        //
+//                                                                        //
+// Set the running substate SFC to AUTO mode and start it:                //
+//------------------------------------------------------------------------//
+      A #subsStart.ISOLATE;
+      JCN _notSFCStarting_ISOLATE;
+      L "dbCONST".SEQ.MODE.AUTO;
+      T #PH_EMC2_ISOLATE.smc.MODE;
+      L "dbCONST".SEQ.CMD.START;
+      T #PH_EMC2_ISOLATE.smc.SQ_CMD;
+      L 0;
+      T #PH_EMC2_ISOLATE.sqSequencer.CMD.Old;
+
+_notSFCStarting_ISOLATE:      NOP 0;
+NETWORK
+TITLE = Start the SFC sequence PH_EMC2_SETUP in Auto for running substate SETUP
+//------------------------------------------------------------------------//
+// START SFC   START SFC   START SFC   START SFC   START SFC   START SFC  //
+//                                                                        //
+// Start the running substate SFC.                                        //
+//                                                                        //
+// Set the running substate SFC to AUTO mode and start it:                //
+//------------------------------------------------------------------------//
+      A #subsStart.SETUP;
+      JCN _notSFCStarting_SETUP;
+      L "dbCONST".SEQ.MODE.AUTO;
+      T #PH_EMC2_SETUP.smc.MODE;
+      L "dbCONST".SEQ.CMD.START;
+      T #PH_EMC2_SETUP.smc.SQ_CMD;
+      L 0;
+      T #PH_EMC2_SETUP.sqSequencer.CMD.Old;
+
+_notSFCStarting_SETUP:      NOP 0;
+
+NETWORK
+TITLE = Arm startup flowpath devices
+//------------------------------------------------------------------------//
+// Arm any flowpath child devices:                                        //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      JCN _noArm_POS_PSPW;
+      S "idbPOS2".f[#p.child.POS_PSPW].p.write.mc.ARMED;
+_noArm_POS_PSPW:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _noArm_POS_PSWFI;
+      S "idbPOS2".f[#p.child.POS_PSWFI].p.write.mc.ARMED;
+_noArm_POS_PSWFI:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _noArm_POS_PW;
+      S "idbPOS4".f[#p.child.POS_PW].p.write.mc.ARMED;
+_noArm_POS_PW:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _noArm_POS_WFI;
+      S "idbPOS4".f[#p.child.POS_WFI].p.write.mc.ARMED;
+_noArm_POS_WFI:      NOP 0;
+
+
+      SET;
+      JC _switch_end;
+
+
+
+NETWORK
+TITLE = Clear the operator prompt flags
+//------------------------------------------------------------------------//
+// CLEAR OPERATOR PROMPT   CLEAR OPERATOR PROMPT   CLEAR OPERATOR PROMPT  //
+//                                                                        //
+// Clear the SFC prompt and confirm bits and the global shared event bits.//
+// Each HMI requires its own trigger and active flags;                    //
+//------------------------------------------------------------------------//
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOP //
+  // STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOP //
+  //------------------------------------------------------------------------//
+_state_STOPPING:      NOP 0;
+
+
+      R #PH_EMC2_CHARGE._prompt_filling_timeout;
+      R #PH_EMC2_CHARGE._prompt_filling_timeout_confirm_yes;
+      R #PH_EMC2_CHARGE._prompt_filling_timeout_confirm_no;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].confirmYes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].confirmNo;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].cancel1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].cancel2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].cancel3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].cancel4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].cancel5;
+      R #PH_EMC2_CHARGE._prompt_invalid_mass;
+      R #PH_EMC2_CHARGE._prompt_invalid_mass_confirm_yes;
+      R #PH_EMC2_CHARGE._prompt_invalid_mass_confirm_no;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].confirmYes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].confirmNo;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].cancel1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].cancel2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].cancel3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].cancel4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].cancel5;
+      R #PH_EMC2_ISOLATE._prompt_isolate;
+      R #PH_EMC2_ISOLATE._prompt_isolate_confirm_yes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].confirmYes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].confirmNo;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].cancel1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].cancel2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].cancel3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].cancel4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].cancel5;
+      R #PH_EMC2_SETUP._prompt_pw;
+      R #PH_EMC2_SETUP._prompt_pw_confirm_yes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].confirmYes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].confirmNo;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel5;
+      R #PH_EMC2_SETUP._prompt_wfi;
+      R #PH_EMC2_SETUP._prompt_wfi_confirm_yes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].confirmYes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].confirmNo;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].cancel1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].cancel2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].cancel3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].cancel4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].cancel5;
+
+NETWORK
+TITLE = RUNNING RUNNING RUNNING Set child selection values
+//------------------------------------------------------------------------//
+// Set the child selection command:                                       //
+//------------------------------------------------------------------------//
+      SET;
+      JC _switch_end;
+
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING    //
+  // RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING    //
+  //------------------------------------------------------------------------//
+_state_RUNNING:      NOP 0;
+
+NETWORK
+TITLE = Interlock pauses the running SFC
+//------------------------------------------------------------------------//
+// Pause the running SFC sequence if any interlock or failure condition:  //
+//------------------------------------------------------------------------//
+      AN #cmdSTOPPED;
+      AN #p.read.bmc.permitStart;
+      A #subsRunning.CHARGE;
+      JCN _ilSFC_CHARGE;
+      L "dbCONST".SEQ.CMD.PAUSE;
+      T #PH_EMC2_CHARGE.smc.SQ_CMD;
+_ilSFC_CHARGE:      NOP 0;
+
+NETWORK
+TITLE = Interlock pauses the running SFC
+//------------------------------------------------------------------------//
+// Pause the running SFC sequence if any interlock or failure condition:  //
+//------------------------------------------------------------------------//
+      AN #cmdSTOPPED;
+      AN #p.read.bmc.permitStart;
+      A #subsRunning.FLUSH;
+      JCN _ilSFC_FLUSH;
+      L "dbCONST".SEQ.CMD.PAUSE;
+      T #PH_EMC2_FLUSH.smc.SQ_CMD;
+_ilSFC_FLUSH:      NOP 0;
+
+NETWORK
+TITLE = Interlock pauses the running SFC
+//------------------------------------------------------------------------//
+// Pause the running SFC sequence if any interlock or failure condition:  //
+//------------------------------------------------------------------------//
+      AN #cmdSTOPPED;
+      AN #p.read.bmc.permitStart;
+      A #subsRunning.ISOLATE;
+      JCN _ilSFC_ISOLATE;
+      L "dbCONST".SEQ.CMD.PAUSE;
+      T #PH_EMC2_ISOLATE.smc.SQ_CMD;
+_ilSFC_ISOLATE:      NOP 0;
+
+NETWORK
+TITLE = Interlock pauses the running SFC
+//------------------------------------------------------------------------//
+// Pause the running SFC sequence if any interlock or failure condition:  //
+//------------------------------------------------------------------------//
+      AN #cmdSTOPPED;
+      AN #p.read.bmc.permitStart;
+      A #subsRunning.SETUP;
+      JCN _ilSFC_SETUP;
+      L "dbCONST".SEQ.CMD.PAUSE;
+      T #PH_EMC2_SETUP.smc.SQ_CMD;
+_ilSFC_SETUP:      NOP 0;
+
+
+NETWORK
+TITLE = Raise operator prompt if required
+//------------------------------------------------------------------------//
+// OPERATOR PROMPT   OPERATOR PROMPT   OPERATOR PROMPT   OPERATOR PROMPT  //
+//                                                                        //
+// Transfer the SFC eventPrompt bit to the global event datablock:        //
+//------------------------------------------------------------------------//
+      O #subsRunning.CHARGE;
+      O #subsRunning.FLUSH;
+      O #subsRunning.ISOLATE;
+      O #subsRunning.SETUP;
+      JCN _noRunPrompt;
+
+      A #PH_EMC2_CHARGE._prompt_filling_timeout;
+      JCN _not_eventPrompt_1;
+      L #p.write.mc.SERIALNUM;
+      T "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].numSerial;
+      R #PH_EMC2_CHARGE._prompt_filling_timeout;
+      R #PH_EMC2_CHARGE._prompt_filling_timeout_confirm_yes;
+      R #PH_EMC2_CHARGE._prompt_filling_timeout_confirm_no;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].confirmYes;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].trigger1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].trigger2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].trigger3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].trigger4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].trigger5;
+_not_eventPrompt_1:      NOP 0;
+
+      A #PH_EMC2_CHARGE._prompt_invalid_mass;
+      JCN _not_eventPrompt_2;
+      L #p.write.mc.SERIALNUM;
+      T "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].numSerial;
+      R #PH_EMC2_CHARGE._prompt_invalid_mass;
+      R #PH_EMC2_CHARGE._prompt_invalid_mass_confirm_yes;
+      R #PH_EMC2_CHARGE._prompt_invalid_mass_confirm_no;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].confirmYes;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].trigger1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].trigger2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].trigger3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].trigger4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].trigger5;
+_not_eventPrompt_2:      NOP 0;
+
+      A #PH_EMC2_ISOLATE._prompt_isolate;
+      JCN _not_eventPrompt_3;
+      L #p.write.mc.SERIALNUM;
+      T "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].numSerial;
+      R #PH_EMC2_ISOLATE._prompt_isolate;
+      R #PH_EMC2_ISOLATE._prompt_isolate_confirm_yes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].confirmYes;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].trigger1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].trigger2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].trigger3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].trigger4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].trigger5;
+_not_eventPrompt_3:      NOP 0;
+
+      A #PH_EMC2_SETUP._prompt_pw;
+      A(;
+      ON "activeHMI1";
+      ON "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel2;
+      );
+      A(;
+      ON "activeHMI2";
+      ON "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel2;
+      );
+      A(;
+      ON "activeHMI3";
+      ON "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel2;
+      );
+      A(;
+      ON "activeHMI4";
+      ON "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel2;
+      );
+      A(;
+      ON "activeHMI5";
+      ON "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel2;
+      );
+      JCN _not_eventPrompt_4;
+      L #p.write.mc.SERIALNUM;
+      T "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].numSerial;
+      R #PH_EMC2_SETUP._prompt_pw;
+      R #PH_EMC2_SETUP._prompt_pw_confirm_yes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].confirmYes;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].trigger1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].trigger2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].trigger3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].trigger4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].trigger5;
+_not_eventPrompt_4:      NOP 0;
+
+      A #PH_EMC2_SETUP._prompt_wfi;
+      JCN _not_eventPrompt_5;
+      L #p.write.mc.SERIALNUM;
+      T "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].numSerial;
+      R #PH_EMC2_SETUP._prompt_wfi;
+      R #PH_EMC2_SETUP._prompt_wfi_confirm_yes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].confirmYes;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].trigger1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].trigger2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].trigger3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].trigger4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].trigger5;
+_not_eventPrompt_5:      NOP 0;
+
+_noRunPrompt:      NOP 0;
+
+NETWORK
+TITLE = Check if operator confirm bit response
+//------------------------------------------------------------------------//
+// OPERATOR CONFIRM   OPERATOR CONFIRM   OPERATOR CONFIRM   OPERATOR CONF //
+//                                                                        //
+// Check if a confirm response has been received:                         //
+//------------------------------------------------------------------------//
+      O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].confirmYes;
+      O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].confirmNo;
+      JCN _not_eventPrompt_1_response;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].cancel1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].cancel2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].cancel3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].cancel4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].cancel5;
+_not_eventPrompt_1_response:      NOP 0;
+
+      O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].confirmYes;
+      O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].confirmNo;
+      JCN _not_eventPrompt_2_response;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].cancel1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].cancel2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].cancel3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].cancel4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].cancel5;
+_not_eventPrompt_2_response:      NOP 0;
+
+      O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].confirmYes;
+      O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].confirmNo;
+      JCN _not_eventPrompt_3_response;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].cancel1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].cancel2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].cancel3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].cancel4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].cancel5;
+_not_eventPrompt_3_response:      NOP 0;
+
+      O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].confirmYes;
+      O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].confirmNo;
+      JCN _not_eventPrompt_4_response;
+//      S     "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel1
+//      S     "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel2
+//      S     "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel3
+//      S     "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel4
+//      S     "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].cancel5
+_not_eventPrompt_4_response:      NOP 0;
+
+      O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].confirmYes;
+      O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].confirmNo;
+      JCN _not_eventPrompt_5_response;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].cancel1;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].cancel2;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].cancel3;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].cancel4;
+      S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].cancel5;
+_not_eventPrompt_5_response:      NOP 0;
+
+
+NETWORK
+TITLE = Return operator confirm bits if made
+//------------------------------------------------------------------------//
+// Receive the eventPrompt confirm bits from the global event datablock:  //
+//------------------------------------------------------------------------//
+      A "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].confirmYes;
+      JCN _not_eventPrompt_1_confirmYes;
+      S #PH_EMC2_CHARGE._prompt_filling_timeout_confirm_yes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].confirmYes;
+_not_eventPrompt_1_confirmYes:      NOP 0;
+
+      A "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].confirmNo;
+      JCN _not_eventPrompt_1_confirmNo;
+      S #PH_EMC2_CHARGE._prompt_filling_timeout_confirm_no;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_1].confirmNo;
+_not_eventPrompt_1_confirmNo:      NOP 0;
+
+      A "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].confirmYes;
+      JCN _not_eventPrompt_2_confirmYes;
+      S #PH_EMC2_CHARGE._prompt_invalid_mass_confirm_yes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].confirmYes;
+_not_eventPrompt_2_confirmYes:      NOP 0;
+
+      A "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].confirmNo;
+      JCN _not_eventPrompt_2_confirmNo;
+      S #PH_EMC2_CHARGE._prompt_invalid_mass_confirm_no;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_2].confirmNo;
+_not_eventPrompt_2_confirmNo:      NOP 0;
+
+      A "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].confirmYes;
+      JCN _not_eventPrompt_3_confirmYes;
+      S #PH_EMC2_ISOLATE._prompt_isolate_confirm_yes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_3].confirmYes;
+_not_eventPrompt_3_confirmYes:      NOP 0;
+
+
+      A "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].confirmYes;
+      JCN _not_eventPrompt_4_confirmYes;
+      S #PH_EMC2_SETUP._prompt_pw_confirm_yes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_4].confirmYes;
+_not_eventPrompt_4_confirmYes:      NOP 0;
+
+
+      A "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].confirmYes;
+      JCN _not_eventPrompt_5_confirmYes;
+      S #PH_EMC2_SETUP._prompt_wfi_confirm_yes;
+      R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_5].confirmYes;
+_not_eventPrompt_5_confirmYes:      NOP 0;
+
+
+
+NETWORK
+TITLE = Log prompt confirm No if required
+//------------------------------------------------------------------------//
+// LOG PROMPT CONFIRM NO   LOG PROMPT CONFIRM NO   LOG PROMPT CONFIRM NO  //
+//                                                                        //
+// Set the eventPrompt confirm No message alarm bit if active:            //
+//------------------------------------------------------------------------//
+      O #subsRunning.CHARGE;
+      O #subsRunning.FLUSH;
+      O #subsRunning.ISOLATE;
+      O #subsRunning.SETUP;
+      JCN _noRunConfirmNo;
+      A #PH_EMC2_CHARGE._prompt_filling_timeout_confirm_no;
+      = #bEventConfirmNo[0];
+      A #PH_EMC2_CHARGE._prompt_invalid_mass_confirm_no;
+      = #bEventConfirmNo[1];
+
+_noRunConfirmNo:      NOP 0;
+
+NETWORK
+TITLE = Log prompt confirm Yes if required
+//------------------------------------------------------------------------//
+// LOG PROMPT CONFIRM YES   LOG PROMPT CONFIRM YES   LOG PROMPT CONFIRM   //
+//                                                                        //
+// Set the eventPrompt confirm Yes message alarm bit if active:           //
+//------------------------------------------------------------------------//
+      O #subsRunning.CHARGE;
+      O #subsRunning.FLUSH;
+      O #subsRunning.ISOLATE;
+      O #subsRunning.SETUP;
+      JCN _noRunConfirmYes;
+      A #PH_EMC2_CHARGE._prompt_filling_timeout_confirm_yes;
+      = #bEventConfirmYes[0];
+      A #PH_EMC2_CHARGE._prompt_invalid_mass_confirm_yes;
+      = #bEventConfirmYes[1];
+      A #PH_EMC2_ISOLATE._prompt_isolate_confirm_yes;
+      = #bEventConfirmYes[2];
+      A #PH_EMC2_SETUP._prompt_pw_confirm_yes;
+      = #bEventConfirmYes[3];
+      A #PH_EMC2_SETUP._prompt_wfi_confirm_yes;
+      = #bEventConfirmYes[4];
+
+_noRunConfirmYes:      NOP 0;
+
+NETWORK
+TITLE = Log message if required
+//------------------------------------------------------------------------//
+// LOG MSG   LOG MSG   LOG MSG   LOG MSG   LOG MSG   LOG MSG   LOG MSG    //
+//                                                                        //
+// Set the eventLogMsg message alarm bit if active:                       //
+//------------------------------------------------------------------------//
+      O #subsRunning.CHARGE;
+      O #subsRunning.FLUSH;
+      O #subsRunning.ISOLATE;
+      O #subsRunning.SETUP;
+      JCN _noRunLogMsg;
+      A #PH_EMC2_CHARGE._log_msg_charge_begin ;// Bit 0
+      = #bEventLogMsg[0];
+      R #PH_EMC2_CHARGE._log_msg_charge_begin;
+
+      A #PH_EMC2_CHARGE._log_msg_charge_end ;// Bit 1
+      = #bEventLogMsg[1];
+      R #PH_EMC2_CHARGE._log_msg_charge_end;
+
+      A #PH_EMC2_SETUP._log_msg_confirm_connect ;// Bit 2
+      = #bEventLogMsg[2];
+      R #PH_EMC2_SETUP._log_msg_confirm_connect;
+
+      A #PH_EMC2_CHARGE._log_msg_filling_timeout ;// Bit 3
+      = #bEventLogMsg[3];
+      R #PH_EMC2_CHARGE._log_msg_filling_timeout;
+
+      A #PH_EMC2_CHARGE._log_msg_filling_timeout_abort ;// Bit 4
+      = #bEventLogMsg[4];
+      R #PH_EMC2_CHARGE._log_msg_filling_timeout_abort;
+
+      A #PH_EMC2_CHARGE._log_msg_filling_timeout_repeat ;// Bit 5
+      = #bEventLogMsg[5];
+      R #PH_EMC2_CHARGE._log_msg_filling_timeout_repeat;
+
+      A #PH_EMC2_FLUSH._log_msg_flush_begin ;// Bit 6
+      = #bEventLogMsg[6];
+      R #PH_EMC2_FLUSH._log_msg_flush_begin;
+
+      A #PH_EMC2_FLUSH._log_msg_flush_end ;// Bit 7
+      = #bEventLogMsg[7];
+      R #PH_EMC2_FLUSH._log_msg_flush_end;
+
+      A #PH_EMC2_CHARGE._log_msg_invalid_mass_abort ;// Bit 8
+      = #bEventLogMsg[8];
+      R #PH_EMC2_CHARGE._log_msg_invalid_mass_abort;
+
+      A #PH_EMC2_CHARGE._log_msg_invalid_mass_repeat ;// Bit 9
+      = #bEventLogMsg[9];
+      R #PH_EMC2_CHARGE._log_msg_invalid_mass_repeat;
+
+      A #PH_EMC2_ISOLATE._log_msg_isolate_begin ;// Bit 10
+      = #bEventLogMsg[10];
+      R #PH_EMC2_ISOLATE._log_msg_isolate_begin;
+
+      A #PH_EMC2_ISOLATE._log_msg_isolate_confirm ;// Bit 11
+      = #bEventLogMsg[11];
+      R #PH_EMC2_ISOLATE._log_msg_isolate_confirm;
+
+      A #PH_EMC2_ISOLATE._log_msg_isolate_end ;// Bit 12
+      = #bEventLogMsg[12];
+      R #PH_EMC2_ISOLATE._log_msg_isolate_end;
+
+      A #PH_EMC2_SETUP._log_msg_setup_begin ;// Bit 13
+      = #bEventLogMsg[13];
+      R #PH_EMC2_SETUP._log_msg_setup_begin;
+
+      A #PH_EMC2_SETUP._log_msg_setup_end ;// Bit 14
+      = #bEventLogMsg[14];
+      R #PH_EMC2_SETUP._log_msg_setup_end;
+
+
+_noRunLogMsg:      NOP 0;
+
+NETWORK
+TITLE = Real data
+//------------------------------------------------------------------------//
+// REAL DATA   REAL DATA   REAL DATA   REAL DATA   REAL DATA   REAL DATA  //
+//                                                                        //
+// Transfer the SFC eventLogReal real data to the global event datablock: //
+//------------------------------------------------------------------------//
+      O #subsRunning.CHARGE;
+      O #subsRunning.FLUSH;
+      O #subsRunning.ISOLATE;
+      O #subsRunning.SETUP;
+      JCN _noRunLogReal;
+      L #PH_EMC2_CHARGE._real_final_mass;
+      T "dbEVENT".eventDataReal[0];
+      L #PH_EMC2_CHARGE._real_actual_mass;
+      T "dbEVENT".eventDataReal[1];
+      L #PH_EMC2_CHARGE._real_timeout_mass;
+      T "dbEVENT".eventDataReal[2];
+      L #PH_EMC2_CHARGE._real_initial_mass;
+      T "dbEVENT".eventDataReal[3];
+      L #PH_EMC2_CHARGE._real_invalid_mass;
+      T "dbEVENT".eventDataReal[4];
+_noRunLogReal:      NOP 0;
+
+NETWORK
+TITLE = Log real data if required
+//------------------------------------------------------------------------//
+// LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG  //
+//                                                                        //
+// Set the eventLogReal data alarm bit if active:                         //
+//------------------------------------------------------------------------//
+      O #subsRunning.CHARGE;
+      O #subsRunning.FLUSH;
+      O #subsRunning.ISOLATE;
+      O #subsRunning.SETUP;
+      JCN _noRunLogRealData;
+      A #PH_EMC2_CHARGE._log_real_actual_mass ;// Bit 0
+      = #bEventLogReal[0];
+      R #PH_EMC2_CHARGE._log_real_actual_mass;
+
+      A #PH_EMC2_CHARGE._log_real_final_mass ;// Bit 1
+      = #bEventLogReal[1];
+      R #PH_EMC2_CHARGE._log_real_final_mass;
+
+      A #PH_EMC2_CHARGE._log_real_initial_mass ;// Bit 2
+      = #bEventLogReal[2];
+      R #PH_EMC2_CHARGE._log_real_initial_mass;
+
+      A #PH_EMC2_CHARGE._log_real_invalid_mass ;// Bit 3
+      = #bEventLogReal[3];
+      R #PH_EMC2_CHARGE._log_real_invalid_mass;
+
+      A #PH_EMC2_CHARGE._log_real_timeout_mass ;// Bit 4
+      = #bEventLogReal[4];
+      R #PH_EMC2_CHARGE._log_real_timeout_mass;
+
+
+_noRunLogRealData:      NOP 0;
+
+
+
+NETWORK
+TITLE = Flag SFC finished if successfully completed execution
+//------------------------------------------------------------------------//
+// SFC COMPLETE   SFC COMPLETE   SFC COMPLETE   SFC COMPLETE   SFC COMPL  //
+//                                                                        //
+// Flag SFC completed if the sequence has finished executing:             //
+//------------------------------------------------------------------------//
+      O(;
+      A #subsRunning.CHARGE;
+      A(;
+      L #PH_EMC2_CHARGE.smc.SQ_STATE;
+      L "dbCONST".SEQ.STATE.COMPLETED;
+      ==I;
+      );
+      );
+      O(;
+      A #subsRunning.FLUSH;
+      A(;
+      L #PH_EMC2_FLUSH.smc.SQ_STATE;
+      L "dbCONST".SEQ.STATE.COMPLETED;
+      ==I;
+      );
+      );
+      O(;
+      A #subsRunning.ISOLATE;
+      A(;
+      L #PH_EMC2_ISOLATE.smc.SQ_STATE;
+      L "dbCONST".SEQ.STATE.COMPLETED;
+      ==I;
+      );
+      );
+      O(;
+      A #subsRunning.SETUP;
+      A(;
+      L #PH_EMC2_SETUP.smc.SQ_STATE;
+      L "dbCONST".SEQ.STATE.COMPLETED;
+      ==I;
+      );
+      );
+      JCN _notFinishedSuccessful;
+      S #flags.sfcCompleted;
+_notFinishedSuccessful:      NOP 0;
+
+NETWORK
+TITLE = Flag SFC aborted if unsuccessfully completed execution
+//------------------------------------------------------------------------//
+// Flag SFC completed if the sequence has been aborted:                   //
+//------------------------------------------------------------------------//
+      O(;
+      A #subsRunning.CHARGE;
+      A(;
+      O(;
+      L #PH_EMC2_CHARGE.smc.SQ_STATE;
+      L "dbCONST".SEQ.STATE.ABORTED;
+      ==I;
+      );
+      O(;
+      L "dbCONST".SEQ.STATE.OFF_IDLE;
+      L #PH_EMC2_CHARGE.smc.SQ_STATE;
+      ==I;
+      );
+      );
+      );
+      O(;
+      A #subsRunning.FLUSH;
+      A(;
+      O(;
+      L #PH_EMC2_FLUSH.smc.SQ_STATE;
+      L "dbCONST".SEQ.STATE.ABORTED;
+      ==I;
+      );
+      O(;
+      L "dbCONST".SEQ.STATE.OFF_IDLE;
+      L #PH_EMC2_FLUSH.smc.SQ_STATE;
+      ==I;
+      );
+      );
+      );
+      O(;
+      A #subsRunning.ISOLATE;
+      A(;
+      O(;
+      L #PH_EMC2_ISOLATE.smc.SQ_STATE;
+      L "dbCONST".SEQ.STATE.ABORTED;
+      ==I;
+      );
+      O(;
+      L "dbCONST".SEQ.STATE.OFF_IDLE;
+      L #PH_EMC2_ISOLATE.smc.SQ_STATE;
+      ==I;
+      );
+      );
+      );
+      O(;
+      A #subsRunning.SETUP;
+      A(;
+      O(;
+      L #PH_EMC2_SETUP.smc.SQ_STATE;
+      L "dbCONST".SEQ.STATE.ABORTED;
+      ==I;
+      );
+      O(;
+      L "dbCONST".SEQ.STATE.OFF_IDLE;
+      L #PH_EMC2_SETUP.smc.SQ_STATE;
+      ==I;
+      );
+      );
+      );
+      JCN _notFinishedUnsuccessful;
+      S #flags.sfcAborted;
+      S #flags.substateCompleted;
+      L "dbCONST".BLK.EMC2.STATE.ABORTED;
+      T #p.read.mc.STATE;
+_notFinishedUnsuccessful:      NOP 0;
+
+NETWORK
+TITLE = Check if substate completed
+//------------------------------------------------------------------------//
+// Check if substate has been completed if SFC finished if there is one:  //
+//------------------------------------------------------------------------//
+      O(;
+      A #subsRunning.CHARGE;
+      A(;
+      O(;
+      A #subsHasSFC.CHARGE;
+      A #flags.sfcCompleted;
+      );
+      ON #subsHasSFC.CHARGE;
+      );
+      );
+      O(;
+      A #subsRunning.FLUSH;
+      A(;
+      O(;
+      A #subsHasSFC.FLUSH;
+      A #flags.sfcCompleted;
+      );
+      ON #subsHasSFC.FLUSH;
+      );
+      );
+      O(;
+      A #subsRunning.ISOLATE;
+      A(;
+      O(;
+      A #subsHasSFC.ISOLATE;
+      A #flags.sfcCompleted;
+      );
+      ON #subsHasSFC.ISOLATE;
+      );
+      );
+      O(;
+      A #subsRunning.SETUP;
+      A(;
+      O(;
+      A #subsHasSFC.SETUP;
+      A #flags.sfcCompleted;
+      );
+      ON #subsHasSFC.SETUP;
+      );
+      );
+      JCN _noSubstateComplete;
+      S #flags.substateCompleted;
+_noSubstateComplete:      NOP 0;
+
+      SET;
+      JC _switch_end;
+
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // COMPLETED   COMPLETED   COMPLETED   COMPLETED   COMPLETED   COMPLETED  //
+  // COMPLETED   COMPLETED   COMPLETED   COMPLETED   COMPLETED   COMPLETED  //
+  //------------------------------------------------------------------------//
+_state_COMPLETED:      NOP 0;
+
+NETWORK
+TITLE = COMPLETED COMPLETED COMPLETED Running substate completed
+//------------------------------------------------------------------------//
+// BLOCK COMPLETE   BLOCK COMPLETE   BLOCK COMPLETE   BLOCK COMPLETE   BL //
+//                                                                        //
+// Set the block state to COMPLETED if no SFC or SFC completed:           //
+//------------------------------------------------------------------------//
+      AN #flags.childMismatch;
+      AN #flags.sfcAborted;
+      JCN _blkComplete;
+      L "dbCONST".BLK.EMC2.STATE.COMPLETED;
+      T #p.read.mc.STATE;
+      L #p.write.mc.SUBS;
+      T #p.read.bmc.lastSUBS;
+
+_blkComplete:      NOP 0;
+
+NETWORK
+TITLE = Arm completed flowpath devices
+//------------------------------------------------------------------------//
+// Arm any flowpath child devices:                                        //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      JCN _noArm_ZSC_FPINLET;
+      S "idbZSC2".f[#p.child.ZSC_FPINLET].p.write.mc.ARMED;
+_noArm_ZSC_FPINLET:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _noArm_ZSC_FPPW;
+      S "idbZSC2".f[#p.child.ZSC_FPPW].p.write.mc.ARMED;
+_noArm_ZSC_FPPW:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _noArm_ZSC_FPWFI;
+      S "idbZSC2".f[#p.child.ZSC_FPWFI].p.write.mc.ARMED;
+_noArm_ZSC_FPWFI:      NOP 0;
+
+
+
+  //------------------------------------------------------------------------//
+  // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+  // END   END   END   END   END   END  END   END   END   END   END   END   //
+  // END   END   END   END   END   END  END   END   END   END   END   END   //
+  //------------------------------------------------------------------------//
+_switch_end:      NOP 0;
+
+NETWORK
+TITLE = SWITCH END SWITCH END ERROR if child mismatch
+//------------------------------------------------------------------------//
+// BLOCK ERROR   BLOCK ERROR   BLOCK ERROR   BLOCK ERROR   BLOCK ERROR    //
+//                                                                        //
+// Set the block state to ERROR if child mismatch and not STOPPED:        //
+//------------------------------------------------------------------------//
+      AN #cmdSTOPPED;
+      A(;
+      ON #p.read.bmc.permitStart;
+      O #flags.sfcAborted;
+      );
+      A(;
+      L "dbCONST".BLK.EMC2.STATE.ERROR;
+      L #p.read.mc.STATE;
+      <>I;
+      );
+      JCN _blkError;
+      L #p.read.mc.STATE;
+      T #stateBeforeError;
+      L "dbCONST".BLK.EMC2.STATE.ERROR;
+      T #p.read.mc.STATE;
+_blkError:      NOP 0;
+
+NETWORK
+TITLE = RESUME if children now okay
+//------------------------------------------------------------------------//
+// BLOCK RESUME   BLOCK RESUME   BLOCK RESUME   BLOCK RESUME   BLOCK RES  //
+//                                                                        //
+// Resume the running SFC sequence if no interlock or failure condition:  //
+//------------------------------------------------------------------------//
+      AN #cmdSTOPPED;
+      A #p.read.bmc.permitStart;
+      AN #flags.sfcAborted;
+      A(;
+      L "dbCONST".BLK.EMC2.STATE.ERROR;
+      L #p.read.mc.STATE;
+      ==I;
+      );
+      JCN _noResume;
+      L #stateBeforeError;
+      T #p.read.mc.STATE;
+
+      A #subsRunning.CHARGE;
+      JCN _resumeSFC_1;
+      L "dbCONST".SEQ.CMD.RESUME;
+      T #PH_EMC2_CHARGE.smc.SQ_CMD;
+_resumeSFC_1:      NOP 0;
+
+      A #subsRunning.FLUSH;
+      JCN _resumeSFC_2;
+      L "dbCONST".SEQ.CMD.RESUME;
+      T #PH_EMC2_FLUSH.smc.SQ_CMD;
+_resumeSFC_2:      NOP 0;
+
+      A #subsRunning.ISOLATE;
+      JCN _resumeSFC_3;
+      L "dbCONST".SEQ.CMD.RESUME;
+      T #PH_EMC2_ISOLATE.smc.SQ_CMD;
+_resumeSFC_3:      NOP 0;
+
+      A #subsRunning.SETUP;
+      JCN _resumeSFC_4;
+      L "dbCONST".SEQ.CMD.RESUME;
+      T #PH_EMC2_SETUP.smc.SQ_CMD;
+_resumeSFC_4:      NOP 0;
+
+
+_noResume:      NOP 0;
+
+NETWORK
+TITLE = Upload child states
+//------------------------------------------------------------------------//
+// Upload the child state:                                                //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      JCN _pSTATE_POS_PSPW;
+      L "idbPOS2".f[#p.child.POS_PSPW].p.read.mc.STATE;
+      T #p.read.POS_PSPW_STATE;
+_pSTATE_POS_PSPW:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_POS_PSWFI;
+      L "idbPOS2".f[#p.child.POS_PSWFI].p.read.mc.STATE;
+      T #p.read.POS_PSWFI_STATE;
+_pSTATE_POS_PSWFI:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_POS_PW;
+      L "idbPOS4".f[#p.child.POS_PW].p.read.mc.STATE;
+      T #p.read.POS_PW_STATE;
+_pSTATE_POS_PW:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_POS_WFI;
+      L "idbPOS4".f[#p.child.POS_WFI].p.read.mc.STATE;
+      T #p.read.POS_WFI_STATE;
+_pSTATE_POS_WFI:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_ZSC_FPINLET;
+      L "idbZSC2".f[#p.child.ZSC_FPINLET].p.read.mc.STATE;
+      T #p.read.ZSC_FPINLET_STATE;
+_pSTATE_ZSC_FPINLET:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_ZSC_FPPW;
+      L "idbZSC2".f[#p.child.ZSC_FPPW].p.read.mc.STATE;
+      T #p.read.ZSC_FPPW_STATE;
+_pSTATE_ZSC_FPPW:      NOP 0;
+
+      A "alwaysHigh";
+      JCN _pSTATE_ZSC_FPWFI;
+      L "idbZSC2".f[#p.child.ZSC_FPWFI].p.read.mc.STATE;
+      T #p.read.ZSC_FPWFI_STATE;
+_pSTATE_ZSC_FPWFI:      NOP 0;
+
+
+NETWORK
+TITLE = Set child substate, command and parameters if no mismatch
+//------------------------------------------------------------------------//
+// Set the child data if no child mismatch:                               //
+//------------------------------------------------------------------------//
+      AN #timeCheckChildStateExpired;
+      A(;
+      O #p.read.bmc.stateRUNNING;
+      O(;
+      L "dbCONST".BLK.EMC2.STATE.COMPLETED;
+      L #p.read.mc.STATE;
+      ==I;
+      );
+      );
+      JCN _noCommandOnChildMismatch;
+
+  //------------------------------------------------------------------------//
+  // Set the child substate if no child mismatch:                           //
+  //------------------------------------------------------------------------//
+
+  //------------------------------------------------------------------------//
+  // Set the child command if no child mismatch:                            //
+  //------------------------------------------------------------------------//
+      A "idbPOS2".f[#p.child.POS_PSPW].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_POS_PSPW;
+      L #p.write.POS_PSPW_CMD;
+      T "idbPOS2".f[#p.child.POS_PSPW].p.write.mc.CMD;
+      T #childReqCMD.POS_PSPW;
+_pCMD_POS_PSPW:      NOP 0;
+
+      A "idbPOS2".f[#p.child.POS_PSWFI].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_POS_PSWFI;
+      L #p.write.POS_PSWFI_CMD;
+      T "idbPOS2".f[#p.child.POS_PSWFI].p.write.mc.CMD;
+      T #childReqCMD.POS_PSWFI;
+_pCMD_POS_PSWFI:      NOP 0;
+
+      A "idbPOS4".f[#p.child.POS_PW].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_POS_PW;
+      L #p.write.POS_PW_CMD;
+      T "idbPOS4".f[#p.child.POS_PW].p.write.mc.CMD;
+      T #childReqCMD.POS_PW;
+_pCMD_POS_PW:      NOP 0;
+
+      A "idbPOS4".f[#p.child.POS_WFI].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_POS_WFI;
+      L #p.write.POS_WFI_CMD;
+      T "idbPOS4".f[#p.child.POS_WFI].p.write.mc.CMD;
+      T #childReqCMD.POS_WFI;
+_pCMD_POS_WFI:      NOP 0;
+
+      A "idbZSC2".f[#p.child.ZSC_FPINLET].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_ZSC_FPINLET;
+      L #p.write.ZSC_FPINLET_CMD;
+      T "idbZSC2".f[#p.child.ZSC_FPINLET].p.write.mc.CMD;
+      T #childReqCMD.ZSC_FPINLET;
+_pCMD_ZSC_FPINLET:      NOP 0;
+
+      A "idbZSC2".f[#p.child.ZSC_FPPW].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_ZSC_FPPW;
+      L #p.write.ZSC_FPPW_CMD;
+      T "idbZSC2".f[#p.child.ZSC_FPPW].p.write.mc.CMD;
+      T #childReqCMD.ZSC_FPPW;
+_pCMD_ZSC_FPPW:      NOP 0;
+
+      A "idbZSC2".f[#p.child.ZSC_FPWFI].p.read.mc.modeAUTO;
+      A "alwaysHigh";
+      JCN _pCMD_ZSC_FPWFI;
+      L #p.write.ZSC_FPWFI_CMD;
+      T "idbZSC2".f[#p.child.ZSC_FPWFI].p.write.mc.CMD;
+      T #childReqCMD.ZSC_FPWFI;
+_pCMD_ZSC_FPWFI:      NOP 0;
+
+
+  //------------------------------------------------------------------------//
+  // Write the non-boolean child parameters if no child mismatch:           //
+  //------------------------------------------------------------------------//
+
+  //------------------------------------------------------------------------//
+  // Write the boolean child parameters if no child mismatch:               //
+  //------------------------------------------------------------------------//
+
+_noCommandOnChildMismatch:      NOP 0;
+
+NETWORK
+TITLE = CALL SFC PH_EMC2_CHARGE if CHARGE running
+//------------------------------------------------------------------------//
+// SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC  //
+//                                                                        //
+// Call the SFC function if this is the running substate. This has to be  //
+// called even if the block is not running so the SFC can process all     //
+// commmands:                                                             //
+//------------------------------------------------------------------------//
+      A #subsRunning.CHARGE;
+      JCN _notSFC_1_CHARGE;
+      CALL #PH_EMC2_CHARGE
+      (  _pos_wfi_state              := "idbPOS4".f[#p.child.POS_WFI].p.read.mc.STATE , 
+         _pos_pw_state               := "idbPOS4".f[#p.child.POS_PW].p.read.mc.STATE , 
+         _pos_pspw_state             := "idbPOS2".f[#p.child.POS_PSPW].p.read.mc.STATE , 
+         _pos_pswfi_state            := "idbPOS2".f[#p.child.POS_PSWFI].p.read.mc.STATE , 
+         _timeout                    := #p.write.TIMEOUT , 
+         _mass_charge                := #p.write.MASS_CHARGE , 
+         _medium_liquid              := #p.write.MEDIUM_LIQUID , 
+         _pos_pswfi_cmd              := #p.write.POS_PSWFI_CMD , 
+         _pos_pspw_cmd               := #p.write.POS_PSPW_CMD , 
+         _pos_wfi_cmd                := #p.write.POS_WFI_CMD , 
+         _pos_pw_cmd                 := #p.write.POS_PW_CMD , 
+         _mass_final                 := #p.read.MASS_FINAL , 
+         _mi_vessel_pv               := "idbMI1".f[#p.link.MI_VESSEL].p.read.PV , 
+         _mass_actual                := #p.read.MASS_ACTUAL , 
+         _mass_initial               := #p.read.MASS_INITIAL , 
+         dummy                       := #dummy
+      );
+_notSFC_1_CHARGE:      NOP 0;
+NETWORK
+TITLE = CALL SFC PH_EMC2_FLUSH if FLUSH running
+//------------------------------------------------------------------------//
+// SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC  //
+//                                                                        //
+// Call the SFC function if this is the running substate. This has to be  //
+// called even if the block is not running so the SFC can process all     //
+// commmands:                                                             //
+//------------------------------------------------------------------------//
+      A #subsRunning.FLUSH;
+      JCN _notSFC_1_FLUSH;
+      CALL #PH_EMC2_FLUSH
+      (  _runtime                    := #p.write.RUNTIME , 
+         _pos_pswfi_cmd              := #p.write.POS_PSWFI_CMD , 
+         _pos_pspw_cmd               := #p.write.POS_PSPW_CMD , 
+         _pos_pw_cmd                 := #p.write.POS_PW_CMD , 
+         _pos_wfi_cmd                := #p.write.POS_WFI_CMD , 
+         dummy                       := #dummy
+      );
+_notSFC_1_FLUSH:      NOP 0;
+NETWORK
+TITLE = CALL SFC PH_EMC2_ISOLATE if ISOLATE running
+//------------------------------------------------------------------------//
+// SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC  //
+//                                                                        //
+// Call the SFC function if this is the running substate. This has to be  //
+// called even if the block is not running so the SFC can process all     //
+// commmands:                                                             //
+//------------------------------------------------------------------------//
+      A #subsRunning.ISOLATE;
+      JCN _notSFC_1_ISOLATE;
+      CALL #PH_EMC2_ISOLATE
+      (  _zsc_fpwfi_state            := "idbZSC2".f[#p.child.ZSC_FPWFI].p.read.mc.STATE , 
+         _zsc_fppw_state             := "idbZSC2".f[#p.child.ZSC_FPPW].p.read.mc.STATE , 
+         _zsc_fpwfi_cmd              := #p.write.ZSC_FPWFI_CMD , 
+         _zsc_fppw_cmd               := #p.write.ZSC_FPPW_CMD , 
+         dummy                       := #dummy
+      );
+_notSFC_1_ISOLATE:      NOP 0;
+NETWORK
+TITLE = CALL SFC PH_EMC2_SETUP if SETUP running
+//------------------------------------------------------------------------//
+// SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC CALL   SFC  //
+//                                                                        //
+// Call the SFC function if this is the running substate. This has to be  //
+// called even if the block is not running so the SFC can process all     //
+// commmands:                                                             //
+//------------------------------------------------------------------------//
+      A #subsRunning.SETUP;
+      JCN _notSFC_1_SETUP;
+      CALL #PH_EMC2_SETUP
+      (  _zsc_fpwfi_state            := "idbZSC2".f[#p.child.ZSC_FPWFI].p.read.mc.STATE , 
+         _zsc_fppw_state             := "idbZSC2".f[#p.child.ZSC_FPPW].p.read.mc.STATE , 
+         _medium_liquid              := #p.write.MEDIUM_LIQUID , 
+         dummy                       := #dummy
+      );
+_notSFC_1_SETUP:      NOP 0;
+
+NETWORK
+TITLE = Check if any Child state does not match the command
+//------------------------------------------------------------------------//
+// CHILD FLOWPATH STATE MISMATCH   CHILD FLOWPATH STATE MISMATCH   CHILD  //
+//                                                                        //
+// Check if any child flowpath device state does not match the command    //
+// from this parent block if the child state grace period timer has       //
+// expired. Stop checking if the first child state mismatch found:        //
+//------------------------------------------------------------------------//
+      A(;
+      O(;
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_PSPW].p.write.mc.ARMED;
+      A "idbPOS2".f[#p.child.POS_PSPW].p.read.mc.FLOWPATH;
+      A(;
+      L "idbPOS2".f[#p.child.POS_PSPW].p.read.mc.STATE;
+      L #childReqCMD.POS_PSPW;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbPOS2".f[#p.child.POS_PSWFI].p.write.mc.ARMED;
+      A "idbPOS2".f[#p.child.POS_PSWFI].p.read.mc.FLOWPATH;
+      A(;
+      L "idbPOS2".f[#p.child.POS_PSWFI].p.read.mc.STATE;
+      L #childReqCMD.POS_PSWFI;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbPOS4".f[#p.child.POS_PW].p.write.mc.ARMED;
+      A "idbPOS4".f[#p.child.POS_PW].p.read.mc.FLOWPATH;
+      A(;
+      L "idbPOS4".f[#p.child.POS_PW].p.read.mc.STATE;
+      L #childReqCMD.POS_PW;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbPOS4".f[#p.child.POS_WFI].p.write.mc.ARMED;
+      A "idbPOS4".f[#p.child.POS_WFI].p.read.mc.FLOWPATH;
+      A(;
+      L "idbPOS4".f[#p.child.POS_WFI].p.read.mc.STATE;
+      L #childReqCMD.POS_WFI;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbZSC2".f[#p.child.ZSC_FPINLET].p.write.mc.ARMED;
+      A "idbZSC2".f[#p.child.ZSC_FPINLET].p.read.mc.FLOWPATH;
+      A(;
+      L "idbZSC2".f[#p.child.ZSC_FPINLET].p.read.mc.STATE;
+      L #childReqCMD.ZSC_FPINLET;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbZSC2".f[#p.child.ZSC_FPPW].p.write.mc.ARMED;
+      A "idbZSC2".f[#p.child.ZSC_FPPW].p.read.mc.FLOWPATH;
+      A(;
+      L "idbZSC2".f[#p.child.ZSC_FPPW].p.read.mc.STATE;
+      L #childReqCMD.ZSC_FPPW;
+      <>I;
+      );
+      );
+      O(;
+      A "alwaysHigh";
+      A "idbZSC2".f[#p.child.ZSC_FPWFI].p.write.mc.ARMED;
+      A "idbZSC2".f[#p.child.ZSC_FPWFI].p.read.mc.FLOWPATH;
+      A(;
+      L "idbZSC2".f[#p.child.ZSC_FPWFI].p.read.mc.STATE;
+      L #childReqCMD.ZSC_FPWFI;
+      <>I;
+      );
+      );
+      );
+      JCN _noMismatch;
+
+      S #flags.childMismatch;
+      JC _noResetMismatch;
+
+_noMismatch:      NOP 0;
+      R #flags.childMismatch;
+      R #p.read.mc.INTIL;
+
+_noResetMismatch:      NOP 0;
+
+NETWORK
+TITLE = If child command changed, start timer to wait for child state
+//------------------------------------------------------------------------//
+// CHILD STATE TIMER   CHILD STATE TIMER   CHILD STATE TIMER   CHILD STAT //
+//                                                                        //
+// If any child command changed then start a timer to provide a grace     //
+// period to allow the child device state to match the command (e.g. to   //
+// allow a valve to move from closed to opened position).                 //
+// Start the child state check timer if a command changed:                //
+//------------------------------------------------------------------------//
+      CALL #timeCheckChildState
+      {time_type := 'Time'}
+      (  IN                          := #flags.childMismatch , 
+         PT                          := #p.read.bmc.transTime , 
+         Q                           := #timeCheckChildStateExpired , 
+         ET                          := #timeCheckChildStateElapsed
+      );
+      NOP 0;
+
+NETWORK
+TITLE = Block errors
+//------------------------------------------------------------------------//
+// Set the block start perimt error status if active:                     //
+//------------------------------------------------------------------------//
+      AN #p.read.bmc.permitStart;
+      = #p.read.err.permitStart;
+
+  //------------------------------------------------------------------------//
+  // Set the child error status if active:                                  //
+  //------------------------------------------------------------------------//
+      A #flags.childInterlock;
+      = #p.read.err.childInterlock;
+
+  //------------------------------------------------------------------------//
+  // Set the child unavailable error status if active:                      //
+  //------------------------------------------------------------------------//
+      A #flags.childUnavailable;
+      = #p.read.err.childUnavailable;
+
+  //------------------------------------------------------------------------//
+  // Set the child state mismatch error status if active:                   //
+  //------------------------------------------------------------------------//
+      A #timeCheckChildStateExpired;
+      = #p.read.err.childMismatch;
+      JCN _noInternalIL;
+      S #p.read.mc.INTIL;
+_noInternalIL:      NOP 0;
+
+  //------------------------------------------------------------------------//
+  // Set the block error flag if anything gone wrong:                       //
+  //------------------------------------------------------------------------//
+      O #p.read.err.childInterlock;
+      O #p.read.err.childMismatch;
+      O #p.read.err.childSafeState;
+      O #p.read.err.childUnavailable;
+      O #p.read.err.permitStart;
+      = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Pack the general block alarm bits
+//------------------------------------------------------------------------//
+// Pack the alarm bits into an integer for the HMI to read:               //
+// Alarms are arranged in the following Little Endian order...            //
+// Word   1                                0                              //
+// Bit    0   1   2   3   4   5   6   7    8   9  10  11  12  13  14  15  //
+// Order  9  10  11  12  13  14  15  16    1   2   3   4   5   6   7   8  //
+//------------------------------------------------------------------------//
+//    A #p.read.err.childInterlock;
+//    = #b[8];
+      A #p.read.err.childMismatch;
+      = #b[9];
+//    A #p.read.err.childSafeState;
+//    = #b[10];
+      A #p.read.err.childUnavailable;
+      = #b[11];
+      A #p.read.err.permitStart;
+      = #b[12];
+      L #w;
+      T #p.read.mc.ALARM;
+
+NETWORK
+TITLE = Pack the prompt event confirm No message event alarm bits
+//------------------------------------------------------------------------//
+// Pack the eventPrompt confirm No alarm bits into an integer for the     //
+// HMI to read:                                                           //
+//------------------------------------------------------------------------//
+      L #wEventConfirmNo[0];
+      T #p.read.eventConfirmNo_0;
+
+NETWORK
+TITLE = Pack the prompt event confirm Yes message event alarm bits
+//------------------------------------------------------------------------//
+// Pack the eventPrompt confirm Yes alarm bits into an integer for the    //
+// HMI to read:                                                           //
+//------------------------------------------------------------------------//
+      L #wEventConfirmYes[0];
+      T #p.read.eventConfirmYes_0;
+
+NETWORK
+TITLE = Pack the log message event alarm bits
+//------------------------------------------------------------------------//
+// Pack the eventLogMsg alarm bits into an integer for the HMI to read:   //
+//------------------------------------------------------------------------//
+      L #wEventLogMsg[0];
+      T #p.read.eventLogMsg_0;
+
+NETWORK
+TITLE = Pack the log real data event alarm bits
+//------------------------------------------------------------------------//
+// Pack the eventLogReal alarm bits into an integer for the HMI to read:  //
+//------------------------------------------------------------------------//
+      L #wEventLogReal[0];
+      T #p.read.eventLogReal_0;
+
+
+END_FUNCTION_BLOCK
+

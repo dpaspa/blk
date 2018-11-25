@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 10/11/2018 5:49:36 PM by David Paspa
+generated on 25/11/2018 11:56:14 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -56,7 +56,7 @@ PARAMETER::4
 --------------------------------------------------
 Name:- r_time_measure_settling
 Type:- TIME
-Description:- Settling time in minutes for measure and tare
+Description:- MX MAKE Vessel settling time for mass measure and tare
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -129,7 +129,7 @@ PARAMETER::13
 --------------------------------------------------
 Name:- r_pres_lpca_make
 Type:- REAL
-Description:- Air pressure during make operation
+Description:- MX MAKE Air pressure during make operation
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -271,29 +271,13 @@ ParameterInOut:- IN_OUT
 --------------------------------------------------
 PARAMETER::31
 --------------------------------------------------
-Name:- fp_time_make_agit_h
-Type:- INT
-Description:- Agitator runtime (Hours) from MAKE faceplate
+Name:- fp_time_make_agit
+Type:- TIME
+Description:- Agitator runtime from MAKE faceplate
 ParameterInOut:- IN
 
 --------------------------------------------------
 PARAMETER::32
---------------------------------------------------
-Name:- fp_time_make_agit_m
-Type:- INT
-Description:- Agitator runtime (Minutes) from MAKE faceplate
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::33
---------------------------------------------------
-Name:- fp_time_make_agit_s
-Type:- INT
-Description:- Agitator runtime (Seconds) from MAKE faceplate
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::34
 --------------------------------------------------
 Name:- prompt_pmo_confirm_yes
 Type:- BOOL
@@ -301,7 +285,7 @@ Description:- UO_MX_MAKE Operator to select Manufacturing Operation confirmed ye
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::33
 --------------------------------------------------
 Name:- fp_speed_setpoint
 Type:- REAL
@@ -309,7 +293,7 @@ Description:- Agitator speed setpoint from MAKE faceplate
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::34
 --------------------------------------------------
 Name:- fp_charge_wfi_make
 Type:- REAL
@@ -317,7 +301,7 @@ Description:- Value of Mass to be charged from MAKE faceplate
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::35
 --------------------------------------------------
 Name:- cmd_charge
 Type:- BOOL
@@ -325,7 +309,7 @@ Description:- Charge additional WFI mass
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::36
 --------------------------------------------------
 Name:- cmd_mix
 Type:- BOOL
@@ -333,7 +317,7 @@ Description:- Enable Agitation of Vessel content
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::37
 --------------------------------------------------
 Name:- cmd_measure
 Type:- BOOL
@@ -341,31 +325,15 @@ Description:- Command to process correct mass measurement of vessel
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::38
 --------------------------------------------------
-Name:- ema_vessel_runtime_h
-Type:- INT
-Description:- Agitator run time Hours for ema_vessel
+Name:- ema_vessel_runtime
+Type:- TIME
+Description:- Agitator run time for ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::41
---------------------------------------------------
-Name:- ema_vessel_runtime_s
-Type:- INT
-Description:- Agitator run time Seconds for ema_vessel
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::42
---------------------------------------------------
-Name:- ema_vessel_runtime_m
-Type:- INT
-Description:- Agitator run time Minutes for ema_vessel
-ParameterInOut:- OUT
-
---------------------------------------------------
-PARAMETER::43
+PARAMETER::39
 --------------------------------------------------
 Name:- ema_vessel_setpoint
 Type:- REAL
@@ -373,7 +341,7 @@ Description:- Agitator speed setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::44
+PARAMETER::40
 --------------------------------------------------
 Name:- emc_water_state
 Type:- INT
@@ -381,7 +349,7 @@ Description:- Device State of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::41
 --------------------------------------------------
 Name:- emc_water_mass_charge
 Type:- REAL
@@ -389,7 +357,7 @@ Description:- Mass to charge emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::42
 --------------------------------------------------
 Name:- emc_water_medium_liquid
 Type:- INT
@@ -397,7 +365,7 @@ Description:- Medium selection emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::43
 --------------------------------------------------
 Name:- emc_water_subs
 Type:- INT
@@ -405,7 +373,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::44
 --------------------------------------------------
 Name:- emc_water_cmd
 Type:- INT
@@ -413,7 +381,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::45
 --------------------------------------------------
 Name:- prompt_pmo
 Type:- BOOL
@@ -421,7 +389,7 @@ Description:- UO_MX_MAKE Operator to select Manufacturing Operation
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::46
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -429,7 +397,7 @@ Description:- Medium selection of emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::47
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -437,7 +405,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::48
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -445,7 +413,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::49
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -902,12 +870,8 @@ Action:- //Transfer input parameter from HMI to EM
 L #_fp_speed_setpoint;
 T #_ema_vessel_setpoint;
 //Load Agitator runtime.
-L #_fp_time_make_agit_h;
-T #_ema_vessel_runtime_h;
-L #_fp_time_make_agit_m;
-T #_ema_vessel_runtime_m;
-L #_fp_time_make_agit_s;
-T #_ema_vessel_runtime_s;
+L #_fp_time_make_agit;
+T #_ema_vessel_runtime;
 
 // Start Agitator 
 L "dbCONST".BLK.EMA1.SUBS.MIX;

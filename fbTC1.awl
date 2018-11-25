@@ -68,13 +68,7 @@ TITLE = Check if the TCV is not in AUTO and REMOTE
     //                                                                        //
     // Check if the TCV cannot be controlled if not in AUTO:                  //
     //------------------------------------------------------------------------//
-    O "idbMOD1".f[#p.link.MOD_TCV].p.read.mc.INTERLOCK;
-    ON "idbMOD1".f[#p.link.MOD_TCV].p.read.mc.modeAUTO;
-    ON(;
-    L "idbMOD1".f[#p.link.MOD_TCV].p.write.mc.CMD;
-    L "dbCONST".BLK.MOD1.CMD.REMOTE;
-    ==I;
-    );
+    AN "idbMOD1".f[#p.link.MOD_TCV].p.read.mc.modeAUTO;
     = #p.read.mc.INTIL;
 
 NETWORK
@@ -185,7 +179,7 @@ TITLE = PID Controller
         D_SEL                := #p.read.D_SEL ,
         CYCLE                := #p.read.CYCLE ,
         SP_INT               := #tSetpoint ,
-        PV_IN                := "idbPI1".f[#p.link.TI_HEX].p.read.PV ,
+        PV_IN                := "idbTI1".f[#p.link.TI_HEX].p.read.PV ,
         MAN                  := #tSetpoint ,
         GAIN                 := #p.read.GAIN ,
         TI                   := #p.read.TI ,
@@ -217,13 +211,19 @@ TITLE = Output if Disabled
 _d:   NOP 0;
 
 NETWORK
-TITLE = Transfer PID output to MOD1 TC Valve
+TITLE = Transfer PID output to MOD1 TC Valve REMOTE setpoint
     //------------------------------------------------------------------------//
     // Write the PID controller output to the temperature control valve (TCV) //
     // remote position setpoint:                                              //
     //------------------------------------------------------------------------//
+    A #cmdEnable;
+    A "idbMOD1".f[#p.link.MOD_TCV].p.read.mc.modeAUTO;
+    JCN _notMODAuto;
+    L "dbCONST".BLK.MOD1.CMD.REMOTE;
+    T "idbMOD1".f[#p.link.MOD_TCV].p.write.mc.CMD;
     L #p.read.MV_OUTPUT;
     T "idbMOD1".f[#p.link.MOD_TCV].p.write.POS_REMOTE;
+_notMODAuto:   NOP 0;
 
     //------------------------------------------------------------------------//
     // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //

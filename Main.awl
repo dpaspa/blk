@@ -33,6 +33,16 @@ VAR_TEMP
     tmpRetVal : Int;
     wabc : Int;
     wmode : Int;
+    hmi1PBeat : Bool;
+    hmi1NBeat : Bool;
+    hmi2PBeat : Bool;
+    hmi2NBeat : Bool;
+    hmi3PBeat : Bool;
+    hmi3NBeat : Bool;
+    hmi4PBeat : Bool;
+    hmi4NBeat : Bool;
+    hmi5PBeat : Bool;
+    hmi5NBeat : Bool;
 END_VAR
 
 BEGIN
@@ -49,6 +59,161 @@ TITLE = CPU to CPU Communication timer and pulse bit
     NOP 0;
     A "timerCOMMS";
     = "pulseCOMMS";
+    NOP 0;
+
+NETWORK
+TITLE = HMI 1 Heartbeat
+    //------------------------------------------------------------------------//
+    // HMI heartbeat:                                                         //
+    //------------------------------------------------------------------------//
+    A "hmi1Pulse";
+    FP "hmi1PEdge";
+    = #hmi1PBeat;
+
+    A "hmi1Pulse";
+    FN "hmi1PEdge";
+    = #hmi1NBeat;
+
+    O #hmi1PBeat;
+    O #hmi1NBeat;
+    S "hmi1Active";
+
+    AN #hmi1PBeat;
+    AN #hmi1NBeat;
+    L S5T#5s;
+    SP "hmi1Timer";
+    NOP 0;
+    NOP 0;
+    NOP 0;
+
+    AN #hmi1PBeat;
+    AN #hmi1NBeat;
+    AN "hmi1Timer";
+    R "hmi1Active";
+    NOP 0;
+
+NETWORK
+TITLE = HMI 2 Heartbeat
+    //------------------------------------------------------------------------//
+    // HMI heartbeat:                                                         //
+    //------------------------------------------------------------------------//
+    A "hmi2Pulse";
+    FP "hmi2PEdge";
+    = #hmi2PBeat;
+
+    A "hmi2Pulse";
+    FN "hmi2PEdge";
+    = #hmi2NBeat;
+
+    O #hmi2PBeat;
+    O #hmi2NBeat;
+    S "hmi2Active";
+
+    AN #hmi2PBeat;
+    AN #hmi2NBeat;
+    L S5T#5s;
+    SP "hmi2Timer";
+    NOP 0;
+    NOP 0;
+    NOP 0;
+
+    AN #hmi2PBeat;
+    AN #hmi2NBeat;
+    AN "hmi2Timer";
+    R "hmi2Active";
+    NOP 0;
+
+NETWORK
+TITLE = HMI 3 Heartbeat
+    //------------------------------------------------------------------------//
+    // HMI heartbeat:                                                         //
+    //------------------------------------------------------------------------//
+    A "hmi3Pulse";
+    FP "hmi3PEdge";
+    = #hmi3PBeat;
+
+    A "hmi3Pulse";
+    FN "hmi3PEdge";
+    = #hmi3NBeat;
+
+    O #hmi3PBeat;
+    O #hmi3NBeat;
+    S "hmi3Active";
+
+    AN #hmi3PBeat;
+    AN #hmi3NBeat;
+    L S5T#5s;
+    SP "hmi3Timer";
+    NOP 0;
+    NOP 0;
+    NOP 0;
+
+    AN #hmi3PBeat;
+    AN #hmi3NBeat;
+    AN "hmi3Timer";
+    R "hmi3Active";
+    NOP 0;
+
+NETWORK
+TITLE = HMI 4 Heartbeat
+    //------------------------------------------------------------------------//
+    // HMI heartbeat:                                                         //
+    //------------------------------------------------------------------------//
+    A "hmi4Pulse";
+    FP "hmi4PEdge";
+    = #hmi4PBeat;
+
+    A "hmi4Pulse";
+    FN "hmi4PEdge";
+    = #hmi4NBeat;
+
+    O #hmi4PBeat;
+    O #hmi4NBeat;
+    S "hmi4Active";
+
+    AN #hmi4PBeat;
+    AN #hmi4NBeat;
+    L S5T#5s;
+    SP "hmi4Timer";
+    NOP 0;
+    NOP 0;
+    NOP 0;
+
+    AN #hmi4PBeat;
+    AN #hmi4NBeat;
+    AN "hmi4Timer";
+    R "hmi4Active";
+    NOP 0;
+
+NETWORK
+TITLE = HMI 5 Heartbeat
+    //------------------------------------------------------------------------//
+    // HMI heartbeat:                                                         //
+    //------------------------------------------------------------------------//
+    A "hmi5Pulse";
+    FP "hmi5PEdge";
+    = #hmi5PBeat;
+
+    A "hmi5Pulse";
+    FN "hmi5PEdge";
+    = #hmi5NBeat;
+
+    O #hmi5PBeat;
+    O #hmi5NBeat;
+    S "hmi5Active";
+
+    AN #hmi5PBeat;
+    AN #hmi5NBeat;
+    L S5T#5s;
+    SP "hmi5Timer";
+    NOP 0;
+    NOP 0;
+    NOP 0;
+
+    AN #hmi5PBeat;
+    AN #hmi5NBeat;
+    AN "hmi5Timer";
+    R "hmi5Active";
     NOP 0;
 
 NETWORK
@@ -164,6 +329,16 @@ TITLE = Call UN communications between PLCs if enabled
     JCN _xUN;
     CALL "fcCallxUNs";
 _xUN:   NOP 0;
+
+NETWORK
+TITLE = Call RECIPE communications between PLCs if enabled
+    //------------------------------------------------------------------------//
+    // Transfer the Master Recipes from master M1 PLC to slave M2 PLC:        //
+    //------------------------------------------------------------------------//
+    A "commsEnable";
+    JCN _xRCP;
+    CALL "fbxRECIPE", "dbxRECIPE";
+_xRCP:   NOP 0;
 
 NETWORK
 TITLE = HMI Sequence animation

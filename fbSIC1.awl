@@ -181,8 +181,6 @@ TITLE = Aggregate all internal interlock conditions
     //------------------------------------------------------------------------//
     // Collect all internal interlock conditions:                             //
     //------------------------------------------------------------------------//
-    O #p.read.ai.ALARM_LL;
-    O #p.read.ai.ALARM_HH;
     ON #p.read.ai.DQ;
     O #p.read.BRK;
     O #p.read.PHR;
@@ -276,7 +274,7 @@ TITLE = Setpoint if Enabled
     //------------------------------------------------------------------------//
     A #cmdEnable;
     JCN _c;
-    L #p.read.SETPOINT_VFD;
+    L #p.write.SETPOINT;
     T #tSetpoint;
 _c:   NOP 0;
 
@@ -360,7 +358,7 @@ TITLE = Set the peer state stopped if so
 _peerStopped:   NOP 0;
 
 NETWORK
-TITLE = Drive the agitator output on if commanded and safe to run
+TITLE = Store the agitator output on if commanded and safe to run
     //------------------------------------------------------------------------//
     // Start the agitator if allowed to run if command is ENABLE and there    //
     // are no interlocks and mass in the vessel is sufficient:                //
@@ -368,7 +366,6 @@ TITLE = Drive the agitator output on if commanded and safe to run
     A #tDO;
     = #p.read.OUT_CMD;
 
-@@TEMPLATE_BEGIN@@
 NETWORK
 TITLE = PID Controller
     //------------------------------------------------------------------------//
@@ -387,26 +384,28 @@ TITLE = PID Controller
         GAIN                 := #p.read.GAIN ,
         TI                   := #p.read.TI ,
         TD                   := #p.read.TD ,
-        LMN_HLM              := 1425.0 ,
+        LMN_HLM              := 100.0 ,
         LMN_LLM              := 0.0 ,
-        LMN                  := #p.read.MV_OUTPUT
+        LMN                  := #p.read.LMN
     );
 
-//NETWORK
-//TITLE = Converts PID output (%) to speed setpoint (RPM)
-//      L #p.read.LMN;
-//      L 100.0;
-//      /R;
-//      T #LMN;
-//
-//      CALL SCALE_X
-//      {dest_type := 'Real', src_type := 'Real'}
-//      (  MIN                         := 0.0 ,
-//         VALUE                       := #LMN ,
-//         MAX                         := 1425.0 ,
-//         Ret_Val                     := #p.read.MV_OUTPUT
-//      );
-@@TEMPLATE_END@@
+NETWORK
+TITLE = Convert PID output (%) to speed setpoint (RPM)
+    //------------------------------------------------------------------------//
+    // Scale the % PID output to VFD scale:                                   //
+    //------------------------------------------------------------------------//
+      L #p.read.LMN;
+      L 100.0;
+      /R;
+      T #LMN;
+
+      CALL SCALE_X
+      {dest_type := 'Real', src_type := 'Real'}
+      (  MIN                         := 0.0 ,
+         VALUE                       := #LMN ,
+         MAX                         := 1425.0 ,
+         Ret_Val                     := #p.read.MV_OUTPUT
+      );
 
 NETWORK
 TITLE = Output if Disabled
@@ -536,19 +535,34 @@ NETWORK
 TITLE = Pack the alarm bits
     //------------------------------------------------------------------------//
     // Pack the alarm bits into an integer for the HMI to read:               //
+    // Alarms are arranged in the following Little Endian order...            //
+    // Word   1                                0                              //
+    // Bit    0   1   2   3   4   5   6   7    8   9  10  11  12  13  14  15  //
+    // Order  9  10  11  12  13  14  15  16    1   2   3   4   5   6   7   8  //
     //------------------------------------------------------------------------//
-    A #p.read.ALM_BRK;
+    A #p.read.ai.ALARM_HH;
     = #b[0];
-    A #p.read.ALM_FLP;
+    A #p.read.ai.ALARM_H;
     = #b[1];
-    A #p.read.ALM_FLT;
+    A #p.read.ai.ALARM_L;
     = #b[2];
-    A #p.read.ALM_PHR;
+    A #p.read.ai.ALARM_LL;
     = #b[3];
-    A #p.read.FAIL_TO_RUN;
+    AN #p.read.ai.DQ;
     = #b[4];
+
+    A #p.read.ALM_BRK;
+    = #b[8];
+    A #p.read.ALM_FLP;
+    = #b[9];
+    A #p.read.ALM_FLT;
+    = #b[10];
+    A #p.read.ALM_PHR;
+    = #b[11];
+    A #p.read.FAIL_TO_RUN;
+    = #b[12];
     A #p.read.ALM_THM;
-    = #b[5];
+    = #b[13];
     L #w;
     T #p.read.mc.ALARM;
 END_FUNCTION_BLOCK

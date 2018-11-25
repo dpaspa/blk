@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 10/11/2018 5:50:47 PM by David Paspa
+generated on 24/11/2018 1:31:30 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -29,13 +29,101 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- emx_drain_cmd
+Type:- INT
+Description:- Sy drain line command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- emx_drain_subs
+Type:- INT
+Description:- Sy drain line substate
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- emx_drain_state
+Type:- INT
+Description:- Sy drain line state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- emx_smfldrn_subs
+Type:- INT
+Description:- SMFL drain line substate
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- emx_smfldrn_cmd
+Type:- INT
+Description:- SMFL drain line command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- emx_smfldrn_state
+Type:- INT
+Description:- SMFL drain line state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- emv_inlet_subs
+Type:- INT
+Description:- Vessel inlet substate
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- emv_inlet_cmd
+Type:- INT
+Description:- Vessel inlet command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- emv_inlet_state
+Type:- INT
+Description:- Vessel inlet state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- prompt_vessel_empty_confirm_yes
+Type:- BOOL
+Description:- UO_SY_SETUP Operator confirm vessel drained confirmed yes
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- prompt_vessel_empty
+Type:- BOOL
+Description:- UO_SY_SETUP Operator to confirm vessel and lines fully drained
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
 Name:- real_not_held
 Type:- REAL
 Description:- UO_SY_SETUP Vacuum hold pressure test failed
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::13
 --------------------------------------------------
 Name:- real_vacuum_fail
 Type:- REAL
@@ -43,7 +131,7 @@ Description:- UO_MX_SETUP Vacuum failed pressure after vacuum timer expired
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::14
 --------------------------------------------------
 Name:- vessel_sy
 Type:- INT
@@ -51,7 +139,7 @@ Description:- Storage vessel selection S1 or S2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::15
 --------------------------------------------------
 Name:- fill_flz
 Type:- INT
@@ -59,7 +147,7 @@ Description:- Filling line selection FL1 or Fl2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::16
 --------------------------------------------------
 Name:- vessel_mx
 Type:- INT
@@ -67,7 +155,7 @@ Description:- Manufacturing vessel selection M1 or M2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::17
 --------------------------------------------------
 Name:- real_pressure_sy
 Type:- REAL
@@ -75,7 +163,7 @@ Description:- US_SY_SETUP Vessel pressure
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::18
 --------------------------------------------------
 Name:- log_real_pressure_sy
 Type:- BOOL
@@ -83,7 +171,7 @@ Description:- US_SY_SETUP Vessel pressure
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::19
 --------------------------------------------------
 Name:- emc_gas_pi_vessel_pv
 Type:- REAL
@@ -91,7 +179,7 @@ Description:- Vessel pressure
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::20
 --------------------------------------------------
 Name:- emx_smfl_cmd
 Type:- INT
@@ -99,7 +187,7 @@ Description:- Command to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::21
 --------------------------------------------------
 Name:- emx_smfl_subs
 Type:- INT
@@ -107,7 +195,7 @@ Description:- Substate selection to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::22
 --------------------------------------------------
 Name:- emx_smfl_state
 Type:- INT
@@ -115,7 +203,7 @@ Description:- Device State of emx_smfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::23
 --------------------------------------------------
 Name:- log_real_not_held
 Type:- BOOL
@@ -123,7 +211,7 @@ Description:- UO_SY_SETUP Vacuum hold pressure test failed
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::24
 --------------------------------------------------
 Name:- vacuum_held_begin_time
 Type:- TOD
@@ -131,7 +219,7 @@ Description:- vacuum hold begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::25
 --------------------------------------------------
 Name:- vacuum_held_end_time
 Type:- TOD
@@ -139,7 +227,7 @@ Description:- vacuum hold end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::26
 --------------------------------------------------
 Name:- time_act_vacuum_held
 Type:- TIME
@@ -147,7 +235,7 @@ Description:- UO_SY_SETUP Vacuum held time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::27
 --------------------------------------------------
 Name:- log_time_act_vacuum_held
 Type:- BOOL
@@ -155,7 +243,7 @@ Description:- UO_SY_SETUP Vacuum held time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::28
 --------------------------------------------------
 Name:- prompt_not_held
 Type:- BOOL
@@ -163,7 +251,7 @@ Description:- UO_SY_SETUP Operator to confirm to retry as vacuum pressure not he
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::29
 --------------------------------------------------
 Name:- prompt_not_held_confirm_yes
 Type:- BOOL
@@ -171,7 +259,7 @@ Description:- UO_SY_SETUP Operator confirmed to retry as vacuum pressure not hel
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::30
 --------------------------------------------------
 Name:- prompt_not_held_confirm_no
 Type:- BOOL
@@ -179,7 +267,7 @@ Description:- UO_SY_SETUP Operator confirmed to abort as vacuum pressure not hel
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::31
 --------------------------------------------------
 Name:- log_msg_not_held_repeat
 Type:- BOOL
@@ -187,7 +275,7 @@ Description:- UO_SY_SETUP Operator confirmed to retry as vacuum pressure not hel
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::32
 --------------------------------------------------
 Name:- log_msg_not_held_abort
 Type:- BOOL
@@ -195,7 +283,7 @@ Description:- UO_SY_SETUP Operator confirmed to abort as vacuum pressure not hel
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::33
 --------------------------------------------------
 Name:- prompt_not_reach
 Type:- BOOL
@@ -203,7 +291,7 @@ Description:- UO_SY_SETUP Operator to confirm to retry as vacuum pressure not re
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::34
 --------------------------------------------------
 Name:- prompt_not_reach_confirm_yes
 Type:- BOOL
@@ -211,7 +299,7 @@ Description:- UO_SY_SETUP Operator confirmed to retry as vacuum pressure not rea
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::35
 --------------------------------------------------
 Name:- prompt_not_reach_confirm_no
 Type:- BOOL
@@ -219,7 +307,7 @@ Description:- UO_SY_SETUP Operator confirmed to abort as vacuum pressure not rea
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::36
 --------------------------------------------------
 Name:- log_msg_not_reach_repeat
 Type:- BOOL
@@ -227,7 +315,7 @@ Description:- UO_SY_SETUP Operator confirmed to retry as vacuum pressure not rea
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::37
 --------------------------------------------------
 Name:- log_msg_not_reach_abort
 Type:- BOOL
@@ -235,7 +323,7 @@ Description:- UO_SY_SETUP Operator confirmed to abort as vacuum pressure not rea
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::38
 --------------------------------------------------
 Name:- log_real_vacuum_fail
 Type:- BOOL
@@ -243,7 +331,7 @@ Description:- UO_SY_SETUP Vacuum failed after vacuum timer expired
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::39
 --------------------------------------------------
 Name:- log_msg_vacuum_begin
 Type:- BOOL
@@ -251,7 +339,7 @@ Description:- UO_SY_SETUP Vacuum begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::29
+PARAMETER::40
 --------------------------------------------------
 Name:- log_msg_setup_end
 Type:- BOOL
@@ -259,7 +347,7 @@ Description:- UO_SY_SETUP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::41
 --------------------------------------------------
 Name:- log_msg_setup_begin
 Type:- BOOL
@@ -267,47 +355,47 @@ Description:- UO_SY_SETUP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::31
+PARAMETER::42
 --------------------------------------------------
 Name:- r_pres_vac_fail
 Type:- REAL
-Description:- Vacuum hold fail pressure
+Description:- SY SETUP Pressure reached when vacuum hold test fails
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::43
 --------------------------------------------------
 Name:- r_pres_stm_pos
 Type:- REAL
-Description:- Positive steam pressure threshold setpoint
+Description:- SY SETUP Positive steam pressure threshold setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::44
 --------------------------------------------------
 Name:- r_pres_vac
 Type:- REAL
-Description:- Setpoint for vacuum pressure
+Description:- SY SETUP Vacuum pressure setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::45
 --------------------------------------------------
 Name:- r_time_vac_hold
 Type:- TIME
-Description:- Vacuum Hold Timer
+Description:- SY SETUP Time for vacuum hold test
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::46
 --------------------------------------------------
 Name:- r_time_eject
 Type:- TIME
-Description:- Vacuum time
+Description:- SY SETUP Time fo vacuum system to run before timeout
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::47
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -315,7 +403,7 @@ Description:- Medium selection for emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::48
 --------------------------------------------------
 Name:- vacuum_hold_test
 Type:- BOOL
@@ -323,7 +411,7 @@ Description:- Vacuum hold test enquiry
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::49
 --------------------------------------------------
 Name:- emc_water_sy_cmd
 Type:- INT
@@ -331,7 +419,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::50
 --------------------------------------------------
 Name:- emc_water_sy_subs
 Type:- INT
@@ -339,7 +427,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::51
 --------------------------------------------------
 Name:- emc_water_sy_state
 Type:- INT
@@ -347,7 +435,7 @@ Description:- Device State of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::52
 --------------------------------------------------
 Name:- log_confirmation
 Type:- TOD
@@ -355,7 +443,7 @@ Description:- UO_SY_SETUP Logging operator confirmation
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::53
 --------------------------------------------------
 Name:- prompt_connect_ok_confirm_yes
 Type:- BOOL
@@ -363,7 +451,7 @@ Description:- UO_SY_SETUP Operator confirmed all vessel connections are properly
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::43
+PARAMETER::54
 --------------------------------------------------
 Name:- prompt_connect_ok
 Type:- BOOL
@@ -371,7 +459,7 @@ Description:- UO_SY_SETUP Operator to confirm all vessel connections are properl
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::44
+PARAMETER::55
 --------------------------------------------------
 Name:- emc_water_sy_medium_liquid
 Type:- INT
@@ -379,7 +467,7 @@ Description:- Medium selection for emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::56
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -387,7 +475,7 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::57
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -395,7 +483,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::58
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -403,7 +491,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::59
 --------------------------------------------------
 Name:- emg_filter_state
 Type:- INT
@@ -411,7 +499,7 @@ Description:- Device State of emg_filter
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::60
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -419,7 +507,7 @@ Description:- Command to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::61
 --------------------------------------------------
 Name:- emg_filter_cmd
 Type:- INT
@@ -427,7 +515,7 @@ Description:- Command to emg_filter
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::62
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -435,7 +523,7 @@ Description:- Substate selection to EXxy07
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::63
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -443,7 +531,7 @@ Description:- Device State of emx_transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::64
 --------------------------------------------------
 Name:- emg_filter_subs
 Type:- INT
@@ -451,7 +539,7 @@ Description:- Substate selection to emg_filter
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::54
+PARAMETER::65
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -459,7 +547,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::55
+PARAMETER::66
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -467,7 +555,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::56
+PARAMETER::67
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -535,7 +623,7 @@ Condition:- A #_prompt_connect_ok_confirm_yes;
 STEP::02
 --------------------------------------------------
 StepNo:- 02
-Title:- UO_SY_SETUP : Setup Unit Operation Commenced
+Title:- UO_SY_SETUP : Setup manual flowpath devices
 Description:- Setup the following paths:
 Spool piece SPx2 SMFLx to ZSCx111
 Flowplate FP31 Mx to Sy/FLz ZSCn11y
@@ -612,7 +700,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 STEP::03
 --------------------------------------------------
 StepNo:- 03
-Title:- UO_SY_SETUP : Unit Operation Commenced
+Title:- UO_SY_SETUP : Connect PW line
 Description:- Connect PW inlet line to Sy. Set emc_water to substate SETUP and MEDIUM=PW.
 Set emv_vessel to substate DISCHARGE.
 
@@ -622,14 +710,8 @@ ACTION::01
 Description:- Reset EMs
 Action:- L "dbCONST".BLK.CMD.STOP;
 T #_emc_water_sy_cmd;
-T #_emv_vessel_cmd;
 Verification:- A(;
 L   #_emc_water_sy_state;
-L   "dbCONST".BLK.STATE.STOPPED;
-==I;
-);
-A(;
-L   #_emv_vessel_state;
 L   "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
@@ -684,23 +766,257 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 STEP::04
 --------------------------------------------------
 StepNo:- 04
-Title:- UO_SY_SETUP : Unit Operation Completed
-Description:- End of Setup
+Title:- UO_SY_SETUP : Open valves to drain vessel
+Description:- Open Sy outlet line valves.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Reset flags
-Action:- //Clear used flags
-SET;
-R #_prompt_connect_ok;
-Verification:- A "uncondJump";
+Description:- Reset EMs
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_emc_gas_cmd;
+T #_emv_inlet_cmd;
+T #_emv_vessel_cmd;
+T #_emx_smfl_cmd;
+T #_emx_smfldrn_cmd;
+T #_emx_drain_cmd;
+T #_emx_transfer_cmd;
+Verification:- A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emv_inlet_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emv_vessel_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emx_smfl_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emx_smfldrn_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emx_drain_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emx_transfer_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Open valves on Mx to drain flow path to drain the vesse with HPCA air pressurel.
+Clear used flags.
+Action:- //Open Sy inlet valve.
+L "dbCONST".BLK.EMV2.SUBS.CHARGE;
+T #_emv_inlet_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emv_inlet_cmd;
+
+//Open Sy outlet valve.
+L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
+T #_emv_vessel_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emv_vessel_cmd;
+
+//Open transfer line valves.
+L "dbCONST".BLK.EMX2.SUBS.SIP;
+T #_emx_transfer_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_transfer_cmd;
+
+//Open SMFL valves.
+L "dbCONST".BLK.EMX6.SUBS.SIP;
+T #_emx_smfl_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_smfl_cmd;
+
+//Open SMFL drain valves.
+L "dbCONST".BLK.EMX4.SUBS.CIP;
+T #_emx_smfldrn_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_smfldrn_cmd;
+
+//Open CIP drain valve.
+L "dbCONST".BLK.EMX4.SUBS.CIP;
+T #_emx_drain_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_drain_cmd;
+
+//Enable HPCA.
+L "dbCONST".SEL.GAS.HPCA;
+T #_emc_gas_medium_gas;
+L "dbCONST".BLK.EMC1.SUBS.VALVE;
+T #_emc_gas_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
+Verification:- A(;
+L #_emv_inlet_subs;
+L "dbCONST".BLK.EMV2.SUBS.CHARGE;
+==I;
+);
+A(;
+L #_emv_vessel_subs;
+L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
+==I;
+);
+A(;
+L #_emx_transfer_subs;
+L "dbCONST".BLK.EMX2.SUBS.SIP;
+==I;
+);
+A(;
+L #_emx_smfl_subs;
+L "dbCONST".BLK.EMX6.SUBS.SIP;
+==I;
+);
+A(;
+L #_emx_smfldrn_subs;
+L "dbCONST".BLK.EMX4.SUBS.CIP;
+==I;
+);
+A(;
+L #_emx_drain_subs;
+L "dbCONST".BLK.EMX4.SUBS.CIP;
+==I;
+);
+A(;
+L #_emc_gas_subs;
+L "dbCONST".BLK.EMC1.SUBS.VALVE;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 4.0000
+Title:- Drain valves opened
+EmptyTransition:- False
+Description:- Drain path valves are opened.
+Condition:- A(;
+L   #_emv_inlet_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+A(;
+L   #_emv_vessel_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+A(;
+L   #_emx_smfl_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+A(;
+L   #_emx_smfldrn_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+A(;
+L   #_emx_drain_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+A(;
+L   #_emx_transfer_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
 
 
 --------------------------------------------------
 STEP::05
 --------------------------------------------------
-StepNo:- 05
+StepNo:- 5.0000
+Title:- UO_SY_SETUP : Wait for operator to confirm vessel empty
+Description:- Prompt operator to confirm vessel empty
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Prompt operator to confirm vessel empty
+Action:- SET;
+S #_prompt_vessel_empty;
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 5.0000
+Title:- Wait for vesse confirmedl empty
+EmptyTransition:- False
+Description:- Jump when operator confirms vessel and lines fully drained
+Condition:- A #_prompt_vessel_empty_confirm_yes;
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 6.0000
+Title:- UO_SY_SETUP : Close drain valve
+Description:- Close outlet line drain valve.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Reset EMs
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_emc_gas_cmd;
+T #_emx_smfldrn_cmd;
+T #_emx_drain_cmd;
+Verification:- A(;
+L   #_emx_smfldrn_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emx_drain_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::06
+--------------------------------------------------
+TRNNo:- 6.0000
+Title:- Empty transition
+EmptyTransition:- False
+Description:- Unconditional jump
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::07
+--------------------------------------------------
+StepNo:- 7.0000
 Title:- UO_SY_SETUP : Start Vacuum
 Description:- Enable vacuum. 
 Start vacuum timer(TIME_EJECT). 
@@ -722,7 +1038,8 @@ L   "dbCONST".BLK.STATE.STOPPED;
 ACTION::02
 --------------------------------------------------
 Description:- Enable vacuum.
-Start vacuum timer. Log Vacuum begin time
+Reset timer.
+
 Action:- //Enable vacuum.
 L "dbCONST".SEL.GAS.VACUUM;
 T #_emc_gas_medium_gas;
@@ -731,25 +1048,29 @@ T #_emc_gas_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emc_gas_cmd;
 
-// Start vacuum timer
-A #SQ_TIMER.Q;
+// Reset timer
 R #sqSeqTimerStart;
+Verification:- AN #SQ_TIMER.Q;
 
-AN #SQ_TIMER.Q;
-S #sqSeqTimerStart;
-L #_r_time_eject;
+--------------------------------------------------
+ACTION::03
+--------------------------------------------------
+Description:- Start vacuum timer. Log Vacuum begin time
+Action:- L #_r_time_eject;
+L 1000;
+*R;
 T #SQ_TIMER.PT;
+S #sqSeqTimerStart;
 
 //Log vacuum begin time
 SET;
 S #_log_msg_vacuum_begin;
-Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
-TRANSITION::05
+TRANSITION::07
 --------------------------------------------------
-TRNNo:- 5.0000
+TRNNo:- 7.0000
 Title:- Timer expired?
 EmptyTransition:- False
 Description:- Vacuum timer expired.
@@ -757,9 +1078,9 @@ Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::06
+STEP::08
 --------------------------------------------------
-StepNo:- 06
+StepNo:- 8.0000
 Title:- UO_SY_SETUP : Vacuum hold evacuation failed 
 Description:- Raise vacuum failed message.
 Log vacuum ejector time failed.
@@ -783,9 +1104,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::07
+TRANSITION::09
 --------------------------------------------------
-TRNNo:- 07
+TRNNo:- 9.0000
 Title:- Try again?
 EmptyTransition:- False
 Description:- Operator want to try again.
@@ -793,9 +1114,9 @@ Condition:- A #_prompt_not_reach_confirm_yes;
 
 
 --------------------------------------------------
-TRANSITION::08
+TRANSITION::10
 --------------------------------------------------
-TRNNo:- 08
+TRNNo:- 10.0000
 Title:- No try?
 EmptyTransition:- False
 Description:- Operator don't want to try again.
@@ -803,9 +1124,9 @@ Condition:- A #_prompt_not_reach_confirm_no;
 
 
 --------------------------------------------------
-STEP::07
+STEP::09
 --------------------------------------------------
-StepNo:- 07
+StepNo:- 9.0000
 Title:- UO_SY_SETUP : Start Vacuum Hold Timer
 Description:- Close Mx vent line vacuum valves.
 Start Vacuum  Hold Timer.
@@ -814,44 +1135,65 @@ Store Vacuum Hold test begin time.
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Close Mx vacuum valves.
-Start Vacuum Hold Timer.
+Description:- Close vacuum valve.
+Action:- //Close vacuum valve.
+L "dbCONST".SEL.GAS.NONE;
+T #_emc_gas_medium_gas;
+L "dbCONST".BLK.CMD.RESTART;
+T #_emc_gas_cmd;
+
+// Reset vacuum hold timer
+R #sqSeqTimerStart;
+Verification:- AN #SQ_TIMER.Q;
+A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+>I;
+);
+A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.INTERLOCKED;
+<I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Start Vacuum Hold Timer.
 Store Vacuum Hold test begin time.
-Action:- //Close Mx vacuum valves.
-L "dbCONST".BLK.CMD.STOP;
+Action:- L "dbCONST".BLK.CMD.START;
 T #_emc_gas_cmd;
 
 // Start vacuum hold timer
-SET;
-A #SQ_TIMER.Q;
-R #sqSeqTimerStart;
-
-AN #SQ_TIMER.Q;
-S #sqSeqTimerStart;
 L #_r_time_vac_hold;
+L 1000;
+*R;
 T #SQ_TIMER.PT;
-
+S #sqSeqTimerStart;
 
 //Store Vacuum Hold test begin time.
 L "dbCONST".CHRONO.CPU_TIME;
 T #_vacuum_held_begin_time;
-Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
-TRANSITION::09
+TRANSITION::11
 --------------------------------------------------
-TRNNo:- 09
-Title:- Empty Transition
+TRNNo:- 11.0000
+Title:- Jump when gas command completed
 EmptyTransition:- False
-Description:- Empty Transition
-Condition:- A "uncondJump";
+Description:- Jump when all gas valves closed
+Condition:- A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
 
 
 --------------------------------------------------
-STEP::08
+STEP::10
 --------------------------------------------------
-StepNo:- 08
+StepNo:- 10.0000
 Title:- UO_SY_SETUP : Log operator repeat
 Description:- Log operator repeat.
 
@@ -868,9 +1210,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::10
+TRANSITION::12
 --------------------------------------------------
-TRNNo:- 10
+TRNNo:- 12.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -878,9 +1220,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::09
+STEP::11
 --------------------------------------------------
-StepNo:- 09
+StepNo:- 11.0000
 Title:- UO_SY_SETUP : Log operator abort
 Description:- Log operator abort.
 
@@ -897,9 +1239,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::11
+TRANSITION::13
 --------------------------------------------------
-TRNNo:- 11
+TRNNo:- 13.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -907,29 +1249,29 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::10
+STEP::12
 --------------------------------------------------
-StepNo:- 10
-Title:- UO_MX_SETUP: Vacuum Hold Test
+StepNo:- 12.0000
+Title:- UO_MX_SETUP : Vacuum hold test
+Description:- Step required for loop reentry
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 
 --------------------------------------------------
-TRANSITION::12
+TRANSITION::14
 --------------------------------------------------
-TRNNo:- 12.0000
-Title:- Empty Transition
+TRNNo:- 14.0000
+Title:- Empty transition
 EmptyTransition:- False
-Description:- Empty Transition
 Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::11
+STEP::13
 --------------------------------------------------
-StepNo:- 11
+StepNo:- 13.0000
 Title:- UO_SY_SETUP : Pressure logging
 Description:- Log vessel pressure at 30 second intervals.
 
@@ -937,7 +1279,11 @@ Description:- Log vessel pressure at 30 second intervals.
 ACTION::01
 --------------------------------------------------
 Description:- Set flags to log Sy vessel pressure.
-Action:- //Log Sy vessel pressure.
+Action:- // Clear gas EM restart command
+L "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
+
+//Log Sy vessel pressure.
 L #_emc_gas_pi_vessel_pv;
 T #_real_pressure_sy;
 
@@ -954,9 +1300,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::13
+TRANSITION::15
 --------------------------------------------------
-TRNNo:- 13.0000
+TRNNo:- 15.0000
 Title:- Timer Expired
 EmptyTransition:- False
 Description:- TIME_VAC_HOLD expired
@@ -964,9 +1310,9 @@ Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-TRANSITION::14
+TRANSITION::16
 --------------------------------------------------
-TRNNo:- 14
+TRNNo:- 16.0000
 Title:- Pressure above setpoint
 EmptyTransition:- False
 Description:- Pressure increased above PRES_VAC_FAIL
@@ -978,9 +1324,9 @@ L #_r_pres_vac_fail;
 
 
 --------------------------------------------------
-TRANSITION::15
+TRANSITION::17
 --------------------------------------------------
-TRNNo:- 15
+TRNNo:- 17.0000
 Title:- Pressure logging timer expired
 EmptyTransition:- False
 Description:- 30 seconds expired
@@ -988,9 +1334,105 @@ Condition:- A #SQ_TIMER2.Q;
 
 
 --------------------------------------------------
-STEP::12
+STEP::14
 --------------------------------------------------
-StepNo:- 12
+StepNo:- 14.0000
+Title:- UO_SY_SETUP : Vacuum Hold failed
+Description:- Set flag to raise vacuum failed message and prompt operator.
+Log Sy vessel pressure.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set flag to raise vacuum failed message and prompt operator.
+Log Sy vessel pressure.
+Action:- //Set flag to raise vacuum failed message and prompt operator.
+SET;
+S #_log_real_not_held;
+S #_prompt_not_held;
+
+
+// Stop timer
+SET;
+R #sqSeqTimerStart;
+R #sqSeqTimerStart2;
+
+//Log Sy vessel pressure.
+L #_emc_gas_pi_vessel_pv;
+T #_real_not_held;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::18
+--------------------------------------------------
+TRNNo:- 18.0000
+Title:- No try?
+EmptyTransition:- False
+Description:- Operator don't want to try again.
+Condition:- A #_prompt_not_held_confirm_no;
+
+
+--------------------------------------------------
+TRANSITION::19
+--------------------------------------------------
+TRNNo:- 19.0000
+Title:- Try again?
+EmptyTransition:- False
+Description:- Operator want to try again.
+Condition:- A #_prompt_not_held_confirm_yes;
+
+
+--------------------------------------------------
+STEP::15
+--------------------------------------------------
+StepNo:- 15.0000
+Title:- UO_SY_SETUP : Log operator abort
+Description:- Log operator abort.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator abort.
+Action:- //Log operator abort.
+SET;
+S #_log_msg_not_held_abort;
+R #_prompt_not_held_confirm_no;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::16
+--------------------------------------------------
+StepNo:- 16.0000
+Title:- UO_SY_SETUP : Log operator repeat
+Description:- Log operator repeat
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator repeat
+Action:- //Log operator repeat.
+SET;
+S #_log_msg_not_held_repeat;
+R #_prompt_not_held_confirm_yes;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::21
+--------------------------------------------------
+TRNNo:- 21.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::17
+--------------------------------------------------
+StepNo:- 17.0000
 Title:- UO_SY_SETUP : Log actual time vacuum held.
 Description:- Log actual time vacuum held.
 Log Sy vessel pressure.
@@ -1025,9 +1467,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::16
+TRANSITION::22
 --------------------------------------------------
-TRNNo:- 16.0000
+TRNNo:- 22.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -1035,105 +1477,57 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::13
+STEP::18
 --------------------------------------------------
-StepNo:- 13
-Title:- UO_SY_SETUP : Vacuum Hold failed
-Description:- Set flag to raise vacuum failed message and prompt operator.
-Log Sy vessel pressure.
+StepNo:- 18.0000
+Title:- UO_SY_SETUP : Break vacuum
+Description:- Open HPCA supply valve to break the vacuum.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Set flag to raise vacuum failed message and prompt operator.
-Log Sy vessel pressure.
-Action:- //Set flag to raise vacuum failed message and prompt operator.
-SET;
-S #_log_real_not_held;
-S #_prompt_not_held;
+Description:- Open HPCA valve to break the vacuum
+Action:- L "dbCONST".SEL.GAS.HPCA;
+T #_emc_gas_medium_gas;
+L "dbCONST".BLK.CMD.RESTART;
+T #_emc_gas_cmd;
+Verification:- A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+>I;
+);
+A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.INTERLOCKED;
+<I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Clear gas EM restart command
+Action:- L "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
 
 
-// Stop timer
-SET;
-R #sqSeqTimerStart;
-R #sqSeqTimerStart2;
-
-//Log Sy vessel pressure.
+--------------------------------------------------
+TRANSITION::23
+--------------------------------------------------
+TRNNo:- 23.0000
+Title:- Pressure at zero
+EmptyTransition:- False
+Description:- Pressure increased to 0
+Condition:- O(;
 L #_emc_gas_pi_vessel_pv;
-T #_real_not_held;
-Verification:- A "uncondJump";
+L 0.0;
+>R;
+);
 
 
 --------------------------------------------------
-TRANSITION::17
+STEP::19
 --------------------------------------------------
-TRNNo:- 17.0000
-Title:- No try?
-EmptyTransition:- False
-Description:- Operator don't want to try again.
-Condition:- A #_prompt_not_held_confirm_no;
-
-
---------------------------------------------------
-TRANSITION::18
---------------------------------------------------
-TRNNo:- 18.0000
-Title:- Try again?
-EmptyTransition:- False
-Description:- Operator want to try again.
-Condition:- A #_prompt_not_held_confirm_yes;
-
-
---------------------------------------------------
-STEP::14
---------------------------------------------------
-StepNo:- 14.0000
-Title:- UO_SY_SETUP : Log operator abort
-Description:- Log operator abort.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Log operator abort.
-Action:- //Log operator abort.
-SET;
-S #_log_msg_not_held_abort;
-R #_prompt_not_held_confirm_no;
-Verification:- A "uncondJump";
-
-
---------------------------------------------------
-STEP::15
---------------------------------------------------
-StepNo:- 15.0000
-Title:- UO_SY_SETUP : Log operator repeat
-Description:- Log operator repeat
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Log operator repeat
-Action:- //Log operator repeat.
-SET;
-S #_log_msg_not_held_repeat;
-R #_prompt_not_held_confirm_yes;
-Verification:- A "uncondJump";
-
-
---------------------------------------------------
-TRANSITION::20
---------------------------------------------------
-TRNNo:- 20.0000
-Title:- Empty Transition
-EmptyTransition:- False
-Description:- Empty Transition
-Condition:- A "uncondJump";
-
-
---------------------------------------------------
-STEP::16
---------------------------------------------------
-StepNo:- 16
+StepNo:- 19.0000
 Title:- UO_SY_SETUP : Setup Unit Operation Completed
 Description:- Clear used flags.
 Log Sy SETUP operation end time.
