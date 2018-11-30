@@ -26,11 +26,11 @@ Dim iErr ' Global error
 '/-----------------------------------------------------------------------------/
 '/ Check if the event is to be canceled:                                       /
 '/-----------------------------------------------------------------------------/
-If (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.cancel2") And SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active2")) Then
+If (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.cancel3") And SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active3")) Then
     '/-------------------------------------------------------------------------/
     '/ Delete any active event message:                                        /
     '/-------------------------------------------------------------------------/
-    SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active2") = False
+    SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active3") = False
     If (SmartTags("interfaceReply.idxMessage1") = @@IDXEVENT@@) Then
         SmartTags("interfaceReply.idxMessage1") = 0
         SmartTags("interfaceReply.numSerial1") = 0
@@ -48,7 +48,9 @@ End If
 '/-----------------------------------------------------------------------------/
 '/ The event is cancelled:                                                     /
 '/-----------------------------------------------------------------------------/
-SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.cancel2") = False
+If (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.cancel3") And SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active3")) Then
+    SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.cancel3") = False
+End If
 
 @@TEMPLATE_END@@
 

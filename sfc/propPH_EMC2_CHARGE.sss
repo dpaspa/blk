@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/09/2018 2:20:59 PM by David Paspa
+generated on 29/11/2018 2:09:43 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -442,6 +442,7 @@ Description:- Log operator abort.
 Action:- //Log operator abort.
 SET;
 S #_log_msg_invalid_mass_abort;
+S #smc.ABORTED;
 Verification:- A "uncondJump";
 
 
@@ -623,12 +624,15 @@ L #_pos_pspw_state;
 ACTION::02
 --------------------------------------------------
 Description:- Start the sequence timer.
-Action:- L #_timeout;
-T #SQ_TIMER.PT;
+Action:- //Start Timer for charge timeout
+A #SQ_TIMER.Q;
+R #sqSeqTimerStart;
 
-SET;
+AN #SQ_TIMER.Q;
 S #sqSeqTimerStart;
-Verification:- A "uncondJump";
+L #_timeout;
+T #SQ_TIMER.PT;
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -811,7 +815,7 @@ Description:- Log operator abort.
 Action:- //Log operator abort.
 SET;
 S #_log_msg_filling_timeout_abort;
-R #_prompt_filling_timeout_confirm_no;
+S #smc.ABORTED;
 Verification:- A "uncondJump";
 
 
@@ -892,7 +896,7 @@ Description:- Log operator repeat
 Action:- //Log operator repeat.
 SET;
 S #_log_msg_filling_timeout_repeat;
-R #_prompt_filling_timeout_confirm_yes;
+R #sqSeqTimerStart;
 Verification:- A "uncondJump";
 
 
@@ -900,10 +904,10 @@ Verification:- A "uncondJump";
 TRANSITION::13
 --------------------------------------------------
 TRNNo:- 13
-Title:- Empty Transition
+Title:- Jump if timer reset
 EmptyTransition:- False
-Description:- Empty Transition
-Condition:- A "uncondJump";
+Description:- Jump if timer reset
+Condition:- AN #SQ_TIMER.Q;
 
 
 --------------------------------------------------

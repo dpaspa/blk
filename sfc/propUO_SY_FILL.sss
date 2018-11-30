@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 19/11/2018 11:37:29 AM by David Paspa
+generated on 29/11/2018 4:44:27 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -20,9 +20,10 @@ Level:- UO
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
 HeaderName:- SUFILL
-Version:- 0.2
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 0.2 Srinivas Nimmala 28-Dec-2009 09/073     Added Ampoule and Vial 
 //                                             pause buttons to stop filling
 // 0.1 Gerald Kontriner 14-Sep-2009            SFC structural design
@@ -532,6 +533,7 @@ Action:- //Log time if one or more units not in correct Hygiene status USED
 SET;
 S #_log_msg_wrong_hygiene;
 S #_prompt_abort;
+S #smc.ABORTED;
 Verification:- A "uncondJump";
 
 
@@ -937,6 +939,7 @@ Action:- //Log operator abort.
 SET;
 S #_log_msg_reset_button_abort;
 R #_prompt_reset_button_confirm_no;
+S #smc.ABORTED;
 Verification:- A "uncondJump";
 
 

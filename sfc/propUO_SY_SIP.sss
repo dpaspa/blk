@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 19/11/2018 11:58:58 AM by David Paspa
+generated on 29/11/2018 4:46:01 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -20,10 +20,11 @@ Level:- UO
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
 HeaderName:- MUSIP
-Version:- 0.3
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
-// 0.3 Srinivas Nimmala  19-May-2010  Wong(Changed Cooling-Preempt)
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
+// 0.3 Srinivas Nimmala 19-May-2010            Wong(Changed Cooling-Preempt)
 // 0.2 David Paspa      26-Oct-2009            Added synch flags
 // 0.1 Gerald Kontriner 09-Sep-2009            SFC structural design
 HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
@@ -31,13 +32,21 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- emc_water_sy_runtime
+Type:- TIME
+Description:- Steam flush run time. Zero for run forever.
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
 Name:- emv_inlet_subs
 Type:- INT
 Description:- Sprayball inlet valves substate
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::3
 --------------------------------------------------
 Name:- emv_inlet_cmd
 Type:- INT
@@ -45,7 +54,7 @@ Description:- Sprayball inlet valves command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::4
 --------------------------------------------------
 Name:- emv_inlet_state
 Type:- INT
@@ -53,7 +62,7 @@ Description:- Sprayball inlet valves state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::5
 --------------------------------------------------
 Name:- emx_transfer_hygiene
 Type:- INT
@@ -61,17 +70,9 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::5
---------------------------------------------------
-Name:- emx_smfl_hygiene
-Type:- INT
-Description:- Description
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- emx_smfldrn_hygiene
+Name:- emx_smfl_hygiene
 Type:- INT
 Description:- Description
 ParameterInOut:- IN_OUT
@@ -777,7 +778,6 @@ L  "dbCONST".BLK.HYGIENE.SIP;
 T #_emx_fill_hygiene;
 T #_emx_transfer_hygiene;
 T #_emx_smfl_hygiene;
-T #_emx_smfldrn_hygiene;
 
 //Start SIP_SETUP.
 L "dbCONST".BLK.EMX6.SUBS.SETUP_SIP;
@@ -789,6 +789,21 @@ L #_emx_smfl_subs;
 L "dbCONST".BLK.EMX6.SUBS.SETUP_SIP;
 ==I;
 );
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Confirmation Received
+EmptyTransition:- False
+Description:- Confirmation from the Operator Received
+Condition:- A(;
+L   #_emx_smfl_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+
 
 
 --------------------------------------------------
@@ -905,6 +920,8 @@ R #sqSeqTimerStart;
 AN #SQ_TIMER.Q;
 S #sqSeqTimerStart;
 L #_r_time_eject;
+L 1000;
+*I;
 T #SQ_TIMER.PT;
 
 //Log vacuum begin time.
@@ -1026,23 +1043,42 @@ Action:- // Stop timer
 SET;
 R #sqSeqTimerStart;
 
-L "dbCONST".BLK.CMD.STOP;
+//Close vacuum valve.
+L "dbCONST".SEL.GAS.NONE;
+T #_emc_gas_medium_gas;
+L "dbCONST".BLK.CMD.RESTART;
 T #_emc_gas_cmd;
 Verification:- A(;
-L #_emc_gas_state;
-L "dbCONST".BLK.STATE.STOPPED;
-==I;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+>I;
 );
+A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.INTERLOCKED;
+<I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Clear EMC restart command
+Action:- L "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
 
 
 --------------------------------------------------
 TRANSITION::08
 --------------------------------------------------
 TRNNo:- 08
-Title:- Empty transition
+Title:- Vacuum valve closed
 EmptyTransition:- False
-Description:- Jump
-Condition:- A "uncondJump";
+Description:- Jump when vaccum closed
+Condition:- A(;
+L 	#_emc_gas_state;
+L 	"dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
 
 
 --------------------------------------------------
@@ -1060,6 +1096,7 @@ Action:- //Log operator abort.
 SET;
 S #_log_msg_vacuum_fail_abort;
 R #_prompt_try_again_confirm_no;
+S #smc.ABORTED;
 Verification:- A "uncondJump";
 
 
@@ -1101,6 +1138,8 @@ Log steam open time.
 Action:- //Open WFI line PS supply valve
 L "dbCONST".SEL.LIQUID.PSWFI;
 T #_emc_water_sy_medium_liquid;
+L 0;
+T #_emc_water_sy_runtime;
 L "dbCONST".BLK.EMC3.SUBS.FLUSH;
 T #_emc_water_sy_subs;
 L "dbCONST".BLK.CMD.START;
@@ -1194,6 +1233,8 @@ R #sqSeqTimerStart;
 AN #SQ_TIMER.Q;
 S #sqSeqTimerStart;
 L #_r_time_stm_drain_sy;
+L 1000;
+*I;
 T #SQ_TIMER.PT;
 
 Verification:- A(;
@@ -1462,6 +1503,8 @@ R #sqSeqTimerStart3;
 AN #SQ_TIMER3.Q;
 S #sqSeqTimerStart3;
 L #_r_time_sip_abort;
+L 1000;
+*I;
 T #SQ_TIMER3.PT;
 
 tsi1: NOP 0;
@@ -1680,6 +1723,8 @@ R #sqSeqTimerStart;
 AN #SQ_TIMER.Q;
 S #sqSeqTimerStart;
 L #_r_time_sip;
+L 1000;
+*I;
 T #SQ_TIMER.PT;
 
 //Log SIP start time.
@@ -1841,7 +1886,7 @@ L 3;
 --------------------------------------------------
 STEP::20
 --------------------------------------------------
-StepNo:- 20.0000
+StepNo:- 20
 Title:- UO_SY_SIP : Automatic Sy SIP ABORT
 Description:- Log automatic ABORT.
 
@@ -1851,6 +1896,7 @@ ACTION::01
 Description:- Log automatic ABORT.
 Action:- SET;
 S #_log_msg_sip_abort;
+S #smc.ABORTED;
 Verification:- A "uncondJump";
 
 
@@ -1992,13 +2038,15 @@ Description:- Start timer
 ACTION::01
 --------------------------------------------------
 Description:- Start timer
-Action:- // Start vacuum timer
+Action:- // Start drain pulse timer
 A #SQ_TIMER.Q;
 R #sqSeqTimerStart;
 
 AN #SQ_TIMER.Q;
 S #sqSeqTimerStart;
 L #_r_time_drain_pulse;
+L 1000;
+*I;
 T #SQ_TIMER.PT;
 Verification:- A #sqSeqTimerStart;
 
@@ -2067,6 +2115,8 @@ R #sqSeqTimerStart;
 AN #SQ_TIMER.Q;
 S #sqSeqTimerStart;
 L #_r_time_drain_pulse;
+L 1000;
+*I;
 T #SQ_TIMER.PT;
 Verification:- A #sqSeqTimerStart;
 
@@ -2173,6 +2223,8 @@ R #sqSeqTimerStart;
 AN #SQ_TIMER.Q;
 S #sqSeqTimerStart;
 L #_r_time_drain_pulse;
+L 1000;
+*I;
 T #SQ_TIMER.PT;
 Verification:- A #sqSeqTimerStart;
 
@@ -2436,7 +2488,6 @@ L  "dbCONST".BLK.HYGIENE.STERILE;
 T #_emx_fill_hygiene;
 T #_emx_transfer_hygiene;
 T #_emx_smfl_hygiene;
-T #_emx_smfldrn_hygiene;
 
 // Set safe state
 L "dbCONST".BLK.CMD.STOP;

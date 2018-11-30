@@ -88,13 +88,12 @@ Else
     '/-------------------------------------------------------------------------/
     '/ The following should be done in a simple small script but WinCC does    /
     '/ not allow the structure SmartTag to be a variable.                      /
-    '/ Set the confirm bit and clear the index for the selected message:       /
+    '/ Set the confirm bit:                                                    /
     '/-------------------------------------------------------------------------/
 @@TEMPLATE_BEGIN|pEventPromptAll@@
     If (idxMessage = @@IDXEVENT@@) Then
     	SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.confirmNo") = bNo
     	SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.confirmYes") = bYes
-        SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active2") = False
     End If
 
 @@TEMPLATE_END@@

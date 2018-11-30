@@ -128,6 +128,7 @@ TITLE = Set Device State to CLOSED if switch is on
     //                                                                        //
     // CLOSED if switch is on:                                                //
     //------------------------------------------------------------------------//
+    A #cmdCLOSE;
     A #tPV;
     JCN _a;
     L "dbCONST".BLK.ZSC1.STATE.CLOSED;
@@ -140,26 +141,19 @@ TITLE = Set Device State to MISMATCH if CLOSED state does not follow command
     // If commanded to CLOSE and not closed then its a problem. If commanded  //
     // to OPEN then actually we don't care if OPENED or CLOSED:               //
     //------------------------------------------------------------------------//
-    O(;
     A #cmdCLOSE;
     AN #tPV;
-    );
-    O(;
-    A #cmdOPEN;
-    A #tPV;
-    );
     JCN _b;
     L "dbCONST".BLK.ZSC1.STATE.MISMATCH;
     T #p.read.mc.STATE;
 _b:   NOP 0;
 
 NETWORK
-TITLE = Set Device State to OPENED if switch is off and command is OPEN
+TITLE = Set Device State to OPENED if command is OPEN
     //------------------------------------------------------------------------//
     // OPENED if switch is on:                                                //
     //------------------------------------------------------------------------//
     A #cmdOPEN;
-    AN #tPV;
     JCN _c;
     L "dbCONST".BLK.ZSC1.STATE.OPENED;
     T #p.read.mc.STATE;

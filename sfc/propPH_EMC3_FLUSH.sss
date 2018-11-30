@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/09/2018 2:21:06 PM by David Paspa
+generated on 29/11/2018 2:09:49 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -125,11 +125,16 @@ Verification:- A "uncondJump";
 TRANSITION::01
 --------------------------------------------------
 TRNNo:- 01
-Title:- Wait for flush time
+Title:- Wait for flush time or run forever if flush time is zero
 EmptyTransition:- False
-Description:- Jump if flush time has expired.
-Condition:- // Flushing time expired.
+Description:- Jump if preset flush time has expired.
+Condition:- // Flushing time expired and not flush forever.
 A #SQ_TIMER.Q;
+A(;
+L #_runtime;
+L 0;
+<>I;
+);
 
 
 --------------------------------------------------

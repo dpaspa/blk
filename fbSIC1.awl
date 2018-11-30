@@ -81,7 +81,6 @@ VAR_TEMP
     startTMRExpired : Bool;
     tManual_Not_PID : Bool;
     startTMRElapsed : Time;
-    permitMass : Bool;
     FTR : Bool;
 END_VAR
 
@@ -250,7 +249,7 @@ TITLE = Permitted to run agitator if mass above minimum value
     >=R;
     );
     JCN _a;
-    S #permitMass;
+    S #p.read.PERMIT_MASS;
 _a:   NOP 0;
 
 NETWORK
@@ -264,7 +263,7 @@ TITLE = Low mass condition must stop the agitator from running
     <R;
     );
     JCN _b;
-    R #permitMass;
+    R #p.read.PERMIT_MASS;
 _b:   NOP 0;
 
 NETWORK
@@ -326,7 +325,7 @@ TITLE = Flag output should be on if command is ENABLE and mass is enough
     //------------------------------------------------------------------------//
     A #cmdEnable;
     AN #p.read.mc.INTERLOCK;
-    A #permitMass;
+    A #p.read.PERMIT_MASS;
     AN #p.read.mc.modeOOS;
     AN(;
     L #p.write.CMD_PEER;
@@ -480,10 +479,33 @@ TITLE = FAULT if any fault condition active
     O #p.read.FLP;
     O #p.read.FLT;
     O #p.read.FAIL_TO_RUN;
+    ON #p.read.ai.DQ;
     JCN _r;
     L "dbCONST".BLK.SIC1.STATE.FAULT;
     T #p.read.mc.STATE;
 _r:   NOP 0;
+
+NETWORK
+TITLE = Reset FAULT if all okay
+    //------------------------------------------------------------------------//
+    // Go to DISABLED from FAULT:                                             //
+    //------------------------------------------------------------------------//
+    AN #p.read.BRK;
+    AN #p.read.PHR;
+    AN #p.read.THM;
+    AN #p.read.FLP;
+    AN #p.read.FLT;
+    AN #p.read.FAIL_TO_RUN;
+    A #p.read.ai.DQ;
+    A(;
+    L #p.read.mc.STATE;
+    L "dbCONST".BLK.SIC1.STATE.FAULT;
+    ==I;
+    );
+    JCN _rok;
+    L "dbCONST".BLK.SIC1.STATE.DISABLED;
+    T #p.read.mc.STATE;
+_rok:      NOP 0;
 
 NETWORK
 TITLE = Stopped if command is ENABLE and mass not enough
@@ -497,7 +519,8 @@ TITLE = Stopped if command is ENABLE and mass not enough
     AN #p.read.FLP;
     AN #p.read.FLT;
     AN #p.read.FAIL_TO_RUN;
-    AN #permitMass;
+    A #p.read.ai.DQ;
+    AN #p.read.PERMIT_MASS;
     JCN _s;
     L "dbCONST".BLK.SIC1.STATE.STOPPED;
     T #p.read.mc.STATE;
@@ -514,6 +537,7 @@ TITLE = Running if output should be on
     AN #p.read.FLP;
     AN #p.read.FLT;
     AN #p.read.FAIL_TO_RUN;
+    A #p.read.ai.DQ;
     A #tDO;
     JCN _t;
     L "dbCONST".BLK.SIC1.STATE.RUNNING;

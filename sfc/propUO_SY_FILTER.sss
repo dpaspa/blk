@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 19/11/2018 11:37:35 AM by David Paspa
+generated on 29/11/2018 4:44:33 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -20,9 +20,10 @@ Level:- UO
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
 HeaderName:- SUFILT
-Version:- 0.1
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 0.1 Gerald Kontriner 14-Sep-2009            SFC structural design
 HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 
@@ -45,21 +46,13 @@ ParameterInOut:- IN_OUT
 --------------------------------------------------
 PARAMETER::3
 --------------------------------------------------
-Name:- emx_smfldrn_hygiene
-Type:- INT
-Description:- Description
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::4
---------------------------------------------------
 Name:- vessel_sy
 Type:- INT
 Description:- Storage vessel selection S1 or S2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::4
 --------------------------------------------------
 Name:- vessel_mx
 Type:- INT
@@ -67,7 +60,7 @@ Description:- Manufacturing vessel selection M1 or M2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::5
 --------------------------------------------------
 Name:- log_msg_filter_begin
 Type:- BOOL
@@ -75,7 +68,7 @@ Description:- UO_SY_FILTER begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::6
 --------------------------------------------------
 Name:- log_msg_filter_end
 Type:- BOOL
@@ -83,7 +76,7 @@ Description:- UO_SY_FILTER end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::7
 --------------------------------------------------
 Name:- r_pres_lpca_purge
 Type:- REAL
@@ -91,7 +84,7 @@ Description:- SY FILTER Pressure LPCA purge after filtration complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::8
 --------------------------------------------------
 Name:- emc_water_sy_state
 Type:- INT
@@ -99,7 +92,7 @@ Description:- Device state of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::9
 --------------------------------------------------
 Name:- emc_water_sy_subs
 Type:- INT
@@ -107,7 +100,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::10
 --------------------------------------------------
 Name:- emc_water_sy_cmd
 Type:- INT
@@ -115,7 +108,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::11
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -123,7 +116,7 @@ Description:- Device state of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::12
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -131,7 +124,7 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::13
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -139,7 +132,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::14
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -147,7 +140,7 @@ Description:- Setpoint to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::15
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -155,7 +148,7 @@ Description:- emc_gas medium
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::16
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -163,7 +156,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::17
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -171,7 +164,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::18
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -179,7 +172,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::19
 --------------------------------------------------
 Name:- sync_read_filtration_complete
 Type:- BOOL
@@ -187,7 +180,7 @@ Description:- Filtration complete flag
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::20
 --------------------------------------------------
 Name:- sync_write_path_ready
 Type:- BOOL
@@ -195,7 +188,7 @@ Description:- Indicates flow path has been opened
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::21
 --------------------------------------------------
 Name:- r_time_lpca_purge
 Type:- Time
@@ -203,7 +196,7 @@ Description:- SY FILTER Time to purge with LPCA after filtration
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::22
 --------------------------------------------------
 Name:- r_pres_lpca_blanket
 Type:- REAL
@@ -346,6 +339,8 @@ R #sqSeqTimerStart;
 AN #SQ_TIMER.Q;
 S #sqSeqTimerStart;
 L #_r_time_lpca_purge;
+L 1000;
+*I;
 T #SQ_TIMER.PT;
 R #_sync_write_path_ready;
 Verification:- A(;
@@ -407,7 +402,6 @@ T  #_emc_gas_cmd;
 L  "dbCONST".BLK.HYGIENE.USED;
 T #_emx_transfer_hygiene;
 T #_emx_smfl_hygiene;
-T #_emx_smfldrn_hygiene;
 Verification:- A(;
 L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;

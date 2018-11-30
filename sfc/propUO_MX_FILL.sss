@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 19/11/2018 11:36:34 AM by David Paspa
+generated on 29/11/2018 4:43:26 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -20,9 +20,10 @@ Level:- UO
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
 HeaderName:- MUFILL
-Version:- 0.1
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 0.1 Gerald Kontriner 10-Sep-2009            SFC structural design
 HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 Name:- emt_hex_setpoint
@@ -77,7 +78,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- emx_smfldrn_hygiene
+Name:- emx_smfl_hygiene
 Type:- INT
 Description:- Description
 ParameterInOut:- IN_OUT
@@ -85,7 +86,7 @@ ParameterInOut:- IN_OUT
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- emx_smfl_hygiene
+Name:- emx_transfer_hygiene
 Type:- INT
 Description:- Description
 ParameterInOut:- IN_OUT
@@ -93,7 +94,7 @@ ParameterInOut:- IN_OUT
 --------------------------------------------------
 PARAMETER::7
 --------------------------------------------------
-Name:- emx_transfer_hygiene
+Name:- emx_fill_hygiene
 Type:- INT
 Description:- Description
 ParameterInOut:- IN_OUT
@@ -101,21 +102,13 @@ ParameterInOut:- IN_OUT
 --------------------------------------------------
 PARAMETER::8
 --------------------------------------------------
-Name:- emx_fill_hygiene
-Type:- INT
-Description:- Description
-ParameterInOut:- IN_OUT
-
---------------------------------------------------
-PARAMETER::9
---------------------------------------------------
 Name:- emx_fill_cmd
 Type:- INT
 Description:- Command for filling line
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::9
 --------------------------------------------------
 Name:- emx_fill_subs
 Type:- INT
@@ -123,7 +116,7 @@ Description:- Substate selection for filling line
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::10
 --------------------------------------------------
 Name:- emx_fill_state
 Type:- INT
@@ -131,7 +124,7 @@ Description:- Device state for filling line
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::11
 --------------------------------------------------
 Name:- emt_hex_setpoint
 Type:- REAL
@@ -139,7 +132,7 @@ Description:- Heat exchanger temperature controller temperature setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::12
 --------------------------------------------------
 Name:- vessel_mx
 Type:- INT
@@ -147,7 +140,7 @@ Description:- Manufacturing vessel selection M1 or M2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::13
 --------------------------------------------------
 Name:- fill_flz
 Type:- INT
@@ -155,7 +148,7 @@ Description:- Filling line selection FL1 or FL2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::14
 --------------------------------------------------
 Name:- vessel_sy
 Type:- INT
@@ -163,7 +156,7 @@ Description:- Storage vessel selection S1 or S2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::15
 --------------------------------------------------
 Name:- log_msg_filtration_end
 Type:- BOOL
@@ -171,7 +164,7 @@ Description:- UO_MX_FILL Filtration end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::16
 --------------------------------------------------
 Name:- log_msg_filtration_start
 Type:- BOOL
@@ -179,7 +172,7 @@ Description:- UO_MX_FILL Filtration begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::17
 --------------------------------------------------
 Name:- log_msg_fill_begin
 Type:- BOOL
@@ -187,7 +180,7 @@ Description:- UO_MX_FILL begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::18
 --------------------------------------------------
 Name:- log_msg_fill_end
 Type:- BOOL
@@ -195,7 +188,7 @@ Description:- UO_MX_FILL end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::19
 --------------------------------------------------
 Name:- emm_vessel_mass_nett
 Type:- REAL
@@ -203,7 +196,7 @@ Description:- Vessel mass
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::20
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -211,7 +204,7 @@ Description:- Substate selection of emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::21
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -219,7 +212,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::22
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -227,7 +220,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::23
 --------------------------------------------------
 Name:- emt_hex_subs
 Type:- INT
@@ -235,7 +228,7 @@ Description:- Substate selection of emt_hex
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::24
 --------------------------------------------------
 Name:- emt_hex_state
 Type:- INT
@@ -243,7 +236,7 @@ Description:- Device State of emt_hex
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::25
 --------------------------------------------------
 Name:- emt_hex_cmd
 Type:- INT
@@ -251,7 +244,7 @@ Description:- Command to emt_hex
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::26
 --------------------------------------------------
 Name:- prompt_filtration
 Type:- BOOL
@@ -259,7 +252,7 @@ Description:- UO_MX_FILL Operator to confirm when ready to start filtration
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::27
 --------------------------------------------------
 Name:- prompt_filtration_confirm_yes
 Type:- BOOL
@@ -267,7 +260,7 @@ Description:- UO_MX_FILL Operator to confirm when ready to start filtration conf
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::29
+PARAMETER::28
 --------------------------------------------------
 Name:- r_temp_filt
 Type:- REAL
@@ -275,7 +268,7 @@ Description:- MX FILL Filling temperature setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::29
 --------------------------------------------------
 Name:- emx_smfl_state
 Type:- INT
@@ -283,7 +276,7 @@ Description:- Device State of emx_smfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::31
+PARAMETER::30
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -291,7 +284,7 @@ Description:- Device State of emx_transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::31
 --------------------------------------------------
 Name:- emx_smfl_cmd
 Type:- INT
@@ -299,7 +292,7 @@ Description:- Command to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::32
 --------------------------------------------------
 Name:- emx_smfl_subs
 Type:- INT
@@ -307,7 +300,7 @@ Description:- Substate selection of emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::33
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -315,7 +308,7 @@ Description:- Command to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::34
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -323,7 +316,7 @@ Description:- Substate selection of emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::35
 --------------------------------------------------
 Name:- log_msg_filtration_complete
 Type:- BOOL
@@ -331,7 +324,7 @@ Description:- UO_MX_FILL Filtration is complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::36
 --------------------------------------------------
 Name:- confirm_complete
 Type:- BOOL
@@ -339,7 +332,7 @@ Description:- UO_MX_FILL Operator to confirm when filtration is complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::37
 --------------------------------------------------
 Name:- r_mass_throttle
 Type:- REAL
@@ -347,7 +340,7 @@ Description:- MX FILL Mass to reduce pressure near the end of filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::38
 --------------------------------------------------
 Name:- r_pres_hpca_filt2
 Type:- REAL
@@ -355,7 +348,7 @@ Description:- MX FILL Reduced HPCA pressure near the end of filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::39
 --------------------------------------------------
 Name:- emx_mmfl_cmd
 Type:- INT
@@ -363,7 +356,7 @@ Description:- Command to emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::40
 --------------------------------------------------
 Name:- emx_mmfl_subs
 Type:- INT
@@ -371,7 +364,7 @@ Description:- Substate selection of emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::41
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -379,7 +372,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::43
+PARAMETER::42
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -387,7 +380,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::44
+PARAMETER::43
 --------------------------------------------------
 Name:- emc_water_state
 Type:- INT
@@ -395,7 +388,7 @@ Description:- Device state of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::44
 --------------------------------------------------
 Name:- emc_water_subs
 Type:- INT
@@ -403,7 +396,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::45
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -411,7 +404,7 @@ Description:- emc_gas_setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::46
 --------------------------------------------------
 Name:- emx_mmfl_state
 Type:- INT
@@ -419,7 +412,7 @@ Description:- Device State of emx_mmfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::47
 --------------------------------------------------
 Name:- emc_water_cmd
 Type:- INT
@@ -427,7 +420,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::48
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -435,7 +428,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::49
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -443,7 +436,7 @@ Description:- emc_gas_medium
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::50
 --------------------------------------------------
 Name:- ema_vessel_state
 Type:- INT
@@ -451,7 +444,7 @@ Description:- Device State of ema_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::51
 --------------------------------------------------
 Name:- ema_vessel_subs
 Type:- INT
@@ -459,7 +452,7 @@ Description:- Substate selection to ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::52
 --------------------------------------------------
 Name:- ema_vessel_cmd
 Type:- INT
@@ -467,7 +460,7 @@ Description:- ema_vessel_cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::54
+PARAMETER::53
 --------------------------------------------------
 Name:- r_pres_hpca_filt
 Type:- REAL
@@ -513,17 +506,53 @@ L  "dbCONST".BLK.HYGIENE.STERILE;
 L #_emx_smfl_hygiene;
 ==I;
 );
-A(;
-L  "dbCONST".BLK.HYGIENE.STERILE;
-L #_emx_smfldrn_hygiene;
-==I;
-);
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 02
+Title:- Incorrect Hygiene Status
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
 STEP::02
 --------------------------------------------------
 StepNo:- 02
+Title:- UO_MX_FILL : Incorrect Hygiene Status
+Description:- Log equipment is not in Hygiene status USED.
+Prompt operator to confirm abort.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log equipment is not in Hygiene status USED.
+Send message to HMI
+Action:- //Log time if one or more units not in correct Hygiene status USED
+SET;
+S #_log_msg_wrong_hygiene;
+S #_prompt_abort;
+S #smc.ABORTED;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 3.0000
+Title:- Confirm Abort (Incorrect Hygiene Status)
+EmptyTransition:- False
+Description:- Confirm Abort (Incorrect Hygiene Status)
+Condition:- A #_prompt_abort_confirm_yes;
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 3.0000
 Title:- UO_MX_FILL : Connect Pre Filter to to Flow Plate FPx1.
 Description:- Prompt operator to confirm Pre-Filter is connected to FPn1 ZSCn113 by starting EMX1_SETUP_FILTER.
 
@@ -556,9 +585,9 @@ L "dbCONST".BLK.EMX1.SUBS.SETUP_FILTER;
 
 
 --------------------------------------------------
-TRANSITION::03
+TRANSITION::04
 --------------------------------------------------
-TRNNo:- 3.0000
+TRNNo:- 4.0000
 Title:- Confirmation Received
 EmptyTransition:- False
 Description:- Confirmation from the Operator Received
@@ -568,36 +597,6 @@ L  #_emx_mmfl_state;
 L  "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
-
-
---------------------------------------------------
-STEP::03
---------------------------------------------------
-StepNo:- 03
-Title:- UO_MX_FILL : Incorrect Hygiene Status
-Description:- Log equipment is not in Hygiene status USED.
-Prompt operator to confirm abort.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Log equipment is not in Hygiene status USED.
-Send message to HMI
-Action:- //Log time if one or more units not in correct Hygiene status USED
-SET;
-S #_log_msg_wrong_hygiene;
-S #_prompt_abort;
-Verification:- A "uncondJump";
-
-
---------------------------------------------------
-TRANSITION::04
---------------------------------------------------
-TRNNo:- 4.0000
-Title:- Confirm Abort (Incorrect Hygiene Status)
-EmptyTransition:- False
-Description:- Confirm Abort (Incorrect Hygiene Status)
-Condition:- A #_prompt_abort_confirm_yes;
 
 
 --------------------------------------------------
@@ -621,33 +620,18 @@ L  #_r_pres_lpca_blanket;
 T  #_emc_gas_setpoint;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T #_emc_gas_subs;
-L  "dbCONST".BLK.CMD.START;
+L  "dbCONST".BLK.CMD.RESTART;
 T #_emc_gas_cmd;
 
 //Set all Mx equipment to safe state.
 L "dbCONST".BLK.CMD.STOP;
 T  #_ema_vessel_cmd;
-L "dbCONST".BLK.SAFE.CMD;
-T  #_ema_vessel_subs;
-
-L "dbCONST".BLK.CMD.STOP;
 T  #_emc_water_cmd;
-L "dbCONST".BLK.SAFE.CMD;
-T  #_emc_water_subs;
-
-L "dbCONST".BLK.CMD.STOP;
 T  #_emv_vessel_cmd;
-L "dbCONST".BLK.SAFE.CMD;
-T  #_emv_vessel_subs;
-
-L "dbCONST".BLK.CMD.STOP;
 T  #_emx_transfer_cmd;
-L "dbCONST".BLK.SAFE.CMD;
-T  #_emx_transfer_subs;
-
 Verification:- A(;
-L #_emc_gas_subs;
-L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
+L #_emc_gas_state;
+L "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
 A(;
@@ -671,7 +655,11 @@ L "dbCONST".BLK.STATE.STOPPED;
 ACTION::02
 --------------------------------------------------
 Description:- Prompt operator to start filtration and reset flags.
-Action:- SET;
+Action:- // Clear gas restart command
+L  "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
+
+SET;
 S #_prompt_filtration;
 Verification:- A "uncondJump";
 
@@ -708,7 +696,7 @@ T #_emx_mmfl_cmd;
 T #_emx_smfl_cmd;
 T #_emx_transfer_cmd;
 T #_emv_vessel_cmd;
-T #_emc_gas_cmd;
+
 Verification:- A(;
 L   #_emt_hex_state;
 L   "dbCONST".BLK.STATE.STOPPED;
@@ -731,11 +719,6 @@ L   "dbCONST".BLK.STATE.STOPPED;
 );
 A(;
 L   #_emv_vessel_state;
-L   "dbCONST".BLK.STATE.STOPPED;
-==I;
-);
-A(;
-L   #_emc_gas_state;
 L   "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
@@ -781,7 +764,7 @@ L "dbCONST".SEL.GAS.LPCA;
 T #_emc_gas_medium_gas;
 L "dbCONST".BLK.EMC1.SUBS.VALVE;
 T #_emc_gas_subs;
-L  "dbCONST".BLK.CMD.START;
+L  "dbCONST".BLK.CMD.RESTART;
 T #_emc_gas_cmd;
 
 //Start FILTER.
@@ -825,6 +808,13 @@ L  "dbCONST".BLK.EMX6.SUBS.FILTER_BLEED;
 ==I;
 );
 
+--------------------------------------------------
+ACTION::04
+--------------------------------------------------
+Description:- Clear EMC gas restart ccommand
+Action:- L  "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
+
 
 --------------------------------------------------
 TRANSITION::06
@@ -858,11 +848,6 @@ L   #_emv_vessel_state;
 L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
-A(;
-L   #_emc_gas_state;
-L   "dbCONST".BLK.STATE.COMPLETED;
-==I;
-);
 
 
 --------------------------------------------------
@@ -876,14 +861,6 @@ Close Mx LPCA valve.
 
 --------------------------------------------------
 ACTION::01
---------------------------------------------------
-Description:- Close Mx LPCA valve.
-Action:- L "dbCONST".BLK.CMD.STOP;
-T  #_emc_gas_cmd;
-Verification:- A "uncondJump";
-
---------------------------------------------------
-ACTION::02
 --------------------------------------------------
 Description:- Reset smfl and hex EMs
 Action:- L "dbCONST".BLK.CMD.STOP;
@@ -901,7 +878,7 @@ L   "dbCONST".BLK.STATE.STOPPED;
 );
 
 --------------------------------------------------
-ACTION::03
+ACTION::02
 --------------------------------------------------
 Description:- Open filter outlet valve, DVx137.
 Action:- //Set emx_smfl to substate FILTER.
@@ -932,15 +909,11 @@ L  "dbCONST".BLK.EMT1.SUBS.COOL;
 --------------------------------------------------
 TRANSITION::07
 --------------------------------------------------
-TRNNo:- 07
-Title:- Mx LPCA valve closed?
+TRNNo:- 7.0000
+Title:- Empty Transition
 EmptyTransition:- False
-Description:- Wait for Mx LPCA valve closed.
-Condition:- A(;
-L #_emc_gas_state;
-L "dbCONST".BLK.STATE.STOPPED;
-==I;
-);
+Description:- Jump
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -961,13 +934,20 @@ L  "dbCONST".SEL.GAS.HPCA;
 T  #_emc_gas_medium_gas;
 L  "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T  #_emc_gas_subs;
-L  "dbCONST".BLK.CMD.START;
+L  "dbCONST".BLK.CMD.RESTART;
 T  #_emc_gas_cmd;
 Verification:- A(;
 L #_emc_gas_subs;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ==I;
 );
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Clear EMC restart command
+Action:- L  "dbCONST".BLK.CMD.START;
+T  #_emc_gas_cmd;
 
 
 --------------------------------------------------
@@ -1037,7 +1017,6 @@ L  "dbCONST".BLK.HYGIENE.USED;
 T #_emx_fill_hygiene;
 T #_emx_transfer_hygiene;
 T #_emx_smfl_hygiene;
-T #_emx_smfldrn_hygiene;
 Verification:- A "uncondJump";
 
 

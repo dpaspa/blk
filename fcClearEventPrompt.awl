@@ -1,0 +1,40 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fcClearEventPrompt                                            //
+// Description:                                                               //
+// Clear the event prompt structure.                                          //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 1.0 David Paspa      30-Nov-2018 NA        Reboot for S7-1500.             //
+//----------------------------------------------------------------------------//
+FUNCTION "fcClearEventPrompt" : Void
+TITLE = Clear eventPrompt structure
+{ S7_Optimized_Access := 'FALSE' }
+AUTHOR : REO
+NAME : fcClearEventPrompt
+VERSION : 1.0
+
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR_INPUT
+    eventPrompt : "udtEventPrompt"; // Event prompt to clear
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Clear the event prompt
+    //------------------------------------------------------------------------//
+    // Clear the event prompt confirm flags and set the cancel flags for each //
+    // HMI:                                                                   //
+    //------------------------------------------------------------------------//
+    R eventPrompt.confirmYes;
+    R eventPrompt.confirmNo;
+    S eventPrompt.cancel1;
+    S eventPrompt.cancel2;
+    S eventPrompt.cancel3;
+    S eventPrompt.cancel4;
+    S eventPrompt.cancel5;
+END_FUNCTION

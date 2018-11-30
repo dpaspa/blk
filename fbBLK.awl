@@ -199,20 +199,20 @@ TITLE = Shutdown if STOPPED command no matter what
 
 @@ATTR_BEGIN|CHILD_ACQUIRE_EXISTS@@
 NETWORK
-TITLE = Check if any shared Child is not Owned or not Available
+TITLE = Check if any shared Child is not Available or not part of the batch
     //------------------------------------------------------------------------//
     // CHILD UNAVAILABLE   CHILD UNAVAILABLE   CHILD UNAVAILABLE   CHILD UNAV //
     //                                                                        //
     // Check any shared child devices are Available. If Available they will   //
-    // be acquired if needed later to execute a command:                      //
+    // be acquired by the batch if needed later to execute a command:         //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_ACQUIRE@@
     O(;
     @@CHILDACQUIRESTATEMENT@@
     AN "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.isAvailable;
     AN(;
-    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
-    L #p.read.mc.ME;
+    L #p.write.mc.SERIALNUM;
+    L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.SERIALNUM;
     ==I;
     );
     );
@@ -330,6 +330,7 @@ TITLE = Set child devices to safe state if stopped command or SFC fault
     T #childReqCMD.@@CHILDPARAMETERALIAS@@;
 _blkSafe_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
+
 @@ATTR_END|CHILD_COMMAND@@
 
 _notChildSafe:   NOP 0;
@@ -367,14 +368,19 @@ TITLE = Cascade Auto or OOS Mode to children
     );
     JCN _nomcAutoOOS;
 
-@@ATTR_BEGIN|CHILD_COMMAND@@
+    L #p.write.mc.MODE;
+@@ATTR_BEGIN|CHILD_COMMAND_ALWAYS@@
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.MODE;
+@@ATTR_END|CHILD_COMMAND_ALWAYS@@
+
+@@ATTR_BEGIN|CHILD_COMMAND_SELECTED@@
     @@CHILDCOMMANDSTATEMENT@@
     JCN _cascMode@@COUNTERATTR|1@@;
     L #p.write.mc.MODE;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.MODE;
 _cascMode@@COUNTERATTR|1@@:   NOP 0;
 
-@@ATTR_END|CHILD_COMMAND@@
+@@ATTR_END|CHILD_COMMAND_SELECTED@@
 _nomcAutoOOS:   NOP 0;
 @@ATTR_END|CHILD_COMMAND_EXISTS@@
 
@@ -520,6 +526,16 @@ _switch:   NOP 0;
 
     //------------------------------------------------------------------------//
     // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
+    // STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOP //
+    // STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOP //
+    //------------------------------------------------------------------------//
+_state_STOPPING: NOP 0;
+
+SET;
+JC _switch_end;
+
+    //------------------------------------------------------------------------//
+    // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
     // STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED    //
     // STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED   STOPPED    //
     //------------------------------------------------------------------------//
@@ -595,6 +611,7 @@ TITLE = Clear the operator prompt flags
 @@ATTR_BEGIN|pEventPromptConfirmNo@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_no;
 @@ATTR_END|pEventPromptConfirmNo@@
+    CALL fcClearEventPrompt (eventPrompt := "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@]);
     R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmYes;
     R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmNo;
     S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel1;
@@ -717,6 +734,23 @@ TITLE = Zero the log time data values
 @@ATTR_END|pEventDataTime@@
 @@ATTR_END|pEventLogTimeExists@@
 
+@@ATTR_BEGIN|CHILD_ACQUIRE@@
+NETWORK
+TITLE = Release child @@CHILDPARAMETERALIAS@@
+    //------------------------------------------------------------------------//
+    // RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELE   //
+    //                                                                        //
+    // Release the child device if acquired earlier to run the command:       //
+    //------------------------------------------------------------------------//
+    A #acquire.@@CHILDPARAMETERALIAS@@;
+    JCN _notOwn@@COUNTERATTR|1@@;
+    L "dbCONST".BLK.ID.AVAILABLE;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
+    R #acquire.@@CHILDPARAMETERALIAS@@;
+_notOwn@@COUNTERATTR@@:   NOP 0;
+
+@@ATTR_END|CHILD_ACQUIRE@@
+
 SET;
 JC _switch_end;
 
@@ -738,6 +772,21 @@ TITLE = STARTING STARTING STARTING Reset running substate and completion flags
 @@ATTR_BEGIN|STATE@@
     R #subsRunning.@@STATE@@;
 @@ATTR_END|STATE@@
+
+@@ATTR_BEGIN|pEventPromptExists@@
+NETWORK
+TITLE = Clear the operator prompt cancels
+    //------------------------------------------------------------------------//
+    // Clear the SFC prompt cancel bits:                                      //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|pEventPrompt@@
+    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel1;
+    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel2;
+    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel3;
+    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel4;
+    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel5;
+@@ATTR_END|pEventPrompt@@
+@@ATTR_END|pEventPromptExists@@
 
 @@ATTR_BEGIN|STATE@@
 NETWORK
@@ -846,7 +895,17 @@ TITLE = Cascade Batch Serial Number to all children
     //                                                                        //
     // Cascade this block's Batch Number and Recipe ID to all child devices:  //
     //------------------------------------------------------------------------//
-@@ATTR_BEGIN|CHILD_CASCADE@@
+    L #p.write.mc.SERIALNUM;
+@@ATTR_BEGIN|CHILD_CASCADE_ALWAYS@@
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.SERIALNUM;
+@@ATTR_END|CHILD_CASCADE_ALWAYS@@
+
+    L #p.write.mc.RECIPE;
+@@ATTR_BEGIN|CHILD_CASCADE_ALWAYS@@
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.RECIPE;
+@@ATTR_END|CHILD_CASCADE_ALWAYS@@
+
+@@ATTR_BEGIN|CHILD_CASCADE_SELECTED@@
     @@CHILDCOMMANDSTATEMENT@@
     JCN _childBatch_@@COUNTERATTR|1@@;
     L #p.write.mc.SERIALNUM;
@@ -855,7 +914,7 @@ TITLE = Cascade Batch Serial Number to all children
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.RECIPE;
 _childBatch_@@COUNTERATTR|1@@:   NOP 0;
 
-@@ATTR_END|CHILD_CASCADE@@
+@@ATTR_END|CHILD_CASCADE_SELECTED@@
 
 @@ATTR_BEGIN|CHILD_CASCADE@@
 @@ATTR_BEGIN|CHILD_INIT_CMD_TRUE_STATES@@
@@ -984,16 +1043,6 @@ JC _switch_end;
 
     //------------------------------------------------------------------------//
     // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
-    // STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOP //
-    // STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOPPING   STOP //
-    //------------------------------------------------------------------------//
-_state_STOPPING: NOP 0;
-
-SET;
-JC _switch_end;
-
-    //------------------------------------------------------------------------//
-    // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
     // RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING    //
     // RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING   RUNNING    //
     //------------------------------------------------------------------------//
@@ -1086,22 +1135,20 @@ _not_eventPrompt_@@IDXEVENT@@:   NOP 0;
 _noRunPrompt:   NOP 0;
 
 NETWORK
-TITLE = Check if operator confirm bit response
+TITLE = Cancel the event messages if response received
     //------------------------------------------------------------------------//
-    // OPERATOR CONFIRM   OPERATOR CONFIRM   OPERATOR CONFIRM   OPERATOR CONF //
-    //                                                                        //
-    // Check if a confirm response has been received:                         //
+    // Cancel all HMI event messages if a response received:                  //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|pEventPrompt@@
     O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmYes;
     O "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmNo;
-    JCN _not_eventPrompt_@@IDXEVENT@@_response;
+    JCN _no_Response_@@IDXEVENT@@;
     S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel1;
     S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel2;
     S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel3;
     S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel4;
     S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel5;
-_not_eventPrompt_@@IDXEVENT@@_response:   NOP 0;
+_no_Response_@@IDXEVENT@@:   NOP 0;
 
 @@ATTR_END|pEventPrompt@@
 
@@ -1400,23 +1447,6 @@ _noArm_@@CHILDPARAMETERALIAS@@:   NOP 0;
 @@ATTR_END|CHILD_ARM_COMPLETED@@
 @@ATTR_END|CHILD_COMMAND_EXISTS@@
 
-@@ATTR_BEGIN|CHILD_ACQUIRE@@
-NETWORK
-TITLE = Release child @@CHILDPARAMETERALIAS@@ if acquired and command completed
-    //------------------------------------------------------------------------//
-    // RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELE   //
-    //                                                                        //
-    // Release the child device if acquired earlier to run the command:       //
-    //------------------------------------------------------------------------//
-    A #acquire.@@CHILDPARAMETERALIAS@@;
-    JCN _notOwn@@COUNTERATTR|1@@;
-    L "dbCONST".BLK.ID.AVAILABLE;
-    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
-    R #acquire.@@CHILDPARAMETERALIAS@@;
-_notOwn@@COUNTERATTR@@:   NOP 0;
-
-@@ATTR_END|CHILD_ACQUIRE@@
-
     //------------------------------------------------------------------------//
     // SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH   SWITCH  //
     // END   END   END   END   END   END  END   END   END   END   END   END   //
@@ -1602,13 +1632,15 @@ TITLE = CALL SFC @@SFC@@ if @@STATE@@ running
 @@ATTR_BEGIN|pSFCSelectMCWrite@@
         @@CHILDPARAMETER@@   := #p.select.@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pSFCSelectMCWrite@@
+@@ATTR_BEGIN|pParentSync@@
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.select.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.@@SYNCPARAMETER@@ ,
+@@ATTR_END|pParentSync@@
         dummy                := #dummy
     );
 _notSFC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|SFC@@
 
-@@ATTR_BEGIN|CHILD_COMMAND_EXISTS@@
 NETWORK
 TITLE = Check if any Child state does not match the command
     //------------------------------------------------------------------------//
@@ -1618,8 +1650,10 @@ TITLE = Check if any Child state does not match the command
     // from this parent block if the child state grace period timer has       //
     // expired. Stop checking if the first child state mismatch found:        //
     //------------------------------------------------------------------------//
+    CLR;
+@@ATTR_BEGIN|CHILD_COMMAND_FLOWPATH_EXISTS@@
     A(;
-@@ATTR_BEGIN|CHILD_COMMAND@@
+@@ATTR_BEGIN|CHILD_COMMAND_FLOWPATH@@
     O(;
     @@CHILDCOMMANDSTATEMENT@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
@@ -1650,8 +1684,9 @@ TITLE = Check if any Child state does not match the command
 @@ATTR_END|CHILD_COMMAND_BLK_EXISTS@@
     );
 
-@@ATTR_END|CHILD_COMMAND@@
+@@ATTR_END|CHILD_COMMAND_FLOWPATH@@
     );
+@@ATTR_END|CHILD_COMMAND_FLOWPATH_EXISTS@@
     JCN _noMismatch;
 
     S #flags.childMismatch;
@@ -1662,7 +1697,6 @@ _noMismatch:   NOP 0;
     R #p.read.mc.INTIL;
 
 _noResetMismatch:   NOP 0;
-@@ATTR_END|CHILD_COMMAND_EXISTS@@
 
 NETWORK
 TITLE = If child command changed, start timer to wait for child state

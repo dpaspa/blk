@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 25/11/2018 11:56:14 AM by David Paspa
+generated on 29/11/2018 4:43:41 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -20,9 +20,10 @@ Level:- UO
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
 HeaderName:- MUMAKE
-Version:- 0.2
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 0.2 Gerald Kontriner 10-Oct-2009            Logic design change
 // 0.1 Gerald Kontriner 17-Sep-2009            SFC structural design
 HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
@@ -436,7 +437,7 @@ Prompt operator to confirm Mx vessel ready for tare.
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Reset EMs
+Description:- Reset EMs 
 Action:- L "dbCONST".BLK.SAFE.CMD;
 T  #_emv_vessel_subs;
 L "dbCONST".BLK.CMD.STOP;
@@ -523,6 +524,8 @@ ACTION::02
 Description:- Set emm_vessel to substate TARE and start it.
 Action:- // Set substate TARE.
 L #_r_time_measure_settling;
+L 1000;
+*I;
 T #_emm_vessel_settling_time;
 L "dbCONST".BLK.EMM1.SUBS.TARE;
 T #_emm_vessel_subs;
@@ -565,6 +568,13 @@ Action:- //Prompt operator to select Manufacturing Operations.
 SET;
 S #_prompt_pmo;
 S #_make_active;
+
+//Reset all commands
+R #_cmd_charge;
+R #_cmd_complete;
+R #_cmd_manway;
+R #_cmd_measure;
+R #_cmd_mix;
 Verification:- A "uncondJump";
 
 
@@ -647,6 +657,8 @@ ACTION::01
 --------------------------------------------------
 Description:- Set substate to safe state and stop emm_vessel.
 Action:- L #_r_time_measure_settling;
+L 1000;
+*I;
 T #_emm_vessel_settling_time;
 L "dbCONST".BLK.CMD.STOP;
 T  #_emm_vessel_cmd;
@@ -871,6 +883,8 @@ L #_fp_speed_setpoint;
 T #_ema_vessel_setpoint;
 //Load Agitator runtime.
 L #_fp_time_make_agit;
+L 1000;
+*I;
 T #_ema_vessel_runtime;
 
 // Start Agitator 
@@ -996,12 +1010,25 @@ Action:- T #_emv_vessel_subs;
 L "dbCONST".BLK.CMD.STOP;
 T #_emv_vessel_cmd;
 
+// Enable LPCA control.
+L #_r_pres_lpca_make;
+T #_emc_gas_setpoint;
+L "dbCONST".SEL.GAS.LPCA;
+T #_emc_gas_medium_gas;
+L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
+T #_emc_gas_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
 
 // Reset flags
 SET;
 R #_cmd_manway;
 R #_prompt_manway_complete_confirm_yes;
-Verification:- A "uncondJump";
+Verification:- A(;
+L #_emc_gas_subs;
+L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
+==I;
+);
 
 
 --------------------------------------------------
@@ -1109,30 +1136,12 @@ Log Mx Make operation end time.
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Action Description
-Action:- L "dbCONST".BLK.CMD.STOP;
-T #_emc_gas_cmd;
-Verification:- A(;
-L #_emc_gas_state;
-L "dbCONST".BLK.STATE.STOPPED;
-==I;
-);
-
---------------------------------------------------
-ACTION::02
---------------------------------------------------
 Description:- Enable LPCA pressure control and enable Mx Manway alarm.
 Action:- //Stop emv_vessel.
 L "dbCONST".BLK.SAFE.CMD;
 T #_emv_vessel_subs;
 L "dbCONST".BLK.CMD.STOP;
 T #_emv_vessel_cmd;
-
-//Enable LPCA pressure control.
-L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
-T #_emc_gas_subs;
-L "dbCONST".BLK.CMD.START;
-T #_emc_gas_cmd;
 Verification:- //Verify emv_vessel stopped.
 A(;
 L #_emv_vessel_state;
@@ -1141,7 +1150,7 @@ L "dbCONST".BLK.STATE.STOPPED;
 );
 
 --------------------------------------------------
-ACTION::03
+ACTION::02
 --------------------------------------------------
 Description:- Set other equipment to safe state and reset flags.
 Log Mx Make operation end time.

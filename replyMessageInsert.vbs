@@ -76,12 +76,12 @@ End If
 '/-----------------------------------------------------------------------------/
 '/ Check if the event is already raised in the message list:                   /
 '/-----------------------------------------------------------------------------/
-If (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active2")) Then
+If (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active3")) Then
 
 '/-----------------------------------------------------------------------------/
 '/ The message is not in the list. Check if it has now been triggered:         /
 '/-----------------------------------------------------------------------------/
-ElseIf (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger2")) Then
+ElseIf (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger3")) Then
     '/-------------------------------------------------------------------------/
     '/ Insert the event message into the first available message box slot:     /
     '/-------------------------------------------------------------------------/
@@ -106,8 +106,8 @@ ElseIf (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger2")) Then
     '/ Flag it was inserted if there was a message slot available:             /
     '/-------------------------------------------------------------------------/
     If (bInserted) Then
-        SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active2") = True
-        SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger2") = False
+        SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active3") = True
+        SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.trigger3") = False
     End If
 End If
 

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 25/11/2018 11:51:45 AM by David Paspa
+generated on 29/11/2018 2:09:40 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -166,19 +166,14 @@ SET;
 S #_log_msg_mix_begin;
 
 
-// Initialise the run timer
-S #sqRunTimer.RESET;
-R #sqRunTimer.NON_RET;
+//Start Timer for agitator runtim
+A #SQ_TIMER.Q;
+R #sqSeqTimerStart;
 
-//Assign the run time setpoint
-L 0;
-T #sqRunTimer.TIME_H;
-
-L 0;
-T #sqRunTimer.TIME_M;
-
+AN #SQ_TIMER.Q;
+S #sqSeqTimerStart;
 L #_runtime;
-T #sqRunTimer.TIME_S;
+T #SQ_TIMER.PT;
 
 // Mixer is running so start accumulating the run time.
 S #sqRunTimer.ENABLE;
@@ -189,7 +184,7 @@ T #_sic_agit_cmd;
 //The  mixer is now be running. 
 L "dbCONST".BLK.SIC1.STATE.RUNNING;
 T #_agit_hist;
-Verification:- A "uncondJump";
+Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
@@ -228,7 +223,7 @@ TRNNo:- 02
 Title:- TIME_RUN expired
 EmptyTransition:- False
 Description:- Jump if running time has expired
-Condition:- A #sqRunTimer.TIME_EXPIRED;
+Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
