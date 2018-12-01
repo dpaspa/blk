@@ -1,0 +1,161 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Description: Handles the HMI interface for operator control of each SFC.   //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      29-Mar-2018 NA        Reboot for S7-1500.             //
+// 0.1 Khairul Basar    05-Oct-2009 NA        Inital Design.                  //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbHMISelectSFC"
+TITLE = SFC Selection
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifbHMISelectSFC
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare local variables:                                                   //
+//----------------------------------------------------------------------------//
+VAR
+    CTR { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Int;   // Counter
+END_VAR
+
+VAR_TEMP
+    sfcSelected : Int;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Increment the counter
+    //------------------------------------------------------------------------//
+    // Increment the HMI number counter:                                      //
+    //------------------------------------------------------------------------//
+    L #CTR;
+    INC 1;
+    T #CTR;
+
+NETWORK
+TITLE = Get the selected SFC for HMI 1
+    //------------------------------------------------------------------------//
+    // Get the SFC index number selected by the user when they clicked the    //
+    // faceplate SFC target:                                                  //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 1;
+    ==I;
+    );
+    JCN _notHMI1;
+    L "dbHMISelect".hmi1SelectSFC;
+    T #sfcSelected;
+_notHMI1:   NOP 0;
+
+NETWORK
+TITLE = Get the selected SFC for HMI 2
+    //------------------------------------------------------------------------//
+    // Get the SFC index number selected by the user when they clicked the    //
+    // faceplate SFC target:                                                  //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 2;
+    ==I;
+    );
+    JCN _notHMI2;
+    L "dbHMISelect".hmi2SelectSFC;
+    T #sfcSelected;
+_notHMI2:   NOP 0;
+
+NETWORK
+TITLE = Get the selected SFC for HMI 3
+    //------------------------------------------------------------------------//
+    // Get the SFC index number selected by the user when they clicked the    //
+    // faceplate SFC target:                                                  //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 3;
+    ==I;
+    );
+    JCN _notHMI3;
+    L "dbHMISelect".hmi3SelectSFC;
+    T #sfcSelected;
+_notHMI3:   NOP 0;
+
+NETWORK
+TITLE = Get the selected SFC for HMI 4
+    //------------------------------------------------------------------------//
+    // Get the SFC index number selected by the user when they clicked the    //
+    // faceplate SFC target:                                                  //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 4;
+    ==I;
+    );
+    JCN _notHMI4;
+    L "dbHMISelect".hmi4SelectSFC;
+    T #sfcSelected;
+_notHMI4:   NOP 0;
+
+NETWORK
+TITLE = Get the selected SFC for HMI 5
+    //------------------------------------------------------------------------//
+    // Get the SFC index number selected by the user when they clicked the    //
+    // faceplate SFC target:                                                  //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 5;
+    ==I;
+    );
+    JCN _notHMI5;
+    L "dbHMISelect".hmi5SelectSFC;
+    T #sfcSelected;
+_notHMI5:   NOP 0;
+
+@@TEMPLATE_BEGIN|INSTANCE_SFC@@
+NETWORK
+TITLE = @@INSTANCE@@ @@DESCRIPTION@@ : @@STATEDESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Check if this SFC is selected:                                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #sfcSelected;
+    L 1@@IDX@@@@SFCIDX@@@@IDX@@;
+    ==I;
+    );
+    JCN _not_@@SFC@@_@@IDX@@;
+
+    CALL "fcHMIInterfaceSFC"
+    (   hmiNum               := #CTR ,
+        smc                  := "idb@@CLASS@@".f[@@IDX@@].@@SFC@@.smc ,
+        sqStep               := "idb@@CLASS@@".f[@@IDX@@].@@SFC@@.sqSequencer.STEP ,
+        tmr                  := "idb@@CLASS@@".f[@@IDX@@].@@SFC@@.SQ_TIMER ,
+        tmr2                 := "idb@@CLASS@@".f[@@IDX@@].@@SFC@@.SQ_TIMER2 ,
+        tmr3                 := "idb@@CLASS@@".f[@@IDX@@].@@SFC@@.SQ_TIMER3
+    );
+
+_not_@@SFC@@_@@IDX@@:   NOP 0;
+
+@@TEMPLATE_END@@
+
+NETWORK
+TITLE = Reset the HMI counter if all done
+    //------------------------------------------------------------------------//
+    // Reset the counter:                                                     //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 4;
+    >I;
+    );
+    JCN _countComplete;
+    L 0;
+    T #CTR;
+_countComplete:   NOP 0;
+
+END_FUNCTION_BLOCK

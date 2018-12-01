@@ -278,7 +278,7 @@ _errorReceiveWrite_@@IDX@@:   NOP 0;
 NETWORK
 TITLE = Reset COMMS counter
     //------------------------------------------------------------------------//
-    // Store previous error status:                                           //
+    // Reset the counter:                                                     //
     //------------------------------------------------------------------------//
     A(;
     L #CTR;
@@ -286,7 +286,7 @@ TITLE = Reset COMMS counter
     >I;
     );
     JCN _commsCountComplete;
-    L 1;
+    L 0;
     T #CTR;
 _commsCountComplete:   NOP 0;
 

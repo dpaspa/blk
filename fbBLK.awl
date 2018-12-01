@@ -491,9 +491,14 @@ TITLE = Hygiene Status Calculation
     //                                                                        //
     // Calculate the hygiene status of the block:                             //
     //------------------------------------------------------------------------//
+    SET;
+    L #p.write.mc.HYGIENE;
+    T #p.read.hs.HYGIENE_STATE;
     CALL "fcHygiene"
     (   hs                   := #p.read.hs
     );
+    L #p.read.hs.HYGIENE_STATE;
+    T #p.write.mc.HYGIENE;
 @@ATTR_END|HYGIENE@@
 
 NETWORK
@@ -565,6 +570,7 @@ TITLE = Reset running substate and completion flags
     //------------------------------------------------------------------------//
     // Reset flags:                                                           //
     //------------------------------------------------------------------------//
+    SET;
     R #flags.sfcAborted;
     R #flags.sfcCompleted;
     R #flags.substateCompleted;
@@ -591,6 +597,7 @@ TITLE = Disarm flowpath devices on STOP command
     //------------------------------------------------------------------------//
     // Disarm the flowpath child devices when STOP command issued:            //
     //------------------------------------------------------------------------//
+    SET;
 @@ATTR_BEGIN|CHILD_COMMAND@@
     R "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
 @@ATTR_END|CHILD_COMMAND@@
@@ -605,20 +612,16 @@ TITLE = Clear the operator prompt flags
     // Clear the SFC prompt and confirm bits and the global shared event bits.//
     // Each HMI requires its own trigger and active flags;                    //
     //------------------------------------------------------------------------//
+    SET;
 @@ATTR_BEGIN|pEventPrompt@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_yes;
 @@ATTR_BEGIN|pEventPromptConfirmNo@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@_confirm_no;
 @@ATTR_END|pEventPromptConfirmNo@@
-    CALL fcClearEventPrompt (eventPrompt := "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@]);
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmYes;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].confirmNo;
-    S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel1;
-    S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel2;
-    S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel3;
-    S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel4;
-    S "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel5;
+@@ATTR_END|pEventPrompt@@
+@@ATTR_BEGIN|pEventPrompt@@
+    CALL fcClearEventPrompt (cancelEvent := TRUE, eventPrompt := "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@]);
 @@ATTR_END|pEventPrompt@@
 @@ATTR_END|pEventPromptExists@@
 
@@ -662,6 +665,7 @@ TITLE = Clear the log message flags
 @@ATTR_BEGIN|pEventLogMsgWordClass@@
     T #wEventLogMsg[@@CWORD@@];
 @@ATTR_END|pEventLogMsgWordClass@@
+    SET;
 @@ATTR_BEGIN|pEventLogMsgClass@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 @@ATTR_END|pEventLogMsgClass@@
@@ -682,6 +686,7 @@ TITLE = Clear the log real data flags
 @@ATTR_BEGIN|pEventDataReal@@
     T "dbEVENT".eventDataReal[@@IDXEVENT@@];
 @@ATTR_END|pEventDataReal@@
+    SET;
 @@ATTR_BEGIN|pEventLogRealClass@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 @@ATTR_END|pEventLogRealClass@@
@@ -701,6 +706,7 @@ TITLE = Clear the log time data flags
 @@ATTR_BEGIN|pEventDataTime@@
     T "dbEVENT".eventDataTime[@@IDXEVENT@@];
 @@ATTR_END|pEventDataTime@@
+    SET;
 @@ATTR_BEGIN|pEventLogTimeClass@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 @@ATTR_END|pEventLogTimeClass@@
@@ -744,9 +750,10 @@ TITLE = Release child @@CHILDPARAMETERALIAS@@
     //------------------------------------------------------------------------//
     A #acquire.@@CHILDPARAMETERALIAS@@;
     JCN _notOwn@@COUNTERATTR|1@@;
+    R #acquire.@@CHILDPARAMETERALIAS@@;
+    R "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.isMaster;
     L "dbCONST".BLK.ID.AVAILABLE;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
-    R #acquire.@@CHILDPARAMETERALIAS@@;
 _notOwn@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|CHILD_ACQUIRE@@
@@ -766,6 +773,7 @@ TITLE = STARTING STARTING STARTING Reset running substate and completion flags
     //------------------------------------------------------------------------//
     // Reset flags:                                                           //
     //------------------------------------------------------------------------//
+    SET;
     R #flags.sfcAborted;
     R #flags.sfcCompleted;
     R #flags.substateCompleted;
@@ -779,12 +787,9 @@ TITLE = Clear the operator prompt cancels
     //------------------------------------------------------------------------//
     // Clear the SFC prompt cancel bits:                                      //
     //------------------------------------------------------------------------//
+    SET;
 @@ATTR_BEGIN|pEventPrompt@@
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel1;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel2;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel3;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel4;
-    R "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@].cancel5;
+    CALL fcClearEventPrompt (cancelEvent := FALSE, eventPrompt := "dbEVENT".eventPrompt.event[#p.link.eventPrompt_@@NUMEVENT@@]);
 @@ATTR_END|pEventPrompt@@
 @@ATTR_END|pEventPromptExists@@
 
@@ -873,7 +878,7 @@ TITLE = Acquire child @@CHILDPARAMETERALIAS@@
     //------------------------------------------------------------------------//
     // ACQUIRE CHILDREN   ACQUIRE CHILDREN   ACQUIRE CHILDREN   ACQUIRE CHILD //
     //                                                                        //
-    // Flag to take writeship of the child now and release at the end if      //
+    // Flag to take ownership of the child now and release at the end if      //
     // the child is available as it would be a child unavailabile failure     //
     // above if not available at this point:                                  //
     //------------------------------------------------------------------------//
@@ -881,6 +886,7 @@ TITLE = Acquire child @@CHILDPARAMETERALIAS@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.isAvailable;
     JCN _childAvail_@@COUNTERATTR|1@@;
     S #acquire.@@CHILDPARAMETERALIAS@@;
+    S "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.isMaster;
     L #p.read.mc.ME;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
 
@@ -1462,10 +1468,7 @@ TITLE = SWITCH END SWITCH END ERROR if child mismatch
     // Set the block state to ERROR if child mismatch and not STOPPED:        //
     //------------------------------------------------------------------------//
     AN #cmdSTOPPED;
-    A(;
-	ON #p.read.bmc.permitStart;
-    O #flags.sfcAborted;
-    );
+	AN #p.read.bmc.permitStart;
     A(;
     L "dbCONST".BLK.@@CLASS@@.STATE.ERROR;
     L #p.read.mc.STATE;
@@ -1632,6 +1635,9 @@ TITLE = CALL SFC @@SFC@@ if @@STATE@@ running
 @@ATTR_BEGIN|pSFCSelectMCWrite@@
         @@CHILDPARAMETER@@   := #p.select.@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pSFCSelectMCWrite@@
+@@ATTR_BEGIN|pSFCSelectMCWriteHygiene@@
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.select.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
+@@ATTR_END|pSFCSelectMCWriteHygiene@@
 @@ATTR_BEGIN|pParentSync@@
         @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.select.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.@@SYNCPARAMETER@@ ,
 @@ATTR_END|pParentSync@@
@@ -1641,23 +1647,17 @@ _notSFC_@@COUNTERATTR@@_@@STATE@@:   NOP 0;
 
 @@ATTR_END|SFC@@
 
+@@ATTR_BEGIN|CHILD_COMMAND_FLOWPATH_EXISTS@@
 NETWORK
 TITLE = Check if any Child state does not match the command
     //------------------------------------------------------------------------//
-    // CHILD FLOWPATH STATE MISMATCH   CHILD FLOWPATH STATE MISMATCH   CHILD  //
-    //                                                                        //
     // Check if any child flowpath device state does not match the command    //
     // from this parent block if the child state grace period timer has       //
     // expired. Stop checking if the first child state mismatch found:        //
     //------------------------------------------------------------------------//
-    CLR;
-@@ATTR_BEGIN|CHILD_COMMAND_FLOWPATH_EXISTS@@
-    A(;
 @@ATTR_BEGIN|CHILD_COMMAND_FLOWPATH@@
-    O(;
     @@CHILDCOMMANDSTATEMENT@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
-    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.FLOWPATH;
     A(;
     L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.STATE;
     L #childReqCMD.@@CHILDPARAMETERALIAS@@;
@@ -1682,10 +1682,27 @@ TITLE = Check if any Child state does not match the command
     );
     );
 @@ATTR_END|CHILD_COMMAND_BLK_EXISTS@@
-    );
+    = #p.child.err@@CHILDPARAMETERALIAS@@;
+
 
 @@ATTR_END|CHILD_COMMAND_FLOWPATH@@
+@@ATTR_END|CHILD_COMMAND_FLOWPATH_EXISTS@@
+
+NETWORK
+TITLE = Flag child mismatch if any Child state does not match the command
+    //------------------------------------------------------------------------//
+    // CHILD FLOWPATH STATE MISMATCH   CHILD FLOWPATH STATE MISMATCH   CHILD  //
+    //                                                                        //
+    // Check if any child mismatch:                                           //
+    //------------------------------------------------------------------------//
+    CLR;
+@@ATTR_BEGIN|CHILD_COMMAND_FLOWPATH_EXISTS@@
+@@ATTR_BEGIN|CHILD_COMMAND_FLOWPATH@@
+    O(;
+    @@CHILDCOMMANDSTATEMENT@@
+    A #p.child.err@@CHILDPARAMETERALIAS@@;
     );
+@@ATTR_END|CHILD_COMMAND_FLOWPATH@@
 @@ATTR_END|CHILD_COMMAND_FLOWPATH_EXISTS@@
     JCN _noMismatch;
 

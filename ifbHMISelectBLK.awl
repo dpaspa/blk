@@ -14,31 +14,111 @@ FUNCTION_BLOCK "ifbHMISelectBLK"
 TITLE = BLK Selection
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
-NAME : ifcHMISelectBLK
+NAME : ifbHMISelectBLK
 VERSION : 2.0
 
 //----------------------------------------------------------------------------//
 // Declare local variables:                                                   //
 //----------------------------------------------------------------------------//
 VAR
-    edge : Array[0..50] of Bool;
+    CTR { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Int;   // Counter
 END_VAR
 
 VAR_TEMP
     blockSelected : Int;
     arrChildIndex : Array[0..50] of Int;
-    tempEdge : Bool;
+    retVal : Int;
 END_VAR
 
 BEGIN
 NETWORK
-TITLE = Get the selected BLK
+TITLE = Increment the counter
+    //------------------------------------------------------------------------//
+    // Increment the HMI number counter:                                      //
+    //------------------------------------------------------------------------//
+    L #CTR;
+    INC 1;
+    T #CTR;
+
+NETWORK
+TITLE = Get the selected BLK for HMI 1
     //------------------------------------------------------------------------//
     // Get the BLK index number selected by the user when they clicked the    //
     // faceplate BLK target:                                                  //
     //------------------------------------------------------------------------//
-    L "dbHMIInterfaceBLK".block.blockSelected;
+    A(;
+    L #CTR;
+    L 1;
+    ==I;
+    );
+    JCN _notHMI1;
+    L "dbHMISelect".hmi1SelectBLK;
     T #blockSelected;
+_notHMI1:   NOP 0;
+
+NETWORK
+TITLE = Get the selected BLK for HMI 2
+    //------------------------------------------------------------------------//
+    // Get the BLK index number selected by the user when they clicked the    //
+    // faceplate BLK target:                                                  //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 2;
+    ==I;
+    );
+    JCN _notHMI2;
+    L "dbHMISelect".hmi2SelectBLK;
+    T #blockSelected;
+_notHMI2:   NOP 0;
+
+NETWORK
+TITLE = Get the selected BLK for HMI 3
+    //------------------------------------------------------------------------//
+    // Get the BLK index number selected by the user when they clicked the    //
+    // faceplate BLK target:                                                  //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 3;
+    ==I;
+    );
+    JCN _notHMI3;
+    L "dbHMISelect".hmi3SelectBLK;
+    T #blockSelected;
+_notHMI3:   NOP 0;
+
+NETWORK
+TITLE = Get the selected BLK for HMI 4
+    //------------------------------------------------------------------------//
+    // Get the BLK index number selected by the user when they clicked the    //
+    // faceplate BLK target:                                                  //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 4;
+    ==I;
+    );
+    JCN _notHMI4;
+    L "dbHMISelect".hmi4SelectBLK;
+    T #blockSelected;
+_notHMI4:   NOP 0;
+
+NETWORK
+TITLE = Get the selected BLK for HMI 5
+    //------------------------------------------------------------------------//
+    // Get the BLK index number selected by the user when they clicked the    //
+    // faceplate BLK target:                                                  //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 5;
+    ==I;
+    );
+    JCN _notHMI5;
+    L "dbHMISelect".hmi5SelectBLK;
+    T #blockSelected;
+_notHMI5:   NOP 0;
 
 @@TEMPLATE_BEGIN|INSTANCE_BLK@@
 NETWORK
@@ -53,7 +133,6 @@ TITLE = @@INSTANCE@@ @@DESCRIPTION@@
     );
     JCN _not_@@INSTANCE@@;
 
-    AN #tempEdge;
     CALL "fcHMIInterfaceBLK"
     (   bmc                  := "idb@@CLASS@@".f[@@IDX@@].p.read.bmc ,
         err                  := "idb@@CLASS@@".f[@@IDX@@].p.read.err ,
@@ -104,4 +183,115 @@ TITLE = Transfer the parameter values to the read only interface arrays
 _not_@@INSTANCE@@:   NOP 0;
 
 @@TEMPLATE_END@@
+
+NETWORK
+TITLE = Copy the block structure back if HMI 1
+    //------------------------------------------------------------------------//
+    // Copy the block structure:                                            //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 1;
+    ==I;
+    );
+    JCN _notMoveHMI1;
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := "dbHMIInterfaceBLK" ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI1InterfaceBLK"
+    );
+_notMoveHMI1:   NOP 0;
+
+NETWORK
+TITLE = Copy the block structure back if HMI 2
+    //------------------------------------------------------------------------//
+    // Copy the block structure:                                            //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 2;
+    ==I;
+    );
+    JCN _notMoveHMI2;
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := "dbHMIInterfaceBLK" ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI2InterfaceBLK"
+    );
+_notMoveHMI2:   NOP 0;
+
+NETWORK
+TITLE = Copy the block structure back if HMI 3
+    //------------------------------------------------------------------------//
+    // Copy the block structure:                                            //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 3;
+    ==I;
+    );
+    JCN _notMoveHMI3;
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := "dbHMIInterfaceBLK" ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI3InterfaceBLK"
+    );
+_notMoveHMI3:   NOP 0;
+
+NETWORK
+TITLE = Copy the block structure back if HMI 4
+    //------------------------------------------------------------------------//
+    // Copy the block structure:                                            //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 4;
+    ==I;
+    );
+    JCN _notMoveHMI4;
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := "dbHMIInterfaceBLK" ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI4InterfaceBLK"
+    );
+_notMoveHMI4:   NOP 0;
+
+NETWORK
+TITLE = Copy the block structure back if HMI 5
+    //------------------------------------------------------------------------//
+    // Copy the block structure:                                            //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 5;
+    ==I;
+    );
+    JCN _notMoveHMI5;
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := "dbHMIInterfaceBLK" ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI5InterfaceBLK"
+    );
+_notMoveHMI5:   NOP 0;
+
+NETWORK
+TITLE = Reset the HMI counter if all done
+    //------------------------------------------------------------------------//
+    // Reset the counter:                                                     //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 4;
+    >I;
+    );
+    JCN _countComplete;
+    L 0;
+    T #CTR;
+_countComplete:   NOP 0;
+
 END_FUNCTION_BLOCK

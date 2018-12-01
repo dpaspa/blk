@@ -20,9 +20,16 @@ VERSION : 2.0
 //----------------------------------------------------------------------------//
 // Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
+VAR_INPUT
+    hmiNum : Int;            // HMI number
+END_VAR
+
 VAR_IN_OUT
-    smc : "udtModeCommandSFC";         // SFC mode and command
-    sqStep : "udtSFCStep32";  // Sequencer runtime
+    smc : "udtModeCommandSFC"; // SFC mode and command
+    sqStep : "udtSFCStep32"; // Sequencer runtime
+    tmr {ReadalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Sequence timer
+    tmr2 {ReadalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Sequence timer
+    tmr3 {ReadalPartName := 'TON'; LibVersion := '1.0'} : TON;   // Sequence timer
 END_VAR
 
 VAR_TEMP
@@ -32,6 +39,18 @@ END_VAR
 
 BEGIN
 NETWORK
+TITLE = HMI 1
+    //------------------------------------------------------------------------//
+    // Check if HMI 1:                                                        //
+    //------------------------------------------------------------------------//
+    A(;
+    L #hmiNum;
+    L 1;
+    ==I;
+    );
+    JCN _notHMI1;
+
+NETWORK
 TITLE = Copy the SFC mode and command data to the HMI interface block
     //------------------------------------------------------------------------//
     // Copy mode and command data:                                            //
@@ -40,7 +59,7 @@ TITLE = Copy the SFC mode and command data to the HMI interface block
     {blk_type := 'Any'}
     (   SRCBLK               := #smc ,
         RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMIInterfaceSFC".sequence.smc
+        DSTBLK               := "dbHMI1InterfaceSFC".sequence.smc
     );
 
 NETWORK
@@ -52,39 +71,69 @@ TITLE = Copy the SFC runtime data to the HMI interface block
     {blk_type := 'Any'}
     (   SRCBLK               := #sqStep ,
         RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMIInterfaceSFC".sequence.sqStep
+        DSTBLK               := "dbHMI1InterfaceSFC".sequence.sqStep
     );
+
+NETWORK
+TITLE = Copy the sequence timer data
+    //------------------------------------------------------------------------//
+    // Copy the sequence timer data:                                          //
+    //------------------------------------------------------------------------//
+    A #tmr.IN;
+    = "dbHMI1InterfaceSFC".sequence.tmr_running;
+    A #tmr2.IN;
+    = "dbHMI1InterfaceSFC".sequence.tmr2_running;
+    A #tmr3.IN;
+    = "dbHMI1InterfaceSFC".sequence.tmr3_running;
+    A #tmr.Q;
+    = "dbHMI1InterfaceSFC".sequence.tmr_expired;
+    A #tmr2.Q;
+    = "dbHMI1InterfaceSFC".sequence.tmr2_expired;
+    A #tmr3.Q;
+    = "dbHMI1InterfaceSFC".sequence.tmr3_expired;
+    L #tmr.EL;
+    T "dbHMI1InterfaceSFC".sequence.tmr_elapsed;
+    L #tmr2.EL;
+    T "dbHMI1InterfaceSFC".sequence.tmr2_elapsed;
+    L #tmr3.EL;
+    T "dbHMI1InterfaceSFC".sequence.tmr3_elapsed;
+    L #tmr.PT;
+    T "dbHMI1InterfaceSFC".sequence.tmr_preset;
+    L #tmr2.PT;
+    T "dbHMI1InterfaceSFC".sequence.tmr2_preset;
+    L #tmr3.PT;
+    T "dbHMI1InterfaceSFC".sequence.tmr3_preset;
 
 NETWORK
 TITLE = Change to Auto sends mode to SFC
     //------------------------------------------------------------------------//
     // If operator just changed to Auto then put the sequence in AUTO:        //
     //------------------------------------------------------------------------//
-    A "dbHMIInterfaceSFC".sequence.manual;
-    FN "edgeSFC";
+    A "dbHMI1InterfaceSFC".sequence.manual;
+    FN "edgeSFC1";
     = #outAUTO;
-    JCN _out;
+    JCN _out1;
     L "dbCONST".SEQ.MODE.AUTO;
-    T "dbHMIInterfaceSFC".sequence.CMD_MODE;
+    T "dbHMI1InterfaceSFC".sequence.CMD_MODE;
     T #smc.MODE;
-_out:      NOP 0;
+_out1:      NOP 0;
 
 NETWORK
 TITLE = Send the user mode
     //------------------------------------------------------------------------//
     // Send any user selected mode to the SFC if in Manual:                   //
     //------------------------------------------------------------------------//
-    A "dbHMIInterfaceSFC".sequence.manual;
-    JCN _auto;
-    L "dbHMIInterfaceSFC".sequence.CMD_MODE;
+    A "dbHMI1InterfaceSFC".sequence.manual;
+    JCN _auto1;
+    L "dbHMI1InterfaceSFC".sequence.CMD_MODE;
     T #smc.MODE;
-_auto:   NOP 0;
+_auto1:   NOP 0;
 
-    AN "dbHMIInterfaceSFC".sequence.manual;
-    JCN _manual;
+    AN "dbHMI1InterfaceSFC".sequence.manual;
+    JCN _manual1;
     L #smc.MODE;
-    T "dbHMIInterfaceSFC".sequence.CMD_MODE;
-_manual:   NOP 0;
+    T "dbHMI1InterfaceSFC".sequence.CMD_MODE;
+_manual1:   NOP 0;
 
 NETWORK
 TITLE = Send the user output commands if in Manual mode
@@ -96,15 +145,377 @@ TITLE = Send the user output commands if in Manual mode
     L "dbCONST".SEQ.MODE.MANUAL;
     ==I;
     );
-    JCN _notManual;
+    JCN _notManual1;
 
-    L "dbHMIInterfaceSFC".sequence.CMD_SQ_CMD;
+    L "dbHMI1InterfaceSFC".sequence.CMD_SQ_CMD;
     T #smc.SQ_CMD;
-    L "dbHMIInterfaceSFC".sequence.CMD_STEPNO_JUMP;
+    L "dbHMI1InterfaceSFC".sequence.CMD_STEPNO_JUMP;
     T #smc.STEPNO_JUMP;
-    A "dbHMIInterfaceSFC".sequence.CMD_MAN_JUMP;
+    A "dbHMI1InterfaceSFC".sequence.CMD_MAN_JUMP;
     = #smc.MAN_JUMP;
 
-_notManual:   NOP 0;
+_notManual1:   NOP 0;
+
+_notHMI1:   NOP 0;
+
+NETWORK
+TITLE = HMI 2
+    //------------------------------------------------------------------------//
+    // Check if HMI 2:                                                        //
+    //------------------------------------------------------------------------//
+    A(;
+    L #hmiNum;
+    L 2;
+    ==I;
+    );
+    JCN _notHMI2;
+
+NETWORK
+TITLE = Copy the SFC mode and command data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy mode and command data:                                            //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #smc ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI2InterfaceSFC".sequence.smc
+    );
+
+NETWORK
+TITLE = Copy the SFC runtime data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy runtime data:                                                     //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #sqStep ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI2InterfaceSFC".sequence.sqStep
+    );
+
+NETWORK
+TITLE = Change to Auto sends mode to SFC
+    //------------------------------------------------------------------------//
+    // If operator just changed to Auto then put the sequence in AUTO:        //
+    //------------------------------------------------------------------------//
+    A "dbHMI2InterfaceSFC".sequence.manual;
+    FN "edgeSFC2";
+    = #outAUTO;
+    JCN _out2;
+    L "dbCONST".SEQ.MODE.AUTO;
+    T "dbHMI2InterfaceSFC".sequence.CMD_MODE;
+    T #smc.MODE;
+_out2:      NOP 0;
+
+NETWORK
+TITLE = Send the user mode
+    //------------------------------------------------------------------------//
+    // Send any user selected mode to the SFC if in Manual:                   //
+    //------------------------------------------------------------------------//
+    A "dbHMI2InterfaceSFC".sequence.manual;
+    JCN _auto2;
+    L "dbHMI2InterfaceSFC".sequence.CMD_MODE;
+    T #smc.MODE;
+_auto2:   NOP 0;
+
+    AN "dbHMI2InterfaceSFC".sequence.manual;
+    JCN _manual2;
+    L #smc.MODE;
+    T "dbHMI2InterfaceSFC".sequence.CMD_MODE;
+_manual2:   NOP 0;
+
+NETWORK
+TITLE = Send the user output commands if in Manual mode
+    //------------------------------------------------------------------------//
+    // Send the user command to the SFC if in MANUAL:                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #smc.MODE;
+    L "dbCONST".SEQ.MODE.MANUAL;
+    ==I;
+    );
+    JCN _notManual2;
+
+    L "dbHMI2InterfaceSFC".sequence.CMD_SQ_CMD;
+    T #smc.SQ_CMD;
+    L "dbHMI2InterfaceSFC".sequence.CMD_STEPNO_JUMP;
+    T #smc.STEPNO_JUMP;
+    A "dbHMI2InterfaceSFC".sequence.CMD_MAN_JUMP;
+    = #smc.MAN_JUMP;
+
+_notManual2:   NOP 0;
+
+_notHMI2:   NOP 0;
+
+NETWORK
+TITLE = HMI 3
+    //------------------------------------------------------------------------//
+    // Check if HMI 3:                                                        //
+    //------------------------------------------------------------------------//
+    A(;
+    L #hmiNum;
+    L 3;
+    ==I;
+    );
+    JCN _notHMI3;
+
+NETWORK
+TITLE = Copy the SFC mode and command data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy mode and command data:                                            //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #smc ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI3InterfaceSFC".sequence.smc
+    );
+
+NETWORK
+TITLE = Copy the SFC runtime data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy runtime data:                                                     //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #sqStep ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI3InterfaceSFC".sequence.sqStep
+    );
+
+NETWORK
+TITLE = Change to Auto sends mode to SFC
+    //------------------------------------------------------------------------//
+    // If operator just changed to Auto then put the sequence in AUTO:        //
+    //------------------------------------------------------------------------//
+    A "dbHMI3InterfaceSFC".sequence.manual;
+    FN "edgeSFC3";
+    = #outAUTO;
+    JCN _out3;
+    L "dbCONST".SEQ.MODE.AUTO;
+    T "dbHMI3InterfaceSFC".sequence.CMD_MODE;
+    T #smc.MODE;
+_out3:      NOP 0;
+
+NETWORK
+TITLE = Send the user mode
+    //------------------------------------------------------------------------//
+    // Send any user selected mode to the SFC if in Manual:                   //
+    //------------------------------------------------------------------------//
+    A "dbHMI3InterfaceSFC".sequence.manual;
+    JCN _auto3;
+    L "dbHMI3InterfaceSFC".sequence.CMD_MODE;
+    T #smc.MODE;
+_auto3:   NOP 0;
+
+    AN "dbHMI3InterfaceSFC".sequence.manual;
+    JCN _manual3;
+    L #smc.MODE;
+    T "dbHMI3InterfaceSFC".sequence.CMD_MODE;
+_manual3:   NOP 0;
+
+NETWORK
+TITLE = Send the user output commands if in Manual mode
+    //------------------------------------------------------------------------//
+    // Send the user command to the SFC if in MANUAL:                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #smc.MODE;
+    L "dbCONST".SEQ.MODE.MANUAL;
+    ==I;
+    );
+    JCN _notManual3;
+
+    L "dbHMI3InterfaceSFC".sequence.CMD_SQ_CMD;
+    T #smc.SQ_CMD;
+    L "dbHMI3InterfaceSFC".sequence.CMD_STEPNO_JUMP;
+    T #smc.STEPNO_JUMP;
+    A "dbHMI3InterfaceSFC".sequence.CMD_MAN_JUMP;
+    = #smc.MAN_JUMP;
+
+_notManual3:   NOP 0;
+
+_notHMI3:   NOP 0;
+
+NETWORK
+TITLE = HMI 4
+    //------------------------------------------------------------------------//
+    // Check if HMI 4:                                                        //
+    //------------------------------------------------------------------------//
+    A(;
+    L #hmiNum;
+    L 4;
+    ==I;
+    );
+    JCN _notHMI4;
+
+NETWORK
+TITLE = Copy the SFC mode and command data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy mode and command data:                                            //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #smc ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI4InterfaceSFC".sequence.smc
+    );
+
+NETWORK
+TITLE = Copy the SFC runtime data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy runtime data:                                                     //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #sqStep ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI4InterfaceSFC".sequence.sqStep
+    );
+
+NETWORK
+TITLE = Change to Auto sends mode to SFC
+    //------------------------------------------------------------------------//
+    // If operator just changed to Auto then put the sequence in AUTO:        //
+    //------------------------------------------------------------------------//
+    A "dbHMI4InterfaceSFC".sequence.manual;
+    FN "edgeSFC4";
+    = #outAUTO;
+    JCN _out4;
+    L "dbCONST".SEQ.MODE.AUTO;
+    T "dbHMI4InterfaceSFC".sequence.CMD_MODE;
+    T #smc.MODE;
+_out4:      NOP 0;
+
+NETWORK
+TITLE = Send the user mode
+    //------------------------------------------------------------------------//
+    // Send any user selected mode to the SFC if in Manual:                   //
+    //------------------------------------------------------------------------//
+    A "dbHMI4InterfaceSFC".sequence.manual;
+    JCN _auto4;
+    L "dbHMI4InterfaceSFC".sequence.CMD_MODE;
+    T #smc.MODE;
+_auto4:   NOP 0;
+
+    AN "dbHMI4InterfaceSFC".sequence.manual;
+    JCN _manual4;
+    L #smc.MODE;
+    T "dbHMI4InterfaceSFC".sequence.CMD_MODE;
+_manual4:   NOP 0;
+
+NETWORK
+TITLE = Send the user output commands if in Manual mode
+    //------------------------------------------------------------------------//
+    // Send the user command to the SFC if in MANUAL:                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #smc.MODE;
+    L "dbCONST".SEQ.MODE.MANUAL;
+    ==I;
+    );
+    JCN _notManual4;
+
+    L "dbHMI4InterfaceSFC".sequence.CMD_SQ_CMD;
+    T #smc.SQ_CMD;
+    L "dbHMI4InterfaceSFC".sequence.CMD_STEPNO_JUMP;
+    T #smc.STEPNO_JUMP;
+    A "dbHMI4InterfaceSFC".sequence.CMD_MAN_JUMP;
+    = #smc.MAN_JUMP;
+
+_notManual4:   NOP 0;
+
+_notHMI4:   NOP 0;
+
+NETWORK
+TITLE = HMI 5
+    //------------------------------------------------------------------------//
+    // Check if HMI 5:                                                        //
+    //------------------------------------------------------------------------//
+    A(;
+    L #hmiNum;
+    L 5;
+    ==I;
+    );
+    JCN _notHMI5;
+
+NETWORK
+TITLE = Copy the SFC mode and command data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy mode and command data:                                            //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #smc ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI5InterfaceSFC".sequence.smc
+    );
+
+NETWORK
+TITLE = Copy the SFC runtime data to the HMI interface block
+    //------------------------------------------------------------------------//
+    // Copy runtime data:                                                     //
+    //------------------------------------------------------------------------//
+    CALL BLKMOV
+    {blk_type := 'Any'}
+    (   SRCBLK               := #sqStep ,
+        RET_VAL              := #retVal ,
+        DSTBLK               := "dbHMI5InterfaceSFC".sequence.sqStep
+    );
+
+NETWORK
+TITLE = Change to Auto sends mode to SFC
+    //------------------------------------------------------------------------//
+    // If operator just changed to Auto then put the sequence in AUTO:        //
+    //------------------------------------------------------------------------//
+    A "dbHMI5InterfaceSFC".sequence.manual;
+    FN "edgeSFC5";
+    = #outAUTO;
+    JCN _out5;
+    L "dbCONST".SEQ.MODE.AUTO;
+    T "dbHMI5InterfaceSFC".sequence.CMD_MODE;
+    T #smc.MODE;
+_out5:      NOP 0;
+
+NETWORK
+TITLE = Send the user mode
+    //------------------------------------------------------------------------//
+    // Send any user selected mode to the SFC if in Manual:                   //
+    //------------------------------------------------------------------------//
+    A "dbHMI5InterfaceSFC".sequence.manual;
+    JCN _auto5;
+    L "dbHMI5InterfaceSFC".sequence.CMD_MODE;
+    T #smc.MODE;
+_auto5:   NOP 0;
+
+    AN "dbHMI5InterfaceSFC".sequence.manual;
+    JCN _manual5;
+    L #smc.MODE;
+    T "dbHMI5InterfaceSFC".sequence.CMD_MODE;
+_manual5:   NOP 0;
+
+NETWORK
+TITLE = Send the user output commands if in Manual mode
+    //------------------------------------------------------------------------//
+    // Send the user command to the SFC if in MANUAL:                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #smc.MODE;
+    L "dbCONST".SEQ.MODE.MANUAL;
+    ==I;
+    );
+    JCN _notManual5;
+
+    L "dbHMI5InterfaceSFC".sequence.CMD_SQ_CMD;
+    T #smc.SQ_CMD;
+    L "dbHMI5InterfaceSFC".sequence.CMD_STEPNO_JUMP;
+    T #smc.STEPNO_JUMP;
+    A "dbHMI5InterfaceSFC".sequence.CMD_MAN_JUMP;
+    = #smc.MAN_JUMP;
+
+_notManual5:   NOP 0;
+
+_notHMI5:   NOP 0;
 
 END_FUNCTION

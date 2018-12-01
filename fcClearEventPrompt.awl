@@ -20,6 +20,10 @@ VERSION : 1.0
 // Declare interface and variables:                                           //
 //----------------------------------------------------------------------------//
 VAR_INPUT
+    cancelEvent : Bool;             // Set or clear the cancel flag
+END_VAR
+
+VAR_IN_OUT
     eventPrompt : "udtEventPrompt"; // Event prompt to clear
 END_VAR
 
@@ -28,8 +32,10 @@ NETWORK
 TITLE = Clear the event prompt
     //------------------------------------------------------------------------//
     // Clear the event prompt confirm flags and set the cancel flags for each //
-    // HMI:                                                                   //
+    // HMI if required:                                                       //
     //------------------------------------------------------------------------//
+    A #cancelEvent;
+    JCN _noCancel;
     R eventPrompt.confirmYes;
     R eventPrompt.confirmNo;
     S eventPrompt.cancel1;
@@ -37,4 +43,20 @@ TITLE = Clear the event prompt
     S eventPrompt.cancel3;
     S eventPrompt.cancel4;
     S eventPrompt.cancel5;
+_noCancel:   NOP 0;
+
+NETWORK
+TITLE = Reset the event cancel flags
+    //------------------------------------------------------------------------//
+    // Reset the cancel flags if required:                                    //
+    //------------------------------------------------------------------------//
+    AN #cancelEvent;
+    JCN _clearCancel;
+    R eventPrompt.cancel1;
+    R eventPrompt.cancel2;
+    R eventPrompt.cancel3;
+    R eventPrompt.cancel4;
+    R eventPrompt.cancel5;
+_clearCancel:   NOP 0;
+
 END_FUNCTION

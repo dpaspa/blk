@@ -26,7 +26,6 @@ VERSION : 1.0
         CMD_SAFE : Int;                // Safe command for the module
         STATE : Int := 1;              // State of the block
         ERROR : Bool;                  // True if any error condition
-        HYGIENE : Int := 1;            // Hygiene status
         INTERLOCK : Bool;              // True if any interlock condition
         CRIL : Bool;                   // Critical Interlock that cannot be bypased.
         NCRIL : Bool;                  // Non-Critical Interlock that can be manually bypassed.
@@ -51,6 +50,7 @@ VERSION : 1.0
         RECIPE : Int;                  // Recipe ID of owning Process Cell
         SERIALNUM : Int;               // Unique batch or CIPSIP serial number
         SUBS : Int := 0;               // Selected substate for Block level modules
+        HYGIENE : Int := 1;            // Hygiene status
         ARMED : Bool := False;         // Flowpath monitoring is armed
         MAN_OVERRIDE : Bool;           // Manual override to bypass NCRIL
         isMaster : Bool;
@@ -464,6 +464,18 @@ VERSION : 0.1
         CMD_STEPNO_JUMP : Int;
         CMD_MAN_JUMP : Bool;
         manual : Bool;
+        tmr_elapsed : Time;
+        tmr2_elapsed : Time;
+        tmr3_elapsed : Time;
+        tmr_preset : Time;
+        tmr2_preset : Time;
+        tmr3_preset : Time;
+        tmr_expired : Bool;
+        tmr2_expired : Bool;
+        tmr3_expired : Bool;
+        tmr_running : Bool;
+        tmr2_running : Bool;
+        tmr3_running : Bool;
     END_STRUCT;
 END_TYPE
 
@@ -481,6 +493,5 @@ VERSION : 0.1
         arrTime : Array[0..60] of Time;
         arrInt : Array[0..60] of Int;
         arrBool : Array[0..60] of Bool;
-        blockSelected : Int;
     END_STRUCT;
 END_TYPE
