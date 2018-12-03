@@ -25,21 +25,25 @@ BEGIN
 END_DATA_BLOCK
 
 DATA_BLOCK "dbHMISelect"
-{ S7_Optimized_Access := 'FALSE' }
+{ S7_Optimized_Access := 'TRUE' }
 VERSION : 0.1
 NON_RETAIN
-    STRUCT
-        hmi1SelectBLK : Int;
-        hmi2SelectBLK : Int;
-        hmi3SelectBLK : Int;
-        hmi4SelectBLK : Int;
-        hmi5SelectBLK : Int;
-        hmi1SelectSFC : Int;
-        hmi2SelectSFC : Int;
-        hmi3SelectSFC : Int;
-        hmi4SelectSFC : Int;
-        hmi5SelectSFC : Int;
-    END_STRUCT;
+    VAR
+        BLK : Struct
+            hmi1Select : Int;
+            hmi2Select : Int;
+            hmi3Select : Int;
+            hmi4Select : Int;
+            hmi5Select : Int;
+        END_STRUCT;
+        SEQ : Struct
+            hmi1Select : Int;
+            hmi2Select : Int;
+            hmi3Select : Int;
+            hmi4Select : Int;
+            hmi5Select : Int;
+        END_STRUCT;
+    END_VAR
 
 BEGIN
 END_DATA_BLOCK
@@ -48,65 +52,26 @@ DATA_BLOCK "dbHMIInterfaceBLK"
 { S7_Optimized_Access := 'FALSE' }
 VERSION : 0.1
 NON_RETAIN
-    STRUCT
-        block : "udtHMIInterfaceBLK";
-    END_STRUCT;
-
-BEGIN
-END_DATA_BLOCK
-
-DATA_BLOCK "dbHMI1InterfaceBLK"
-{ S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
-NON_RETAIN
-    STRUCT
-        block : "udtHMIInterfaceBLK";
-    END_STRUCT;
-
-BEGIN
-END_DATA_BLOCK
-
-DATA_BLOCK "dbHMI2InterfaceBLK"
-{ S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
-NON_RETAIN
-    STRUCT
-        block : "udtHMIInterfaceBLK";
-    END_STRUCT;
-
-BEGIN
-END_DATA_BLOCK
-
-DATA_BLOCK "dbHMI3InterfaceBLK"
-{ S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
-NON_RETAIN
-    STRUCT
-        block : "udtHMIInterfaceBLK";
-    END_STRUCT;
-
-BEGIN
-END_DATA_BLOCK
-
-DATA_BLOCK "dbHMI4InterfaceBLK"
-{ S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
-NON_RETAIN
-    STRUCT
-        block : "udtHMIInterfaceBLK";
-    END_STRUCT;
-
-BEGIN
-END_DATA_BLOCK
-
-DATA_BLOCK "dbHMI5InterfaceBLK"
-{ S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
-NON_RETAIN
-    STRUCT
-        block : "udtHMIInterfaceBLK";
-    END_STRUCT;
-
+    VAR
+        buffer : Struct
+            block : "udtHMIInterfaceBLK";
+        END_STRUCT;
+        hmi1 : Struct
+            block : "udtHMIInterfaceBLK";
+        END_STRUCT;
+        hmi2 : Struct
+            block : "udtHMIInterfaceBLK";
+        END_STRUCT;
+        hmi3 : Struct
+            block : "udtHMIInterfaceBLK";
+        END_STRUCT;
+        hmi4 : Struct
+            block : "udtHMIInterfaceBLK";
+        END_STRUCT;
+        hmi5 : Struct
+            block : "udtHMIInterfaceBLK";
+        END_STRUCT;
+END_VAR
 BEGIN
 END_DATA_BLOCK
 
@@ -130,92 +95,65 @@ BEGIN
 
 END_DATA_BLOCK
 
-DATA_BLOCK "dbHMI1InterfaceSFC"
+DATA_BLOCK "dbHMIInterfaceSFC"
 { S7_Optimized_Access := 'FALSE' }
 VERSION : 0.1
 NON_RETAIN
-    STRUCT
-        sequence : "udtHMIInterfaceSFC";
-    END_STRUCT;
-
-BEGIN
-END_DATA_BLOCK
-
-DATA_BLOCK "dbHMI2InterfaceSFC"
-{ S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
-NON_RETAIN
-    STRUCT
-        sequence : "udtHMIInterfaceSFC";
-    END_STRUCT;
-
-BEGIN
-END_DATA_BLOCK
-
-DATA_BLOCK "dbHMI3InterfaceSFC"
-{ S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
-NON_RETAIN
-    STRUCT
-        sequence : "udtHMIInterfaceSFC";
-    END_STRUCT;
-
-BEGIN
-END_DATA_BLOCK
-
-DATA_BLOCK "dbHMI4InterfaceSFC"
-{ S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
-NON_RETAIN
-    STRUCT
-        sequence : "udtHMIInterfaceSFC";
-    END_STRUCT;
-
-BEGIN
-END_DATA_BLOCK
-
-DATA_BLOCK "dbHMI5InterfaceSFC"
-{ S7_Optimized_Access := 'FALSE' }
-VERSION : 0.1
-NON_RETAIN
-    STRUCT
-        sequence : "udtHMIInterfaceSFC";
-    END_STRUCT;
-
-BEGIN
-END_DATA_BLOCK
-
-DATA_BLOCK "TimeSyncBlock"
-{ S7_Optimized_Access := 'TRUE' }
-VERSION : 0.1
-    STRUCT
-        PLC_DateAndTime : Date_And_Time;
-        JOB_MailBoxHMI1 : Word;
-        JOB_MailBoxHMI2 : Word;
-        JOB_MailBoxHMI3 : Word;
-        JOB_MailBoxHMI4 : Word;
-        JOB_MailBoxHMI5 : Word;
-        setTimeFromPC : Bool;
-        HMI_PLC_DateAndTime : Date_And_Time;
-    END_STRUCT;
-
-BEGIN
-END_DATA_BLOCK
-
-DATA_BLOCK "HMIDateTime"
-{ S7_Optimized_Access := 'TRUE' }
-VERSION : 0.1
-    STRUCT
-        AreaPointer : Struct   // job mailbox
-            Job_No : Word;   // job number
-            Para_1 : Word;   // parameter 1
-            Para_2 : Word;   // parameter 2
-            Para_3 : Word;   // parameter 3
+    VAR
+        buffer : Struct
+            block : "udtHMIInterfaceSFC";
         END_STRUCT;
-    END_STRUCT;
+        hmi1 : Struct
+            block : "udtHMIInterfaceSFC";
+        END_STRUCT;
+        hmi2 : Struct
+            block : "udtHMIInterfaceSFC";
+        END_STRUCT;
+        hmi3 : Struct
+            block : "udtHMIInterfaceSFC";
+        END_STRUCT;
+        hmi4 : Struct
+            block : "udtHMIInterfaceSFC";
+        END_STRUCT;
+        hmi5 : Struct
+            block : "udtHMIInterfaceSFC";
+        END_STRUCT;
+    END_VAR
 
-    BEGIN
+BEGIN
 END_DATA_BLOCK
+
+//DATA_BLOCK "TimeSyncBlock"
+//{ S7_Optimized_Access := 'TRUE' }
+//VERSION : 0.1
+//    STRUCT
+//        PLC_DateAndTime : Date_And_Time;
+//        JOB_MailBoxHMI1 : Word;
+//        JOB_MailBoxHMI2 : Word;
+//        JOB_MailBoxHMI3 : Word;
+//        JOB_MailBoxHMI4 : Word;
+//        JOB_MailBoxHMI5 : Word;
+//        setTimeFromPC : Bool;
+//        HMI_PLC_DateAndTime : Date_And_Time;
+//    END_STRUCT;
+//
+//BEGIN
+//END_DATA_BLOCK
+
+//DATA_BLOCK "HMIDateTime"
+//{ S7_Optimized_Access := 'TRUE' }
+//VERSION : 0.1
+//    STRUCT
+//        AreaPointer : Struct   // job mailbox
+//            Job_No : Word;   // job number
+//            Para_1 : Word;   // parameter 1
+//            Para_2 : Word;   // parameter 2
+//            Para_3 : Word;   // parameter 3
+//        END_STRUCT;
+//    END_STRUCT;
+//
+//    BEGIN
+//END_DATA_BLOCK
 
 //DATA_BLOCK "fbSimulate_DB"
 //{ S7_Optimized_Access := 'FALSE' }

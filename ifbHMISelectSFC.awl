@@ -49,7 +49,7 @@ TITLE = Get the selected SFC for HMI 1
     ==I;
     );
     JCN _notHMI1;
-    L "dbHMISelect".hmi1SelectSFC;
+    L "dbHMISelect".SEQ.hmi1Select;
     T #sfcSelected;
 _notHMI1:   NOP 0;
 
@@ -65,7 +65,7 @@ TITLE = Get the selected SFC for HMI 2
     ==I;
     );
     JCN _notHMI2;
-    L "dbHMISelect".hmi2SelectSFC;
+    L "dbHMISelect".SEQ.hmi2Select;
     T #sfcSelected;
 _notHMI2:   NOP 0;
 
@@ -81,7 +81,7 @@ TITLE = Get the selected SFC for HMI 3
     ==I;
     );
     JCN _notHMI3;
-    L "dbHMISelect".hmi3SelectSFC;
+    L "dbHMISelect".SEQ.hmi3Select;
     T #sfcSelected;
 _notHMI3:   NOP 0;
 
@@ -97,7 +97,7 @@ TITLE = Get the selected SFC for HMI 4
     ==I;
     );
     JCN _notHMI4;
-    L "dbHMISelect".hmi4SelectSFC;
+    L "dbHMISelect".SEQ.hmi4Select;
     T #sfcSelected;
 _notHMI4:   NOP 0;
 
@@ -113,7 +113,7 @@ TITLE = Get the selected SFC for HMI 5
     ==I;
     );
     JCN _notHMI5;
-    L "dbHMISelect".hmi5SelectSFC;
+    L "dbHMISelect".SEQ.hmi5Select;
     T #sfcSelected;
 _notHMI5:   NOP 0;
 
@@ -142,6 +142,96 @@ TITLE = @@INSTANCE@@ @@DESCRIPTION@@ : @@STATEDESCRIPTION@@
 _not_@@SFC@@_@@IDX@@:   NOP 0;
 
 @@TEMPLATE_END@@
+
+NETWORK
+TITLE = Copy the block structure back if HMI 1
+    //------------------------------------------------------------------------//
+    // Copy the block structure:                                              //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 1;
+    ==I;
+    );
+    JCN _notMoveHMI1;
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := "dbHMIInterfaceSFC".buffer ,
+        OUT                  := "dbHMIInterfaceSFC".hmi1
+    );
+_notMoveHMI1:   NOP 0;
+
+NETWORK
+TITLE = Copy the block structure back if HMI 2
+    //------------------------------------------------------------------------//
+    // Copy the block structure:                                              //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 2;
+    ==I;
+    );
+    JCN _notMoveHMI2;
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := "dbHMIInterfaceSFC".buffer ,
+        OUT                  := "dbHMIInterfaceSFC".hmi2
+    );
+_notMoveHMI2:   NOP 0;
+
+NETWORK
+TITLE = Copy the block structure back if HMI 3
+    //------------------------------------------------------------------------//
+    // Copy the block structure:                                              //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 3;
+    ==I;
+    );
+    JCN _notMoveHMI3;
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := "dbHMIInterfaceSFC".buffer ,
+        OUT                  := "dbHMIInterfaceSFC".hmi3
+    );
+_notMoveHMI3:   NOP 0;
+
+NETWORK
+TITLE = Copy the block structure back if HMI 4
+    //------------------------------------------------------------------------//
+    // Copy the block structure:                                              //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 4;
+    ==I;
+    );
+    JCN _notMoveHMI4;
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := "dbHMIInterfaceSFC".buffer ,
+        OUT                  := "dbHMIInterfaceSFC".hmi4
+    );
+_notMoveHMI4:   NOP 0;
+
+NETWORK
+TITLE = Copy the block structure back if HMI 5
+    //------------------------------------------------------------------------//
+    // Copy the block structure:                                              //
+    //------------------------------------------------------------------------//
+    A(;
+    L #CTR;
+    L 5;
+    ==I;
+    );
+    JCN _notMoveHMI5;
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := "dbHMIInterfaceSFC".buffer ,
+        OUT                  := "dbHMIInterfaceSFC".hmi5
+    );
+_notMoveHMI5:   NOP 0;
 
 NETWORK
 TITLE = Reset the HMI counter if all done

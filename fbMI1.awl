@@ -39,18 +39,6 @@ END_VAR
 
 BEGIN
 NETWORK
-TITLE = Safe Command on restart
-    //------------------------------------------------------------------------//
-    // Set the safe command if restarting the PLC:                            //
-    //------------------------------------------------------------------------//
-    A "flagFirstScanRestart";
-    JCN _noRestart;
-    L "dbCONST".BLK.MI1.SAFE.CMD;
-    T #p.write.mc.CMD;
-    T #p.read.mc.CMD_SAFE;
-_noRestart:   NOP 0;
-
-NETWORK
 TITLE = Analog input setpoints
     //------------------------------------------------------------------------//
     // ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
@@ -115,7 +103,8 @@ TITLE = Call Mode and Command handling function
     // state:                                                                 //
     //------------------------------------------------------------------------//
     CALL "fcModeCmd"
-    (   mcRead             := #p.read.mc ,
+    (   cmdSafe              := "dbCONST".BLK.MI1.SAFE.CMD ,
+        mcRead               := #p.read.mc ,
         mcWrite              := #p.write.mc
     );
 

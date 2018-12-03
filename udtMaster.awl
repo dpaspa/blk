@@ -37,7 +37,6 @@ VERSION : 1.0
         needAttention : Bool;          // True if block needs operator attention
         isAvailable : Bool;            // True if block has no write
         isBatch : Bool;
-        isMaster : Bool;
     END_STRUCT;
 END_TYPE
 
@@ -53,7 +52,14 @@ VERSION : 1.0
         HYGIENE : Int := 1;            // Hygiene status
         ARMED : Bool := False;         // Flowpath monitoring is armed
         MAN_OVERRIDE : Bool;           // Manual override to bypass NCRIL
-        isMaster : Bool;
+    END_STRUCT;
+END_TYPE
+
+TYPE "udtMCMaster"
+VERSION : 1.0
+    STRUCT
+        read : Bool;
+        write : Bool;
     END_STRUCT;
 END_TYPE
 
@@ -68,27 +74,43 @@ END_TYPE
 TYPE "udtModeCommandBLK"
 VERSION : 1.0
     STRUCT
+        cmdRestartCompleted : Bool;
+        hasSFC : Bool;
         transTime : Time := T#10s;               // Selected substate for Block level modules
         lastSUBS : Int := 0;
         lastSTATE : Int := 0;
         permitStart: Bool;
-        eventInterlock : Bool;
-        eventModeAuto : Bool;
-        eventModeManual : Bool;
-        eventModeOOS : Bool;
-        eventCmdRestart : Bool;
-        eventCmdStart : Bool;
-        eventCmdStop : Bool;
-        hasSFC : Bool;
-        edgeInterlock : Bool;
-        edgeCommandRestart : Bool;
-        edgeCommandStart : Bool;
-        edgeCommandStop : Bool;
-        edgeModeAuto : Bool;
-        edgeModeManual : Bool;
-        edgeModeOOS : Bool;
-        stateRUNNING : Bool;
-        stateSTOPPED : Bool;
+        event : STRUCT;
+            interlock : Bool;
+            cmdRestart : Bool;
+            cmdStart : Bool;
+            cmdStop : Bool;
+            modeAuto : Bool;
+            modeManual : Bool;
+            modeOOS : Bool;
+        END_STRUCT;
+        edge : STRUCT;
+            interlock : Bool;
+            cmdRestart : Bool;
+            cmdStart : Bool;
+            cmdStop : Bool;
+            modeAuto : Bool;
+            modeManual : Bool;
+            modeOOS : Bool;
+        END_STRUCT;
+        flags : STRUCT;
+            childInterlock : Bool;
+            childFailed : Bool;
+            childMismatch : Bool;
+            childUnavailable : Bool;
+            sfcAborted : Bool;
+            sfcCompleted : Bool;
+            substateCompleted : Bool;
+        END_STRUCT;
+        state : STRUCT;
+            running : Bool;
+            stopped : Bool;
+        END_STRUCT;
     END_STRUCT;
 END_TYPE
 
@@ -464,18 +486,24 @@ VERSION : 0.1
         CMD_STEPNO_JUMP : Int;
         CMD_MAN_JUMP : Bool;
         manual : Bool;
-        tmr_elapsed : Time;
-        tmr2_elapsed : Time;
-        tmr3_elapsed : Time;
-        tmr_preset : Time;
-        tmr2_preset : Time;
-        tmr3_preset : Time;
-        tmr_expired : Bool;
-        tmr2_expired : Bool;
-        tmr3_expired : Bool;
-        tmr_running : Bool;
-        tmr2_running : Bool;
-        tmr3_running : Bool;
+        tmr : Struct;
+            elapsed : Time;
+            expired : Bool;
+            preset : Time;
+            running : Bool;
+        END_STRUCT;
+        tmr2 : Struct;
+            elapsed : Time;
+            expired : Bool;
+            preset : Time;
+            running : Bool;
+        END_STRUCT;
+        tmr3 : Struct;
+            elapsed : Time;
+            expired : Bool;
+            preset : Time;
+            running : Bool;
+        END_STRUCT;
     END_STRUCT;
 END_TYPE
 

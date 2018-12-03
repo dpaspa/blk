@@ -23,6 +23,10 @@ AUTHOR : REO
 NAME : fcModeCmd
 VERSION : 2.0
 
+VAR_INPUT
+    cmdSafe : Int;           // Safe command for the block
+END_VAR
+
 VAR_IN_OUT
     mcRead : "udtMCRead";    // Block mode and command from read CPU
     mcWrite : "udtMCWrite";  // Block mode and command directives from write CPU
@@ -30,15 +34,18 @@ END_VAR
 
 BEGIN
 NETWORK
-TITLE = Auto Mode on CPU startup
+TITLE = Auto Mode and safe command on CPU startup
     //------------------------------------------------------------------------//
     // RESTART   RESTART   RESTART   RESTART   RESTART   RESTART   RESTART    //
     // RESTART   RESTART   RESTART   RESTART   RESTART   RESTART   RESTART    //
     //                                                                        //
-    // Set the mode to Auto if CPU has restarted:                             //
+    // Set the mode to Auto and safe command if CPU has restarted:            //
     //------------------------------------------------------------------------//
     A "flagFirstScanRestart";
     JCN _a;
+    L #cmdSafe;
+    T #mcWrite.CMD;
+    T #mcRead.CMD_SAFE;
     L "dbCONST".BLK.MODE.AUTO;
     T #mcWrite.MODE;
 _a:   NOP 0;

@@ -23,14 +23,15 @@ AUTHOR : REO
 NAME : fcModeCmdBLK
 VERSION : 2.0
 
-VAR_IN_OUT
-    mcRead : "udtMCRead";          // Block mode and command from read CPU
-    mcWrite : "udtMCWrite";            // Block mode and command directives from write CPU
-    bmc : "udtModeCommandBLK";         // Block mode and command
+VAR_INPUT
+    tmrChildExpired : Bool;        // Child mismatch timer expired
 END_VAR
 
-VAR_TEMP
-    edgeInterlock : Bool;
+VAR_IN_OUT
+    mcRead : "udtMCRead";          // Block mode and command from read CPU
+    mcWrite : "udtMCWrite";        // Block mode and command directives from write CPU
+    bmc : "udtModeCommandBLK";     // Block mode and command
+    err : "udtBLKError";           // Block error flags
 END_VAR
 
 BEGIN
@@ -43,8 +44,8 @@ TITLE = Flag if block Mode just changed to Auto
     // edge. The result will only last for one scan after the positive edge:  //
     //------------------------------------------------------------------------//
     A #mcRead.modeAUTO;
-    FP #bmc.edgeModeAuto;
-    = #bmc.eventModeAuto;
+    FP #bmc.edge.modeAuto;
+    = #bmc.event.modeAuto;
 
 NETWORK
 TITLE = Flag if block Mode just changed to Manual
@@ -52,8 +53,8 @@ TITLE = Flag if block Mode just changed to Manual
     // Check if the mode has just been changed to Manual:                     //
     //------------------------------------------------------------------------//
     A #mcRead.modeMANUAL;
-    FP #bmc.edgeModeManual;
-    = #bmc.eventModeManual;
+    FP #bmc.edge.modeManual;
+    = #bmc.event.modeManual;
 
 NETWORK
 TITLE = Flag if block Mode just changed to Out Of Service
@@ -61,8 +62,8 @@ TITLE = Flag if block Mode just changed to Out Of Service
     // Check if the mode has just been changed to Out of Service:             //
     //------------------------------------------------------------------------//
     A #mcRead.modeOOS;
-    FP #bmc.edgeModeOOS;
-    = #bmc.eventModeOOS;
+    FP #bmc.edge.modeOOS;
+    = #bmc.event.modeOOS;
 
 NETWORK
 TITLE = Flag if a running substate restart command issued
@@ -82,8 +83,8 @@ TITLE = Flag if a running substate restart command issued
     L "dbCONST".BLK.STATE.COMPLETED;
     ==I;
     );
-    FP #bmc.edgeCommandRestart;
-    = #bmc.eventCmdRestart;
+    FP #bmc.edge.cmdRestart;
+    = #bmc.event.cmdRestart;
 
 NETWORK
 TITLE = Flag if a new block running substate command issued
@@ -104,8 +105,8 @@ TITLE = Flag if a new block running substate command issued
     L "dbCONST".BLK.STATE.STOPPED;
     ==I;
     );
-    FP #bmc.edgeCommandStart;
-    = #bmc.eventCmdStart;
+    FP #bmc.edge.cmdStart;
+    = #bmc.event.cmdStart;
 
 NETWORK
 TITLE = Flag if block stop command issued
@@ -120,8 +121,8 @@ TITLE = Flag if block stop command issued
     L "dbCONST".BLK.CMD.STOP;
     ==I;
     );
-    FP #bmc.edgeCommandStop;
-    = #bmc.eventCmdStop;
+    FP #bmc.edge.cmdStop;
+    = #bmc.event.cmdStop;
 
 NETWORK
 TITLE = Stopped flag if in STOPPED state
@@ -133,7 +134,7 @@ TITLE = Stopped flag if in STOPPED state
     L #mcRead.STATE;
     ==I;
 	);
-    = #bmc.stateSTOPPED;
+    = #bmc.state.stopped;
 
 NETWORK
 TITLE = Running flag if in a RUNNING substate
@@ -150,7 +151,7 @@ TITLE = Running flag if in a RUNNING substate
     L "dbCONST".BLK.STATE.INTERLOCKED;
     <I;
     );
-    = #bmc.stateRUNNING;
+    = #bmc.state.running;
 
 NETWORK
 TITLE = Interlocked State. Send safe command in case of any interlock or failure
@@ -160,8 +161,8 @@ TITLE = Interlocked State. Send safe command in case of any interlock or failure
     //------------------------------------------------------------------------//
     O #mcRead.INTERLOCK;
     ON #bmc.permitStart;
-    FP #bmc.edgeInterlock;
-    = #bmc.eventInterlock;
+    FP #bmc.edge.interlock;
+    = #bmc.event.interlock;
     JCN _noInterlock;
     S #mcRead.INTERLOCK;
     L #mcRead.STATE;
@@ -171,5 +172,89 @@ TITLE = Interlocked State. Send safe command in case of any interlock or failure
 
 _noInterlock:   NOP 0;
 
+NETWORK
+TITLE = Check if any Child has Failed
+    //------------------------------------------------------------------------//
+    // Check if any child cannot be controlled by this parent block in which  //
+    // case this block will fail and so operation at this level should be     //
+    // inhibited:                                                             //
+    //------------------------------------------------------------------------//
+    O #bmc.flags.childInterlock;
+    O #bmc.flags.childUnavailable;
+    O #tmrChildExpired;
+    JCN _noChildFail;
+    S #bmc.flags.childFailed;
+_noChildFail:   NOP 0;
+
+NETWORK
+TITLE = Check if Child Failed condition cleard
+    //------------------------------------------------------------------------//
+    // Child fail condition cleared if all children match:                    //
+    //------------------------------------------------------------------------//
+    AN #bmc.flags.childInterlock;
+    AN #bmc.flags.childUnavailable;
+    AN #bmc.flags.childMismatch;
+    JCN _childFailCleared;
+    R #bmc.flags.childFailed;
+_childFailCleared:   NOP 0;
+
+NETWORK
+TITLE = Set Start command permitted flag if all okay
+    //------------------------------------------------------------------------//
+    // If no interlock and all calling parameters and child devices are okay  //
+    // then a Start is permitted:                                             //
+    //------------------------------------------------------------------------//
+    AN #mcRead.INTERLOCK;
+    AN #bmc.flags.childFailed;
+    = #bmc.permitStart;
+
+NETWORK
+TITLE = Operator Attention Flag
+    //------------------------------------------------------------------------//
+    // If not in Auto or any interlock or inhibit condition then the block    //
+    // needs operator attention:                                              //
+    //------------------------------------------------------------------------//
+    O #mcRead.needAttention;
+    ON #bmc.permitStart;
+    = #mcRead.needAttention;
+
+NETWORK
+TITLE = Block errors
+    //------------------------------------------------------------------------//
+    // Set the block start perimt error status if active:                     //
+    //------------------------------------------------------------------------//
+    AN #bmc.permitStart;
+    = #err.permitStart;
+
+    //------------------------------------------------------------------------//
+    // Set the child error status if active:                                  //
+    //------------------------------------------------------------------------//
+    A #bmc.flags.childInterlock;
+    = #err.childInterlock;
+
+    //------------------------------------------------------------------------//
+    // Set the child unavailable error status if active:                      //
+    //------------------------------------------------------------------------//
+    A #bmc.flags.childUnavailable;
+    = #err.childUnavailable;
+
+    //------------------------------------------------------------------------//
+    // Set the child state mismatch error status if active:                   //
+    //------------------------------------------------------------------------//
+    A #tmrChildExpired;
+    = #err.childMismatch;
+    JCN _noInternalIL;
+    S #mcRead.INTIL;
+_noInternalIL:   NOP 0;
+
+    //------------------------------------------------------------------------//
+    // Set the block error flag if anything gone wrong:                       //
+    //------------------------------------------------------------------------//
+    O #err.childInterlock;
+    O #err.childMismatch;
+    O #err.childSafeState;
+    O #err.childUnavailable;
+    O #err.permitStart;
+    = #mcRead.ERROR;
 
 END_FUNCTION

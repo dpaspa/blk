@@ -179,6 +179,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if send Write to partner CPU
     L @@COUNTERTEMPLATE@@;
     ==I;
     );
+    A(;
+    O #BSENDRead_@@IDX@@.DONE;
+    O #BSENDRead_@@IDX@@.ERROR;
+    );
     JCN _notReadWrite_@@IDX@@;
     S #BSENDWrite_@@IDX@@.REQ;
     L 2@@ID@@1;

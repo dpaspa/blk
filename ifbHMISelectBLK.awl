@@ -52,7 +52,7 @@ TITLE = Get the selected BLK for HMI 1
     ==I;
     );
     JCN _notHMI1;
-    L "dbHMISelect".hmi1SelectBLK;
+    L "dbHMISelect".BLK.hmi1Select;
     T #blockSelected;
 _notHMI1:   NOP 0;
 
@@ -68,7 +68,7 @@ TITLE = Get the selected BLK for HMI 2
     ==I;
     );
     JCN _notHMI2;
-    L "dbHMISelect".hmi2SelectBLK;
+    L "dbHMISelect".BLK.hmi2Select;
     T #blockSelected;
 _notHMI2:   NOP 0;
 
@@ -84,7 +84,7 @@ TITLE = Get the selected BLK for HMI 3
     ==I;
     );
     JCN _notHMI3;
-    L "dbHMISelect".hmi3SelectBLK;
+    L "dbHMISelect".BLK.hmi3Select;
     T #blockSelected;
 _notHMI3:   NOP 0;
 
@@ -100,7 +100,7 @@ TITLE = Get the selected BLK for HMI 4
     ==I;
     );
     JCN _notHMI4;
-    L "dbHMISelect".hmi4SelectBLK;
+    L "dbHMISelect".BLK.hmi4Select;
     T #blockSelected;
 _notHMI4:   NOP 0;
 
@@ -116,7 +116,7 @@ TITLE = Get the selected BLK for HMI 5
     ==I;
     );
     JCN _notHMI5;
-    L "dbHMISelect".hmi5SelectBLK;
+    L "dbHMISelect".BLK.hmi5Select;
     T #blockSelected;
 _notHMI5:   NOP 0;
 
@@ -151,11 +151,11 @@ TITLE = Transfer the child state values and errors to the read only interface ar
 @@ATTR_END|CHILD_INSTANCE@@
 @@ATTR_BEGIN|CHILD_INSTANCE@@
     L "idb@@CHILDALIASCLASS@@".f[arrChildIndex[@@COUNTERATTR|1@@]].p.read.mc.STATE;
-    T "dbHMIInterfaceBLK".block.arrChildState[@@COUNTERATTR@@];
+    T "dbHMIInterfaceBLK".buffer.block.arrChildState[@@COUNTERATTR@@];
     A "idb@@CHILDALIASCLASS@@".f[arrChildIndex[@@COUNTERATTR@@]].p.read.mc.ERROR;
-    = "dbHMIInterfaceBLK".block.arrChildError[@@COUNTERATTR@@];
+    = "dbHMIInterfaceBLK".buffer.block.arrChildError[@@COUNTERATTR@@];
     A "idb@@CHILDALIASCLASS@@".f[arrChildIndex[@@COUNTERATTR@@]].p.read.mc.INTERLOCK;
-    = "dbHMIInterfaceBLK".block.arrChildInterlock[@@COUNTERATTR@@];
+    = "dbHMIInterfaceBLK".buffer.block.arrChildInterlock[@@COUNTERATTR@@];
 @@ATTR_END|CHILD_INSTANCE@@
 
 NETWORK
@@ -165,19 +165,19 @@ TITLE = Transfer the parameter values to the read only interface arrays
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|pInterfaceBool@@
     A "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
-    = "dbHMIInterfaceBLK".block.arrBool[@@COUNTERATTR|1@@];
+    = "dbHMIInterfaceBLK".buffer.block.arrBool[@@COUNTERATTR|1@@];
 @@ATTR_END|pInterfaceBool@@
 @@ATTR_BEGIN|pInterfaceInt@@
     L "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
-    T "dbHMIInterfaceBLK".block.arrInt[@@COUNTERATTR|1@@];
+    T "dbHMIInterfaceBLK".buffer.block.arrInt[@@COUNTERATTR|1@@];
 @@ATTR_END|pInterfaceInt@@
 @@ATTR_BEGIN|pInterfaceReal@@
     L "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
-    T "dbHMIInterfaceBLK".block.arrReal[@@COUNTERATTR|1@@];
+    T "dbHMIInterfaceBLK".buffer.block.arrReal[@@COUNTERATTR|1@@];
 @@ATTR_END|pInterfaceReal@@
 @@ATTR_BEGIN|pInterfaceTime@@
     L "idb@@CLASS@@".f[@@IDX@@].p.@@OPERATION@@.@@BLOCKPARAMETER@@;
-    T "dbHMIInterfaceBLK".block.arrTime[@@COUNTERATTR|1@@];
+    T "dbHMIInterfaceBLK".buffer.block.arrTime[@@COUNTERATTR|1@@];
 @@ATTR_END|pInterfaceTime@@
 
 _not_@@INSTANCE@@:   NOP 0;
@@ -187,7 +187,7 @@ _not_@@INSTANCE@@:   NOP 0;
 NETWORK
 TITLE = Copy the block structure back if HMI 1
     //------------------------------------------------------------------------//
-    // Copy the block structure:                                            //
+    // Copy the block structure:                                              //
     //------------------------------------------------------------------------//
     A(;
     L #CTR;
@@ -195,18 +195,17 @@ TITLE = Copy the block structure back if HMI 1
     ==I;
     );
     JCN _notMoveHMI1;
-    CALL BLKMOV
-    {blk_type := 'Any'}
-    (   SRCBLK               := "dbHMIInterfaceBLK" ,
-        RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMI1InterfaceBLK"
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := "dbHMIInterfaceBLK".buffer ,
+        OUT                  := "dbHMIInterfaceBLK".hmi1
     );
 _notMoveHMI1:   NOP 0;
 
 NETWORK
 TITLE = Copy the block structure back if HMI 2
     //------------------------------------------------------------------------//
-    // Copy the block structure:                                            //
+    // Copy the block structure:                                              //
     //------------------------------------------------------------------------//
     A(;
     L #CTR;
@@ -214,18 +213,17 @@ TITLE = Copy the block structure back if HMI 2
     ==I;
     );
     JCN _notMoveHMI2;
-    CALL BLKMOV
-    {blk_type := 'Any'}
-    (   SRCBLK               := "dbHMIInterfaceBLK" ,
-        RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMI2InterfaceBLK"
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := "dbHMIInterfaceBLK".buffer ,
+        OUT                  := "dbHMIInterfaceBLK".hmi2
     );
 _notMoveHMI2:   NOP 0;
 
 NETWORK
 TITLE = Copy the block structure back if HMI 3
     //------------------------------------------------------------------------//
-    // Copy the block structure:                                            //
+    // Copy the block structure:                                              //
     //------------------------------------------------------------------------//
     A(;
     L #CTR;
@@ -233,18 +231,17 @@ TITLE = Copy the block structure back if HMI 3
     ==I;
     );
     JCN _notMoveHMI3;
-    CALL BLKMOV
-    {blk_type := 'Any'}
-    (   SRCBLK               := "dbHMIInterfaceBLK" ,
-        RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMI3InterfaceBLK"
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := "dbHMIInterfaceBLK".buffer ,
+        OUT                  := "dbHMIInterfaceBLK".hmi3
     );
 _notMoveHMI3:   NOP 0;
 
 NETWORK
 TITLE = Copy the block structure back if HMI 4
     //------------------------------------------------------------------------//
-    // Copy the block structure:                                            //
+    // Copy the block structure:                                              //
     //------------------------------------------------------------------------//
     A(;
     L #CTR;
@@ -252,18 +249,17 @@ TITLE = Copy the block structure back if HMI 4
     ==I;
     );
     JCN _notMoveHMI4;
-    CALL BLKMOV
-    {blk_type := 'Any'}
-    (   SRCBLK               := "dbHMIInterfaceBLK" ,
-        RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMI4InterfaceBLK"
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := "dbHMIInterfaceBLK".buffer ,
+        OUT                  := "dbHMIInterfaceBLK".hmi4
     );
 _notMoveHMI4:   NOP 0;
 
 NETWORK
 TITLE = Copy the block structure back if HMI 5
     //------------------------------------------------------------------------//
-    // Copy the block structure:                                            //
+    // Copy the block structure:                                              //
     //------------------------------------------------------------------------//
     A(;
     L #CTR;
@@ -271,11 +267,10 @@ TITLE = Copy the block structure back if HMI 5
     ==I;
     );
     JCN _notMoveHMI5;
-    CALL BLKMOV
-    {blk_type := 'Any'}
-    (   SRCBLK               := "dbHMIInterfaceBLK" ,
-        RET_VAL              := #retVal ,
-        DSTBLK               := "dbHMI5InterfaceBLK"
+    CALL MOVE
+    {value_type := 'Variant'}
+    (   IN                   := "dbHMIInterfaceBLK".buffer ,
+        OUT                  := "dbHMIInterfaceBLK".hmi5
     );
 _notMoveHMI5:   NOP 0;
 
