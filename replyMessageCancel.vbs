@@ -48,7 +48,7 @@ End If
 '/-----------------------------------------------------------------------------/
 '/ The event is cancelled:                                                     /
 '/-----------------------------------------------------------------------------/
-If (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.cancel3") And SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active3")) Then
+If (SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.cancel3") And Not SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.active3")) Then
     SmartTags("dbEVENT_eventPrompt_event{@@IDXEVENT@@}.cancel3") = False
 End If
 

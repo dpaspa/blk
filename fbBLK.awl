@@ -250,9 +250,7 @@ TITLE = Set child devices to safe state if stopped command or SFC fault
 @@ATTR_BEGIN|CHILD_ACQUIRE_EXISTS_ALIAS@@
     A #acquire.@@CHILDPARAMETERALIAS@@;
 @@ATTR_END|CHILD_ACQUIRE_EXISTS_ALIAS@@
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
 @@ATTR_BEGIN|PARENT_PEER@@
     A "idb@@PARENTPEERCLASS@@".f[#p.child.@@PARENTPEERALIAS@@].p.read.mc.modeAUTO;
@@ -307,9 +305,7 @@ TITLE = Cascade Auto or OOS Mode to children
 @@ATTR_END|CHILD_COMMAND_ALWAYS@@
 
 @@ATTR_BEGIN|CHILD_COMMAND_SELECTED@@
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     JCN _cascMode@@COUNTERATTR|1@@;
     L #p.write.mc.MODE;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.MODE;
@@ -385,9 +381,7 @@ TITLE = Set parent parameter @@CHILDPARAMETERATTRIBUTE@@ value for child device 
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     JCN _parentWrite_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
     L #p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
     T #p.@@OPERATION@@.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
@@ -409,9 +403,7 @@ TITLE = Set parent parameter @@CHILDPARAMETERATTRIBUTE@@ value for child device 
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     JCN _parentWriteBool_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
     A #p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
     = #p.@@OPERATION@@.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
@@ -436,8 +428,15 @@ TITLE = Hygiene Status Calculation
     CALL "fcHygiene"
     (   hs                   := #p.read.hs
     );
+    A(;
     L #p.read.hs.HYGIENE_STATE;
     T #p.write.mc.HYGIENE;
+    <>I;
+    );
+    JCN _noChangeHygiene;
+    L #p.read.hs.HYGIENE_STATE;
+    T #p.write.mc.HYGIENE;
+_noChangeHygiene:   NOP 0;
 @@ATTR_END|HYGIENE@@
 
 NETWORK
@@ -699,18 +698,28 @@ TITLE = Zero the log time data values
 
 @@ATTR_BEGIN|CHILD_ACQUIRE@@
 NETWORK
-TITLE = Release child @@CHILDPARAMETERALIAS@@
+TITLE = Set child @@CHILDPARAMETERALIAS@@ available
     //------------------------------------------------------------------------//
     // RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELE   //
     //                                                                        //
+    // Make the child device available if acquired to run the command:        //
+    //------------------------------------------------------------------------//
+    A #acquire.@@CHILDPARAMETERALIAS@@;
+    JCN _alreadyAvail@@COUNTERATTR|1@@;
+    L "dbCONST".BLK.ID.AVAILABLE;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
+_alreadyAvail@@COUNTERATTR|1@@:   NOP 0;
+
+NETWORK
+TITLE = Release child @@CHILDPARAMETERALIAS@@
+    //------------------------------------------------------------------------//
     // Release the child device if acquired earlier to run the command:       //
     //------------------------------------------------------------------------//
     A #acquire.@@CHILDPARAMETERALIAS@@;
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.isAvailable;
     JCN _notOwn@@COUNTERATTR|1@@;
     R #acquire.@@CHILDPARAMETERALIAS@@;
-    R "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.isMaster;
-    L "dbCONST".BLK.ID.AVAILABLE;
-    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
+    R "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.master.write;
 _notOwn@@COUNTERATTR@@:   NOP 0;
 
 @@ATTR_END|CHILD_ACQUIRE@@
@@ -843,7 +852,7 @@ TITLE = Acquire child @@CHILDPARAMETERALIAS@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.isAvailable;
     JCN _childAvail_@@COUNTERATTR|1@@;
     S #acquire.@@CHILDPARAMETERALIAS@@;
-    S "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.isMaster;
+    S "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.master.write;
     L #p.read.mc.ME;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
 
@@ -864,9 +873,7 @@ TITLE = Cascade Batch Serial Number to all children
 @@ATTR_END|CHILD_CASCADE_ALWAYS@@
 
 @@ATTR_BEGIN|CHILD_CASCADE_SELECTED@@
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     JCN _childBatch_@@COUNTERATTR|1@@;
     L #p.write.mc.SERIALNUM;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.SERIALNUM;
@@ -889,9 +896,7 @@ TITLE = Command child device @@CHILDPARAMETERALIAS@@ for initial TRUE command @@
 @@ATTR_BEGIN|CHILD_INIT_CMD_TRUE@@
     O(;
     A #subsStart.@@STATE@@;
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     @@CONDITIONSTATEMENT@@
     );
 @@ATTR_END|CHILD_INIT_CMD_TRUE@@
@@ -922,9 +927,7 @@ TITLE = Command child device @@CHILDPARAMETERALIAS@@ for initial FALSE command @
 @@ATTR_BEGIN|CHILD_INIT_CMD_FALSE@@
     O(;
     A #subsStart.@@STATE@@;
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     AN(;
     @@CONDITIONSTATEMENT@@
     );
@@ -1465,9 +1468,7 @@ TITLE = Upload child states
     // Upload the child state:                                                //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_CASCADE@@
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     JCN _pSTATE_@@CHILDPARAMETERALIAS@@;
     L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.STATE;
     T #p.read.@@CHILDPARAMETERALIAS@@_STATE;
@@ -1496,9 +1497,7 @@ TITLE = Set child substate, command and parameters if no mismatch
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_COMMAND_BLK@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     JCN _pSUBS_@@CHILDPARAMETERALIAS@@;
     L #p.write.@@CHILDPARAMETERALIAS@@_SUBS;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.SUBS;
@@ -1512,9 +1511,7 @@ _pSUBS_@@CHILDPARAMETERALIAS@@:   NOP 0;
 @@ATTR_BEGIN|CHILD_COMMAND_EXISTS@@
 @@ATTR_BEGIN|CHILD_COMMAND@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     JCN _pCMD_@@CHILDPARAMETERALIAS@@;
     L #p.write.@@CHILDPARAMETERALIAS@@_CMD;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.CMD;
@@ -1610,9 +1607,7 @@ TITLE = Check if any Child state does not match the command
     // expired. Stop checking if the first child state mismatch found:        //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_COMMAND_FLOWPATH@@
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
     A(;
     L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.STATE;
@@ -1658,9 +1653,7 @@ TITLE = Flag child mismatch if any Child state does not match the command
 @@ATTR_END|CHILD_COMMAND_FLOWPATH_ALWAYS@@
 @@ATTR_BEGIN|CHILD_COMMAND_FLOWPATH@@
     O(;
-    A(;
     @@CHILDCOMMANDSTATEMENT@@
-    );
     A #p.child.err@@CHILDPARAMETERALIAS@@;
     );
 @@ATTR_END|CHILD_COMMAND_FLOWPATH@@

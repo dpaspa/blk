@@ -70,7 +70,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if send Read to partner CPU
     // If this is the Block read then set the transaction send and receive    //
     // IDs and transfer the calculated parameters:                            //
     //------------------------------------------------------------------------//
-    A "idb@@CLASS@@".f[@@IDX@@].p.read.mc.isMaster;
+    A "idb@@CLASS@@".f[@@IDX@@].p.master.read;
     A(;
     L #CTR;
     L @@COUNTERTEMPLATE|1@@;
@@ -90,7 +90,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if receive Read from partner CPU
     // If this is not the Block read then set the transaction send and      //
     // receive  IDs to receive the calculated parameters:                     //
     //------------------------------------------------------------------------//
-    AN "idb@@CLASS@@".f[@@IDX@@].p.read.mc.isMaster;
+    AN "idb@@CLASS@@".f[@@IDX@@].p.master.read;
     O(;
     L #CTR;
     L @@COUNTERTEMPLATE@@;
@@ -137,7 +137,7 @@ TITLE = Check item @@IDX@@ @@INSTANCE@@ if receive Read from partner CPU
     //------------------------------------------------------------------------//
     // If not read then receive the calculated parameters:                  //
     //------------------------------------------------------------------------//
-    AN "idb@@CLASS@@".f[@@IDX@@].p.read.mc.isMaster;
+    AN "idb@@CLASS@@".f[@@IDX@@].p.master.read;
     = #BRCVRead_@@IDX@@.EN_R;
 
 NETWORK
@@ -173,7 +173,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if send Write to partner CPU
     // send the write parameters:                                             //
     //------------------------------------------------------------------------//
 @@COUNTERTEMPLATEINCR@@
-    A "idb@@CLASS@@".f[@@IDX@@].p.write.mc.isMaster;
+    A "idb@@CLASS@@".f[@@IDX@@].p.master.write;
     A(;
     L #CTR;
     L @@COUNTERTEMPLATE@@;
@@ -193,7 +193,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ if receive Write from partner CPU
     // If this is not the Write then set the transaction send and receive IDs //
     // and receive the write parameters:                                      //
     //------------------------------------------------------------------------//
-    AN "idb@@CLASS@@".f[@@IDX@@].p.write.mc.isMaster;
+    AN "idb@@CLASS@@".f[@@IDX@@].p.master.write;
     O(;
     L #CTR;
     L @@COUNTERTEMPLATE@@;
@@ -240,7 +240,7 @@ TITLE = Check item @@IDX@@ @@INSTANCE@@ if receive Write data from partner CPU
     //------------------------------------------------------------------------//
     // If not the Write read then receive the write parameters:             //
     //------------------------------------------------------------------------//
-    AN "idb@@CLASS@@".f[@@IDX@@].p.write.mc.isMaster;
+    AN "idb@@CLASS@@".f[@@IDX@@].p.master.write;
     = #BRCVWrite_@@IDX@@.EN_R;
 
 NETWORK

@@ -83,7 +83,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
     // This block can only reside within this CPU:                            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.read.mc.isMaster;
+    = #f[@@IDX@@].p.master.read;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
@@ -91,7 +91,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     // This block can only be owned by a parent block in this CPU:            //
     //------------------------------------------------------------------------//
     A "alwaysHigh";
-    = #f[@@IDX@@].p.write.mc.isMaster;
+    = #f[@@IDX@@].p.master.write;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Field Input
@@ -125,7 +125,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
     // This block can only reside in another CPU:                             //
     //------------------------------------------------------------------------//
     A "alwaysLow";
-    = #f[@@IDX@@].p.read.mc.isMaster;
+    = #f[@@IDX@@].p.master.read;
 
 @@ATTR_BEGIN|ISOWNED@@
 NETWORK
@@ -134,7 +134,7 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     // This block can only be owned by a parent block in another CPU:         //
     //------------------------------------------------------------------------//
     A "alwaysLow";
-    = #f[@@IDX@@].p.write.mc.isMaster;
+    = #f[@@IDX@@].p.master.write;
 @@ATTR_END|ISOWNED@@
 
 @@TEMPLATE_END@@
