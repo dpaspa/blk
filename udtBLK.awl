@@ -68,24 +68,12 @@ VERSION : 1.0
 @@ATTR_BEGIN|pClassBlockWrite@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
 @@ATTR_END|pClassBlockWrite@@
-@@ATTR_BEGIN|CHILD_COMMAND@@
-        @@CHILDPARAMETERALIAS@@_CMD : INT;
-@@ATTR_END|CHILD_COMMAND@@
-@@ATTR_BEGIN|CHILD_COMMAND_BLK@@
-        @@CHILDPARAMETERALIAS@@_SUBS : INT;
-@@ATTR_END|CHILD_COMMAND_BLK@@
 @@ATTR_BEGIN|CHILD_HYGIENE_BLK@@
         @@CHILDPARAMETERALIAS@@_HYGIENE : INT;
 @@ATTR_END|CHILD_HYGIENE_BLK@@
-@@ATTR_BEGIN|pSFCChildWriteDefine@@
+@@ATTR_BEGIN|pSFCSelectMCWriteDefineHygiene@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
-@@ATTR_END|pSFCChildWriteDefine@@
-@@ATTR_BEGIN|pSFCChildWriteBoolDefine@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
-@@ATTR_END|pSFCChildWriteBoolDefine@@
-@@ATTR_BEGIN|pSFCSelectMCWriteDefine@@
-        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
-@@ATTR_END|pSFCSelectMCWriteDefine@@
+@@ATTR_END|pSFCSelectMCWriteDefineHygiene@@
 @@ATTR_BEGIN|pBLOCK_RECIPE@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
 @@ATTR_END|pBLOCK_RECIPE@@
@@ -95,6 +83,21 @@ END_TYPE
 TYPE "udt@@CLASS@@command"
 VERSION : 1.0
     STRUCT
+@@ATTR_BEGIN|CHILD_COMMAND@@
+        @@CHILDPARAMETERALIAS@@_CMD : INT;
+@@ATTR_END|CHILD_COMMAND@@
+@@ATTR_BEGIN|CHILD_COMMAND_BLK@@
+        @@CHILDPARAMETERALIAS@@_SUBS : INT;
+@@ATTR_END|CHILD_COMMAND_BLK@@
+@@ATTR_BEGIN|pSFCChildWriteDefine@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
+@@ATTR_END|pSFCChildWriteDefine@@
+@@ATTR_BEGIN|pSFCChildWriteBoolDefine@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
+@@ATTR_END|pSFCChildWriteBoolDefine@@
+@@ATTR_BEGIN|pSFCSelectMCWriteDefine@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
+@@ATTR_END|pSFCSelectMCWriteDefine@@
     END_STRUCT;
 END_TYPE
 
@@ -133,6 +136,9 @@ VERSION : 1.0
 @@ATTR_BEGIN|pSFCSelectMCWriteDefine@@
         @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
 @@ATTR_END|pSFCSelectMCWriteDefine@@
+@@ATTR_BEGIN|pSFCSelectMCWriteDefineHygiene@@
+        @@BLOCKPARAMETER@@ : @@PARAMETERDATATYPE@@ := @@PARAMETERVALUE@@;
+@@ATTR_END|pSFCSelectMCWriteDefineHygiene@@
     END_STRUCT;
 END_TYPE
 @@ATTR_END|pChildSelectExists@@
@@ -142,7 +148,7 @@ VERSION : 1.0
     STRUCT
         child : "udt@@CLASS@@children";      // Child index to access child instance DB
         link : "udt@@CLASS@@link";           // Link index to access link instance DB
-        master : "udtMCMaster";              // Control flags for PLC to PLC communication
+        master : "udtMCMaster";         // Control flags for PLC to PLC communication
 @@ATTR_BEGIN|pChildSelectExists@@
         select : "udt@@CLASS@@select";       // Select index to access selection instance DB
 @@ATTR_END|pChildSelectExists@@

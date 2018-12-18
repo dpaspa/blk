@@ -19,6 +19,7 @@ VERSION : 2.0
 // Calling parameters should be retentive in nature:                          //
 //----------------------------------------------------------------------------//
 VAR_IN_OUT
+    hygiene : Int;
     hs : "udtHygiene";       // Hygiene status
 END_VAR
 
@@ -33,57 +34,62 @@ END_VAR
 
 BEGIN
 NETWORK
+TITLE = Update the hygiene state in the structure
+    L #hygiene;
+    T #hs.HYGIENE_STATE;
+
+NETWORK
 TITLE = Start cleanliness monitoring timer if Hygiene Status is CLEAN
     A(;
-      L #hs.HYGIENE_STATE;
-      L "dbCONST".BLK.HYGIENE.CLEAN;
-      ==I;
+    L #hs.HYGIENE_STATE;
+    L "dbCONST".BLK.HYGIENE.CLEAN;
+    ==I;
     );
-      = #start_clean_tmr;
+    = #start_clean_tmr;
     JCN _a;
-      R #hs.CLEAN_TOUT;
+    R #hs.CLEAN_TOUT;
 _a:   NOP 0;
 
 NETWORK
 TITLE = Start sterile monitoring timer if Hygiene Status is STERILE
     A(;
-      L #hs.HYGIENE_STATE;
-      L "dbCONST".BLK.HYGIENE.STERILE;
-      ==I;
+    L #hs.HYGIENE_STATE;
+    L "dbCONST".BLK.HYGIENE.STERILE;
+    ==I;
     );
-      = #start_sterile_tmr;
+    = #start_sterile_tmr;
     JCN _b;
-      R #hs.STERILE_TOUT;
+    R #hs.STERILE_TOUT;
 _b:   NOP 0;
 
 NETWORK
 TITLE = Reset cleanliness timer if Hygiene Status is not CLEAN
     A(;
-      L #hs.HYGIENE_STATE;
-      L "dbCONST".BLK.HYGIENE.CLEAN;
-      <>I;
+    L #hs.HYGIENE_STATE;
+    L "dbCONST".BLK.HYGIENE.CLEAN;
+    <>I;
     );
-      = #reset_clean_tmr;
+    = #reset_clean_tmr;
 
 NETWORK
 TITLE = Reset sterile timer if Hygiene Status is not STERILE
     A(;
-      L #hs.HYGIENE_STATE;
-      L "dbCONST".BLK.HYGIENE.STERILE;
-      <>I;
+    L #hs.HYGIENE_STATE;
+    L "dbCONST".BLK.HYGIENE.STERILE;
+    <>I;
     );
-      = #reset_sterile_tmr;
+    = #reset_sterile_tmr;
 NETWORK
 
 TITLE = Retentive timer for CLEAN
-      CALL TONR, "dbTONR"
-      (  IN                          := #start_clean_tmr ,
-         R                           := #reset_clean_tmr ,
-         PT                          := #hs.CLEAN_TIME ,
-         Q                           := #clean_timeout ,
-         ET                          := #hs.CLEAN_ELAPSED_TIME
-      );
-      NOP 0;
+    CALL TONR, "dbTONR"
+    (   IN                          := #start_clean_tmr ,
+        R                           := #reset_clean_tmr ,
+        PT                          := #hs.CLEAN_TIME ,
+        Q                           := #clean_timeout ,
+        ET                          := #hs.CLEAN_ELAPSED_TIME
+    );
+    NOP 0;
 
 NETWORK
 TITLE = Retentive timer for STERILE
@@ -102,6 +108,7 @@ TITLE = Set the Hygiene Status to USED if cleanliness timer expired
     JCN _c;
       L "dbCONST".BLK.HYGIENE.USED;
       T #hs.HYGIENE_STATE;
+      T #hygiene;
 _c:   NOP 0;
 
 NETWORK
@@ -115,6 +122,7 @@ TITLE = Set the Hygiene Status to CLEAN if sterile timer expired
     JCN _d;
       L "dbCONST".BLK.HYGIENE.CLEAN;
       T #hs.HYGIENE_STATE;
+      T #hygiene;
 _d:   NOP 0;
 
 NETWORK

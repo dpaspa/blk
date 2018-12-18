@@ -159,8 +159,7 @@ TITLE = Interlocked State. Send safe command in case of any interlock or failure
     // Block should be interlocked state if STOPPED and interlock active or   //
     // child failed:                                                          //
     //------------------------------------------------------------------------//
-    O #mcRead.INTERLOCK;
-    ON #bmc.permitStart;
+    A #mcRead.INTERLOCK;
     FP #bmc.edge.interlock;
     = #bmc.event.interlock;
     JCN _noInterlock;

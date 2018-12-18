@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/11/2018 2:09:43 PM by David Paspa
+generated on 12/12/2018 12:33:47 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -12,28 +12,29 @@ SEQUENCE
 --------------------------------------------------
 
 Name:- CHARGE
-Title:- PH_CHARGE
-Description:- Add specified amount of WFI or PW to the vessel Mx
+Title:- PH_EMC2_CHARGE
+Description:- Add specified amount of WFI or PW to the Manufacturing Vessel Mx
 HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 Class:- EMC2
 Level:- PH
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
-HeaderName:- C2PCHAR
-Version:- 0.5
+HeaderName:- C2_CHAR
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
-// 0.6 Srinivas Nimmala  19-May-2010           Report Trigger Added    
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
+// 0.6 Srinivas Nimmala 19-May-2010            Report Trigger Added    
 
-// 0.5 Khairul Basar  20-Sep-2009 CC-09/023    SQ_TIMER is removed from Visio variable list.Timeout_alarm 
+// 0.5 Khairul Basar    20-Sep-2009 CC-09/023  SQ_TIMER is removed from Visio variable list.Timeout_alarm 
 //                                             programmed.Start/Stop of EMM1 to request mass measurement.
 //                                             Reset Pulse mode in S007.Mass_current compare logic with >=R
 //                                             instead of ==R.
-// 0.4 Khairul Basar  25-Aug-2009 CC-09/023    Change in Verific. & TRN code OR to AND. 
+// 0.4 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific. & TRN code OR to AND. 
 //                                             Change in the Last step.SQ_TIMER added.
-// 0.3 David Paspa    24-Aug-2009 CC-09/023    Removed repeated setup steps.
-// 0.2 Khairul Basar  18-Aug-2009              Added logic code
-// 0.1 David Paspa    13-Jul-2009              SFC structural design
+// 0.3 David Paspa      24-Aug-2009 CC-09/023  Removed repeated setup steps.
+// 0.2 Khairul Basar    18-Aug-2009            Added logic code
+// 0.1 David Paspa      13-Jul-2009            SFC structural design
 
 --------------------------------------------------
 PARAMETER::1
@@ -444,6 +445,16 @@ SET;
 S #_log_msg_invalid_mass_abort;
 S #smc.ABORTED;
 Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 05
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------

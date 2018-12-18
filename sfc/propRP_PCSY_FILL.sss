@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/11/2018 2:09:09 PM by David Paspa
+generated on 12/12/2018 10:47:22 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -11,18 +11,19 @@ generated on 29/11/2018 2:09:09 PM by David Paspa
 SEQUENCE
 --------------------------------------------------
 
-SFCNo:- 3
+SFCNo:- 006
 Title:- RP_PCSY_FILL
-Description:- Recipe Procedure for Transfer from Storage Vessel Sy to Filling (Vial or Ampoule)
+Description:- Recipe Procedure Sequence for Transfer from Storage Vessel Sy to Filling Machine Line FLz
 Name:- FILL
 Class:- PCSY
 Level:- RP
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
-HeaderName:- PCSFIL
-Version:- 0.2
+HeaderName:- PCSYFIL
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 0.2 Khairul Bhasar   02-Nov-2009 09/058     Added Ampoule and Vial Filling switches
 // 0.1 Gerald Kontriner 18-Sep-2009            SFC structural design
 HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
@@ -268,6 +269,16 @@ T #_sy_vessel_hygiene;
 SET;
 S #_release_flz;
 Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 05
+Title:- Empty step
+EmptyTransition:- False
+Description:- Jump unconditionally
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------

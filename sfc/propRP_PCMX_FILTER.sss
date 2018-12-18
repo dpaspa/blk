@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/11/2018 2:09:01 PM by David Paspa
+generated on 12/12/2018 10:47:16 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -11,18 +11,19 @@ generated on 29/11/2018 2:09:01 PM by David Paspa
 SEQUENCE
 --------------------------------------------------
 
-SFCNo:- 4
+SFCNo:- 003
 Title:- RP_PCMX_FILTER
-Description:- Recipe procedure sequence for Filtration from Manufacturing Vessel Mx to Storage Vessel Sy.
+Description:- Recipe Procedure Sequence for Filtration from Manufacturing Vessel Mx to Storage Vessel Sy.
 Name:- FILTER
 Class:- PCMX
 Level:- RP
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
-HeaderName:- PCFILT
-Version:- 0.1
+HeaderName:- PCMXFILT
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 0.1 Gerald Kontriner 18-Sep-2009            SFC structural design
 HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 
@@ -69,7 +70,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- mx_vessel_sync_write_start_hpca
+Name:- mx_vessel_sync_read_start_hpca
 Type:- BOOL
 Description:- Mx start to supply HPCA
 ParameterInOut:- OUT
@@ -101,7 +102,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::10
 --------------------------------------------------
-Name:- sy_vessel_sync_write_filtration_complete
+Name:- sy_vessel_sync_read_filtration_complete
 Type:- BOOL
 Description:- Sy Filtration complete
 ParameterInOut:- OUT
@@ -109,7 +110,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::11
 --------------------------------------------------
-Name:- mx_vessel_sync_write_filtration_complete
+Name:- mx_vessel_sync_read_filtration_complete
 Type:- BOOL
 Description:- Mx Filtration complete
 ParameterInOut:- OUT
@@ -117,7 +118,7 @@ ParameterInOut:- OUT
 --------------------------------------------------
 PARAMETER::12
 --------------------------------------------------
-Name:- mx_vessel_sync_read_ready_hpca
+Name:- mx_vessel_sync_write_ready_hpca
 Type:- BOOL
 Description:- Mx is ready to supply HPCA
 ParameterInOut:- IN
@@ -125,7 +126,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::13
 --------------------------------------------------
-Name:- sy_vessel_sync_read_path_ready
+Name:- sy_vessel_sync_write_path_ready
 Type:- BOOL
 Description:- Sy path is ready
 ParameterInOut:- IN
@@ -209,8 +210,8 @@ Description:- Log Mx Filtration to Sy operation begin time.
 Action:- //Log Mx filtration to Sy operation begin
 SET;
 S #_log_msg_filter_begin;
-R #_sy_vessel_sync_write_filtration_complete;
-R #_mx_vessel_sync_write_filtration_complete;
+R #_sy_vessel_sync_read_filtration_complete;
+R #_mx_vessel_sync_read_filtration_complete;
 R #_Report_End; //REPORT END FLAG
 Verification:- A "uncondJump";
 
@@ -325,7 +326,7 @@ Title:- Sy and FLz path ready?
 EmptyTransition:- False
 Description:- Check if Sy and FLz path is ready. 
 If all path_ready flags have been set.
-Condition:- A #_sy_vessel_sync_read_path_ready;
+Condition:- A #_sy_vessel_sync_write_path_ready;
 
 
 --------------------------------------------------
@@ -370,7 +371,7 @@ TRNNo:- 05
 Title:- HPCA ready?
 EmptyTransition:- False
 Description:- Check if SMFLx and MMFLx has flagged it is ready for HPCA
-Condition:- A #_mx_vessel_sync_read_ready_hpca;
+Condition:- A #_mx_vessel_sync_write_ready_hpca;
 
 
 --------------------------------------------------
@@ -385,7 +386,7 @@ ACTION::01
 --------------------------------------------------
 Description:- Set MX ready_hpca flag.
 Action:- SET;
-S #_mx_vessel_sync_write_start_hpca;
+S #_mx_vessel_sync_read_start_hpca;
 Verification:- A "uncondJump";
 
 
@@ -413,9 +414,9 @@ ACTION::01
 Description:- Set SY flag filtration_complete
 Set MX flag filtration_complete
 Action:- SET;
-S #_mx_vessel_sync_write_filtration_complete;
-S #_sy_vessel_sync_write_filtration_complete;
-R #_mx_vessel_sync_write_start_hpca;
+S #_mx_vessel_sync_read_filtration_complete;
+S #_sy_vessel_sync_read_filtration_complete;
+R #_mx_vessel_sync_read_start_hpca;
 Verification:- A "uncondJump";
 
 
@@ -490,9 +491,9 @@ SET;
 S #_log_msg_filter_end;
 
 //Clear used flags
-R #_mx_vessel_sync_write_start_hpca;
-R #_mx_vessel_sync_write_filtration_complete;
-R #_sy_vessel_sync_write_filtration_complete;
+R #_mx_vessel_sync_read_start_hpca;
+R #_mx_vessel_sync_read_filtration_complete;
+R #_sy_vessel_sync_read_filtration_complete;
 R #_prompt_abort_confirm_yes;
 R #_Report_End; 
 Verification:- A "uncondJump";

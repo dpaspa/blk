@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 30/11/2018 6:23:48 PM by David Paspa
+generated on 12/12/2018 1:58:51 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -2049,6 +2049,21 @@ L 1000;
 *I;
 T #SQ_TIMER.PT;
 Verification:- A #sqSeqTimerStart;
+
+
+--------------------------------------------------
+TRANSITION::35
+--------------------------------------------------
+TRNNo:- 35
+Title:- Finished pulsing drain valves?
+EmptyTransition:- False
+Description:- Drain valves pulsed PULSE_NUMBER times
+Condition:- A(;
+L 	#_pulse_counter;
+L 	#_r_pulse_number; 
+>=I;
+);
+
 
 
 --------------------------------------------------

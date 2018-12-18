@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/11/2018 4:44:27 PM by David Paspa
+generated on 12/12/2018 1:57:12 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -32,13 +32,29 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- emx_fill_sync_write_fill_resume
+Type:- BOOL
+Description:- Filling pause button resumed synchronisation flag
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- emx_fill_sync_write_fill_pause
+Type:- BOOL
+Description:- Filling pause button pressed synchronisation flag
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
 Name:- emv_inlet_cmd
 Type:- INT
 Description:- Sprayball inlet valves comment
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::4
 --------------------------------------------------
 Name:- r_pres_lpca_blanket
 Type:- REAL
@@ -46,7 +62,7 @@ Description:- SY FILL LPCA blanket pressure
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::5
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
@@ -55,7 +71,7 @@ Description:- UO_SY_FILL Operator to confirm abort due to invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::6
 --------------------------------------------------
 Name:- prompt_abort_confirm_yes
 Type:- BOOL
@@ -63,7 +79,7 @@ Description:- UO_SY_FILL Operator confirmed to abort due to invalid Hygiene Stat
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::7
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
@@ -71,7 +87,7 @@ Description:- UO_SY_FILL Unit has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::8
 --------------------------------------------------
 Name:- emx_transfer_hygiene
 Type:- INT
@@ -79,7 +95,7 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::9
 --------------------------------------------------
 Name:- emx_fill_hygiene
 Type:- INT
@@ -87,7 +103,7 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::10
 --------------------------------------------------
 Name:- emx_fill_subs
 Type:- INT
@@ -95,7 +111,7 @@ Description:- Substate selection for filling line
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::11
 --------------------------------------------------
 Name:- emx_fill_cmd
 Type:- INT
@@ -103,7 +119,7 @@ Description:- Command for filling line
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::12
 --------------------------------------------------
 Name:- emx_fill_state
 Type:- INT
@@ -111,7 +127,7 @@ Description:- Device state for filling line
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::13
 --------------------------------------------------
 Name:- vessel_sy
 Type:- INT
@@ -119,7 +135,7 @@ Description:- Storage vessel selection S1 or S2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::14
 --------------------------------------------------
 Name:- fill_flz
 Type:- INT
@@ -127,7 +143,7 @@ Description:- Filling line selection FL1 or FL2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::15
 --------------------------------------------------
 Name:- emx_smfl_cmd
 Type:- INT
@@ -135,7 +151,7 @@ Description:- Command to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::16
 --------------------------------------------------
 Name:- emx_smfl_subs
 Type:- INT
@@ -143,7 +159,7 @@ Description:- Substate selection to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::17
 --------------------------------------------------
 Name:- emx_smfl_state
 Type:- INT
@@ -151,7 +167,7 @@ Description:- Device State of emx_smfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::18
 --------------------------------------------------
 Name:- emc_water_sy_cmd
 Type:- INT
@@ -159,7 +175,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::19
 --------------------------------------------------
 Name:- emc_water_sy_subs
 Type:- INT
@@ -167,7 +183,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::20
 --------------------------------------------------
 Name:- emc_water_sy_state
 Type:- INT
@@ -175,7 +191,7 @@ Description:- Device State of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::21
 --------------------------------------------------
 Name:- log_msg_filling_start
 Type:- BOOL
@@ -183,7 +199,7 @@ Description:- UO_SY_FILL Operator confirmed filling start
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::22
 --------------------------------------------------
 Name:- log_msg_reset_button_abort
 Type:- BOOL
@@ -191,7 +207,7 @@ Description:- UO_SY_FILL Operator confirmed to abort pause button reset
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::23
 --------------------------------------------------
 Name:- log_msg_reset_button_retry
 Type:- BOOL
@@ -199,7 +215,7 @@ Description:- UO_SY_FILL Operator confirmed to reset pause button
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::24
 --------------------------------------------------
 Name:- log_msg_filling_paused
 Type:- BOOL
@@ -207,7 +223,7 @@ Description:- UO_SY_FILL Operator paused filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::25
 --------------------------------------------------
 Name:- prompt_transfer_complete_confirm_no
 Type:- BOOL
@@ -215,7 +231,7 @@ Description:- UO_SY_FILL Operator confirm transfer is complete confirmed no
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::26
 --------------------------------------------------
 Name:- log_msg_transfer_complete
 Type:- BOOL
@@ -223,7 +239,7 @@ Description:- UO_SY_FILL Operator confirmed transfer is complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::27
 --------------------------------------------------
 Name:- log_msg_hpca_begin
 Type:- BOOL
@@ -231,7 +247,7 @@ Description:- UO_SY_FILL HPCA begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::28
 --------------------------------------------------
 Name:- log_msg_fill_begin
 Type:- BOOL
@@ -239,7 +255,7 @@ Description:- UO_SY_FILL begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::29
 --------------------------------------------------
 Name:- log_msg_fill_end
 Type:- BOOL
@@ -247,7 +263,7 @@ Description:- UO_SY_FILL end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::30
 --------------------------------------------------
 Name:- fill_proceed
 Type:- BOOL
@@ -255,7 +271,7 @@ Description:- Parent synchronisation flag to proceed with filling operation
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::29
+PARAMETER::31
 --------------------------------------------------
 Name:- prompt_transfer_complete
 Type:- BOOL
@@ -263,7 +279,7 @@ Description:- UO_SY_FILL Operator to confirm transfer is complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::32
 --------------------------------------------------
 Name:- prompt_reset_button_confirm_no
 Type:- BOOL
@@ -271,7 +287,7 @@ Description:- UO_SY_FILL Operator confirmed to ABORT filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::31
+PARAMETER::33
 --------------------------------------------------
 Name:- prompt_transfer_complete_confirm_yes
 Type:- BOOL
@@ -279,7 +295,7 @@ Description:- UO_SY_FILL Operator confirm transfer is complete confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::34
 --------------------------------------------------
 Name:- prompt_filter_bled_confirm_yes
 Type:- BOOL
@@ -287,7 +303,7 @@ Description:- UO_SY_FILL Operator to confirm filling machine sterile filter bled
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::35
 --------------------------------------------------
 Name:- prompt_filter_bled
 Type:- BOOL
@@ -295,7 +311,7 @@ Description:- UO_SY_FILL Operator to confirm filling machine sterile filter has 
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::36
 --------------------------------------------------
 Name:- log_msg_fl_ready
 Type:- BOOL
@@ -303,7 +319,7 @@ Description:- UO_SY_FILL Operator confirmed Filling Line ready
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::37
 --------------------------------------------------
 Name:- log_msg_filter_bled
 Type:- BOOL
@@ -311,7 +327,7 @@ Description:- UO_SY_FILL Operator confirmed filter has been bled
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::38
 --------------------------------------------------
 Name:- prompt_reset_button_confirm_yes
 Type:- BOOL
@@ -319,7 +335,7 @@ Description:- UO_SY_FILL Operator confirmed to RESUME filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::39
 --------------------------------------------------
 Name:- prompt_reset_button
 Type:- BOOL
@@ -327,7 +343,7 @@ Description:- UO_SY_FILL Operator to confirm to RESET Filling Paused button or A
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::40
 --------------------------------------------------
 Name:- prompt_start_filling
 Type:- BOOL
@@ -335,7 +351,7 @@ Description:- UO_SY_FILL Operator to confirm to start filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::41
 --------------------------------------------------
 Name:- prompt_start_filling_confirm_yes
 Type:- BOOL
@@ -343,7 +359,7 @@ Description:- UO_SY_FILL Operator confirm to start filling confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::42
 --------------------------------------------------
 Name:- log_msg_confirm_start_filling
 Type:- BOOL
@@ -351,7 +367,7 @@ Description:- UO_SY_FILL Operator confirmed to start filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::43
 --------------------------------------------------
 Name:- prompt_fl_ready_confirm_yes
 Type:- BOOL
@@ -359,7 +375,7 @@ Description:- UO_SY_FILL Operator to confirm filling line is ready confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::44
 --------------------------------------------------
 Name:- prompt_fl_ready
 Type:- BOOL
@@ -367,15 +383,7 @@ Description:- UO_SY_FILL Operator to confirm filling line is ready
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::43
---------------------------------------------------
-Name:- pause_button
-Type:- BOOL
-Description:- Filling Pause Button
-ParameterInOut:- IN
-
---------------------------------------------------
-PARAMETER::44
+PARAMETER::45
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -383,7 +391,7 @@ Description:- emc_gas_medium
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::46
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -391,7 +399,7 @@ Description:- emc_gas_setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::47
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -399,7 +407,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::48
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -407,7 +415,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::49
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -415,7 +423,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::50
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -423,7 +431,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::51
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -431,7 +439,7 @@ Description:- Command to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::52
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -439,7 +447,7 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::53
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -447,7 +455,7 @@ Description:- Device State of emx_transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::54
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -455,7 +463,7 @@ Description:- Substate selection to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::54
+PARAMETER::55
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -463,7 +471,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::55
+PARAMETER::56
 --------------------------------------------------
 Name:- r_pres_hpca_fill
 Type:- REAL
@@ -864,7 +872,28 @@ L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 --------------------------------------------------
 TRANSITION::08
 --------------------------------------------------
-TRNNo:- 08
+TRNNo:- 8.0000
+Title:- Unconditional jump
+EmptyTransition:- False
+Description:- jump
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::08
+--------------------------------------------------
+StepNo:- 8.0000
+Title:- UO_SY_FILL : Check for filling completion or pause
+Description:- Check for complete or paused
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+
+--------------------------------------------------
+TRANSITION::09
+--------------------------------------------------
+TRNNo:- 9.0000
 Title:- Completion confirmed?
 EmptyTransition:- False
 Description:- Operator confirmed completion
@@ -872,20 +901,19 @@ Condition:- A #_prompt_transfer_complete_confirm_yes;
 
 
 --------------------------------------------------
-TRANSITION::09
+TRANSITION::10
 --------------------------------------------------
-TRNNo:- 09
+TRNNo:- 10.0000
 Title:- Filling Pause Button is pressed.
 EmptyTransition:- False
 Description:- Filling Pause Button is pressed.
-Condition:- A #_prompt_transfer_complete_confirm_no;
-A #_pause_button;
+Condition:- A #_emx_fill_sync_write_fill_pause;
 
 
 --------------------------------------------------
-STEP::08
+STEP::09
 --------------------------------------------------
-StepNo:- 08
+StepNo:- 9.0000
 Title:- UO_SY_FILL : Wait for OPER to RESUME or ABORT
 Description:- Raise Filling paused message.
 Prompt Operator to RESET Filling Paused Button else ABORT the sequence.
@@ -899,14 +927,13 @@ Action:- // Prompt Operator to RESET Filling Paused Button else ABORT the sequen
 SET;
 S #_log_msg_filling_paused;
 S #_prompt_reset_button;
-R #_prompt_reset_button_confirm_no;
 Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::10
+TRANSITION::11
 --------------------------------------------------
-TRNNo:- 10
+TRNNo:- 11.0000
 Title:- ABORT Filling?
 EmptyTransition:- False
 Description:- Operator confirmed to ABORT filling.
@@ -914,20 +941,20 @@ Condition:- A #_prompt_reset_button_confirm_no;
 
 
 --------------------------------------------------
-TRANSITION::11
+TRANSITION::12
 --------------------------------------------------
-TRNNo:- 11
+TRNNo:- 12.0000
 Title:- Resume confirmed and NO pause button
 EmptyTransition:- False
 Description:- Operator confirmed to RESUME & Filling Pause Button is NOT pressed (RESET).
 Condition:- A #_prompt_reset_button_confirm_yes;
-AN #_pause_button;
+A #_emx_fill_sync_write_fill_resume;
 
 
 --------------------------------------------------
-STEP::09
+STEP::10
 --------------------------------------------------
-StepNo:- 09
+StepNo:- 10.0000
 Title:- UO_SY_FILL : Log operator abort
 Description:- Log operator abort.
 
@@ -938,15 +965,14 @@ Description:- Log operator abort.
 Action:- //Log operator abort.
 SET;
 S #_log_msg_reset_button_abort;
-R #_prompt_reset_button_confirm_no;
 S #smc.ABORTED;
 Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::12
+TRANSITION::13
 --------------------------------------------------
-TRNNo:- 12
+TRNNo:- 13.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -954,9 +980,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::10
+STEP::11
 --------------------------------------------------
-StepNo:- 10
+StepNo:- 11.0000
 Title:- UO_SY_FILL : Log operator repeat
 Description:- Log operator repeat
 
@@ -967,14 +993,13 @@ Description:- Log operator repeat
 Action:- //Log operator repeat.
 SET;
 S #_log_msg_reset_button_retry;
-R #_prompt_reset_button_confirm_yes;
 Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::13
+TRANSITION::14
 --------------------------------------------------
-TRNNo:- 13
+TRNNo:- 14.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition
@@ -982,9 +1007,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::11
+STEP::12
 --------------------------------------------------
-StepNo:- 11
+StepNo:- 12.0000
 Title:- UO_SY_FILL : Disable HPCA control and open VENT
 Description:- Log operator confirmation transfer is complete.
 Set FLZ and SVT hygiene status to USED.
@@ -1017,9 +1042,9 @@ L "dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::14
+TRANSITION::15
 --------------------------------------------------
-TRNNo:- 14
+TRNNo:- 15.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Jump
@@ -1027,9 +1052,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::12
+STEP::13
 --------------------------------------------------
-StepNo:- 12
+StepNo:- 13.0000
 Title:- UO_SY_FILL : Filling Unit Operation Completed
 Description:- Set Sy products to safe state.
 
@@ -1075,7 +1100,6 @@ Description:-  Log FILLING operation end time if normal completion.
 Action:- // Log Sy Fill operation end time.
 SET;
 S #_log_msg_fill_end;
-R #_prompt_abort_confirm_yes;
 Verification:- A "uncondJump";
 
 ****************************************************************************************************

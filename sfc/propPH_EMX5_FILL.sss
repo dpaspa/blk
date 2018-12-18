@@ -1,0 +1,257 @@
+****************************************************************************************************
+SEQUENCE STEP SCHEDULE
+generated on 12/12/2018 12:34:31 PM by David Paspa
+****************************************************************************************************
+
+
+
+
+
+--------------------------------------------------
+SEQUENCE
+--------------------------------------------------
+
+Name:- FILL
+Title:- PH_EMX5_FILL
+Description:- Open and close spray ball valves for specified duration.
+Class:- EMX5
+Level:- PH
+STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
+ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
+HeaderName:- X5FILL
+Version:- 2.0
+RevisionHistory:- // SFC Revision History:
+// Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
+// 0.1 David Paspa      13-Jul-2009            SFC structural design
+HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
+
+--------------------------------------------------
+PARAMETER::1
+--------------------------------------------------
+Name:- sync_write_fill_resume
+Type:- BOOL
+Description:- Filling has been resumed synchronisation flag
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- sync_write_fill_pause
+Type:- BOOL
+Description:- Filling has been paused synchronisation flag
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_msg_fill_begin
+Type:- BOOL
+Description:- PH_EMX5_FILL begin time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- log_msg_fill_end
+Type:- BOOL
+Description:- PH_EMX5_FILL end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- di_pause_state
+Type:- INT
+Description:- Pause button state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- log_msg_pause_end
+Type:- BOOL
+Description:- Pause end time
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- log_msg_pause_begin
+Type:- BOOL
+Description:- Pause begin time
+ParameterInOut:- VAR
+
+
+--------------------------------------------------
+STEP::01
+--------------------------------------------------
+StepNo:- 01
+Title:- PH_EMX5_FILL : Begin filling
+Description:- Log FILL begin time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log FILL begin time.
+Action:- //Log FILL begin time.
+SET;
+S #_log_msg_fill_begin;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::01
+--------------------------------------------------
+TRNNo:- 01
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::02
+--------------------------------------------------
+StepNo:- 02
+Title:- PH_EMX5_FILL : Check if filling is paused or resumed
+Description:- Check FILL pause button
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 2.0000
+Title:- Jump if ENABLED
+EmptyTransition:- False
+Description:- Wait until PAUSE button is released.
+Condition:- // Jump if pause button released
+AN #_sync_write_fill_resume;
+A(;
+L #_di_pause_state;
+L "dbCONST".BLK.DI3.STATE.ENABLED;
+==I;
+);
+
+
+--------------------------------------------------
+TRANSITION::03
+--------------------------------------------------
+TRNNo:- 3.0000
+Title:- Jump if PAUSED
+EmptyTransition:- False
+Description:- Wait until PAUSE button is pressed.
+Condition:- // Jump if pause button pressed
+AN #_sync_write_fill_pause;
+A(;
+L #_di_pause_state;
+L "dbCONST".BLK.DI3.STATE.PAUSED;
+==I;
+);
+
+
+--------------------------------------------------
+STEP::03
+--------------------------------------------------
+StepNo:- 3.0000
+Title:- PH_EMX5_FILL : Filling is resumed
+Description:- Resume FILL
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set the filling resumed flag and clear the paused flag
+Action:- SET;
+S #_sync_write_fill_resume;
+R #_sync_write_fill_pause;
+
+
+--------------------------------------------------
+TRANSITION::04
+--------------------------------------------------
+TRNNo:- 4.0000
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::04
+--------------------------------------------------
+StepNo:- 4.0000
+Title:- PH_EMX5_FILL : Filling is paused
+Description:- Pause FILL
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Set the filling paused flag and clear the resumed flag
+Action:- SET;
+S #_sync_write_fill_pause;
+R #_sync_write_fill_resume;
+
+
+--------------------------------------------------
+TRANSITION::05
+--------------------------------------------------
+TRNNo:- 5.0000
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::05
+--------------------------------------------------
+StepNo:- 5.0000
+Title:- PH_EMX5_FILL : Monitor pause button change
+Description:- Monitor pause button during filling
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+
+--------------------------------------------------
+TRANSITION::06
+--------------------------------------------------
+TRNNo:- 6.0000
+Title:- Last Step never jump
+EmptyTransition:- False
+Description:- Last Step will never be true
+Condition:- AN "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::07
+--------------------------------------------------
+TRNNo:- 7.0000
+Title:- Unconditional Jump
+EmptyTransition:- False
+Description:- Jump
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 6.0000
+Title:- PH_EMX5_FILL : Last Step
+Description:- Log FILL operation end time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log FILL operation end time.
+Action:- //Log FILL operation end time.
+SET;
+S #_log_msg_fill_end;
+Verification:- A "uncondJump";
+
+****************************************************************************************************
+END SSS REPORT
+****************************************************************************************************

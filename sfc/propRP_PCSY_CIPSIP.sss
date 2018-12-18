@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/11/2018 2:09:06 PM by David Paspa
+generated on 12/12/2018 10:47:20 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -11,18 +11,19 @@ generated on 29/11/2018 2:09:06 PM by David Paspa
 SEQUENCE
 --------------------------------------------------
 
-SFCNo:- 3
+SFCNo:- 005
 Title:- RP_PCSY_CIPSIP
-Description:- Recipe Procedure for Equipment CIP and SIP
+Description:- Recipe Procedure Sequence for Storage Vessel Sy CIP and SIP
 Name:- CIPSIP
 Class:- PCSY
 Level:- RP
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
-HeaderName:- PCSCIP
-Version:- 0.4
+HeaderName:- PCSYCIP
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 0.4 Srinivas Nimmala 22-Jan-2010 CC-10/005  Added Hpn2 pulse delay timer
 // 0.3 Srinivas Nimmala 22-Dec-2009 CC-09/071  Disable cooling after Hpn2 purge
 // 0.3 Steve Linehan    22-Dec-2009 CC-09/070  Disable the agitator before empties the vessel
@@ -33,13 +34,37 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- prompt_continue_sip_confirm_yes
+Type:- BOOL
+Description:- RP_PCSY_CIPSIP Operator to confirm to continue for SIP confirm yes
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- prompt_continue_sip
+Type:- BOOL
+Description:- RP_PCSY_CIPSIP Operator to confirm to continue for SIP
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- prompt_continue_sip_confirm_no
+Type:- BOOL
+Description:- RP_PCSY_CIPSIP Operator to confirm to continue for SIP confirm no
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
 Name:- vessel_sy
 Type:- INT
 Description:- Storage vessel selection S1 or S2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::5
 --------------------------------------------------
 Name:- vessel_mx
 Type:- INT
@@ -47,7 +72,7 @@ Description:- Manufacturing vessel selection M1 or M2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::6
 --------------------------------------------------
 Name:- fill_flz
 Type:- INT
@@ -55,7 +80,7 @@ Description:- Filling line selection FL1 or FL2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::7
 --------------------------------------------------
 Name:- release_sy
 Type:- BOOL
@@ -63,7 +88,7 @@ Description:- Release Sy.
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::8
 --------------------------------------------------
 Name:- log_msg_cipsip_end
 Type:- BOOL
@@ -71,7 +96,7 @@ Description:- RP_PCSY_CIPSIP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::9
 --------------------------------------------------
 Name:- log_msg_cipsip_begin
 Type:- BOOL
@@ -79,7 +104,7 @@ Description:- RP_PCSY_CIPSIP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::10
 --------------------------------------------------
 Name:- log_msg_sip_sy_end
 Type:- BOOL
@@ -87,7 +112,7 @@ Description:- RP_PCSY_CIPSIP Sterilisation SY end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::11
 --------------------------------------------------
 Name:- log_msg_sip_sy_begin
 Type:- BOOL
@@ -95,7 +120,7 @@ Description:- RP_PCSY_CIPSIP Sterilisation SY begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::12
 --------------------------------------------------
 Name:- log_msg_vacuum_sy_end
 Type:- BOOL
@@ -103,7 +128,7 @@ Description:- RP_PCSY_CIPSIP Vacuum SY end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::13
 --------------------------------------------------
 Name:- log_msg_vacuum_sy_begin
 Type:- BOOL
@@ -111,7 +136,7 @@ Description:- RP_PCSY_CIPSIP Vacuum SY begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::14
 --------------------------------------------------
 Name:- log_msg_sip_mx_end
 Type:- BOOL
@@ -119,7 +144,7 @@ Description:- RP_PCSY_CIPSIP Sterilisation MX end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::15
 --------------------------------------------------
 Name:- log_msg_sip_mx_begin
 Type:- BOOL
@@ -127,7 +152,7 @@ Description:- RP_PCSY_CIPSIP Sterilisation MX begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::16
 --------------------------------------------------
 Name:- log_msg_vacuum_mx_end
 Type:- BOOL
@@ -135,7 +160,7 @@ Description:- RP_PCSY_CIPSIP Vacuum MX end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::17
 --------------------------------------------------
 Name:- log_msg_vacuum_mx_begin
 Type:- BOOL
@@ -143,7 +168,7 @@ Description:- RP_PCSY_CIPSIP Vacuum MX begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::18
 --------------------------------------------------
 Name:- log_msg_vacuum_hold_end
 Type:- BOOL
@@ -151,7 +176,7 @@ Description:- RP_PCSY_CIPSIP Vacuum Hold Test end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::19
 --------------------------------------------------
 Name:- log_msg_vacuum_hold_begin
 Type:- BOOL
@@ -159,7 +184,7 @@ Description:- RP_PCSY_CIPSIP Vacuum Hold Test begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::20
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
@@ -167,7 +192,7 @@ Description:- RP_PCSY_CIPSIP Operator to confirm to abort due to invalid Hygiene
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::21
 --------------------------------------------------
 Name:- prompt_abort_confirm_yes
 Type:- BOOL
@@ -175,7 +200,7 @@ Description:- RP_PCSY_CIPSIP Operator confirmed to abort due to invalid Hygiene 
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::22
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
@@ -183,7 +208,7 @@ Description:- RP_PCSY_CIPSIP Storage vessel unit has wrong Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::23
 --------------------------------------------------
 Name:- sy_vessel_hygiene
 Type:- INT
@@ -191,7 +216,7 @@ Description:- Hygiene Status of unit Sy
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::24
 --------------------------------------------------
 Name:- sy_vessel_state
 Type:- INT
@@ -199,7 +224,7 @@ Description:- Device State of unit Sy
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::25
 --------------------------------------------------
 Name:- sy_vessel_subs
 Type:- INT
@@ -207,7 +232,7 @@ Description:- Substate selection to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::26
 --------------------------------------------------
 Name:- sy_vessel_cmd
 Type:- INT
@@ -406,6 +431,8 @@ ACTION::01
 Description:- Set Sy Hygiene status to CLEAN.
 
 Action:- //Set Sy hygiene status to CLEAN
+SET;
+S _prompt_continue_sip;
 L "dbCONST".BLK.HYGIENE.CLEAN;
 T #_sy_vessel_hygiene;
 Verification:- A "uncondJump";
@@ -415,10 +442,20 @@ Verification:- A "uncondJump";
 TRANSITION::06
 --------------------------------------------------
 TRNNo:- 06
-Title:- Empty Transition
+Title:- Operator confirmed not to continue for SIP
 EmptyTransition:- False
-Description:- Empty Transition
-Condition:- A "uncondJump";
+Description:- Operator confirms not to do SIP
+Condition:- A #_prompt_continue_sip_confirm_no;
+
+
+--------------------------------------------------
+TRANSITION::07
+--------------------------------------------------
+TRNNo:- 7.0000
+Title:- Operator confirmed to continue for SIP
+EmptyTransition:- False
+Description:- Operator confirms to do SIP
+Condition:- A #_prompt_continue_sip_confirm_yes;
 
 
 --------------------------------------------------
@@ -466,9 +503,9 @@ L "dbCONST".BLK.SY.SUBS.SIP;
 
 
 --------------------------------------------------
-TRANSITION::07
+TRANSITION::08
 --------------------------------------------------
-TRNNo:- 07
+TRNNo:- 8.0000
 Title:- Sy state SIP complete?
 EmptyTransition:- False
 Description:- Wait for Sy to complete.
@@ -511,9 +548,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::08
+TRANSITION::09
 --------------------------------------------------
-TRNNo:- 08
+TRNNo:- 9.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Empty Transition

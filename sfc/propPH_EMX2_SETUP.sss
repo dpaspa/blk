@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/11/2018 2:10:10 PM by David Paspa
+generated on 12/12/2018 12:34:23 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -18,10 +18,11 @@ Class:- EMX2
 Level:- PH
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
-HeaderName:- X3PSET
-Version:- 0.4
+HeaderName:- X2_SET
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 0.4 Khairul Basar    09-Sep-2009 CC-09/023  In Last Step, Prompt & confirm flag 
 //                                             reset code added.
 // 0.3 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific & TRN code OR to AND
@@ -123,7 +124,7 @@ ParameterInOut:- VAR
 STEP::01
 --------------------------------------------------
 StepNo:- 01
-Title:- PH_EMC2_SETUP : SETUP begin.
+Title:- PH_EMX2_SETUP : SETUP begin.
 Description:- Log SETUP begin time.
 
 --------------------------------------------------
@@ -185,7 +186,6 @@ ACTION::01
 Description:- Log operator confirmation 
 Action:- SET;
 S #_log_msg_confirm_connect;
-R #_prompt_connect_confirm_yes;
 Verification:- A "uncondJump";
 
 

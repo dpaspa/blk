@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/11/2018 2:09:48 PM by David Paspa
+generated on 12/12/2018 12:33:52 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -18,10 +18,11 @@ Class:- EMC2
 Level:- PH
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
-HeaderName:- C2PSET
-Version:- 0.4
+HeaderName:- C2_SET
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 0.4 Khairul Basar    20-Sep-2009 CC-09/023  Regenerated to add SQ_FINISH flag.
 // 0.3 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific,& TRN code OR to AND
 //                                             Change in the Last step.
@@ -32,13 +33,45 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- zsc_fpwfi_cmd
+Type:- INT
+Description:- WFI line connection command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- zsc_fppw_cmd
+Type:- INT
+Description:- PW line connection command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- zsc_fpinlet_state
+Type:- INT
+Description:- Vessel inlet connection state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- zsc_fpinlet_cmd
+Type:- INT
+Description:- Vessel inlet connection command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
 Name:- log_msg_confirm_connect
 Type:- BOOL
 Description:- PH_EMC2_SETUP Operator confirmed connections have been made
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::6
 --------------------------------------------------
 Name:- log_msg_setup_begin
 Type:- BOOL
@@ -46,7 +79,7 @@ Description:- PH_EMC2_SETUP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::7
 --------------------------------------------------
 Name:- log_msg_setup_end
 Type:- BOOL
@@ -54,7 +87,7 @@ Description:- PH_EMC2_SETUP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::8
 --------------------------------------------------
 Name:- zsc_fpwfi_state
 Type:- INT
@@ -62,7 +95,7 @@ Description:- WFI line connection sensor switch
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::9
 --------------------------------------------------
 Name:- zsc_fppw_state
 Type:- INT
@@ -70,7 +103,7 @@ Description:- PW line connection sensor switch state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::10
 --------------------------------------------------
 Name:- prompt_pw_confirm_yes
 Type:- BOOL
@@ -78,7 +111,7 @@ Description:- PH_EMC2_SETUP Operator to confirm PW line connected confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::11
 --------------------------------------------------
 Name:- prompt_wfi_confirm_yes
 Type:- BOOL
@@ -86,7 +119,7 @@ Description:- PH_EMC2_SETUP Operator to confirm WFI line connected confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::12
 --------------------------------------------------
 Name:- prompt_pw
 Type:- BOOL
@@ -94,7 +127,7 @@ Description:- PH_EMC2_SETUP Operator to confirm PW line connected
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::13
 --------------------------------------------------
 Name:- prompt_wfi
 Type:- BOOL
@@ -102,7 +135,7 @@ Description:- PH_EMC2_SETUP Operator to confirm WFI line connected
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::14
 --------------------------------------------------
 Name:- medium_liquid
 Type:- INT
@@ -171,7 +204,7 @@ L "dbCONST".SEL.LIQUID.PSWFI;
 --------------------------------------------------
 TRANSITION::03
 --------------------------------------------------
-TRNNo:- 3.0000
+TRNNo:- 03
 Title:- Continue if PW or PS_PW medium selected
 EmptyTransition:- False
 Description:- Continue if PW or PS_PW medium selected
@@ -202,6 +235,16 @@ Description:- Prompt operator to connect WFI supply to the vessel Mx, Sy or FLz 
 Action:- //Prompt to connect WFI.
 SET;
 S #_prompt_wfi;
+
+// Send IN command to WFI zsc.
+L "dbCONST".BLK.ZSC2.CMD.IN;
+T #_zsc_fpinlet_cmd;
+T  #_zsc_fpwfi_cmd;
+
+// Send OUT command to PW zsc.
+L "dbCONST".BLK.ZSC2.CMD.OUT;
+T  #_zsc_fppw_cmd;
+
 Verification:- A "uncondJump";
 
 
@@ -229,6 +272,16 @@ Description:- Prompt operator to connect PW supply to the vessel Mx inlet line, 
 Action:- //Prompt to connect PW.
 SET;
 S #_prompt_pw;
+
+// Send IN command to PW zsc.
+L "dbCONST".BLK.ZSC2.CMD.IN;
+T #_zsc_fpinlet_cmd;
+T  #_zsc_fppw_cmd;
+
+// Send OUT command to WFI zsc.
+L "dbCONST".BLK.ZSC2.CMD.OUT;
+T  #_zsc_fpwfi_cmd;
+
 Verification:- A "uncondJump";
 
 
@@ -264,44 +317,52 @@ TRNNo:- 06
 Title:- WFI/PW/PS connections made
 EmptyTransition:- False
 Description:- Jump if correct switch ZSCx103 or ZSCx105 are made to ZSCx107
-Condition:- //Check connection PW or PS_PW medium selected.
-A(;
-O(     ;
-L #_medium_liquid;
-L "dbCONST".SEL.LIQUID.PW;
-==I;
-  );
-O(;
-L #_medium_liquid;
-L "dbCONST".SEL.LIQUID.PSPW;
-==I;
-  );
+Condition:- A(;
+L #_zsc_fpinlet_state;  // Vessel inlet line connection
+L "dbCONST".BLK.ZSC2.STATE.IN;
+==I ;  
 );
-A(    ;
+A(;
+//Check connection PW or PS_PW medium selected.
+O(;
+    A(;
+        O(;
+        L #_medium_liquid;
+        L "dbCONST".SEL.LIQUID.PW;
+        ==I;
+        );
+        O(;
+        L #_medium_liquid;
+        L "dbCONST".SEL.LIQUID.PSPW;
+        ==I;
+        );
+    );
+    A(    ;
     L #_zsc_fppw_state; //PW or PW PS line is selected
     L "dbCONST".BLK.ZSC2.STATE.IN;
-      ==I ;  
-   )    ;
-
+    ==I ;  
+    );
+);
 //Or Check connection WFI or PS_WFI medium selected.
 O(;
-A(;
-O(     ;
-L #_medium_liquid;
-L "dbCONST".SEL.LIQUID.WFI;
-==I;
-  );
-O(;
-L #_medium_liquid;
-L "dbCONST".SEL.LIQUID.PSWFI;
-==I;
-   );
+    A(;
+        O(;
+        L #_medium_liquid;
+        L "dbCONST".SEL.LIQUID.WFI;
+        ==I;
+        );
+        O(;
+        L #_medium_liquid;
+        L "dbCONST".SEL.LIQUID.PSWFI;
+        ==I;
+        );
+    );
+    A(;
+    L #_zsc_fpwfi_state;  //WFI or WFI PS line is selcted
+    L "dbCONST".BLK.ZSC2.STATE.IN;
+    ==I ;  
+    );
 );
-A(;
-   L #_zsc_fpwfi_state;  //WFI or WFI PS line is selcted
-   L "dbCONST".BLK.ZSC2.STATE.IN;
-   ==I ;  
-   );
 );
 
 

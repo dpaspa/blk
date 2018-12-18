@@ -1,0 +1,217 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Class:       ifbPOS2                                                       //
+// Description: Instances of POS2                                             //
+//                                                                            //
+// POS2 On/Off valve with single output and closed feedback. Uses the generic //
+// fbPOSx class. The FB_C has feedback from field.                            //
+// In this case FB_O = NOT-FB_C/OUT_Q because FB_O has no field feedback.     //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.7 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.6 Gus Abdallah     01-Oct-2009 CC-09/016 Interlocks are CM processed.    //
+// 0.5 Khairul Basar    18-Sep-2009 CC-09/016 ifcPOSx is called for           //
+//                                            interfacing.                    //
+// 0.4 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters   //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters.          //
+// 0.3 Khairul Basar    10-Sep-2009 CC-09/016 Only POSx updated.              //
+// 0.2 Khairul Basar    02-Sep-2009 CC-09/016 FB_O=NOT-FB_C assigned.         //
+//                                            Instances are updated after     //
+//                                            modification on POSx(ref-fbPOSx)//
+//                                            Class/instance interlocks are   //
+//                                            added.                          //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+@@TEMPLATE_BEGIN|createInstancesGlobal@@
+// @@IDX@@       @@INSTANCE@@      @@DESCRIPTION@@
+@@TEMPLATE_END@@
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "ifbPOS2"
+TITLE = Instances of POS2 On/Off valve with single output and closed feedback
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifbPOS2
+VERSION : 2.0
+
+//----------------------------------------------------------------------------//
+// Declare the instance objects of the class:                                 //
+//----------------------------------------------------------------------------//
+VAR
+@@TEMPLATE_BEGIN|createClassNone@@
+@@ATTR_BEGIN|numInstances@@
+    f : Array[0..@@MAXITEM@@] of "fbPOSx";
+@@ATTR_END|numInstances@@
+@@TEMPLATE_END@@
+END_VAR
+
+VAR_TEMP
+    FB_C : Bool;
+    FB_O : Bool;
+END_VAR
+
+BEGIN
+@@TEMPLATE_BEGIN|createInstances@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Critical Interlocks
+    //------------------------------------------------------------------------//
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+    //                                                                        //
+    // Get the critical interlock if there is one. If not set alwaysLow:      //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+@@ATTR_BEGIN|CRIL_TARGET@@
+    A "idbCRIL".p[@@IDXIL@@].INTERLOCK;
+@@ATTR_END|CRIL_TARGET@@
+@@ATTR_END|CRIL_EXISTS@@
+    = #f[@@IDX@@].p.read.mc.CRIL;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@ Non-Critical Interlocks
+    //------------------------------------------------------------------------//
+    // Get the non-critical interlock if there is one. If not set alwaysLow:  //
+    //------------------------------------------------------------------------//
+@@ATTR_BEGIN|NCRIL_EXISTS@@
+@@ATTR_DEFAULT_BEGIN@@
+    A "alwaysLow";
+@@ATTR_DEFAULT_END@@
+@@ATTR_BEGIN|NCRIL_TARGET@@
+    A "idbNCRIL".p[@@IDXIL@@].INTERLOCK;
+@@ATTR_END|NCRIL_TARGET@@
+@@ATTR_END|NCRIL_EXISTS@@
+    = #f[@@IDX@@].p.read.mc.NCRIL;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
+    //------------------------------------------------------------------------//
+    // Set the instance unique ID:                                            //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ID.@@INSTANCE@@;
+    T #f[@@IDX@@].p.read.mc.ME;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner ID
+    //------------------------------------------------------------------------//
+    // Set the instance Owner ID:                                             //
+    //------------------------------------------------------------------------//
+    L "dbCONST".BLK.ID.@@PARENT@@;
+    T #f[@@IDX@@].p.write.mc.OWNER;
+
+@@ATTR_BEGIN|FLOWPATH@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@CLASS@@ is a Flowpath device
+    //------------------------------------------------------------------------//
+    // This class of device is a FLOWPATH device where the state must equal   //
+    // the command once set by the parent:                                    //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #f[@@IDX@@].p.read.mc.FLOWPATH;
+@@ATTR_END|FLOWPATH@@
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
+    //------------------------------------------------------------------------//
+    // This block can only reside within this CPU:                            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #f[@@IDX@@].p.master.read;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in this CPU:            //
+    //------------------------------------------------------------------------//
+    A "alwaysHigh";
+    = #f[@@IDX@@].p.master.write;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Normally opened or closed
+    //------------------------------------------------------------------------//
+    // Set the instance opened feedback value from the field:                 //
+    //------------------------------------------------------------------------//
+    A @@NC@@;
+    = #f[@@IDX@@].p.read.NC;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Feedback from the field
+    //------------------------------------------------------------------------//
+    // Get the position feedback values:                                      //
+    //------------------------------------------------------------------------//
+    A "@@INSTANCE@@-ZSC";
+    = #FB_C;
+    AN "@@INSTANCE@@-ZSC";
+    = #FB_O;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Closed feedback
+    //------------------------------------------------------------------------//
+    // Set the instance closed feedback value from the field:                 //
+    //------------------------------------------------------------------------//
+    A #FB_C;
+    = #f[@@IDX@@].p.read.FB_C;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Opened feedback
+    //------------------------------------------------------------------------//
+    // Set the instance opened feedback value from the field:                 //
+    //------------------------------------------------------------------------//
+    A #FB_O;
+    = #f[@@IDX@@].p.read.FB_O;
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
+    CALL #f[@@IDX@@];
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command
+    //------------------------------------------------------------------------//
+    // Set the instance output command to the field:                          //
+    //------------------------------------------------------------------------//
+    A #f[@@IDX@@].p.read.OUT_Q;
+    = "@@INSTANCE@@-CMD";
+
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Send the alarm bits to the global DB
+    //------------------------------------------------------------------------//
+    // Transfer the class event log message bits to the global DB:            //
+    //------------------------------------------------------------------------//
+    L #f[@@IDX@@].p.read.mc.ALARM;
+    T "dbEVENT".alarmBlock.alarm_@@INSTANCE@@;
+
+@@TEMPLATE_END@@
+
+@@TEMPLATE_BEGIN|createInstancesForeign@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
+    //------------------------------------------------------------------------//
+    // This block can only reside in another CPU:                             //
+    //------------------------------------------------------------------------//
+    A "alwaysLow";
+    = #f[@@IDX@@].p.master.read;
+
+@@ATTR_BEGIN|ISOWNED@@
+NETWORK
+TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in another CPU:         //
+    //------------------------------------------------------------------------//
+    A "alwaysLow";
+    = #f[@@IDX@@].p.master.write;
+@@ATTR_END|ISOWNED@@
+
+@@TEMPLATE_END@@
+
+END_FUNCTION_BLOCK

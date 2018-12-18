@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/11/2018 4:43:26 PM by David Paspa
+generated on 12/12/2018 4:39:18 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -46,13 +46,109 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- log_msg_filling_paused
+Type:- BOOL
+Description:- UO_MX_FILL User pressed the pause button
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- log_msg_reset_button_abort
+Type:- BOOL
+Description:- UO_MX_FILL Operator abort after filling was paused
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- log_msg_reset_button_retry
+Type:- BOOL
+Description:- UO_MX_FILL Operator to retry after filling was paused
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
+Name:- r_pos_fill_mod_local
+Type:- REAL
+Description:- MX FILL HEX modulating valve position
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::5
+--------------------------------------------------
+Name:- emt_hex_pos_local
+Type:- REAL
+Description:- Heat exchanger temperature control modulating valve local position
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::6
+--------------------------------------------------
+Name:- prompt_reset_button_confirm_no
+Type:- BOOL
+Description:- UO_MX_FILL Operator to confirm to RESET Filling Paused button confirmed no
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::7
+--------------------------------------------------
+Name:- prompt_reset_button_confirm_yes
+Type:- BOOL
+Description:- UO_MX_FILL Operator to confirm to RESET Filling Paused button confirmed yes
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::8
+--------------------------------------------------
+Name:- prompt_reset_button
+Type:- BOOL
+Description:- UO_MX_FILL Operator to confirm to RESET Filling Paused button or ABORT
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::9
+--------------------------------------------------
+Name:- emx_fill_sync_write_fill_resume
+Type:- BOOL
+Description:- Filling pause button resumed synchronisation flag
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::10
+--------------------------------------------------
+Name:- emx_fill_sync_write_fill_pause
+Type:- BOOL
+Description:- Filling pause button pressed synchronisation flag
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::11
+--------------------------------------------------
+Name:- prompt_transfer_complete_confirm_yes
+Type:- BOOL
+Description:- UO_MX_FILL Operator to confirm when filling complete confirm yes
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::12
+--------------------------------------------------
+Name:- prompt_transfer_complete
+Type:- BOOL
+Description:- UO_MX_FILL Operator to confirm when filling complete
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::13
+--------------------------------------------------
 Name:- r_pres_lpca_blanket
 Type:- REAL
 Description:- MX FILL LPCA blanket pressure
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::14
 --------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
@@ -60,7 +156,7 @@ Description:- UO_MX_FILL Operator to confirm abort due to invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::15
 --------------------------------------------------
 Name:- prompt_abort_confirm_yes
 Type:- BOOL
@@ -68,7 +164,7 @@ Description:- UO_MX_FILL Operator confirmed to abort due to invalid Hygiene Stat
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::16
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
@@ -76,7 +172,7 @@ Description:- UO_MX_FILL Unit has incorrect Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::17
 --------------------------------------------------
 Name:- emx_smfl_hygiene
 Type:- INT
@@ -84,7 +180,7 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::18
 --------------------------------------------------
 Name:- emx_transfer_hygiene
 Type:- INT
@@ -92,7 +188,7 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::19
 --------------------------------------------------
 Name:- emx_fill_hygiene
 Type:- INT
@@ -100,7 +196,7 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::20
 --------------------------------------------------
 Name:- emx_fill_cmd
 Type:- INT
@@ -108,7 +204,7 @@ Description:- Command for filling line
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::21
 --------------------------------------------------
 Name:- emx_fill_subs
 Type:- INT
@@ -116,7 +212,7 @@ Description:- Substate selection for filling line
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::22
 --------------------------------------------------
 Name:- emx_fill_state
 Type:- INT
@@ -124,7 +220,7 @@ Description:- Device state for filling line
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::23
 --------------------------------------------------
 Name:- emt_hex_setpoint
 Type:- REAL
@@ -132,7 +228,7 @@ Description:- Heat exchanger temperature controller temperature setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::24
 --------------------------------------------------
 Name:- vessel_mx
 Type:- INT
@@ -140,7 +236,7 @@ Description:- Manufacturing vessel selection M1 or M2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::25
 --------------------------------------------------
 Name:- fill_flz
 Type:- INT
@@ -148,7 +244,7 @@ Description:- Filling line selection FL1 or FL2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::26
 --------------------------------------------------
 Name:- vessel_sy
 Type:- INT
@@ -156,7 +252,7 @@ Description:- Storage vessel selection S1 or S2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::27
 --------------------------------------------------
 Name:- log_msg_filtration_end
 Type:- BOOL
@@ -164,7 +260,7 @@ Description:- UO_MX_FILL Filtration end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::28
 --------------------------------------------------
 Name:- log_msg_filtration_start
 Type:- BOOL
@@ -172,7 +268,7 @@ Description:- UO_MX_FILL Filtration begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::29
 --------------------------------------------------
 Name:- log_msg_fill_begin
 Type:- BOOL
@@ -180,7 +276,7 @@ Description:- UO_MX_FILL begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::30
 --------------------------------------------------
 Name:- log_msg_fill_end
 Type:- BOOL
@@ -188,7 +284,7 @@ Description:- UO_MX_FILL end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::31
 --------------------------------------------------
 Name:- emm_vessel_mass_nett
 Type:- REAL
@@ -196,7 +292,7 @@ Description:- Vessel mass
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::32
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -204,7 +300,7 @@ Description:- Substate selection of emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::33
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -212,7 +308,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::34
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -220,7 +316,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::35
 --------------------------------------------------
 Name:- emt_hex_subs
 Type:- INT
@@ -228,7 +324,7 @@ Description:- Substate selection of emt_hex
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::36
 --------------------------------------------------
 Name:- emt_hex_state
 Type:- INT
@@ -236,7 +332,7 @@ Description:- Device State of emt_hex
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::37
 --------------------------------------------------
 Name:- emt_hex_cmd
 Type:- INT
@@ -244,7 +340,7 @@ Description:- Command to emt_hex
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::38
 --------------------------------------------------
 Name:- prompt_filtration
 Type:- BOOL
@@ -252,7 +348,7 @@ Description:- UO_MX_FILL Operator to confirm when ready to start filtration
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::39
 --------------------------------------------------
 Name:- prompt_filtration_confirm_yes
 Type:- BOOL
@@ -260,15 +356,7 @@ Description:- UO_MX_FILL Operator to confirm when ready to start filtration conf
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::28
---------------------------------------------------
-Name:- r_temp_filt
-Type:- REAL
-Description:- MX FILL Filling temperature setpoint
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::29
+PARAMETER::40
 --------------------------------------------------
 Name:- emx_smfl_state
 Type:- INT
@@ -276,7 +364,7 @@ Description:- Device State of emx_smfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::41
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -284,7 +372,7 @@ Description:- Device State of emx_transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::31
+PARAMETER::42
 --------------------------------------------------
 Name:- emx_smfl_cmd
 Type:- INT
@@ -292,7 +380,7 @@ Description:- Command to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::43
 --------------------------------------------------
 Name:- emx_smfl_subs
 Type:- INT
@@ -300,7 +388,7 @@ Description:- Substate selection of emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::44
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -308,7 +396,7 @@ Description:- Command to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::45
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -316,7 +404,7 @@ Description:- Substate selection of emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::46
 --------------------------------------------------
 Name:- log_msg_filtration_complete
 Type:- BOOL
@@ -324,15 +412,7 @@ Description:- UO_MX_FILL Filtration is complete
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::36
---------------------------------------------------
-Name:- confirm_complete
-Type:- BOOL
-Description:- UO_MX_FILL Operator to confirm when filtration is complete
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::37
+PARAMETER::47
 --------------------------------------------------
 Name:- r_mass_throttle
 Type:- REAL
@@ -340,7 +420,7 @@ Description:- MX FILL Mass to reduce pressure near the end of filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::48
 --------------------------------------------------
 Name:- r_pres_hpca_filt2
 Type:- REAL
@@ -348,7 +428,7 @@ Description:- MX FILL Reduced HPCA pressure near the end of filling
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::49
 --------------------------------------------------
 Name:- emx_mmfl_cmd
 Type:- INT
@@ -356,7 +436,7 @@ Description:- Command to emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::50
 --------------------------------------------------
 Name:- emx_mmfl_subs
 Type:- INT
@@ -364,7 +444,7 @@ Description:- Substate selection of emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::51
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -372,7 +452,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::52
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -380,7 +460,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::43
+PARAMETER::53
 --------------------------------------------------
 Name:- emc_water_state
 Type:- INT
@@ -388,7 +468,7 @@ Description:- Device state of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::44
+PARAMETER::54
 --------------------------------------------------
 Name:- emc_water_subs
 Type:- INT
@@ -396,7 +476,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::55
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -404,7 +484,7 @@ Description:- emc_gas_setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::56
 --------------------------------------------------
 Name:- emx_mmfl_state
 Type:- INT
@@ -412,7 +492,7 @@ Description:- Device State of emx_mmfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::57
 --------------------------------------------------
 Name:- emc_water_cmd
 Type:- INT
@@ -420,7 +500,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::58
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -428,7 +508,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::59
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -436,7 +516,7 @@ Description:- emc_gas_medium
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::60
 --------------------------------------------------
 Name:- ema_vessel_state
 Type:- INT
@@ -444,7 +524,7 @@ Description:- Device State of ema_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::61
 --------------------------------------------------
 Name:- ema_vessel_subs
 Type:- INT
@@ -452,7 +532,7 @@ Description:- Substate selection to ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::62
 --------------------------------------------------
 Name:- ema_vessel_cmd
 Type:- INT
@@ -460,7 +540,7 @@ Description:- ema_vessel_cmd
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::63
 --------------------------------------------------
 Name:- r_pres_hpca_filt
 Type:- REAL
@@ -696,7 +776,6 @@ T #_emx_mmfl_cmd;
 T #_emx_smfl_cmd;
 T #_emx_transfer_cmd;
 T #_emv_vessel_cmd;
-
 Verification:- A(;
 L   #_emt_hex_state;
 L   "dbCONST".BLK.STATE.STOPPED;
@@ -731,12 +810,10 @@ Enable HEX Temperature control with TEMP_FILT setpoint.
 Action:- //Log filtration start time.
 SET;
 S #_log_msg_filtration_start;
-R #_prompt_filtration_confirm_yes;
-
-L  #_r_temp_filt;
-T  #_emt_hex_setpoint;
 
 //Start EMT_PREEMPT.
+L  100.0;
+T  #_emt_hex_pos_local;
 L  "dbCONST".BLK.EMT1.SUBS.PREEMPT;
 T  #_emt_hex_subs;
 L  "dbCONST".BLK.CMD.START;
@@ -920,7 +997,7 @@ Condition:- A "uncondJump";
 STEP::07
 --------------------------------------------------
 StepNo:- 07
-Title:- UO_MX_FILL : Enable HPCA pressure control.
+Title:- UO_MX_FILL : Enable HPCA pressure control and HEX filling
 Description:- Set Mx HPCA pressure control at setpoint PRES_HPCA_FILT.
 
 --------------------------------------------------
@@ -946,14 +1023,39 @@ L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 ACTION::02
 --------------------------------------------------
 Description:- Clear EMC restart command
+Set HEX to filling position
 Action:- L  "dbCONST".BLK.CMD.START;
 T  #_emc_gas_cmd;
+
+L  _r_pos_fill_mod_local;
+T  #_emt_hex_pos_local;
 
 
 --------------------------------------------------
 TRANSITION::08
 --------------------------------------------------
-TRNNo:- 08
+TRNNo:- 8.0000
+Title:- Unconditional jump
+EmptyTransition:- False
+Description:- jump
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::08
+--------------------------------------------------
+StepNo:- 8.0000
+Title:- UO_MX_FILL : Check for throttle mass or pause
+Description:- Check for throttle or paused
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+
+--------------------------------------------------
+TRANSITION::09
+--------------------------------------------------
+TRNNo:- 9.0000
 Title:- Mass of Vessel has reach throttled mass
 EmptyTransition:- False
 Description:- Mass_Throttle_Mx has reach set point.
@@ -965,9 +1067,115 @@ L #_emm_vessel_mass_nett;
 
 
 --------------------------------------------------
-STEP::08
+TRANSITION::10
 --------------------------------------------------
-StepNo:- 08
+TRNNo:- 10.0000
+Title:- Filling Pause Button is pressed.
+EmptyTransition:- False
+Description:- Filling Pause Button is pressed.
+Condition:- A #_emx_fill_sync_write_fill_pause;
+
+
+--------------------------------------------------
+STEP::09
+--------------------------------------------------
+StepNo:- 9.0000
+Title:- UO_MX_FILL : Wait for OPER to RESUME or ABORT
+Description:- Raise Filling paused message.
+Prompt Operator to RESET Filling Paused Button else ABORT the sequence.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Raise Filling paused message.
+Prompt Operator to RESET Filling Paused Button else ABORT the sequence.
+Action:- // Prompt Operator to RESET Filling Paused Button else ABORT the sequence.
+SET;
+S #_log_msg_filling_paused;
+S #_prompt_reset_button;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::11
+--------------------------------------------------
+TRNNo:- 11.0000
+Title:- ABORT Filling?
+EmptyTransition:- False
+Description:- Operator confirmed to ABORT filling.
+Condition:- A #_prompt_reset_button_confirm_no;
+
+
+--------------------------------------------------
+TRANSITION::12
+--------------------------------------------------
+TRNNo:- 12.0000
+Title:- Resume confirmed and NO pause button
+EmptyTransition:- False
+Description:- Operator confirmed to RESUME & Filling Pause Button is NOT pressed (RESET).
+Condition:- A #_prompt_reset_button_confirm_yes;
+A #_emx_fill_sync_write_fill_resume;
+
+
+--------------------------------------------------
+STEP::10
+--------------------------------------------------
+StepNo:- 10.0000
+Title:- UO_MX_FILL : Log operator abort
+Description:- Log operator abort.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator abort.
+Action:- //Log operator abort.
+SET;
+S #_log_msg_reset_button_abort;
+S #smc.ABORTED;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::13
+--------------------------------------------------
+TRNNo:- 13.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::11
+--------------------------------------------------
+StepNo:- 11.0000
+Title:- UO_MX_FILL : Log operator repeat
+Description:- Log operator repeat
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator repeat
+Action:- //Log operator repeat.
+SET;
+S #_log_msg_reset_button_retry;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::14
+--------------------------------------------------
+TRNNo:- 14.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::12
+--------------------------------------------------
+StepNo:- 12.0000
 Title:- UO_MX_FILL : Enable HPCA pressure control for new set point.
 Description:- Set Mx HPCA pressure control at setpoint PRES_HPCA_FILT set point 2.
 
@@ -976,25 +1184,154 @@ ACTION::01
 --------------------------------------------------
 Description:- HPCA pressure control at setpoint 2, PRES_HPCA_FILT2.
 Action:- // Set HPCA valve pressure control at setpoint 2
+SET;
+S #_prompt_transfer_complete;
 L #_r_pres_hpca_filt2;
 T #_emc_gas_setpoint;
 Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::09
+TRANSITION::15
 --------------------------------------------------
-TRNNo:- 09
-Title:- Filtration complete?
+TRNNo:- 15.0000
+Title:- Unconditional jump
 EmptyTransition:- False
-Description:- Wait for operator to confirm filtration is complete.
-Condition:- A #_confirm_complete;
+Description:- jump
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::09
+STEP::13
 --------------------------------------------------
-StepNo:- 09
+StepNo:- 13.0000
+Title:- UO_MX_FILL : Check for filling completion or pause
+Description:- Check for complete or paused
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+
+--------------------------------------------------
+TRANSITION::16
+--------------------------------------------------
+TRNNo:- 16.0000
+Title:- Completion confirmed?
+EmptyTransition:- False
+Description:- Operator confirmed completion
+Condition:- A #_prompt_transfer_complete_confirm_yes;
+
+
+--------------------------------------------------
+TRANSITION::17
+--------------------------------------------------
+TRNNo:- 17.0000
+Title:- Filling Pause Button is pressed.
+EmptyTransition:- False
+Description:- Filling Pause Button is pressed.
+Condition:- A #_emx_fill_sync_write_fill_pause;
+
+
+--------------------------------------------------
+STEP::14
+--------------------------------------------------
+StepNo:- 14.0000
+Title:- UO_MX_FILL : Wait for OPER to RESUME or ABORT
+Description:- Raise Filling paused message.
+Prompt Operator to RESET Filling Paused Button else ABORT the sequence.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Raise Filling paused message.
+Prompt Operator to RESET Filling Paused Button else ABORT the sequence.
+Action:- // Prompt Operator to RESET Filling Paused Button else ABORT the sequence.
+SET;
+S #_log_msg_filling_paused;
+S #_prompt_reset_button;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::18
+--------------------------------------------------
+TRNNo:- 18.0000
+Title:- ABORT Filling?
+EmptyTransition:- False
+Description:- Operator confirmed to ABORT filling.
+Condition:- A #_prompt_reset_button_confirm_no;
+
+
+--------------------------------------------------
+TRANSITION::19
+--------------------------------------------------
+TRNNo:- 19.0000
+Title:- Resume confirmed and NO pause button
+EmptyTransition:- False
+Description:- Operator confirmed to RESUME & Filling Pause Button is NOT pressed (RESET).
+Condition:- A #_prompt_reset_button_confirm_yes;
+A #_emx_fill_sync_write_fill_resume;
+
+
+--------------------------------------------------
+STEP::15
+--------------------------------------------------
+StepNo:- 15.0000
+Title:- UO_MX_FILL : Log operator abort
+Description:- Log operator abort.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator abort.
+Action:- //Log operator abort.
+SET;
+S #_log_msg_reset_button_abort;
+S #smc.ABORTED;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::20
+--------------------------------------------------
+TRNNo:- 20.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::16
+--------------------------------------------------
+StepNo:- 16.0000
+Title:- UO_MX_FILL : Log operator repeat
+Description:- Log operator repeat
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Log operator repeat
+Action:- //Log operator repeat.
+SET;
+S #_log_msg_reset_button_retry;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+TRANSITION::21
+--------------------------------------------------
+TRNNo:- 21.0000
+Title:- Empty Transition
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::17
+--------------------------------------------------
+StepNo:- 17.0000
 Title:- UO_MX_FILL : Filtration completed.
 Description:- Log operator confirmation transfer complete and filtration operation end time.
 Set SMFL, SVT and FLZ hygiene status to USED.
@@ -1021,9 +1358,9 @@ Verification:- A "uncondJump";
 
 
 --------------------------------------------------
-TRANSITION::10
+TRANSITION::22
 --------------------------------------------------
-TRNNo:- 10
+TRNNo:- 22.0000
 Title:- Empty Transition
 EmptyTransition:- False
 Description:- Jump
@@ -1031,9 +1368,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::10
+STEP::18
 --------------------------------------------------
-StepNo:- 10
+StepNo:- 18.0000
 Title:- UO_MX_FILL : Disable HPCA control
 Description:- Disable HEX Temperature control and Mx HPCA control.
 
@@ -1043,32 +1380,12 @@ Close sterile filter outlet valve and path sequentially up to including Sy outle
 ACTION::01
 --------------------------------------------------
 Description:- Disable HEX temperature control, HPCA control and stop filter.
-Action:- //Stop EMT_PREEMPT.
-L "dbCONST".BLK.SAFE.CMD;
-T  #_emt_hex_subs;
+Action:- //Stop all EMs
 L "dbCONST".BLK.CMD.STOP;
 T  #_emt_hex_cmd;
-
-//Disable HPCA control.
-L "dbCONST".BLK.SAFE.CMD;
-T  #_emc_gas_subs;
-L "dbCONST".BLK.CMD.STOP;
 T  #_emc_gas_cmd;
-
-//Stop FILTER.
-L "dbCONST".BLK.SAFE.CMD;
-T #_emx_mmfl_subs;
-L "dbCONST".BLK.CMD.STOP;
 T #_emx_mmfl_cmd;
-
-L "dbCONST".BLK.SAFE.CMD;
-T #_emx_transfer_subs;
-L "dbCONST".BLK.CMD.STOP;
 T #_emx_transfer_cmd;
-
-L "dbCONST".BLK.SAFE.CMD;
-T #_emx_smfl_subs;
-L "dbCONST".BLK.CMD.STOP;
 T #_emx_smfl_cmd;
 Verification:- A(;
 L #_emt_hex_state;
@@ -1098,9 +1415,9 @@ L "dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::11
+TRANSITION::23
 --------------------------------------------------
-TRNNo:- 11
+TRNNo:- 23.0000
 Title:- Empty transition.
 EmptyTransition:- False
 Description:- Unconditional jump
@@ -1108,9 +1425,9 @@ Condition:- A "uncondJump";
 
 
 --------------------------------------------------
-STEP::11
+STEP::19
 --------------------------------------------------
-StepNo:- 11
+StepNo:- 19.0000
 Title:- UO_MX_FILL : Filling Unit Operation Completed
 Description:- Disable Mx manway alarm and low pressure alarm.
 Log Mx Fill operation end time.
@@ -1141,7 +1458,6 @@ T #_emv_vessel_cmd;
 //Log Mx Fill operation end time.
 SET;
 S #_log_msg_fill_end;
-R #_prompt_abort_confirm_yes;
 Verification:- A(;
 L #_emv_vessel_subs;
 L "dbCONST".BLK.EMV1.SUBS.MANWAY;

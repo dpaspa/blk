@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 30/11/2018 6:24:19 PM by David Paspa
+generated on 12/12/2018 12:34:17 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -13,15 +13,16 @@ SEQUENCE
 
 Name:- SIP_PULSE
 Title:- PH_EMX1_SIP_PULSE
-Description:- Open and close valves for specified duration.
+Description:- Open and close spray ball valves for specified duration.
 Class:- EMX1
 Level:- PH
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
-HeaderName:- X1PUL
-Version:- 1.0
+HeaderName:- X1_PUL
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 1.0 David Paspa      30-Nov-2018            SFC structural design
 HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 
@@ -211,6 +212,32 @@ Condition:- A #SQ_TIMER.Q;
 STEP::05
 --------------------------------------------------
 StepNo:- 05
+Title:- PH_EMX1_PULSE : Last Step
+Description:- Leave drain valve opened.
+Log PULSE operation end time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open drain valve.
+Log PULSE operation end time.
+Action:- SET;
+R #sqSeqTimerStart;
+
+//Close valve.
+L "dbCONST".BLK.POSx.CMD.OPEN;
+T  #_pos_filterinlet_cmd;
+
+//Log PULSE operation end time.
+SET;
+S #_log_msg_pulse_end;
+Verification:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 6.0000
 Title:- PH_EMX1_PULSE : Reset timer
 Description:- Reset timer
 
@@ -231,32 +258,6 @@ Title:- Unconditional Jump
 EmptyTransition:- False
 Description:- Unconditional Jump
 Condition:- A "uncondJump";
-
-
---------------------------------------------------
-STEP::06
---------------------------------------------------
-StepNo:- 06
-Title:- PH_EMX1_PULSE : Last Step
-Description:- Close valve.
-Log PULSE operation end time.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Close drain valve.
-Log PULSE operation end time.
-Action:- SET;
-R #sqSeqTimerStart;
-
-//Close sprayball 1 and 2.
-L "dbCONST".BLK.POSx.CMD.CLOSE;
-T  #_pos_filterinlet_cmd;
-
-//Log PULSE operation end time.
-SET;
-S #_log_msg_pulse_end;
-Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

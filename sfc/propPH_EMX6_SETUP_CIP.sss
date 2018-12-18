@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 3/12/2018 6:39:07 PM by David Paspa
+generated on 12/12/2018 12:34:35 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -13,15 +13,16 @@ SEQUENCE
 
 Name:- SETUP_CIP
 Title:- PH_EMX6_SETUP_CIP
-Description:- Setup M1 Manufacturing Filtration line flowpath for CIP
+Description:- Setup Manufacturing Filtration line flowpath for CIP
 Class:- EMX6
 Level:- PH
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
-HeaderName:- X1PCSET
-Version:- 0.4
+HeaderName:- X6_CSET
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 0.4 Khairul Basar    07-Sep-2009 CC-09/023  confirm_CIPinout flag is reset in Step1.
 // 0.3 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific,& TRN code OR to AND
 //                                             Change in the Last step.
@@ -64,7 +65,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- prompt_connect_confirm_yes
+Name:- prompt_connect_cip_confirm_yes
 Type:- BOOL
 Description:- PH_EMX6_SETUP_CIP Operator to confirm CIP path connected confirmed yes
 ParameterInOut:- VAR
@@ -72,7 +73,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- prompt_connect
+Name:- prompt_connect_cip
 Type:- BOOL
 Description:- PH_EMX6_SETUP_CIP Operator to confirm CIP path connected
 ParameterInOut:- VAR
@@ -120,7 +121,7 @@ ACTION::01
 Description:- Prompt operator to connect CIP flowpath ZSCx111
 Action:- //Prompt to connect CIP.
 SET;
-S #_prompt_connect;
+S #_prompt_connect_cip;
 
 
 --------------------------------------------------
@@ -130,7 +131,7 @@ TRNNo:- 02
 Title:- Operator confirmation
 EmptyTransition:- False
 Description:- Wait for operator to confirm connections has been made.
-Condition:- A #_prompt_connect_confirm_yes;
+Condition:- A #_prompt_connect_cip_confirm_yes;
 
 
 --------------------------------------------------

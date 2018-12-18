@@ -327,7 +327,7 @@ TITLE = Interlocked condition cleared
     ==I;
     );
     JCN _ilCleared;
-    L #p.read.bmc.lastSTATE;
+    L #p.write.mc.SUBS;
     T #p.read.mc.STATE;
 
 _ilCleared:   NOP 0;
@@ -384,7 +384,7 @@ TITLE = Set parent parameter @@CHILDPARAMETERATTRIBUTE@@ value for child device 
     @@CHILDCOMMANDSTATEMENT@@
     JCN _parentWrite_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
     L #p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
-    T #p.@@OPERATION@@.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
+    T #p.command.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
 
 _parentWrite_@@COUNTERATTR@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@:   NOP 0;
 
@@ -406,7 +406,7 @@ TITLE = Set parent parameter @@CHILDPARAMETERATTRIBUTE@@ value for child device 
     @@CHILDCOMMANDSTATEMENT@@
     JCN _parentWriteBool_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
     A #p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
-    = #p.@@OPERATION@@.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
+    = #p.command.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
 
 _parentWriteBool_@@COUNTERATTR@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@:   NOP 0;
 
@@ -422,21 +422,10 @@ TITLE = Hygiene Status Calculation
     //                                                                        //
     // Calculate the hygiene status of the block:                             //
     //------------------------------------------------------------------------//
-    SET;
-    L #p.write.mc.HYGIENE;
-    T #p.read.hs.HYGIENE_STATE;
     CALL "fcHygiene"
-    (   hs                   := #p.read.hs
+    (   hygiene              := #p.write.mc.HYGIENE ,
+        hs                   := #p.read.hs
     );
-    A(;
-    L #p.read.hs.HYGIENE_STATE;
-    T #p.write.mc.HYGIENE;
-    <>I;
-    );
-    JCN _noChangeHygiene;
-    L #p.read.hs.HYGIENE_STATE;
-    T #p.write.mc.HYGIENE;
-_noChangeHygiene:   NOP 0;
 @@ATTR_END|HYGIENE@@
 
 NETWORK
@@ -523,8 +512,11 @@ TITLE = Reset child commands
     //------------------------------------------------------------------------//
     L 0;
 @@ATTR_BEGIN|pSFCChildMCWriteDefine@@
-    T #p.write.@@BLOCKPARAMETER@@;
+    T #p.command.@@BLOCKPARAMETER@@;
 @@ATTR_END|pSFCChildMCWriteDefine@@
+@@ATTR_BEGIN|pSFCChildMCWriteDefineHygiene@@
+    T #p.write.@@BLOCKPARAMETER@@;
+@@ATTR_END|pSFCChildMCWriteDefineHygiene@@
 @@ATTR_BEGIN|pSFCSelectMCWriteDefine@@
     T #p.select.@@BLOCKPARAMETER@@;
 @@ATTR_END|pSFCSelectMCWriteDefine@@
@@ -850,13 +842,20 @@ TITLE = Acquire child @@CHILDPARAMETERALIAS@@
     //------------------------------------------------------------------------//
     @@CHILDACQUIRESTATEMENT@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.isAvailable;
-    JCN _childAvail_@@COUNTERATTR|1@@;
+@@ATTR_BEGIN|CHILD_ACQUIRE_STATE_EXISTS@@
+    A(;
+@@ATTR_BEGIN|CHILD_ACQUIRE_STATE@@
+    O #subsRunning.@@STATE@@;
+@@ATTR_END|CHILD_ACQUIRE_STATE@@
+    );
+@@ATTR_END|CHILD_ACQUIRE_STATE_EXISTS@@
+    JCN _childAvail_@@CHILDPARAMETERALIAS@@;
     S #acquire.@@CHILDPARAMETERALIAS@@;
     S "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.master.write;
     L #p.read.mc.ME;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
 
-_childAvail_@@COUNTERATTR@@:   NOP 0;
+_childAvail_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
 @@ATTR_END|CHILD_ACQUIRE@@
 
@@ -1022,9 +1021,9 @@ TITLE = RUNNING RUNNING RUNNING Set child selection values
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|pSFCSelectMCWriteDefine@@
     L #p.select.@@BLOCKPARAMETER@@;
-@@ATTR_BEGIN|CHILD_COMMAND_CLASS@@
-    T #p.write.@@SELECTCHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
-@@ATTR_END|CHILD_COMMAND_CLASS@@
+@@ATTR_BEGIN|CHILD_COMMAND_CLASS_ALIAS@@
+    T #p.command.@@SELECTCHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
+@@ATTR_END|CHILD_COMMAND_CLASS_ALIAS@@
 @@ATTR_END|pSFCSelectMCWriteDefine@@
 
 NETWORK
@@ -1448,7 +1447,8 @@ TITLE = RESUME if children now okay
     ==I;
     );
     JCN _noResume;
-    L #stateBeforeError;
+//    L #stateBeforeError;
+    L #p.write.mc.SUBS;
     T #p.read.mc.STATE;
 
 @@ATTR_BEGIN|SFC@@
@@ -1468,12 +1468,8 @@ TITLE = Upload child states
     // Upload the child state:                                                //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_CASCADE@@
-    @@CHILDCOMMANDSTATEMENT@@
-    JCN _pSTATE_@@CHILDPARAMETERALIAS@@;
     L "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.STATE;
     T #p.read.@@CHILDPARAMETERALIAS@@_STATE;
-_pSTATE_@@CHILDPARAMETERALIAS@@:   NOP 0;
-
 @@ATTR_END|CHILD_CASCADE@@
 
 NETWORK
@@ -1493,55 +1489,58 @@ TITLE = Set child substate, command and parameters if no mismatch
     JCN _noCommandOnChildMismatch;
 
     //------------------------------------------------------------------------//
-    // Set the child substate if no child mismatch:                           //
+    // Set the block child substate and command if no child mismatch:         //
     //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CHILD_COMMAND_EXISTS@@
 @@ATTR_BEGIN|CHILD_COMMAND_BLK@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
     @@CHILDCOMMANDSTATEMENT@@
     JCN _pSUBS_@@CHILDPARAMETERALIAS@@;
-    L #p.write.@@CHILDPARAMETERALIAS@@_SUBS;
+    L #p.command.@@CHILDPARAMETERALIAS@@_SUBS;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.SUBS;
+    L #p.command.@@CHILDPARAMETERALIAS@@_CMD;
+    T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.CMD;
+    T #childReqCMD.@@CHILDPARAMETERALIAS@@;
 _pSUBS_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
 @@ATTR_END|CHILD_COMMAND_BLK@@
+@@ATTR_END|CHILD_COMMAND_EXISTS@@
 
     //------------------------------------------------------------------------//
-    // Set the child command if no child mismatch:                            //
+    // Set the non-block child command if no child mismatch:                  //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_COMMAND_EXISTS@@
-@@ATTR_BEGIN|CHILD_COMMAND@@
+@@ATTR_BEGIN|CHILD_COMMAND_NOT_BLK@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
     @@CHILDCOMMANDSTATEMENT@@
     JCN _pCMD_@@CHILDPARAMETERALIAS@@;
-    L #p.write.@@CHILDPARAMETERALIAS@@_CMD;
+    L #p.command.@@CHILDPARAMETERALIAS@@_CMD;
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.CMD;
     T #childReqCMD.@@CHILDPARAMETERALIAS@@;
 _pCMD_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
-@@ATTR_END|CHILD_COMMAND@@
+@@ATTR_END|CHILD_COMMAND_NOT_BLK@@
 @@ATTR_END|CHILD_COMMAND_EXISTS@@
 
     //------------------------------------------------------------------------//
-    // Write the non-boolean child parameters if no child mismatch:           //
+    // Write the child parameters if no child mismatch:                       //
     //------------------------------------------------------------------------//
-@@ATTR_BEGIN|pSFCChildWriteDefine@@
-    A "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
-    JCN _pSFCChildWrite_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
-    L #p.write.@@BLOCKPARAMETER@@;
+@@ATTR_BEGIN|CHILD_COMMAND@@
+    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
+    @@CHILDCOMMANDSTATEMENT@@
+    JCN _pPARAMETER_@@CHILDPARAMETERALIAS@@;
+@@ATTR_BEGIN|pSFCChildWriteDefineAlias@@
+    L #p.command.@@BLOCKPARAMETER@@;
     T "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
-_pSFCChildWrite_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@: NOP 0;
-
-@@ATTR_END|pSFCChildWriteDefine@@
-
-    //------------------------------------------------------------------------//
-    // Write the boolean child parameters if no child mismatch:               //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|pSFCChildWriteBoolDefine@@
-    A "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
-    A #p.write.@@BLOCKPARAMETER@@;
+@@ATTR_END|pSFCChildWriteDefineAlias@@
+@@ATTR_BEGIN|pSFCChildWriteBoolDefineAlias@@
+    A #p.command.@@BLOCKPARAMETER@@;
     = "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
+@@ATTR_END|pSFCChildWriteBoolDefineAlias@@
+_pPARAMETER_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
-@@ATTR_END|pSFCChildWriteBoolDefine@@
+
+@@ATTR_END|CHILD_COMMAND@@
 
 _noCommandOnChildMismatch:   NOP 0;
 
@@ -1569,13 +1568,16 @@ TITLE = CALL SFC @@SFC@@ if @@STATE@@ running
         @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pSFCChildMCRead@@
 @@ATTR_BEGIN|pSFCChildMCWrite@@
-        @@CHILDPARAMETER@@   := #p.write.@@BLOCKPARAMETER@@ ,
+        @@CHILDPARAMETER@@   := #p.command.@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pSFCChildMCWrite@@
+@@ATTR_BEGIN|pSFCChildMCWriteHygiene@@
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
+@@ATTR_END|pSFCChildMCWriteHygiene@@
 @@ATTR_BEGIN|pSFCChildRead@@
         @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pSFCChildRead@@
 @@ATTR_BEGIN|pSFCChildWrite@@
-        @@CHILDPARAMETER@@   := #p.write.@@BLOCKPARAMETER@@ ,
+        @@CHILDPARAMETER@@   := #p.command.@@BLOCKPARAMETER@@ ,
 @@ATTR_END|pSFCChildWrite@@
 @@ATTR_BEGIN|pSFCChildWriteBool@@
         @@CHILDPARAMETER@@   := #p.write.@@BLOCKPARAMETER@@ ,
@@ -1590,7 +1592,7 @@ TITLE = CALL SFC @@SFC@@ if @@STATE@@ running
         @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.select.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.mc.@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pSFCSelectMCWriteHygiene@@
 @@ATTR_BEGIN|pParentSync@@
-        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.select.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.@@SYNCPARAMETER@@ ,
+        @@CHILDPARAMETER@@   := "idb@@CHILDPARAMETERCLASS@@".f[#p.select.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@ ,
 @@ATTR_END|pParentSync@@
         dummy                := #dummy
     );
@@ -1606,7 +1608,7 @@ TITLE = Check if any Child state does not match the command
     // from this parent block if the child state grace period timer has       //
     // expired. Stop checking if the first child state mismatch found:        //
     //------------------------------------------------------------------------//
-@@ATTR_BEGIN|CHILD_COMMAND_FLOWPATH@@
+@@ATTR_BEGIN|CHILD_COMMAND_FLOWPATH_ALL@@
     @@CHILDCOMMANDSTATEMENT@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.ARMED;
     A(;
@@ -1636,7 +1638,7 @@ TITLE = Check if any Child state does not match the command
     = #p.child.err@@CHILDPARAMETERALIAS@@;
 
 
-@@ATTR_END|CHILD_COMMAND_FLOWPATH@@
+@@ATTR_END|CHILD_COMMAND_FLOWPATH_ALL@@
 @@ATTR_END|CHILD_COMMAND_FLOWPATH_EXISTS@@
 
 NETWORK

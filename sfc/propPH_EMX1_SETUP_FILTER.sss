@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 29/11/2018 2:10:05 PM by David Paspa
+generated on 12/12/2018 12:34:14 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -12,16 +12,17 @@ SEQUENCE
 --------------------------------------------------
 
 Name:- SETUP_FILTER
-Title:- Setup MMFLx for Filtration
+Title:- PH_EMX1_SETUP_FILTER
 Description:- Setup MMFLx for Filtration
 Class:- EMX1
 Level:- PH
 STEP_LIST_FORMAT:- JU    S0@@STEP_NUM@@; // STEP-0@@STEP_NUM@@:
 ACT_LIST_FORMAT:- JU    @@ACT_CODE@@@@STEP_NUM@@; //ACTION-@@ACT_NUM@@
-HeaderName:- X1PFILT
-Version:- 0.4
+HeaderName:- X1_FILT
+Version:- 2.0
 RevisionHistory:- // SFC Revision History:
 // Rev By               Date        CC         Note
+// 2.0 David Paspa      27-Nov-2018            Reboot for S7-1500
 // 0.4 Khairul Basar    07-Sep-2009 CC-09/023  Prompt_filter is reset in Step2.
 // 0.3 Khairul Basar    25-Aug-2009 CC-09/023  Change in Verific,& TRN code OR to AND
 //                                             Change in the Last step.
@@ -64,7 +65,7 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::5
 --------------------------------------------------
-Name:- prompt_connect_confirm_yes
+Name:- prompt_connect_filter_confirm_yes
 Type:- BOOL
 Description:- PH_EMX1_SETUP_FILTER operator to confirm filters connected confirmed yes
 ParameterInOut:- VAR
@@ -72,7 +73,7 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::6
 --------------------------------------------------
-Name:- prompt_connect
+Name:- prompt_connect_filter
 Type:- BOOL
 Description:- PH_EMX1_SETUP_FILTER Operator to confirm filters connected
 ParameterInOut:- VAR
@@ -119,7 +120,7 @@ ACTION::01
 Description:- Prompt operator to connect the filter
 Action:- //Prompt to connect filter.
 SET;
-S #_prompt_connect;
+S #_prompt_connect_filter;
 Verification:- A "uncondJump";
 
 
@@ -130,7 +131,7 @@ TRNNo:- 02
 Title:- Operator confirmation
 EmptyTransition:- False
 Description:- Wait for operator to confirm connections has been made.
-Condition:- A #_prompt_connect_confirm_yes;
+Condition:- A #_prompt_connect_filter_confirm_yes;
 
 
 --------------------------------------------------
@@ -146,7 +147,6 @@ ACTION::01
 Description:- Log operator confirmation and continue to check connection.
 Action:- SET;
 S #_log_msg_confirm_connect;
-R  #_prompt_connect_confirm_yes;
 Verification:- A "uncondJump";
 
 
@@ -158,11 +158,11 @@ Title:- Connection correctly inserted
 EmptyTransition:- False
 Description:- Jump if correct switch ZSCx113 connected
 Condition:- //Verify the correct switch connected.
-A(    ;
+A(;
 L #_zsc_filter_state;
 L "dbCONST".BLK.ZSC2.STATE.IN;
-      ==I ;  
-  )     ;
+==I ;  
+);
 
 
 --------------------------------------------------
