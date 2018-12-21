@@ -62,8 +62,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_END|CRIL_EXISTS@@
     = #f[@@IDX@@].p.read.mc.CRIL;
 
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Get the non-critical interlock if there is one. If not set alwaysLow:  //
     //------------------------------------------------------------------------//
@@ -77,17 +75,14 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
 @@ATTR_END|NCRIL_EXISTS@@
     = #f[@@IDX@@].p.read.mc.NCRIL;
 
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Unique ID
     //------------------------------------------------------------------------//
     // Set the instance unique ID:                                            //
     //------------------------------------------------------------------------//
+    SET;
     L "dbCONST".BLK.ID.@@INSTANCE@@;
     T #f[@@IDX@@].p.read.mc.ME;
 
 @@ATTR_BEGIN|ISOWNED@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner ID
     //------------------------------------------------------------------------//
     // Set the instance Owner ID:                                             //
     //------------------------------------------------------------------------//
@@ -96,8 +91,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Owner ID
 @@ATTR_END|ISOWNED@@
 
 @@ATTR_BEGIN|SELVALUEMYSELF@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Instance selection of myself
     //------------------------------------------------------------------------//
     // Set the instance selection value to itself:                            //
     //------------------------------------------------------------------------//
@@ -106,8 +99,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Instance selection of myself
 @@ATTR_END|SELVALUEMYSELF@@
 
 @@ATTR_BEGIN|FLOWPATH@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : @@CLASS@@ is a Flowpath device
     //------------------------------------------------------------------------//
     // This class of device is a FLOWPATH device where the state must equal   //
     // the command once set by the parent:                                    //
@@ -116,8 +107,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@CLASS@@ is a Flowpath device
     = #f[@@IDX@@].p.read.mc.FLOWPATH;
 @@ATTR_END|FLOWPATH@@
 
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
     //------------------------------------------------------------------------//
     // This block can only reside within this CPU:                            //
     //------------------------------------------------------------------------//
@@ -125,8 +114,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
     = #f[@@IDX@@].p.master.read;
 
 @@ATTR_BEGIN|ISOWNED@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     //------------------------------------------------------------------------//
     // This block can only be owned by a parent block in this CPU:            //
     //------------------------------------------------------------------------//
@@ -135,11 +122,10 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
 @@ATTR_END|ISOWNED@@
 
 @@ATTR_BEGIN|pBLOCK_RECIPE_EXISTS@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Set recipe parameters
     //------------------------------------------------------------------------//
     // Set the Control Recipe parameter values:                               //
     //------------------------------------------------------------------------//
+    SET;
 @@ATTR_BEGIN|pBLOCK_RECIPE@@
     L "dbRECIPE".recipeControl.@@RECIPE@@.@@BLOCKPARAMETER@@;
     T #f[@@IDX@@].p.write.@@BLOCKPARAMETER@@;
@@ -147,8 +133,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Set recipe parameters
 
 @@ATTR_END|pBLOCK_RECIPE_EXISTS@@
 
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Set child index numbers
     //------------------------------------------------------------------------//
     // Set the child block index values:                                      //
     //------------------------------------------------------------------------//
@@ -158,8 +142,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Set child index numbers
 @@ATTR_END|CHILD_INSTANCE@@
 
 @@ATTR_BEGIN|LINK_BLK@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Linked block parameters
     //------------------------------------------------------------------------//
     // Set the linked block child index:                                      //
     //------------------------------------------------------------------------//
@@ -169,8 +151,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Linked block parameters
 @@ATTR_END|LINK_BLK@@
 
 @@ATTR_BEGIN|pEventPromptExists@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : eventPrompt instance index values
     //------------------------------------------------------------------------//
     // Set the index values for the instance eventPrompt:                     //
     //------------------------------------------------------------------------//
@@ -181,16 +161,12 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : eventPrompt instance index values
 
 @@ATTR_END|pEventPromptExists@@
 
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //
     //------------------------------------------------------------------------//
     CALL #f[@@IDX@@];
-    
+
 @@ATTR_BEGIN|pEventLogMsgExists@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class event log message bits to global DB
     //------------------------------------------------------------------------//
     // Transfer the class event log message bits to the global DB:            //
     //------------------------------------------------------------------------//
@@ -201,8 +177,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class event log message bits to glo
 @@ATTR_END|pEventLogMsgExists@@
 
 @@ATTR_BEGIN|pEventLogRealExists@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class event log real data bits to global DB
     //------------------------------------------------------------------------//
     // Transfer the class event log message bits to the global DB:            //
     //------------------------------------------------------------------------//
@@ -213,8 +187,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class event log real data bits to g
 @@ATTR_END|pEventLogRealExists@@
 
 @@ATTR_BEGIN|pEventLogTimeExists@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class event log time data bits to global DB
     //------------------------------------------------------------------------//
     // Transfer the class event log message bits to the global DB:            //
     //------------------------------------------------------------------------//
@@ -225,8 +197,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class event log time data bits to g
 @@ATTR_END|pEventLogTimeExists@@
 
 @@ATTR_BEGIN|pEventConfirmNoExists@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class prompt event confirm No message bits to global DB
     //------------------------------------------------------------------------//
     // Transfer the class event confirm No message bits to the global DB:    //
     //------------------------------------------------------------------------//
@@ -237,8 +207,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class prompt event confirm No messa
 @@ATTR_END|pEventConfirmNoExists@@
 
 @@ATTR_BEGIN|pEventConfirmYesExists@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class prompt event confirm Yes message bits to global DB
     //------------------------------------------------------------------------//
     // Transfer the class event confirm Yes message bits to the global DB:    //
     //------------------------------------------------------------------------//
@@ -248,8 +216,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Transfer class prompt event confirm Yes mess
 @@ATTR_END|pEventConfirmYesWordClass@@
 @@ATTR_END|pEventConfirmYesExists@@
 
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Send the general block alarm bits to the global DB
     //------------------------------------------------------------------------//
     // Transfer the block arlam bits to the global DB:                        //
     //------------------------------------------------------------------------//
@@ -268,8 +234,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
     = #f[@@IDX@@].p.master.read;
 
 @@ATTR_BEGIN|ISOWNED@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     //------------------------------------------------------------------------//
     // This block can only be owned by a parent block in another CPU:         //
     //------------------------------------------------------------------------//

@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/12/2018 10:47:20 AM by David Paspa
+generated on 18/12/2018 1:40:19 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -106,93 +106,13 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::10
 --------------------------------------------------
-Name:- log_msg_sip_sy_end
-Type:- BOOL
-Description:- RP_PCSY_CIPSIP Sterilisation SY end
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::11
---------------------------------------------------
-Name:- log_msg_sip_sy_begin
-Type:- BOOL
-Description:- RP_PCSY_CIPSIP Sterilisation SY begin
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::12
---------------------------------------------------
-Name:- log_msg_vacuum_sy_end
-Type:- BOOL
-Description:- RP_PCSY_CIPSIP Vacuum SY end
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::13
---------------------------------------------------
-Name:- log_msg_vacuum_sy_begin
-Type:- BOOL
-Description:- RP_PCSY_CIPSIP Vacuum SY begin
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::14
---------------------------------------------------
-Name:- log_msg_sip_mx_end
-Type:- BOOL
-Description:- RP_PCSY_CIPSIP Sterilisation MX end
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::15
---------------------------------------------------
-Name:- log_msg_sip_mx_begin
-Type:- BOOL
-Description:- RP_PCSY_CIPSIP Sterilisation MX begin
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::16
---------------------------------------------------
-Name:- log_msg_vacuum_mx_end
-Type:- BOOL
-Description:- RP_PCSY_CIPSIP Vacuum MX end
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::17
---------------------------------------------------
-Name:- log_msg_vacuum_mx_begin
-Type:- BOOL
-Description:- RP_PCSY_CIPSIP Vacuum MX begin
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::18
---------------------------------------------------
-Name:- log_msg_vacuum_hold_end
-Type:- BOOL
-Description:- RP_PCSY_CIPSIP Vacuum Hold Test end
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::19
---------------------------------------------------
-Name:- log_msg_vacuum_hold_begin
-Type:- BOOL
-Description:- RP_PCSY_CIPSIP Vacuum Hold Test begin
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::20
---------------------------------------------------
 Name:- prompt_abort
 Type:- BOOL
 Description:- RP_PCSY_CIPSIP Operator to confirm to abort due to invalid Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::11
 --------------------------------------------------
 Name:- prompt_abort_confirm_yes
 Type:- BOOL
@@ -200,7 +120,7 @@ Description:- RP_PCSY_CIPSIP Operator confirmed to abort due to invalid Hygiene 
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::12
 --------------------------------------------------
 Name:- log_msg_wrong_hygiene
 Type:- BOOL
@@ -208,7 +128,7 @@ Description:- RP_PCSY_CIPSIP Storage vessel unit has wrong Hygiene Status
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::13
 --------------------------------------------------
 Name:- sy_vessel_hygiene
 Type:- INT
@@ -216,7 +136,7 @@ Description:- Hygiene Status of unit Sy
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::14
 --------------------------------------------------
 Name:- sy_vessel_state
 Type:- INT
@@ -224,7 +144,7 @@ Description:- Device State of unit Sy
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::15
 --------------------------------------------------
 Name:- sy_vessel_subs
 Type:- INT
@@ -232,7 +152,7 @@ Description:- Substate selection to unit Sy
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::16
 --------------------------------------------------
 Name:- sy_vessel_cmd
 Type:- INT
@@ -536,10 +456,6 @@ Setting the event for the batch report
 Action:- //Set Sy hygiene status to STERILE.
 L "dbCONST".BLK.HYGIENE.STERILE;
 T #_sy_vessel_hygiene;
-
-//Report Event Set
-SET;
-S #_log_msg_sip_mx_end;
 
 //Release Sy.
 SET;

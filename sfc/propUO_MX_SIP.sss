@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/12/2018 1:56:55 PM by David Paspa
+generated on 20/12/2018 2:07:35 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -128,9 +128,9 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::13
 --------------------------------------------------
-Name:- log_real_emg_ti_vent_pv
+Name:- log_real_emt_ti_hex_pv
 Type:- BOOL
-Description:- UO_MX_SIP Vent filter temperature PV
+Description:- UO_MX_SIP HEX Outlet temperature PV
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -160,9 +160,9 @@ ParameterInOut:- VAR
 --------------------------------------------------
 PARAMETER::17
 --------------------------------------------------
-Name:- real_emg_ti_vent_pv
+Name:- real_emt_ti_hex_pv
 Type:- REAL
-Description:- UO_MX_SIP Vent filter temperature PV
+Description:- UO_MX_SIP HEX Outlet temperature PV
 ParameterInOut:- VAR
 
 --------------------------------------------------
@@ -504,9 +504,9 @@ ParameterInOut:- IN
 --------------------------------------------------
 PARAMETER::60
 --------------------------------------------------
-Name:- emg_filter_ti_vent_pv
+Name:- emt_hex_ti_hex_pv
 Type:- REAL
-Description:- TIn101 Vent Filter Temperature
+Description:- TIn109 Heat Exchanger Outlet Temperature
 ParameterInOut:- IN
 
 --------------------------------------------------
@@ -1278,7 +1278,7 @@ Condition:- A "uncondJump";
 --------------------------------------------------
 STEP::13
 --------------------------------------------------
-StepNo:- 13.0000
+StepNo:- 13
 Title:- UO_MX_SIP : Monitor MX SIP Temperatures
 Description:- Log all Mx vessel temperatures every 30sec.
 
@@ -1289,8 +1289,8 @@ Description:- Log all Mx vessel temperatures  every 30sec.
 Action:- //Log all temperatures
 SET;
 R #sqSeqTimerStart2;
-L #_emg_filter_ti_vent_pv;
-T #_real_emg_ti_vent_pv;
+L #_emt_hex_ti_hex_pv;
+T #_real_emt_ti_hex_pv;
 L #_emg_filter_ti_drain_pv;
 T #_real_emg_ti_drain_pv;
 L #_emv_vessel_ti_vessel_pv;
@@ -1299,7 +1299,7 @@ L #_emx_drain_ti_drain_pv;
 T #_real_emx_ti_drain_pv;
 
 SET;
-S #_log_real_emg_ti_vent_pv;
+S #_log_real_emt_ti_hex_pv;
 S #_log_real_emg_ti_drain_pv;
 S #_log_real_emv_ti_vessel_pv;
 S #_log_real_emx_ti_drain_pv;
@@ -1315,16 +1315,16 @@ Verification:- A "uncondJump";
 --------------------------------------------------
 TRANSITION::15
 --------------------------------------------------
-TRNNo:- 15.0000
+TRNNo:- 15
 Title:- Temperature below setpoint
 EmptyTransition:- False
 Description:- SIP timer running and any temperature below TEMP_SIP or the vent filter inlet temperature below TEMP_SIP_VENT?
 Condition:- A #_sip_timer_started;
 A(;
-//TIn101
+//TIn109
 O(;
-L 	#_emg_filter_ti_vent_pv;
-L 	#_r_temp_sip_vent;
+L 	#_emt_hex_ti_hex_pv;
+L 	#_r_temp_sip;
 <R;
 );
 //TIn103
@@ -1356,13 +1356,13 @@ Title:- All temperatures above setpoint.
 EmptyTransition:- False
 Description:- All SIP temperatures above TEMP_SIP °C and the vent filter inlet temperature above TEMP_SIP_VENT?
 and SIP timer not running? 
-Mx Gas Filter TI_x101, Mx vent line TI_x103, Mx Vessel TI_x105, MFLx Filtration Line TI_x107 & Mx Drain TI_x109.
+Mx HEX Outlet TI_x109, Mx vent line TI_x103, Mx Vessel TI_x105, MFLx Filtration Line TI_x107 & Mx Drain TI_x109.
 Condition:- AN #_sip_timer_started;
 
-//TIn101
+//TIn109
 A(;
-L 	#_emg_filter_ti_vent_pv;
-L 	#_r_temp_sip_vent;
+L 	#_emt_hex_ti_hex_pv;
+L 	#_r_temp_sip;
 >R;
 );
 //TIn103

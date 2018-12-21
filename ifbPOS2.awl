@@ -61,9 +61,6 @@ BEGIN
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
-    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
-    // INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
-    //                                                                        //
     // Get the critical interlock if there is one. If not set alwaysLow:      //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CRIL_EXISTS@@
@@ -90,43 +87,81 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     = #f[@@IDX@@].p.read.mc.NCRIL;
 
 @@ATTR_BEGIN|FLOWPATH@@
+    //------------------------------------------------------------------------//
+    // This class of device is a FLOWPATH device where the state must equal   //
+    // the command once set by the parent:                                    //
+    //------------------------------------------------------------------------//
     A "alwaysHigh";
     = #f[@@IDX@@].p.read.mc.FLOWPATH;
 @@ATTR_END|FLOWPATH@@
 
+    //------------------------------------------------------------------------//
+    // This block can only reside within this CPU:                            //
+    //------------------------------------------------------------------------//
     A "alwaysHigh";
     = #f[@@IDX@@].p.master.read;
 
+    //------------------------------------------------------------------------//
+    // This block can only be owned by a parent block in this CPU:            //
+    //------------------------------------------------------------------------//
     A "alwaysHigh";
     = #f[@@IDX@@].p.master.write;
 
+    //------------------------------------------------------------------------//
+    // Set the instance opened feedback value from the field:                 //
+    //------------------------------------------------------------------------//
     A @@NC@@;
     = #f[@@IDX@@].p.read.NC;
 
+    //------------------------------------------------------------------------//
+    // Get the position feedback values:                                      //
+    //------------------------------------------------------------------------//
     A "@@INSTANCE@@-ZSC";
     = #FB_C;
     AN "@@INSTANCE@@-ZSC";
     = #FB_O;
 
+    //------------------------------------------------------------------------//
+    // Set the instance closed feedback value from the field:                 //
+    //------------------------------------------------------------------------//
     A #FB_C;
     = #f[@@IDX@@].p.read.FB_C;
 
+    //------------------------------------------------------------------------//
+    // Set the instance opened feedback value from the field:                 //
+    //------------------------------------------------------------------------//
     A #FB_O;
     = #f[@@IDX@@].p.read.FB_O;
 
+    //------------------------------------------------------------------------//
+    // Set the instance unique ID:                                            //
+    //------------------------------------------------------------------------//
     SET;
     L "dbCONST".BLK.ID.@@INSTANCE@@;
     T #f[@@IDX@@].p.read.mc.ME;
+
+    //------------------------------------------------------------------------//
+    // Set the instance Owner ID:                                             //
+    //------------------------------------------------------------------------//
     L "dbCONST".BLK.ID.@@PARENT@@;
     T #f[@@IDX@@].p.write.mc.OWNER;
 
+    //------------------------------------------------------------------------//
+    // Call the class function to process each instance:                      //
+    //------------------------------------------------------------------------//
     CALL #f[@@IDX@@];
 
-    A #f[@@IDX@@].p.read.OUT_Q;
-    = "@@INSTANCE@@-CMD";
-
+    //------------------------------------------------------------------------//
+    // Transfer the class event log message bits to the global DB:            //
+    //------------------------------------------------------------------------//
     L #f[@@IDX@@].p.read.mc.ALARM;
     T "dbEVENT".alarmBlock.alarm_@@INSTANCE@@;
+
+    //------------------------------------------------------------------------//
+    // Set the instance output command to the field:                          //
+    //------------------------------------------------------------------------//
+    A #f[@@IDX@@].p.read.OUT_Q;
+    = "@@INSTANCE@@-CMD";
 
 @@TEMPLATE_END@@
 
@@ -140,8 +175,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Read
     = #f[@@IDX@@].p.master.read;
 
 @@ATTR_BEGIN|ISOWNED@@
-NETWORK
-TITLE = Item @@IDX@@ @@INSTANCE@@ : Block Write
     //------------------------------------------------------------------------//
     // This block can only be owned by a parent block in another CPU:         //
     //------------------------------------------------------------------------//

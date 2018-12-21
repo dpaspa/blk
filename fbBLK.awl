@@ -335,11 +335,11 @@ _ilCleared:   NOP 0;
 @@ATTR_BEGIN|CHILD_COMMAND_EXISTS@@
 @@ATTR_BEGIN|pChildReadExists@@
 NETWORK
-TITLE = Upload non-boolean child parameter values
+TITLE = Upload child parameter values
     //------------------------------------------------------------------------//
     // CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER  //
     //                                                                        //
-    // Get the initial input non-boolean value for the child parameter:       //
+    // Get the initial input value for the child parameter:                   //
     //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_COMMAND@@
 @@ATTR_BEGIN|pChildRead@@
@@ -353,13 +353,6 @@ TITLE = Upload non-boolean child parameter values
 
 @@ATTR_BEGIN|CHILD_COMMAND_EXISTS@@
 @@ATTR_BEGIN|pChildReadBoolExists@@
-NETWORK
-TITLE = Upload boolean child parameter values
-    //------------------------------------------------------------------------//
-    // CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER   CHILD PARAMETER  //
-    //                                                                        //
-    // Get the initial boolean input value for the child parameter:           //
-    //------------------------------------------------------------------------//
 @@ATTR_BEGIN|CHILD_COMMAND@@
 @@ATTR_BEGIN|pChildReadBool@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
@@ -370,47 +363,31 @@ TITLE = Upload boolean child parameter values
 @@ATTR_END|pChildReadBoolExists@@
 @@ATTR_END|CHILD_COMMAND_EXISTS@@
 
-@@ATTR_BEGIN|CHILD_COMMAND_EXISTS@@
-@@ATTR_BEGIN|CHILD_COMMAND@@
-@@ATTR_BEGIN|pParentWrite@@
 NETWORK
-TITLE = Set parent parameter @@CHILDPARAMETERATTRIBUTE@@ value for child device @@CHILDPARAMETERALIAS@@
+TITLE = Set parent parameter values for child devices
     //------------------------------------------------------------------------//
     // PARENT PARAMETER   PARENT PARAMETER   PARENT PARAMETER   PARENT PARAM  //
     //                                                                        //
     // Set the initial input value for the child calling parameter:           //
     //------------------------------------------------------------------------//
+@@ATTR_BEGIN|CHILD_COMMAND_EXISTS@@
+@@ATTR_BEGIN|CHILD_COMMAND@@
+@@ATTR_BEGIN|pParentWriteExists@@
     A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
     @@CHILDCOMMANDSTATEMENT@@
-    JCN _parentWrite_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
+    JCN _parentWrite_@@CHILDPARAMETERALIAS@@;
+@@ATTR_BEGIN|pParentWrite@@
     L #p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
     T #p.command.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
-
-_parentWrite_@@COUNTERATTR@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@:   NOP 0;
-
 @@ATTR_END|pParentWrite@@
-@@ATTR_END|CHILD_COMMAND@@
-@@ATTR_END|CHILD_COMMAND_EXISTS@@
-
-@@ATTR_BEGIN|CHILD_COMMAND_EXISTS@@
-@@ATTR_BEGIN|CHILD_COMMAND@@
 @@ATTR_BEGIN|pParentWriteBool@@
-NETWORK
-TITLE = Set parent parameter @@CHILDPARAMETERATTRIBUTE@@ value for child device @@CHILDPARAMETERALIAS@@
-    //------------------------------------------------------------------------//
-    // PARENT PARAMETER   PARENT PARAMETER   PARENT PARAMETER   PARENT PARAM  //
-    //                                                                        //
-    // Set the initial input value for the child calling parameter:           //
-    //------------------------------------------------------------------------//
-    A "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.read.mc.modeAUTO;
-    @@CHILDCOMMANDSTATEMENT@@
-    JCN _parentWriteBool_@@COUNTERATTR|1@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
     A #p.@@OPERATION@@.@@CHILDPARAMETERATTRIBUTE@@;
     = #p.command.@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@;
-
-_parentWriteBool_@@COUNTERATTR@@_@@CHILDPARAMETERALIAS@@_@@CHILDPARAMETERATTRIBUTE@@:   NOP 0;
-
 @@ATTR_END|pParentWriteBool@@
+_parentWrite_@@CHILDPARAMETERALIAS@@:   NOP 0;
+
+
+@@ATTR_END|pParentWriteExists@@
 @@ATTR_END|CHILD_COMMAND@@
 @@ATTR_END|CHILD_COMMAND_EXISTS@@
 
@@ -481,8 +458,6 @@ TITLE = STOPPED STOPPED STOPPED Set block state STOPPED
 	L "dbCONST".BLK.@@CLASS@@.STATE.STOPPED;
     T #p.read.mc.STATE;
 
-NETWORK
-TITLE = Send SFC STOP command
     //------------------------------------------------------------------------//
     // If commanded to Stop then tell the SFC to go to the last step:         //
     //------------------------------------------------------------------------//
@@ -492,8 +467,6 @@ TITLE = Send SFC STOP command
     T #@@SFC@@.sqSequencer.CMD.New;
 @@ATTR_END|SFC@@
 
-NETWORK
-TITLE = Reset running substate and completion flags
     //------------------------------------------------------------------------//
     // Reset flags:                                                           //
     //------------------------------------------------------------------------//
@@ -505,8 +478,6 @@ TITLE = Reset running substate and completion flags
     R #subsRunning.@@STATE@@;
 @@ATTR_END|STATE@@
 
-NETWORK
-TITLE = Reset child commands
     //------------------------------------------------------------------------//
     // Reset the child commands:                                              //
     //------------------------------------------------------------------------//
@@ -522,8 +493,6 @@ TITLE = Reset child commands
 @@ATTR_END|pSFCSelectMCWriteDefine@@
 
 @@ATTR_BEGIN|CHILD_COMMAND_EXISTS@@
-NETWORK
-TITLE = Disarm flowpath devices on STOP command
     //------------------------------------------------------------------------//
     // Disarm the flowpath child devices when STOP command issued:            //
     //------------------------------------------------------------------------//
@@ -537,8 +506,6 @@ TITLE = Disarm flowpath devices on STOP command
 @@ATTR_END|CHILD_COMMAND_EXISTS@@
 
 @@ATTR_BEGIN|SELECT_EXISTS@@
-NETWORK
-TITLE = Clear calling parameter selection flags
     //------------------------------------------------------------------------//
     // Clear calling parameter selections:                                    //
     //------------------------------------------------------------------------//
@@ -551,8 +518,6 @@ TITLE = Clear calling parameter selection flags
 @@ATTR_END|SELECT_EXISTS@@
 
 @@ATTR_BEGIN|pEventPromptExists@@
-NETWORK
-TITLE = Clear the operator prompt flags
     //------------------------------------------------------------------------//
     // CLEAR OPERATOR PROMPT   CLEAR OPERATOR PROMPT   CLEAR OPERATOR PROMPT  //
     //                                                                        //
@@ -573,8 +538,6 @@ TITLE = Clear the operator prompt flags
 @@ATTR_END|pEventPromptExists@@
 
 @@ATTR_BEGIN|pEventConfirmNoExists@@
-NETWORK
-TITLE = Clear the event prompt confirm No message flags
     //------------------------------------------------------------------------//
     // CLEAR PROMPT NO   CLEAR PROMPT NO   CLEAR PROMPT NO   CLEAR PROMPT NO  //
     //                                                                        //
@@ -587,8 +550,6 @@ TITLE = Clear the event prompt confirm No message flags
 @@ATTR_END|pEventConfirmNoExists@@
 
 @@ATTR_BEGIN|pEventConfirmYesExists@@
-NETWORK
-TITLE = Clear the event prompt confirm Yes message flags
     //------------------------------------------------------------------------//
     // CLEAR PROMPT YES   CLEAR PROMPT YES   CLEAR PROMPT YES   CLEAR PROMPT  //
     //                                                                        //
@@ -601,8 +562,6 @@ TITLE = Clear the event prompt confirm Yes message flags
 @@ATTR_END|pEventConfirmYesExists@@
 
 @@ATTR_BEGIN|pEventLogMsgExists@@
-NETWORK
-TITLE = Clear the log message flags
     //------------------------------------------------------------------------//
     // CLEAR LOG MESSAGE   CLEAR LOG MESSAGE   CLEAR LOG MESSAGE   CLEAR LOG  //
     //                                                                        //
@@ -619,8 +578,6 @@ TITLE = Clear the log message flags
 @@ATTR_END|pEventLogMsgExists@@
 
 @@ATTR_BEGIN|pEventLogRealExists@@
-NETWORK
-TITLE = Clear the log real data flags
     //------------------------------------------------------------------------//
     // CLEAR LOG REAL   CLEAR LOG REAL   CLEAR LOG REAL   CLEAR LOG REAL   CL //
     //                                                                        //
@@ -640,8 +597,6 @@ TITLE = Clear the log real data flags
 @@ATTR_END|pEventLogRealExists@@
 
 @@ATTR_BEGIN|pEventLogTimeExists@@
-NETWORK
-TITLE = Clear the log time data flags
     //------------------------------------------------------------------------//
     // CLEAR LOG TIME   CLEAR LOG TIME   CLEAR LOG TIME   CLEAR LOG TIME   CL //
     //                                                                        //
@@ -661,8 +616,6 @@ TITLE = Clear the log time data flags
 @@ATTR_END|pEventLogTimeExists@@
 
 @@ATTR_BEGIN|pEventLogRealExists@@
-NETWORK
-TITLE = Zero the real data values
     //------------------------------------------------------------------------//
     // ZERO DATA REAL   ZERO DATA REAL   ZERO DATA REAL   ZERO DATA REAL   ZE //
     //                                                                        //
@@ -675,8 +628,6 @@ TITLE = Zero the real data values
 @@ATTR_END|pEventLogRealExists@@
 
 @@ATTR_BEGIN|pEventLogTimeExists@@
-NETWORK
-TITLE = Zero the log time data values
     //------------------------------------------------------------------------//
     // ZERO DATA TIME   ZERO DATA TIME   ZERO DATA TIME   ZERO DATA TIME   ZE //
     //                                                                        //
@@ -689,8 +640,6 @@ TITLE = Zero the log time data values
 @@ATTR_END|pEventLogTimeExists@@
 
 @@ATTR_BEGIN|CHILD_ACQUIRE@@
-NETWORK
-TITLE = Set child @@CHILDPARAMETERALIAS@@ available
     //------------------------------------------------------------------------//
     // RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELEASE CHILD   RELE   //
     //                                                                        //
@@ -702,8 +651,6 @@ TITLE = Set child @@CHILDPARAMETERALIAS@@ available
     T "idb@@CHILDALIASCLASS@@".f[#p.child.@@CHILDPARAMETERALIAS@@].p.write.mc.OWNER;
 _alreadyAvail@@COUNTERATTR|1@@:   NOP 0;
 
-NETWORK
-TITLE = Release child @@CHILDPARAMETERALIAS@@
     //------------------------------------------------------------------------//
     // Release the child device if acquired earlier to run the command:       //
     //------------------------------------------------------------------------//
@@ -740,8 +687,6 @@ TITLE = STARTING STARTING STARTING Reset running substate and completion flags
 @@ATTR_END|STATE@@
 
 @@ATTR_BEGIN|pEventPromptExists@@
-NETWORK
-TITLE = Clear the operator prompt cancels
     //------------------------------------------------------------------------//
     // Clear the SFC prompt cancel bits:                                      //
     //------------------------------------------------------------------------//
@@ -752,8 +697,6 @@ TITLE = Clear the operator prompt cancels
 @@ATTR_END|pEventPromptExists@@
 
 @@ATTR_BEGIN|STATE@@
-NETWORK
-TITLE = Set running SUBSTATE if @@STATE@@
     //------------------------------------------------------------------------//
     // RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG   RUNNING SUBSTATE FLAG  //
     //                                                                        //
@@ -772,8 +715,6 @@ _noSubsRun_@@STATE@@:   NOP 0;
 
 @@ATTR_END|STATE@@
 
-NETWORK
-TITLE = The STATE follows the SUBSTATE when running
     //------------------------------------------------------------------------//
     // Set the state to the substate if running:                              //
     //------------------------------------------------------------------------//
@@ -786,8 +727,6 @@ TITLE = The STATE follows the SUBSTATE when running
 _noSubsRun:   NOP 0;
 
 @@ATTR_BEGIN|SELECT_EXISTS@@
-NETWORK
-TITLE = Calling Parameter Selection flags
     //------------------------------------------------------------------------//
     // CALLING PARAMETER SELECTION FLAG   CALLING PARAMETER SELECTION FLAG    //
     //                                                                        //
@@ -815,8 +754,6 @@ _select_@@PARAMETER@@_@@SELECTION@@_@@SELECTIONVALUE@@:   NOP 0;
 @@ATTR_END|SELECT_EXISTS@@
 
 @@ATTR_BEGIN|CHILD_SELECT@@
-NETWORK
-TITLE = Set selected child @@CHILDPARAMETERALIAS@@ index value
     //------------------------------------------------------------------------//
     // CHILD SELECT   CHILD SELECT   CHILD SELECT   CHILD SELECT   CHILD SEL  //
     //                                                                        //
@@ -831,8 +768,6 @@ _childSelect_@@COUNTERATTR|1@@:   NOP 0;
 @@ATTR_END|CHILD_SELECT@@
 
 @@ATTR_BEGIN|CHILD_ACQUIRE@@
-NETWORK
-TITLE = Acquire child @@CHILDPARAMETERALIAS@@
     //------------------------------------------------------------------------//
     // ACQUIRE CHILDREN   ACQUIRE CHILDREN   ACQUIRE CHILDREN   ACQUIRE CHILD //
     //                                                                        //
@@ -859,8 +794,6 @@ _childAvail_@@CHILDPARAMETERALIAS@@:   NOP 0;
 
 @@ATTR_END|CHILD_ACQUIRE@@
 
-NETWORK
-TITLE = Cascade Batch Serial Number to all children
     //------------------------------------------------------------------------//
     // BATCH ID    BATCH ID    BATCH ID    BATCH ID    BATCH ID    BATCH ID   //
     //                                                                        //
@@ -882,8 +815,6 @@ _childBatch_@@COUNTERATTR|1@@:   NOP 0;
 
 @@ATTR_BEGIN|CHILD_CASCADE@@
 @@ATTR_BEGIN|CHILD_INIT_CMD_TRUE_STATES@@
-NETWORK
-TITLE = Command child device @@CHILDPARAMETERALIAS@@ for initial TRUE command @@TRUECOMMAND@@
     //------------------------------------------------------------------------//
     // CHILD INITIAL TRUE COMMAND   CHILD INITIAL TRUE COMMAND   CHILD INITIA //
     //                                                                        //
@@ -913,8 +844,6 @@ _childInitTrue_@@CHILDPARAMETERALIAS@@_@@TRUECOMMAND@@:   NOP 0;
 @@ATTR_BEGIN|CHILD_INIT_CMD_FALSE_EXISTS@@
 @@ATTR_BEGIN|CHILD_CASCADE@@
 @@ATTR_BEGIN|CHILD_INIT_CMD_FALSE_STATES@@
-NETWORK
-TITLE = Command child device @@CHILDPARAMETERALIAS@@ for initial FALSE command @@FALSECOMMAND@@
     //------------------------------------------------------------------------//
     // CHILD INITIAL FALSE COMMAND   CHILD INITIAL FALSE COMMAND   CHILD INIT //
     //                                                                        //
@@ -946,8 +875,6 @@ _childInitFalse_@@CHILDPARAMETERALIAS@@_@@FALSECOMMAND@@:   NOP 0;
 
 @@ATTR_BEGIN|SFC@@
 @@ATTR_BEGIN|pSFCParametersRecipeExist@@
-NETWORK
-TITLE = Set recipe parameters if starting @@SFC@@ running SUBSTATE
     //------------------------------------------------------------------------//
     // Set recipe parameters:                                                 //
     //------------------------------------------------------------------------//
@@ -964,8 +891,6 @@ _noStaticParms_@@STATE@@:   NOP 0;
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|SFC@@
-NETWORK
-TITLE = Start the SFC sequence @@SFC@@ in Auto for running substate @@STATE@@
     //------------------------------------------------------------------------//
     // START SFC   START SFC   START SFC   START SFC   START SFC   START SFC  //
     //                                                                        //
@@ -986,8 +911,6 @@ _notSFCStarting_@@STATE@@:      NOP 0;
 @@ATTR_END|SFC@@
 
 @@ATTR_BEGIN|CHILD_COMMAND_EXISTS@@
-NETWORK
-TITLE = Arm startup flowpath devices
     //------------------------------------------------------------------------//
     // Arm any flowpath child devices:                                        //
     //------------------------------------------------------------------------//
