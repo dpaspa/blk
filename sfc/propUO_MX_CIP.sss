@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/12/2018 1:55:52 PM by David Paspa
+generated on 9/01/2019 4:01:12 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -31,13 +31,29 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- log_msg_wfi_fl_rinse_end
+Type:- BOOL
+Description:- UO_MX_CIP WFI filtration line rinse end
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- log_msg_wfi_fl_rinse_begin
+Type:- BOOL
+Description:- UO_MX_CIP WFI filtration line rinse begin
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
 Name:- prompt_vessel_empty_confirm_yes
 Type:- BOOL
 Description:- UO_MX_CIP Operator to confirm the vessel is empty confirm yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::4
 --------------------------------------------------
 Name:- prompt_vessel_empty
 Type:- BOOL
@@ -45,7 +61,7 @@ Description:- UO_MX_CIP Operator to confirm the vessel is empty
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::5
 --------------------------------------------------
 Name:- ema_vessel_runtime
 Type:- TIME
@@ -53,7 +69,7 @@ Description:- Agitator run time
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::6
 --------------------------------------------------
 Name:- emx_drain_state
 Type:- INT
@@ -61,7 +77,7 @@ Description:- Mx drain line state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::7
 --------------------------------------------------
 Name:- emx_drain_subs
 Type:- INT
@@ -69,7 +85,7 @@ Description:- Mx drain line substate
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::8
 --------------------------------------------------
 Name:- emx_drain_cmd
 Type:- INT
@@ -77,7 +93,7 @@ Description:- Mx drain line command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::9
 --------------------------------------------------
 Name:- emv_inlet_opened_time
 Type:- TIME
@@ -85,7 +101,7 @@ Description:- Sprayball inlets pulse open time
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::10
 --------------------------------------------------
 Name:- r_time_sprayball_opened
 Type:- TIME
@@ -93,7 +109,7 @@ Description:- MX CIP Time to pulse open each sprayball valve
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::11
 --------------------------------------------------
 Name:- emv_inlet_cmd
 Type:- INT
@@ -101,7 +117,7 @@ Description:- Sprayball inlets command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::12
 --------------------------------------------------
 Name:- emv_inlet_state
 Type:- INT
@@ -109,7 +125,7 @@ Description:- Sprayball inlets state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::13
 --------------------------------------------------
 Name:- emv_inlet_subs
 Type:- INT
@@ -117,7 +133,7 @@ Description:- Sprayball inlets substate
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::14
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -125,7 +141,7 @@ Description:- Pressure control setpoint
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::15
 --------------------------------------------------
 Name:- emm_vessel_settling_time
 Type:- TIME
@@ -133,7 +149,7 @@ Description:- Settling time for tare or measure
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::16
 --------------------------------------------------
 Name:- r_time_measure_settling
 Type:- TIME
@@ -141,7 +157,7 @@ Description:- MX CIP Time for vessel contents settling for mass measure or tare
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::17
 --------------------------------------------------
 Name:- r_pres_gas_empty
 Type:- REAL
@@ -149,7 +165,7 @@ Description:- MX CIP HPCA pressure to empty the vessel
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::18
 --------------------------------------------------
 Name:- r_pres_gas_wash
 Type:- REAL
@@ -157,7 +173,7 @@ Description:- MX CIP HPCA pressure to blow through whilst washing or rinsing the
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::19
 --------------------------------------------------
 Name:- r_time_agit_clean
 Type:- TIME
@@ -165,7 +181,7 @@ Description:- MX CIP Time to clean agitator when flooded
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::20
 --------------------------------------------------
 Name:- log_msg_pw_fl_wash_end
 Type:- BOOL
@@ -173,7 +189,7 @@ Description:- UO_MX_CIP PW filtration line wash end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::21
 --------------------------------------------------
 Name:- log_msg_pw_fl_wash_begin
 Type:- BOOL
@@ -181,7 +197,7 @@ Description:- UO_MX_CIP PW filtration line wash begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::22
 --------------------------------------------------
 Name:- vessel_mx
 Type:- INT
@@ -189,7 +205,7 @@ Description:- Manufacturing vessel selection M1 or M2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::23
 --------------------------------------------------
 Name:- emc_water_mass_charge
 Type:- REAL
@@ -197,7 +213,7 @@ Description:- Description
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::24
 --------------------------------------------------
 Name:- emc_water_timeout
 Type:- TIME
@@ -205,231 +221,7 @@ Description:- Description
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::23
---------------------------------------------------
-Name:- wfi_flrinse_begin_time
-Type:- TOD
-Description:- WFI filtration line rinse begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::24
---------------------------------------------------
-Name:- wfi_flrinse_end_time
-Type:- TOD
-Description:- WFI filtration line rinse end time
-ParameterInOut:- VAR
-
---------------------------------------------------
 PARAMETER::25
---------------------------------------------------
-Name:- log_time_act_wfi_flrinse
-Type:- BOOL
-Description:- UO_MX_CIP Actual WFI filtration line rinse time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::26
---------------------------------------------------
-Name:- time_act_wfi_flrinse
-Type:- TIME
-Description:- UO_MX_CIP Actual WFI filtration line rinse time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::27
---------------------------------------------------
-Name:- wfi_rinse_begin_time
-Type:- TOD
-Description:- WFI rinse begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::28
---------------------------------------------------
-Name:- wfi_rinse_end_time
-Type:- TOD
-Description:- WFI rinse end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::29
---------------------------------------------------
-Name:- log_time_act_wfi_rinse
-Type:- BOOL
-Description:- UO_MX_CIP Actual WFI rinse time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::30
---------------------------------------------------
-Name:- time_act_wfi_rinse
-Type:- TIME
-Description:- UO_MX_CIP Actual WFI rinse time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::31
---------------------------------------------------
-Name:- pw_steam_begin_time
-Type:- TOD
-Description:- PW steaming begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::32
---------------------------------------------------
-Name:- pw_steam_end_time
-Type:- TOD
-Description:- PW steaming end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::33
---------------------------------------------------
-Name:- log_time_act_pw_steam
-Type:- BOOL
-Description:- UO_MX_CIP Actual PW line steam time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::34
---------------------------------------------------
-Name:- time_act_pw_steam
-Type:- TIME
-Description:- UO_MX_CIP Actual PW line steam time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::35
---------------------------------------------------
-Name:- pw_flwash_begin_time
-Type:- TOD
-Description:- Filtration line PW wash begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::36
---------------------------------------------------
-Name:- pw_flwash_end_time
-Type:- TOD
-Description:- Filtration line PW wash end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::37
---------------------------------------------------
-Name:- log_time_act_pw_flwash
-Type:- BOOL
-Description:- UO_MX_CIP Actual PW flush time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::38
---------------------------------------------------
-Name:- time_act_pw_flwash
-Type:- TIME
-Description:- UO_MX_CIP Actual PW flush time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::39
---------------------------------------------------
-Name:- pw_wash_begin_time
-Type:- TOD
-Description:- PW wash begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::40
---------------------------------------------------
-Name:- pw_wash_end_time
-Type:- TOD
-Description:- PW wash begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::41
---------------------------------------------------
-Name:- log_time_act_pw_wash
-Type:- BOOL
-Description:- UO_MX_CIP Actual PW wash time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::42
---------------------------------------------------
-Name:- time_act_pw_wash
-Type:- TIME
-Description:- UO_MX_CIP Actual PW wash time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::43
---------------------------------------------------
-Name:- flood_mixing_begin_time
-Type:- TOD
-Description:- PW flood mixing begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::44
---------------------------------------------------
-Name:- flood_mixing_end_time
-Type:- TOD
-Description:- PW flood mixing end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::45
---------------------------------------------------
-Name:- log_time_act_flood_mixing
-Type:- BOOL
-Description:- UO_MX_CIP Actual PW flood mixing time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::46
---------------------------------------------------
-Name:- time_act_flood_mixing
-Type:- TIME
-Description:- UO_MX_CIP Actual PW flood mixing time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::47
---------------------------------------------------
-Name:- log_real_pw_flood_mass
-Type:- BOOL
-Description:- UO_MX_CIP Actual PW flood mass
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::48
---------------------------------------------------
-Name:- pw_flush_end_time
-Type:- TOD
-Description:- PW Flush end time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::49
---------------------------------------------------
-Name:- log_time_act_pw_flush
-Type:- BOOL
-Description:- UO_MX_CIP Actual PW flush time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::50
---------------------------------------------------
-Name:- pw_flush_begin_time
-Type:- TOD
-Description:- PW Flush begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::51
 --------------------------------------------------
 Name:- log_msg_cip_end
 Type:- BOOL
@@ -438,7 +230,7 @@ Description:- UO_MX_CIP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::26
 --------------------------------------------------
 Name:- log_msg_cip_begin
 Type:- BOOL
@@ -446,7 +238,7 @@ Description:- UO_MX_CIP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::27
 --------------------------------------------------
 Name:- emm_vessel_mass_tare
 Type:- REAL
@@ -454,7 +246,7 @@ Description:- Saved tare mass value
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::54
+PARAMETER::28
 --------------------------------------------------
 Name:- emm_vessel_subs
 Type:- INT
@@ -462,7 +254,7 @@ Description:- Substate selection to emm_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::55
+PARAMETER::29
 --------------------------------------------------
 Name:- emm_vessel_cmd
 Type:- INT
@@ -470,7 +262,7 @@ Description:- Command to emm_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::56
+PARAMETER::30
 --------------------------------------------------
 Name:- emm_vessel_state
 Type:- INT
@@ -478,7 +270,7 @@ Description:- Device State of emm_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::57
+PARAMETER::31
 --------------------------------------------------
 Name:- r_agit_setpoint
 Type:- REAL
@@ -486,7 +278,7 @@ Description:- MX CIP Agitator speed for cleaning
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::58
+PARAMETER::32
 --------------------------------------------------
 Name:- emc_water_runtime
 Type:- TIME
@@ -494,15 +286,7 @@ Description:- run time for emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::59
---------------------------------------------------
-Name:- time_act_pw_flush
-Type:- TIME
-Description:- UO_MX_CIP Actual PW flush time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::60
+PARAMETER::33
 --------------------------------------------------
 Name:- r_time_wfi_rinse_mx
 Type:- TIME
@@ -510,7 +294,7 @@ Description:- MX CIP Time to rinse vessel and outlet drain line with WFI
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::61
+PARAMETER::34
 --------------------------------------------------
 Name:- r_time_pw_wash_mmflx
 Type:- TIME
@@ -518,7 +302,7 @@ Description:- MX CIP Time to wash filtration line with PW
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::62
+PARAMETER::35
 --------------------------------------------------
 Name:- emx_mmfl_subs
 Type:- INT
@@ -526,7 +310,7 @@ Description:- Substate selection to emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::63
+PARAMETER::36
 --------------------------------------------------
 Name:- emx_mmfl_cmd
 Type:- INT
@@ -534,7 +318,7 @@ Description:- Command to emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::64
+PARAMETER::37
 --------------------------------------------------
 Name:- emx_mmfl_state
 Type:- INT
@@ -542,7 +326,7 @@ Description:- Device State of emx_mmfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::65
+PARAMETER::38
 --------------------------------------------------
 Name:- log_msg_wfi_rinse_end
 Type:- BOOL
@@ -550,7 +334,7 @@ Description:- UO_MX_CIP WFI rinse end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::66
+PARAMETER::39
 --------------------------------------------------
 Name:- log_msg_wfi_rinse_begin
 Type:- BOOL
@@ -558,7 +342,7 @@ Description:- UO_MX_CIP WFI rinse begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::67
+PARAMETER::40
 --------------------------------------------------
 Name:- log_msg_pw_wash_end
 Type:- BOOL
@@ -566,7 +350,7 @@ Description:- UO_MX_CIP PW wash end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::68
+PARAMETER::41
 --------------------------------------------------
 Name:- log_msg_pw_wash_begin
 Type:- BOOL
@@ -574,7 +358,7 @@ Description:- UO_MX_CIP PW wash begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::69
+PARAMETER::42
 --------------------------------------------------
 Name:- log_msg_pw_flood_end
 Type:- BOOL
@@ -582,7 +366,7 @@ Description:- UO_MX_CIP PW flood end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::70
+PARAMETER::43
 --------------------------------------------------
 Name:- log_msg_pw_flood_begin
 Type:- BOOL
@@ -590,7 +374,7 @@ Description:- UO_MX_CIP PW flood begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::71
+PARAMETER::44
 --------------------------------------------------
 Name:- log_msg_pw_flush_end
 Type:- BOOL
@@ -598,7 +382,7 @@ Description:- UO_MX_CIP PW flush end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::72
+PARAMETER::45
 --------------------------------------------------
 Name:- log_msg_pw_flush_begin
 Type:- BOOL
@@ -606,23 +390,7 @@ Description:- UO_MX_CIP PW flush begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::73
---------------------------------------------------
-Name:- real_pw_flood_mass
-Type:- REAL
-Description:- UO_MX_CIP Actual PW flood mass
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::74
---------------------------------------------------
-Name:- log_msg_pw_flood_timeout
-Type:- BOOL
-Description:- UO_MX_CIP Timeout waiting forl PW flood mass
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::75
+PARAMETER::46
 --------------------------------------------------
 Name:- ema_vessel_setpoint
 Type:- REAL
@@ -630,7 +398,7 @@ Description:- Speed Setpoint Parameter Agitator
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::76
+PARAMETER::47
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -638,7 +406,7 @@ Description:- Medium to use for gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::77
+PARAMETER::48
 --------------------------------------------------
 Name:- emc_water_medium_liquid
 Type:- INT
@@ -646,7 +414,7 @@ Description:- Medium selection for emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::78
+PARAMETER::49
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -654,7 +422,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::79
+PARAMETER::50
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -662,7 +430,7 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::80
+PARAMETER::51
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -670,7 +438,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::81
+PARAMETER::52
 --------------------------------------------------
 Name:- emc_water_state
 Type:- INT
@@ -678,7 +446,7 @@ Description:- Device State of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::82
+PARAMETER::53
 --------------------------------------------------
 Name:- emc_water_subs
 Type:- INT
@@ -686,7 +454,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::83
+PARAMETER::54
 --------------------------------------------------
 Name:- emc_water_cmd
 Type:- INT
@@ -694,7 +462,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::84
+PARAMETER::55
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -702,7 +470,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::85
+PARAMETER::56
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -710,7 +478,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::86
+PARAMETER::57
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -718,7 +486,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::87
+PARAMETER::58
 --------------------------------------------------
 Name:- ema_vessel_state
 Type:- INT
@@ -726,7 +494,7 @@ Description:- Device State of ema_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::88
+PARAMETER::59
 --------------------------------------------------
 Name:- ema_vessel_subs
 Type:- INT
@@ -734,7 +502,7 @@ Description:- Substate selection to ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::89
+PARAMETER::60
 --------------------------------------------------
 Name:- ema_vessel_cmd
 Type:- INT
@@ -742,7 +510,7 @@ Description:- Command to ema_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::90
+PARAMETER::61
 --------------------------------------------------
 Name:- r_time_wfi_rinse_mmflx
 Type:- TIME
@@ -750,7 +518,7 @@ Description:- MX CIP Time to rinse filtration line with WFI
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::91
+PARAMETER::62
 --------------------------------------------------
 Name:- r_time_wfi_empty_mx
 Type:- TIME
@@ -758,7 +526,7 @@ Description:- MX CIP Time to empty the vessel after WFI rinse
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::92
+PARAMETER::63
 --------------------------------------------------
 Name:- r_time_pw_steam_mx
 Type:- TIME
@@ -766,7 +534,7 @@ Description:- MX CIP Time to steam vessel PW connection
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::93
+PARAMETER::64
 --------------------------------------------------
 Name:- r_time_pw_wash_mx
 Type:- TIME
@@ -774,7 +542,7 @@ Description:- MX CIP Time to wash the vessel with PW
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::94
+PARAMETER::65
 --------------------------------------------------
 Name:- r_time_pw_empty2
 Type:- TIME
@@ -782,7 +550,7 @@ Description:- MX CIP Time to empty the vessel after PW wash
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::95
+PARAMETER::66
 --------------------------------------------------
 Name:- r_time_pw_empty1
 Type:- TIME
@@ -790,7 +558,7 @@ Description:- MX CIP Time to empty the vessel after agitator flooding
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::96
+PARAMETER::67
 --------------------------------------------------
 Name:- r_time_pw_flood
 Type:- TIME
@@ -798,7 +566,7 @@ Description:- MX CIP Time for PW charge mass timeout if not reached
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::97
+PARAMETER::68
 --------------------------------------------------
 Name:- r_time_pw_flush_mx
 Type:- TIME
@@ -806,7 +574,7 @@ Description:- MX CIP Time for initial PW flush
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::98
+PARAMETER::69
 --------------------------------------------------
 Name:- r_mass_pw_flood
 Type:- REAL
@@ -1066,13 +834,9 @@ T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emc_water_cmd;
 
-//Report Event Set
+//Store PW Flush begin time.
 SET;
 S #_log_msg_pw_flush_begin;
-
-//Store PW Flush begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_pw_flush_begin_time;
 Verification:- //Verify if emc_water changed to substate FLUSH.
 A(;
 L   #_emc_water_subs;
@@ -1136,20 +900,8 @@ Description:- Log actual PW flush time.
 Close Mx outlet valve.
 Close HPCA supply valve.
 Action:- //Store PW Flush end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_pw_flush_end_time;
-
-//Log actual PW flush time.
-CALL T_DIFF
-{date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_pw_flush_end_time ,
-   IN2                         := #_pw_flush_begin_time ,
-  OUT                         := #_time_act_pw_flush
-);
-
 SET;
-S #_log_time_act_pw_flush;
-
+S #_log_msg_pw_flush_end;
 
 // Close Mx outlet valve.
 L "dbCONST".BLK.CMD.STOP;
@@ -1158,10 +910,6 @@ T  #_emv_vessel_cmd;
 // Stop emc_gas.
 L "dbCONST".BLK.CMD.STOP;
 T  #_emc_gas_cmd;
-
-//Report Event Set
-SET;
-S #_log_msg_pw_flush_end;
 Verification:- //Verify if emv_vessel & emc_gas stopped.
 A(;
 L #_emv_vessel_state;
@@ -1310,8 +1058,8 @@ ACTION::03
 --------------------------------------------------
 Description:- Store mixing begin time.
 Action:- //Store flood mixing begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_flood_mixing_begin_time;
+SET;
+S #_log_msg_pw_flood_begin;
 Verification:- A "uncondJump";
 
 
@@ -1363,18 +1111,8 @@ L "dbCONST".BLK.CMD.START;
 T #_emv_vessel_cmd;
 
 //Store PW Flood mixing end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_flood_mixing_end_time;
-
-//Log actual PW Flood mixing time.
-CALL T_DIFF
-{date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_flood_mixing_end_time ,
-   IN2                         := #_flood_mixing_begin_time ,
-  OUT                         := #_time_act_flood_mixing
-);
 SET;
-S #_log_time_act_flood_mixing;
+S #_log_msg_pw_flood_end;
 Verification:- A(;
 L #_ema_vessel_state;
 L "dbCONST".BLK.STATE.STOPPED;
@@ -1501,16 +1239,9 @@ T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emc_water_cmd;
 
-
-//Report Event Set
+//Store PW wash begin time.
 SET;
 S #_log_msg_pw_wash_begin;
-
-
-//Store PW wash begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_pw_wash_begin_time;
-
 Verification:- //Verify if emc_water changed to substate FLUSH.
 A(;
 L   #_emc_water_subs;
@@ -1536,49 +1267,7 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 --------------------------------------------------
 STEP::10
 --------------------------------------------------
-StepNo:- 10
-Title:- UO_MX_CIP : PW washing completed
-Description:- Log actual tank PW wash time.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Log actual tank PW wash time.
-Action:- //Store PW wash end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_pw_wash_end_time;
-
-
-//Log actual tank PW wash time
-CALL T_DIFF
-{date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_pw_wash_end_time ,
-   IN2                         := #_pw_wash_begin_time ,
-  OUT                         := #_time_act_pw_wash
-);
-SET;
-S #_log_time_act_pw_wash;
-
-//Report Event Set
-SET;
-S #_log_msg_pw_wash_end;
-Verification:- A "uncondJump";
-
-
---------------------------------------------------
-TRANSITION::10
---------------------------------------------------
-TRNNo:- 10
-Title:- Empty Transition
-EmptyTransition:- False
-Description:- Empty Transition
-Condition:- A "uncondJump";
-
-
---------------------------------------------------
-STEP::11
---------------------------------------------------
-StepNo:- 11
+StepNo:- 10.0000
 Title:- UO_MX_CIP : Divert Wash to MMFLx
 Description:- Divert Wash to MMFLx.
 Start TIME_PW_WASH_MMFLx.
@@ -1591,6 +1280,10 @@ Description:- Reset the EMs
 Action:- L "dbCONST".BLK.CMD.STOP;
 T #_emx_mmfl_cmd;
 T #_emc_water_cmd;
+
+//Store PW wash end time.
+SET;
+S #_log_msg_pw_wash_end;
 Verification:- A(;
 L    #_emx_mmfl_state;
 L    "dbCONST".BLK.STATE.STOPPED;
@@ -1635,15 +1328,7 @@ T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emc_water_cmd;
 
-
-
-
 //Store PW filtration wash begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_pw_flwash_begin_time;
-
-
-//Report Event Set
 SET;
 S #_log_msg_pw_fl_wash_begin;
 Verification:- //Verify if emc_water changed to substate FLUSH.
@@ -1655,9 +1340,9 @@ L   "dbCONST".BLK.EMC2.SUBS.FLUSH;
 
 
 --------------------------------------------------
-TRANSITION::11
+TRANSITION::10
 --------------------------------------------------
-TRNNo:- 11
+TRNNo:- 10.0000
 Title:- Timer expired.
 EmptyTransition:- False
 Description:- TIME_PW_WASH_MMFLx expired?
@@ -1674,9 +1359,9 @@ L    "dbCONST".BLK.STATE.COMPLETED;
 
 
 --------------------------------------------------
-STEP::12
+STEP::11
 --------------------------------------------------
-StepNo:- 12
+StepNo:- 11.0000
 Title:- UO_MX_CIP : Filtration line PW wash completed
 Description:- Log actual Filtration line PW wash time and close PW supply valve.
 Start TIME_PW_EMPTY2.
@@ -1686,24 +1371,6 @@ ACTION::01
 --------------------------------------------------
 Description:- Log actual Filtration line PW wash time and close PW supply valve.
 Action:- //Store PW filtration wash end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_pw_flwash_end_time;
-
-//Log actual filtration line PW wash time.
-CALL T_DIFF
-{date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_pw_flwash_end_time ,
-   IN2                         := #_pw_flwash_begin_time ,
-  OUT                         := #_time_act_pw_flwash
-);
-SET;
-S #_log_time_act_pw_flwash;
-
-//Close PW supply valve.
-L "dbCONST".BLK.CMD.STOP;
-T  #_emc_water_cmd;
-
-//Report Event Set
 SET;
 S #_log_msg_pw_fl_wash_end;
 
@@ -1746,9 +1413,9 @@ Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
-TRANSITION::12
+TRANSITION::11
 --------------------------------------------------
-TRNNo:- 12
+TRNNo:- 11.0000
 Title:- Timer expired
 EmptyTransition:- False
 Description:- #TIME_PW_EMPTY2 expired?
@@ -1756,9 +1423,9 @@ Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::13
+STEP::12
 --------------------------------------------------
-StepNo:- 13
+StepNo:- 12.0000
 Title:- MX_UO_CIP : Steaming PW inlet line
 Description:- Close HPCA supply valve(vent opened) and open PW line PS supply valve with Timer TIME_PW_STEAM.
 Store PW steaming begin time.
@@ -1800,11 +1467,6 @@ L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emc_water_cmd;
-
-
-//Store PW steaming begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_pw_steam_begin_time;
 Verification:- //Verify if emc_water changed to substate FLUSH.
 A(;
 L   #_emc_water_subs;
@@ -1814,9 +1476,9 @@ L   "dbCONST".BLK.EMC2.SUBS.FLUSH;
 
 
 --------------------------------------------------
-TRANSITION::13
+TRANSITION::12
 --------------------------------------------------
-TRNNo:- 13
+TRNNo:- 12.0000
 Title:- Timer Expired?
 EmptyTransition:- False
 Description:- TIME_PW_STEAM expired?
@@ -1829,9 +1491,9 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 
 
 --------------------------------------------------
-STEP::14
+STEP::13
 --------------------------------------------------
-StepNo:- 14
+StepNo:- 13.0000
 Title:- UO_MX_CIP : Stop Steaming PW inlet line
 Description:- Log actual PW line steaming time.
 Close PW line PS supply valve.
@@ -1844,21 +1506,6 @@ Log actual PW line steaming time.
 Action:- //Close PW line PS supply valve
 L "dbCONST".BLK.CMD.STOP;
 T  #_emc_water_cmd;
-
-
-//Store PW Flush end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_pw_steam_end_time;
-
-//Log actual PW line steaming time.
-CALL T_DIFF
-{date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_pw_steam_end_time ,
-   IN2                         := #_pw_steam_begin_time ,
-  OUT                         := #_time_act_pw_steam
-);
-SET;
-S #_log_time_act_pw_steam;
 Verification:- A(;
 L #_emc_water_state;
 L "dbCONST".BLK.STATE.STOPPED;
@@ -1881,9 +1528,9 @@ Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
-TRANSITION::14
+TRANSITION::13
 --------------------------------------------------
-TRNNo:- 14
+TRNNo:- 13.0000
 Title:- Timer
 EmptyTransition:- False
 Description:- Timer 10s
@@ -1891,9 +1538,9 @@ Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::15
+STEP::14
 --------------------------------------------------
-StepNo:- 15
+StepNo:- 14.0000
 Title:- MX_UO_CIP : Wait for OPER to setup for WFI
 Description:- Setup for WFI addition to vessel. Start EMC2_SETUP with MEDIUM WFI.
 Open outlet valve.
@@ -1952,9 +1599,9 @@ L 	"dbCONST".BLK.EMV1.SUBS.DISCHARGE;
 
 
 --------------------------------------------------
-TRANSITION::15
+TRANSITION::14
 --------------------------------------------------
-TRNNo:- 15
+TRNNo:- 14.0000
 Title:- Setup ready for WFI addition.
 EmptyTransition:- False
 Description:- WFI addition SETUP completed.
@@ -1971,9 +1618,9 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 
 
 --------------------------------------------------
-STEP::16
+STEP::15
 --------------------------------------------------
-StepNo:- 16
+StepNo:- 15.0000
 Title:- UO_MX_CIP : Commence WFI Rinse
 Description:- Divert to tank outlet drain line.
 Open WFI supply valve to rinse vessel and open HPCA supply valve.
@@ -2057,13 +1704,9 @@ T #_emc_water_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emc_water_cmd;
 
-//Report Event Set
+//Store WFI rinse begin time.
 SET;
 S #_log_msg_wfi_rinse_begin;
-
-//Store WFI rinse begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_wfi_rinse_begin_time;
 Verification:- //Verify if emc_water changed to FLUSH substate.
 A(;
 L #_emc_water_subs;
@@ -2073,9 +1716,9 @@ L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 
 
 --------------------------------------------------
-TRANSITION::16
+TRANSITION::15
 --------------------------------------------------
-TRNNo:- 16
+TRNNo:- 15.0000
 Title:- Timer Expired?
 EmptyTransition:- False
 Description:- TIME_WFI_RINSE_Mx expired?
@@ -2098,9 +1741,9 @@ L   "dbCONST".BLK.STATE.COMPLETED;
 
 
 --------------------------------------------------
-STEP::17
+STEP::16
 --------------------------------------------------
-StepNo:- 17
+StepNo:- 16.0000
 Title:- UO_MX_CIP : Mx_WFI_Rinse Completed
 Description:- Log actual WFI rinse time. 
 Divert Wash to MMFLx.
@@ -2132,18 +1775,8 @@ ACTION::02
 Description:- Log actual WFI rinse time. 
 Divert to MMFLx Filtration Line.
 Action:- //Store WFI rinse end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_wfi_rinse_end_time;
-
-//Log actual tank WFI rinse time.
-CALL T_DIFF
-{date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_wfi_rinse_end_time ,
-   IN2                         := #_wfi_rinse_begin_time ,
-  OUT                         := #_time_act_wfi_rinse
-);
 SET;
-S #_log_time_act_wfi_rinse;
+S #_log_msg_wfi_rinse_end;
 
 // Set emx_mmfl to substate CIP_MMFLX and start it.
 L "dbCONST".BLK.EMX1.SUBS.CIP_MMFLX;
@@ -2176,8 +1809,8 @@ L "dbCONST".BLK.CMD.START;
 T #_emc_water_cmd;
 
 //Store WFI filtration line rinse begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_wfi_flrinse_begin_time;
+SET;
+S #_log_msg_wfi_fl_rinse_begin;
 Verification:- //Verify if emc_water changed to FLUSH substate.
 A(;
 L #_emc_water_subs;
@@ -2187,9 +1820,9 @@ L "dbCONST".BLK.EMC2.SUBS.FLUSH;
 
 
 --------------------------------------------------
-TRANSITION::17
+TRANSITION::16
 --------------------------------------------------
-TRNNo:- 17
+TRNNo:- 16.0000
 Title:- MMFLx WFI Rinse Completed
 EmptyTransition:- False
 Description:- MMFLx WFI Rinse Completed
@@ -2197,9 +1830,9 @@ Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::18
+STEP::17
 --------------------------------------------------
-StepNo:- 18
+StepNo:- 17.0000
 Title:- UO_MX_CIP : WFI Rinse complete. Wait to empty vessel.
 Description:- Log actual MMFLx WFI rinse time.
 Close WFI supply valve.
@@ -2213,26 +1846,12 @@ Description:- Log actual filtration line WFI Rinse time.
 Close WFI supply valve and start WFI Empty timer.
 
 Action:- //Store WFI filtration line rinse end time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_wfi_flrinse_end_time;
-
-//Log actual filtration line WFI Rinse time.
-CALL T_DIFF
-{date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_wfi_flrinse_end_time ,
-   IN2                         := #_wfi_flrinse_begin_time ,
-  OUT                         := #_time_act_wfi_flrinse
-);
 SET;
-S #_log_time_act_wfi_flrinse;
+S #_log_msg_wfi_fl_rinse_end;
 
 //Close WFI supply valve.
 L "dbCONST".BLK.CMD.STOP;
 T  #_emc_water_cmd;
-
-//Report Event Set
-SET;
-S #_log_msg_wfi_rinse_end;
 
 // Set emx_mmfl to substate SIP and restart it.
 L "dbCONST".BLK.EMX1.SUBS.SIP;
@@ -2273,9 +1892,9 @@ Verification:- A #sqSeqTimerStart;
 
 
 --------------------------------------------------
-TRANSITION::18
+TRANSITION::17
 --------------------------------------------------
-TRNNo:- 18
+TRNNo:- 17.0000
 Title:- Timer Expired?
 EmptyTransition:- False
 Description:- TIME_WFI_EMPTY expired?
@@ -2283,9 +1902,9 @@ Condition:- A #SQ_TIMER.Q;
 
 
 --------------------------------------------------
-STEP::19
+STEP::18
 --------------------------------------------------
-StepNo:- 19
+StepNo:- 18.0000
 Title:- UO_MX_CIP : Close HPCA supply valve
 Description:- Close compressed air HPCA supply valve.
 
@@ -2308,9 +1927,9 @@ L 	"dbCONST".BLK.STATE.STOPPED;
 
 
 --------------------------------------------------
-TRANSITION::19
+TRANSITION::18
 --------------------------------------------------
-TRNNo:- 19.0000
+TRNNo:- 18.0000
 Title:- Wait for vessel confirmed empty
 EmptyTransition:- False
 Description:- Jump when operator confirms vessel and lines fully drained
@@ -2318,9 +1937,9 @@ Condition:- A #_prompt_vessel_empty_confirm_yes;
 
 
 --------------------------------------------------
-STEP::20
+STEP::19
 --------------------------------------------------
-StepNo:- 20
+StepNo:- 19.0000
 Title:- UO_MX_CIP : Unit Operation Completed
 Description:- Set all used equipment modules to safe state.
 Log Mx CIP operation end time.

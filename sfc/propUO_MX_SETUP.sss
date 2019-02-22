@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 18/12/2018 1:56:42 PM by David Paspa
+generated on 9/01/2019 4:01:49 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -30,13 +30,29 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- log_real_pressure_mx
+Type:- BOOL
+Description:- UO_MX_SETUP Log vessel pressure during hold test
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- real_pressure_mx
+Type:- REAL
+Description:- UO_MX_SETUP Vessel pressure during hold test
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
 Name:- log_real_pressure_vacuum_end
 Type:- BOOL
 Description:- UO_MX_SETUP Vessel pressure at vacuum hold test end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::4
 --------------------------------------------------
 Name:- real_pressure_vacuum_end
 Type:- REAL
@@ -44,7 +60,7 @@ Description:- UO_MX_SETUP Vessel pressure at vacuum hold test end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::5
 --------------------------------------------------
 Name:- log_msg_vacuum_hold_end
 Type:- BOOL
@@ -52,7 +68,7 @@ Description:- UO_MX_SETUP Vacuum hold end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::6
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -60,7 +76,7 @@ Description:- Pressure control setpoint
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::7
 --------------------------------------------------
 Name:- r_pres_gas_empty
 Type:- REAL
@@ -68,7 +84,7 @@ Description:- Air pressure to empty vessel
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::8
 --------------------------------------------------
 Name:- prompt_vessel_empty_confirm_yes
 Type:- BOOL
@@ -76,7 +92,7 @@ Description:- UO_MX_SETUP Operator confirm vessel drained confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::9
 --------------------------------------------------
 Name:- prompt_vessel_empty
 Type:- BOOL
@@ -84,7 +100,7 @@ Description:- UO_MX_SETUP Operator to confirm vessel and lines fully drained
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::10
 --------------------------------------------------
 Name:- emm_vessel_mi_vessel_pv
 Type:- REAL
@@ -92,7 +108,7 @@ Description:- Vessel measured mass
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::11
 --------------------------------------------------
 Name:- emx_drain_state
 Type:- INT
@@ -100,7 +116,7 @@ Description:- State for MX drain valves
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::12
 --------------------------------------------------
 Name:- emx_drain_subs
 Type:- INT
@@ -108,7 +124,7 @@ Description:- Substate for MX drain valves
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::13
 --------------------------------------------------
 Name:- emx_drain_cmd
 Type:- INT
@@ -116,7 +132,7 @@ Description:- Command for MX drain valves
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::14
 --------------------------------------------------
 Name:- emv_inlet_subs
 Type:- INT
@@ -124,7 +140,7 @@ Description:- Sprayball inlet substate
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::15
 --------------------------------------------------
 Name:- emv_inlet_state
 Type:- INT
@@ -132,7 +148,7 @@ Description:- Sprayball inlet state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::16
 --------------------------------------------------
 Name:- emv_inlet_cmd
 Type:- INT
@@ -140,7 +156,7 @@ Description:- Sprayball inlet command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::17
 --------------------------------------------------
 Name:- r_time_hex_drain
 Type:- TIME
@@ -148,7 +164,7 @@ Description:- MX SETUP Heat exchanger drain time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::18
 --------------------------------------------------
 Name:- emt_hex_cmd
 Type:- INT
@@ -156,7 +172,7 @@ Description:- Heat exchanger temperature control command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::19
 --------------------------------------------------
 Name:- emt_hex_subs
 Type:- INT
@@ -164,7 +180,7 @@ Description:- Heat exchanger temperature control substate
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::20
 --------------------------------------------------
 Name:- emt_hex_drain_time
 Type:- TIME
@@ -172,7 +188,7 @@ Description:- Heat exchanger drain time
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::21
 --------------------------------------------------
 Name:- emt_hex_state
 Type:- INT
@@ -180,7 +196,7 @@ Description:- Heat exchanger temperature control state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::22
 --------------------------------------------------
 Name:- real_not_held
 Type:- REAL
@@ -188,7 +204,7 @@ Description:- UO_MX_SETUP Vacuum pressure hold test failed
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::23
 --------------------------------------------------
 Name:- real_vacuum_fail
 Type:- REAL
@@ -196,7 +212,7 @@ Description:- UO_MX_SETUP Vacuum failed pressure after vacuum timer expired
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::24
 --------------------------------------------------
 Name:- vessel_mx
 Type:- INT
@@ -204,7 +220,7 @@ Description:- Manufacturing vessel selection M1 or M2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::25
 --------------------------------------------------
 Name:- log_real_pressure_vacuum_begin
 Type:- BOOL
@@ -212,7 +228,7 @@ Description:- UO_MX_SETUP Vessel pressure at vacuum hold test begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::26
 --------------------------------------------------
 Name:- real_pressure_vacuum_begin
 Type:- REAL
@@ -220,7 +236,7 @@ Description:- UO_MX_SETUP Vessel pressure at vacuum hold test begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::27
 --------------------------------------------------
 Name:- emc_gas_pi_vessel_pv
 Type:- REAL
@@ -228,7 +244,7 @@ Description:- Vessel pressure
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::28
 --------------------------------------------------
 Name:- log_real_not_held
 Type:- BOOL
@@ -236,39 +252,7 @@ Description:- UO_MX_SETUP Vacuum pressure hold test failed
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::27
---------------------------------------------------
-Name:- vacuum_held_begin_time
-Type:- TOD
-Description:- vacuum hold begin time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::28
---------------------------------------------------
-Name:- vacuum_held_end_time
-Type:- TOD
-Description:- vacuum hold end time
-ParameterInOut:- VAR
-
---------------------------------------------------
 PARAMETER::29
---------------------------------------------------
-Name:- time_act_vacuum_held
-Type:- TIME
-Description:- UO_MX_SETUP Vacuum held time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::30
---------------------------------------------------
-Name:- log_time_act_vacuum_held
-Type:- BOOL
-Description:- UO_MX_SETUP Vacuum held time
-ParameterInOut:- VAR
-
---------------------------------------------------
-PARAMETER::31
 --------------------------------------------------
 Name:- prompt_not_held
 Type:- BOOL
@@ -276,7 +260,7 @@ Description:- UO_MX_SETUP Operator to confirm to retry as vacuum pressure not he
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::30
 --------------------------------------------------
 Name:- prompt_not_held_confirm_yes
 Type:- BOOL
@@ -284,7 +268,7 @@ Description:- UO_MX_SETUP Operator to confirm to retry vacuum pressure not held 
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::31
 --------------------------------------------------
 Name:- prompt_not_held_confirm_no
 Type:- BOOL
@@ -292,7 +276,7 @@ Description:- UO_MX_SETUP Operator to confirm to retry vacuum pressure not held 
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::32
 --------------------------------------------------
 Name:- log_msg_not_held_repeat
 Type:- BOOL
@@ -300,7 +284,7 @@ Description:- UO_MX_SETUP Operator confirmed to retry when vacuum pressure not h
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::33
 --------------------------------------------------
 Name:- log_msg_not_held_abort
 Type:- BOOL
@@ -308,7 +292,7 @@ Description:- UO_MX_SETUP Operator confirmed to abort when vacuum pressure not h
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::34
 --------------------------------------------------
 Name:- prompt_not_reach
 Type:- BOOL
@@ -316,7 +300,7 @@ Description:- UO_MX_SETUP Operator to confirm retry when vacuum pressure not rea
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::35
 --------------------------------------------------
 Name:- prompt_not_reach_confirm_yes
 Type:- BOOL
@@ -324,7 +308,7 @@ Description:- UO_MX_SETUP Operator confirmed retry when vacuum pressure not reac
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::36
 --------------------------------------------------
 Name:- prompt_not_reach_confirm_no
 Type:- BOOL
@@ -332,7 +316,7 @@ Description:- UO_MX_SETUP Operator confirmed abort when vacuum pressure not reac
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::37
 --------------------------------------------------
 Name:- log_msg_not_reach_repeat
 Type:- BOOL
@@ -340,7 +324,7 @@ Description:- UO_MX_SETUP Operator confirmed retry when vacuum pressure not reac
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::38
 --------------------------------------------------
 Name:- log_msg_not_reach_abort
 Type:- BOOL
@@ -348,7 +332,7 @@ Description:- UO_MX_SETUP Operator confirmed abort when vacuum pressure not reac
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::39
 --------------------------------------------------
 Name:- log_real_vacuum_fail
 Type:- BOOL
@@ -356,7 +340,7 @@ Description:- UO_MX_SETUP Vacuum failed after vacuum timer expired
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::40
 --------------------------------------------------
 Name:- log_msg_vacuum_hold_begin
 Type:- BOOL
@@ -364,7 +348,7 @@ Description:- UO_MX_SETUP Vacuum hold begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::43
+PARAMETER::41
 --------------------------------------------------
 Name:- log_msg_setup_end
 Type:- BOOL
@@ -372,7 +356,7 @@ Description:- UO_MX_SETUP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::44
+PARAMETER::42
 --------------------------------------------------
 Name:- log_msg_setup_begin
 Type:- BOOL
@@ -380,7 +364,7 @@ Description:- UO_MX_SETUP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::43
 --------------------------------------------------
 Name:- r_pres_vac_fail
 Type:- REAL
@@ -388,7 +372,7 @@ Description:- MX SETUP Vacuum hold test fail pressure
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::44
 --------------------------------------------------
 Name:- r_pres_vac
 Type:- REAL
@@ -396,7 +380,7 @@ Description:- MX SETUP Vacuum setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::45
 --------------------------------------------------
 Name:- r_time_vac_hold
 Type:- TIME
@@ -404,7 +388,7 @@ Description:- MX SETUP Time for vacuum hold test
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::46
 --------------------------------------------------
 Name:- r_time_eject
 Type:- TIME
@@ -412,7 +396,7 @@ Description:- MX SETUP Time to run vacuum system before timeout
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::47
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -420,7 +404,7 @@ Description:- Medium selection for emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::48
 --------------------------------------------------
 Name:- vacuum_hold_test
 Type:- BOOL
@@ -428,7 +412,7 @@ Description:- Vacuum hold test enquiry
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::49
 --------------------------------------------------
 Name:- emm_vessel_cmd
 Type:- INT
@@ -436,7 +420,7 @@ Description:- Command to emm_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::50
 --------------------------------------------------
 Name:- emm_vessel_subs
 Type:- INT
@@ -444,7 +428,7 @@ Description:- Substate selection to emm_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::51
 --------------------------------------------------
 Name:- emm_vessel_state
 Type:- INT
@@ -452,7 +436,7 @@ Description:- Device State of emm_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::54
+PARAMETER::52
 --------------------------------------------------
 Name:- emc_water_cmd
 Type:- INT
@@ -460,7 +444,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::55
+PARAMETER::53
 --------------------------------------------------
 Name:- emc_water_subs
 Type:- INT
@@ -468,7 +452,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::56
+PARAMETER::54
 --------------------------------------------------
 Name:- emc_water_state
 Type:- INT
@@ -476,7 +460,7 @@ Description:- Device State of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::57
+PARAMETER::55
 --------------------------------------------------
 Name:- prompt_connect_ok_confirm_yes
 Type:- BOOL
@@ -484,7 +468,7 @@ Description:- UO_MX_SETUP Operator confirm vessel connections made confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::58
+PARAMETER::56
 --------------------------------------------------
 Name:- prompt_connect_ok
 Type:- BOOL
@@ -492,7 +476,7 @@ Description:- UO_MX_SETUP Operator to confirm all vessel connections are properl
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::59
+PARAMETER::57
 --------------------------------------------------
 Name:- emc_water_medium_liquid
 Type:- INT
@@ -500,7 +484,7 @@ Description:- Medium selection for emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::60
+PARAMETER::58
 --------------------------------------------------
 Name:- emx_mmfl_cmd
 Type:- INT
@@ -508,7 +492,7 @@ Description:- Command to emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::61
+PARAMETER::59
 --------------------------------------------------
 Name:- emx_mmfl_state
 Type:- INT
@@ -516,7 +500,7 @@ Description:- Device State of emx_mmfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::62
+PARAMETER::60
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -524,7 +508,7 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::63
+PARAMETER::61
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -532,7 +516,7 @@ Description:- Device State of EVxy04
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::64
+PARAMETER::62
 --------------------------------------------------
 Name:- emx_mmfl_subs
 Type:- INT
@@ -540,7 +524,7 @@ Description:- Substate selection to emx_mmfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::65
+PARAMETER::63
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -548,7 +532,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::66
+PARAMETER::64
 --------------------------------------------------
 Name:- emg_filter_state
 Type:- INT
@@ -556,7 +540,7 @@ Description:- Device State of emg_filter
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::67
+PARAMETER::65
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -564,7 +548,7 @@ Description:- Command to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::68
+PARAMETER::66
 --------------------------------------------------
 Name:- emg_filter_cmd
 Type:- INT
@@ -572,7 +556,7 @@ Description:- Command to emg_filter
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::69
+PARAMETER::67
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -580,7 +564,7 @@ Description:- Substate selection to EXxy07
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::70
+PARAMETER::68
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -588,7 +572,7 @@ Description:- Device State of emx_transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::71
+PARAMETER::69
 --------------------------------------------------
 Name:- emg_filter_subs
 Type:- INT
@@ -596,7 +580,7 @@ Description:- Substate selection to emg_filter
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::72
+PARAMETER::70
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -604,7 +588,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::73
+PARAMETER::71
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -612,7 +596,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::74
+PARAMETER::72
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -1124,11 +1108,7 @@ L 1000;
 *I;
 T #SQ_TIMER.PT;
 
-
 //Store Vacuum Hold test begin time.
-L "dbCONST".CHRONO.CPU_TIME;
-T #_vacuum_held_begin_time;
-
 SET;
 S _log_msg_vacuum_hold_begin;
 
@@ -1440,18 +1420,6 @@ Action:- //Store Vacuum Hold test end time.
 SET;
 S _log_msg_vacuum_hold_end;
 
-L "dbCONST".CHRONO.CPU_TIME;
-T #_vacuum_held_end_time;
-
-//Log actual time vacuum held.
-CALL T_DIFF
-{date_type := 'Time_Of_Day', time_type := 'Time'}
-(  IN1                         := #_vacuum_held_end_time ,
-   IN2                         := #_vacuum_held_begin_time ,
-  OUT                         := #_time_act_vacuum_held
-);
-SET;
-S #_log_time_act_vacuum_held;
 R #sqSeqTimerStart2;
 
 //Log Mx vessel pressure.

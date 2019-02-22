@@ -150,16 +150,29 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
 
 @@ATTR_END|LINK_BLK@@
 
+    //------------------------------------------------------------------------//
+    // Set the index values for the event instances:                          //
+    //------------------------------------------------------------------------//
 @@ATTR_BEGIN|pEventPromptExists@@
-    //------------------------------------------------------------------------//
-    // Set the index values for the instance eventPrompt:                     //
-    //------------------------------------------------------------------------//
 @@ATTR_BEGIN|pEventPromptInstance@@
     L @@IDXEVENT@@;
     T #f[@@IDX@@].p.link.eventPrompt_@@NUMEVENT@@;
 @@ATTR_END|pEventPromptInstance@@
-
 @@ATTR_END|pEventPromptExists@@
+
+@@ATTR_BEGIN|pEventLogRealExists@@
+@@ATTR_BEGIN|pEventLogRealInstance@@
+    L @@IDXEVENT@@;
+    T #f[@@IDX@@].p.link.eventDataReal_@@COFFSET@@;
+@@ATTR_END|pEventLogRealInstance@@
+@@ATTR_END|pEventLogRealExists@@
+
+@@ATTR_BEGIN|pEventLogTimeExists@@
+@@ATTR_BEGIN|pEventLogTimeInstance@@
+    L @@IDXEVENT@@;
+    T #f[@@IDX@@].p.link.eventDataTime_@@COFFSET@@;
+@@ATTR_END|pEventLogTimeInstance@@
+@@ATTR_END|pEventLogTimeExists@@
 
     //------------------------------------------------------------------------//
     // Call the class function to process each instance:                      //

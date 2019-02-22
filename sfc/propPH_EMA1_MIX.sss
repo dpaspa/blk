@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/12/2018 12:33:43 PM by David Paspa
+generated on 10/01/2019 10:05:37 AM by David Paspa
 ****************************************************************************************************
 
 
@@ -43,13 +43,29 @@ SFCCommCode:-
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- real_setpoint
+Type:- REAL
+Description:- PH_EMA1_MIX Agiator setpoint log
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- log_real_setpoint
+Type:- BOOL
+Description:- PH_EMA1_MIX Agiator setpoint log
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
 Name:- sic_agit_cmd
 Type:- INT
 Description:- Agitator command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::4
 --------------------------------------------------
 Name:- log_msg_mix_begin
 Type:- BOOL
@@ -57,7 +73,7 @@ Description:- PH_EMA1_MIX begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::5
 --------------------------------------------------
 Name:- log_msg_mix_end
 Type:- BOOL
@@ -65,7 +81,7 @@ Description:- PH_EMA1_MIX end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::6
 --------------------------------------------------
 Name:- setpoint
 Type:- REAL
@@ -73,7 +89,7 @@ Description:- Required agitator speed for mixing
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::7
 --------------------------------------------------
 Name:- sic_agit_setpoint
 Type:- REAL
@@ -81,7 +97,7 @@ Description:- Agitator speed setpoint attribute
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::8
 --------------------------------------------------
 Name:- agit_running
 Type:- BOOL
@@ -89,7 +105,7 @@ Description:- Agitator running
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::9
 --------------------------------------------------
 Name:- runtime
 Type:- TIME
@@ -97,7 +113,7 @@ Description:- Agitator run time
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::10
 --------------------------------------------------
 Name:- AcumTimeS
 Type:- INT
@@ -105,7 +121,7 @@ Description:- AcumTimeS
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::11
 --------------------------------------------------
 Name:- AcumTimeM
 Type:- INT
@@ -113,7 +129,7 @@ Description:- AcumTimeM
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::12
 --------------------------------------------------
 Name:- AcumTimeH
 Type:- INT
@@ -121,7 +137,7 @@ Description:- Total acumulated running time
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::13
 --------------------------------------------------
 Name:- agit_hist
 Type:- INT
@@ -129,7 +145,7 @@ Description:- Previous state of SIC
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::14
 --------------------------------------------------
 Name:- agit_stopped
 Type:- BOOL
@@ -137,7 +153,7 @@ Description:- Agitator stopped message to be logged
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::15
 --------------------------------------------------
 Name:- sic_agit_state
 Type:- INT
@@ -158,16 +174,20 @@ ACTION::01
 --------------------------------------------------
 Description:- Log EMA1_MIX begin time.
 Initialise the run timer.
-Action:- // Set the agitator speed setpoint
-L #_setpoint;
-T #_sic_agit_setpoint;
-
-//Log EMA1_MIX begin time.
+Action:- //Log EMA1_MIX begin time.
 SET;
 S #_log_msg_mix_begin;
 
+// Set the agitator speed setpoint
+L #_setpoint;
+T #_sic_agit_setpoint;
+T #_real_setpoint;
 
-//Start Timer for agitator runtim
+SET;
+S #_log_real_setpoint;
+
+
+//Start Timer for agitator runtime
 A #SQ_TIMER.Q;
 R #sqSeqTimerStart;
 

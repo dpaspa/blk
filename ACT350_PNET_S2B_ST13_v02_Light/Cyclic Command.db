@@ -1,0 +1,30 @@
+﻿DATA_BLOCK "Cyclic Command"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+NON_RETAIN
+   VAR 
+      ByteOrderTest_Cyclic : Bool;   // Cyclic command to perform Byte Order Test
+      ReportDefault_Cyclic : Bool;   // Cyclic command to request default weight data from device
+      PresetTare_Cyclic : Bool;   // Cyclic command to perform preset tare onto device
+      ReportGross_Cyclic : Bool;   // Cyclic command to request gross weight data from device
+      ReportTare_Cyclic : Bool;   // Cyclic command to request tare weight data from device
+      ReportNet_Cyclic : Bool;   // Cyclic command to request net weight data from device
+      TareStable_Cyclic : Bool;   // Cyclic command to perform tare when stable onto device
+      ZeroStable_Cyclic : Bool;   // Cyclic command to perform zero when stable onto device
+      ClearTare_Cyclic : Bool;   // Cyclic command to perform clear tare onto device
+      Noop_Cyclic : Bool;   // Cyclic command to perform no-operation
+      WriteComparator1_Cyclic : Bool;   // Cyclic command to write comparator 1 value onto device
+      Comparator1_Value : Real;   // Comparator 1 value to be written onto device
+      PreTare_Weight : Real;   // Pre-tare weight value to be written onto device
+      Always_ON : Bool;   // internal bit used for programming
+      CommandHistory : Word;   // Cyclic command which has been executed earlier
+      CommandExecuted : Bool;   // Bit to show that new cyclic command has been aknowledged and executed by device
+      SequenceNumberMemory : Int;   // Sequence number increment by 1 from 0 to 3 everytime a new command has been executed
+      ByteOrder_OK : Bool;
+   END_VAR
+
+
+BEGIN
+
+END_DATA_BLOCK
+

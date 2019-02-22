@@ -587,9 +587,6 @@ TITLE = STOPPED STOPPED STOPPED Set block state STOPPED
 @@ATTR_BEGIN|pEventLogRealWordClass@@
     T #wEventLogReal[@@CWORD@@];
 @@ATTR_END|pEventLogRealWordClass@@
-@@ATTR_BEGIN|pEventDataReal@@
-    T "dbEVENT".eventDataReal[@@IDXEVENT@@];
-@@ATTR_END|pEventDataReal@@
     SET;
 @@ATTR_BEGIN|pEventLogRealClass@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
@@ -606,9 +603,6 @@ TITLE = STOPPED STOPPED STOPPED Set block state STOPPED
 @@ATTR_BEGIN|pEventLogTimeWordClass@@
     T #wEventLogTime[@@CWORD@@];
 @@ATTR_END|pEventLogTimeWordClass@@
-@@ATTR_BEGIN|pEventDataTime@@
-    T "dbEVENT".eventDataTime[@@IDXEVENT@@];
-@@ATTR_END|pEventDataTime@@
     SET;
 @@ATTR_BEGIN|pEventLogTimeClass@@
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
@@ -1146,35 +1140,17 @@ TITLE = Real data
     O #subsRunning.@@STATE@@;
 @@ATTR_END|SFC@@
     JCN _noRunLogReal;
-@@ATTR_BEGIN|pEventDataReal@@
-    L #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    T "dbEVENT".eventDataReal[@@IDXOFFSET@@];
-@@ATTR_END|pEventDataReal@@
-_noRunLogReal:   NOP 0;
 
-@@ATTR_END|pEventLogRealExists@@
-
-@@ATTR_BEGIN|pEventLogRealExists@@
-NETWORK
-TITLE = Log real data if required
-    //------------------------------------------------------------------------//
-    // LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG REAL   LOG  //
-    //                                                                        //
-    // Set the eventLogReal data alarm bit if active:                         //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|SFC@@
-    O #subsRunning.@@STATE@@;
-@@ATTR_END|SFC@@
-    JCN _noRunLogRealData;
 @@ATTR_BEGIN|pEventLogRealClass@@
+    L #@@PARAMETERSOURCE@@.@@DATAPARAMETER@@;
+    T "dbEVENT".eventDataReal[#p.link.eventDataReal_@@COFFSET@@];
     A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;   // Bit @@CBIT@@
     = #bEventLogReal[@@COFFSET@@];
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
 
 @@ATTR_END|pEventLogRealClass@@
 
-_noRunLogRealData:   NOP 0;
-
+_noRunLogReal:   NOP 0;
 @@ATTR_END|pEventLogRealExists@@
 
 @@ATTR_BEGIN|pEventLogTimeExists@@
@@ -1189,36 +1165,17 @@ TITLE = Time data
     O #subsRunning.@@STATE@@;
 @@ATTR_END|SFC@@
     JCN _noRunLogTime;
-@@ATTR_BEGIN|pEventDataTime@@
-    L #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-    T "dbEVENT".eventDataTime[@@IDXOFFSET@@];
-@@ATTR_END|pEventDataTime@@
-_noRunLogTime:   NOP 0;
 
-@@ATTR_END|pEventLogTimeExists@@
-
-@@ATTR_BEGIN|pEventLogTimeExists@@
-NETWORK
-TITLE = Log time data if required
-    //------------------------------------------------------------------------//
-    // LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG TIME   LOG  //
-    //                                                                        //
-    // Set the eventLogTime data alarm bit if active:                         //
-    //------------------------------------------------------------------------//
-@@ATTR_BEGIN|SFC@@
-    O #subsRunning.@@STATE@@;
-@@ATTR_END|SFC@@
-    JCN _noRunLogTimeData;
 @@ATTR_BEGIN|pEventLogTimeClass@@
+    L #@@PARAMETERSOURCE@@.@@DATAPARAMETER@@;
+    T "dbEVENT".eventDataTime[#p.link.eventDataTime_@@COFFSET@@];
     A #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;   // Bit @@CBIT@@
     = #bEventLogTime[@@COFFSET@@];
     R #@@PARAMETERSOURCE@@.@@CHILDPARAMETER@@;
-_not_@@PARAMETERSOURCE@@@@CHILDPARAMETER@@:   NOP 0;
 
 @@ATTR_END|pEventLogTimeClass@@
 
-_noRunLogTimeData:   NOP 0;
-
+_noRunLogTime:   NOP 0;
 @@ATTR_END|pEventLogTimeExists@@
 
 @@ATTR_BEGIN|SFCExists@@

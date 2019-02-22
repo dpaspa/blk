@@ -56,18 +56,22 @@ STRUCT
 @@ATTR_END|pEventLogRealWordInstance@@
 @@TEMPLATE_END@@
     END_STRUCT ;
+@@TEMPLATE_BEGIN|pEventLogTimeExists@@
     eventLogTime : STRUCT                        // SFC events for logging Time data
-@@TEMPLATE_BEGIN|INSTANCE_BLK_ALL@@
+@@ATTR_BEGIN|INSTANCE_BLK_ALL@@
 @@ATTR_BEGIN|pEventLogTimeWordInstance@@
         event_@@INSTANCE@@_@@CWORD@@ : Int;
 @@ATTR_END|pEventLogTimeWordInstance@@
-@@TEMPLATE_END@@
+@@ATTR_END|INSTANCE_BLK_ALL@@
     END_STRUCT ;
+@@TEMPLATE_END@@
 @@TEMPLATE_BEGIN|pEventLogRealNumAll@@
     eventDataReal : Array[0..@@IDXEVENTMAX@@] of Real;   // SFC events for logging real data
 @@TEMPLATE_END@@
-@@TEMPLATE_BEGIN|pEventLogTimeNumAll@@
+@@TEMPLATE_BEGIN|pEventLogTimeExists@@
+@@ATTR_BEGIN|pEventLogTimeNumAll@@
     eventDataTime : Array[0..@@IDXEVENTMAX@@] of DWord;  // SFC events for logging tmie data
+@@ATTR_END|pEventLogTimeNumAll@@
 @@TEMPLATE_END@@
     eventPrompt : STRUCT                         // SFC events for operator prompts
 @@TEMPLATE_BEGIN|pEventPromptNum@@

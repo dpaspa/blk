@@ -1,0 +1,27 @@
+It is unfortunate I didn't do this earlier, but here we are. Sorry.
+
+At this late stage, we'll have to just do the following...there's no time to integrate it properly.
+
+    Download the ACT350_PNET_S2B_ST13_v02_Light project from the link you sent me or use the downloaded one I attach.
+    Open the project in TIA 14. It is a TIA 13 project so it has to upgrade it. Follow all the prompts.
+    Once you have all the code imported you need to copy it across to our project. Open a second instance of TIA with our project in it. You copy from one position to the other so expand the trees to match the same positions (actually I don't know if that part is mandatory but better safe than sorry).
+    Copy the objects in this order (order is very important):
+        PLC Data Types (click and drag)
+        System Blocks->Program Resources (those 3 blocks in there we'll need) (click and drag)
+        PLC Tags. You'll need to adjust some problem I/O addresses for M, I and Q. Just set to next unused addresses (highlight the rows, copy, go to our project, go to the end of our PLC Tag list and paste).
+        Program blocks. There is DB6, DB1 and DB13. Rather than click and drag, which is possible, in our project create a new DB for each one and copy and paste the rows across as for the PLC Tags. Note the DB numbers will be different in ours. If you click and drag there will be two duplicate DB3 and two DB17s. That could be a problem. Note the new DB numbers.
+        Click and drag the OB200 CyclicProgram block. Check the code for errors. Maybe you have to edit it to point correctly to the new DB numbers. Not much code in there so shouldn't take long.
+    Once finished you can try and compile and download if no errors. If errors try and resolve them one by one. I compiled here with only one warning which I could probably get rid of if I tried.
+
+We got the GSD file from KK for the ACT350. I hope its the right one. This package has other GSD files. See how we go first with our original one. Worst case you need to update the GSD file to match but they look the same from the cursory glance I had. This is the file which defines the PROFINET device capabilties. It is human readable if you want to take a look, but only necessary if we have problems.
+
+You'll have to get the raw value in our MI1 function from the DB address of the measured value in the Mettler Toledo (I'll call that MT) function. See if you can work out how to do that part. To check it is working you can monitor those new MT DBs for now. If the measurement is right there then replacing our address with that one in our MI1 FB is easy. Alternatively you can change our address to internal (%Mnnn) and move the data from the MT DB to our tag so no code change to our MI1. That might be nicer at this point. To do that just add at the end of DB200:
+
+L #MT tag;
+T #MI1 tag;
+
+See how you go.
+
+Unfortunately the program is well over-engineered for the amount of CPU memory. This will fit but we're really at the limit of capacity (let alone we left far behind any recommended operating limits).
+
+Dave.
