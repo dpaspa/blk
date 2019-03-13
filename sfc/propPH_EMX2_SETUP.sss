@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/12/2018 12:34:23 PM by David Paspa
+generated on 13/03/2019 6:46:28 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -124,7 +124,7 @@ ParameterInOut:- VAR
 STEP::01
 --------------------------------------------------
 StepNo:- 01
-Title:- PH_EMX2_SETUP : SETUP begin.
+Title:- PH_EMX2_SETUP : SETUP begin. Check mixing vessel connection.
 Description:- Log SETUP begin time.
 
 --------------------------------------------------
@@ -140,8 +140,8 @@ Verification:- A "uncondJump";
 --------------------------------------------------
 TRANSITION::01
 --------------------------------------------------
-TRNNo:- 01
-Title:- Unconditional Jump
+TRNNo:- 1.0000
+Title:- Jump
 EmptyTransition:- False
 Description:- Jump
 Condition:- A "uncondJump";
@@ -150,8 +150,8 @@ Condition:- A "uncondJump";
 --------------------------------------------------
 STEP::02
 --------------------------------------------------
-StepNo:- 02
-Title:- PH_EMX2_SETUP : Prompt to connect filling machine
+StepNo:- 2.0000
+Title:- PH_EMX2_SETUP : Prompt to connect transfer connections
 Description:- Prompt operator to connect filling machine flowpath
 
 --------------------------------------------------
@@ -176,7 +176,7 @@ Condition:- A #_prompt_connect_confirm_yes;
 --------------------------------------------------
 STEP::03
 --------------------------------------------------
-StepNo:- 03
+StepNo:- 3.0000
 Title:- PH_EMX2_SETUP : Check connection
 Description:- Log operator confirmation and continue to check connection.
 
@@ -192,7 +192,7 @@ Verification:- A "uncondJump";
 --------------------------------------------------
 TRANSITION::03
 --------------------------------------------------
-TRNNo:- 03
+TRNNo:- 3.0000
 Title:- Connection correctly inserted
 EmptyTransition:- False
 Description:- Jump if correct switch conection has been made.
@@ -260,7 +260,7 @@ A(;
 --------------------------------------------------
 TRANSITION::04
 --------------------------------------------------
-TRNNo:- 04
+TRNNo:- 4.0000
 Title:- Operator not setup correctly
 EmptyTransition:- False
 Description:- Jump unconditionally, the connections are not made correctly
@@ -270,7 +270,7 @@ Condition:- A "uncondJump";
 --------------------------------------------------
 STEP::04
 --------------------------------------------------
-StepNo:- 04
+StepNo:- 4.0000
 Title:- PH_EMX2_SETUP : Last Step
 Description:- Log SETUP operation end time.
 

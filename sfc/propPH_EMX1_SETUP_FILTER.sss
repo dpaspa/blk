@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/12/2018 12:34:14 PM by David Paspa
+generated on 13/03/2019 3:52:16 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -33,13 +33,29 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- zsc_filter_cmd
+Type:- INT
+Description:- FILTER connection command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- zsc_cipsip_cmd
+Type:- INT
+Description:- CIPSIP connection command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
 Name:- log_msg_confirm_connect
 Type:- BOOL
 Description:- PH_EMX1_SETUP_FILTER OPerator to confirm filters connected confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::4
 --------------------------------------------------
 Name:- log_msg_setup_filter_begin
 Type:- BOOL
@@ -47,7 +63,7 @@ Description:- PH_EMX1_SETUP_FILTER begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::5
 --------------------------------------------------
 Name:- log_msg_setup_filter_end
 Type:- BOOL
@@ -55,7 +71,7 @@ Description:- PH_EMX1_SETUP_FILTER end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::6
 --------------------------------------------------
 Name:- zsc_filter_state
 Type:- INT
@@ -63,7 +79,7 @@ Description:- MMFLx Filter connection sensor switch.
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::7
 --------------------------------------------------
 Name:- prompt_connect_filter_confirm_yes
 Type:- BOOL
@@ -71,7 +87,7 @@ Description:- PH_EMX1_SETUP_FILTER operator to confirm filters connected confirm
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::8
 --------------------------------------------------
 Name:- prompt_connect_filter
 Type:- BOOL
@@ -93,6 +109,14 @@ Description:- Log SETUP FILTER begin time.
 Action:- //Log SETUP FILTER begin time.
 SET;
 S #_log_msg_setup_filter_begin;
+
+// Send IN command to FILTER zsc.
+L "dbCONST".BLK.ZSC2.CMD.IN;
+T  #_zsc_filter_cmd;
+
+// Send OUT command to CIPSIP zsc.
+L "dbCONST".BLK.ZSC2.CMD.OUT;
+T #_zsc_cipsip_cmd;
 Verification:- A "uncondJump";
 
 

@@ -1,0 +1,325 @@
+﻿FUNCTION_BLOCK "ifbSIC1"
+TITLE = Instances of agitator speed control
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifbSIC1
+VERSION : 2.0
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Class:       ifbDI1                                                        //
+// Description: Instances of DI1                                              //
+//                                                                            //
+// Agitator speed control.                                                    //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
+// 0.8 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.7 Gus Abdallah     01-Oct-2009 CC-09/016 Interlocks are CM processed.    //
+// 0.6 Khairul Basar    18-Sep-2009 CC-09/016 ifcSIC1 is created & interfaced.//
+// 0.5 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters   //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters.          //
+// 0.4 Khairul Basar    14-Sep-2009 CC-09/016 O/P var DataQuality added.      //
+// 0.3 Khairul Basar    11-Sep-2009 CC-09/016 Ref2.                           //
+// 0.2 Khairul Basar    03-Sep-2009 CC-09/016 Ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//                                                                            //
+// Ref2:                                                                      //
+// TAH,THR & FLT are changed from NO to NC contact in the instance logic.     //
+// SIC1 changed: Now Setpoint is moved to PID as per selected mode.           //
+// TAH,THR & FLT will result device state 'FAULT=5'.                          //
+// In DB1, Device state changed to 3=Stop, 4=Running instead of 4=stop,       //
+// 3=Running.                                                                 //
+//                                                                            //
+// Ref1:                                                                      //
+// MI1 Measure value assigned to MASS_MI1 parameter, The only DI ES_1000      //
+// Emergency switch is connected to CRIL, whereas others MOT_OL, MOT_OH &    //
+// INVF is connected to corresponding input parameters, these are removed     //
+// from AND logic from CRIL. MV_RPM analog value range is hardcoded, but     //
+// Speed set point range not hard coded, it will be done in HMI.              //
+// Now the Minimum mass condition is always overridden in manual mode         //
+// Now Device states are configured for ENABLED, when enabled two sub state   //
+// STOPPED & RUNNING and DISABLED                                             //
+// Now Parameters MEASURE_RPM for agitator RPM , MASS_MI1 is for mass of the  //
+// vessel(this parameter is not in the FS), parameter for set point of manual //
+// is SETPOINT_MAN, & in auto is SETPOINT_AUTO configured.                    //
+// Set point SETPOINT_MAN and SETPOINT_AUTO initialized to 0.0 and GAIN to 1.0//
+// Emergency stop signal added to CRIL.                                      //
+// Now logic state for Interlock is corrected, see 2.                         //
+// ALARM_HH, ALARM_H, ALARM_L, ALARM_LL are added in SIC1 and programmed.     //
+//----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+// 0       AG1101      M1 Agitator
+// 1       AG2101      M2 Agitator
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+// Declare the instance objects of the class:                                 //
+//----------------------------------------------------------------------------//
+   VAR 
+      f : Array[0..1] of "fbSIC1";
+      EmergencyStop : Bool;
+   END_VAR
+
+   VAR_TEMP 
+      tPV : Real;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Item 0 AG1101 : M1 Agitator Critical Interlocks
+//------------------------------------------------------------------------//
+// INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+// INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+//                                                                        //
+// Get the critical interlock if there is one. If not set alwaysLow:      //
+//------------------------------------------------------------------------//
+      A "idbCRIL".p[0].INTERLOCK;
+      = #f[0].p.read.mc.CRIL;
+
+NETWORK
+TITLE = Item 0 AG1101 : M1 Agitator Non-Critical Interlocks
+//------------------------------------------------------------------------//
+// Get the non-critical interlock if there is one. If not set alwaysLow:  //
+//------------------------------------------------------------------------//
+      A "alwaysLow";
+      = #f[0].p.read.mc.NCRIL;
+
+NETWORK
+TITLE = Item 0 AG1101 : Unique ID
+//------------------------------------------------------------------------//
+// Set the instance unique ID:                                            //
+//------------------------------------------------------------------------//
+      L "dbCONST".BLK.ID.AG1101;
+      T #f[0].p.read.mc.ME;
+
+NETWORK
+TITLE = Item 0 AG1101 : Owner ID
+//------------------------------------------------------------------------//
+// Set the instance Owner ID:                                             //
+//------------------------------------------------------------------------//
+      L "dbCONST".BLK.ID.EA1010;
+      T #f[0].p.write.mc.OWNER;
+
+
+NETWORK
+TITLE = Item 0 AG1101 : Block Read
+//------------------------------------------------------------------------//
+// This block can only reside within this CPU:                            //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      = #f[0].p.master.read;
+
+NETWORK
+TITLE = Item 0 AG1101 : Block Write
+//------------------------------------------------------------------------//
+// This block can only be owned by a parent block in this CPU:            //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      = #f[0].p.master.write;
+
+NETWORK
+TITLE = Item 0 AG1101 : Speed measured value
+//------------------------------------------------------------------------//
+// Set the instance speed measured value from the field:                  //
+//------------------------------------------------------------------------//
+      L "AG1101-RAW";
+      T #f[0].p.read.ai.RAW_INPUT;
+
+NETWORK
+TITLE = Item 0 AG1101 : Field Fault Inputs
+//------------------------------------------------------------------------//
+// Set the instance fault input values from the field:                    //
+//------------------------------------------------------------------------//
+      A "AG1101-BRK";
+      = #f[0].p.read.BRK;
+      A "AG1101-FLP";
+      = #f[0].p.read.FLP;
+      A "AG1101-FLT";
+      = #f[0].p.read.FLT;
+      A "AG1101-THM";
+      = #f[0].p.read.THM;
+      A "PH1001-DI";
+      = #f[0].p.read.PHR;
+
+NETWORK
+TITLE = Item 0 AG1101 : Mass measured value
+//------------------------------------------------------------------------//
+// Set the instance mass measured value and data quality from the field:  //
+//------------------------------------------------------------------------//
+      L "idbMI1".f[0].p.read.ai.PV;
+      T #f[0].p.read.MI1_MASS;
+      A "idbMI1".f[0].p.read.ai.DQ;
+      = #f[0].p.read.MI1_DQ;
+
+NETWORK
+TITLE = Item 0 AG1101 : Mass values to run and stop agitator
+//------------------------------------------------------------------------//
+// Set the instance mass measured value and data quality from the field:  //
+//------------------------------------------------------------------------//
+      L 2200.0;
+      T #f[0].p.read.MASS_RUN;
+      L 2000.0;
+      T #f[0].p.read.MASS_STOP;
+
+NETWORK
+TITLE = AG1101 : Analog input default alarms
+//------------------------------------------------------------------------//
+// Set the default alarm values on startup:                               //
+//------------------------------------------------------------------------//
+      A "flagFirstScanRestart";
+      JCN _noRestart_AG1101;
+      L 0.0;
+      T #f[0].p.write.LIMIT_LL;
+      L 0.0;
+      T #f[0].p.write.LIMIT_L;
+      L 275.0;
+      T #f[0].p.write.LIMIT_H;
+      L 285.0;
+      T #f[0].p.write.LIMIT_HH;
+      A "alwaysLow";
+      = #f[0].p.write.ENABLE_LL;
+      A "alwaysLow";
+      = #f[0].p.write.ENABLE_L;
+      A "alwaysLow";
+      = #f[0].p.write.ENABLE_H;
+      A "alwaysLow";
+      = #f[0].p.write.ENABLE_HH;
+_noRestart_AG1101:      NOP 0;
+
+NETWORK
+TITLE = AG1101 : Analog input attributes
+//------------------------------------------------------------------------//
+// Set the fixed analog input attributes:                                 //
+//------------------------------------------------------------------------//
+      A "alwaysLow";
+      = #f[0].p.read.ai.POLARITY;
+      L 0.0;
+      T #f[0].p.read.ai.RANGE_LOWER;
+      L 285.0;
+      T #f[0].p.read.ai.RANGE_UPPER;
+      L "AG1101-RAW";
+      T #f[0].p.read.ai.RAW_INPUT;
+
+
+NETWORK
+TITLE = Clamp the Setpoint at minimum
+//------------------------------------------------------------------------//
+// Setpoint minimum clamp:                                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #f[0].p.write.SETPOINT;
+      L 7.0;
+      <R;
+      );
+      JCN _ma;
+      L 7.0;
+      T #f[0].p.write.SETPOINT;
+_ma:      NOP 0;
+
+NETWORK
+TITLE = Clamp the Setpoint at maximum
+//------------------------------------------------------------------------//
+// Setpoint maximum clamp:                                                //
+//------------------------------------------------------------------------//
+      A(;
+      L #f[0].p.write.SETPOINT;
+      L 285.0;
+      >R;
+      );
+      JCN _mb;
+      L 285.0;
+      T #f[0].p.write.SETPOINT;
+_mb:      NOP 0;
+
+NETWORK
+TITLE = Item 0 AG1101 : M1 Agitator
+//------------------------------------------------------------------------//
+// Call the class function to process each instance:                      //
+//------------------------------------------------------------------------//
+      CALL #f[0];
+
+//NETWORK
+//TITLE = Emergency stop active
+//    //------------------------------------------------------------------------//
+//    // Check if any emergency stop is active:                                 //
+//    //------------------------------------------------------------------------//
+//    O "ES1100-DI";
+//    O "ES1101-DI";
+//    = #EmergencyStop;
+
+NETWORK
+TITLE = Drive interface
+//------------------------------------------------------------------------//
+// Call the Siemens VFD drive interface module:                           //
+//------------------------------------------------------------------------//
+      CALL "PZD_G120_Tel_352", "PZD_G120_Tel_352_DB_M1"
+      (  address                     := 284 , 
+         ON_OFF1                     := "AG1101-CMD" , 
+         enable_operation            := #f[0].p.read.OUT_CMD , 
+         acknowledge                 := #f[0].p.read.ERROR_RESET , 
+         CTW_bit_08                  := 1 , 
+         CTW_bit_09                  := 1 , 
+         CTW_bit_12                  := 1 , 
+         CTW_bit_15                  := 1 , 
+         speed_setpoint              := #f[0].p.read.MV_OUTPUT , 
+         reference_speed_P2000       := 1425.0 , 
+         reference_current_P2002     := 9.9 , 
+         reference_torque_P2003      := 40.2 , 
+         ready_for_switching_on      := #f[0].p.read.RDY_TO_ON , 
+         ready_for_operation         := #f[0].p.read.RDY_TO_RUN , 
+         operation_enabled           := #f[0].p.read.RUNNING , 
+         actual_speed                := #tPV , 
+         communication_error         := #f[0].p.read.ai.BROKEN_WIRE
+      );
+
+NETWORK
+TITLE = Item 0 AG1101 : Adjust PV for gearbox speed
+//------------------------------------------------------------------------//
+// Divide the VFD speed by the gearbox ratio                        //
+//------------------------------------------------------------------------//
+      L #tPV;
+      L 5.0;
+      /R;
+      T #f[0].p.read.ai.PV;
+
+NETWORK
+TITLE = Item 0 AG1101 : Output Command
+//------------------------------------------------------------------------//
+// Set the instance output command to the field:                          //
+//------------------------------------------------------------------------//
+      A #f[0].p.read.OUT_CMD;
+      = "AG1101-CMD";
+
+NETWORK
+TITLE = Item 0 AG1101 : Send the alarm bits to the global DB
+//------------------------------------------------------------------------//
+// Transfer the class event log message bits to the global DB:            //
+//------------------------------------------------------------------------//
+      L #f[0].p.read.mc.ALARM;
+      T "dbEVENT".alarmBlock.alarm_AG1101;
+
+
+NETWORK
+TITLE = Item 1 AG2101 : Block Read
+//------------------------------------------------------------------------//
+// This block can only reside in another CPU:                             //
+//------------------------------------------------------------------------//
+      A "alwaysLow";
+      = #f[1].p.master.read;
+
+NETWORK
+TITLE = Item 1 AG2101 : Block Write
+//------------------------------------------------------------------------//
+// This block can only be owned by a parent block in another CPU:         //
+//------------------------------------------------------------------------//
+      A "alwaysLow";
+      = #f[1].p.master.write;
+
+
+END_FUNCTION_BLOCK
+

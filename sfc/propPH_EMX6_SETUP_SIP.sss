@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/12/2018 12:34:38 PM by David Paspa
+generated on 13/03/2019 3:52:47 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -33,13 +33,29 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- zsc_filter_cmd
+Type:- INT
+Description:- Filter connection command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- zsc_drain_cmd
+Type:- INT
+Description:- Drain connection command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
 Name:- log_msg_confirm_connect
 Type:- BOOL
 Description:- PH_EMX6_SETUP_SIP Operator to confirm SIP path connected confirmed yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::4
 --------------------------------------------------
 Name:- log_msg_setup_sip_begin
 Type:- BOOL
@@ -47,7 +63,7 @@ Description:- PH_EMX6_SETUP_SIP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::5
 --------------------------------------------------
 Name:- log_msg_setup_sip_end
 Type:- BOOL
@@ -55,7 +71,7 @@ Description:- PH_EMX6_SETUP_SIP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::6
 --------------------------------------------------
 Name:- zsc_filter_state
 Type:- INT
@@ -63,7 +79,7 @@ Description:- SIP connection sensor switch.
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::7
 --------------------------------------------------
 Name:- prompt_connect_sip_confirm_yes
 Type:- BOOL
@@ -71,7 +87,7 @@ Description:- PH_EMX6_SETUP_SIP Operator to confirm SIP path connected confirmed
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::8
 --------------------------------------------------
 Name:- prompt_connect_sip
 Type:- BOOL
@@ -84,16 +100,25 @@ STEP::01
 --------------------------------------------------
 StepNo:- 01
 Title:- PH_EMX6_SETUP_SIP : SETUP SIP begin.
-Description:- Log SETUP SIP begin time.
+Description:- Command keypiece devices to required states.
+Log SETUP SIP begin time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log SETUP SIP begin time.
+Description:- Command keypiece devices to required states.
+Log SETUP SIP begin time.
 Action:- //Log SETUP SIP begin time.
 SET;
 S #_log_msg_setup_sip_begin;
 
+// Send IN command to FILTER zsc.
+L "dbCONST".BLK.ZSC2.CMD.IN;
+T  #_zsc_filter_cmd;
+
+// Send OUT command to DRAIN zsc.
+L "dbCONST".BLK.ZSC2.CMD.OUT;
+T #_zsc_drain_cmd;
 Verification:- A "uncondJump";
 
 

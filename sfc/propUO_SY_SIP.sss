@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 9/01/2019 4:03:53 PM by David Paspa
+generated on 13/03/2019 5:24:54 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -32,13 +32,37 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- emx_smfldrn_state
+Type:- INT
+Description:- SMFL drain state
+ParameterInOut:- IN
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- emx_smfldrn_subs
+Type:- INT
+Description:- SMFLx substate
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- emx_smfldrn_cmd
+Type:- INT
+Description:- SMFLx drain command
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
 Name:- emc_water_sy_runtime
 Type:- TIME
 Description:- Steam flush run time. Zero for run forever.
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::5
 --------------------------------------------------
 Name:- emv_inlet_subs
 Type:- INT
@@ -46,7 +70,7 @@ Description:- Sprayball inlet valves substate
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::6
 --------------------------------------------------
 Name:- emv_inlet_cmd
 Type:- INT
@@ -54,7 +78,7 @@ Description:- Sprayball inlet valves command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::7
 --------------------------------------------------
 Name:- emv_inlet_state
 Type:- INT
@@ -62,7 +86,7 @@ Description:- Sprayball inlet valves state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::8
 --------------------------------------------------
 Name:- emx_transfer_hygiene
 Type:- INT
@@ -70,7 +94,7 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::9
 --------------------------------------------------
 Name:- emx_smfl_hygiene
 Type:- INT
@@ -78,7 +102,7 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::10
 --------------------------------------------------
 Name:- emx_fill_hygiene
 Type:- INT
@@ -86,7 +110,7 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::11
 --------------------------------------------------
 Name:- vessel_sy
 Type:- INT
@@ -94,7 +118,7 @@ Description:- Storage vessel selection S1 or S2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::12
 --------------------------------------------------
 Name:- fill_flz
 Type:- INT
@@ -102,7 +126,7 @@ Description:- Filling line selection FL1 or FL2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::13
 --------------------------------------------------
 Name:- vessel_mx
 Type:- INT
@@ -110,7 +134,7 @@ Description:- Manufacturing vessel selection M1 or M2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::14
 --------------------------------------------------
 Name:- r_time_sip
 Type:- TIME
@@ -118,7 +142,7 @@ Description:- SY SIP Sterilisation time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::15
 --------------------------------------------------
 Name:- prompt_try_again
 Type:- BOOL
@@ -126,7 +150,7 @@ Description:- UO_SY_SIP Operator to confirm to retry or abort
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::16
 --------------------------------------------------
 Name:- prompt_try_again_confirm_yes
 Type:- BOOL
@@ -134,7 +158,7 @@ Description:- UO_SY_SIP Operator confirm to retry
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::17
 --------------------------------------------------
 Name:- prompt_try_again_confirm_no
 Type:- BOOL
@@ -142,7 +166,7 @@ Description:- UO_SY_SIP Operator confirm to abort
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::18
 --------------------------------------------------
 Name:- log_real_emx_11_ti_drain_pv
 Type:- BOOL
@@ -150,7 +174,7 @@ Description:- UO_SY_SIP Vessels transfer line temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::19
 --------------------------------------------------
 Name:- log_real_emx_6_ti_drain_pv
 Type:- BOOL
@@ -158,7 +182,7 @@ Description:- UO_SY_SIP MX transfer line temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::20
 --------------------------------------------------
 Name:- real_emx_11_ti_drain_pv
 Type:- REAL
@@ -166,7 +190,7 @@ Description:- UO_SY_SIP Vessels transfer line temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::21
 --------------------------------------------------
 Name:- real_emx_6_ti_drain_pv
 Type:- REAL
@@ -174,7 +198,7 @@ Description:- UO_SY_SIP MX transfer line temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::22
 --------------------------------------------------
 Name:- real_emv_ti_vessel_pv
 Type:- REAL
@@ -182,7 +206,7 @@ Description:- UO_SY_SIP Vessel temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::23
 --------------------------------------------------
 Name:- real_emg_ti_drain_pv
 Type:- REAL
@@ -190,7 +214,7 @@ Description:- UO_SY_SIP Vent filter drain line temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::24
 --------------------------------------------------
 Name:- log_real_emv_ti_vessel_pv
 Type:- BOOL
@@ -198,7 +222,7 @@ Description:- UO_SY_SIP Vessel temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::25
 --------------------------------------------------
 Name:- log_real_emg_ti_drain_pv
 Type:- BOOL
@@ -206,7 +230,7 @@ Description:- UO_SY_SIP Vent filter drain line temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::26
 --------------------------------------------------
 Name:- log_msg_steam_open
 Type:- BOOL
@@ -214,7 +238,7 @@ Description:- UO_SY_SIP Steam opened time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::27
 --------------------------------------------------
 Name:- log_msg_steam_closed
 Type:- BOOL
@@ -222,7 +246,7 @@ Description:- UO_SY_SIP Steam closed time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::28
 --------------------------------------------------
 Name:- log_msg_pres_leave_reached
 Type:- BOOL
@@ -230,7 +254,7 @@ Description:- UO_SY_SIP HPCA LEAVE pressure reached
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::29
 --------------------------------------------------
 Name:- log_msg_pres_blow_reached
 Type:- BOOL
@@ -238,7 +262,7 @@ Description:- UO_SY_SIP HPCA BLOW pressure reached
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::30
 --------------------------------------------------
 Name:- log_msg_sip_timer_reset
 Type:- BOOL
@@ -246,7 +270,7 @@ Description:- UO_SY_SIP Sterilisation timer reset
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::31
 --------------------------------------------------
 Name:- log_msg_vacuum_begin
 Type:- BOOL
@@ -254,7 +278,7 @@ Description:- UO_SY_SIP Vacuum begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::29
+PARAMETER::32
 --------------------------------------------------
 Name:- log_msg_sip_start
 Type:- BOOL
@@ -262,7 +286,7 @@ Description:- UO_SY_SIP Sterilisation begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::33
 --------------------------------------------------
 Name:- log_msg_sip_complete
 Type:- BOOL
@@ -270,7 +294,7 @@ Description:- UO_SY_SIP Sterilisation end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::31
+PARAMETER::34
 --------------------------------------------------
 Name:- log_msg_vacuum_fail
 Type:- BOOL
@@ -278,7 +302,7 @@ Description:- UO_SY_SIP Vacuum failed
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::35
 --------------------------------------------------
 Name:- log_msg_vacuum_fail_abort
 Type:- BOOL
@@ -286,7 +310,7 @@ Description:- UO_SY_SIP Operator confirmed to abort when vacuum time failed
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::36
 --------------------------------------------------
 Name:- log_msg_vacuum_fail_repeat
 Type:- BOOL
@@ -294,7 +318,7 @@ Description:- UO_SY_SIP Operator confirmed to retry when vacuum time failed
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::37
 --------------------------------------------------
 Name:- log_msg_sip_abort
 Type:- BOOL
@@ -302,7 +326,7 @@ Description:- UO_SY_SIP Automatic abort due to too many failures
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::38
 --------------------------------------------------
 Name:- log_real_positive_pressure
 Type:- BOOL
@@ -310,7 +334,7 @@ Description:- UO_SY_SIP Positive pressure
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::39
 --------------------------------------------------
 Name:- log_msg_sip_begin
 Type:- BOOL
@@ -318,7 +342,7 @@ Description:- UO_SY_SIP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::40
 --------------------------------------------------
 Name:- log_msg_sip_end
 Type:- BOOL
@@ -326,7 +350,7 @@ Description:- UO_SY_SIP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::41
 --------------------------------------------------
 Name:- r_temp_sip_vent
 Type:- REAL
@@ -334,7 +358,7 @@ Description:- SY SIP Sterilisation temperature for vessel vent valve line
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::42
 --------------------------------------------------
 Name:- r_temp_sip
 Type:- REAL
@@ -342,7 +366,7 @@ Description:- SY SIP Sterilisation temperature
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::43
 --------------------------------------------------
 Name:- emx_11_ti_drain_pv
 Type:- REAL
@@ -350,7 +374,7 @@ Description:- SMFL Drain temperature
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::44
 --------------------------------------------------
 Name:- emx_6_ti_drain_pv
 Type:- REAL
@@ -358,7 +382,7 @@ Description:- Drain temperature
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::45
 --------------------------------------------------
 Name:- emv_ti_vessel_pv
 Type:- REAL
@@ -366,7 +390,7 @@ Description:- Vessel temperature
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::43
+PARAMETER::46
 --------------------------------------------------
 Name:- emg_ti_drain_pv
 Type:- REAL
@@ -374,7 +398,7 @@ Description:- Vent filter top outlet temperature
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::44
+PARAMETER::47
 --------------------------------------------------
 Name:- emc_gas_pi_vessel_pv
 Type:- REAL
@@ -382,7 +406,7 @@ Description:- Sy vessel pressure
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::48
 --------------------------------------------------
 Name:- r_pres_vac
 Type:- REAL
@@ -390,7 +414,7 @@ Description:- SY SIP Pressure for vacuum before sterilisation
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::49
 --------------------------------------------------
 Name:- pulse_counter
 Type:- INT
@@ -398,7 +422,7 @@ Description:- CTR_PULSE_VLV
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::50
 --------------------------------------------------
 Name:- r_pulse_number
 Type:- INT
@@ -406,7 +430,7 @@ Description:- SY SIP Number of times to pulse drain valves
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::51
 --------------------------------------------------
 Name:- ctr_sip_abort
 Type:- INT
@@ -414,7 +438,7 @@ Description:- counter of SIP abort times
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::52
 --------------------------------------------------
 Name:- r_num_sip_abort
 Type:- INT
@@ -422,7 +446,7 @@ Description:- SY SIP Number of times to try before SIP abort
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::53
 --------------------------------------------------
 Name:- sip_timer_started
 Type:- BOOL
@@ -430,7 +454,7 @@ Description:- sip timer started flag
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::54
 --------------------------------------------------
 Name:- r_time_sip_abort
 Type:- TIME
@@ -438,7 +462,7 @@ Description:- SY SIP Time to abort SIP if sterilisation temperature cannot reach
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::55
 --------------------------------------------------
 Name:- sip_path
 Type:- INT
@@ -446,7 +470,7 @@ Description:- sip path selection
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::56
 --------------------------------------------------
 Name:- concurrent_path_sip
 Type:- BOOL
@@ -454,7 +478,7 @@ Description:- concurrent path sip flag from parent
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::54
+PARAMETER::57
 --------------------------------------------------
 Name:- r_time_eject
 Type:- TIME
@@ -462,7 +486,7 @@ Description:- SY SIP Time for vacuum timeout if pressure not reached
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::55
+PARAMETER::58
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -470,7 +494,7 @@ Description:- Command to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::56
+PARAMETER::59
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -478,7 +502,7 @@ Description:- Substate selection to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::57
+PARAMETER::60
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -486,7 +510,7 @@ Description:- Device state of emx_smfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::58
+PARAMETER::61
 --------------------------------------------------
 Name:- emx_drain_state
 Type:- INT
@@ -494,7 +518,7 @@ Description:- Device state of emx_drain
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::59
+PARAMETER::62
 --------------------------------------------------
 Name:- emx_drain_cmd
 Type:- INT
@@ -502,7 +526,7 @@ Description:- Command to emx_drain
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::60
+PARAMETER::63
 --------------------------------------------------
 Name:- emx_drain_subs
 Type:- INT
@@ -510,7 +534,7 @@ Description:- Substate selection to emx_drain
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::61
+PARAMETER::64
 --------------------------------------------------
 Name:- emx_smfl_cmd
 Type:- INT
@@ -518,7 +542,7 @@ Description:- Command to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::62
+PARAMETER::65
 --------------------------------------------------
 Name:- emx_smfl_subs
 Type:- INT
@@ -526,7 +550,7 @@ Description:- Substate selection to emx_smfl
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::63
+PARAMETER::66
 --------------------------------------------------
 Name:- emx_smfl_state
 Type:- INT
@@ -534,7 +558,7 @@ Description:- Device state of emx_smfl
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::64
+PARAMETER::67
 --------------------------------------------------
 Name:- log_disconnect
 Type:- BOOL
@@ -542,7 +566,7 @@ Description:- UO_SY_SIP Operator confirmed all vessel pipe entries are disconnec
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::65
+PARAMETER::68
 --------------------------------------------------
 Name:- real_positive_pressure
 Type:- REAL
@@ -550,7 +574,7 @@ Description:- UO_SY_SIP Positive pressure
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::66
+PARAMETER::69
 --------------------------------------------------
 Name:- emc_water_sy_cmd
 Type:- INT
@@ -558,7 +582,7 @@ Description:- Command to ECn002
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::67
+PARAMETER::70
 --------------------------------------------------
 Name:- emc_water_sy_subs
 Type:- INT
@@ -566,7 +590,7 @@ Description:- Substate selection to ECn002
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::68
+PARAMETER::71
 --------------------------------------------------
 Name:- emc_water_sy_medium_liquid
 Type:- INT
@@ -574,7 +598,7 @@ Description:- Medium selection to ECn002
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::69
+PARAMETER::72
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -582,7 +606,7 @@ Description:- PID Pressure Setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::70
+PARAMETER::73
 --------------------------------------------------
 Name:- emg_filter_state
 Type:- INT
@@ -590,7 +614,7 @@ Description:- Device State of emg_filter
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::71
+PARAMETER::74
 --------------------------------------------------
 Name:- emc_water_sy_state
 Type:- INT
@@ -598,7 +622,7 @@ Description:- Device State of ECn002
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::72
+PARAMETER::75
 --------------------------------------------------
 Name:- emg_filter_subs
 Type:- INT
@@ -606,7 +630,7 @@ Description:- Substate selection to emg_filter
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::73
+PARAMETER::76
 --------------------------------------------------
 Name:- emg_filter_cmd
 Type:- INT
@@ -614,7 +638,7 @@ Description:- Command to emg_filter
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::74
+PARAMETER::77
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -622,7 +646,7 @@ Description:- emc_gas_medium
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::75
+PARAMETER::78
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -630,7 +654,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::76
+PARAMETER::79
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -638,7 +662,7 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::77
+PARAMETER::80
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -646,7 +670,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::78
+PARAMETER::81
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -654,7 +678,7 @@ Description:- Device State of ECn001
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::79
+PARAMETER::82
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -662,7 +686,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::80
+PARAMETER::83
 --------------------------------------------------
 Name:- r_time_drain_pulse
 Type:- TIME
@@ -670,7 +694,7 @@ Description:- SY SIP Time to pulse each drain valve
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::81
+PARAMETER::84
 --------------------------------------------------
 Name:- r_pres_hpca_leave
 Type:- REAL
@@ -678,7 +702,7 @@ Description:- SY SIP HPCA pressure after condensate drain blow down
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::82
+PARAMETER::85
 --------------------------------------------------
 Name:- r_time_stm_drain_sy
 Type:- TIME
@@ -686,7 +710,7 @@ Description:- SY SIP Time to steam the condensate drains
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::83
+PARAMETER::86
 --------------------------------------------------
 Name:- r_pres_hpca_blow
 Type:- REAL
@@ -694,7 +718,7 @@ Description:- SY SIP HPCA Pressure to blow out condesate drain valves
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::84
+PARAMETER::87
 --------------------------------------------------
 Name:- r_pres_lpca_blanket
 Type:- REAL
@@ -702,7 +726,7 @@ Description:- SY SIP LPCA blanket pressure
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::85
+PARAMETER::88
 --------------------------------------------------
 Name:- r_pres_stm_pos
 Type:- REAL
@@ -710,7 +734,7 @@ Description:- SY SIP Positive steam pressure threshold
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::86
+PARAMETER::89
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -794,10 +818,16 @@ ACTION::01
 --------------------------------------------------
 Description:- Action Description
 Action:- L "dbCONST".BLK.CMD.STOP;
+T #_emv_inlet_cmd;
 T #_emv_vessel_cmd;
 T #_emx_smfl_cmd;
 T #_emx_transfer_cmd;
 Verification:- A(;
+L   #_emv_inlet_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
 L   #_emv_vessel_state;
 L   "dbCONST".BLK.STATE.STOPPED;
 ==I;
@@ -835,14 +865,30 @@ L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
 T #_emv_vessel_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emv_vessel_cmd;
+
+// Open Sy inlet sprayball valves
+L "dbCONST".BLK.EMV2.SUBS.CHARGE;
+T #_emv_inlet_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emv_inlet_cmd;
 Verification:- A(;
-L #_emx_smfl_subs;
-L "dbCONST".BLK.EMX6.SUBS.SIP;
+L #_emx_smfl_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
 A(;
-L #_emx_transfer_subs;
-L "dbCONST".BLK.EMX2.SUBS.SIP;
+L #_emx_transfer_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+A(;
+L   #_emv_inlet_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
+==I;
+);
+A(;
+L   #_emv_vessel_state;
+L   "dbCONST".BLK.STATE.COMPLETED;
 ==I;
 );
 
@@ -1062,13 +1108,25 @@ STEP::07
 --------------------------------------------------
 StepNo:- 07
 Title:- UO_MX_SIP : Log Operator Abort
-Description:- Log operator abort.
+Description:- Set devices to safe state.
+Log operator abort.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
 Description:- Log operator abort.
-Action:- //Log operator abort.
+Action:- // Set all used equipment to safe state.
+L "dbCONST".BLK.CMD.STOP;
+T #_emv_vessel_cmd;
+T #_emv_inlet_cmd;
+T #_emg_filter_cmd;
+T  #_emc_gas_cmd;
+T  #_emc_water_sy_cmd;
+T  #_emx_drain_cmd;
+T  #_emx_smfl_cmd;
+T  #_emx_transfer_cmd;
+
+//Log operator abort.
 SET;
 S #_log_msg_vacuum_fail_abort;
 R #_prompt_try_again_confirm_no;
@@ -1127,7 +1185,7 @@ S #_log_msg_steam_open;
 Verification:- //Verify if emc_water changed to substate FLUSH.
 A(;
 L   #_emc_water_sy_subs;
-L   "dbCONST".BLK.EMC2.SUBS.FLUSH;
+L   "dbCONST".BLK.EMC3.SUBS.FLUSH;
 ==I;
 );
 
@@ -1174,6 +1232,7 @@ S #_log_real_positive_pressure;
 L "dbCONST".BLK.CMD.STOP;
 T #_emg_filter_cmd;
 T #_emx_drain_cmd;
+T #_emx_smfldrn_cmd;
 Verification:- A(;
 L   #_emg_filter_state;
 L   "dbCONST".BLK.STATE.STOPPED;
@@ -1181,6 +1240,11 @@ L   "dbCONST".BLK.STATE.STOPPED;
 );
 A(;
 L   #_emx_drain_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emx_smfldrn_state;
 L   "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
@@ -1202,6 +1266,18 @@ T #_emg_filter_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emg_filter_cmd;
 
+//Start EMX4_SIP.
+L "dbCONST".BLK.EMX4.SUBS.SIP;
+T #_emx_smfldrn_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_smfldrn_cmd;
+
+// Open SIP drain valve on gas line.
+L "dbCONST".SEL.GAS.DRAIN;
+T #_emc_gas_medium_gas;
+L "dbCONST".BLK.CMD.RESTART;
+T #_emc_gas_cmd;
+
 //Start Timer for venting
 A #SQ_TIMER.Q;
 R #sqSeqTimerStart;
@@ -1212,18 +1288,38 @@ L #_r_time_stm_drain_sy;
 L 1000;
 *I;
 T #SQ_TIMER.PT;
-
 Verification:- A(;
-L #_emx_drain_subs;
-L "dbCONST".BLK.EMX4.SUBS.SIP;
+L #_emx_drain_state;
+L "dbCONST".BLK.EMX4.STATE.COMPLETED;
+==I;
+);
+A(;
+L #_emx_smfldrn_state;
+L "dbCONST".BLK.EMX4.STATE.COMPLETED;
 ==I;
 );
 A(;
 L #_emg_filter_subs;
-L "dbCONST".BLK.EMG1.SUBS.SIP;
+L "dbCONST".BLK.EMG1.STATE.COMPLETED;
 ==I;
 );
-A #sqSeqTimerStart;
+A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+>I;
+);
+A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.INTERLOCKED;
+<I;
+);
+
+--------------------------------------------------
+ACTION::03
+--------------------------------------------------
+Description:- Clear EMC gas restart command
+Action:- L "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
 
 
 --------------------------------------------------
@@ -1506,15 +1602,29 @@ Title:- UO_SY_SIP : Storage Vessel SIP
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
+Description:- Reset log message flags and start timer to give a chance for HMI to see them.
+Action:- SET;
+R #_log_real_emx_11_ti_drain_pv;
+R #_log_real_emx_6_ti_drain_pv;
+R #_log_real_emv_ti_vessel_pv;
+R #_log_real_emg_ti_drain_pv;
+
+R #sqSeqTimerStart2;
+
+AN #SQ_TIMER2.Q;
+S #sqSeqTimerStart2;
+L T#10S;
+T #SQ_TIMER2.PT;
+
+
 
 --------------------------------------------------
 TRANSITION::20
 --------------------------------------------------
-TRNNo:- 20.0000
-Title:- Empty Transition
+TRNNo:- 20
+Title:- 10 seconds expired
 EmptyTransition:- False
-Description:- Empty Transition
-Condition:- A "uncondJump";
+Condition:- A #SQ_TIMER2.Q;
 
 
 --------------------------------------------------
@@ -1548,7 +1658,7 @@ S #_log_real_emg_ti_drain_pv;
 
 AN #SQ_TIMER2.Q;
 S #sqSeqTimerStart2;
-L T#30S;
+L T#20S;
 T #SQ_TIMER2.PT;
 
 Verification:- A #sqSeqTimerStart2;
@@ -1647,7 +1757,7 @@ TRANSITION::24
 TRNNo:- 24
 Title:- Temperature logging timer expired
 EmptyTransition:- False
-Description:- 30 seconds expired.
+Description:- 20 seconds expired.
 Condition:- A #SQ_TIMER2.Q;
 
 
@@ -1850,8 +1960,20 @@ Description:- Log automatic ABORT.
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log automatic ABORT.
-Action:- SET;
+Description:- Set all devices to safe state.
+Log automatic ABORT.
+Action:- // Set all used equipment to safe state.
+L "dbCONST".BLK.CMD.STOP;
+T #_emv_vessel_cmd;
+T #_emv_inlet_cmd;
+T #_emg_filter_cmd;
+T  #_emc_gas_cmd;
+T  #_emc_water_sy_cmd;
+T  #_emx_drain_cmd;
+T  #_emx_smfl_cmd;
+T  #_emx_transfer_cmd;
+
+SET;
 S #_log_msg_sip_abort;
 S #smc.ABORTED;
 Verification:- A "uncondJump";
@@ -2373,7 +2495,8 @@ STEP::30
 --------------------------------------------------
 StepNo:- 30
 Title:- UO_SY_SIP : Wait for OPER to isolate vessel SY
-Description:- Prompt operator to disconnect all vessel utility pipe entry.
+Description:- Set SMFL, SVT and FLZ hygiene status to STERILE.
+Prompt operator to disconnect all vessel utility pipe entry.
 Set emv_vessel & emc_water to substate ISOLATE.
 
 --------------------------------------------------
@@ -2408,6 +2531,12 @@ L "dbCONST".BLK.EMC3.SUBS.ISOLATE;
 T #_emc_water_sy_subs;  //SUB_ECxy03
 L "dbCONST".BLK.CMD.START;
 T #_emc_water_sy_cmd;
+
+//Set SMFL, SVT and FLZ hygiene status to STERILE.
+L  "dbCONST".BLK.HYGIENE.STERILE;
+T #_emx_fill_hygiene;
+T #_emx_transfer_hygiene;
+T #_emx_smfl_hygiene;
 Verification:- A(;
 L #_emv_vessel_subs;
 L "dbCONST".BLK.EMV1.SUBS.ISOLATE;
@@ -2445,8 +2574,7 @@ STEP::31
 --------------------------------------------------
 StepNo:- 31
 Title:- UO_SY_SIP : Unit Operation Completed
-Description:- Set SMFL, SVT and FLZ hygiene status to STERILE.
-Set equipment to SAFE state.
+Description:- Set equipment to SAFE state.
 Log SIP operation end time.
 
 --------------------------------------------------
@@ -2455,21 +2583,9 @@ ACTION::01
 Description:- Set SMFL, SVT and FLZ hygiene status to STERILE.
 Set equipment to SAFE state.
 Log SIP operation end time.
-Action:- //Set SMFL, SVT and FLZ hygiene status to STERILE.
-L  "dbCONST".BLK.HYGIENE.STERILE;
-T #_emx_fill_hygiene;
-T #_emx_transfer_hygiene;
-T #_emx_smfl_hygiene;
-
-// Set safe state
+Action:- // Set safe state
 L "dbCONST".BLK.CMD.STOP;
-T  #_emx_smfl_cmd;
-T  #_emx_transfer_cmd;
-T  #_emv_inlet_cmd;
-T  #_emv_vessel_cmd;
-T  #_emx_drain_cmd;
 T  #_emc_water_sy_cmd;
-T  #_emc_gas_cmd;
 T  #_emg_filter_cmd;
 
 //Log SIP operation end time.

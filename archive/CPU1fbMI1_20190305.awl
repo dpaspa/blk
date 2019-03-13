@@ -1,0 +1,245 @@
+﻿FUNCTION_BLOCK "fbMI1"
+TITLE = AL1 : Generic analog indicator
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fbMI1
+VERSION : 2.2
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbAL1                                                         //
+// Description:                                                               //
+// Load Cell mass indicator.                                                  //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.2 David Paspa      22-Feb-2019 NA        Removed call to fcAnalog. MT    //
+//                                            sends PV directly.              //
+// 2.1 David Paspa      25-Aug-2018 NA        Made separate block to store    //
+//                                            gross, tare and nett masses.    //
+// 2.0 David Paspa      19-Apr-2018 NA        Reboot for S7-1500 consolidated //
+//                                            into fcAL1 from all analog      //
+//                                            classes.                        //
+// 0.3 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Upper/Lower range hardcoded.    //
+//                                            USER_INPUT added for manual     //
+//                                            mode simulation.                //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+   VAR 
+      p : "udtMI1";   // Block data interface
+   END_VAR
+   VAR DB_SPECIFIC
+      b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..15] of Bool;
+      w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT b : Word;
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = Analog input setpoints
+//------------------------------------------------------------------------//
+// ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
+// ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VALUE   ANALOG VAL //
+//                                                                        //
+// Set the analog input setpoints:                		                  //
+//------------------------------------------------------------------------//
+      L #p.write.LIMIT_HH;
+      T #p.read.ai.LIMIT_HH;
+      L #p.write.LIMIT_H;
+      T #p.read.ai.LIMIT_H;
+      L #p.write.LIMIT_L;
+      T #p.read.ai.LIMIT_L;
+      L #p.write.LIMIT_LL;
+      T #p.read.ai.LIMIT_LL;
+      A #p.write.ENABLE_HH;
+      = #p.read.ai.ENABLE_HH;
+      A #p.write.ENABLE_H;
+      = #p.read.ai.ENABLE_H;
+      A #p.write.ENABLE_L;
+      = #p.read.ai.ENABLE_L;
+      A #p.write.ENABLE_LL;
+      = #p.read.ai.ENABLE_LL;
+
+NETWORK
+TITLE = Check for out of range error
+//------------------------------------------------------------------------//
+// Check if the input value is underrange or overrange:                   //
+//------------------------------------------------------------------------//
+      A(;
+      O(;
+      L #p.read.ai.PV;
+      L 20000.0;
+      >R;
+      );
+      O(;
+      L #p.read.ai.PV;
+      L -50.0;
+      <R;
+      );
+      );
+      = #p.read.ai.RANGE_ERROR;
+
+NETWORK
+TITLE = Set Data Quality
+//------------------------------------------------------------------------//
+// Can't call fcAnalog because MT PROFINET already scales to engineering  //
+// units:                                                                 //
+// If no error set Data Quality DQ=1 (GOOD), else DQ=0 (BAD):             //
+//------------------------------------------------------------------------//
+      O(;
+      AN #p.read.ai.RANGE_ERROR;
+//     A     "MI1101-DATA_OK"
+      AN #p.read.mc.modeOOS;
+      );
+      = #p.read.ai.DQ;
+
+NETWORK
+TITLE = HighHigh ALARM
+//------------------------------------------------------------------------//
+// Set HighHigh Alarm if limit reached:                                   //
+//------------------------------------------------------------------------//
+      AN #p.read.mc.modeOOS;
+      A #p.read.ai.ENABLE_HH;
+      A(;
+      L #p.read.ai.PV;
+      L #p.read.ai.LIMIT_HH;
+      >=R;
+      );
+      = #p.read.ai.ALARM_HH;
+
+NETWORK
+TITLE = High ALARM
+//------------------------------------------------------------------------//
+// Set High Alarm if limit reached:                                       //
+//------------------------------------------------------------------------//
+      AN #p.read.mc.modeOOS;
+      A #p.read.ai.ENABLE_H;
+      A(;
+      L #p.read.ai.PV;
+      L #p.read.ai.LIMIT_H;
+      >=R;
+      );
+      = #p.read.ai.ALARM_H;
+
+NETWORK
+TITLE = Low ALARM
+//------------------------------------------------------------------------//
+// Set Low Alarm if limit reached:                                        //
+//------------------------------------------------------------------------//
+      AN #p.read.mc.modeOOS;
+      A #p.read.ai.ENABLE_L;
+      A(;
+      L #p.read.ai.PV;
+      L #p.read.ai.LIMIT_L;
+      <=R;
+      );
+      = #p.read.ai.ALARM_L;
+
+NETWORK
+TITLE = LowLow ALARM
+//------------------------------------------------------------------------//
+// Set LowLow Alarm if limit reached:                                     //
+//------------------------------------------------------------------------//
+      AN #p.read.mc.modeOOS;
+      A #p.read.ai.ENABLE_LL;
+      A(;
+      L #p.read.ai.PV;
+      L #p.read.ai.LIMIT_LL;
+      <=R;
+      );
+      = #p.read.ai.ALARM_LL;
+
+NETWORK
+TITLE = Promote the analog input attributes
+//------------------------------------------------------------------------//
+// Promote the analog input attributes to module level:                   //
+//------------------------------------------------------------------------//
+      L #p.read.ai.PV;
+      T #p.read.PV;
+      A #p.read.ai.DQ;
+      = #p.read.DQ;
+
+NETWORK
+TITLE = Set Internal INTERLOCK Flag
+//------------------------------------------------------------------------//
+// INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+// INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+//                                                                        //
+// Internal interlock flag if any problem with the measurement:           //
+//------------------------------------------------------------------------//
+      ON #p.read.ai.DQ;
+      O #p.read.ai.ALARM_HH;
+      = #p.read.mc.INTIL;
+
+NETWORK
+TITLE = Call Mode and Command handling function
+//------------------------------------------------------------------------//
+// MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+// MODE AND COMMAND   MODE AND COMMAND   MODE AND COMMAND   MODE AND COMM //
+//                                                                        //
+// Process the standard block functions for command, mode, interlock and  //
+// state:                                                                 //
+//------------------------------------------------------------------------//
+
+      CALL "fcModeCmd"
+      (  cmdSafe                     := "dbCONST".BLK.MI1.SAFE.CMD , 
+         mcRead                      := #p.read.mc , 
+         mcWrite                     := #p.write.mc
+      );
+
+NETWORK
+TITLE = Set Device State to Enabled if healthy
+//------------------------------------------------------------------------//
+// STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+// STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+//                                                                        //
+// ENABLED if input signal is healthy:                                    //
+//------------------------------------------------------------------------//
+      A #p.read.ai.DQ;
+      JCN _a;
+      L #p.read.STATE_ENABLED;
+      T #p.read.mc.STATE;
+      R #p.read.mc.ERROR;
+_a:      NOP 0;
+
+NETWORK
+TITLE = Set Device State to Fault if any field signal error
+//------------------------------------------------------------------------//
+// FAULT if any input error:                                              //
+//------------------------------------------------------------------------//
+      AN #p.read.ai.DQ;
+      AN #p.read.mc.modeOOS;
+      JCN _b;
+      L #p.read.STATE_FAULT;
+      T #p.read.mc.STATE;
+      S #p.read.mc.ERROR;
+_b:      NOP 0;
+
+NETWORK
+TITLE = Pack the alarm bits
+//------------------------------------------------------------------------//
+// Pack the alarm bits into an integer for the HMI to read:               //
+// Alarms are arranged in the following Little Endian order...            //
+// Word   1                                0                              //
+// Bit    0   1   2   3   4   5   6   7    8   9  10  11  12  13  14  15  //
+// Order  9  10  11  12  13  14  15  16    1   2   3   4   5   6   7   8  //
+//------------------------------------------------------------------------//
+      A #p.read.ai.ALARM_HH;
+      = #b[0];
+      A #p.read.ai.ALARM_H;
+      = #b[1];
+      A #p.read.ai.ALARM_L;
+      = #b[2];
+      A #p.read.ai.ALARM_LL;
+      = #b[3];
+      AN #p.read.ai.DQ;
+      = #b[4];
+      L #w;
+      T #p.read.mc.ALARM;
+
+END_FUNCTION_BLOCK
+

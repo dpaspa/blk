@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 9/01/2019 4:02:09 PM by David Paspa
+generated on 13/03/2019 5:24:39 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -998,9 +998,10 @@ Condition:- A "uncondJump";
 --------------------------------------------------
 STEP::06
 --------------------------------------------------
-StepNo:- 6.0000
+StepNo:- 06
 Title:- UO_MX_SIP : Log Operator Abort
-Description:- Log operator abort.
+Description:- Set devices to safe state.
+Log operator abort.
 
 --------------------------------------------------
 ACTION::01
@@ -1011,6 +1012,16 @@ SET;
 S #_log_msg_vacuum_fail_abort;
 R #_prompt_try_again_confirm_no;
 S #smc.ABORTED;
+
+// Set all used equipment to safe state.
+L "dbCONST".BLK.CMD.STOP;
+T #_emv_vessel_cmd;
+T #_emv_inlet_cmd;
+T #_emg_filter_cmd;
+T  #_emc_gas_cmd;
+T  #_emc_water_cmd;
+T  #_emx_drain_cmd;
+T  #_emx_mmfl_cmd;
 Verification:- A "uncondJump";
 
 
@@ -1078,7 +1089,7 @@ L 	#_r_pres_stm_pos;
 --------------------------------------------------
 STEP::08
 --------------------------------------------------
-StepNo:- 8.0000
+StepNo:- 08
 Title:- UO_MX_SIP : Positive pressure. 
 Description:- Positive pressure has been achieved.
 Log actual positive pressure.
@@ -1108,6 +1119,12 @@ L "dbCONST".BLK.EMG1.SUBS.SIP;
 T #_emg_filter_subs;
 L "dbCONST".BLK.CMD.START;
 T #_emg_filter_cmd;
+
+//Open gas line drain valve.
+L "dbCONST".SEL.GAS.DRAIN;
+T #_emc_gas_medium_gas;
+L "dbCONST".BLK.CMD.RESTART;
+T #_emc_gas_cmd;
 Verification:- A(;
 L #_emx_drain_subs;
 L "dbCONST".BLK.EMX4.SUBS.SIP;
@@ -1118,6 +1135,24 @@ L #_emg_filter_subs;
 L "dbCONST".BLK.EMG1.SUBS.SIP;
 ==I;
 );
+A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+>I;
+);
+A(;
+L   #_emc_gas_state;
+L   "dbCONST".BLK.STATE.INTERLOCKED;
+<I;
+);
+
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
+Description:- Clear gas EM restart command
+Action:- L "dbCONST".BLK.CMD.START;
+T #_emc_gas_cmd;
 
 
 --------------------------------------------------
@@ -1174,6 +1209,18 @@ Description:- Log closed system steaming start time
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
+Description:- Stop MMFLx to reset it
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_emx_mmfl_cmd;
+Verification:- A(;
+L   #_emx_mmfl_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+
+--------------------------------------------------
+ACTION::02
+--------------------------------------------------
 Description:- Log closed system start time
 Start pulsing MMFLx valves
 Action:- //Log closed system start time.
@@ -1182,22 +1229,11 @@ S #_log_msg_steam_closed;
 
 // Set emx_mmfl to substate SIP_PULSE and start it.
 L _r_time_mmflx_pulse_heat;
+L 1000;
+*I;
 T #_emx_mmfl_opened_time;
 L "dbCONST".BLK.EMX1.SUBS.SIP_PULSE;
 T #_emx_mmfl_subs;
-L "dbCONST".BLK.CMD.RESTART;
-T #_emx_mmfl_cmd;
-Verification:- A(;
-L   #_emx_mmfl_state;
-L   "dbCONST".BLK.STATE.COMPLETED;
-==I;
-);
-
---------------------------------------------------
-ACTION::02
---------------------------------------------------
-Description:- Clear restart command
-Action:- // Clear the restart command
 L "dbCONST".BLK.CMD.START;
 T #_emx_mmfl_cmd;
 
@@ -1258,21 +1294,36 @@ Condition:- A "uncondJump";
 --------------------------------------------------
 STEP::12
 --------------------------------------------------
-StepNo:- 12.0000
+StepNo:- 12
 Title:- UO_MX_SIP : Mixing Vessel SIP
+Description:- Reset log message flags
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
+Description:- Reset message log flags
+Action:- SET;
+R #_log_real_emt_ti_hex_pv;
+R #_log_real_emg_ti_drain_pv;
+R #_log_real_emv_ti_vessel_pv;
+R #_log_real_emx_ti_drain_pv;
+
+R #sqSeqTimerStart2;
+
+AN #SQ_TIMER2.Q;
+S #sqSeqTimerStart2;
+L T#10S;
+T #SQ_TIMER2.PT;
+
 
 --------------------------------------------------
 TRANSITION::14
 --------------------------------------------------
-TRNNo:- 14.0000
-Title:- Empty Transition
+TRNNo:- 14
+Title:- 10 seconds expired
 EmptyTransition:- False
-Description:- Empty Transition
-Condition:- A "uncondJump";
+Description:- Jump after flags have had a chance to reset on HMI
+Condition:- A #SQ_TIMER2.Q;
 
 
 --------------------------------------------------
@@ -1307,7 +1358,7 @@ S #_log_real_emx_ti_drain_pv;
 
 AN #SQ_TIMER2.Q;
 S #sqSeqTimerStart2;
-L T#30S;
+L T#20S;
 T #SQ_TIMER2.PT;
 Verification:- A "uncondJump";
 
@@ -1388,10 +1439,10 @@ L 	#_r_temp_sip;
 --------------------------------------------------
 TRANSITION::17
 --------------------------------------------------
-TRNNo:- 17.0000
+TRNNo:- 17
 Title:- Temperature logging timer expired
 EmptyTransition:- False
-Description:- 30 seconds expired.
+Description:- 20 seconds expired.
 Condition:- A #SQ_TIMER2.Q;
 
 
@@ -1449,6 +1500,8 @@ S #_sip_timer_started;
 
 // Update emx_mmfl pulse time
 L _r_time_mmflx_pulse_sip;
+L 1000;
+*I;
 T #_emx_mmfl_opened_time;
 Verification:- A #sqSeqTimerStart;
 
@@ -1592,17 +1645,29 @@ L 	#_r_pres_hpca_blow;
 --------------------------------------------------
 STEP::17
 --------------------------------------------------
-StepNo:- 17.0000
+StepNo:- 17
 Title:- UO_MX_SIP : Automatic MX SIP ABORT
-Description:- Log automatic ABORT.
+Description:- Set devices to safe state.
+Log automatic ABORT.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Log automatic ABORT.
+Description:- Set devices to safe state.
+Log automatic ABORT.
 Action:- SET;
 S #_log_msg_sip_abort;
 S #smc.ABORTED;
+
+// Set all used equipment to safe state.
+L "dbCONST".BLK.CMD.STOP;
+T #_emv_vessel_cmd;
+T #_emv_inlet_cmd;
+T #_emg_filter_cmd;
+T  #_emc_gas_cmd;
+T  #_emc_water_cmd;
+T  #_emx_drain_cmd;
+T  #_emx_mmfl_cmd;
 Verification:- A "uncondJump";
 
 
@@ -1619,7 +1684,7 @@ Condition:- A "uncondJump";
 --------------------------------------------------
 STEP::18
 --------------------------------------------------
-StepNo:- 18.0000
+StepNo:- 18
 Title:- UO_MX_SIP : Start HPCA pressure control
 Description:- Log time when pressure reached.
 Enable Mx HPCA pressure control at setpoint PRES_HPCA_BLOW.
@@ -1628,19 +1693,7 @@ Enable Mx HPCA pressure control at setpoint PRES_HPCA_BLOW.
 ACTION::01
 --------------------------------------------------
 Description:- Reset gas EM
-Action:- L "dbCONST".BLK.CMD.START;
-T #_emv_inlet_cmd;
-
-//Open Mx outlet valve.
-L "dbCONST".BLK.EMV1.SUBS.DISCHARGE;
-T #_emv_vessel_subs;
-L "dbCONST".BLK.CMD.START;
-T #_emv_vessel_cmd;
-
-//Start emx_mmfl SIP.
-L "dbCONST".BLK.EMX1.SUBS.SIP;
-T #_emx_mmfl_subs;
-L "dbCONST".BLK.CMD.START;
+Action:- L "dbCONST".BLK.CMD.STOP;
 T #_emc_gas_cmd;
 Verification:- A(;
 L   #_emc_gas_state;

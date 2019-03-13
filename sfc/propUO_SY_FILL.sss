@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 9/01/2019 4:02:24 PM by David Paspa
+generated on 13/03/2019 3:55:04 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -499,16 +499,6 @@ S #_log_msg_fill_begin;
 TRANSITION::01
 --------------------------------------------------
 TRNNo:- 1.0000
-Title:- Incorrect Hygiene Status
-EmptyTransition:- False
-Description:- Empty Transition
-Condition:- A "uncondJump";
-
-
---------------------------------------------------
-TRANSITION::02
---------------------------------------------------
-TRNNo:- 2.0000
 Title:- Check Hygiene Status
 EmptyTransition:- False
 Description:- SVT and FLZ are in Hygiene status STERILE?
@@ -522,6 +512,16 @@ L  "dbCONST".BLK.HYGIENE.STERILE;
 L #_emx_transfer_hygiene;
 ==I;
 );
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 2.0000
+Title:- Incorrect Hygiene Status
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -1054,7 +1054,7 @@ Condition:- A "uncondJump";
 --------------------------------------------------
 STEP::13
 --------------------------------------------------
-StepNo:- 13.0000
+StepNo:- 13
 Title:- UO_SY_FILL : Filling Unit Operation Completed
 Description:- Set Sy products to safe state.
 
@@ -1069,8 +1069,9 @@ Action:- // Set remaining Sy equipment to SAFE state.
 
 //Stop FILTER.
 L "dbCONST".BLK.CMD.STOP;
+T #_emc_gas_cmd;
 T #_emx_transfer_cmd;
-T #_emx_smfl_cmd;
+T #_emx_fill_cmd;
 T #_emv_vessel_cmd;
 Verification:- A(;
 L #_emc_gas_state;

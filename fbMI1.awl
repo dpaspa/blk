@@ -7,6 +7,8 @@
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
+// 2.2 David Paspa      22-Feb-2019 NA        Removed call to fcAnalog. MT    //
+//                                            sends PV directly.              //
 // 2.1 David Paspa      25-Aug-2018 NA        Made separate block to store    //
 //                                            gross, tare and nett masses.    //
 // 2.0 David Paspa      19-Apr-2018 NA        Reboot for S7-1500 consolidated //
@@ -23,7 +25,7 @@ TITLE = AL1 : Generic analog indicator
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
 NAME : fbMI1
-VERSION : 2.1
+VERSION : 2.2
 
 //----------------------------------------------------------------------------//
 // Declare interface and variables:                                           //
@@ -64,13 +66,92 @@ TITLE = Analog input setpoints
     = #p.read.ai.ENABLE_LL;
 
 NETWORK
-TITLE = Call Analog Input handling function
+TITLE = Check for out of range error
     //------------------------------------------------------------------------//
-    // Scale the analog input value and check it is healty:                   //
+    // Check if the input value is underrange or overrange:                   //
     //------------------------------------------------------------------------//
-    CALL "fcAnalog"
-    (   ai                   := #p.read.ai
+    A(;
+    O(;
+    L #p.read.ai.PV;
+    L 20000.0;
+    >R;
     );
+    O(;
+    L #p.read.ai.PV;
+    L -50.0;
+    <R;
+    );
+    );
+    = #p.read.ai.RANGE_ERROR;
+
+NETWORK
+TITLE = Set Data Quality
+    //------------------------------------------------------------------------//
+    // Can't call fcAnalog because MT PROFINET already scales to engineering  //
+    // units:                                                                 //
+    // If no error set Data Quality DQ=1 (GOOD), else DQ=0 (BAD):             //
+    //------------------------------------------------------------------------//
+    O(;
+    AN #p.read.ai.RANGE_ERROR;
+    AN #p.read.mc.modeOOS;
+    );
+    = #p.read.ai.DQ;
+
+NETWORK
+TITLE = HighHigh ALARM
+    //------------------------------------------------------------------------//
+    // Set HighHigh Alarm if limit reached:                                   //
+    //------------------------------------------------------------------------//
+    AN #p.read.mc.modeOOS;
+    A #p.read.ai.ENABLE_HH;
+    A(;
+    L #p.read.ai.PV;
+    L #p.read.ai.LIMIT_HH;
+    >=R;
+    );
+    = #p.read.ai.ALARM_HH;
+
+NETWORK
+TITLE = High ALARM
+    //------------------------------------------------------------------------//
+    // Set High Alarm if limit reached:                                       //
+    //------------------------------------------------------------------------//
+    AN #p.read.mc.modeOOS;
+    A #p.read.ai.ENABLE_H;
+    A(;
+    L #p.read.ai.PV;
+    L #p.read.ai.LIMIT_H;
+    >=R;
+    );
+    = #p.read.ai.ALARM_H;
+
+NETWORK
+TITLE = Low ALARM
+    //------------------------------------------------------------------------//
+    // Set Low Alarm if limit reached:                                        //
+    //------------------------------------------------------------------------//
+    AN #p.read.mc.modeOOS;
+    A #p.read.ai.ENABLE_L;
+    A(;
+    L #p.read.ai.PV;
+    L #p.read.ai.LIMIT_L;
+    <=R;
+    );
+    = #p.read.ai.ALARM_L;
+
+NETWORK
+TITLE = LowLow ALARM
+    //------------------------------------------------------------------------//
+    // Set LowLow Alarm if limit reached:                                     //
+    //------------------------------------------------------------------------//
+    AN #p.read.mc.modeOOS;
+    A #p.read.ai.ENABLE_LL;
+    A(;
+    L #p.read.ai.PV;
+    L #p.read.ai.LIMIT_LL;
+    <=R;
+    );
+    = #p.read.ai.ALARM_LL;
 
 NETWORK
 TITLE = Promote the analog input attributes
@@ -90,7 +171,8 @@ TITLE = Set Internal INTERLOCK Flag
     //                                                                        //
     // Internal interlock flag if any problem with the measurement:           //
     //------------------------------------------------------------------------//
-    AN #p.read.ai.DQ;
+    ON #p.read.ai.DQ;
+    O #p.read.ai.ALARM_HH;
     = #p.read.mc.INTIL;
 
 NETWORK

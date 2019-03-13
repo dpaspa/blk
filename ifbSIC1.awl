@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------------//
 // Revision history:                                                          //
 // Rev By               Date        CC        Note                            //
+// 2.1 David Paspa      22-Feb-2019 NA        Update device call.             //
 // 2.0 David Paspa      05-Jan-2018 NA        Reboot for S7-1500.             //
 // 0.8 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
 //                                            Toggle.                         //
@@ -56,7 +57,7 @@ TITLE = Instances of agitator speed control
 { S7_Optimized_Access := 'TRUE' }
 AUTHOR : REO
 NAME : ifbSIC1
-VERSION : 2.0
+VERSION : 2.1
 
 //----------------------------------------------------------------------------//
 // Declare the instance objects of the class:                                 //
@@ -65,9 +66,12 @@ VAR
 @@TEMPLATE_BEGIN|createClassNone@@
 @@ATTR_BEGIN|numInstances@@
     f : Array[0..@@MAXITEM@@] of "fb@@CLASS@@";
-    EmergencyStop : Bool;
 @@ATTR_END|numInstances@@
 @@TEMPLATE_END@@
+END_VAR
+
+VAR_TEMP
+    tPV : Real;
 END_VAR
 
 BEGIN
@@ -275,15 +279,6 @@ TITLE = Item @@IDX@@ @@INSTANCE@@ : @@DESCRIPTION@@
     //------------------------------------------------------------------------//
     CALL #f[@@IDX@@];
 
-//NETWORK
-//TITLE = Emergency stop active
-//    //------------------------------------------------------------------------//
-//    // Check if any emergency stop is active:                                 //
-//    //------------------------------------------------------------------------//
-//    O "ES@@CONNECTION@@100-DI";
-//    O "ES@@CONNECTION@@101-DI";
-//    = #EmergencyStop;
-
 NETWORK
 TITLE = Drive interface
     //------------------------------------------------------------------------//
@@ -304,8 +299,20 @@ TITLE = Drive interface
          reference_torque_P2003      := @@MXAGITREFERENCETORQUE@@ ,
          ready_for_switching_on      := #f[@@IDX@@].p.read.RDY_TO_ON ,
          ready_for_operation         := #f[@@IDX@@].p.read.RDY_TO_RUN ,
-         operation_enabled           := #f[@@IDX@@].p.read.RUNNING
+         operation_enabled           := #f[@@IDX@@].p.read.RUNNING ,
+         actual_speed                := #tPV ,
+         communication_error         := #f[@@IDX@@].p.read.ai.BROKEN_WIRE
       );
+
+NETWORK
+TITLE = Item 0 AG1101 : Adjust PV for gearbox speed
+    //------------------------------------------------------------------------//
+    // Divide the VFD speed by the gearbox ratio                              //
+    //------------------------------------------------------------------------//
+    L #tPV;
+    L 5.0;
+    /R;
+    T #f[@@IDX@@].p.read.ai.PV;
 
 NETWORK
 TITLE = Item @@IDX@@ @@INSTANCE@@ : Output Command

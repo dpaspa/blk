@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 9/01/2019 4:57:04 PM by David Paspa
+generated on 13/03/2019 3:55:52 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -30,13 +30,37 @@ HMI_FORMAT:- @@STEP_NUM_INT@@,@@STEP_TITLE@@
 --------------------------------------------------
 PARAMETER::1
 --------------------------------------------------
+Name:- r_pres_gas_wfi_rinse
+Type:- REAL
+Description:- SY CIP HPCA pressure when rinsing with WFI
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::2
+--------------------------------------------------
+Name:- emv_inlet_opened_time
+Type:- TIME
+Description:- Sprayball inlets pulse open time
+ParameterInOut:- OUT
+
+--------------------------------------------------
+PARAMETER::3
+--------------------------------------------------
+Name:- r_time_sprayball_opened
+Type:- TIME
+Description:- SY CIP Time to pulse open each sprayball valve
+ParameterInOut:- VAR
+
+--------------------------------------------------
+PARAMETER::4
+--------------------------------------------------
 Name:- log_msg_wfi_smflx_rinse_end
 Type:- BOOL
 Description:- UO_SY_CIP WFI SMFLx Rinse end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::2
+PARAMETER::5
 --------------------------------------------------
 Name:- log_msg_wfi_smflx_rinse_begin
 Type:- BOOL
@@ -44,7 +68,7 @@ Description:- UO_SY_CIP WFI SMFLx Rinse begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::3
+PARAMETER::6
 --------------------------------------------------
 Name:- log_msg_pw_flz_wash_end
 Type:- BOOL
@@ -52,7 +76,7 @@ Description:- UO_SY_CIP PW FLz Wash end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::4
+PARAMETER::7
 --------------------------------------------------
 Name:- log_msg_pw_flz_wash_begin
 Type:- BOOL
@@ -60,7 +84,7 @@ Description:- UO_SY_CIP PW FLz Wash begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::5
+PARAMETER::8
 --------------------------------------------------
 Name:- log_msg_pw_smflx_wash_end
 Type:- BOOL
@@ -68,7 +92,7 @@ Description:- UO_SY_CIP PW SMFLx Wash end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::6
+PARAMETER::9
 --------------------------------------------------
 Name:- log_msg_pw_smflx_wash_begin
 Type:- BOOL
@@ -76,7 +100,7 @@ Description:- UO_SY_CIP PW SMFLx Wash begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::7
+PARAMETER::10
 --------------------------------------------------
 Name:- prompt_vessel_empty_confirm_yes
 Type:- BOOL
@@ -84,7 +108,7 @@ Description:- UO_SY_CIP Operator to confirm the vessel is empty confirm yes
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::8
+PARAMETER::11
 --------------------------------------------------
 Name:- prompt_vessel_empty
 Type:- BOOL
@@ -92,7 +116,7 @@ Description:- UO_SY_CIP Operator to confirm the vessel is empty
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::9
+PARAMETER::12
 --------------------------------------------------
 Name:- emx_smfldrn_state
 Type:- INT
@@ -100,7 +124,7 @@ Description:- Storage vessel manufacturing line drain state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::10
+PARAMETER::13
 --------------------------------------------------
 Name:- emx_smfldrn_subs
 Type:- INT
@@ -108,7 +132,7 @@ Description:- Storage vessel manufacturing line drain substate
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::11
+PARAMETER::14
 --------------------------------------------------
 Name:- emx_smfldrn_cmd
 Type:- INT
@@ -116,7 +140,7 @@ Description:- Storage vessel manufacturing line drain command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::12
+PARAMETER::15
 --------------------------------------------------
 Name:- emx_smfl_state
 Type:- INT
@@ -124,7 +148,7 @@ Description:- Storage vessel manufacturing line state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::13
+PARAMETER::16
 --------------------------------------------------
 Name:- emx_smfl_subs
 Type:- INT
@@ -132,7 +156,7 @@ Description:- Storage vessel manufacturing line substate
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::14
+PARAMETER::17
 --------------------------------------------------
 Name:- emx_smfl_cmd
 Type:- INT
@@ -140,7 +164,7 @@ Description:- Storage vessel manufacturing line command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::15
+PARAMETER::18
 --------------------------------------------------
 Name:- r_pres_gas_wash
 Type:- REAL
@@ -148,7 +172,7 @@ Description:- Wash air pressure setpoint
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::16
+PARAMETER::19
 --------------------------------------------------
 Name:- emc_gas_setpoint
 Type:- REAL
@@ -156,7 +180,7 @@ Description:- Gas pressure setpoint
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::17
+PARAMETER::20
 --------------------------------------------------
 Name:- emv_inlet_state
 Type:- INT
@@ -164,7 +188,7 @@ Description:- Sprayball inlet valves state
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::18
+PARAMETER::21
 --------------------------------------------------
 Name:- emv_inlet_subs
 Type:- INT
@@ -172,7 +196,7 @@ Description:- Sprayball inlet valves substate
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::19
+PARAMETER::22
 --------------------------------------------------
 Name:- emv_inlet_cmd
 Type:- INT
@@ -180,7 +204,7 @@ Description:- Sprayball inlet valves command
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::20
+PARAMETER::23
 --------------------------------------------------
 Name:- emx_smfl_hygiene
 Type:- INT
@@ -188,7 +212,7 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::21
+PARAMETER::24
 --------------------------------------------------
 Name:- emx_fill_hygiene
 Type:- INT
@@ -196,7 +220,7 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::22
+PARAMETER::25
 --------------------------------------------------
 Name:- emx_transfer_hygiene
 Type:- INT
@@ -204,7 +228,7 @@ Description:- Description
 ParameterInOut:- IN_OUT
 
 --------------------------------------------------
-PARAMETER::23
+PARAMETER::26
 --------------------------------------------------
 Name:- vessel_sy
 Type:- INT
@@ -212,7 +236,7 @@ Description:- Storage vessel selection S1 or S2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::24
+PARAMETER::27
 --------------------------------------------------
 Name:- fill_flz
 Type:- INT
@@ -220,7 +244,7 @@ Description:- Filling line selection FL1 or FL2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::25
+PARAMETER::28
 --------------------------------------------------
 Name:- vessel_mx
 Type:- INT
@@ -228,7 +252,7 @@ Description:- Manufacturing vessel selection M1 or M2
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::26
+PARAMETER::29
 --------------------------------------------------
 Name:- emc_water_sy_medium_liquid
 Type:- INT
@@ -236,7 +260,7 @@ Description:- Medium selection of emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::27
+PARAMETER::30
 --------------------------------------------------
 Name:- prompt_steam_confirm_no
 Type:- BOOL
@@ -244,7 +268,7 @@ Description:- UO_SY_CIP Operator to confirm if steaming is required confirmed no
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::28
+PARAMETER::31
 --------------------------------------------------
 Name:- prompt_steam
 Type:- BOOL
@@ -252,7 +276,7 @@ Description:- UO_SY_CIP Operator to confirm if steaming is required
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::29
+PARAMETER::32
 --------------------------------------------------
 Name:- r_time_wfi_rinse_smflx
 Type:- TIME
@@ -260,7 +284,7 @@ Description:- SY CIP Time to rinse MX transfer line with WFI
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::30
+PARAMETER::33
 --------------------------------------------------
 Name:- r_time_pw_wash_smflx
 Type:- TIME
@@ -268,7 +292,7 @@ Description:- SY CIP Time to wash MX transfer line line with PW
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::31
+PARAMETER::34
 --------------------------------------------------
 Name:- emc_water_sy_runtime
 Type:- TIME
@@ -276,7 +300,7 @@ Description:- run time for emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::32
+PARAMETER::35
 --------------------------------------------------
 Name:- log_msg_cip_begin
 Type:- BOOL
@@ -284,7 +308,7 @@ Description:- UO_SY_CIP begin time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::33
+PARAMETER::36
 --------------------------------------------------
 Name:- log_msg_cip_end
 Type:- BOOL
@@ -292,7 +316,7 @@ Description:- UO_SY_CIP end time
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::34
+PARAMETER::37
 --------------------------------------------------
 Name:- emx_transfer_cmd
 Type:- INT
@@ -300,7 +324,7 @@ Description:- Command to emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::35
+PARAMETER::38
 --------------------------------------------------
 Name:- emx_transfer_subs
 Type:- INT
@@ -308,7 +332,7 @@ Description:- Substate selection emx_transfer
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::36
+PARAMETER::39
 --------------------------------------------------
 Name:- emx_transfer_state
 Type:- INT
@@ -316,7 +340,7 @@ Description:- Device State of emx_transfer
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::37
+PARAMETER::40
 --------------------------------------------------
 Name:- emx_drain_cmd
 Type:- INT
@@ -324,7 +348,7 @@ Description:- Command to emx_drain
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::38
+PARAMETER::41
 --------------------------------------------------
 Name:- emx_drain_subs
 Type:- INT
@@ -332,7 +356,7 @@ Description:- Substate selection emx_drain
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::39
+PARAMETER::42
 --------------------------------------------------
 Name:- emx_drain_state
 Type:- INT
@@ -340,7 +364,7 @@ Description:- Device State of emx_drain
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::40
+PARAMETER::43
 --------------------------------------------------
 Name:- r_time_wfi_steam_sy
 Type:- TIME
@@ -348,7 +372,7 @@ Description:- SY CIP Time to steam vessel WFI connection
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::41
+PARAMETER::44
 --------------------------------------------------
 Name:- r_time_pw_wash_flz
 Type:- TIME
@@ -356,7 +380,7 @@ Description:- SY CIP Time to wash filling line with PW
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::42
+PARAMETER::45
 --------------------------------------------------
 Name:- log_msg_wfi_flz_rinse_end
 Type:- BOOL
@@ -364,7 +388,7 @@ Description:- UO_SY_CIP WFI Rinse filling line end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::43
+PARAMETER::46
 --------------------------------------------------
 Name:- log_msg_wfi_flz_rinse_begin
 Type:- BOOL
@@ -372,7 +396,7 @@ Description:- UO_SY_CIP WFI Rinse filling line begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::44
+PARAMETER::47
 --------------------------------------------------
 Name:- log_msg_wfi_rinse_end
 Type:- BOOL
@@ -380,7 +404,7 @@ Description:- UO_SY_CIP WFI Rinse end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::45
+PARAMETER::48
 --------------------------------------------------
 Name:- log_msg_wfi_rinse_begin
 Type:- BOOL
@@ -388,7 +412,7 @@ Description:- UO_SY_CIP WFI Rinse begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::46
+PARAMETER::49
 --------------------------------------------------
 Name:- log_msg_pw_wash_end
 Type:- BOOL
@@ -396,7 +420,7 @@ Description:- UO_SY_CIP PW Wash end
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::47
+PARAMETER::50
 --------------------------------------------------
 Name:- log_msg_pw_wash_begin
 Type:- BOOL
@@ -404,7 +428,7 @@ Description:- UO_SY_CIP PW Wash begin
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::48
+PARAMETER::51
 --------------------------------------------------
 Name:- r_time_pw_steam_sy
 Type:- TIME
@@ -412,7 +436,7 @@ Description:- SY CIP Time to steam vessel PW connection
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::49
+PARAMETER::52
 --------------------------------------------------
 Name:- emc_gas_subs
 Type:- INT
@@ -420,7 +444,7 @@ Description:- Substate selection to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::50
+PARAMETER::53
 --------------------------------------------------
 Name:- emc_water_sy_state
 Type:- INT
@@ -428,7 +452,7 @@ Description:- Device State of emc_water
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::51
+PARAMETER::54
 --------------------------------------------------
 Name:- emv_vessel_subs
 Type:- INT
@@ -436,7 +460,7 @@ Description:- Substate selection to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::52
+PARAMETER::55
 --------------------------------------------------
 Name:- emc_water_sy_subs
 Type:- INT
@@ -444,7 +468,7 @@ Description:- Substate selection to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::53
+PARAMETER::56
 --------------------------------------------------
 Name:- emc_water_sy_cmd
 Type:- INT
@@ -452,7 +476,7 @@ Description:- Command to emc_water
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::54
+PARAMETER::57
 --------------------------------------------------
 Name:- emv_vessel_cmd
 Type:- INT
@@ -460,7 +484,7 @@ Description:- Command to emv_vessel
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::55
+PARAMETER::58
 --------------------------------------------------
 Name:- emv_vessel_state
 Type:- INT
@@ -468,7 +492,7 @@ Description:- Device State of emv_vessel
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::56
+PARAMETER::59
 --------------------------------------------------
 Name:- emc_gas_medium_gas
 Type:- INT
@@ -476,7 +500,7 @@ Description:- Medium selection of emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::57
+PARAMETER::60
 --------------------------------------------------
 Name:- emc_gas_state
 Type:- INT
@@ -484,7 +508,7 @@ Description:- Device State of emc_gas
 ParameterInOut:- IN
 
 --------------------------------------------------
-PARAMETER::58
+PARAMETER::61
 --------------------------------------------------
 Name:- emc_gas_cmd
 Type:- INT
@@ -492,7 +516,7 @@ Description:- Command to emc_gas
 ParameterInOut:- OUT
 
 --------------------------------------------------
-PARAMETER::59
+PARAMETER::62
 --------------------------------------------------
 Name:- r_time_wfi_empty_sy
 Type:- TIME
@@ -500,7 +524,7 @@ Description:- SY CIP Time to wait to empty the vessel after WFI rinse
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::60
+PARAMETER::63
 --------------------------------------------------
 Name:- r_time_wfi_rinse_flz
 Type:- TIME
@@ -508,7 +532,7 @@ Description:- SY CIP Time to rinse filling line with WFI
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::61
+PARAMETER::64
 --------------------------------------------------
 Name:- r_time_wfi_rinse_sy
 Type:- TIME
@@ -516,7 +540,7 @@ Description:- SY CIP Time to rinse vessel with WFI
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::62
+PARAMETER::65
 --------------------------------------------------
 Name:- r_time_pw_empty_sy
 Type:- TIME
@@ -524,7 +548,7 @@ Description:- SY CIP Time to empty the vessel after the PW wash
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::63
+PARAMETER::66
 --------------------------------------------------
 Name:- r_time_pw_wash_sy
 Type:- TIME
@@ -532,7 +556,7 @@ Description:- SY CIP Time to wash vessel with PW
 ParameterInOut:- VAR
 
 --------------------------------------------------
-PARAMETER::64
+PARAMETER::67
 --------------------------------------------------
 Name:- prompt_steam_confirm_yes
 Type:- BOOL
@@ -1018,17 +1042,40 @@ Action:- //Store PW SMFLx rinse end time.
 SET;
 S #_log_msg_pw_smflx_wash_end;
 
-//Close PW supply valve.
+//Close PW supply valve and transfer valves
 L "dbCONST".BLK.CMD.STOP;
 T  #_emc_water_sy_cmd;
+T #_emx_transfer_cmd;
+T #_emx_drain_cmd;
 Verification:- A(;
 L   #_emc_water_sy_state;
+L   "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L   #_emx_transfer_state;
 L   "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 
 --------------------------------------------------
 ACTION::02
+--------------------------------------------------
+Description:- Open all outlet drain paths
+Action:- //Start EMX2_SIP.
+L "dbCONST".BLK.EMX2.SUBS.SIP;
+T #_emx_transfer_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_transfer_cmd;
+
+// Open 2" drain
+L "dbCONST".BLK.EMX4.SUBS.CIP;
+T #_emx_drain_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_drain_cmd;
+
+--------------------------------------------------
+ACTION::03
 --------------------------------------------------
 Description:- Start Timer for PW_EMPTY.
 Action:- //Start Timer for PW_EMPTY.
@@ -1272,7 +1319,7 @@ S #_log_msg_wfi_rinse_begin;
 // Open HPCA supply
 L "dbCONST".SEL.GAS.HPCA;
 T #_emc_gas_medium_gas;
-L #_r_pres_gas_wash;
+L #_r_pres_gas_wfi_rinse;
 T #_emc_gas_setpoint;
 L "dbCONST".BLK.EMC1.SUBS.PRESSURE;
 T #_emc_gas_subs;
@@ -1544,17 +1591,45 @@ Action:- //Store WFI SMFLx rinse end time.
 SET;
 S #_log_msg_wfi_smflx_rinse_end;
 
-//Close WFI supply valve
+//Close WFI supply valve and outlet paths
 L "dbCONST".BLK.CMD.STOP;
 T  #_emc_water_sy_cmd;
+T #_emx_transfer_cmd;
+T #_emx_drain_cmd;
 Verification:- A(;
 L #_emc_water_sy_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L #_emx_transfer_state;
+L "dbCONST".BLK.STATE.STOPPED;
+==I;
+);
+A(;
+L #_emx_drain_state;
 L "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 
 --------------------------------------------------
 ACTION::02
+--------------------------------------------------
+Description:- Open all outlet drain paths
+Action:- //Start EMX2_SIP.
+L "dbCONST".BLK.EMX2.SUBS.SIP;
+T #_emx_transfer_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_transfer_cmd;
+
+// Open 2" drain
+L "dbCONST".BLK.EMX4.SUBS.CIP;
+T #_emx_drain_subs;
+L "dbCONST".BLK.CMD.START;
+T #_emx_drain_cmd;
+
+--------------------------------------------------
+ACTION::03
 --------------------------------------------------
 Description:- Start timer time_wfi_empty_sy
 Action:- //Start Timer for WFI Empty.
@@ -1671,12 +1746,12 @@ T #_emx_drain_cmd;
 T #_emc_water_sy_cmd;
 Verification:- A(;
 L #_emx_drain_state;
-L   "dbCONST".BLK.STATE.COMPLETED;
+L   "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 A(;
 L #_emc_water_sy_state;
-L   "dbCONST".BLK.STATE.COMPLETED;
+L   "dbCONST".BLK.STATE.STOPPED;
 ==I;
 );
 
@@ -1747,8 +1822,10 @@ STEP::15
 --------------------------------------------------
 StepNo:- 15
 Title:- SY_UO_CIP : Filling Line steaming complete
-Description:- Close PS supply valve.
+Description:- Set SMFL, SVT and FLZ hygiene status to CLEAN.
+Close PS supply valve.
 Log actual post CIP CS steaming time.
+Set EM hygiene status.
 
 --------------------------------------------------
 ACTION::01
@@ -1758,6 +1835,12 @@ Log actual post CIP PS WFI steaming time.
 Action:- //Close PS wfi supply valve.
 L "dbCONST".BLK.CMD.STOP;
 T  #_emc_water_sy_cmd;
+
+//Set SMFL, SVT and FLZ hygiene status to CLEAN.
+L  "dbCONST".BLK.HYGIENE.CLEAN;
+T #_emx_fill_hygiene;
+T #_emx_transfer_hygiene;
+T #_emx_smfl_hygiene;
 Verification:- A(;
 L #_emc_water_sy_state;
 L "dbCONST".BLK.STATE.STOPPED;
@@ -1778,10 +1861,9 @@ Condition:- A "uncondJump";
 --------------------------------------------------
 STEP::16
 --------------------------------------------------
-StepNo:- 16.0000
+StepNo:- 16
 Title:- SY_UO_CIP : Unit Operation Completed
-Description:- Set SMFL, SVT and FLZ hygiene status to CLEAN.
-Log Sy CIP operation end time.
+Description:- Log Sy CIP operation end time.
 
 Close all drain valves.
 
@@ -1791,15 +1873,16 @@ ACTION::01
 Description:- Set SMFL, SVT and FLZ hygiene status to CLEAN.
 Close all drain valves.
 Log Sy CIP operation end time.
-Action:- //Set SMFL, SVT and FLZ hygiene status to CLEAN.
-L  "dbCONST".BLK.HYGIENE.CLEAN;
-T #_emx_fill_hygiene;
-T #_emx_transfer_hygiene;
-T #_emx_smfl_hygiene;
-
-// Set Sy equipment to safe state:
+Action:- // Set Sy equipment to safe state:
 L "dbCONST".BLK.CMD.STOP;
-T  #_emx_drain_cmd;
+T #_emc_gas_cmd;
+T #_emc_water_sy_cmd;
+T #_emv_inlet_cmd;
+T #_emv_vessel_cmd;
+T #_emx_drain_cmd;
+T #_emx_transfer_cmd;
+T #_emx_smfl_cmd;
+T #_emx_smfldrn_cmd;
 
 // Log Sy CIP operation end time.
 SET;

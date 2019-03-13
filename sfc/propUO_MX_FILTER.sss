@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 9/01/2019 4:01:29 PM by David Paspa
+generated on 13/03/2019 3:53:58 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -600,16 +600,6 @@ S #_log_msg_filter_begin;
 TRANSITION::01
 --------------------------------------------------
 TRNNo:- 1.0000
-Title:- Incorrect Hygiene Status
-EmptyTransition:- False
-Description:- Empty Transition
-Condition:- A "uncondJump";
-
-
---------------------------------------------------
-TRANSITION::02
---------------------------------------------------
-TRNNo:- 02
 Title:- Check Hygiene Status
 EmptyTransition:- False
 Description:- SMFL and SVT are in Hygiene status STERILE?
@@ -623,6 +613,16 @@ L  "dbCONST".BLK.HYGIENE.STERILE;
 L #_emx_smfl_hygiene;
 ==I;
 );
+
+
+--------------------------------------------------
+TRANSITION::02
+--------------------------------------------------
+TRNNo:- 2.0000
+Title:- Incorrect Hygiene Status
+EmptyTransition:- False
+Description:- Empty Transition
+Condition:- A "uncondJump";
 
 
 --------------------------------------------------
@@ -1405,7 +1405,8 @@ STEP::14
 --------------------------------------------------
 StepNo:- 14
 Title:- UO_MX_FILTER : Filtration Unit Operation Completed
-Description:- Disable Mx manway alarm and low pressure alarm.
+Description:- Set all devices to safe state.
+Disable Mx manway alarm and low pressure alarm.
 Log Mx Filter operation end time.
 
 --------------------------------------------------
@@ -1413,7 +1414,17 @@ ACTION::01
 --------------------------------------------------
 Description:- Disable Mx manway alarm and low pressure alarm.
 Log Mx Filter operation end time.
-Action:- //Set emv_vessel to substate MANWAY and start it to disable Manway alarm.
+Action:- L "dbCONST".BLK.CMD.STOP;
+T #_emv_vessel_cmd;
+T  #_ema_vessel_cmd;
+T  #_emc_gas_cmd;
+T  #_emc_water_cmd;
+T  #_emx_transfer_cmd;
+T #_emt_hex_cmd;
+T  #_emx_mmfl_cmd;
+T  #_emx_smfl_cmd;
+
+//Set emv_vessel to substate MANWAY and start it to disable Manway alarm.
 L "dbCONST".BLK.EMV1.SUBS.MANWAY;
 T #_emv_vessel_subs;
 L "dbCONST".BLK.CMD.START;

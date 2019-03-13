@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 12/12/2018 12:34:17 PM by David Paspa
+generated on 13/03/2019 3:52:20 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -211,33 +211,7 @@ Condition:- A #SQ_TIMER.Q;
 --------------------------------------------------
 STEP::05
 --------------------------------------------------
-StepNo:- 05
-Title:- PH_EMX1_PULSE : Last Step
-Description:- Leave drain valve opened.
-Log PULSE operation end time.
-
---------------------------------------------------
-ACTION::01
---------------------------------------------------
-Description:- Open drain valve.
-Log PULSE operation end time.
-Action:- SET;
-R #sqSeqTimerStart;
-
-//Close valve.
-L "dbCONST".BLK.POSx.CMD.OPEN;
-T  #_pos_filterinlet_cmd;
-
-//Log PULSE operation end time.
-SET;
-S #_log_msg_pulse_end;
-Verification:- A "uncondJump";
-
-
---------------------------------------------------
-STEP::06
---------------------------------------------------
-StepNo:- 6.0000
+StepNo:- 5.0000
 Title:- PH_EMX1_PULSE : Reset timer
 Description:- Reset timer
 
@@ -258,6 +232,32 @@ Title:- Unconditional Jump
 EmptyTransition:- False
 Description:- Unconditional Jump
 Condition:- A "uncondJump";
+
+
+--------------------------------------------------
+STEP::06
+--------------------------------------------------
+StepNo:- 6.0000
+Title:- PH_EMX1_PULSE : Last Step
+Description:- Leave drain valve opened.
+Log PULSE operation end time.
+
+--------------------------------------------------
+ACTION::01
+--------------------------------------------------
+Description:- Open drain valve.
+Log PULSE operation end time.
+Action:- SET;
+R #sqSeqTimerStart;
+
+//Close valve.
+L "dbCONST".BLK.POSx.CMD.OPEN;
+T  #_pos_filterinlet_cmd;
+
+//Log PULSE operation end time.
+SET;
+S #_log_msg_pulse_end;
+Verification:- A "uncondJump";
 
 ****************************************************************************************************
 END SSS REPORT

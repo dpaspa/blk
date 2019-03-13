@@ -131,8 +131,12 @@ TITLE = @@INSTANCE@@ : Analog input attributes
     T #f[@@IDX@@].p.read.ai.RANGE_LOWER;
     L @@RANGEHIGH@@;
     T #f[@@IDX@@].p.read.ai.RANGE_UPPER;
+
+    //------------------------------------------------------------------------//
+    // MT PROFINET already converts to engineering units so not really RAW:   //
+    //------------------------------------------------------------------------//
     L "@@INSTANCE@@-RAW";
-    T #f[@@IDX@@].p.read.ai.RAW_INPUT;
+    T #f[@@IDX@@].p.read.ai.PV;
 
 @@ATTR_END|ANALOG@@
 

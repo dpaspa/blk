@@ -1,0 +1,171 @@
+﻿FUNCTION_BLOCK "ifbMI1"
+TITLE = MI1 Instances
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : ifbMI1
+VERSION : 2.1
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//                Automatically Generated File - Do Not Edit                  //
+//----------------------------------------------------------------------------//
+// Name:        ifbMI1                                                  //
+// Description: Instances of MI1                                        //
+//                                                                            //
+// Load cell mass indicator                                                       //
+// This file inherits from the base template ifbAL.awl.                       //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.1 David Paspa      25-Aug-2018 NA        Made separate block to store    //
+//                                            gross, tare and nett masses.    //
+// 2.0 David Paspa      08-Jan-2018 NA        Reboot for S7-1500. Created     //
+//                                            base template ifbAL1.           //
+// 0.4 Khairul Basar    12-Oct-2009 CC-09/016 IN_REQ_MODE is assigned to      //
+//                                            Toggle.                         //
+// 0.3 Khairul Basar    14-Sep-2009 CC-09/016 Ref.OB100,Instance LIMIT_H/HH   //
+//                                            Hardcode deleted.               //
+// 0.2 Khairul Basar    31-Aug-2009 CC-09/016 Upper/Lower range hardcoded.    //
+//                                            USER_INPUT added for manual     //
+//                                            mode simulation.                //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design.                 //
+//----------------------------------------------------------------------------//
+// Index   Instance    Description                                            //
+// 0       MI1101      M1 Mass Indicator
+// 1       MI2101      M2 Mass Indicator
+//----------------------------------------------------------------------------//
+//----------------------------------------------------------------------------//
+// Declare the instance objects of the class:                                 //
+//----------------------------------------------------------------------------//
+   VAR 
+      f : Array[0..1] of "fbMI1";
+   END_VAR
+
+
+BEGIN
+NETWORK
+TITLE = MI1101 : Unique ID
+//------------------------------------------------------------------------//
+// INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+// INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INSTANCE   INST //
+//                                                                        //
+// Set the instance unique ID:                                            //
+//------------------------------------------------------------------------//
+      L "dbCONST".BLK.ID.MI1101;
+      T #f[0].p.read.mc.ME;
+
+NETWORK
+TITLE = Item 0 MI1101 : Owner ID
+//------------------------------------------------------------------------//
+// Set the instance Owner ID:                                             //
+//------------------------------------------------------------------------//
+      L "dbCONST".BLK.ID.EM1009;
+      T #f[0].p.write.mc.OWNER;
+
+
+NETWORK
+TITLE = Item 0 MI1101 : Block Read
+//------------------------------------------------------------------------//
+// This block can only reside within this CPU:                            //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      = #f[0].p.master.read;
+
+NETWORK
+TITLE = Item 0 MI1101 : Block Write
+//------------------------------------------------------------------------//
+// This block can only be owned by a parent block in this CPU:            //
+//------------------------------------------------------------------------//
+      A "alwaysHigh";
+      = #f[0].p.master.write;
+
+NETWORK
+TITLE = MI1101 : Analog input default alarms
+//------------------------------------------------------------------------//
+// Set the default alarm values on startup:                               //
+//------------------------------------------------------------------------//
+      A "flagFirstScanRestart";
+      JCN _noRestart_MI1101;
+      L 0.0;
+      T #f[0].p.write.LIMIT_LL;
+      L 0.0;
+      T #f[0].p.write.LIMIT_L;
+      L 12500.0;
+      T #f[0].p.write.LIMIT_H;
+      L 12900.0;
+      T #f[0].p.write.LIMIT_HH;
+      A "alwaysLow";
+      = #f[0].p.write.ENABLE_LL;
+      A "alwaysLow";
+      = #f[0].p.write.ENABLE_L;
+      A "alwaysHigh";
+      = #f[0].p.write.ENABLE_H;
+      A "alwaysHigh";
+      = #f[0].p.write.ENABLE_HH;
+_noRestart_MI1101:      NOP 0;
+
+NETWORK
+TITLE = MI1101 : Analog input attributes
+//------------------------------------------------------------------------//
+// Set the fixed analog input attributes:                                 //
+//------------------------------------------------------------------------//
+////------------------------------------------------------------------------// 
+//
+//     // MT PROFINET already converts to engineering units so not really 
+//RAW:   //
+////------------------------------------------------------------------------// 
+      A "alwaysLow";
+      = #f[0].p.read.ai.POLARITY;
+      L 0.0;
+      T #f[0].p.read.ai.RANGE_LOWER;
+      L 13000.0;
+      T #f[0].p.read.ai.RANGE_UPPER;
+      L "MI1101-RAW";
+      T #f[0].p.read.ai.PV;
+
+NETWORK
+TITLE = MI1101 : Command and state values
+//------------------------------------------------------------------------//
+// Call the class function to process each instance:                      //
+//------------------------------------------------------------------------//
+      L "dbCONST".BLK.MI1.CMD.ENABLE;
+      T #f[0].p.read.CMD_ENABLE;
+      L "dbCONST".BLK.MI1.STATE.ENABLED;
+      T #f[0].p.read.STATE_ENABLED;
+      L "dbCONST".BLK.MI1.STATE.FAULT;
+      T #f[0].p.read.STATE_FAULT;
+
+NETWORK
+TITLE = Item 0 MI1101 : M1 Mass Indicator
+//------------------------------------------------------------------------//
+// Call the class function to process the instance:                       //
+//------------------------------------------------------------------------//
+      CALL #f[0];
+
+NETWORK
+TITLE = Item 0 MI1101 : Send the alarm bits to the global DB
+//------------------------------------------------------------------------//
+// Transfer the class event log message bits to the global DB:            //
+//------------------------------------------------------------------------//
+      L #f[0].p.read.mc.ALARM;
+      T "dbEVENT".alarmBlock.alarm_MI1101;
+
+
+NETWORK
+TITLE = Item 1 MI2101 : Block Read
+//------------------------------------------------------------------------//
+// This block can only reside in another CPU:                             //
+//------------------------------------------------------------------------//
+      A "alwaysLow";
+      = #f[1].p.master.read;
+
+NETWORK
+TITLE = Item 1 MI2101 : Block Write
+//------------------------------------------------------------------------//
+// This block can only be owned by a parent block in another CPU:         //
+//------------------------------------------------------------------------//
+      A "alwaysLow";
+      = #f[1].p.master.write;
+
+
+END_FUNCTION_BLOCK
+

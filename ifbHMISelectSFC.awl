@@ -24,7 +24,7 @@ VAR
 END_VAR
 
 VAR_TEMP
-    sfcSelected : Int;
+    sfcSelected : DInt;
 END_VAR
 
 BEGIN
@@ -125,10 +125,10 @@ TITLE = @@INSTANCE@@ @@DESCRIPTION@@ : @@STATEDESCRIPTION@@
     //------------------------------------------------------------------------//
     A(;
     L #sfcSelected;
-    L 1@@IDX@@@@SFCIDX@@@@IDX@@;
+    L @@IDXSFCUNIQUE@@;
     ==I;
     );
-    JCN _not_@@SFC@@_@@IDX@@;
+    JCN _not_@@SFC@@_@@IDXSFCUNIQUE@@;
 
     CALL "fcHMIInterfaceSFC"
     (   hmiNum               := #CTR ,
@@ -139,7 +139,7 @@ TITLE = @@INSTANCE@@ @@DESCRIPTION@@ : @@STATEDESCRIPTION@@
         tmr3                 := "idb@@CLASS@@".f[@@IDX@@].@@SFC@@.SQ_TIMER3
     );
 
-_not_@@SFC@@_@@IDX@@:   NOP 0;
+_not_@@SFC@@_@@IDXSFCUNIQUE@@:   NOP 0;
 
 @@TEMPLATE_END@@
 

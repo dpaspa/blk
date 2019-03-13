@@ -1,6 +1,6 @@
 ****************************************************************************************************
 SEQUENCE STEP SCHEDULE
-generated on 9/01/2019 4:01:49 PM by David Paspa
+generated on 13/03/2019 3:54:24 PM by David Paspa
 ****************************************************************************************************
 
 
@@ -1492,19 +1492,30 @@ L 0.0;
 --------------------------------------------------
 STEP::18
 --------------------------------------------------
-StepNo:- 18.0000
+StepNo:- 18
 Title:- UO_MX_SETUP : Setup Unit Operation Completed
-Description:- Clear used flags.
+Description:- Set all devices to safe state.
+Clear used flags.
 Log Mx SETUP operation end time.
 
 --------------------------------------------------
 ACTION::01
 --------------------------------------------------
-Description:- Clear used flags.
+Description:- Set all devices to safe state. 
+Clear used flags.
 Log Mx SETUP operation end time.
-Action:- // Stop gas
+Action:- // Set all used equipment to safe state.
 L "dbCONST".BLK.CMD.STOP;
-T #_emc_gas_cmd; 
+T #_emv_vessel_cmd;
+T #_emv_inlet_cmd;
+T #_emg_filter_cmd;
+T  #_emm_vessel_cmd;
+T #_emt_hex_cmd;
+T  #_emc_gas_cmd;
+T  #_emc_water_cmd;
+T  #_emx_drain_cmd;
+T  #_emx_mmfl_cmd;
+T  #_emx_transfer_cmd;
 
 //Clear used flags
 SET;

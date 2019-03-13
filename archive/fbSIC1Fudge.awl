@@ -1,0 +1,518 @@
+//----------------------------------------------------------------------------//
+//            Copyright 2018 Rieckermann Engineering Operations               //
+//----------------------------------------------------------------------------//
+// Class:       fbSIC1                                                        //
+// Description:                                                               //
+// Agitator speed control.                                                    //
+//----------------------------------------------------------------------------//
+// Revision history:                                                          //
+// Rev By               Date        CC        Note                            //
+// 2.1 David Paspa      25-Feb-2019 NA        Removed pulse counter input.    //
+// 2.0 David Paspa      30-Jan-2018 NA        Reboot for S7-1500.             //
+// 1.0 Khairul/Steve    15-Oct-2009 CC-09/016 PID loop removed.               //
+// 0.9 Gerald Kontriner 09-Oct-2009 CC-09/016 MON_MISMATCH Logic              //
+// 0.8 Khairul Basar    02-Oct-2009 CC-09/016 ALARM_L corrected in NW25.      //
+// 0.7 Mr. Khoon        01-Oct-2009 CC-09/016 Mode=Initialized,OOS coded.     //
+// 0.6 Steve Linehan    29-Sep-2009 CC-09/016 Bypass Input Mode Added.        //
+// 0.5 Khairul Basar    16-Sep-2009 CC-09/016 Duplicate Auto/man parameters   //
+//                                            deleted auto/manual both now    //
+//                                            using same parameters.          //
+// 0.4 Khairul Basar    14-Sep-2009 CC-09/016 DataQuality variable&logic      //
+//                                            added.                          //
+// 0.3 Khairul Basar    11-Sep-2009 CC-09/016 Ref2.                           //
+// 0.2 Khairul Basar    03-Sep-2009 CC-09/016 Ref1.                           //
+// 0.1 Khairul Basar    03-Aug-2009           Initial design                  //
+//                                                                            //
+// Ref2:                                                                      //
+// Now Setpoint is moved to PID as per selected mode.TAH,THR & FLT Contact are//
+// corrected as per Failsafe siganl from field & FLT will result device state //
+// 'FAULT=5'.In DB1, Device state changed to 3=Stop, 4=Running instead of     //
+// 4=stop,3=Running.                                                          //
+//                                                                            //
+// Ref1:                                                                      //
+// MI1 Measure value assigned to MASS_MI1 parameter,Now the Minimum mass      //
+// condition is always overridden in manual mode.Now Device states are        //
+// configured for ENABLED, when enabled two sub state STOPPED & RUNNING and   //
+// DISABLED. Now Parameters MEASURE_RPM for agitator RPM , MASS_MI1 is for    //
+// mass of the  vessel, parameter for set point of manual is SETPOINT_MAN, &  //
+// in auto is SETPOINT_AUTO configured.Set point SETPOINT_MAN and             //
+// SETPOINT_AUTO initialized to 0.0 and GAIN to 1.0.ALARM_HH, ALARM_H,        //
+// ALARM_L, ALARM_LL are added in SIC1 and programmed.Default value added for //
+// following parameters.                                                      //
+// SL.NO.Parameter NameRange of ValueDefault Value                            //
+// 1.MODE=1=Manual                                                            //
+// 2.CMND_AUTO=1=disable                                                      //
+// 3.CMND_MAN=1=disable                                                       //
+// 4.P_SEL=True                                                               //
+// 5.I_SEL=True                                                               //
+// 6.D_SEL=True                                                               //
+// 7.CYCLE=T#1s                                                               //
+//----------------------------------------------------------------------------//
+FUNCTION_BLOCK "fbSIC1"
+TITLE = SIC1 : Agitator speed control
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : REO
+NAME : fbSIC1
+VERSION : 2.1
+
+//----------------------------------------------------------------------------//
+// Declare interface and variables:                                           //
+//----------------------------------------------------------------------------//
+VAR
+    p : "udtSIC1";           // Block data interface
+    startTMR {ReadalPartName := 'TON'; LibVersion := '1.0'} : TON;
+END_VAR
+
+VAR DB_SPECIFIC
+    b { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Array[0..15] of Bool;
+    w { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT b : Word;
+END_VAR
+
+VAR_TEMP
+    cmdEnable : Bool;
+    cmdDisable : Bool;
+    edgeStart : Bool;
+    eventStart : Bool;
+    tDO : Bool;
+    tPV_MASS : Real;
+
+    Add back...
+    tSetpoint : Real;
+
+    startTMRExpired : Bool;
+    startTMRElapsed : Time;
+    FTR : Bool;
+END_VAR
+
+BEGIN
+NETWORK
+TITLE = Analog alarm setpoints
+    //------------------------------------------------------------------------//
+    // Set the analog alarm setpoints:                		                  //
+    //------------------------------------------------------------------------//
+	L #p.write.LIMIT_HH;
+    T #p.read.ai.LIMIT_HH;
+    L #p.write.LIMIT_H;
+    T #p.read.ai.LIMIT_H;
+    L #p.write.LIMIT_L;
+    T #p.read.ai.LIMIT_L;
+    L #p.write.LIMIT_LL;
+    T #p.read.ai.LIMIT_LL;
+    A #p.write.ENABLE_HH;
+    = #p.read.ai.ENABLE_HH;
+    A #p.write.ENABLE_H;
+    = #p.read.ai.ENABLE_H;
+    A #p.write.ENABLE_L;
+    = #p.read.ai.ENABLE_L;
+    A #p.write.ENABLE_LL;
+    = #p.read.ai.ENABLE_LL;
+
+NETWORK
+TITLE = Motor faults and three phase relay alarm
+    //------------------------------------------------------------------------//
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    // INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK   INTERLOCK  //
+    //                                                                        //
+    // Raise alarm if any motor control fault condition is active:            //
+    //------------------------------------------------------------------------//
+    A #p.read.PHR;
+    = #p.read.ALM_PHR;
+    = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Motor breaker fault
+    A #p.read.BRK;
+    = #p.read.ALM_BRK;
+    = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Pulse counter fault
+    A #p.read.FLP;
+    = #p.read.ALM_FLP;
+    = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Inverter fault
+    A #p.read.FLT;
+    = #p.read.ALM_FLT;
+    = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Thermistor module alarm
+    A #p.read.THM;
+    = #p.read.ALM_THM;
+    = #p.read.mc.ERROR;
+
+NETWORK
+TITLE = Aggregate all internal interlock conditions
+    //------------------------------------------------------------------------//
+    // Collect all internal interlock conditions:                             //
+    //------------------------------------------------------------------------//
+    ON #p.read.ai.DQ;
+    O #p.read.BRK;
+    O #p.read.PHR;
+    O #p.read.FLP;
+    O #p.read.FLT;
+    O #p.read.THM;
+    O #p.read.FAIL_TO_RUN;
+    = #p.read.mc.INTIL;
+
+NETWORK
+TITLE = Call Mode and Command handling block
+    //------------------------------------------------------------------------//
+    // COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND PROCESSOR   COMMAND    //
+    //                                                                        //
+    // Process the standard block functions for command, mode, interlock and  //
+    // state:                                                                 //
+    //------------------------------------------------------------------------//
+    CALL "fcModeCmd"
+    (   cmdSafe              := "dbCONST".BLK.SIC1.SAFE.CMD ,
+        mcRead               := #p.read.mc ,
+        mcWrite              := #p.write.mc
+    );
+
+NETWORK
+TITLE = Enable command
+    //------------------------------------------------------------------------//
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    // COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND   COMMAND    //
+    //                                                                        //
+    // CMD is ENABLE:                                                         //
+    //------------------------------------------------------------------------//
+    A(;
+    L #p.write.mc.CMD;
+    L "dbCONST".BLK.SIC1.CMD.ENABLE;
+    ==I;
+    );
+    =#cmdEnable;
+
+NETWORK
+TITLE = Disable command
+    //------------------------------------------------------------------------//
+    // CMD is DISABLE:                                                        //
+    //------------------------------------------------------------------------//
+    A(;
+    L #p.write.mc.CMD;
+    L "dbCONST".BLK.SIC1.CMD.DISABLE;
+    ==I;
+    );
+    = #cmdDisable
+
+NETWORK
+TITLE = Vessel mass
+    //------------------------------------------------------------------------//
+    // Get the vessel mass from the MI1 CM:                                   //
+    //------------------------------------------------------------------------//
+    L #p.read.MI1_MASS;
+    T #tPV_MASS;
+
+NETWORK
+TITLE = Permitted to run agitator if mass above minimum value
+    //------------------------------------------------------------------------//
+    // Permit the agitator to run if mass above minimum start level:          //
+    //------------------------------------------------------------------------//
+    A(;
+    L #tPV_MASS;
+    L #p.read.MASS_RUN;
+    >=R;
+    );
+    JCN _a;
+    S #p.read.PERMIT_MASS;
+_a:   NOP 0;
+
+NETWORK
+TITLE = Low mass condition must stop the agitator from running
+    //------------------------------------------------------------------------//
+    // Inhibit the agitator from running if mass below minimum stop level:    //
+    //------------------------------------------------------------------------//
+    A(;
+    L #tPV_MASS;
+    L #p.read.MASS_STOP;
+    <R;
+    );
+    JCN _b;
+    R #p.read.PERMIT_MASS;
+_b:   NOP 0;
+
+NETWORK
+TITLE = Disable command
+    //------------------------------------------------------------------------//
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    // OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS   OUTPUTS    //
+    //                                                                        //
+    // DISABLE command if not enabled or any interlock:                       //
+    //------------------------------------------------------------------------//
+    A #cmdDisable;
+    JCN _e;
+    R #tDO;
+    L "dbCONST".BLK.SIC1.CMD.DISABLE;
+    T #p.write.mc.CMD;
+_e:   NOP 0;
+
+NETWORK
+TITLE = Flag output should be on if command is ENABLE and mass is enough
+    //------------------------------------------------------------------------//
+    // Flag output to be set on if command is enable and no interlock and     //
+    // mass in the vessel is high enough to permit agiator operation and      //
+    // no stop request from another interested party (i.e. module, such EMM1)://
+    //------------------------------------------------------------------------//
+    A #cmdEnable;
+    AN #p.read.mc.INTERLOCK;
+    A #p.read.PERMIT_MASS;
+    AN #p.read.mc.modeOOS;
+    AN(;
+    L #p.write.CMD_PEER;
+    L "dbCONST".BLK.SIC1.STATE.STOPPED;
+    ==I;
+    );
+    S #tDO;
+
+NETWORK
+TITLE = Set the peer state running if so
+    //------------------------------------------------------------------------//
+    // If agitator might run then the peer state is running:                  //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    JCN _peerRunning;
+    L "dbCONST".BLK.SIC1.STATE.RUNNING;
+    T #p.read.STATE_PEER;
+_peerRunning:   NOP 0;
+
+NETWORK
+TITLE = Set the peer state stopped if so
+    //------------------------------------------------------------------------//
+    // If agitator is stopped then the peer state is stopped:                 //
+    //------------------------------------------------------------------------//
+    AN #tDO;
+    JCN _peerStopped;
+    L "dbCONST".BLK.SIC1.STATE.STOPPED;
+    T #p.read.STATE_PEER;
+_peerStopped:   NOP 0;
+
+NETWORK
+TITLE = Store the agitator output on if commanded and safe to run
+    //------------------------------------------------------------------------//
+    // Start the agitator if allowed to run if command is ENABLE and there    //
+    // are no interlocks and mass in the vessel is sufficient:                //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    = #p.read.OUT_CMD;
+
+NETWORK
+TITLE = Output if Disabled
+    //------------------------------------------------------------------------//
+    // Output should be 0 if disabled:                                        //
+    //------------------------------------------------------------------------//
+    A #cmdDisable;
+    JCN _i;
+    L 0.0;
+    T #p.read.MV_OUTPUT;
+_i:    NOP 0;
+
+NETWORK
+TITLE = Start event if commanded to start
+    //------------------------------------------------------------------------//
+    // Flag start event if just commanded to start:                           //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    FP #edgeStart;
+    = #eventStart;
+
+NETWORK
+TITLE = Fault if start timer expired and not running
+    //------------------------------------------------------------------------//
+    // Fault if start timer expired and still not running:                    //
+    //------------------------------------------------------------------------//
+    A #tDO;
+    AN #p.read.RUNNING;
+    AN #p.read.mc.modeOOS;
+    = #FTR;
+
+    CALL #startTMR
+    {time_type := 'Time'}
+    (   IN                   := #FTR ,
+        PT                   := #p.read.FB_TDELAY ,
+        Q                    := #startTMRExpired ,
+        ET                   := #startTMRElapsed
+    );
+    NOP 0;
+
+    A #startTMRExpired;
+    = #p.read.FAIL_TO_RUN;
+
+NETWORK
+TITLE = Disable state
+    //------------------------------------------------------------------------//
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    // STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE   STATE  //
+    //                                                                        //
+    // DISABLED if command is disable or any interlock and not motor fault:   //
+    //------------------------------------------------------------------------//
+    AN #p.read.BRK;
+    AN #p.read.PHR;
+    AN #p.read.THM;
+    AN #p.read.FLP;
+    AN #p.read.FLT;
+    AN #p.read.FAIL_TO_RUN;
+    A #cmdDisable;
+    JCN _q;
+    L "dbCONST".BLK.SIC1.STATE.DISABLED;
+    T #p.read.mc.STATE;
+    L 0.0;
+
+    T #p.read.ai.PV;
+
+    delete all use of ai.PV like the above and change to...
+    T #tSetpoint;
+
+_q:   NOP 0;
+
+NETWORK
+TITLE = FAULT if any fault condition active
+    //------------------------------------------------------------------------//
+    // FAULT if any motor fault condition is active:                          //
+    //------------------------------------------------------------------------//
+    O #p.read.BRK;
+    O #p.read.PHR;
+    O #p.read.THM;
+    O #p.read.FLP;
+    O #p.read.FLT;
+    O #p.read.FAIL_TO_RUN;
+    ON #p.read.ai.DQ;
+    JCN _r;
+    L "dbCONST".BLK.SIC1.STATE.FAULT;
+    T #p.read.mc.STATE;
+    L 0.0;
+    T #tSetpoint;
+_r:   NOP 0;
+
+NETWORK
+TITLE = Reset FAULT if all okay
+    //------------------------------------------------------------------------//
+    // Go to DISABLED from FAULT:                                             //
+    //------------------------------------------------------------------------//
+    AN #p.read.BRK;
+    AN #p.read.PHR;
+    AN #p.read.THM;
+    AN #p.read.FLP;
+    AN #p.read.FLT;
+    AN #p.read.FAIL_TO_RUN;
+    A #p.read.ai.DQ;
+    A(;
+    L #p.read.mc.STATE;
+    L "dbCONST".BLK.SIC1.STATE.FAULT;
+    ==I;
+    );
+    JCN _rok;
+    L "dbCONST".BLK.SIC1.STATE.DISABLED;
+    T #p.read.mc.STATE;
+    L 0.0;
+    T #tSetpoint;
+_rok:      NOP 0;
+
+NETWORK
+TITLE = Stopped if command is ENABLE and mass not enough
+    //------------------------------------------------------------------------//
+    // STOPPED if command is enable and no interlock but mass not enough:     //
+    //------------------------------------------------------------------------//
+    A #cmdEnable;
+    AN #p.read.BRK;
+    AN #p.read.PHR;
+    AN #p.read.THM;
+    AN #p.read.FLP;
+    AN #p.read.FLT;
+    AN #p.read.FAIL_TO_RUN;
+    A #p.read.ai.DQ;
+    AN #p.read.PERMIT_MASS;
+    JCN _s;
+    L "dbCONST".BLK.SIC1.STATE.STOPPED;
+    T #p.read.mc.STATE;
+    L 0.0;
+    T #tSetpoint;
+_s:   NOP 0;
+
+NETWORK
+TITLE = Running if output should be on
+    //------------------------------------------------------------------------//
+    // RUNNING if command is enable and no interlock and mass permits:        //
+    //------------------------------------------------------------------------//
+    AN #p.read.BRK;
+    AN #p.read.PHR;
+    AN #p.read.THM;
+    AN #p.read.FLP;
+    AN #p.read.FLT;
+    AN #p.read.FAIL_TO_RUN;
+    A #p.read.ai.DQ;
+    A #tDO;
+    JCN _t;
+    L "dbCONST".BLK.SIC1.STATE.RUNNING;
+    T #p.read.mc.STATE;
+    L #p.write.SETPOINT;
+    T #tSetpoint;
+_t:   NOP 0;
+
+NETWORK
+TITLE = Send the setpoint to the field
+    //------------------------------------------------------------------------//
+    // Write the setpoint value to the field output. Multiply by 5 for the    //
+    // gearbox ratio of 5:1:                                                  //
+    //------------------------------------------------------------------------//
+    L #tSetpoint;
+    L 5.0;
+    *R;
+    T #p.read.MV_OUTPUT;
+
+NETWORK
+TITLE = Promote the PV
+    //------------------------------------------------------------------------//
+    // Copy the ai PV to the loop PV:                                         //
+    //------------------------------------------------------------------------//
+    L #p.read.ai.PV;
+    T #p.read.PV;
+
+NETWORK
+TITLE = Operator Attention Flag
+    //------------------------------------------------------------------------//
+    // If not in Auto or any interlock or inhibit condition then the block    //
+    // needs operator attention:                                              //
+    //------------------------------------------------------------------------//
+    O #p.read.mc.needAttention;
+    O #p.read.mc.INTERLOCK;
+    O #p.read.FAIL_TO_RUN;
+    = #p.read.mc.needAttention;
+
+NETWORK
+TITLE = Pack the alarm bits
+    //------------------------------------------------------------------------//
+    // Pack the alarm bits into an integer for the HMI to read:               //
+    // Alarms are arranged in the following Little Endian order...            //
+    // Word   1                                0                              //
+    // Bit    0   1   2   3   4   5   6   7    8   9  10  11  12  13  14  15  //
+    // Order  9  10  11  12  13  14  15  16    1   2   3   4   5   6   7   8  //
+    //------------------------------------------------------------------------//
+    A #p.read.ai.ALARM_HH;
+    = #b[0];
+    A #p.read.ai.ALARM_H;
+    = #b[1];
+    A #p.read.ai.ALARM_L;
+    = #b[2];
+    A #p.read.ai.ALARM_LL;
+    = #b[3];
+    AN #p.read.ai.DQ;
+    = #b[4];
+
+    A #p.read.ALM_BRK;
+    = #b[8];
+    A #p.read.ALM_FLP;
+    = #b[9];
+    A #p.read.ALM_FLT;
+    = #b[10];
+    A #p.read.ALM_PHR;
+    = #b[11];
+    A #p.read.FAIL_TO_RUN;
+    = #b[12];
+    A #p.read.ALM_THM;
+    = #b[13];
+    L #w;
+    T #p.read.mc.ALARM;
+END_FUNCTION_BLOCK
