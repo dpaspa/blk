@@ -25,6 +25,7 @@ VERSION : 1.0
         ME : Int;                      // Unique ID of the block instance
         CMD_SAFE : Int;                // Safe command for the module
         STATE : Int := 1;              // State of the block
+        HYGIENE : Int := 1;            // Hygiene status from write for read only
         ERROR : Bool;                  // True if any error condition
         INTERLOCK : Bool;              // True if any interlock condition
         CRIL : Bool;                   // Critical Interlock that cannot be bypased.
@@ -42,13 +43,13 @@ END_TYPE
 TYPE "udtMCWrite"
 VERSION : 1.0
     STRUCT
-        CMD : Int := 1;                // Start/Stop command
+        CMD : Int := 0;                // Start/Stop command
         MODE : Int := 2;               // Select auto mode by default
         OWNER : Int;                   // Value to be set or reset by Parent
         RECIPE : Int;                  // Recipe ID of owning Process Cell
         SERIALNUM : Int;               // Unique batch or CIPSIP serial number
         SUBS : Int := 0;               // Selected substate for Block level modules
-        HYGIENE : Int := 1;            // Hygiene status
+        HYGIENE : Int := 1;            // Hygiene status, USED by default
         ARMED : Bool := False;         // Flowpath monitoring is armed
         MAN_OVERRIDE : Bool;           // Manual override to bypass NCRIL
     END_STRUCT;
@@ -515,10 +516,10 @@ VERSION : 0.1
         err : "udtBLKError";         // Block error
         arrChildState : Array[0..30] of Int;
         arrChildError : Array[0..30] of Bool;
-        arrChildInterlock : Array[0..30] of Bool;
-        arrReal : Array[0..60] of Real;
-        arrTime : Array[0..60] of Time;
-        arrInt : Array[0..60] of Int;
-        arrBool : Array[0..60] of Bool;
+        arrChildUnavailable : Array[0..30] of Bool;
+        arrReal : Array[0..30] of Real;
+        arrTime : Array[0..30] of Time;
+        arrInt : Array[0..30] of Int;
+        arrBool : Array[0..30] of Bool;
     END_STRUCT;
 END_TYPE
